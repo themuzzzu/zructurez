@@ -2,6 +2,9 @@ import { Navbar } from "@/components/Navbar";
 import { CreatePost } from "@/components/CreatePost";
 import { CategoryFilter } from "@/components/CategoryFilter";
 import { PostCard } from "@/components/PostCard";
+import { Button } from "@/components/ui/button";
+import { Moon, Sun } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const SAMPLE_POSTS = [
   {
@@ -26,10 +29,40 @@ const SAMPLE_POSTS = [
 ];
 
 const Index = () => {
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const isDarkMode = localStorage.getItem("darkMode") === "true";
+    setIsDark(isDarkMode);
+    if (isDarkMode) {
+      document.documentElement.classList.add("dark");
+    }
+  }, []);
+
+  const toggleDarkMode = () => {
+    setIsDark(!isDark);
+    document.documentElement.classList.toggle("dark");
+    localStorage.setItem("darkMode", (!isDark).toString());
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background transition-colors duration-300">
       <Navbar />
       <main className="container max-w-2xl pt-24 pb-12">
+        <div className="fixed bottom-4 right-4 z-50">
+          <Button
+            variant="outline"
+            size="icon"
+            className="rounded-full"
+            onClick={toggleDarkMode}
+          >
+            {isDark ? (
+              <Sun className="h-5 w-5" />
+            ) : (
+              <Moon className="h-5 w-5" />
+            )}
+          </Button>
+        </div>
         <CreatePost />
         <CategoryFilter />
         <div className="space-y-4">
