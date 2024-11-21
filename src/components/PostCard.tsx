@@ -29,7 +29,7 @@ export const PostCard = ({
       <div className="p-4">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <img src={avatar} alt={author} className="h-10 w-10 rounded-full" />
+            <img src={avatar} alt={author} className="h-10 w-10 rounded-full hover:scale-110 transition-transform" />
             <div>
               <h3 className="font-semibold">{author}</h3>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -39,7 +39,7 @@ export const PostCard = ({
               </div>
             </div>
           </div>
-          <Button variant="ghost" size="icon" className="text-muted-foreground">
+          <Button variant="ghost" size="icon" className="text-muted-foreground hover:rotate-90 transition-transform">
             <MoreHorizontal className="h-5 w-5" />
           </Button>
         </div>
@@ -50,22 +50,22 @@ export const PostCard = ({
           <img
             src={image}
             alt="Post content"
-            className="w-full h-64 object-cover rounded-lg mb-4"
+            className="w-full h-64 object-cover rounded-lg mb-4 hover:scale-[1.02] transition-transform"
           />
         )}
         
         <Separator className="my-4" />
         
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" className="text-muted-foreground">
+          <Button variant="ghost" size="sm" className="text-muted-foreground hover:scale-105 transition-transform">
             <Heart className="h-4 w-4 mr-2" />
             {likes}
           </Button>
-          <Button variant="ghost" size="sm" className="text-muted-foreground">
+          <Button variant="ghost" size="sm" className="text-muted-foreground hover:scale-105 transition-transform">
             <MessageCircle className="h-4 w-4 mr-2" />
             {comments}
           </Button>
-          <Button variant="ghost" size="sm" className="text-muted-foreground ml-auto">
+          <Button variant="ghost" size="sm" className="text-muted-foreground ml-auto hover:scale-105 transition-transform">
             <Share2 className="h-4 w-4" />
           </Button>
         </div>

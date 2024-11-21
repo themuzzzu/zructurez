@@ -16,12 +16,12 @@ const categories = [
 
 export const CategoryFilter = () => {
   return (
-    <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide">
+    <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide animate-slide-in">
       {categories.map((category) => (
         <Button
           key={category}
           variant={category === "All" ? "default" : "outline"}
-          className="whitespace-nowrap bg-card"
+          className="whitespace-nowrap bg-card hover:scale-105 transition-transform"
         >
           {category}
         </Button>
