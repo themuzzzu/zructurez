@@ -1,0 +1,38 @@
+import { Bell, Menu, Search } from "lucide-react";
+import { Button } from "./ui/button";
+
+export const Navbar = () => {
+  return (
+    <nav className="border-b bg-white py-4 fixed top-0 w-full z-50">
+      <div className="container flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" className="lg:hidden">
+            <Menu className="h-5 w-5" />
+          </Button>
+          <h1 className="text-xl font-bold text-primary">Nextdoor Clone</h1>
+        </div>
+        
+        <div className="hidden md:flex items-center gap-4 flex-1 max-w-md mx-4">
+          <div className="relative w-full">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <input
+              type="search"
+              placeholder="Search posts..."
+              className="w-full pl-10 pr-4 py-2 border rounded-full bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" className="relative">
+            <Bell className="h-5 w-5" />
+            <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
+          </Button>
+          <Button variant="ghost" className="hidden md:flex">
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="avatar" className="h-6 w-6 rounded-full" />
+          </Button>
+        </div>
+      </div>
+    </nav>
+  );
+};
