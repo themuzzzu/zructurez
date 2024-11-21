@@ -1,10 +1,10 @@
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
-import { Image, MessageCircle, Tag } from "lucide-react";
+import { Image, MessageCircle, Tag, MapPin, Poll } from "lucide-react";
 
 export const CreatePost = () => {
   return (
-    <Card className="p-4 mb-6 animate-fade-in">
+    <Card className="p-4 mb-6 animate-fade-in bg-card">
       <div className="flex items-start gap-4">
         <img
           src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"
@@ -18,7 +18,7 @@ export const CreatePost = () => {
           >
             What's happening in your neighborhood, Felix?
           </button>
-          <div className="flex gap-2 mt-4">
+          <div className="flex flex-wrap gap-2 mt-4">
             <Button variant="ghost" size="sm" className="text-muted-foreground">
               <Image className="h-4 w-4 mr-2" />
               Photo
@@ -28,8 +28,12 @@ export const CreatePost = () => {
               Category
             </Button>
             <Button variant="ghost" size="sm" className="text-muted-foreground">
-              <MessageCircle className="h-4 w-4 mr-2" />
+              <Poll className="h-4 w-4 mr-2" />
               Poll
+            </Button>
+            <Button variant="ghost" size="sm" className="text-muted-foreground">
+              <MapPin className="h-4 w-4 mr-2" />
+              Location
             </Button>
           </div>
         </div>

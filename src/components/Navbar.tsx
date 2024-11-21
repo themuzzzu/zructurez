@@ -1,5 +1,6 @@
-import { Bell, Menu, Search } from "lucide-react";
+import { Bell, Menu, Search, MessageSquare, Home, Users } from "lucide-react";
 import { Button } from "./ui/button";
+import { Separator } from "./ui/separator";
 
 export const Navbar = () => {
   return (
@@ -10,6 +11,21 @@ export const Navbar = () => {
             <Menu className="h-5 w-5" />
           </Button>
           <h1 className="text-xl font-bold text-primary">Neighborly</h1>
+          
+          <div className="hidden md:flex items-center gap-2">
+            <Button variant="ghost" size="sm">
+              <Home className="h-4 w-4 mr-2" />
+              Home
+            </Button>
+            <Button variant="ghost" size="sm">
+              <MessageSquare className="h-4 w-4 mr-2" />
+              Messages
+            </Button>
+            <Button variant="ghost" size="sm">
+              <Users className="h-4 w-4 mr-2" />
+              Groups
+            </Button>
+          </div>
         </div>
         
         <div className="hidden md:flex items-center gap-4 flex-1 max-w-md mx-4">
@@ -28,8 +44,13 @@ export const Navbar = () => {
             <Bell className="h-5 w-5" />
             <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
           </Button>
+          <Separator orientation="vertical" className="h-6 hidden md:block" />
           <Button variant="ghost" className="hidden md:flex gap-2">
-            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="avatar" className="h-6 w-6 rounded-full" />
+            <img 
+              src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" 
+              alt="avatar" 
+              className="h-6 w-6 rounded-full" 
+            />
             <span className="text-sm">Felix</span>
           </Button>
         </div>
