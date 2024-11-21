@@ -5,7 +5,7 @@ import { Separator } from "./ui/separator";
 export const Navbar = () => {
   return (
     <nav className="border-b bg-card py-4 fixed top-0 w-full z-50">
-      <div className="container flex items-center justify-between">
+      <div className="container flex items-center justify-between animate-fade-down">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" className="lg:hidden">
             <Menu className="h-5 w-5" />
@@ -13,15 +13,15 @@ export const Navbar = () => {
           <h1 className="text-xl font-bold text-primary">Neighborly</h1>
           
           <div className="hidden md:flex items-center gap-2">
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" className="transition-all duration-300 hover:bg-accent/80">
               <Home className="h-4 w-4 mr-2" />
               Home
             </Button>
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" className="transition-all duration-300 hover:bg-accent/80">
               <MessageSquare className="h-4 w-4 mr-2" />
               Messages
             </Button>
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" className="transition-all duration-300 hover:bg-accent/80">
               <Users className="h-4 w-4 mr-2" />
               Groups
             </Button>
@@ -34,22 +34,22 @@ export const Navbar = () => {
             <input
               type="search"
               placeholder="Search posts, neighbors, and more..."
-              className="w-full pl-10 pr-4 py-2 border rounded-full bg-background focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border rounded-full bg-background focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300"
             />
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="relative">
+          <Button variant="ghost" size="icon" className="relative transition-transform duration-300 hover:scale-110">
             <Bell className="h-5 w-5" />
             <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
           </Button>
           <Separator orientation="vertical" className="h-6 hidden md:block" />
-          <Button variant="ghost" className="hidden md:flex gap-2">
+          <Button variant="ghost" className="hidden md:flex gap-2 transition-all duration-300 hover:bg-accent/80">
             <img 
               src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" 
               alt="avatar" 
-              className="h-6 w-6 rounded-full" 
+              className="h-6 w-6 rounded-full transition-transform duration-300 hover:scale-110" 
             />
             <span className="text-sm">Felix</span>
           </Button>
