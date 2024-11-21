@@ -13,19 +13,23 @@ export const CreatePost = () => {
         />
         <div className="flex-1">
           <button
-            className="w-full text-left p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+            className="w-full text-left p-3 bg-accent/50 rounded-lg hover:bg-accent transition-colors"
             onClick={() => alert("Open post modal")}
           >
-            What's happening in your neighborhood?
+            What's happening in your neighborhood, Felix?
           </button>
           <div className="flex gap-2 mt-4">
-            <Button variant="ghost" size="sm" className="text-gray-600">
+            <Button variant="ghost" size="sm" className="text-muted-foreground">
               <Image className="h-4 w-4 mr-2" />
               Photo
             </Button>
-            <Button variant="ghost" size="sm" className="text-gray-600">
+            <Button variant="ghost" size="sm" className="text-muted-foreground">
               <Tag className="h-4 w-4 mr-2" />
               Category
+            </Button>
+            <Button variant="ghost" size="sm" className="text-muted-foreground">
+              <MessageCircle className="h-4 w-4 mr-2" />
+              Poll
             </Button>
           </div>
         </div>

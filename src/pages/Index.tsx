@@ -26,6 +26,53 @@ const SAMPLE_POSTS = [
     comments: 15,
     image: "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=800",
   },
+  {
+    author: "Lisa Chen",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Lisa",
+    time: "6h ago",
+    content: "Selling my gently used patio furniture set. Includes 4 chairs and a table. Perfect condition, just moving and can't take it with me. $200 OBO. DM for more details!",
+    category: "For Sale",
+    likes: 8,
+    comments: 6,
+    image: "https://images.unsplash.com/photo-1567225557594-88d73e55f2cb?w=800",
+  },
+  {
+    author: "David Martinez",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=David",
+    time: "8h ago",
+    content: "⚠️ Heads up neighbors! There have been reports of car break-ins on Maple Avenue last night. Remember to lock your cars and don't leave valuables visible.",
+    category: "Safety",
+    likes: 45,
+    comments: 32,
+  },
+  {
+    author: "Emma Wilson",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emma",
+    time: "12h ago",
+    content: "Can anyone recommend a reliable plumber? Have a leaky faucet that needs fixing ASAP. Preferably someone who can come this week. Thanks in advance!",
+    category: "Recommendations",
+    likes: 3,
+    comments: 12,
+  },
+  {
+    author: "Tom Bradley",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Tom",
+    time: "1d ago",
+    content: "Just moved to the neighborhood! Looking forward to meeting everyone. We're the new family at 342 Pine Street. Feel free to stop by and say hi! 👋",
+    category: "General",
+    likes: 56,
+    comments: 28,
+  },
+  {
+    author: "Rachel Green",
+    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Rachel",
+    time: "1d ago",
+    content: "The local farmer's market is back this Sunday! 9 AM - 2 PM at Central Park. Lots of fresh produce, baked goods, and crafts. Support our local vendors! 🥕🍎",
+    category: "Events",
+    likes: 34,
+    comments: 16,
+    image: "https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=800",
+  }
 ];
 
 const Index = () => {
