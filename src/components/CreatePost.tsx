@@ -1,6 +1,6 @@
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
-import { Image, MessageCircle, Tag, MapPin, Poll } from "lucide-react";
+import { Image, MessageCircle, Tag, MapPin, ListChecks } from "lucide-react";
 
 export const CreatePost = () => {
   return (
@@ -28,7 +28,7 @@ export const CreatePost = () => {
               Category
             </Button>
             <Button variant="ghost" size="sm" className="text-muted-foreground">
-              <Poll className="h-4 w-4 mr-2" />
+              <ListChecks className="h-4 w-4 mr-2" />
               Poll
             </Button>
             <Button variant="ghost" size="sm" className="text-muted-foreground">
