@@ -1,8 +1,29 @@
 import { Bell, Menu, Search, MessageSquare, Home, Users } from "lucide-react";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
+import { useNavigate } from "react-router-dom";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
 
 export const Navbar = () => {
+  const navigate = useNavigate();
+
+  const handleHomeClick = () => {
+    navigate("/");
+    toast.success("Welcome home!");
+  };
+
+  const handleProfileAction = (action: string) => {
+    toast.info(`${action} clicked - Feature coming soon!`);
+  };
+
   return (
     <nav className="border-b bg-card py-4 fixed top-0 w-full z-50">
       <div className="container flex items-center justify-between animate-fade-down">
@@ -13,7 +34,12 @@ export const Navbar = () => {
           <h1 className="text-xl font-bold text-primary">Neighborly</h1>
           
           <div className="hidden md:flex items-center gap-2">
-            <Button variant="ghost" size="sm" className="transition-all duration-300 hover:bg-accent/80">
+            <Button 
+              variant="glow" 
+              size="sm" 
+              onClick={handleHomeClick}
+              className="transition-all duration-300 hover:bg-accent/80"
+            >
               <Home className="h-4 w-4 mr-2" />
               Home
             </Button>
@@ -45,14 +71,36 @@ export const Navbar = () => {
             <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
           </Button>
           <Separator orientation="vertical" className="h-6 hidden md:block" />
-          <Button variant="ghost" className="hidden md:flex gap-2 transition-all duration-300 hover:bg-accent/80">
-            <img 
-              src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" 
-              alt="avatar" 
-              className="h-6 w-6 rounded-full transition-transform duration-300 hover:scale-110" 
-            />
-            <span className="text-sm">Felix</span>
-          </Button>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="hidden md:flex gap-2 transition-all duration-300 hover:bg-accent/80">
+                <img 
+                  src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" 
+                  alt="avatar" 
+                  className="h-6 w-6 rounded-full transition-transform duration-300 hover:scale-110" 
+                />
+                <span className="text-sm">Felix</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => handleProfileAction("Profile")}>
+                Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleProfileAction("Settings")}>
+                Settings
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleProfileAction("Help")}>
+                Help
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => handleProfileAction("Sign out")}>
+                Sign out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </nav>

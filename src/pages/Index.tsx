@@ -105,30 +105,30 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background transition-colors duration-300">
       <Navbar />
-      <main className="container max-w-2xl pt-24 pb-12">
-        <div className="fixed bottom-4 right-4 z-50">
-          <Button
-            variant="outline"
-            size="icon"
-            className="rounded-full bg-background"
-            onClick={toggleDarkMode}
-          >
-            {isDark ? (
-              <Sun className="h-5 w-5" />
-            ) : (
-              <Moon className="h-5 w-5" />
-            )}
-          </Button>
-        </div>
+      <main className="container max-w-2xl pt-24 pb-12 space-y-8">
         <CreatePost />
         <CategoryFilter />
         <Separator className="my-6" />
-        <div className="space-y-4">
+        <div className="space-y-6">
           {SAMPLE_POSTS.map((post, index) => (
             <PostCard key={index} {...post} />
           ))}
         </div>
       </main>
+      <div className="fixed bottom-4 right-4 z-50">
+        <Button
+          variant="outline"
+          size="icon"
+          className="rounded-full bg-background"
+          onClick={toggleDarkMode}
+        >
+          {isDark ? (
+            <Sun className="h-5 w-5" />
+          ) : (
+            <Moon className="h-5 w-5" />
+          )}
+        </Button>
+      </div>
     </div>
   );
 };
