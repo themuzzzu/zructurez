@@ -1,9 +1,17 @@
-import { MessageCircle, Heart, Share2, MoreHorizontal } from "lucide-react";
+import { MessageCircle, Heart, Share2, MoreHorizontal, Smile } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Separator } from "./ui/separator";
 import { useState } from "react";
 import { toast } from "sonner";
+import { CommentSection } from "./CommentSection";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
+const EMOJI_REACTIONS = ["👍", "❤️", "😂", "😮", "😢", "😡"];
 
 interface PostCardProps {
   author: string;
@@ -28,7 +36,8 @@ export const PostCard = ({
 }: PostCardProps) => {
   const [likes, setLikes] = useState(initialLikes);
   const [isLiked, setIsLiked] = useState(false);
-  const [comments, setComments] = useState(initialComments);
+  const [showComments, setShowComments] = useState(false);
+  const [reactions, setReactions] = useState<{ [key: string]: number }>({});
 
   const handleLike = () => {
     if (isLiked) {
@@ -42,9 +51,12 @@ export const PostCard = ({
     }
   };
 
-  const handleComment = () => {
-    setComments(prev => prev + 1);
-    toast.success("Comment added!");
+  const handleReaction = (emoji: string) => {
+    setReactions(prev => ({
+      ...prev,
+      [emoji]: (prev[emoji] || 0) + 1
+    }));
+    toast.success(`You reacted with ${emoji}`);
   };
 
   const handleShare = () => {
@@ -90,6 +102,14 @@ export const PostCard = ({
           />
         )}
         
+        <div className="flex flex-wrap gap-2 mb-4">
+          {Object.entries(reactions).map(([emoji, count]) => (
+            <span key={emoji} className="text-sm bg-accent/50 px-2 py-1 rounded-full">
+              {emoji} {count}
+            </span>
+          ))}
+        </div>
+        
         <Separator className="my-4" />
         
         <div className="flex items-center gap-4">
@@ -102,15 +122,43 @@ export const PostCard = ({
             <Heart className={`h-4 w-4 mr-2 ${isLiked ? 'fill-current' : ''}`} />
             {likes}
           </Button>
+          
           <Button 
             variant="ghost" 
             size="sm" 
             className="text-muted-foreground transition-all duration-300 hover:scale-105 hover:bg-accent/80"
-            onClick={handleComment}
+            onClick={() => setShowComments(!showComments)}
           >
             <MessageCircle className="h-4 w-4 mr-2" />
-            {comments}
+            {initialComments}
           </Button>
+
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-muted-foreground transition-all duration-300 hover:scale-105 hover:bg-accent/80"
+              >
+                <Smile className="h-4 w-4 mr-2" />
+                React
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-full p-2">
+              <div className="flex flex-wrap gap-2">
+                {EMOJI_REACTIONS.map((emoji) => (
+                  <button
+                    key={emoji}
+                    onClick={() => handleReaction(emoji)}
+                    className="text-xl hover:scale-125 transition-transform p-1"
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
+          
           <Button 
             variant="ghost" 
             size="sm" 
@@ -120,6 +168,21 @@ export const PostCard = ({
             <Share2 className="h-4 w-4" />
           </Button>
         </div>
+
+        {showComments && (
+          <CommentSection
+            postId="1"
+            initialComments={[
+              {
+                id: "1",
+                author: "Jane Doe",
+                avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Jane",
+                content: "This is amazing! Thanks for sharing!",
+                timestamp: "2 hours ago"
+              }
+            ]}
+          />
+        )}
       </div>
     </Card>
   );
