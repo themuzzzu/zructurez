@@ -105,14 +105,23 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background transition-colors duration-300">
       <Navbar />
-      <main className="container max-w-2xl pt-24 pb-12 space-y-8">
-        <CreatePost />
-        <CategoryFilter />
-        <Separator className="my-6" />
-        <div className="space-y-6">
-          {SAMPLE_POSTS.map((post, index) => (
-            <PostCard key={index} {...post} />
-          ))}
+      <main className="container max-w-2xl pt-28 pb-16">
+        <div className="space-y-12">
+          <section className="space-y-6">
+            <CreatePost />
+          </section>
+
+          <section className="space-y-6">
+            <CategoryFilter />
+          </section>
+
+          <Separator className="my-8" />
+
+          <section className="space-y-8">
+            {SAMPLE_POSTS.map((post, index) => (
+              <PostCard key={index} {...post} />
+            ))}
+          </section>
         </div>
       </main>
       <div className="fixed bottom-4 right-4 z-50">
