@@ -1,4 +1,6 @@
 import { Button } from "./ui/button";
+import { useState } from "react";
+import { toast } from "sonner";
 
 const categories = [
   "All",
@@ -15,16 +17,24 @@ const categories = [
 ];
 
 export const CategoryFilter = () => {
+  const [selectedCategory, setSelectedCategory] = useState("All");
+
+  const handleCategoryClick = (category: string) => {
+    setSelectedCategory(category);
+    toast.success(`Filtered by ${category}`);
+  };
+
   return (
     <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide animate-fade-up [animation-delay:100ms]">
       {categories.map((category, index) => (
         <Button
           key={category}
-          variant={category === "All" ? "default" : "outline"}
+          variant={category === selectedCategory ? "default" : "outline"}
           className="whitespace-nowrap bg-card transition-all duration-300 hover:scale-105 hover:shadow-md"
           style={{
             animationDelay: `${index * 50}ms`,
           }}
+          onClick={() => handleCategoryClick(category)}
         >
           {category}
         </Button>

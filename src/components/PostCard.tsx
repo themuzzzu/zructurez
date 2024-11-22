@@ -2,6 +2,8 @@ import { MessageCircle, Heart, Share2, MoreHorizontal } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Separator } from "./ui/separator";
+import { useState } from "react";
+import { toast } from "sonner";
 
 interface PostCardProps {
   author: string;
@@ -20,10 +22,39 @@ export const PostCard = ({
   time,
   content,
   category,
-  likes,
-  comments,
+  likes: initialLikes,
+  comments: initialComments,
   image,
 }: PostCardProps) => {
+  const [likes, setLikes] = useState(initialLikes);
+  const [isLiked, setIsLiked] = useState(false);
+  const [comments, setComments] = useState(initialComments);
+
+  const handleLike = () => {
+    if (isLiked) {
+      setLikes(prev => prev - 1);
+      setIsLiked(false);
+      toast.info("Post unliked");
+    } else {
+      setLikes(prev => prev + 1);
+      setIsLiked(true);
+      toast.success("Post liked!");
+    }
+  };
+
+  const handleComment = () => {
+    setComments(prev => prev + 1);
+    toast.success("Comment added!");
+  };
+
+  const handleShare = () => {
+    toast.success("Post shared!");
+  };
+
+  const handleMoreOptions = () => {
+    toast.info("More options coming soon!");
+  };
+
   return (
     <Card className="mb-4 opacity-0 animate-fade-up [animation-fill-mode:forwards] [animation-delay:200ms] bg-card hover:shadow-lg transition-shadow duration-300">
       <div className="p-4">
@@ -39,7 +70,12 @@ export const PostCard = ({
               </div>
             </div>
           </div>
-          <Button variant="ghost" size="icon" className="text-muted-foreground transition-transform duration-300 hover:rotate-90">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="text-muted-foreground transition-transform duration-300 hover:rotate-90"
+            onClick={handleMoreOptions}
+          >
             <MoreHorizontal className="h-5 w-5" />
           </Button>
         </div>
@@ -57,15 +93,30 @@ export const PostCard = ({
         <Separator className="my-4" />
         
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" className="text-muted-foreground transition-all duration-300 hover:scale-105 hover:bg-accent/80">
-            <Heart className="h-4 w-4 mr-2" />
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className={`text-muted-foreground transition-all duration-300 hover:scale-105 hover:bg-accent/80 ${isLiked ? 'text-primary' : ''}`}
+            onClick={handleLike}
+          >
+            <Heart className={`h-4 w-4 mr-2 ${isLiked ? 'fill-current' : ''}`} />
             {likes}
           </Button>
-          <Button variant="ghost" size="sm" className="text-muted-foreground transition-all duration-300 hover:scale-105 hover:bg-accent/80">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-muted-foreground transition-all duration-300 hover:scale-105 hover:bg-accent/80"
+            onClick={handleComment}
+          >
             <MessageCircle className="h-4 w-4 mr-2" />
             {comments}
           </Button>
-          <Button variant="ghost" size="sm" className="text-muted-foreground ml-auto transition-all duration-300 hover:scale-105 hover:bg-accent/80">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-muted-foreground ml-auto transition-all duration-300 hover:scale-105 hover:bg-accent/80"
+            onClick={handleShare}
+          >
             <Share2 className="h-4 w-4" />
           </Button>
         </div>
