@@ -25,25 +25,25 @@ export const CreatePost = () => {
   };
 
   return (
-    <Card className="p-4 mb-6 animate-fade-up bg-card">
+    <Card className="p-4 bg-card">
       <div className="flex items-start gap-4">
         <img
           src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"
           alt="avatar"
-          className="h-10 w-10 rounded-full transition-transform duration-300 hover:scale-110"
+          className="h-10 w-10 rounded-full"
         />
         <div className="flex-1">
           <button
-            className="w-full text-left p-3 bg-accent/50 rounded-lg transition-all duration-300 hover:bg-accent hover:shadow-lg"
+            className="w-full text-left p-3 bg-accent/50 rounded-lg text-muted-foreground transition-all duration-300 hover:bg-accent"
             onClick={handleCreatePost}
           >
-            What's happening in your neighborhood, Felix?
+            Share something with your neighborhood...
           </button>
           <div className="flex flex-wrap gap-2 mt-4">
             <Button 
               variant="ghost" 
               size="sm" 
-              className="text-muted-foreground transition-all duration-300 hover:scale-105 hover:bg-accent/80"
+              className="text-muted-foreground"
               onClick={handlePhotoUpload}
             >
               <Image className="h-4 w-4 mr-2" />
@@ -52,7 +52,7 @@ export const CreatePost = () => {
             <Button 
               variant="ghost" 
               size="sm" 
-              className="text-muted-foreground transition-all duration-300 hover:scale-105 hover:bg-accent/80"
+              className="text-muted-foreground"
               onClick={handleCategorySelect}
             >
               <Tag className="h-4 w-4 mr-2" />
@@ -61,7 +61,7 @@ export const CreatePost = () => {
             <Button 
               variant="ghost" 
               size="sm" 
-              className="text-muted-foreground transition-all duration-300 hover:scale-105 hover:bg-accent/80"
+              className="text-muted-foreground"
               onClick={handlePollCreate}
             >
               <ListChecks className="h-4 w-4 mr-2" />
@@ -70,7 +70,7 @@ export const CreatePost = () => {
             <Button 
               variant="ghost" 
               size="sm" 
-              className="text-muted-foreground transition-all duration-300 hover:scale-105 hover:bg-accent/80"
+              className="text-muted-foreground"
               onClick={handleLocationAdd}
             >
               <MapPin className="h-4 w-4 mr-2" />

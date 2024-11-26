@@ -2,10 +2,7 @@ import { Navbar } from "@/components/Navbar";
 import { CreatePost } from "@/components/CreatePost";
 import { CategoryFilter } from "@/components/CategoryFilter";
 import { PostCard } from "@/components/PostCard";
-import { Button } from "@/components/ui/button";
-import { Moon, Sun } from "lucide-react";
-import { useEffect, useState } from "react";
-import { Separator } from "@/components/ui/separator";
+import { Sidebar } from "@/components/Sidebar";
 
 const SAMPLE_POSTS = [
   {
@@ -86,57 +83,24 @@ const SAMPLE_POSTS = [
 ];
 
 const Index = () => {
-  const [isDark, setIsDark] = useState(false);
-
-  useEffect(() => {
-    const isDarkMode = localStorage.getItem("darkMode") === "true";
-    setIsDark(isDarkMode);
-    if (isDarkMode) {
-      document.documentElement.classList.add("dark");
-    }
-  }, []);
-
-  const toggleDarkMode = () => {
-    setIsDark(!isDark);
-    document.documentElement.classList.toggle("dark");
-    localStorage.setItem("darkMode", (!isDark).toString());
-  };
-
   return (
-    <div className="min-h-screen bg-background transition-colors duration-300">
+    <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="container max-w-2xl pt-28 pb-16">
-        <div className="space-y-12">
-          <section className="space-y-6">
-            <CreatePost />
-          </section>
-
-          <section className="space-y-6">
-            <CategoryFilter />
-          </section>
-
-          <Separator className="my-8" />
-
-          <section className="space-y-8">
-            {SAMPLE_POSTS.map((post, index) => (
-              <PostCard key={index} {...post} />
-            ))}
-          </section>
+      <div className="container max-w-[1400px] pt-20 pb-16">
+        <div className="flex gap-6">
+          <Sidebar className="w-64 hidden lg:block" />
+          <main className="flex-1 max-w-2xl mx-auto lg:mx-0">
+            <div className="space-y-6">
+              <CreatePost />
+              <CategoryFilter />
+              <div className="space-y-4">
+                {SAMPLE_POSTS.map((post, index) => (
+                  <PostCard key={index} {...post} />
+                ))}
+              </div>
+            </div>
+          </main>
         </div>
-      </main>
-      <div className="fixed bottom-4 right-4 z-50">
-        <Button
-          variant="outline"
-          size="icon"
-          className="rounded-full bg-background"
-          onClick={toggleDarkMode}
-        >
-          {isDark ? (
-            <Sun className="h-5 w-5" />
-          ) : (
-            <Moon className="h-5 w-5" />
-          )}
-        </Button>
       </div>
     </div>
   );
