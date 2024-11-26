@@ -13,6 +13,7 @@ const SAMPLE_POSTS = [
     category: "Lost & Found",
     likes: 12,
     comments: 8,
+    image: "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=800"
   },
   {
     author: "Mike Peterson",
@@ -22,7 +23,7 @@ const SAMPLE_POSTS = [
     category: "Events",
     likes: 45,
     comments: 23,
-    image: "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=800",
+    image: "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=800"
   },
   {
     author: "Lisa Chen",
@@ -32,7 +33,7 @@ const SAMPLE_POSTS = [
     category: "For Sale",
     likes: 18,
     comments: 32,
-    image: "https://images.unsplash.com/photo-1567225557594-88d73e55f2cb?w=800",
+    image: "https://images.unsplash.com/photo-1567225557594-88d73e55f2cb?w=800"
   },
   {
     author: "David Martinez",
@@ -42,6 +43,7 @@ const SAMPLE_POSTS = [
     category: "Safety",
     likes: 89,
     comments: 56,
+    image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=800"
   },
   {
     author: "Emma Wilson",
@@ -60,6 +62,7 @@ const SAMPLE_POSTS = [
     category: "General",
     likes: 65,
     comments: 42,
+    image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800"
   },
   {
     author: "Rachel Green",
@@ -69,7 +72,7 @@ const SAMPLE_POSTS = [
     category: "Events",
     likes: 34,
     comments: 16,
-    image: "https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=800",
+    image: "https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=800"
   },
   {
     author: "James Wilson",
