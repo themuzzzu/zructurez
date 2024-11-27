@@ -7,6 +7,8 @@ import Index from "./pages/Index";
 import Marketplace from "./pages/Marketplace";
 import Services from "./pages/Services";
 import Groups from "./pages/Groups";
+import Messages from "./pages/Messages";
+import Events from "./pages/Events";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +23,8 @@ const App = () => (
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/services" element={<Services />} />
           <Route path="/groups" element={<Groups />} />
+          <Route path="/messages" element={<Messages />} />
+          <Route path="/events" element={<Events />} />
           <Route path="/maps" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
