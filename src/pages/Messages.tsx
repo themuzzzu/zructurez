@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Search, Send } from "lucide-react";
+import { Search, Send, ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
 
 const SAMPLE_CHATS = [
   {
@@ -53,6 +54,14 @@ const Messages = () => {
         <div className="flex gap-6">
           <Sidebar className="w-64 hidden lg:block" />
           <main className="flex-1">
+            <div className="flex items-center gap-4 mb-4">
+              <Link to="/">
+                <Button variant="ghost" size="icon">
+                  <ArrowLeft className="h-5 w-5" />
+                </Button>
+              </Link>
+              <h1 className="text-3xl font-bold">Messages</h1>
+            </div>
             <Card className="h-[calc(100vh-140px)]">
               <div className="flex h-full">
                 <div className="w-80 border-r">

@@ -2,8 +2,9 @@ import { Navbar } from "@/components/Navbar";
 import { Sidebar } from "@/components/Sidebar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Calendar, MapPin, Clock, Users2 } from "lucide-react";
+import { Calendar, MapPin, Clock, Users2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
 
 const SAMPLE_EVENTS = [
   {
@@ -52,7 +53,14 @@ const Events = () => {
           <main className="flex-1">
             <div className="space-y-6">
               <div className="flex justify-between items-center">
-                <h1 className="text-3xl font-bold">Events</h1>
+                <div className="flex items-center gap-4">
+                  <Link to="/">
+                    <Button variant="ghost" size="icon">
+                      <ArrowLeft className="h-5 w-5" />
+                    </Button>
+                  </Link>
+                  <h1 className="text-3xl font-bold">Events</h1>
+                </div>
                 <Button onClick={() => toast.info("Create event feature coming soon!")}>
                   Create Event
                 </Button>

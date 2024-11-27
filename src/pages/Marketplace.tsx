@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { DollarSign, MessageSquare, Share2 } from "lucide-react";
+import { DollarSign, MessageSquare, Share2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
 
 interface MarketplaceItem {
   id: string;
@@ -73,7 +74,14 @@ const Marketplace = () => {
       <div className="container max-w-[1400px]">
         <div className="flex flex-col gap-6">
           <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold">Marketplace</h1>
+            <div className="flex items-center gap-4">
+              <Link to="/">
+                <Button variant="ghost" size="icon">
+                  <ArrowLeft className="h-5 w-5" />
+                </Button>
+              </Link>
+              <h1 className="text-3xl font-bold">Marketplace</h1>
+            </div>
             <Button onClick={() => toast.info("New listing feature coming soon!")}>
               List an Item
             </Button>
