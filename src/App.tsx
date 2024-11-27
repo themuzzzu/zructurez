@@ -9,6 +9,7 @@ import Services from "./pages/Services";
 import Groups from "./pages/Groups";
 import Messages from "./pages/Messages";
 import Events from "./pages/Events";
+import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/groups" element={<Groups />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/events" element={<Events />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="/maps" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
