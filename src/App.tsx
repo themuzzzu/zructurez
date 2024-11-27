@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import Marketplace from "./pages/Marketplace";
 import Services from "./pages/Services";
+import Groups from "./pages/Groups";
 
 const queryClient = new QueryClient();
 
@@ -19,6 +20,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/services" element={<Services />} />
+          <Route path="/groups" element={<Groups />} />
           <Route path="/maps" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
