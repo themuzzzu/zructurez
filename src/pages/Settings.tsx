@@ -7,6 +7,8 @@ import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 
 const settingsFormSchema = z.object({
   notifications: z.boolean().default(true),
@@ -25,6 +27,7 @@ const defaultValues: Partial<SettingsFormValues> = {
 };
 
 const Settings = () => {
+  const navigate = useNavigate();
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsFormSchema),
     defaultValues,
@@ -40,9 +43,19 @@ const Settings = () => {
       <Navbar />
       <div className="container max-w-[1400px] pt-20 pb-16">
         <div className="space-y-6">
-          <div>
-            <h1 className="text-3xl font-bold animate-fade-up">Settings</h1>
-            <p className="text-muted-foreground">Manage your account preferences and settings.</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold animate-fade-up">Settings</h1>
+              <p className="text-muted-foreground">Manage your account preferences and settings.</p>
+            </div>
+            <Button 
+              variant="outline" 
+              onClick={() => navigate('/')}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Home
+            </Button>
           </div>
 
           <div className="grid gap-6">
