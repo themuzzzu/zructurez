@@ -8,15 +8,53 @@ import { Search, Send, ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
+import { MessageBubble } from "@/components/MessageBubble";
 
-const SAMPLE_CHATS = [
+interface Message {
+  id: string;
+  content: string;
+  timestamp: string;
+  senderId: string;
+}
+
+interface Chat {
+  id: number;
+  name: string;
+  avatar: string;
+  lastMessage: string;
+  time: string;
+  unread: number;
+  messages: Message[];
+}
+
+const SAMPLE_CHATS: Chat[] = [
   {
     id: 1,
     name: "Sarah Johnson",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah",
     lastMessage: "Thanks for the help with the garden!",
     time: "2m ago",
-    unread: 2
+    unread: 2,
+    messages: [
+      {
+        id: "1",
+        content: "Hi there! Could you help me with my garden?",
+        timestamp: "Yesterday 2:30 PM",
+        senderId: "sarah"
+      },
+      {
+        id: "2",
+        content: "Of course! What do you need help with?",
+        timestamp: "Yesterday 2:35 PM",
+        senderId: "me"
+      },
+      {
+        id: "3",
+        content: "Thanks for the help with the garden!",
+        timestamp: "2m ago",
+        senderId: "sarah"
+      }
+    ]
   },
   {
     id: 2,
@@ -37,15 +75,42 @@ const SAMPLE_CHATS = [
 ];
 
 const Messages = () => {
-  const [selectedChat, setSelectedChat] = useState<number | null>(null);
+  const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [message, setMessage] = useState("");
+  const [chats, setChats] = useState<Chat[]>(SAMPLE_CHATS);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleSendMessage = () => {
-    if (message.trim()) {
-      toast.success("Message sent!");
-      setMessage("");
-    }
+    if (!message.trim() || !selectedChat) return;
+
+    const newMessage: Message = {
+      id: Date.now().toString(),
+      content: message,
+      timestamp: new Date().toLocaleTimeString(),
+      senderId: "me"
+    };
+
+    const updatedChats = chats.map(chat => {
+      if (chat.id === selectedChat.id) {
+        return {
+          ...chat,
+          messages: [...chat.messages, newMessage],
+          lastMessage: message,
+          time: "Just now"
+        };
+      }
+      return chat;
+    });
+
+    setChats(updatedChats);
+    setSelectedChat(updatedChats.find(chat => chat.id === selectedChat.id) || null);
+    setMessage("");
+    toast.success("Message sent!");
   };
+
+  const filteredChats = chats.filter(chat => 
+    chat.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -71,15 +136,19 @@ const Messages = () => {
                       <Input
                         placeholder="Search messages..."
                         className="pl-10"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                       />
                     </div>
                   </div>
                   <ScrollArea className="h-[calc(100vh-220px)]">
-                    {SAMPLE_CHATS.map((chat) => (
+                    {filteredChats.map((chat) => (
                       <button
                         key={chat.id}
-                        className="w-full p-4 flex items-start gap-3 hover:bg-accent transition-colors border-b"
-                        onClick={() => setSelectedChat(chat.id)}
+                        className={`w-full p-4 flex items-start gap-3 hover:bg-accent transition-colors border-b ${
+                          selectedChat?.id === chat.id ? 'bg-accent' : ''
+                        }`}
+                        onClick={() => setSelectedChat(chat)}
                       >
                         <img
                           src={chat.avatar}
@@ -109,20 +178,25 @@ const Messages = () => {
                       <div className="p-4 border-b">
                         <div className="flex items-center gap-3">
                           <img
-                            src={SAMPLE_CHATS.find(c => c.id === selectedChat)?.avatar}
+                            src={selectedChat.avatar}
                             alt="Chat avatar"
                             className="w-10 h-10 rounded-full"
                           />
                           <span className="font-semibold">
-                            {SAMPLE_CHATS.find(c => c.id === selectedChat)?.name}
+                            {selectedChat.name}
                           </span>
                         </div>
                       </div>
                       <ScrollArea className="flex-1 p-4">
                         <div className="space-y-4">
-                          <p className="text-center text-sm text-muted-foreground">
-                            This is the beginning of your conversation
-                          </p>
+                          {selectedChat.messages.map((msg) => (
+                            <MessageBubble
+                              key={msg.id}
+                              content={msg.content}
+                              timestamp={msg.timestamp}
+                              isOwn={msg.senderId === "me"}
+                            />
+                          ))}
                         </div>
                       </ScrollArea>
                       <div className="p-4 border-t">
