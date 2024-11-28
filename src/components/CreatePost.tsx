@@ -3,9 +3,17 @@ import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Image as ImageIcon, Tag, MapPin, ListChecks, X } from "lucide-react";
 import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 
 export const CreatePost = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<string>("");
 
   const handleCreatePost = () => {
     toast.info("Create post feature coming soon!");
@@ -41,8 +49,9 @@ export const CreatePost = () => {
     toast.info("Poll creation feature coming soon!");
   };
 
-  const handleLocationAdd = () => {
-    toast.info("Location adding feature coming soon!");
+  const handleLocationSelect = (value: string) => {
+    setSelectedLocation(value);
+    toast.success(`Location scope set to ${value}`);
   };
 
   return (
@@ -115,15 +124,24 @@ export const CreatePost = () => {
               <ListChecks className="h-4 w-4 mr-2" />
               Poll
             </Button>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="text-muted-foreground"
-              onClick={handleLocationAdd}
-            >
-              <MapPin className="h-4 w-4 mr-2" />
-              Location
-            </Button>
+            <Select onValueChange={handleLocationSelect} value={selectedLocation}>
+              <SelectTrigger className="w-[140px]">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-muted-foreground -ml-3"
+                >
+                  <MapPin className="h-4 w-4 mr-2" />
+                  {selectedLocation || "Location"}
+                </Button>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="local">Local</SelectItem>
+                <SelectItem value="district">District</SelectItem>
+                <SelectItem value="state">State</SelectItem>
+                <SelectItem value="national">National</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </div>
