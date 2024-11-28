@@ -20,7 +20,7 @@ export const Navbar = () => {
     <nav className="border-b bg-card py-3 fixed top-0 w-full z-50">
       <div className="container max-w-[1400px] flex items-center justify-between animate-fade-down">
         <div className="flex items-center gap-4">
-          <h1 className="text-xl font-bold text-primary">Neighborly</h1>
+          <h1 className="text-xl font-bold text-primary">ztructers</h1>
         </div>
         
         <div className="flex items-center gap-4 flex-1 max-w-xl mx-4">
