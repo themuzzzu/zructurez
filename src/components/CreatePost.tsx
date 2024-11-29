@@ -29,16 +29,38 @@ export const CreatePost = () => {
 
     setIsPosting(true);
     try {
-      // Simulate API call with timeout
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      // Create the post data object
+      const postData = {
+        content,
+        location: selectedLocation,
+        image: selectedImage,
+        timestamp: new Date().toISOString(),
+      };
+
+      // Make the API call to create the post
+      const response = await fetch('/api/posts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(postData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create post');
+      }
+
       // Reset form
       setContent("");
       setSelectedImage(null);
       setSelectedLocation("");
       
       toast.success("Post created successfully!");
+
+      // Trigger a refresh of the posts list (you'll need to implement this)
+      // For example: refetchPosts();
     } catch (error) {
+      console.error('Error creating post:', error);
       toast.error("Failed to create post. Please try again.");
     } finally {
       setIsPosting(false);
