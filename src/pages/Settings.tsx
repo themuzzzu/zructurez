@@ -9,6 +9,7 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import { useEffect } from "react";
 
 const settingsFormSchema = z.object({
   notifications: z.boolean().default(true),
@@ -22,7 +23,7 @@ type SettingsFormValues = z.infer<typeof settingsFormSchema>;
 const defaultValues: Partial<SettingsFormValues> = {
   notifications: true,
   emailUpdates: true,
-  darkMode: false,
+  darkMode: document.documentElement.classList.contains('dark'),
   locationSharing: false,
 };
 
@@ -32,6 +33,22 @@ const Settings = () => {
     resolver: zodResolver(settingsFormSchema),
     defaultValues,
   });
+
+  // Update dark mode class when the setting changes
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === 'darkMode') {
+        if (value.darkMode) {
+          document.documentElement.classList.add('dark');
+          toast.success("Dark mode enabled");
+        } else {
+          document.documentElement.classList.remove('dark');
+          toast.success("Light mode enabled");
+        }
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form.watch]);
 
   function onSubmit(data: SettingsFormValues) {
     toast.success("Settings updated successfully!");
