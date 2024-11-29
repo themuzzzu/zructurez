@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
+import { Textarea } from "./ui/textarea";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
@@ -17,9 +18,31 @@ const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/web
 export const CreatePost = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<string>("");
+  const [content, setContent] = useState("");
+  const [isPosting, setIsPosting] = useState(false);
 
-  const handleCreatePost = () => {
-    toast.info("Create post feature coming soon!");
+  const handleCreatePost = async () => {
+    if (!content.trim()) {
+      toast.error("Please write something to post");
+      return;
+    }
+
+    setIsPosting(true);
+    try {
+      // Simulate API call with timeout
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Reset form
+      setContent("");
+      setSelectedImage(null);
+      setSelectedLocation("");
+      
+      toast.success("Post created successfully!");
+    } catch (error) {
+      toast.error("Failed to create post. Please try again.");
+    } finally {
+      setIsPosting(false);
+    }
   };
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -71,12 +94,12 @@ export const CreatePost = () => {
           className="h-10 w-10 rounded-full"
         />
         <div className="flex-1">
-          <button
-            className="w-full text-left p-3 bg-accent/50 rounded-lg text-muted-foreground transition-all duration-300 hover:bg-accent"
-            onClick={handleCreatePost}
-          >
-            Share something with your neighborhood...
-          </button>
+          <Textarea
+            placeholder="Share something with your neighborhood..."
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            className="min-h-[100px] bg-accent/50 hover:bg-accent focus:bg-accent transition-colors duration-300"
+          />
 
           {selectedImage && (
             <div className="relative mt-4 group">
@@ -150,6 +173,13 @@ export const CreatePost = () => {
                 <SelectItem value="national">National</SelectItem>
               </SelectContent>
             </Select>
+            <Button 
+              className="ml-auto"
+              onClick={handleCreatePost}
+              disabled={isPosting || !content.trim()}
+            >
+              {isPosting ? "Posting..." : "Post"}
+            </Button>
           </div>
         </div>
       </div>
