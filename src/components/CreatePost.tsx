@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "./ui/select";
 import { Textarea } from "./ui/textarea";
-import { ImageUpload } from "./ImageUpload";
+import { ImageUpload, ACCEPTED_IMAGE_TYPES } from "./ImageUpload";
 import { createPost } from "../services/postService";
 
 export const CreatePost = () => {

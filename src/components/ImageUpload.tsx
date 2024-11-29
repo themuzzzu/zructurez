@@ -3,8 +3,8 @@ import { Button } from "./ui/button";
 import { X } from "lucide-react";
 import { toast } from "sonner";
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+export const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
 interface ImageUploadProps {
   selectedImage: string | null;
