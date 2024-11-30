@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Home, Users2, MessageSquare, Calendar, ShoppingBag, Map, Settings, Wrench } from "lucide-react";
+import { Home, Users2, MessageSquare, Calendar, ShoppingBag, Map, Settings, Wrench, Building2 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
@@ -14,6 +14,7 @@ export function Sidebar({ className, ...props }: SidebarProps) {
     { name: "Events", href: "/events", icon: Calendar },
     { name: "Marketplace", href: "/marketplace", icon: ShoppingBag },
     { name: "Services", href: "/services", icon: Wrench },
+    { name: "Business", href: "/business", icon: Building2 },
     { name: "Maps", href: "/maps", icon: Map },
     { name: "Settings", href: "/settings", icon: Settings },
   ];

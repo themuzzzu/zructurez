@@ -1,0 +1,36 @@
+import { Button } from "./ui/button";
+import { useState } from "react";
+import { toast } from "sonner";
+import { Hospital, Car, UtensilsCrossed } from "lucide-react";
+
+const categories = [
+  { id: "all", name: "All", icon: null },
+  { id: "healthcare", name: "Healthcare", icon: Hospital },
+  { id: "driving-school", name: "Driving Schools", icon: Car },
+  { id: "restaurant", name: "Restaurants", icon: UtensilsCrossed },
+];
+
+export const BusinessCategoryFilter = () => {
+  const [selectedCategory, setSelectedCategory] = useState("all");
+
+  const handleCategoryClick = (categoryId: string) => {
+    setSelectedCategory(categoryId);
+    toast.success(`Filtered by ${categories.find(c => c.id === categoryId)?.name}`);
+  };
+
+  return (
+    <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide animate-fade-up">
+      {categories.map(({ id, name, icon: Icon }) => (
+        <Button
+          key={id}
+          variant={id === selectedCategory ? "default" : "outline"}
+          className="whitespace-nowrap transition-all duration-300 hover:scale-105 hover:shadow-md"
+          onClick={() => handleCategoryClick(id)}
+        >
+          {Icon && <Icon className="h-4 w-4 mr-2" />}
+          {name}
+        </Button>
+      ))}
+    </div>
+  );
+};
