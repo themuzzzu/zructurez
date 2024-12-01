@@ -3,11 +3,13 @@ import { BusinessCard } from "@/components/BusinessCard";
 import { BusinessCategoryFilter } from "@/components/BusinessCategoryFilter";
 import { CreateBusinessListing } from "@/components/CreateBusinessListing";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, ArrowLeft } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Business = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-background">
@@ -15,7 +17,20 @@ const Business = () => {
       <div className="container max-w-[1400px] pt-20 pb-16">
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold animate-fade-up">Business Directory</h1>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => navigate('/')}
+                  className="flex items-center gap-2"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Back to Home
+                </Button>
+              </div>
+              <h1 className="text-3xl font-bold animate-fade-up">Business Directory</h1>
+            </div>
             <Button 
               onClick={() => setShowCreateForm(true)}
               className="gap-2"
