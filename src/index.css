@@ -47,6 +47,23 @@
     --input: 352 3.7% 15.9%;
     --ring: 352 84% 49%;
   }
+
+  /* Default selection color */
+  ::selection {
+    @apply bg-primary/20 text-foreground;
+  }
+
+  /* Dark mode selection color */
+  .dark ::selection {
+    @apply bg-primary/30 text-foreground;
+  }
+
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
 
 @layer utilities {
@@ -57,14 +74,5 @@
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
   }
 }
