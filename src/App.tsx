@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Marketplace from "./pages/Marketplace";
 import Services from "./pages/Services";
@@ -11,6 +11,7 @@ import Messages from "./pages/Messages";
 import Events from "./pages/Events";
 import Settings from "./pages/Settings";
 import Business from "./pages/Business";
+import Maps from "./pages/Maps";
 
 const queryClient = new QueryClient();
 
@@ -29,7 +30,7 @@ const App = () => (
           <Route path="/events" element={<Events />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/business" element={<Business />} />
-          <Route path="/maps" element={<Navigate to="/" replace />} />
+          <Route path="/maps" element={<Maps />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
