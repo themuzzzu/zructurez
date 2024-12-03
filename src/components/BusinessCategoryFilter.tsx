@@ -1,13 +1,35 @@
 import { Button } from "./ui/button";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Hospital, Car, UtensilsCrossed } from "lucide-react";
+import { 
+  Hospital, 
+  Car, 
+  UtensilsCrossed,
+  Briefcase,
+  Scissors,
+  Graduation,
+  Building2,
+  ShoppingBag,
+  Dumbbell,
+  Home,
+  Wrench,
+  Heart
+} from "lucide-react";
 
 const categories = [
   { id: "all", name: "All", icon: null },
   { id: "healthcare", name: "Healthcare", icon: Hospital },
   { id: "driving-school", name: "Driving Schools", icon: Car },
   { id: "restaurant", name: "Restaurants", icon: UtensilsCrossed },
+  { id: "professional", name: "Professional Services", icon: Briefcase },
+  { id: "salon", name: "Beauty & Salon", icon: Scissors },
+  { id: "education", name: "Education", icon: Graduation },
+  { id: "real-estate", name: "Real Estate", icon: Building2 },
+  { id: "retail", name: "Retail", icon: ShoppingBag },
+  { id: "fitness", name: "Fitness", icon: Dumbbell },
+  { id: "home-services", name: "Home Services", icon: Home },
+  { id: "maintenance", name: "Maintenance", icon: Wrench },
+  { id: "wellness", name: "Wellness", icon: Heart },
 ];
 
 export const BusinessCategoryFilter = () => {
