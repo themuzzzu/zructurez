@@ -55,7 +55,12 @@
 
   /* Dark mode selection color */
   .dark ::selection {
-    @apply bg-primary/30 text-foreground;
+    @apply bg-primary/30 text-black;
+  }
+
+  /* Dark mode hover styles */
+  .dark *:hover {
+    @apply text-black transition-colors duration-200;
   }
 
   * {
