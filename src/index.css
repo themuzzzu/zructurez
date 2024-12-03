@@ -55,7 +55,7 @@
 
   /* Dark mode selection color */
   .dark ::selection {
-    @apply bg-primary/30 text-foreground;
+    @apply bg-primary/30 text-black;
   }
 
   * {
