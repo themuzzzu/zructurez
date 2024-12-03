@@ -15,7 +15,14 @@ import {
   Heart,
   Dog,
   BookOpen,
-  Wifi
+  Wifi,
+  Car,
+  UtensilsCrossed,
+  Baby,
+  Flower2,
+  Music2,
+  Dumbbell,
+  Stethoscope
 } from "lucide-react";
 
 const categories = [
@@ -33,7 +40,14 @@ const categories = [
   { id: "wellness", name: "Wellness", icon: Heart },
   { id: "pet-care", name: "Pet Care", icon: Dog },
   { id: "tutoring", name: "Tutoring", icon: BookOpen },
-  { id: "internet", name: "Internet Services", icon: Wifi }
+  { id: "internet", name: "Internet Services", icon: Wifi },
+  { id: "automotive", name: "Automotive", icon: Car },
+  { id: "catering", name: "Catering", icon: UtensilsCrossed },
+  { id: "childcare", name: "Childcare", icon: Baby },
+  { id: "gardening", name: "Gardening", icon: Flower2 },
+  { id: "music", name: "Music Lessons", icon: Music2 },
+  { id: "fitness", name: "Fitness Training", icon: Dumbbell },
+  { id: "healthcare", name: "Healthcare", icon: Stethoscope }
 ];
 
 export const ServiceCategoryFilter = () => {
@@ -41,7 +55,8 @@ export const ServiceCategoryFilter = () => {
 
   const handleCategoryClick = (categoryId: string) => {
     setSelectedCategory(categoryId);
-    toast.success(`Filtered by ${categories.find(c => c.id === categoryId)?.name}`);
+    const categoryName = categories.find(c => c.id === categoryId)?.name;
+    toast.success(`Filtered by ${categoryName}`);
   };
 
   return (
