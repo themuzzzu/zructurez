@@ -32,12 +32,11 @@ export function Sidebar({ className, ...props }: SidebarProps) {
               to={item.href}
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
-                "bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
                 isActive && "bg-accent font-medium"
               )}
             >
               <Icon className="h-4 w-4" />
-              <span className="select-text">{item.name}</span>
+              {item.name}
             </Link>
           );
         })}
