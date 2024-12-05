@@ -59,7 +59,7 @@
   }
 
   /* Dark mode section name selection color */
-  .dark nav a ::selection {
+  .dark nav a span::selection {
     @apply bg-primary/30 text-black;
   }
 
