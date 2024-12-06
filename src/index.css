@@ -55,12 +55,12 @@
 
   /* Dark mode selection color */
   .dark ::selection {
-    @apply bg-primary/30 text-black;
+    @apply bg-black text-white;
   }
 
-  /* Dark mode section name selection color */
-  .dark .sidebar ::selection {
-    @apply bg-primary/30 text-black;
+  /* Dark mode section selection color */
+  .dark section ::selection {
+    @apply bg-black text-white;
   }
 
   * {
