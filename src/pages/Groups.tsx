@@ -3,37 +3,64 @@ import { CreatePost } from "@/components/CreatePost";
 import { Sidebar } from "@/components/Sidebar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Users2, ArrowLeft } from "lucide-react";
+import { Users2, ArrowLeft, Plus, Minus } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
+import { useState } from "react";
 
-const SAMPLE_GROUPS = [
-  {
-    id: 1,
-    name: "Neighborhood Watch",
-    members: 156,
-    description: "Keep our community safe and informed about local security matters.",
-    image: "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=800"
-  },
-  {
-    id: 2,
-    name: "Local Events & Activities",
-    members: 342,
-    description: "Share and discover exciting events happening in our area.",
-    image: "https://images.unsplash.com/photo-1511795409834-432f7b1728b2?w=800"
-  },
-  {
-    id: 3,
-    name: "Community Garden Club",
-    members: 89,
-    description: "Tips, advice, and meetups for local gardening enthusiasts.",
-    image: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800"
-  }
-];
+interface Group {
+  id: number;
+  name: string;
+  members: number;
+  description: string;
+  image: string;
+  joined: boolean;
+}
 
 const Groups = () => {
+  const [groups, setGroups] = useState<Group[]>([
+    {
+      id: 1,
+      name: "Neighborhood Watch",
+      members: 156,
+      description: "Keep our community safe and informed about local security matters.",
+      image: "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=800",
+      joined: false
+    },
+    {
+      id: 2,
+      name: "Local Events & Activities",
+      members: 342,
+      description: "Share and discover exciting events happening in our area.",
+      image: "https://images.unsplash.com/photo-1511795409834-432f7b1728b2?w=800",
+      joined: false
+    },
+    {
+      id: 3,
+      name: "Community Garden Club",
+      members: 89,
+      description: "Tips, advice, and meetups for local gardening enthusiasts.",
+      image: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800",
+      joined: false
+    }
+  ]);
+
   const handleJoinGroup = (groupId: number) => {
-    toast.success("Group joined successfully!");
+    setGroups(prevGroups =>
+      prevGroups.map(group => {
+        if (group.id === groupId) {
+          const newJoinedStatus = !group.joined;
+          const memberDelta = newJoinedStatus ? 1 : -1;
+          toast.success(newJoinedStatus ? "Successfully joined the group!" : "Left the group");
+          return {
+            ...group,
+            joined: newJoinedStatus,
+            members: group.members + memberDelta
+          };
+        }
+        return group;
+      })
+    );
   };
 
   return (
@@ -54,6 +81,7 @@ const Groups = () => {
                   <h1 className="text-3xl font-bold">Groups</h1>
                 </div>
                 <Button onClick={() => toast.info("Create group feature coming soon!")}>
+                  <Plus className="h-4 w-4 mr-2" />
                   Create Group
                 </Button>
               </div>
@@ -61,8 +89,8 @@ const Groups = () => {
               <CreatePost />
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {SAMPLE_GROUPS.map((group) => (
-                  <Card key={group.id} className="overflow-hidden hover:shadow-lg transition-all duration-300">
+                {groups.map((group) => (
+                  <Card key={group.id} className="overflow-hidden hover:shadow-lg transition-all duration-300 animate-fade-up">
                     <img
                       src={group.image}
                       alt={group.name}
@@ -74,12 +102,23 @@ const Groups = () => {
                         <Users2 className="h-4 w-4 mr-2" />
                         {group.members} members
                       </div>
-                      <p className="text-muted-foreground mb-4">{group.description}</p>
+                      <p className="text-muted-foreground mb-4 line-clamp-2">{group.description}</p>
                       <Button 
                         className="w-full"
+                        variant={group.joined ? "destructive" : "default"}
                         onClick={() => handleJoinGroup(group.id)}
                       >
-                        Join Group
+                        {group.joined ? (
+                          <>
+                            <Minus className="h-4 w-4 mr-2" />
+                            Leave Group
+                          </>
+                        ) : (
+                          <>
+                            <Plus className="h-4 w-4 mr-2" />
+                            Join Group
+                          </>
+                        )}
                       </Button>
                     </div>
                   </Card>
