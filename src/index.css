@@ -53,13 +53,8 @@
     @apply bg-primary/20 text-foreground;
   }
 
-  /* Dark mode selection color */
-  .dark ::selection {
-    @apply bg-black text-white;
-  }
-
-  /* Dark mode section selection color */
-  .dark section ::selection {
+  /* Dark mode selection color - applying to all elements */
+  .dark *::selection {
     @apply bg-black text-white;
   }
 
