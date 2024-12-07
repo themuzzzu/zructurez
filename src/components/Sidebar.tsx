@@ -31,7 +31,7 @@ export function Sidebar({ className, ...props }: SidebarProps) {
               key={item.name}
               to={item.href}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
+                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent dark:hover:text-black",
                 isActive && "bg-accent font-medium"
               )}
             >
