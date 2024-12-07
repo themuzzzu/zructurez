@@ -32,7 +32,7 @@ export function Sidebar({ className, ...props }: SidebarProps) {
               to={item.href}
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent dark:hover:text-black dark:focus:text-black",
-                isActive && "bg-accent font-medium"
+                isActive && "bg-accent font-medium dark:text-black"
               )}
             >
               <Icon className="h-4 w-4" />
