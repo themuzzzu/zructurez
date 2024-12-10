@@ -3,6 +3,7 @@ import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -51,6 +52,12 @@ const Auth = () => {
                 label: 'text-foreground font-medium',
                 input: 'bg-background',
               },
+            }}
+            providers={["google"]}
+            redirectTo={window.location.origin}
+            onError={(error) => {
+              console.error("Auth error:", error);
+              toast.error("Authentication failed. Please try again.");
             }}
           />
         </div>
