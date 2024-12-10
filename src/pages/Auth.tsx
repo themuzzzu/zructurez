@@ -3,7 +3,6 @@ import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -41,35 +40,18 @@ const Auth = () => {
               variables: {
                 default: {
                   colors: {
-                    brand: '#e31837',
-                    brandAccent: '#b31528',
-                    inputBackground: 'white',
-                    inputText: '#333333',
-                    inputBorder: '#e5e7eb',
-                    inputBorderHover: '#e31837',
-                    inputBorderFocus: '#e31837',
-                  },
-                  borderWidths: {
-                    buttonBorderWidth: '1px',
-                    inputBorderWidth: '1px',
-                  },
-                  radii: {
-                    borderRadiusButton: '0.5rem',
-                    buttonBorderRadius: '0.5rem',
-                    inputBorderRadius: '0.5rem',
+                    brand: 'hsl(var(--primary))',
+                    brandAccent: 'hsl(var(--primary))',
                   },
                 },
               },
               className: {
-                button: 'hover:scale-105 transition-transform duration-200',
+                button: 'hover:opacity-90 transition-opacity',
                 container: 'space-y-4',
                 label: 'text-foreground font-medium',
-                input: 'hover:border-primary focus:border-primary focus:ring-primary',
+                input: 'bg-background',
               },
             }}
-            theme="default"
-            providers={["google"]}
-            redirectTo={window.location.origin}
           />
         </div>
       </div>
