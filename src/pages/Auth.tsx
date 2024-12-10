@@ -1,11 +1,11 @@
-import { Auth } from "@supabase/auth-ui-react";
+import { Auth as SupabaseAuth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
-const AuthPage = () => {
+const Auth = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -20,8 +20,6 @@ const AuthPage = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_IN") {
         navigate("/");
-      } else if (event === "SIGNED_OUT") {
-        navigate("/auth");
       }
     });
 
@@ -36,7 +34,7 @@ const AuthPage = () => {
           <p className="text-muted-foreground">Sign in to your account to continue</p>
         </div>
         <div className="bg-card p-8 rounded-lg shadow-lg border animate-scale-in">
-          <Auth
+          <SupabaseAuth
             supabaseClient={supabase}
             appearance={{
               theme: ThemeSupa,
@@ -71,9 +69,6 @@ const AuthPage = () => {
             }}
             theme="default"
             providers={[]}
-            onError={(error) => {
-              toast.error(error.message);
-            }}
             redirectTo={window.location.origin}
           />
         </div>
@@ -82,4 +77,4 @@ const AuthPage = () => {
   );
 };
 
-export default AuthPage;
+export default Auth;
