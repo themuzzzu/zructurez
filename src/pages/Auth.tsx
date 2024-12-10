@@ -3,14 +3,25 @@ import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const AuthPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Check if user is already signed in
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        navigate("/");
+      }
+    });
+
+    // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_IN") {
         navigate("/");
+      } else if (event === "SIGNED_OUT") {
+        navigate("/auth");
       }
     });
 
@@ -27,6 +38,9 @@ const AuthPage = () => {
             appearance={{ theme: ThemeSupa }}
             theme="light"
             providers={[]}
+            onError={(error) => {
+              toast.error(error.message);
+            }}
           />
         </div>
       </div>
