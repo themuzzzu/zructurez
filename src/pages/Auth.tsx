@@ -68,7 +68,7 @@ const Auth = () => {
               },
             }}
             theme="default"
-            providers={[]}
+            providers={["google"]}
             redirectTo={window.location.origin}
           />
         </div>
