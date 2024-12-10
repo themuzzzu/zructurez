@@ -10,10 +10,23 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 export const Navbar = () => {
-  const handleProfileAction = (action: string) => {
-    toast.info(`${action} clicked - Feature coming soon!`);
+  const navigate = useNavigate();
+
+  const handleProfileAction = async (action: string) => {
+    if (action === "Sign out") {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        toast.error("Error signing out");
+      } else {
+        navigate("/auth");
+      }
+    } else {
+      toast.info(`${action} clicked - Feature coming soon!`);
+    }
   };
 
   return (

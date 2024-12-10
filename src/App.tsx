@@ -2,7 +2,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Session } from "@supabase/supabase-js";
 import Index from "./pages/Index";
 import Marketplace from "./pages/Marketplace";
 import Services from "./pages/Services";
@@ -12,8 +15,37 @@ import Events from "./pages/Events";
 import Settings from "./pages/Settings";
 import Business from "./pages/Business";
 import Maps from "./pages/Maps";
+import Auth from "./pages/Auth";
 
 const queryClient = new QueryClient();
+
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setLoading(false);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+
+  if (!session) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  return <>{children}</>;
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -22,15 +54,79 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/marketplace" element={<Marketplace />} />
-          <Route path="/services" element={<Services />} />
-          <Route path="/groups" element={<Groups />} />
-          <Route path="/messages" element={<Messages />} />
-          <Route path="/events" element={<Events />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/business" element={<Business />} />
-          <Route path="/maps" element={<Maps />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Index />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/marketplace"
+            element={
+              <ProtectedRoute>
+                <Marketplace />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/services"
+            element={
+              <ProtectedRoute>
+                <Services />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/groups"
+            element={
+              <ProtectedRoute>
+                <Groups />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/messages"
+            element={
+              <ProtectedRoute>
+                <Messages />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/events"
+            element={
+              <ProtectedRoute>
+                <Events />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/business"
+            element={
+              <ProtectedRoute>
+                <Business />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/maps"
+            element={
+              <ProtectedRoute>
+                <Maps />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
