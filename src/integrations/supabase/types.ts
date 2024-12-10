@@ -30,6 +30,45 @@ export type Database = {
         }
         Relationships: []
       }
+      services: {
+        Row: {
+          availability: string | null
+          category: string
+          contact_info: string | null
+          created_at: string
+          description: string
+          id: string
+          location: string | null
+          price: number
+          title: string
+          user_id: string
+        }
+        Insert: {
+          availability?: string | null
+          category: string
+          contact_info?: string | null
+          created_at?: string
+          description: string
+          id?: string
+          location?: string | null
+          price: number
+          title: string
+          user_id: string
+        }
+        Update: {
+          availability?: string | null
+          category?: string
+          contact_info?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          location?: string | null
+          price?: number
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
