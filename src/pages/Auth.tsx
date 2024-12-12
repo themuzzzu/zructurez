@@ -25,8 +25,12 @@ const Auth = () => {
         navigate("/auth");
       }
       // Handle authentication errors
-      if (event === "TOKEN_REFRESHED" && !session) {
-        toast.error("Authentication failed. Please try again.");
+      if (!session) {
+        if (event === "USER_DELETED") {
+          toast.error("Account not found. Please sign up.");
+        } else if (event === "SIGNED_OUT") {
+          toast.error("You have been signed out.");
+        }
       }
     });
 
@@ -61,7 +65,7 @@ const Auth = () => {
               },
             }}
             providers={["google"]}
-            redirectTo={window.location.origin}
+            redirectTo={`${window.location.origin}/auth/callback`}
           />
         </div>
       </div>
