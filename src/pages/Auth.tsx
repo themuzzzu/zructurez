@@ -25,7 +25,7 @@ const Auth = () => {
         navigate("/auth");
       }
       // Handle authentication errors
-      if (event === "USER_DELETED" || event === "SIGNED_OUT") {
+      if (event === "TOKEN_REFRESHED" && !session) {
         toast.error("Authentication failed. Please try again.");
       }
     });
