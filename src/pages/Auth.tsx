@@ -26,10 +26,18 @@ const Auth = () => {
       }
       // Handle authentication errors
       if (!session) {
-        if (event === "USER_DELETED") {
-          toast.error("Account not found. Please sign up.");
-        } else if (event === "SIGNED_OUT") {
-          toast.error("You have been signed out.");
+        switch (event) {
+          case "SIGNED_OUT":
+            toast.error("You have been signed out.");
+            break;
+          case "TOKEN_REFRESHED":
+            toast.error("Authentication failed. Please try again.");
+            break;
+          default:
+            // Only show generic error for other cases
+            if (event !== "INITIAL_SESSION") {
+              toast.error("Authentication error. Please try again.");
+            }
         }
       }
     });
