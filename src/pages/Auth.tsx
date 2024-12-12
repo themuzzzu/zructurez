@@ -21,6 +21,13 @@ const Auth = () => {
       if (event === "SIGNED_IN") {
         navigate("/");
       }
+      if (event === "SIGNED_OUT") {
+        navigate("/auth");
+      }
+      // Handle authentication errors
+      if (event === "USER_DELETED" || event === "SIGNED_OUT") {
+        toast.error("Authentication failed. Please try again.");
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -55,10 +62,6 @@ const Auth = () => {
             }}
             providers={["google"]}
             redirectTo={window.location.origin}
-            onError={(error) => {
-              console.error("Auth error:", error);
-              toast.error("Authentication failed. Please try again.");
-            }}
           />
         </div>
       </div>
