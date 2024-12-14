@@ -3,7 +3,6 @@ import { CreatePost } from "@/components/CreatePost";
 import { CategoryFilter } from "@/components/CategoryFilter";
 import { PostCard } from "@/components/PostCard";
 import { Sidebar } from "@/components/Sidebar";
-import { ShoppingSection } from "@/components/ShoppingSection";
 
 const SAMPLE_POSTS = [
   {
@@ -97,7 +96,6 @@ const Index = () => {
             <div className="space-y-6">
               <CreatePost />
               <CategoryFilter />
-              <ShoppingSection />
               <div className="space-y-4">
                 {SAMPLE_POSTS.map((post, index) => (
                   <PostCard key={index} {...post} />
