@@ -27,34 +27,20 @@ const Auth = () => {
         toast.info("Signed out successfully");
       }
       // Handle authentication errors
-      if (!session) {
-        switch (event) {
-          case "SIGNED_OUT":
-            toast.info("You have been signed out");
-            break;
-          case "USER_UPDATED":
-            toast.success("Your profile has been updated");
-            break;
-          case "PASSWORD_RECOVERY":
-            toast.info("Password recovery email sent");
-            break;
-        }
+      if (event === "USER_DELETED") {
+        toast.error("User account has been deleted");
+      }
+      if (event === "PASSWORD_RECOVERY") {
+        toast.info("Password recovery email sent");
+      }
+      // Handle user already exists error
+      if (event === "SIGNED_UP" && !session) {
+        toast.error("This email is already registered. Please sign in instead.");
       }
     });
 
-    // Handle specific auth errors
-    const handleAuthError = (error: any) => {
-      if (error?.message?.includes("user_already_exists")) {
-        toast.error("This email is already registered. Please sign in instead.");
-      }
-    };
-
-    // Subscribe to auth errors
-    const { data: { subscription: errorSubscription } } = supabase.auth.onError(handleAuthError);
-
     return () => {
       subscription.unsubscribe();
-      errorSubscription?.unsubscribe();
     };
   }, [navigate]);
 
