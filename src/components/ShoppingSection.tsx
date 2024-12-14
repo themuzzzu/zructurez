@@ -60,17 +60,29 @@ const SAMPLE_PRODUCTS: Product[] = [
 ];
 
 export const ShoppingSection = () => {
-  const { data: products, isLoading } = useQuery({
+  const { data: products, isLoading, isError } = useQuery({
     queryKey: ['products'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data.length > 0 ? data : SAMPLE_PRODUCTS;
-    }
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        if (error) {
+          console.error('Error fetching products:', error);
+          throw error;
+        }
+        
+        return data.length > 0 ? data : SAMPLE_PRODUCTS;
+      } catch (error) {
+        console.error('Failed to fetch products:', error);
+        // Fallback to sample products if fetch fails
+        return SAMPLE_PRODUCTS;
+      }
+    },
+    retry: 2, // Retry failed requests twice
+    staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
   });
 
   const handleAddToCart = (productId: string) => {
@@ -85,6 +97,10 @@ export const ShoppingSection = () => {
     return <div className="text-center">Loading products...</div>;
   }
 
+  if (isError) {
+    toast.error("Failed to load products. Showing sample products instead.");
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -96,7 +112,7 @@ export const ShoppingSection = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {products.map((product) => (
+        {(products || SAMPLE_PRODUCTS).map((product) => (
           <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-all duration-300">
             {product.image_url && (
               <img

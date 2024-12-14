@@ -1,15 +1,16 @@
 import { Auth as SupabaseAuth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import { toast } from "sonner";
+import { AuthChangeEvent } from "@supabase/supabase-js";
 
 const Auth = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if user is already signed in
+    // Check if user is already logged in
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         navigate("/");
@@ -18,40 +19,44 @@ const Auth = () => {
 
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN" && session) {
+      if (session) {
         navigate("/");
-        toast.success("Successfully signed in!");
       }
-      if (event === "SIGNED_OUT") {
-        navigate("/auth");
-        toast.info("Signed out successfully");
-      }
-      // Handle authentication errors
-      if (event === "USER_DELETED") {
-        toast.error("User account has been deleted");
-      }
-      if (event === "PASSWORD_RECOVERY") {
-        toast.info("Password recovery email sent");
-      }
-      // Handle user already exists error
-      if (event === "SIGNED_UP" && !session) {
-        toast.error("This email is already registered. Please sign in instead.");
+
+      // Handle specific auth events
+      switch (event) {
+        case 'USER_DELETED':
+          toast.error("Account deleted successfully");
+          break;
+        case 'SIGNED_OUT':
+          toast.info("Signed out successfully");
+          break;
+        case 'SIGNED_IN':
+          toast.success("Signed in successfully");
+          break;
+        case 'SIGNED_UP':
+          toast.success("Account created successfully! Please verify your email.");
+          break;
+        case 'USER_UPDATED':
+          toast.success("Account updated successfully");
+          break;
       }
     });
 
+    // Cleanup subscription
     return () => {
       subscription.unsubscribe();
     };
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4 animate-fade-up">
-      <div className="w-full max-w-md space-y-8">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <div className="w-full max-w-md space-y-4">
         <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold text-primary">Welcome to Zructures</h1>
-          <p className="text-muted-foreground">Sign in to your account to continue</p>
+          <h1 className="text-2xl font-bold">Welcome</h1>
+          <p className="text-muted-foreground">Sign in to your account or create a new one</p>
         </div>
-        <div className="bg-card p-8 rounded-lg shadow-lg border animate-scale-in">
+        <div className="bg-card rounded-lg shadow-lg p-6">
           <SupabaseAuth
             supabaseClient={supabase}
             appearance={{
@@ -59,20 +64,13 @@ const Auth = () => {
               variables: {
                 default: {
                   colors: {
-                    brand: 'hsl(var(--primary))',
-                    brandAccent: 'hsl(var(--primary))',
+                    brand: 'rgb(var(--primary))',
+                    brandAccent: 'rgb(var(--primary))',
                   },
                 },
               },
-              className: {
-                button: 'hover:opacity-90 transition-opacity',
-                container: 'space-y-4',
-                label: 'text-foreground font-medium',
-                input: 'bg-background',
-              },
             }}
-            providers={["google"]}
-            redirectTo={`${window.location.origin}/auth/callback`}
+            providers={["google", "github"]}
           />
         </div>
       </div>
