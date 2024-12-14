@@ -18,26 +18,26 @@ const Auth = () => {
 
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN") {
+      if (event === "SIGNED_IN" && session) {
         navigate("/");
+        toast.success("Successfully signed in!");
       }
       if (event === "SIGNED_OUT") {
         navigate("/auth");
+        toast.info("Signed out successfully");
       }
       // Handle authentication errors
       if (!session) {
         switch (event) {
           case "SIGNED_OUT":
-            toast.error("You have been signed out.");
+            toast.info("You have been signed out");
             break;
-          case "TOKEN_REFRESHED":
-            toast.error("Authentication failed. Please try again.");
+          case "USER_UPDATED":
+            toast.success("Your profile has been updated");
             break;
-          default:
-            // Only show generic error for other cases
-            if (event !== "INITIAL_SESSION") {
-              toast.error("Authentication error. Please try again.");
-            }
+          case "PASSWORD_RECOVERY":
+            toast.info("Password recovery email sent");
+            break;
         }
       }
     });
