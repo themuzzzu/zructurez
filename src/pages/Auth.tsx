@@ -42,7 +42,20 @@ const Auth = () => {
       }
     });
 
-    return () => subscription.unsubscribe();
+    // Handle specific auth errors
+    const handleAuthError = (error: any) => {
+      if (error?.message?.includes("user_already_exists")) {
+        toast.error("This email is already registered. Please sign in instead.");
+      }
+    };
+
+    // Subscribe to auth errors
+    const { data: { subscription: errorSubscription } } = supabase.auth.onError(handleAuthError);
+
+    return () => {
+      subscription.unsubscribe();
+      errorSubscription?.unsubscribe();
+    };
   }, [navigate]);
 
   return (
