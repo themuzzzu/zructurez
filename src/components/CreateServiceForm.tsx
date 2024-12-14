@@ -5,6 +5,7 @@ import { Textarea } from "./ui/textarea";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { LocationSelector } from "./LocationSelector";
 
 export const CreateServiceForm = () => {
   const navigate = useNavigate();
@@ -129,11 +130,9 @@ export const CreateServiceForm = () => {
       </div>
 
       <div className="space-y-2">
-        <Input
-          name="location"
-          placeholder="Location"
+        <LocationSelector
           value={formData.location}
-          onChange={handleChange}
+          onChange={(value) => setFormData(prev => ({ ...prev, location: value }))}
         />
       </div>
 
