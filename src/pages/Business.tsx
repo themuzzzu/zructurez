@@ -71,7 +71,9 @@ const SAMPLE_BUSINESSES = [
     location: "123 Medical Center Drive",
     contact: "+1 (555) 123-4567",
     hours: "Open 24/7",
-    verified: true
+    verified: true,
+    serviceName: "General Consultation",
+    cost: 150
   },
   {
     id: "2",
@@ -84,7 +86,9 @@ const SAMPLE_BUSINESSES = [
     location: "456 Learning Lane",
     contact: "+1 (555) 234-5678",
     hours: "Mon-Sat: 8AM-6PM",
-    verified: true
+    verified: true,
+    serviceName: "Driving Lesson",
+    cost: 75
   },
   {
     id: "3",
@@ -97,7 +101,9 @@ const SAMPLE_BUSINESSES = [
     location: "789 Dining Street",
     contact: "+1 (555) 345-6789",
     hours: "Tue-Sun: 11AM-10PM",
-    verified: true
+    verified: true,
+    serviceName: "Table Reservation",
+    cost: 50
   }
 ];
 
