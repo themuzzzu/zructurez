@@ -74,31 +74,31 @@ export const PostCard = ({
           <div className="flex items-center gap-3">
             <img src={avatar} alt={author} className="h-10 w-10 rounded-full transition-transform duration-300 hover:scale-110" />
             <div>
-              <h3 className="font-semibold">{author}</h3>
+              <h3 className="font-semibold line-clamp-1">{author}</h3>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span>{time}</span>
+                <span className="line-clamp-1">{time}</span>
                 <span>•</span>
-                <span className="text-primary">{category}</span>
+                <span className="text-primary line-clamp-1">{category}</span>
               </div>
             </div>
           </div>
           <Button 
             variant="ghost" 
             size="icon" 
-            className="text-muted-foreground transition-transform duration-300 hover:rotate-90"
+            className="text-muted-foreground transition-transform duration-300 hover:rotate-90 shrink-0"
             onClick={handleMoreOptions}
           >
             <MoreHorizontal className="h-5 w-5" />
           </Button>
         </div>
         
-        <p className="whitespace-pre-line mb-4">{content}</p>
+        <p className="whitespace-pre-line mb-4 text-sm sm:text-base">{content}</p>
         
         {image && (
           <img
             src={image}
             alt="Post content"
-            className="w-full h-64 object-cover rounded-lg mb-4 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
+            className="w-full h-48 sm:h-64 object-cover rounded-lg mb-4 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
           />
         )}
         
@@ -112,7 +112,7 @@ export const PostCard = ({
         
         <Separator className="my-4" />
         
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4 flex-wrap sm:flex-nowrap">
           <Button 
             variant="ghost" 
             size="sm" 

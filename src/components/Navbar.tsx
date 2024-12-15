@@ -1,4 +1,4 @@
-import { Bell, Search } from "lucide-react";
+import { Bell, Search, Menu } from "lucide-react";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
 import {
@@ -9,9 +9,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { Sidebar } from "./Sidebar";
 
 export const Navbar = () => {
   const navigate = useNavigate();
@@ -33,10 +39,20 @@ export const Navbar = () => {
     <nav className="border-b bg-card py-3 fixed top-0 w-full z-50">
       <div className="container max-w-[1400px] flex items-center justify-between animate-fade-down">
         <div className="flex items-center gap-4">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="lg:hidden">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="p-0 w-64">
+              <Sidebar className="w-full" />
+            </SheetContent>
+          </Sheet>
           <h1 className="text-xl font-bold text-primary">Zructures</h1>
         </div>
         
-        <div className="flex items-center gap-4 flex-1 max-w-xl mx-4">
+        <div className="hidden md:flex items-center gap-4 flex-1 max-w-xl mx-4">
           <div className="relative w-full">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
@@ -52,7 +68,7 @@ export const Navbar = () => {
             <Bell className="h-5 w-5" />
             <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
           </Button>
-          <Separator orientation="vertical" className="h-6" />
+          <Separator orientation="vertical" className="h-6 hidden sm:block" />
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -62,7 +78,7 @@ export const Navbar = () => {
                   alt="avatar" 
                   className="h-6 w-6 rounded-full transition-transform duration-300 hover:scale-110" 
                 />
-                <span className="text-sm">Felix</span>
+                <span className="text-sm hidden sm:inline">Felix</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
