@@ -26,7 +26,27 @@ const Auth = () => {
       <div className="w-full max-w-md">
         <SupabaseAuth 
           supabaseClient={supabase}
-          appearance={{ theme: ThemeSupa }}
+          appearance={{
+            theme: ThemeSupa,
+            variables: {
+              default: {
+                colors: {
+                  brand: '#e31837',
+                  brandAccent: '#b31528',
+                }
+              }
+            },
+            style: {
+              button: {
+                borderRadius: '6px',
+                transition: 'all 0.2s ease',
+              },
+              container: {
+                borderRadius: '8px',
+                boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+              },
+            }
+          }}
           providers={['google']}
         />
       </div>
