@@ -30,7 +30,11 @@ export const CategoryFilter = () => {
         <Button
           key={category}
           variant={category === selectedCategory ? "default" : "outline"}
-          className="whitespace-nowrap bg-card transition-all duration-300 hover:scale-105 hover:shadow-md"
+          className={`whitespace-nowrap transition-all duration-300 hover:scale-105 hover:shadow-md ${
+            category === selectedCategory 
+              ? "bg-primary text-primary-foreground border-primary" 
+              : "bg-card hover:bg-accent"
+          }`}
           style={{
             animationDelay: `${index * 50}ms`,
           }}
