@@ -32,7 +32,7 @@ export const CreatePost = () => {
         content,
         location: selectedLocation,
         image: selectedImage,
-        timestamp: new Date().toISOString(),
+        category: null,
       });
 
       // Reset form
@@ -114,7 +114,7 @@ export const CreatePost = () => {
               variant="ghost" 
               size="sm" 
               className="text-muted-foreground"
-              onClick={handleCategorySelect}
+              onClick={() => toast.info("Category selection feature coming soon!")}
             >
               <Tag className="h-4 w-4 mr-2" />
               Category
@@ -123,12 +123,12 @@ export const CreatePost = () => {
               variant="ghost" 
               size="sm" 
               className="text-muted-foreground"
-              onClick={handlePollCreate}
+              onClick={() => toast.info("Poll creation feature coming soon!")}
             >
               <ListChecks className="h-4 w-4 mr-2" />
               Poll
             </Button>
-            <Select onValueChange={handleLocationSelect} value={selectedLocation}>
+            <Select onValueChange={setSelectedLocation} value={selectedLocation}>
               <SelectTrigger className="w-[140px]">
                 <Button 
                   variant="ghost" 

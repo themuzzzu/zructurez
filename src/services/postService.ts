@@ -16,7 +16,7 @@ interface Post {
   location: string | null;
   category: string | null;
   created_at: string;
-  profiles: {
+  profiles?: {
     username: string | null;
     avatar_url: string | null;
   } | null;
@@ -54,6 +54,7 @@ export const createPost = async (postData: CreatePostData) => {
 export const getPosts = async () => {
   const { data: userData } = await supabase.auth.getUser();
   
+  // First get all posts with their basic info and counts
   const { data: posts, error } = await supabase
     .from('posts')
     .select(`
@@ -62,11 +63,9 @@ export const getPosts = async () => {
         username,
         avatar_url
       ),
-      likes: likes(count),
-      comments: comments(count),
-      user_has_liked: likes!inner(id)
+      likes: likes (count),
+      comments: comments (count)
     `)
-    .eq(userData.user ? 'likes.user_id' : 'id', userData.user?.id || '')
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -74,7 +73,28 @@ export const getPosts = async () => {
     throw error;
   }
 
-  return posts as Post[];
+  // If user is authenticated, get their likes
+  let userLikes: { post_id: string }[] = [];
+  if (userData.user) {
+    const { data: likes, error: likesError } = await supabase
+      .from('likes')
+      .select('post_id')
+      .eq('user_id', userData.user.id);
+
+    if (!likesError) {
+      userLikes = likes || [];
+    }
+  }
+
+  // Transform the posts to match the Post interface
+  const transformedPosts = posts.map(post => ({
+    ...post,
+    likes: post.likes?.count || 0,
+    comments: post.comments?.count || 0,
+    user_has_liked: userLikes.some(like => like.post_id === post.id)
+  })) as Post[];
+
+  return transformedPosts;
 };
 
 export const likePost = async (postId: string) => {

@@ -1,48 +1,38 @@
-import { Button } from "./ui/button";
-import { useState } from "react";
-import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 const categories = [
   "All",
   "General",
+  "News",
   "Events",
-  "For Sale",
-  "Safety",
-  "Lost & Found",
+  "Questions",
   "Recommendations",
-  "Crime & Safety",
-  "Local News",
-  "Free Items",
-  "Pets",
+  "Lost & Found",
+  "Safety",
+  "Community",
 ];
 
-export const CategoryFilter = () => {
-  const [selectedCategory, setSelectedCategory] = useState("All");
+interface CategoryFilterProps {
+  onCategorySelect: (category: string | null) => void;
+}
 
-  const handleCategoryClick = (category: string) => {
-    setSelectedCategory(category);
-    toast.success(`Filtered by ${category}`);
-  };
-
+export const CategoryFilter = ({ onCategorySelect }: CategoryFilterProps) => {
   return (
-    <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide animate-fade-up [animation-delay:100ms]">
-      {categories.map((category, index) => (
-        <Button
-          key={category}
-          variant={category === selectedCategory ? "default" : "outline"}
-          className={`whitespace-nowrap transition-all duration-300 hover:scale-105 hover:shadow-md ${
-            category === selectedCategory 
-              ? "bg-primary text-primary-foreground border-primary" 
-              : "bg-card hover:bg-accent"
-          }`}
-          style={{
-            animationDelay: `${index * 50}ms`,
-          }}
-          onClick={() => handleCategoryClick(category)}
-        >
-          {category}
-        </Button>
-      ))}
-    </div>
+    <ScrollArea className="w-full whitespace-nowrap">
+      <div className="flex w-max space-x-2 p-1">
+        {categories.map((category) => (
+          <Button
+            key={category}
+            variant="ghost"
+            className="text-sm"
+            onClick={() => onCategorySelect(category === "All" ? null : category)}
+          >
+            {category}
+          </Button>
+        ))}
+      </div>
+      <ScrollBar orientation="horizontal" />
+    </ScrollArea>
   );
 };
