@@ -16,10 +16,10 @@ interface Post {
   location: string | null;
   category: string | null;
   created_at: string;
-  profiles?: {
+  profiles: {
     username: string | null;
     avatar_url: string | null;
-  } | null;
+  };
   likes: number;
   comments: number;
   user_has_liked: boolean;
@@ -35,6 +35,7 @@ export const createPost = async (postData: CreatePostData) => {
     .from('posts')
     .insert({
       user_id: userData.user.id,
+      profile_id: userData.user.id,
       content: postData.content,
       image_url: postData.image,
       location: postData.location,
@@ -54,12 +55,11 @@ export const createPost = async (postData: CreatePostData) => {
 export const getPosts = async () => {
   const { data: userData } = await supabase.auth.getUser();
   
-  // First get all posts with their basic info and counts
   const { data: posts, error } = await supabase
     .from('posts')
     .select(`
       *,
-      profiles (
+      profiles!posts_profile_id_fkey (
         username,
         avatar_url
       ),
@@ -89,8 +89,8 @@ export const getPosts = async () => {
   // Transform the posts to match the Post interface
   const transformedPosts = posts.map(post => ({
     ...post,
-    likes: post.likes?.count || 0,
-    comments: post.comments?.count || 0,
+    likes: post.likes?.length || 0,
+    comments: post.comments?.length || 0,
     user_has_liked: userLikes.some(like => like.post_id === post.id)
   })) as Post[];
 

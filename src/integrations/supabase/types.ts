@@ -96,7 +96,15 @@ export type Database = {
           post_id?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       posts: {
         Row: {
@@ -106,6 +114,7 @@ export type Database = {
           id: string
           image_url: string | null
           location: string | null
+          profile_id: string
           user_id: string
         }
         Insert: {
@@ -115,6 +124,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           location?: string | null
+          profile_id: string
           user_id: string
         }
         Update: {
@@ -124,9 +134,18 @@ export type Database = {
           id?: string
           image_url?: string | null
           location?: string | null
+          profile_id?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "posts_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       products: {
         Row: {
