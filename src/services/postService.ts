@@ -52,6 +52,49 @@ export const createPost = async (postData: CreatePostData) => {
   return data;
 };
 
+export const updatePost = async (postId: string, content: string, category: string | null) => {
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) {
+    throw new Error('User not authenticated');
+  }
+
+  const { data, error } = await supabase
+    .from('posts')
+    .update({
+      content,
+      category,
+    })
+    .eq('id', postId)
+    .eq('user_id', userData.user.id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating post:', error);
+    throw error;
+  }
+
+  return data;
+};
+
+export const deletePost = async (postId: string) => {
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) {
+    throw new Error('User not authenticated');
+  }
+
+  const { error } = await supabase
+    .from('posts')
+    .delete()
+    .eq('id', postId)
+    .eq('user_id', userData.user.id);
+
+  if (error) {
+    console.error('Error deleting post:', error);
+    throw error;
+  }
+};
+
 export const getPosts = async () => {
   const { data: userData } = await supabase.auth.getUser();
   

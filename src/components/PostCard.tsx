@@ -1,17 +1,33 @@
-import { MessageCircle, Heart, Share2, MoreHorizontal, Smile } from "lucide-react";
+import { MessageCircle, Heart, Share2, MoreHorizontal, Smile, Pencil, Trash2 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Separator } from "./ui/separator";
 import { useState } from "react";
 import { toast } from "sonner";
 import { CommentSection } from "./CommentSection";
-import { likePost, unlikePost } from "@/services/postService";
+import { likePost, unlikePost, updatePost, deletePost } from "@/services/postService";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const EMOJI_REACTIONS = ["👍", "❤️", "😂", "😮", "😢", "😡"];
 
@@ -42,7 +58,12 @@ export const PostCard = ({
 }: PostCardProps) => {
   const [showComments, setShowComments] = useState(false);
   const [reactions, setReactions] = useState<{ [key: string]: number }>({});
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editedContent, setEditedContent] = useState(content);
+  const [editedCategory, setEditedCategory] = useState(category);
   const queryClient = useQueryClient();
+  const { data: userData } = await supabase.auth.getUser();
+  const isAuthor = userData?.user?.id === id;
 
   const likeMutation = useMutation({
     mutationFn: async () => {
@@ -62,6 +83,35 @@ export const PostCard = ({
     },
   });
 
+  const updateMutation = useMutation({
+    mutationFn: async () => {
+      await updatePost(id, editedContent, editedCategory);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      setIsEditDialogOpen(false);
+      toast.success("Post updated successfully!");
+    },
+    onError: (error) => {
+      console.error('Error updating post:', error);
+      toast.error("Failed to update post");
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      await deletePost(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      toast.success("Post deleted successfully!");
+    },
+    onError: (error) => {
+      console.error('Error deleting post:', error);
+      toast.error("Failed to delete post");
+    },
+  });
+
   const handleLike = () => {
     likeMutation.mutate();
   };
@@ -75,14 +125,27 @@ export const PostCard = ({
   };
 
   const handleShare = () => {
-    // Copy post URL to clipboard
     const postUrl = `${window.location.origin}/post/${id}`;
     navigator.clipboard.writeText(postUrl);
     toast.success("Post link copied to clipboard!");
   };
 
-  const handleMoreOptions = () => {
-    toast.info("More options coming soon!");
+  const handleEdit = () => {
+    setIsEditDialogOpen(true);
+  };
+
+  const handleDelete = () => {
+    if (window.confirm("Are you sure you want to delete this post?")) {
+      deleteMutation.mutate();
+    }
+  };
+
+  const handleUpdate = () => {
+    if (editedContent.trim()) {
+      updateMutation.mutate();
+    } else {
+      toast.error("Post content cannot be empty");
+    }
   };
 
   return (
@@ -100,14 +163,30 @@ export const PostCard = ({
               </div>
             </div>
           </div>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="text-muted-foreground transition-transform duration-300 hover:rotate-90 shrink-0"
-            onClick={handleMoreOptions}
-          >
-            <MoreHorizontal className="h-5 w-5" />
-          </Button>
+          {isAuthor && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="text-muted-foreground transition-transform duration-300 hover:rotate-90 shrink-0"
+                >
+                  <MoreHorizontal className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleEdit}>
+                  <Pencil className="h-4 w-4 mr-2" />
+                  Edit post
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleDelete} className="text-destructive">
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete post
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
         
         <p className="whitespace-pre-line mb-4 text-sm sm:text-base">{content}</p>
@@ -195,6 +274,45 @@ export const PostCard = ({
           />
         )}
       </div>
+
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Post</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="content" className="text-sm font-medium">
+                Content
+              </label>
+              <textarea
+                id="content"
+                value={editedContent}
+                onChange={(e) => setEditedContent(e.target.value)}
+                className="w-full min-h-[100px] p-2 border rounded-md"
+              />
+            </div>
+            <div>
+              <label htmlFor="category" className="text-sm font-medium">
+                Category
+              </label>
+              <Input
+                id="category"
+                value={editedCategory}
+                onChange={(e) => setEditedCategory(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleUpdate} disabled={updateMutation.isPending}>
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };
