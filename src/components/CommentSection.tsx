@@ -3,23 +3,38 @@ import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
 import { Avatar } from "./ui/avatar";
 import { toast } from "sonner";
-
-interface Comment {
-  id: string;
-  author: string;
-  avatar: string;
-  content: string;
-  timestamp: string;
-}
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { addComment, getComments } from "@/services/postService";
 
 interface CommentSectionProps {
   postId: string;
-  initialComments: Comment[];
+  initialComments: any[];
 }
 
-export const CommentSection = ({ postId, initialComments }: CommentSectionProps) => {
-  const [comments, setComments] = useState<Comment[]>(initialComments);
+export const CommentSection = ({ postId }: CommentSectionProps) => {
   const [newComment, setNewComment] = useState("");
+  const queryClient = useQueryClient();
+
+  const { data: comments, isLoading } = useQuery({
+    queryKey: ['comments', postId],
+    queryFn: () => getComments(postId),
+  });
+
+  const commentMutation = useMutation({
+    mutationFn: async () => {
+      await addComment(postId, newComment);
+    },
+    onSuccess: () => {
+      setNewComment("");
+      queryClient.invalidateQueries({ queryKey: ['comments', postId] });
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      toast.success("Comment added!");
+    },
+    onError: (error) => {
+      console.error('Error adding comment:', error);
+      toast.error("Failed to add comment");
+    },
+  });
 
   const handleSubmitComment = () => {
     if (!newComment.trim()) {
@@ -27,18 +42,12 @@ export const CommentSection = ({ postId, initialComments }: CommentSectionProps)
       return;
     }
 
-    const comment: Comment = {
-      id: Math.random().toString(36).substring(7),
-      author: "Felix",
-      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix",
-      content: newComment,
-      timestamp: "Just now"
-    };
-
-    setComments([comment, ...comments]);
-    setNewComment("");
-    toast.success("Comment added!");
+    commentMutation.mutate();
   };
+
+  if (isLoading) {
+    return <div className="text-center py-4">Loading comments...</div>;
+  }
 
   return (
     <div className="space-y-4 mt-4">
@@ -57,26 +66,32 @@ export const CommentSection = ({ postId, initialComments }: CommentSectionProps)
             onChange={(e) => setNewComment(e.target.value)}
             className="min-h-[80px] resize-none"
           />
-          <Button onClick={handleSubmitComment} className="float-right">
-            Comment
+          <Button 
+            onClick={handleSubmitComment} 
+            className="float-right"
+            disabled={commentMutation.isPending}
+          >
+            {commentMutation.isPending ? "Posting..." : "Comment"}
           </Button>
         </div>
       </div>
 
       <div className="space-y-4 mt-6">
-        {comments.map((comment) => (
+        {comments?.map((comment: any) => (
           <div key={comment.id} className="flex gap-4 animate-fade-up">
             <Avatar>
               <img
-                src={comment.avatar}
-                alt={`${comment.author}'s avatar`}
+                src={comment.profiles?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.user_id}`}
+                alt={`${comment.profiles?.username || 'Anonymous'}'s avatar`}
                 className="h-8 w-8 rounded-full"
               />
             </Avatar>
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                <span className="font-semibold">{comment.author}</span>
-                <span className="text-sm text-muted-foreground">{comment.timestamp}</span>
+                <span className="font-semibold">{comment.profiles?.username || 'Anonymous'}</span>
+                <span className="text-sm text-muted-foreground">
+                  {new Date(comment.created_at).toLocaleString()}
+                </span>
               </div>
               <p className="mt-1 text-sm">{comment.content}</p>
             </div>

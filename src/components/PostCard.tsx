@@ -5,15 +5,18 @@ import { Separator } from "./ui/separator";
 import { useState } from "react";
 import { toast } from "sonner";
 import { CommentSection } from "./CommentSection";
+import { likePost, unlikePost } from "@/services/postService";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const EMOJI_REACTIONS = ["👍", "❤️", "😂", "😮", "😢", "😡"];
 
 interface PostCardProps {
+  id: string;
   author: string;
   avatar: string;
   time: string;
@@ -22,9 +25,11 @@ interface PostCardProps {
   likes: number;
   comments: number;
   image?: string;
+  isLiked: boolean;
 }
 
 export const PostCard = ({
+  id,
   author,
   avatar,
   time,
@@ -33,22 +38,32 @@ export const PostCard = ({
   likes: initialLikes,
   comments: initialComments,
   image,
+  isLiked: initialIsLiked,
 }: PostCardProps) => {
-  const [likes, setLikes] = useState(initialLikes);
-  const [isLiked, setIsLiked] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [reactions, setReactions] = useState<{ [key: string]: number }>({});
+  const queryClient = useQueryClient();
+
+  const likeMutation = useMutation({
+    mutationFn: async () => {
+      if (initialIsLiked) {
+        await unlikePost(id);
+      } else {
+        await likePost(id);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      toast.success(initialIsLiked ? "Post unliked" : "Post liked!");
+    },
+    onError: (error) => {
+      console.error('Error toggling like:', error);
+      toast.error("Failed to update like status");
+    },
+  });
 
   const handleLike = () => {
-    if (isLiked) {
-      setLikes(prev => prev - 1);
-      setIsLiked(false);
-      toast.info("Post unliked");
-    } else {
-      setLikes(prev => prev + 1);
-      setIsLiked(true);
-      toast.success("Post liked!");
-    }
+    likeMutation.mutate();
   };
 
   const handleReaction = (emoji: string) => {
@@ -60,7 +75,10 @@ export const PostCard = ({
   };
 
   const handleShare = () => {
-    toast.success("Post shared!");
+    // Copy post URL to clipboard
+    const postUrl = `${window.location.origin}/post/${id}`;
+    navigator.clipboard.writeText(postUrl);
+    toast.success("Post link copied to clipboard!");
   };
 
   const handleMoreOptions = () => {
@@ -116,11 +134,12 @@ export const PostCard = ({
           <Button 
             variant="ghost" 
             size="sm" 
-            className={`text-muted-foreground transition-all duration-300 hover:scale-105 hover:bg-accent/80 ${isLiked ? 'text-primary' : ''}`}
+            className={`text-muted-foreground transition-all duration-300 hover:scale-105 hover:bg-accent/80 ${initialIsLiked ? 'text-primary' : ''}`}
             onClick={handleLike}
+            disabled={likeMutation.isPending}
           >
-            <Heart className={`h-4 w-4 mr-2 ${isLiked ? 'fill-current' : ''}`} />
-            {likes}
+            <Heart className={`h-4 w-4 mr-2 ${initialIsLiked ? 'fill-current' : ''}`} />
+            {initialLikes}
           </Button>
           
           <Button 
@@ -171,16 +190,8 @@ export const PostCard = ({
 
         {showComments && (
           <CommentSection
-            postId="1"
-            initialComments={[
-              {
-                id: "1",
-                author: "Jane Doe",
-                avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Jane",
-                content: "This is amazing! Thanks for sharing!",
-                timestamp: "2 hours ago"
-              }
-            ]}
+            postId={id}
+            initialComments={[]}
           />
         )}
       </div>
