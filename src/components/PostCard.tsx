@@ -2,7 +2,7 @@ import { MessageCircle, Heart, Share2, MoreHorizontal, Smile, Pencil, Trash2 } f
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Separator } from "./ui/separator";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { CommentSection } from "./CommentSection";
 import { likePost, unlikePost, updatePost, deletePost } from "@/services/postService";
@@ -61,9 +61,16 @@ export const PostCard = ({
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editedContent, setEditedContent] = useState(content);
   const [editedCategory, setEditedCategory] = useState(category);
+  const [isAuthor, setIsAuthor] = useState(false);
   const queryClient = useQueryClient();
-  const { data: userData } = await supabase.auth.getUser();
-  const isAuthor = userData?.user?.id === id;
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      setIsAuthor(userData?.user?.id === id);
+    };
+    checkUser();
+  }, [id]);
 
   const likeMutation = useMutation({
     mutationFn: async () => {
