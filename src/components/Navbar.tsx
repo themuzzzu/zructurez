@@ -30,6 +30,8 @@ export const Navbar = () => {
       } else {
         navigate("/auth");
       }
+    } else if (action === "Settings") {
+      navigate("/settings");
     } else {
       toast.info(`${action} clicked - Feature coming soon!`);
     }
