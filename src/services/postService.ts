@@ -220,9 +220,11 @@ export const getComments = async (postId: string) => {
     .from('comments')
     .select(`
       *,
-      profiles (
-        username,
-        avatar_url
+      user:user_id (
+        profile:profiles (
+          username,
+          avatar_url
+        )
       )
     `)
     .eq('post_id', postId)
@@ -233,5 +235,11 @@ export const getComments = async (postId: string) => {
     throw error;
   }
 
-  return comments;
+  // Transform the nested data structure to match the expected format
+  const transformedComments = comments.map(comment => ({
+    ...comment,
+    profiles: comment.user?.profile || { username: 'Anonymous', avatar_url: null }
+  }));
+
+  return transformedComments;
 };
