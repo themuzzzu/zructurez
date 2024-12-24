@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
@@ -57,86 +56,81 @@ export const CreateServiceForm = () => {
     price: "",
     location: "",
     contact_info: "",
-    availability: "",
+    availability: ""
   });
 
   useEffect(() => {
-    // Check if user is authenticated
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
-        navigate("/auth");
-        return;
-      }
-      setUserId(session.user.id);
-    });
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUserId(user?.id || null);
+    };
+    getUser();
+  }, []);
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_OUT") {
-        navigate("/auth");
-      } else if (session) {
-        setUserId(session.user.id);
-      }
-    });
+  const validatePhoneNumber = (number: string) => {
+    // Allow +91 prefix and 10 digits
+    const phoneRegex = /^(\+91[-\s]?)?[0-9]{10}$/;
+    return phoneRegex.test(number.replace(/\s+/g, ''));
+  };
 
-    return () => subscription.unsubscribe();
-  }, [navigate]);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
-  const validatePhoneNumber = (phone: string) => {
-    // Indian mobile number validation: 10 digits with optional +91 country code
-    const phoneRegex = /^(\+91)?[-.\s]?\d{10}$/;
-    return phoneRegex.test(phone);
+  const handleLocationSelect = (location: string) => {
+    setFormData(prev => ({
+      ...prev,
+      location
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!userId) {
-      toast.error("You must be logged in to create a service");
+      toast.error("Please log in to create a service");
       return;
     }
 
     if (!validatePhoneNumber(formData.contact_info)) {
-      toast.error("Please enter a valid Indian mobile number (e.g., 1234567890 or +91-1234567890)");
+      toast.error("Please enter a valid Indian mobile number (+91XXXXXXXXXX or 10 digits)");
       return;
     }
-    
+
     setLoading(true);
 
     try {
-      const { error } = await supabase.from("services").insert({
-        ...formData,
-        price: parseFloat(formData.price),
-        user_id: userId,
-      });
+      const { error } = await supabase.from('services').insert([
+        {
+          user_id: userId,
+          title: formData.title,
+          description: formData.description,
+          category: formData.category,
+          price: parseFloat(formData.price),
+          location: formData.location,
+          contact_info: formData.contact_info,
+          availability: formData.availability
+        }
+      ]);
 
       if (error) throw error;
 
-      toast.success("Service listed successfully!");
-      setFormData({
-        title: "",
-        description: "",
-        category: "",
-        price: "",
-        location: "",
-        contact_info: "",
-        availability: "",
-      });
+      toast.success("Service created successfully!");
+      navigate('/services');
     } catch (error) {
-      console.error("Error:", error);
-      toast.error("Failed to list service. Please try again.");
+      console.error('Error:', error);
+      toast.error("Failed to create service. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 max-w-xl mx-auto p-6">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
         <Input
           name="title"
@@ -169,7 +163,7 @@ export const CreateServiceForm = () => {
               {formData.category
                 ? categories.find(
                     (category) => category.toLowerCase() === formData.category.toLowerCase()
-                  )
+                  ) || "Select category..."
                 : "Select category..."}
               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
@@ -182,6 +176,7 @@ export const CreateServiceForm = () => {
                 {categories.map((category) => (
                   <CommandItem
                     key={category}
+                    value={category}
                     onSelect={(currentValue) => {
                       setFormData(prev => ({
                         ...prev,
@@ -193,7 +188,9 @@ export const CreateServiceForm = () => {
                     <Check
                       className={cn(
                         "mr-2 h-4 w-4",
-                        formData.category.toLowerCase() === category.toLowerCase() ? "opacity-100" : "opacity-0"
+                        formData.category.toLowerCase() === category.toLowerCase()
+                          ? "opacity-100"
+                          : "opacity-0"
                       )}
                     />
                     {category}
@@ -209,7 +206,6 @@ export const CreateServiceForm = () => {
         <Input
           name="price"
           type="number"
-          step="0.01"
           placeholder="Price"
           value={formData.price}
           onChange={handleChange}
@@ -218,21 +214,17 @@ export const CreateServiceForm = () => {
       </div>
 
       <div className="space-y-2">
-        <LocationSelector
-          value={formData.location}
-          onChange={(value) => setFormData(prev => ({ ...prev, location: value }))}
-        />
+        <LocationSelector onLocationSelect={handleLocationSelect} />
       </div>
 
       <div className="space-y-2">
         <Input
           name="contact_info"
-          placeholder="Mobile Number (e.g., 1234567890 or +91-1234567890)"
+          placeholder="Contact Number (e.g., +91XXXXXXXXXX)"
           value={formData.contact_info}
           onChange={handleChange}
-          type="tel"
-          pattern="^(\+91)?[-.\s]?\d{10}$"
-          title="Please enter a valid Indian mobile number (10 digits with optional +91 country code)"
+          pattern="^(\+91[-\s]?)?[0-9]{10}$"
+          title="Please enter a valid Indian mobile number (+91XXXXXXXXXX or 10 digits)"
           required
         />
       </div>
@@ -240,14 +232,15 @@ export const CreateServiceForm = () => {
       <div className="space-y-2">
         <Input
           name="availability"
-          placeholder="Availability"
+          placeholder="Availability (e.g., Mon-Fri 9AM-5PM)"
           value={formData.availability}
           onChange={handleChange}
+          required
         />
       </div>
 
       <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? "Listing Service..." : "List Service"}
+        {loading ? "Creating..." : "Create Service"}
       </Button>
     </form>
   );
