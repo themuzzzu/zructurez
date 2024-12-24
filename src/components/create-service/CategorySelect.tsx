@@ -8,27 +8,27 @@ import {
 } from "../ui/select";
 
 const categories = [
-  "Plumbing",
-  "Electrical",
-  "Computer Repair",
-  "Beauty Services",
-  "Home Cleaning",
-  "Moving Services",
-  "Painting",
-  "Pest Control",
-  "Photography",
-  "Laundry",
-  "Wellness",
-  "Pet Care",
-  "Tutoring",
-  "Internet Services",
   "Automotive",
+  "Beauty Services",
   "Catering",
   "Childcare",
-  "Gardening",
-  "Music Lessons",
+  "Computer Repair",
+  "Electrical",
   "Fitness Training",
-  "Healthcare"
+  "Gardening",
+  "Healthcare",
+  "Home Cleaning",
+  "Internet Services",
+  "Laundry",
+  "Moving Services",
+  "Music Lessons",
+  "Painting",
+  "Pest Control",
+  "Pet Care",
+  "Photography",
+  "Plumbing",
+  "Tutoring",
+  "Wellness"
 ];
 
 interface CategorySelectProps {
