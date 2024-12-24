@@ -3,7 +3,6 @@ import { Button } from "./ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import { ImageUpload } from "./ImageUpload";
 import { ServiceFormFields } from "./create-service/ServiceFormFields";
 import { validatePhoneNumber } from "./create-service/validation";
 import type { ServiceFormData, CreateServiceFormProps } from "./create-service/ServiceFormTypes";
@@ -12,7 +11,6 @@ export const CreateServiceForm = ({ onSuccess }: CreateServiceFormProps) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [formData, setFormData] = useState<ServiceFormData>({
     title: "",
     description: "",
@@ -20,7 +18,8 @@ export const CreateServiceForm = ({ onSuccess }: CreateServiceFormProps) => {
     price: "",
     location: "",
     contact_info: "",
-    availability: ""
+    availability: "",
+    works: []
   });
 
   useEffect(() => {
@@ -31,7 +30,7 @@ export const CreateServiceForm = ({ onSuccess }: CreateServiceFormProps) => {
     getUser();
   }, []);
 
-  const handleChange = (name: string, value: string) => {
+  const handleChange = (name: string, value: string | any[]) => {
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -40,7 +39,6 @@ export const CreateServiceForm = ({ onSuccess }: CreateServiceFormProps) => {
 
   const uploadImage = async (imageFile: string) => {
     try {
-      // Convert base64 to blob
       const base64Data = imageFile.split(',')[1];
       const byteCharacters = atob(base64Data);
       const byteNumbers = new Array(byteCharacters.length);
@@ -84,13 +82,10 @@ export const CreateServiceForm = ({ onSuccess }: CreateServiceFormProps) => {
     setLoading(true);
 
     try {
-      let imageUrl = null;
-      if (selectedImage) {
-        imageUrl = await uploadImage(selectedImage);
-      }
-
-      const { error } = await supabase.from('services').insert([
-        {
+      // First, create the service
+      const { data: service, error: serviceError } = await supabase
+        .from('services')
+        .insert([{
           user_id: userId,
           title: formData.title,
           description: formData.description,
@@ -99,11 +94,32 @@ export const CreateServiceForm = ({ onSuccess }: CreateServiceFormProps) => {
           location: formData.location,
           contact_info: formData.contact_info,
           availability: formData.availability,
-          image_url: imageUrl
-        }
-      ]);
+        }])
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (serviceError) throw serviceError;
+
+      // Then, upload works if any
+      if (formData.works && formData.works.length > 0) {
+        for (const work of formData.works) {
+          let imageUrl = null;
+          if (work.media) {
+            imageUrl = await uploadImage(work.media);
+          }
+
+          const { error: portfolioError } = await supabase
+            .from('service_portfolio')
+            .insert([{
+              service_id: service.id,
+              title: formData.title,
+              description: work.description,
+              image_url: imageUrl
+            }]);
+
+          if (portfolioError) throw portfolioError;
+        }
+      }
 
       toast.success("Service created successfully!");
       onSuccess?.();
@@ -120,14 +136,6 @@ export const CreateServiceForm = ({ onSuccess }: CreateServiceFormProps) => {
     <form onSubmit={handleSubmit} className="space-y-4">
       <ServiceFormFields formData={formData} onChange={handleChange} />
       
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700">Service Image</label>
-        <ImageUpload
-          selectedImage={selectedImage}
-          onImageSelect={setSelectedImage}
-        />
-      </div>
-
       <Button type="submit" className="w-full" disabled={loading}>
         {loading ? "Creating..." : "Create Service"}
       </Button>

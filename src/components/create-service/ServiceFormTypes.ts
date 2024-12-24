@@ -1,3 +1,9 @@
+export interface WorkItem {
+  id: string;
+  description: string;
+  media: string | null;
+}
+
 export interface ServiceFormData {
   title: string;
   description: string;
@@ -6,6 +12,7 @@ export interface ServiceFormData {
   location: string;
   contact_info: string;
   availability: string;
+  works?: WorkItem[];
 }
 
 export interface CreateServiceFormProps {

@@ -3,11 +3,12 @@ import { Textarea } from "../ui/textarea";
 import { Label } from "../ui/label";
 import { CategorySelect } from "./CategorySelect";
 import { LocationSelector } from "../LocationSelector";
-import { ServiceFormData } from "./ServiceFormTypes";
+import { ServiceWorks } from "./ServiceWorks";
+import type { ServiceFormData } from "./ServiceFormTypes";
 
 interface ServiceFormFieldsProps {
   formData: ServiceFormData;
-  onChange: (name: string, value: string) => void;
+  onChange: (name: string, value: string | any[]) => void;
 }
 
 export const ServiceFormFields = ({ formData, onChange }: ServiceFormFieldsProps) => {
@@ -88,6 +89,11 @@ export const ServiceFormFields = ({ formData, onChange }: ServiceFormFieldsProps
           required
         />
       </div>
+
+      <ServiceWorks
+        works={formData.works || []}
+        onChange={(works) => onChange("works", works)}
+      />
     </>
   );
 };
