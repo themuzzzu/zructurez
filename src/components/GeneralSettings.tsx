@@ -4,11 +4,12 @@ import { Switch } from "@/components/ui/switch";
 import { useTheme } from "@/components/ThemeProvider";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
+import { type Theme } from "@/components/ThemeProvider";
 
 export const GeneralSettings = () => {
   const { theme, setTheme } = useTheme();
 
-  const handleThemeChange = (value: string) => {
+  const handleThemeChange = (value: Theme) => {
     setTheme(value);
     toast.success(`Theme changed to ${value} mode`);
   };
