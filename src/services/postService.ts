@@ -152,51 +152,6 @@ export const getPosts = async () => {
   return transformedPosts;
 };
 
-export const likePost = async (postId: string) => {
-  const { data: userData } = await supabase.auth.getUser();
-  if (!userData.user) {
-    throw new Error('User not authenticated');
-  }
-
-  const { data, error } = await supabase
-    .from('likes')
-    .insert({
-      user_id: userData.user.id,
-      post_id: postId,
-    })
-    .select()
-    .single();
-
-  if (error) {
-    if (error.code === '23505') { // Unique violation
-      toast.error('You have already liked this post');
-    } else {
-      console.error('Error liking post:', error);
-      throw error;
-    }
-  }
-
-  return data;
-};
-
-export const unlikePost = async (postId: string) => {
-  const { data: userData } = await supabase.auth.getUser();
-  if (!userData.user) {
-    throw new Error('User not authenticated');
-  }
-
-  const { error } = await supabase
-    .from('likes')
-    .delete()
-    .eq('post_id', postId)
-    .eq('user_id', userData.user.id);
-
-  if (error) {
-    console.error('Error unliking post:', error);
-    throw error;
-  }
-};
-
 export const addComment = async (postId: string, content: string) => {
   const { data: userData } = await supabase.auth.getUser();
   if (!userData.user) {
@@ -245,8 +200,54 @@ export const getComments = async (postId: string): Promise<Comment[]> => {
     throw error;
   }
 
+  // Transform the comments to ensure they match the Comment interface
   return comments.map(comment => ({
     ...comment,
     profiles: comment.profiles || { username: 'Anonymous', avatar_url: null }
-  }));
+  })) as Comment[];
+};
+
+export const likePost = async (postId: string) => {
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) {
+    throw new Error('User not authenticated');
+  }
+
+  const { data, error } = await supabase
+    .from('likes')
+    .insert({
+      user_id: userData.user.id,
+      post_id: postId,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    if (error.code === '23505') { // Unique violation
+      toast.error('You have already liked this post');
+    } else {
+      console.error('Error liking post:', error);
+      throw error;
+    }
+  }
+
+  return data;
+};
+
+export const unlikePost = async (postId: string) => {
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) {
+    throw new Error('User not authenticated');
+  }
+
+  const { error } = await supabase
+    .from('likes')
+    .delete()
+    .eq('post_id', postId)
+    .eq('user_id', userData.user.id);
+
+  if (error) {
+    console.error('Error unliking post:', error);
+    throw error;
+  }
 };
