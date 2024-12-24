@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "./ui/button";
-import { X } from "lucide-react";
+import { X, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -40,7 +40,26 @@ export const ImageUpload = ({ selectedImage, onImageSelect }: ImageUploadProps) 
   };
 
   return (
-    <>
+    <div className="space-y-4">
+      <div className="flex items-center gap-4">
+        <Button
+          type="button"
+          variant="outline"
+          className="flex items-center gap-2"
+          onClick={() => document.getElementById('photo-upload')?.click()}
+        >
+          <Upload className="h-4 w-4" />
+          Choose Image
+        </Button>
+        <input
+          id="photo-upload"
+          type="file"
+          accept={ACCEPTED_IMAGE_TYPES.join(',')}
+          onChange={handlePhotoUpload}
+          className="hidden"
+        />
+      </div>
+
       {selectedImage && (
         <div className="relative mt-4 group">
           <img
@@ -58,6 +77,6 @@ export const ImageUpload = ({ selectedImage, onImageSelect }: ImageUploadProps) 
           </Button>
         </div>
       )}
-    </>
+    </div>
   );
 };

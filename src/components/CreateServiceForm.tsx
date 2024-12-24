@@ -1,15 +1,12 @@
 import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Textarea } from "./ui/textarea";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import { LocationSelector } from "./LocationSelector";
-import { CategorySelect } from "./create-service/CategorySelect";
-import { validatePhoneNumber } from "./create-service/validation";
 import { ImageUpload } from "./ImageUpload";
-import type { ServiceFormData, CreateServiceFormProps } from "./create-service/types";
+import { ServiceFormFields } from "./create-service/ServiceFormFields";
+import { validatePhoneNumber } from "./create-service/validation";
+import type { ServiceFormData, CreateServiceFormProps } from "./create-service/ServiceFormTypes";
 
 export const CreateServiceForm = ({ onSuccess }: CreateServiceFormProps) => {
   const navigate = useNavigate();
@@ -34,8 +31,7 @@ export const CreateServiceForm = ({ onSuccess }: CreateServiceFormProps) => {
     getUser();
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
+  const handleChange = (name: string, value: string) => {
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -122,82 +118,14 @@ export const CreateServiceForm = ({ onSuccess }: CreateServiceFormProps) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <Input
-          name="title"
-          placeholder="Service Title"
-          value={formData.title}
-          onChange={handleChange}
-          required
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Textarea
-          name="description"
-          placeholder="Service Description"
-          value={formData.description}
-          onChange={handleChange}
-          required
-        />
-      </div>
-
-      <div className="space-y-2">
-        <CategorySelect 
-          value={formData.category}
-          onChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Input
-          name="price"
-          type="number"
-          placeholder="Price"
-          value={formData.price}
-          onChange={handleChange}
-          required
-        />
-      </div>
-
-      <div className="space-y-2">
-        <LocationSelector
-          value={formData.location}
-          onChange={(value) => setFormData(prev => ({ ...prev, location: value }))}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Input
-          name="contact_info"
-          placeholder="Contact Number (e.g., +91XXXXXXXXXX)"
-          value={formData.contact_info}
-          onChange={handleChange}
-          pattern="^(\+91[-\s]?)?[0-9]{10}$"
-          title="Please enter a valid Indian mobile number (+91XXXXXXXXXX or 10 digits)"
-          required
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Input
-          name="availability"
-          placeholder="Availability (e.g., Mon-Fri 9AM-5PM)"
-          value={formData.availability}
-          onChange={handleChange}
-          required
-        />
-      </div>
-
+      <ServiceFormFields formData={formData} onChange={handleChange} />
+      
       <div className="space-y-2">
         <label className="block text-sm font-medium text-gray-700">Service Image</label>
         <ImageUpload
           selectedImage={selectedImage}
           onImageSelect={setSelectedImage}
         />
-        {selectedImage && (
-          <p className="text-sm text-muted-foreground">Image uploaded successfully</p>
-        )}
       </div>
 
       <Button type="submit" className="w-full" disabled={loading}>
