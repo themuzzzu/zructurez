@@ -6,8 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Local Services</title>
     <script>
+      let mapInitialized = false;
+      
       function initMap() {
         console.log('Google Maps API loaded successfully');
+        mapInitialized = true;
+        // Dispatch a custom event that our React components can listen for
+        window.dispatchEvent(new Event('google-maps-loaded'));
       }
     </script>
     <script 

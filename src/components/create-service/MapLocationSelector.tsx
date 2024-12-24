@@ -16,36 +16,28 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    let attempts = 0;
-    const maxAttempts = 20; // 10 seconds maximum wait time
-    
-    const checkGoogleMapsLoaded = () => {
-      if (window.google && window.google.maps) {
-        console.log('Google Maps loaded successfully');
-        setIsLoading(false);
-        return;
-      }
-      
-      attempts++;
-      if (attempts < maxAttempts) {
-        setTimeout(checkGoogleMapsLoaded, 500);
-      } else {
-        console.error('Google Maps failed to load');
-        toast.error("Failed to load Google Maps. Please refresh the page.");
-        setIsLoading(false);
-      }
+    // Function to initialize map when Google Maps is ready
+    const handleGoogleMapsLoaded = () => {
+      console.log('Received google-maps-loaded event');
+      setIsLoading(false);
     };
 
-    // Start checking after a short delay
-    setTimeout(checkGoogleMapsLoaded, 1000);
+    // Add event listener for our custom event
+    window.addEventListener('google-maps-loaded', handleGoogleMapsLoaded);
+
+    // Check if Maps is already loaded (in case we missed the event)
+    if (window.google?.maps) {
+      console.log('Google Maps already loaded');
+      setIsLoading(false);
+    }
 
     return () => {
-      attempts = maxAttempts; // Stop checking on unmount
+      window.removeEventListener('google-maps-loaded', handleGoogleMapsLoaded);
     };
   }, []);
 
   const initializeMap = (container: HTMLElement) => {
-    if (!window.google || !window.google.maps) {
+    if (!window.google?.maps) {
       console.error('Google Maps not available');
       toast.error("Google Maps is not available. Please refresh the page.");
       return;
@@ -66,33 +58,19 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
         position: mapInstance.getCenter(),
       });
 
+      // Handle map clicks
       mapInstance.addListener("click", (e: google.maps.MapMouseEvent) => {
         if (e.latLng) {
           marker.setPosition(e.latLng);
-          const geocoder = new google.maps.Geocoder();
-          geocoder.geocode(
-            { location: e.latLng },
-            (results: google.maps.GeocoderResult[] | null, status: google.maps.GeocoderStatus) => {
-              if (status === "OK" && results?.[0]) {
-                setSelectedLocation(results[0].formatted_address);
-              }
-            }
-          );
+          updateLocationFromLatLng(e.latLng);
         }
       });
 
+      // Handle marker drag
       marker.addListener("dragend", () => {
         const position = marker.getPosition();
         if (position) {
-          const geocoder = new google.maps.Geocoder();
-          geocoder.geocode(
-            { location: position },
-            (results: google.maps.GeocoderResult[] | null, status: google.maps.GeocoderStatus) => {
-              if (status === "OK" && results?.[0]) {
-                setSelectedLocation(results[0].formatted_address);
-              }
-            }
-          );
+          updateLocationFromLatLng(position);
         }
       });
 
@@ -102,6 +80,18 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
       console.error("Error initializing map:", error);
       toast.error("Failed to initialize map. Please try again.");
     }
+  };
+
+  const updateLocationFromLatLng = (latLng: google.maps.LatLng) => {
+    const geocoder = new google.maps.Geocoder();
+    geocoder.geocode(
+      { location: latLng },
+      (results: google.maps.GeocoderResult[] | null, status: google.maps.GeocoderStatus) => {
+        if (status === "OK" && results?.[0]) {
+          setSelectedLocation(results[0].formatted_address);
+        }
+      }
+    );
   };
 
   const handleConfirm = () => {
