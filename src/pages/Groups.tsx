@@ -1,5 +1,4 @@
 import { Navbar } from "@/components/Navbar";
-import { CreatePost } from "@/components/CreatePost";
 import { Sidebar } from "@/components/Sidebar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -85,8 +84,6 @@ const Groups = () => {
                   Create Group
                 </Button>
               </div>
-              
-              <CreatePost />
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {groups.map((group) => (
