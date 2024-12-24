@@ -46,6 +46,11 @@ interface CategorySelectProps {
 
 export const CategorySelect = ({ value = '', onChange }: CategorySelectProps) => {
   const [open, setOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
+
+  const filteredCategories = categories.filter(category =>
+    category.toLowerCase().includes(searchValue.toLowerCase())
+  );
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -61,17 +66,22 @@ export const CategorySelect = ({ value = '', onChange }: CategorySelectProps) =>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full p-0" align="start">
-        <Command>
-          <CommandInput placeholder="Search category..." />
+        <Command shouldFilter={false}>
+          <CommandInput 
+            placeholder="Search category..." 
+            value={searchValue}
+            onValueChange={setSearchValue}
+          />
           <CommandEmpty>No category found.</CommandEmpty>
           <CommandGroup className="max-h-[200px] overflow-y-auto">
-            {categories.map((category) => (
+            {filteredCategories.map((category) => (
               <CommandItem
                 key={category}
                 value={category}
                 onSelect={(currentValue) => {
                   onChange(currentValue === value ? '' : currentValue);
                   setOpen(false);
+                  setSearchValue("");
                 }}
               >
                 <Check
