@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { MapPin } from "lucide-react";
+import { toast } from "sonner";
 
 interface MapLocationSelectorProps {
   value: string;
@@ -12,34 +13,95 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
   const [isOpen, setIsOpen] = useState(false);
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<string>(value);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const checkGoogleMapsLoaded = () => {
+      if (window.google && window.google.maps) {
+        setIsLoading(false);
+      } else {
+        setTimeout(checkGoogleMapsLoaded, 100);
+      }
+    };
+
+    checkGoogleMapsLoaded();
+  }, []);
 
   const initializeMap = (container: HTMLElement) => {
-    const mapInstance = new google.maps.Map(container, {
-      center: { lat: 14.9041, lng: 77.9813 }, // Tadipatri coordinates
-      zoom: 13,
-      mapTypeControl: false,
-      streetViewControl: false,
-    });
+    if (!window.google || !window.google.maps) {
+      toast.error("Google Maps is not loaded yet. Please try again.");
+      return;
+    }
 
-    mapInstance.addListener("click", (e: google.maps.MapMouseEvent) => {
-      const geocoder = new google.maps.Geocoder();
-      geocoder.geocode(
-        { location: e.latLng },
-        (results: google.maps.GeocoderResult[] | null, status: google.maps.GeocoderStatus) => {
-          if (status === "OK" && results?.[0]) {
-            setSelectedLocation(results[0].formatted_address);
-          }
+    try {
+      const mapInstance = new google.maps.Map(container, {
+        center: { lat: 14.9041, lng: 77.9813 }, // Tadipatri coordinates
+        zoom: 13,
+        mapTypeControl: false,
+        streetViewControl: false,
+      });
+
+      const marker = new google.maps.Marker({
+        map: mapInstance,
+        draggable: true,
+        position: mapInstance.getCenter(),
+      });
+
+      mapInstance.addListener("click", (e: google.maps.MapMouseEvent) => {
+        if (e.latLng) {
+          marker.setPosition(e.latLng);
+          const geocoder = new google.maps.Geocoder();
+          geocoder.geocode(
+            { location: e.latLng },
+            (results: google.maps.GeocoderResult[] | null, status: google.maps.GeocoderStatus) => {
+              if (status === "OK" && results?.[0]) {
+                setSelectedLocation(results[0].formatted_address);
+              }
+            }
+          );
         }
-      );
-    });
+      });
 
-    setMap(mapInstance);
+      marker.addListener("dragend", () => {
+        const position = marker.getPosition();
+        if (position) {
+          const geocoder = new google.maps.Geocoder();
+          geocoder.geocode(
+            { location: position },
+            (results: google.maps.GeocoderResult[] | null, status: google.maps.GeocoderStatus) => {
+              if (status === "OK" && results?.[0]) {
+                setSelectedLocation(results[0].formatted_address);
+              }
+            }
+          );
+        }
+      });
+
+      setMap(mapInstance);
+    } catch (error) {
+      console.error("Error initializing map:", error);
+      toast.error("Failed to initialize map. Please try again.");
+    }
   };
 
   const handleConfirm = () => {
     onChange(selectedLocation);
     setIsOpen(false);
   };
+
+  if (isLoading) {
+    return (
+      <Button
+        type="button"
+        variant="outline"
+        className="w-full justify-start gap-2"
+        disabled
+      >
+        <MapPin className="h-4 w-4" />
+        Loading map...
+      </Button>
+    );
+  }
 
   return (
     <div className="space-y-2">
@@ -67,7 +129,7 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
 
           <div className="flex justify-between">
             <div className="text-sm text-muted-foreground">
-              {selectedLocation || "Click on the map to select a location"}
+              {selectedLocation || "Click or drag the marker on the map to select a location"}
             </div>
             <Button onClick={handleConfirm}>Confirm Location</Button>
           </div>
