@@ -60,17 +60,17 @@ export const CategorySelect = ({ value = '', onChange }: CategorySelectProps) =>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0">
+      <PopoverContent className="w-full p-0" align="start">
         <Command>
           <CommandInput placeholder="Search category..." />
           <CommandEmpty>No category found.</CommandEmpty>
-          <CommandGroup>
+          <CommandGroup className="max-h-[200px] overflow-y-auto">
             {categories.map((category) => (
               <CommandItem
                 key={category}
                 value={category}
                 onSelect={(currentValue) => {
-                  onChange(currentValue);
+                  onChange(currentValue === value ? '' : currentValue);
                   setOpen(false);
                 }}
               >
