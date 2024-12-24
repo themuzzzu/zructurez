@@ -3,7 +3,6 @@ import { Textarea } from "../ui/textarea";
 import { Label } from "../ui/label";
 import { CategorySelect } from "./CategorySelect";
 import { ServiceWorks } from "./ServiceWorks";
-import { MapLocationSelector } from "./MapLocationSelector";
 import type { ServiceFormData } from "./ServiceFormTypes";
 
 interface ServiceFormFieldsProps {
@@ -57,10 +56,13 @@ export const ServiceFormFields = ({ formData, onChange }: ServiceFormFieldsProps
       </div>
 
       <div className="space-y-2">
-        <Label>Location</Label>
-        <MapLocationSelector
+        <Label htmlFor="location">Location</Label>
+        <Input
+          id="location"
+          name="location"
+          placeholder="Enter your service location"
           value={formData.location}
-          onChange={(value) => onChange("location", value)}
+          onChange={(e) => onChange(e.target.name, e.target.value)}
         />
       </div>
 
