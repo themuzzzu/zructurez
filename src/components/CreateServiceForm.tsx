@@ -6,11 +6,50 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { LocationSelector } from "./LocationSelector";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+const categories = [
+  "Plumbing",
+  "Electrical",
+  "Computer Repair",
+  "Beauty Services",
+  "Home Cleaning",
+  "Moving Services",
+  "Painting",
+  "Pest Control",
+  "Photography",
+  "Laundry",
+  "Wellness",
+  "Pet Care",
+  "Tutoring",
+  "Internet Services",
+  "Automotive",
+  "Catering",
+  "Childcare",
+  "Gardening",
+  "Music Lessons",
+  "Fitness Training",
+  "Healthcare"
+];
 
 export const CreateServiceForm = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -119,13 +158,51 @@ export const CreateServiceForm = () => {
       </div>
 
       <div className="space-y-2">
-        <Input
-          name="category"
-          placeholder="Category"
-          value={formData.category}
-          onChange={handleChange}
-          required
-        />
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={open}
+              className="w-full justify-between"
+            >
+              {formData.category
+                ? categories.find(
+                    (category) => category.toLowerCase() === formData.category.toLowerCase()
+                  )
+                : "Select category..."}
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-full p-0">
+            <Command>
+              <CommandInput placeholder="Search category..." />
+              <CommandEmpty>No category found.</CommandEmpty>
+              <CommandGroup>
+                {categories.map((category) => (
+                  <CommandItem
+                    key={category}
+                    onSelect={(currentValue) => {
+                      setFormData(prev => ({
+                        ...prev,
+                        category: currentValue
+                      }));
+                      setOpen(false);
+                    }}
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        formData.category.toLowerCase() === category.toLowerCase() ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    {category}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </Command>
+          </PopoverContent>
+        </Popover>
       </div>
 
       <div className="space-y-2">
