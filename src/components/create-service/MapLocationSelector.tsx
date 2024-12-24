@@ -31,11 +31,11 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
     };
 
     // Create the map instance
-    const map = new google.maps.Map(mapRef.current, mapOptions);
+    const map = new window.google.maps.Map(mapRef.current, mapOptions);
     mapInstanceRef.current = map;
 
     // Create a marker for the default location
-    const marker = new google.maps.Marker({
+    const marker = new window.google.maps.Marker({
       position: defaultLocation,
       map: map,
       draggable: true,
@@ -54,7 +54,7 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
       });
       
       // Get address for the selected location
-      const geocoder = new google.maps.Geocoder();
+      const geocoder = new window.google.maps.Geocoder();
       geocoder.geocode(
         { location: e.latLng },
         (results: google.maps.GeocoderResult[], status: google.maps.GeocoderStatus) => {
@@ -78,7 +78,7 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
       });
 
       // Get address for the dragged location
-      const geocoder = new google.maps.Geocoder();
+      const geocoder = new window.google.maps.Geocoder();
       geocoder.geocode(
         { location: position },
         (results: google.maps.GeocoderResult[], status: google.maps.GeocoderStatus) => {
