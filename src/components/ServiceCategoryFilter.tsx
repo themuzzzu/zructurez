@@ -29,7 +29,7 @@ const categories = [
   { id: "all", name: "All", icon: null },
   { id: "plumbing", name: "Plumbing", icon: Wrench },
   { id: "electrical", name: "Electrical", icon: Zap },
-  { id: "computer", name: "Computer Repair", icon: Computer },
+  { id: "computer-repair", name: "Computer Repair", icon: Computer },
   { id: "beauty", name: "Beauty Services", icon: Scissors },
   { id: "cleaning", name: "Home Cleaning", icon: Home },
   { id: "moving", name: "Moving Services", icon: Truck },
@@ -60,12 +60,12 @@ export const ServiceCategoryFilter = () => {
   };
 
   return (
-    <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide animate-fade-up">
+    <div className="flex gap-3 overflow-x-auto pb-4 px-2 scrollbar-hide animate-fade-up">
       {categories.map(({ id, name, icon: Icon }) => (
         <Button
           key={id}
           variant={id === selectedCategory ? "default" : "outline"}
-          className="whitespace-nowrap transition-all duration-300 hover:scale-105 hover:shadow-md"
+          className="whitespace-nowrap transition-all duration-300 hover:scale-105 hover:shadow-md min-w-fit px-4"
           onClick={() => handleCategoryClick(id)}
         >
           {Icon && <Icon className="h-4 w-4 mr-2" />}

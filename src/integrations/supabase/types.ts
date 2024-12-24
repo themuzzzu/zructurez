@@ -207,6 +207,44 @@ export type Database = {
         }
         Relationships: []
       }
+      service_portfolio: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          service_id: string
+          title: string
+          video_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          service_id: string
+          title: string
+          video_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          service_id?: string
+          title?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_portfolio_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       services: {
         Row: {
           availability: string | null
