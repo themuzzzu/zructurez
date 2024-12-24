@@ -29,19 +29,19 @@ const categories = [
   "Plumbing",
   "Tutoring",
   "Wellness"
-];
+].sort();
 
 interface CategorySelectProps {
   value: string;
   onChange: (value: string) => void;
 }
 
-export const CategorySelect = ({ value = '', onChange }: CategorySelectProps) => {
+export const CategorySelect = ({ value, onChange }: CategorySelectProps) => {
   return (
     <div className="space-y-2">
       <Label htmlFor="category">Category</Label>
       <Select value={value} onValueChange={onChange}>
-        <SelectTrigger>
+        <SelectTrigger id="category">
           <SelectValue placeholder="Select a category" />
         </SelectTrigger>
         <SelectContent className="max-h-[300px] overflow-y-auto">
