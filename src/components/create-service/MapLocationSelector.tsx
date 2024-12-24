@@ -16,24 +16,43 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let attempts = 0;
+    const maxAttempts = 20; // 10 seconds maximum wait time
+    
     const checkGoogleMapsLoaded = () => {
       if (window.google && window.google.maps) {
+        console.log('Google Maps loaded successfully');
         setIsLoading(false);
+        return;
+      }
+      
+      attempts++;
+      if (attempts < maxAttempts) {
+        setTimeout(checkGoogleMapsLoaded, 500);
       } else {
-        setTimeout(checkGoogleMapsLoaded, 100);
+        console.error('Google Maps failed to load');
+        toast.error("Failed to load Google Maps. Please refresh the page.");
+        setIsLoading(false);
       }
     };
 
-    checkGoogleMapsLoaded();
+    // Start checking after a short delay
+    setTimeout(checkGoogleMapsLoaded, 1000);
+
+    return () => {
+      attempts = maxAttempts; // Stop checking on unmount
+    };
   }, []);
 
   const initializeMap = (container: HTMLElement) => {
     if (!window.google || !window.google.maps) {
-      toast.error("Google Maps is not loaded yet. Please try again.");
+      console.error('Google Maps not available');
+      toast.error("Google Maps is not available. Please refresh the page.");
       return;
     }
 
     try {
+      console.log('Initializing map...');
       const mapInstance = new google.maps.Map(container, {
         center: { lat: 14.9041, lng: 77.9813 }, // Tadipatri coordinates
         zoom: 13,
@@ -77,6 +96,7 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
         }
       });
 
+      console.log('Map initialized successfully');
       setMap(mapInstance);
     } catch (error) {
       console.error("Error initializing map:", error);

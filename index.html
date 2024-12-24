@@ -5,7 +5,16 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Local Services</title>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBOnx38SUqt4hNkRh_DQsyGPQz_-bFvwLk&libraries=places"></script>
+    <script>
+      function initMap() {
+        console.log('Google Maps API loaded successfully');
+      }
+    </script>
+    <script 
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBOnx38SUqt4hNkRh_DQsyGPQz_-bFvwLk&libraries=places&callback=initMap" 
+      async 
+      defer
+    ></script>
   </head>
   <body>
     <div id="root"></div>
