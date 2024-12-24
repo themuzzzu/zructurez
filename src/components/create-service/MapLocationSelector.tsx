@@ -21,7 +21,7 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
     if (!open || !mapRef.current) return;
 
     // Initialize the map
-    const defaultLocation = { lat: 14.904093, lng: 77.981401 }; // Default coordinates
+    const defaultLocation = { lat: 14.904093, lng: 77.981401 }; // Default coordinates for India
     const mapOptions: google.maps.MapOptions = {
       center: defaultLocation,
       zoom: 14,
