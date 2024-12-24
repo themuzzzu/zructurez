@@ -45,6 +45,127 @@ export type Database = {
         }
         Relationships: []
       }
+      business_portfolio: {
+        Row: {
+          business_id: string
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          title: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          title: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_portfolio_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_products: {
+        Row: {
+          business_id: string
+          created_at: string
+          description: string
+          id: string
+          image_url: string | null
+          name: string
+          price: number
+          stock: number | null
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          description: string
+          id?: string
+          image_url?: string | null
+          name: string
+          price: number
+          stock?: number | null
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          description?: string
+          id?: string
+          image_url?: string | null
+          name?: string
+          price?: number
+          stock?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_products_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      businesses: {
+        Row: {
+          category: string
+          contact: string | null
+          created_at: string
+          description: string
+          hours: string | null
+          id: string
+          image_url: string | null
+          location: string | null
+          name: string
+          user_id: string
+          verified: boolean | null
+          video_url: string | null
+        }
+        Insert: {
+          category: string
+          contact?: string | null
+          created_at?: string
+          description: string
+          hours?: string | null
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          name: string
+          user_id: string
+          verified?: boolean | null
+          video_url?: string | null
+        }
+        Update: {
+          category?: string
+          contact?: string | null
+          created_at?: string
+          description?: string
+          hours?: string | null
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          name?: string
+          user_id?: string
+          verified?: boolean | null
+          video_url?: string | null
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           content: string
