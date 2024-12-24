@@ -8,12 +8,14 @@ import { useNavigate } from "react-router-dom";
 import { LocationSelector } from "./LocationSelector";
 import { CategorySelect } from "./create-service/CategorySelect";
 import { validatePhoneNumber } from "./create-service/validation";
+import { ImageUpload } from "./ImageUpload";
 import type { ServiceFormData, CreateServiceFormProps } from "./create-service/types";
 
 export const CreateServiceForm = ({ onSuccess }: CreateServiceFormProps) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [formData, setFormData] = useState<ServiceFormData>({
     title: "",
     description: "",
@@ -40,6 +42,26 @@ export const CreateServiceForm = ({ onSuccess }: CreateServiceFormProps) => {
     }));
   };
 
+  const uploadImage = async (imageFile: string) => {
+    try {
+      const fileName = `${userId}/${crypto.randomUUID()}`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('service-images')
+        .upload(fileName, imageFile);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('service-images')
+        .getPublicUrl(fileName);
+
+      return publicUrl;
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      throw error;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -56,6 +78,11 @@ export const CreateServiceForm = ({ onSuccess }: CreateServiceFormProps) => {
     setLoading(true);
 
     try {
+      let imageUrl = null;
+      if (selectedImage) {
+        imageUrl = await uploadImage(selectedImage);
+      }
+
       const { error } = await supabase.from('services').insert([
         {
           user_id: userId,
@@ -65,7 +92,8 @@ export const CreateServiceForm = ({ onSuccess }: CreateServiceFormProps) => {
           price: parseFloat(formData.price),
           location: formData.location,
           contact_info: formData.contact_info,
-          availability: formData.availability
+          availability: formData.availability,
+          image_url: imageUrl
         }
       ]);
 
@@ -148,6 +176,13 @@ export const CreateServiceForm = ({ onSuccess }: CreateServiceFormProps) => {
           value={formData.availability}
           onChange={handleChange}
           required
+        />
+      </div>
+
+      <div className="space-y-2">
+        <ImageUpload
+          selectedImage={selectedImage}
+          onImageSelect={setSelectedImage}
         />
       </div>
 

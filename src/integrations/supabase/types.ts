@@ -374,6 +374,7 @@ export type Database = {
           created_at: string
           description: string
           id: string
+          image_url: string | null
           location: string | null
           price: number
           title: string
@@ -386,6 +387,7 @@ export type Database = {
           created_at?: string
           description: string
           id?: string
+          image_url?: string | null
           location?: string | null
           price: number
           title: string
@@ -398,6 +400,7 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          image_url?: string | null
           location?: string | null
           price?: number
           title?: string
