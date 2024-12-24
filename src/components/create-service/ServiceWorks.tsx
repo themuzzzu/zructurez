@@ -2,12 +2,7 @@ import { Plus } from "lucide-react";
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
 import { ServiceWorkItem } from "./ServiceWorkItem";
-
-interface WorkItem {
-  id: string;
-  description: string;
-  media: string | null;
-}
+import type { WorkItem } from "./ServiceFormTypes";
 
 interface ServiceWorksProps {
   works: WorkItem[];

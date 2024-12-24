@@ -12,7 +12,7 @@ export interface ServiceFormData {
   location: string;
   contact_info: string;
   availability: string;
-  works?: WorkItem[];
+  works: WorkItem[];
 }
 
 export interface CreateServiceFormProps {

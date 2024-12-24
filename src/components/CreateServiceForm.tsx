@@ -19,7 +19,7 @@ export const CreateServiceForm = ({ onSuccess }: CreateServiceFormProps) => {
     location: "",
     contact_info: "",
     availability: "",
-    works: []
+    works: [] // Initialize as empty array
   });
 
   useEffect(() => {
