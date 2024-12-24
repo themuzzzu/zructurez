@@ -31,10 +31,10 @@ interface Comment {
   user_id: string;
   content: string;
   created_at: string;
-  profiles: {
+  profiles?: {
     username: string | null;
     avatar_url: string | null;
-  };
+  } | null;
 }
 
 export const createPost = async (postData: CreatePostData) => {
@@ -212,7 +212,7 @@ export const addComment = async (postId: string, content: string) => {
     })
     .select(`
       *,
-      profiles (
+      profiles:user_id (
         username,
         avatar_url
       )
@@ -232,7 +232,7 @@ export const getComments = async (postId: string): Promise<Comment[]> => {
     .from('comments')
     .select(`
       *,
-      profiles!comments_user_id_fkey (
+      profiles:user_id (
         username,
         avatar_url
       )
