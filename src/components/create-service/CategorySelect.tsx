@@ -44,7 +44,7 @@ interface CategorySelectProps {
   onChange: (value: string) => void;
 }
 
-export const CategorySelect = ({ value, onChange }: CategorySelectProps) => {
+export const CategorySelect = ({ value = '', onChange }: CategorySelectProps) => {
   const [open, setOpen] = useState(false);
 
   return (
@@ -77,9 +77,7 @@ export const CategorySelect = ({ value, onChange }: CategorySelectProps) => {
                 <Check
                   className={cn(
                     "mr-2 h-4 w-4",
-                    value.toLowerCase() === category.toLowerCase()
-                      ? "opacity-100"
-                      : "opacity-0"
+                    value === category ? "opacity-100" : "opacity-0"
                   )}
                 />
                 {category}
