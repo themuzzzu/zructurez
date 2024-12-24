@@ -42,10 +42,21 @@ export const CreateServiceForm = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
+  const validatePhoneNumber = (phone: string) => {
+    // Basic phone number validation: 10 digits, optionally with country code
+    const phoneRegex = /^(\+\d{1,3})?[-.\s]?\d{10}$/;
+    return phoneRegex.test(phone);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userId) {
       toast.error("You must be logged in to create a service");
+      return;
+    }
+
+    if (!validatePhoneNumber(formData.contact_info)) {
+      toast.error("Please enter a valid mobile number (e.g., 1234567890 or +1-1234567890)");
       return;
     }
     
@@ -139,9 +150,13 @@ export const CreateServiceForm = () => {
       <div className="space-y-2">
         <Input
           name="contact_info"
-          placeholder="Contact Information"
+          placeholder="Mobile Number (e.g., 1234567890 or +1-1234567890)"
           value={formData.contact_info}
           onChange={handleChange}
+          type="tel"
+          pattern="^(\+\d{1,3})?[-.\s]?\d{10}$"
+          title="Please enter a valid mobile number (10 digits, optional country code)"
+          required
         />
       </div>
 
