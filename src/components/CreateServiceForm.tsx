@@ -44,10 +44,20 @@ export const CreateServiceForm = ({ onSuccess }: CreateServiceFormProps) => {
 
   const uploadImage = async (imageFile: string) => {
     try {
-      const fileName = `${userId}/${crypto.randomUUID()}`;
+      // Convert base64 to blob
+      const base64Data = imageFile.split(',')[1];
+      const byteCharacters = atob(base64Data);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'image/jpeg' });
+
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}`;
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('service-images')
-        .upload(fileName, imageFile);
+        .upload(fileName, blob);
 
       if (uploadError) throw uploadError;
 
@@ -180,10 +190,14 @@ export const CreateServiceForm = ({ onSuccess }: CreateServiceFormProps) => {
       </div>
 
       <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700">Service Image</label>
         <ImageUpload
           selectedImage={selectedImage}
           onImageSelect={setSelectedImage}
         />
+        {selectedImage && (
+          <p className="text-sm text-muted-foreground">Image uploaded successfully</p>
+        )}
       </div>
 
       <Button type="submit" className="w-full" disabled={loading}>
