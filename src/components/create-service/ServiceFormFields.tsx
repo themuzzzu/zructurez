@@ -37,13 +37,10 @@ export const ServiceFormFields = ({ formData, onChange }: ServiceFormFieldsProps
         />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="category">Category</Label>
-        <CategorySelect 
-          value={formData.category}
-          onChange={(value) => onChange("category", value)}
-        />
-      </div>
+      <CategorySelect 
+        value={formData.category}
+        onChange={(value) => onChange("category", value)}
+      />
 
       <div className="space-y-2">
         <Label htmlFor="price">Price</Label>
