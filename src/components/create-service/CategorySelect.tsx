@@ -44,7 +44,7 @@ export const CategorySelect = ({ value = '', onChange }: CategorySelectProps) =>
         <SelectTrigger>
           <SelectValue placeholder="Select a category" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="max-h-[300px] overflow-y-auto">
           {categories.map((category) => (
             <SelectItem key={category} value={category}>
               {category}
