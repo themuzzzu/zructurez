@@ -2,6 +2,7 @@ import { Navbar } from "@/components/Navbar";
 import { ServiceCard } from "@/components/ServiceCard";
 import { ServiceCategoryFilter } from "@/components/ServiceCategoryFilter";
 import { CreateServiceForm } from "@/components/CreateServiceForm";
+import { SearchInput } from "@/components/SearchInput";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -68,6 +69,13 @@ const SAMPLE_SERVICES = [
 
 const Services = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredServices = SAMPLE_SERVICES.filter(service => 
+    service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    service.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    service.category.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -96,9 +104,17 @@ const Services = () => {
             <CreateServiceForm />
           ) : (
             <>
-              <ServiceCategoryFilter />
+              <div className="flex flex-col gap-6">
+                <SearchInput
+                  placeholder="Search services by name, description, or category..."
+                  value={searchQuery}
+                  onChange={setSearchQuery}
+                  className="max-w-xl"
+                />
+                <ServiceCategoryFilter />
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {SAMPLE_SERVICES.map((service) => (
+                {filteredServices.map((service) => (
                   <ServiceCard key={service.id} {...service} />
                 ))}
               </div>
