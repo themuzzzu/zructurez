@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { MapPin } from "lucide-react";
+import { toast } from "sonner";
 
 interface MapLocationSelectorProps {
   value: string;
@@ -10,11 +11,102 @@ interface MapLocationSelectorProps {
 
 export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProps) => {
   const [open, setOpen] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [locationName, setLocationName] = useState(value || "");
+  const mapRef = useRef<HTMLDivElement>(null);
+  const markerRef = useRef<google.maps.Marker | null>(null);
+  const mapInstanceRef = useRef<google.maps.Map | null>(null);
+
+  useEffect(() => {
+    if (!open || !mapRef.current) return;
+
+    // Initialize the map
+    const defaultLocation = { lat: 14.904093, lng: 77.981401 }; // Tadipatri coordinates
+    const mapOptions: google.maps.MapOptions = {
+      center: defaultLocation,
+      zoom: 14,
+      mapTypeControl: true,
+      streetViewControl: true,
+      fullscreenControl: true,
+    };
+
+    // Create the map instance
+    const map = new google.maps.Map(mapRef.current, mapOptions);
+    mapInstanceRef.current = map;
+
+    // Create a marker for the default location
+    const marker = new google.maps.Marker({
+      position: defaultLocation,
+      map: map,
+      draggable: true,
+      title: "Drag to select location",
+    });
+    markerRef.current = marker;
+
+    // Add click listener to the map
+    map.addListener("click", (e: google.maps.MapMouseEvent) => {
+      if (!e.latLng) return;
+      
+      marker.setPosition(e.latLng);
+      setSelectedLocation({
+        lat: e.latLng.lat(),
+        lng: e.latLng.lng(),
+      });
+      
+      // Get address for the selected location
+      const geocoder = new google.maps.Geocoder();
+      geocoder.geocode(
+        { location: e.latLng },
+        (results: google.maps.GeocoderResult[], status: google.maps.GeocoderStatus) => {
+          if (status === "OK" && results[0]) {
+            setLocationName(results[0].formatted_address);
+          } else {
+            toast.error("Could not find address for this location");
+          }
+        }
+      );
+    });
+
+    // Add dragend listener to the marker
+    marker.addListener("dragend", () => {
+      const position = marker.getPosition();
+      if (!position) return;
+
+      setSelectedLocation({
+        lat: position.lat(),
+        lng: position.lng(),
+      });
+
+      // Get address for the dragged location
+      const geocoder = new google.maps.Geocoder();
+      geocoder.geocode(
+        { location: position },
+        (results: google.maps.GeocoderResult[], status: google.maps.GeocoderStatus) => {
+          if (status === "OK" && results[0]) {
+            setLocationName(results[0].formatted_address);
+          } else {
+            toast.error("Could not find address for this location");
+          }
+        }
+      );
+    });
+
+    return () => {
+      // Cleanup
+      if (markerRef.current) {
+        markerRef.current.setMap(null);
+      }
+      mapInstanceRef.current = null;
+    };
+  }, [open]);
 
   const handleLocationSelect = () => {
-    // For now, we'll just use Tadipatri as the default location
-    onChange("Tadipatri, Andhra Pradesh");
-    setOpen(false);
+    if (locationName) {
+      onChange(locationName);
+      setOpen(false);
+    } else {
+      toast.error("Please select a location on the map");
+    }
   };
 
   return (
@@ -29,17 +121,15 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
         <DialogHeader>
           <DialogTitle>Select Location</DialogTitle>
         </DialogHeader>
-        <div className="w-full h-[400px] rounded-lg overflow-hidden shadow-lg">
-          <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d30844.73348794849!2d77.98140110185223!3d14.904093129595008!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bb41cadcd3b8d9f%3A0xd1bff73d9d4719fc!2sTadipatri%2C%20Andhra%20Pradesh%20515411!5e0!3m2!1sen!2sin!4v1735066470408!5m2!1sen!2sin"
-            width="100%"
-            height="100%"
-            style={{ border: 0 }}
-            allowFullScreen
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            title="Location Map"
-          />
+        <div className="space-y-4">
+          <div className="w-full h-[400px] rounded-lg overflow-hidden shadow-lg">
+            <div ref={mapRef} className="w-full h-full" />
+          </div>
+          {locationName && (
+            <div className="px-4 py-2 bg-muted rounded-lg">
+              <p className="text-sm">Selected location: {locationName}</p>
+            </div>
+          )}
         </div>
         <div className="flex justify-end gap-2 mt-4">
           <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
