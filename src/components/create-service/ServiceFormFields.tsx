@@ -72,8 +72,6 @@ export const ServiceFormFields = ({ formData, onChange }: ServiceFormFieldsProps
           placeholder="Contact Number (e.g., +91XXXXXXXXXX)"
           value={formData.contact_info}
           onChange={(e) => onChange(e.target.name, e.target.value)}
-          pattern="^(\+91[-\s]?)?[0-9]{10}$"
-          title="Please enter a valid Indian mobile number (+91XXXXXXXXXX or 10 digits)"
           required
         />
       </div>

@@ -91,6 +91,25 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
       );
     });
 
+    // Try to set initial marker position if we have a value
+    if (value) {
+      const geocoder = new window.google.maps.Geocoder();
+      geocoder.geocode(
+        { address: value },
+        (results: google.maps.GeocoderResult[], status: google.maps.GeocoderStatus) => {
+          if (status === "OK" && results[0]?.geometry?.location) {
+            const location = results[0].geometry.location;
+            marker.setPosition(location);
+            map.setCenter(location);
+            setSelectedLocation({
+              lat: location.lat(),
+              lng: location.lng(),
+            });
+          }
+        }
+      );
+    }
+
     return () => {
       // Cleanup
       if (markerRef.current) {
@@ -98,7 +117,7 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
       }
       mapInstanceRef.current = null;
     };
-  }, [open]);
+  }, [open, value]);
 
   const handleLocationSelect = () => {
     if (locationName) {
@@ -122,7 +141,7 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
           <DialogTitle>Select Location</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-          <div className="w-full h-[400px] rounded-lg overflow-hidden shadow-lg">
+          <div className="w-full h-[400px] rounded-lg overflow-hidden border border-input">
             <div ref={mapRef} className="w-full h-full" />
           </div>
           {locationName && (
