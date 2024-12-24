@@ -25,6 +25,18 @@ interface Post {
   user_has_liked: boolean;
 }
 
+interface Comment {
+  id: string;
+  post_id: string;
+  user_id: string;
+  content: string;
+  created_at: string;
+  profiles: {
+    username: string | null;
+    avatar_url: string | null;
+  };
+}
+
 export const createPost = async (postData: CreatePostData) => {
   const { data: userData } = await supabase.auth.getUser();
   if (!userData.user) {
@@ -215,16 +227,14 @@ export const addComment = async (postId: string, content: string) => {
   return data;
 };
 
-export const getComments = async (postId: string) => {
+export const getComments = async (postId: string): Promise<Comment[]> => {
   const { data: comments, error } = await supabase
     .from('comments')
     .select(`
       *,
-      user:user_id (
-        profile:profiles (
-          username,
-          avatar_url
-        )
+      profiles!comments_user_id_fkey (
+        username,
+        avatar_url
       )
     `)
     .eq('post_id', postId)
@@ -235,11 +245,8 @@ export const getComments = async (postId: string) => {
     throw error;
   }
 
-  // Transform the nested data structure to match the expected format
-  const transformedComments = comments.map(comment => ({
+  return comments.map(comment => ({
     ...comment,
-    profiles: comment.user?.profile || { username: 'Anonymous', avatar_url: null }
+    profiles: comment.profiles || { username: 'Anonymous', avatar_url: null }
   }));
-
-  return transformedComments;
 };
