@@ -57,7 +57,7 @@ export const ServiceFormFields = ({ formData, onChange }: ServiceFormFieldsProps
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="location">Location</Label>
+        <Label>Location</Label>
         <MapLocationSelector
           value={formData.location}
           onChange={(value) => onChange("location", value)}
