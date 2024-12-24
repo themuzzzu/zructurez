@@ -11,7 +11,7 @@ interface MapLocationSelectorProps {
 
 export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProps) => {
   const [open, setOpen] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<google.maps.LatLngLiteral | null>(null);
   const [locationName, setLocationName] = useState(value || "");
   const mapRef = useRef<HTMLDivElement>(null);
   const markerRef = useRef<google.maps.Marker | null>(null);
@@ -21,7 +21,7 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
     if (!open || !mapRef.current) return;
 
     // Initialize the map
-    const defaultLocation = { lat: 14.904093, lng: 77.981401 }; // Tadipatri coordinates
+    const defaultLocation: google.maps.LatLngLiteral = { lat: 14.904093, lng: 77.981401 }; // Tadipatri coordinates
     const mapOptions: google.maps.MapOptions = {
       center: defaultLocation,
       zoom: 14,
@@ -31,11 +31,11 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
     };
 
     // Create the map instance
-    const map = new window.google.maps.Map(mapRef.current, mapOptions);
+    const map = new google.maps.Map(mapRef.current, mapOptions);
     mapInstanceRef.current = map;
 
     // Create a marker for the default location
-    const marker = new window.google.maps.Marker({
+    const marker = new google.maps.Marker({
       position: defaultLocation,
       map: map,
       draggable: true,
@@ -54,7 +54,7 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
       });
       
       // Get address for the selected location
-      const geocoder = new window.google.maps.Geocoder();
+      const geocoder = new google.maps.Geocoder();
       geocoder.geocode(
         { location: e.latLng },
         (results: google.maps.GeocoderResult[], status: google.maps.GeocoderStatus) => {
@@ -78,7 +78,7 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
       });
 
       // Get address for the dragged location
-      const geocoder = new window.google.maps.Geocoder();
+      const geocoder = new google.maps.Geocoder();
       geocoder.geocode(
         { location: position },
         (results: google.maps.GeocoderResult[], status: google.maps.GeocoderStatus) => {
