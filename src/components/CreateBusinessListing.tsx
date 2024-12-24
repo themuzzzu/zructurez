@@ -14,12 +14,14 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { X } from "lucide-react";
 import { ImageUpload } from "./ImageUpload";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CreateBusinessListingProps {
   onClose: () => void;
 }
 
 export const CreateBusinessListing = ({ onClose }: CreateBusinessListingProps) => {
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     category: "",
@@ -38,8 +40,51 @@ export const CreateBusinessListing = ({ onClose }: CreateBusinessListingProps) =
       return;
     }
 
-    toast.success("Business listing submitted for review!");
-    onClose();
+    setLoading(true);
+
+    try {
+      let imageUrl = null;
+
+      if (formData.image) {
+        // Convert base64 to blob
+        const base64Data = formData.image.split(',')[1];
+        const byteCharacters = atob(base64Data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'image/jpeg' });
+
+        // Upload to Supabase Storage
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('business-images')
+          .upload(fileName, blob);
+
+        if (uploadError) {
+          throw uploadError;
+        }
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('business-images')
+          .getPublicUrl(fileName);
+
+        imageUrl = publicUrl;
+      }
+
+      // Here you would typically save the business data to your database
+      // For now, we'll just show a success message
+      toast.success("Business listing submitted for review!");
+      console.log("Business data:", { ...formData, imageUrl });
+      onClose();
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("Failed to submit listing. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -75,6 +120,11 @@ export const CreateBusinessListing = ({ onClose }: CreateBusinessListingProps) =
               <SelectItem value="healthcare">Healthcare</SelectItem>
               <SelectItem value="driving-school">Driving School</SelectItem>
               <SelectItem value="restaurant">Restaurant</SelectItem>
+              <SelectItem value="retail">Retail</SelectItem>
+              <SelectItem value="education">Education</SelectItem>
+              <SelectItem value="fitness">Fitness</SelectItem>
+              <SelectItem value="beauty">Beauty & Wellness</SelectItem>
+              <SelectItem value="professional">Professional Services</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -125,14 +175,17 @@ export const CreateBusinessListing = ({ onClose }: CreateBusinessListingProps) =
             selectedImage={formData.image}
             onImageSelect={(image) => setFormData({ ...formData, image })}
           />
+          {formData.image && (
+            <p className="text-sm text-muted-foreground">Image uploaded successfully</p>
+          )}
         </div>
 
         <div className="flex gap-2 justify-end">
-          <Button variant="outline" type="button" onClick={onClose}>
+          <Button variant="outline" type="button" onClick={onClose} disabled={loading}>
             Cancel
           </Button>
-          <Button type="submit">
-            Submit Listing
+          <Button type="submit" disabled={loading}>
+            {loading ? "Submitting..." : "Submit Listing"}
           </Button>
         </div>
       </form>
