@@ -75,7 +75,7 @@ export const CreatePost = () => {
             placeholder="Share something with your neighborhood..."
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="min-h-[100px] bg-accent/50 hover:bg-accent focus:bg-accent transition-colors duration-300 text-foreground placeholder:text-muted-foreground"
+            className="min-h-[100px] bg-background text-black dark:text-white hover:bg-background/90 focus:bg-background/90 transition-colors duration-300"
           />
 
           <ImageUpload 
