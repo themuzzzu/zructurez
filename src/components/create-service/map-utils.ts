@@ -15,7 +15,7 @@ export const initializeGeocoder = (
     (results: google.maps.GeocoderResult[] | null, status: google.maps.GeocoderStatus) => {
       if (status === "OK" && results?.[0]) {
         setSelectedLocation(results[0].formatted_address);
-        toast.success("Location selected successfully");
+        console.log("Location selected:", results[0].formatted_address);
       } else {
         console.error('Geocoding failed:', status);
         toast.error("Failed to get address for selected location");
@@ -57,7 +57,7 @@ export const initializeAutocomplete = (
       // Update selected location
       if (place.formatted_address) {
         setSelectedLocation(place.formatted_address);
-        toast.success("Location selected: " + place.formatted_address);
+        console.log("Location selected from autocomplete:", place.formatted_address);
       }
     });
 
@@ -70,6 +70,7 @@ export const initializeAutocomplete = (
 };
 
 export const createMapInstance = (container: HTMLElement) => {
+  console.log('Creating map instance...');
   const map = new google.maps.Map(container, {
     center: TADIPATRI_CENTER,
     zoom: 14,
@@ -88,13 +89,16 @@ export const createMapInstance = (container: HTMLElement) => {
 
   // Add a custom style to make the map more visible
   map.setOptions({
-    backgroundColor: '#f8fafc'
+    backgroundColor: '#f8fafc',
+    gestureHandling: 'greedy'
   });
 
+  console.log('Map instance created successfully');
   return map;
 };
 
 export const createMarker = (map: google.maps.Map) => {
+  console.log('Creating marker...');
   return new google.maps.Marker({
     map,
     draggable: true,

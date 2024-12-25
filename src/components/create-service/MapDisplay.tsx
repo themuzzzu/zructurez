@@ -17,15 +17,19 @@ export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) =
 
   useEffect(() => {
     const initializeMap = async () => {
-      if (!window.google?.maps) {
-        console.error('Google Maps not loaded');
-        toast.error("Google Maps is not available. Please refresh the page.");
+      if (!mapRef.current) {
+        console.error('Map container not found');
         return;
       }
 
-      if (!mapRef.current) return;
-
       try {
+        // Check if Google Maps API is loaded
+        if (typeof google === 'undefined') {
+          console.error('Google Maps API not loaded');
+          toast.error("Google Maps is not available. Please refresh the page.");
+          return;
+        }
+
         console.log('Initializing map...');
         const map = createMapInstance(mapRef.current);
         const marker = createMarker(map);
@@ -63,7 +67,12 @@ export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) =
       }
     };
 
-    initializeMap();
+    // Add a small delay to ensure DOM is ready
+    const timer = setTimeout(() => {
+      initializeMap();
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, [onLocationSelect]);
 
   // Update map when search input changes
@@ -110,7 +119,8 @@ export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) =
       </div>
       <div 
         ref={mapRef}
-        className="w-full h-[400px] rounded-md border"
+        className="w-full h-[400px] rounded-md border bg-gray-50"
+        style={{ display: 'block' }}
       />
     </div>
   );
