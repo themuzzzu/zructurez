@@ -10,19 +10,24 @@ import { toast } from "sonner";
 const ServiceDetails = () => {
   const { id } = useParams();
 
-  const { data: service, isLoading } = useQuery({
+  const { data: service, isLoading, error } = useQuery({
     queryKey: ['service', id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('services')
         .select(`
           *,
+          profiles (
+            username,
+            avatar_url
+          ),
           service_portfolio (*)
         `)
         .eq('id', id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) throw new Error('Service not found');
       return data;
     }
   });
@@ -45,20 +50,26 @@ const ServiceDetails = () => {
         <Navbar />
         <div className="container max-w-[1400px] pt-20 pb-16">
           <div className="flex items-center justify-center h-[60vh]">
-            Loading...
+            <div className="animate-pulse">Loading service details...</div>
           </div>
         </div>
       </div>
     );
   }
 
-  if (!service) {
+  if (error || !service) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="container max-w-[1400px] pt-20 pb-16">
-          <div className="flex items-center justify-center h-[60vh]">
-            Service not found
+          <div className="flex flex-col items-center justify-center h-[60vh] space-y-4">
+            <div className="text-xl font-semibold">Service not found</div>
+            <Link to="/services">
+              <Button variant="outline">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Services
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
@@ -144,6 +155,25 @@ const ServiceDetails = () => {
                       {service.contact_info}
                     </div>
                   )}
+                </div>
+              </Card>
+
+              <Card className="p-6 space-y-4">
+                <h3 className="font-semibold">Service Provider</h3>
+                <div className="flex items-center gap-3">
+                  <img
+                    src={service.profiles?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${service.user_id}`}
+                    alt="Provider"
+                    className="w-10 h-10 rounded-full"
+                  />
+                  <div>
+                    <div className="font-medium">
+                      {service.profiles?.username || "Anonymous"}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      Service Provider
+                    </div>
+                  </div>
                 </div>
               </Card>
             </div>
