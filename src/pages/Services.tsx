@@ -21,8 +21,14 @@ const Services = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('services')
-        .select('*, profiles(username, avatar_url)')
-        .eq('user_id', 'profiles.id');
+        .select(`
+          *,
+          profiles (
+            username,
+            avatar_url
+          )
+        `)
+        .eq('user_id', 'id');
 
       if (error) {
         toast.error("Failed to load services");
