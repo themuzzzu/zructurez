@@ -23,7 +23,7 @@ const Services = () => {
         .from('services')
         .select(`
           *,
-          profiles:user_id (
+          profiles!services_user_id_fkey (
             username,
             avatar_url
           )
@@ -106,8 +106,8 @@ const Services = () => {
                       provider={service.profiles?.username || "Anonymous"}
                       avatar={service.profiles?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${service.user_id}`}
                       category={service.category}
-                      rating={4.5} // TODO: Implement ratings
-                      reviews={0} // TODO: Implement reviews
+                      rating={4.5}
+                      reviews={0}
                       description={service.description}
                       image={service.image_url || "https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=800"}
                       hourlyRate={service.price}
