@@ -4,78 +4,52 @@ import { ServiceCategoryFilter } from "@/components/ServiceCategoryFilter";
 import { CreateServiceForm } from "@/components/CreateServiceForm";
 import { SearchInput } from "@/components/SearchInput";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Plus } from "lucide-react";
+import { ArrowLeft, Plus, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
-
-const SAMPLE_SERVICES = [
-  {
-    id: "1",
-    name: "Mike's Plumbing",
-    provider: "Mike Wilson",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Mike",
-    category: "Plumbing",
-    rating: 4.8,
-    reviews: 156,
-    description: "Licensed plumber with 15+ years experience. Available 24/7 for emergencies. Specializing in repairs, installations, and maintenance.",
-    image: "https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=800",
-    hourlyRate: 85,
-    location: "Oak Street",
-    availability: "Available Now"
-  },
-  {
-    id: "2",
-    name: "Elite Electrical Services",
-    provider: "Sarah Johnson",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah",
-    category: "Electrical",
-    rating: 4.9,
-    reviews: 203,
-    description: "Certified electrician offering residential and commercial services. Expert in wiring, installations, and electrical repairs.",
-    image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800",
-    hourlyRate: 95,
-    location: "Pine Avenue",
-    availability: "Available Tomorrow"
-  },
-  {
-    id: "3",
-    name: "HandyTech Solutions",
-    provider: "David Chen",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=David",
-    category: "Computer Repair",
-    rating: 4.7,
-    reviews: 89,
-    description: "Professional IT support and computer repair services. Hardware upgrades, virus removal, and data recovery.",
-    image: "https://images.unsplash.com/photo-1483058712412-4245e9b90334?w=800",
-    hourlyRate: 75,
-    location: "Maple Drive",
-    availability: "Available Now"
-  },
-  {
-    id: "4",
-    name: "Green Thumb Gardens",
-    provider: "Emma Davis",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emma",
-    category: "Landscaping",
-    rating: 4.6,
-    reviews: 167,
-    description: "Professional landscaping and garden maintenance. Design, planting, and lawn care services.",
-    image: "https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?w=800",
-    hourlyRate: 65,
-    location: "Cedar Lane",
-    availability: "Next Week"
-  }
-];
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const Services = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
 
-  const filteredServices = SAMPLE_SERVICES.filter(service => 
-    service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    service.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    service.category.toLowerCase().includes(searchQuery.toLowerCase())
+  const { data: services, isLoading } = useQuery({
+    queryKey: ['services'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('services')
+        .select(`
+          *,
+          profiles:user_id (
+            username,
+            avatar_url
+          )
+        `);
+
+      if (error) {
+        toast.error("Failed to load services");
+        throw error;
+      }
+
+      return data || [];
+    }
+  });
+
+  const filteredServices = services?.filter(service => 
+    (selectedCategory === "all" || service.category.toLowerCase() === selectedCategory.toLowerCase()) &&
+    (searchQuery === "" || 
+      service.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      service.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      service.category.toLowerCase().includes(searchQuery.toLowerCase())
+    )
   );
+
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -101,7 +75,7 @@ const Services = () => {
           </div>
 
           {showCreateForm ? (
-            <CreateServiceForm />
+            <CreateServiceForm onSuccess={() => setShowCreateForm(false)} />
           ) : (
             <>
               <div className="flex flex-col gap-6">
@@ -111,13 +85,38 @@ const Services = () => {
                   onChange={setSearchQuery}
                   className="max-w-xl"
                 />
-                <ServiceCategoryFilter />
+                <ServiceCategoryFilter onCategoryChange={handleCategoryChange} />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredServices.map((service) => (
-                  <ServiceCard key={service.id} {...service} />
-                ))}
-              </div>
+
+              {isLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              ) : filteredServices?.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground">No services found</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredServices?.map((service) => (
+                    <ServiceCard
+                      key={service.id}
+                      id={service.id}
+                      name={service.title}
+                      provider={service.profiles?.username || "Anonymous"}
+                      avatar={service.profiles?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${service.user_id}`}
+                      category={service.category}
+                      rating={4.5} // TODO: Implement ratings
+                      reviews={0} // TODO: Implement reviews
+                      description={service.description}
+                      image={service.image_url || "https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=800"}
+                      hourlyRate={service.price}
+                      location={service.location || "Location not specified"}
+                      availability={service.availability || "Contact for availability"}
+                    />
+                  ))}
+                </div>
+              )}
             </>
           )}
         </div>

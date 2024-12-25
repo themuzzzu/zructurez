@@ -1,5 +1,5 @@
 import { Button } from "./ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import {
   Wrench,
@@ -50,14 +50,24 @@ const categories = [
   { id: "healthcare", name: "Healthcare", icon: Stethoscope }
 ];
 
-export const ServiceCategoryFilter = () => {
+interface ServiceCategoryFilterProps {
+  onCategoryChange: (category: string) => void;
+}
+
+export const ServiceCategoryFilter = ({ onCategoryChange }: ServiceCategoryFilterProps) => {
   const [selectedCategory, setSelectedCategory] = useState("all");
 
   const handleCategoryClick = (categoryId: string) => {
     setSelectedCategory(categoryId);
+    onCategoryChange(categoryId);
     const categoryName = categories.find(c => c.id === categoryId)?.name;
     toast.success(`Filtered by ${categoryName}`);
   };
+
+  useEffect(() => {
+    // Initialize with "all" category
+    onCategoryChange(selectedCategory);
+  }, []);
 
   return (
     <div className="flex gap-3 overflow-x-auto pb-4 px-2 scrollbar-hide animate-fade-up">
