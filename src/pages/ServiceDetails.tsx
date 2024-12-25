@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, Star, MapPin, Clock, Phone, Mail } from "lucide-react";
+import { ArrowLeft, MapPin, Clock, Phone, Mail } from "lucide-react";
 import { toast } from "sonner";
 
 const ServiceDetails = () => {
@@ -16,7 +16,10 @@ const ServiceDetails = () => {
       // First get the service details
       const { data: serviceData, error: serviceError } = await supabase
         .from('services')
-        .select('*')
+        .select(`
+          *,
+          service_portfolio (*)
+        `)
         .eq('id', id)
         .maybeSingle();
 
@@ -32,19 +35,9 @@ const ServiceDetails = () => {
 
       if (profileError) throw profileError;
 
-      // Get the service portfolio
-      const { data: portfolioData, error: portfolioError } = await supabase
-        .from('service_portfolio')
-        .select('*')
-        .eq('service_id', id);
-
-      if (portfolioError) throw portfolioError;
-
-      // Combine all the data
       return {
         ...serviceData,
-        profiles: profileData,
-        service_portfolio: portfolioData
+        profile: profileData
       };
     }
   });
@@ -61,6 +54,28 @@ const ServiceDetails = () => {
     }
   };
 
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container max-w-[1400px] pt-20 pb-16">
+          <div className="flex flex-col items-center justify-center h-[60vh] space-y-4">
+            <h2 className="text-2xl font-semibold">Service not found</h2>
+            <p className="text-muted-foreground">
+              The service you're looking for doesn't exist or has been removed.
+            </p>
+            <Link to="/services">
+              <Button variant="default">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Services
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
@@ -74,15 +89,18 @@ const ServiceDetails = () => {
     );
   }
 
-  if (error || !service) {
+  if (!service) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="container max-w-[1400px] pt-20 pb-16">
           <div className="flex flex-col items-center justify-center h-[60vh] space-y-4">
-            <div className="text-xl font-semibold">Service not found</div>
+            <h2 className="text-2xl font-semibold">Service not found</h2>
+            <p className="text-muted-foreground">
+              The service you're looking for doesn't exist or has been removed.
+            </p>
             <Link to="/services">
-              <Button variant="outline">
+              <Button variant="default">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Services
               </Button>
@@ -137,7 +155,7 @@ const ServiceDetails = () => {
                 <Card className="p-6 space-y-4">
                   <h2 className="text-2xl font-semibold">Portfolio</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {service.service_portfolio.map((item: any) => (
+                    {service.service_portfolio.map((item) => (
                       <Card key={item.id} className="p-4 space-y-2">
                         {item.image_url && (
                           <img
@@ -179,13 +197,13 @@ const ServiceDetails = () => {
                 <h3 className="font-semibold">Service Provider</h3>
                 <div className="flex items-center gap-3">
                   <img
-                    src={service.profiles?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${service.user_id}`}
+                    src={service.profile?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${service.user_id}`}
                     alt="Provider"
                     className="w-10 h-10 rounded-full"
                   />
                   <div>
                     <div className="font-medium">
-                      {service.profiles?.username || "Anonymous"}
+                      {service.profile?.username || "Anonymous"}
                     </div>
                     <div className="text-sm text-muted-foreground">
                       Service Provider
