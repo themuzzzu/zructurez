@@ -23,11 +23,12 @@ const Services = () => {
         .from('services')
         .select(`
           *,
-          profiles!services_user_id_fkey (
+          profiles (
             username,
             avatar_url
           )
-        `);
+        `)
+        .eq('profiles.id', 'user_id');
 
       if (error) {
         toast.error("Failed to load services");
