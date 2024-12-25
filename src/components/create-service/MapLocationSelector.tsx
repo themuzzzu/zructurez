@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { MapPin, Search } from "lucide-react";
-import { toast } from "sonner";
 import { Input } from "../ui/input";
+import { MapDisplay } from "./MapDisplay";
 
 interface MapLocationSelectorProps {
   value: string;
@@ -12,18 +12,9 @@ interface MapLocationSelectorProps {
 
 export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [map, setMap] = useState<google.maps.Map | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<string>(value);
   const [isLoading, setIsLoading] = useState(true);
   const [searchInput, setSearchInput] = useState("");
-  const [autocomplete, setAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
-  const [marker, setMarker] = useState<google.maps.Marker | null>(null);
-
-  // Tadipatri coordinates
-  const TADIPATRI_CENTER = {
-    lat: 14.9041,
-    lng: 77.9813
-  };
 
   useEffect(() => {
     const handleGoogleMapsLoaded = () => {
@@ -42,98 +33,6 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
       window.removeEventListener('google-maps-loaded', handleGoogleMapsLoaded);
     };
   }, []);
-
-  const initializeMap = (container: HTMLElement) => {
-    if (!window.google?.maps) {
-      console.error('Google Maps not available');
-      toast.error("Google Maps is not available. Please refresh the page.");
-      return;
-    }
-
-    try {
-      console.log('Initializing map...');
-      const mapInstance = new google.maps.Map(container, {
-        center: TADIPATRI_CENTER,
-        zoom: 14,
-        mapTypeControl: false,
-        streetViewControl: false,
-      });
-
-      const markerInstance = new google.maps.Marker({
-        map: mapInstance,
-        draggable: true,
-        position: mapInstance.getCenter(),
-      });
-
-      setMarker(markerInstance);
-
-      // Initialize geocoder and get initial location name
-      const geocoder = new google.maps.Geocoder();
-      geocoder.geocode(
-        { location: TADIPATRI_CENTER },
-        (results: google.maps.GeocoderResult[] | null, status: google.maps.GeocoderStatus) => {
-          if (status === "OK" && results?.[0]) {
-            setSelectedLocation(results[0].formatted_address);
-          }
-        }
-      );
-
-      // Initialize Places Autocomplete
-      const autocompleteInput = document.getElementById('location-search') as HTMLInputElement;
-      if (autocompleteInput) {
-        const autocompleteInstance = new google.maps.places.Autocomplete(autocompleteInput, {
-          componentRestrictions: { country: 'IN' },
-          fields: ['formatted_address', 'geometry']
-        });
-
-        autocompleteInstance.addListener('place_changed', () => {
-          const place = autocompleteInstance.getPlace();
-          if (place.geometry?.location && place.formatted_address) {
-            mapInstance.setCenter(place.geometry.location);
-            markerInstance.setPosition(place.geometry.location);
-            setSelectedLocation(place.formatted_address);
-            mapInstance.setZoom(16);
-          }
-        });
-
-        setAutocomplete(autocompleteInstance);
-      }
-
-      // Handle map clicks
-      mapInstance.addListener("click", (e: google.maps.MapMouseEvent) => {
-        if (e.latLng) {
-          markerInstance.setPosition(e.latLng);
-          updateLocationFromLatLng(e.latLng);
-        }
-      });
-
-      // Handle marker drag
-      markerInstance.addListener("dragend", () => {
-        const position = markerInstance.getPosition();
-        if (position) {
-          updateLocationFromLatLng(position);
-        }
-      });
-
-      console.log('Map initialized successfully');
-      setMap(mapInstance);
-    } catch (error) {
-      console.error("Error initializing map:", error);
-      toast.error("Failed to initialize map. Please try again.");
-    }
-  };
-
-  const updateLocationFromLatLng = (latLng: google.maps.LatLng) => {
-    const geocoder = new google.maps.Geocoder();
-    geocoder.geocode(
-      { location: latLng },
-      (results: google.maps.GeocoderResult[] | null, status: google.maps.GeocoderStatus) => {
-        if (status === "OK" && results?.[0]) {
-          setSelectedLocation(results[0].formatted_address);
-        }
-      }
-    );
-  };
 
   const handleConfirm = () => {
     onChange(selectedLocation);
@@ -185,10 +84,9 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
               />
             </div>
 
-            <div 
-              id="map" 
-              className="w-full h-[400px] rounded-md border"
-              ref={(el) => el && !map && initializeMap(el)}
+            <MapDisplay 
+              onLocationSelect={setSelectedLocation}
+              searchInput={searchInput}
             />
           </div>
 
