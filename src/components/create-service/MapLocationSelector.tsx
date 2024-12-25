@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
-import { MapPin, Search } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { Input } from "../ui/input";
 import { MapDisplay } from "./MapDisplay";
+import { Label } from "../ui/label";
 
 interface MapLocationSelectorProps {
   value: string;
@@ -14,16 +15,14 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
   const [isOpen, setIsOpen] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<string>(value);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchInput, setSearchInput] = useState("");
+  const [manualLocation, setManualLocation] = useState(value);
 
   useEffect(() => {
     const handleGoogleMapsLoaded = () => {
-      console.log('Maps loaded event received');
       setIsLoading(false);
     };
 
     if (window.google?.maps) {
-      console.log('Maps already loaded');
       setIsLoading(false);
     }
 
@@ -35,7 +34,9 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
   }, []);
 
   const handleConfirm = () => {
-    onChange(selectedLocation);
+    // Use either the map-selected location or manual input
+    const finalLocation = manualLocation || selectedLocation;
+    onChange(finalLocation);
     setIsOpen(false);
   };
 
@@ -62,7 +63,7 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
         onClick={() => setIsOpen(true)}
       >
         <MapPin className="h-4 w-4" />
-        {value || "Select location from map..."}
+        {value || "Select or type location..."}
       </Button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -72,27 +73,30 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
           </DialogHeader>
           
           <div className="space-y-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <div className="space-y-2">
+              <Label htmlFor="manual-location">Enter Location</Label>
               <Input
-                id="location-search"
+                id="manual-location"
                 type="text"
-                placeholder="Search for a location..."
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                className="pl-10"
+                placeholder="Type your location..."
+                value={manualLocation}
+                onChange={(e) => setManualLocation(e.target.value)}
+                className="w-full"
               />
             </div>
 
-            <MapDisplay 
-              onLocationSelect={setSelectedLocation}
-              searchInput={searchInput}
-            />
+            <div className="space-y-2">
+              <Label>Or select from map</Label>
+              <MapDisplay 
+                onLocationSelect={setSelectedLocation}
+                searchInput=""
+              />
+            </div>
           </div>
 
           <div className="flex justify-between">
             <div className="text-sm text-muted-foreground">
-              {selectedLocation || "Click or drag the marker on the map to select a location"}
+              {selectedLocation || manualLocation || "Enter location or select from map"}
             </div>
             <Button onClick={handleConfirm}>Confirm Location</Button>
           </div>
