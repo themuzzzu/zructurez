@@ -15,6 +15,9 @@ export const initializeGeocoder = (
     (results: google.maps.GeocoderResult[] | null, status: google.maps.GeocoderStatus) => {
       if (status === "OK" && results?.[0]) {
         setSelectedLocation(results[0].formatted_address);
+      } else {
+        console.error('Geocoding failed:', status);
+        toast.error("Failed to get address for selected location");
       }
     }
   );
@@ -28,16 +31,31 @@ export const initializeAutocomplete = (
 ) => {
   const autocomplete = new google.maps.places.Autocomplete(input, {
     componentRestrictions: { country: 'IN' },
-    fields: ['formatted_address', 'geometry']
+    fields: ['formatted_address', 'geometry', 'name'],
+    bounds: new google.maps.LatLngBounds(
+      new google.maps.LatLng(TADIPATRI_CENTER.lat - 0.1, TADIPATRI_CENTER.lng - 0.1),
+      new google.maps.LatLng(TADIPATRI_CENTER.lat + 0.1, TADIPATRI_CENTER.lng + 0.1)
+    ),
+    strictBounds: false
   });
 
   autocomplete.addListener('place_changed', () => {
     const place = autocomplete.getPlace();
-    if (place.geometry?.location && place.formatted_address) {
-      map.setCenter(place.geometry.location);
-      marker.setPosition(place.geometry.location);
+    
+    if (!place.geometry?.location) {
+      toast.error("No location found for this place");
+      return;
+    }
+
+    // Update map and marker
+    map.setCenter(place.geometry.location);
+    marker.setPosition(place.geometry.location);
+    map.setZoom(16);
+
+    // Update selected location
+    if (place.formatted_address) {
       setSelectedLocation(place.formatted_address);
-      map.setZoom(16);
+      toast.success("Location selected: " + place.formatted_address);
     }
   });
 
@@ -50,6 +68,8 @@ export const createMapInstance = (container: HTMLElement) => {
     zoom: 14,
     mapTypeControl: false,
     streetViewControl: false,
+    fullscreenControl: false,
+    zoomControl: true,
   });
 };
 
@@ -58,5 +78,6 @@ export const createMarker = (map: google.maps.Map) => {
     map,
     draggable: true,
     position: map.getCenter(),
+    animation: google.maps.Animation.DROP,
   });
 };

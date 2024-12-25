@@ -10,6 +10,8 @@ interface MapDisplayProps {
 export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const mapInstanceRef = useRef<google.maps.Map | null>(null);
+  const markerRef = useRef<google.maps.Marker | null>(null);
 
   useEffect(() => {
     if (!window.google?.maps) {
@@ -24,17 +26,15 @@ export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) =
       console.log('Initializing map...');
       const map = createMapInstance(mapRef.current);
       const marker = createMarker(map);
+      
+      mapInstanceRef.current = map;
+      markerRef.current = marker;
 
       // Initialize geocoder for initial location
       initializeGeocoder(
         new google.maps.LatLng(TADIPATRI_CENTER.lat, TADIPATRI_CENTER.lng),
         onLocationSelect
       );
-
-      // Initialize autocomplete if search input is available
-      if (searchInputRef.current) {
-        initializeAutocomplete(searchInputRef.current, map, marker, onLocationSelect);
-      }
 
       // Handle map clicks
       map.addListener("click", (e: google.maps.MapMouseEvent) => {
@@ -59,10 +59,41 @@ export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) =
     }
   }, [onLocationSelect]);
 
+  // Update map when search input changes
+  useEffect(() => {
+    if (!searchInputRef.current || !mapInstanceRef.current || !markerRef.current) return;
+
+    const map = mapInstanceRef.current;
+    const marker = markerRef.current;
+
+    // Initialize autocomplete
+    const autocomplete = initializeAutocomplete(
+      searchInputRef.current,
+      map,
+      marker,
+      onLocationSelect
+    );
+
+    return () => {
+      google.maps.event.clearInstanceListeners(autocomplete);
+    };
+  }, [onLocationSelect]);
+
   return (
-    <div 
-      ref={mapRef}
-      className="w-full h-[400px] rounded-md border"
-    />
+    <div className="space-y-4">
+      <div className="relative">
+        <input
+          ref={searchInputRef}
+          type="text"
+          placeholder="Search for a location..."
+          className="w-full px-4 py-2 border rounded-md"
+          defaultValue={searchInput}
+        />
+      </div>
+      <div 
+        ref={mapRef}
+        className="w-full h-[400px] rounded-md border"
+      />
+    </div>
   );
 };
