@@ -19,23 +19,34 @@ const Services = () => {
   const { data: services, isLoading } = useQuery({
     queryKey: ['services'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First, get all services
+      const { data: servicesData, error: servicesError } = await supabase
         .from('services')
-        .select(`
-          *,
-          profiles (
-            username,
-            avatar_url
-          )
-        `)
-        .eq('user_id', 'id');
+        .select('*');
 
-      if (error) {
+      if (servicesError) {
         toast.error("Failed to load services");
-        throw error;
+        throw servicesError;
       }
 
-      return data || [];
+      // Then, get the profiles for these services
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, username, avatar_url')
+        .in('id', servicesData.map(service => service.user_id));
+
+      if (profilesError) {
+        toast.error("Failed to load profiles");
+        throw profilesError;
+      }
+
+      // Combine the data
+      const servicesWithProfiles = servicesData.map(service => ({
+        ...service,
+        profiles: profilesData.find(profile => profile.id === service.user_id)
+      }));
+
+      return servicesWithProfiles || [];
     }
   });
 
