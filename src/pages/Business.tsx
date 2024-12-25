@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { CreateBusinessForm } from "@/components/CreateBusinessForm";
 
 const SAMPLE_BUSINESSES = [
   {
@@ -57,6 +58,7 @@ const SAMPLE_BUSINESSES = [
 
 const Business = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [showCreateForm, setShowCreateForm] = useState(false);
 
   const filteredBusinesses = SAMPLE_BUSINESSES.filter(business => 
     business.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -79,27 +81,39 @@ const Business = () => {
               </Link>
               <h1 className="text-3xl font-bold animate-fade-up">Local Businesses</h1>
             </div>
-            <Button className="gap-2">
+            <Button 
+              onClick={() => setShowCreateForm(!showCreateForm)}
+              className="gap-2"
+            >
               <Plus className="h-4 w-4" />
-              Register Business
+              {showCreateForm ? "Cancel" : "Register Business"}
             </Button>
           </div>
 
-          <div className="flex flex-col gap-6">
-            <SearchInput
-              placeholder="Search businesses by name, description, category, or location..."
-              value={searchQuery}
-              onChange={setSearchQuery}
-              className="max-w-xl"
+          {showCreateForm ? (
+            <CreateBusinessForm 
+              onSuccess={() => setShowCreateForm(false)}
+              onCancel={() => setShowCreateForm(false)}
             />
-            <BusinessCategoryFilter />
-          </div>
+          ) : (
+            <>
+              <div className="flex flex-col gap-6">
+                <SearchInput
+                  placeholder="Search businesses by name, description, category, or location..."
+                  value={searchQuery}
+                  onChange={setSearchQuery}
+                  className="max-w-xl"
+                />
+                <BusinessCategoryFilter />
+              </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredBusinesses.map((business) => (
-              <BusinessCard key={business.id} {...business} />
-            ))}
-          </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredBusinesses.map((business) => (
+                  <BusinessCard key={business.id} {...business} />
+                ))}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
