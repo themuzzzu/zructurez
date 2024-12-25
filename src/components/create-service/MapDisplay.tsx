@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { createMapInstance, createMarker, initializeGeocoder, initializeAutocomplete, TADIPATRI_CENTER } from "./map-utils";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { Input } from "../ui/input";
 
 interface MapDisplayProps {
   onLocationSelect: (location: string) => void;
@@ -9,93 +9,24 @@ interface MapDisplayProps {
 }
 
 export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) => {
-  const mapRef = useRef<HTMLDivElement>(null);
-  const searchInputRef = useRef<HTMLInputElement>(null);
-  const mapInstanceRef = useRef<google.maps.Map | null>(null);
-  const markerRef = useRef<google.maps.Marker | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const initializeMap = async () => {
-      if (!mapRef.current) {
-        console.error('Map container not found');
-        return;
-      }
-
-      try {
-        // Check if Google Maps API is loaded
-        if (typeof google === 'undefined') {
-          console.error('Google Maps API not loaded');
-          toast.error("Google Maps is not available. Please refresh the page.");
-          return;
-        }
-
-        console.log('Initializing map...');
-        const map = createMapInstance(mapRef.current);
-        const marker = createMarker(map);
-        
-        mapInstanceRef.current = map;
-        markerRef.current = marker;
-
-        // Initialize geocoder for initial location
-        initializeGeocoder(
-          new google.maps.LatLng(TADIPATRI_CENTER.lat, TADIPATRI_CENTER.lng),
-          onLocationSelect
-        );
-
-        // Handle map clicks
-        map.addListener("click", (e: google.maps.MapMouseEvent) => {
-          if (e.latLng) {
-            marker.setPosition(e.latLng);
-            initializeGeocoder(e.latLng, onLocationSelect);
-          }
-        });
-
-        // Handle marker drag
-        marker.addListener("dragend", () => {
-          const position = marker.getPosition();
-          if (position) {
-            initializeGeocoder(position, onLocationSelect);
-          }
-        });
-
-        console.log('Map initialized successfully');
-        setIsLoading(false);
-      } catch (error) {
-        console.error("Error initializing map:", error);
-        toast.error("Failed to initialize map. Please try again.");
-      }
-    };
-
-    // Add a small delay to ensure DOM is ready
+    // Simulate map loading
     const timer = setTimeout(() => {
-      initializeMap();
-    }, 100);
+      setIsLoading(false);
+    }, 1000);
 
     return () => clearTimeout(timer);
-  }, [onLocationSelect]);
+  }, []);
 
-  // Update map when search input changes
-  useEffect(() => {
-    if (!searchInputRef.current || !mapInstanceRef.current || !markerRef.current) return;
-
-    const map = mapInstanceRef.current;
-    const marker = markerRef.current;
-
-    // Initialize autocomplete
-    const autocomplete = initializeAutocomplete(
-      searchInputRef.current,
-      map,
-      marker,
-      onLocationSelect
-    );
-
-    return () => {
-      if (autocomplete) {
-        google.maps.event.clearInstanceListeners(autocomplete);
-      }
-    };
-  }, [onLocationSelect]);
+  const handleLocationSelect = () => {
+    if (searchInputRef.current?.value) {
+      onLocationSelect(searchInputRef.current.value);
+      toast.success("Location selected successfully");
+    }
+  };
 
   if (isLoading) {
     return (
@@ -109,19 +40,29 @@ export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) =
   return (
     <div className="space-y-4">
       <div className="relative">
-        <input
+        <Input
           ref={searchInputRef}
           type="text"
           placeholder="Search for a location..."
-          className="w-full px-4 py-2 border rounded-md"
+          className="w-full px-4 py-2"
           defaultValue={searchInput}
+          onChange={handleLocationSelect}
         />
       </div>
-      <div 
-        ref={mapRef}
-        className="w-full h-[400px] rounded-md border bg-gray-50"
-        style={{ display: 'block' }}
-      />
+      <div className="w-full h-[400px] rounded-md border bg-gray-50 overflow-hidden">
+        <iframe 
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d30844.73348794849!2d77.9814011018522!3d14.904093129595012!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bb41cadcd3b8d9f%3A0xd1bff73d9d4719fc!2sTadipatri%2C%20Andhra%20Pradesh%20515411!5e0!3m2!1sen!2sin!4v1735108282438!5m2!1sen!2sin"
+          width="100%"
+          height="100%"
+          style={{ border: 0 }}
+          allowFullScreen
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+        />
+      </div>
+      <div className="text-sm text-muted-foreground">
+        Click on the map or enter a location in the search box
+      </div>
     </div>
   );
 };
