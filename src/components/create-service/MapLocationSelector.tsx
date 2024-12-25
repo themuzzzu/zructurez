@@ -16,21 +16,18 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Function to initialize map when Google Maps is ready
     const handleGoogleMapsLoaded = () => {
-      console.log('Received google-maps-loaded event');
+      console.log('Maps loaded event received');
       setIsLoading(false);
     };
 
-    // Add event listener for our custom event
-    window.addEventListener('google-maps-loaded', handleGoogleMapsLoaded);
-
-    // Check if Maps is already loaded (in case we missed the event)
     if (window.google?.maps) {
-      console.log('Google Maps already loaded');
+      console.log('Maps already loaded');
       setIsLoading(false);
     }
 
+    window.addEventListener('google-maps-loaded', handleGoogleMapsLoaded);
+    
     return () => {
       window.removeEventListener('google-maps-loaded', handleGoogleMapsLoaded);
     };
