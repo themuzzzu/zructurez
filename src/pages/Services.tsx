@@ -22,7 +22,7 @@ const Services = () => {
       const { data, error } = await supabase
         .from('services')
         .select('*, profiles(username, avatar_url)')
-        .eq('profiles.id', 'user_id');
+        .eq('user_id', 'profiles.id');
 
       if (error) {
         toast.error("Failed to load services");
