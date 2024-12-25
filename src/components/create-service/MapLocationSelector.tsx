@@ -15,6 +15,12 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
   const [selectedLocation, setSelectedLocation] = useState<string>(value);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Tadipatri coordinates
+  const TADIPATRI_CENTER = {
+    lat: 14.9041,
+    lng: 77.9813
+  };
+
   useEffect(() => {
     const handleGoogleMapsLoaded = () => {
       console.log('Maps loaded event received');
@@ -43,8 +49,8 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
     try {
       console.log('Initializing map...');
       const mapInstance = new google.maps.Map(container, {
-        center: { lat: 14.9041, lng: 77.9813 }, // Tadipatri coordinates
-        zoom: 13,
+        center: TADIPATRI_CENTER,
+        zoom: 14,
         mapTypeControl: false,
         streetViewControl: false,
       });
@@ -54,6 +60,17 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
         draggable: true,
         position: mapInstance.getCenter(),
       });
+
+      // Initialize geocoder
+      const geocoder = new google.maps.Geocoder();
+      geocoder.geocode(
+        { location: TADIPATRI_CENTER },
+        (results: google.maps.GeocoderResult[] | null, status: google.maps.GeocoderStatus) => {
+          if (status === "OK" && results?.[0]) {
+            setSelectedLocation(results[0].formatted_address);
+          }
+        }
+      );
 
       // Handle map clicks
       mapInstance.addListener("click", (e: google.maps.MapMouseEvent) => {
