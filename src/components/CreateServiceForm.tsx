@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { ServiceFormFields } from "./create-service/ServiceFormFields";
 import { validatePhoneNumber } from "./create-service/validation";
+import { ImageUpload } from "./ImageUpload";
 import type { ServiceFormData, CreateServiceFormProps } from "./create-service/ServiceFormTypes";
 
 export const CreateServiceForm = ({ onSuccess }: CreateServiceFormProps) => {
@@ -19,7 +20,8 @@ export const CreateServiceForm = ({ onSuccess }: CreateServiceFormProps) => {
     location: "",
     contact_info: "",
     availability: "",
-    works: [] // Initialize as empty array
+    image: null,
+    works: []
   });
 
   useEffect(() => {
@@ -30,7 +32,7 @@ export const CreateServiceForm = ({ onSuccess }: CreateServiceFormProps) => {
     getUser();
   }, []);
 
-  const handleChange = (name: string, value: string | any[]) => {
+  const handleChange = (name: string, value: string | any[] | null) => {
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -82,6 +84,11 @@ export const CreateServiceForm = ({ onSuccess }: CreateServiceFormProps) => {
     setLoading(true);
 
     try {
+      let imageUrl = null;
+      if (formData.image) {
+        imageUrl = await uploadImage(formData.image);
+      }
+
       // First, create the service
       const { data: service, error: serviceError } = await supabase
         .from('services')
@@ -94,6 +101,7 @@ export const CreateServiceForm = ({ onSuccess }: CreateServiceFormProps) => {
           location: formData.location,
           contact_info: formData.contact_info,
           availability: formData.availability,
+          image_url: imageUrl,
         }])
         .select()
         .single();
@@ -103,9 +111,9 @@ export const CreateServiceForm = ({ onSuccess }: CreateServiceFormProps) => {
       // Then, upload works if any
       if (formData.works && formData.works.length > 0) {
         for (const work of formData.works) {
-          let imageUrl = null;
+          let workImageUrl = null;
           if (work.media) {
-            imageUrl = await uploadImage(work.media);
+            workImageUrl = await uploadImage(work.media);
           }
 
           const { error: portfolioError } = await supabase
@@ -114,7 +122,7 @@ export const CreateServiceForm = ({ onSuccess }: CreateServiceFormProps) => {
               service_id: service.id,
               title: formData.title,
               description: work.description,
-              image_url: imageUrl
+              image_url: workImageUrl
             }]);
 
           if (portfolioError) throw portfolioError;
@@ -135,6 +143,14 @@ export const CreateServiceForm = ({ onSuccess }: CreateServiceFormProps) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <ServiceFormFields formData={formData} onChange={handleChange} />
+      
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Service Image</label>
+        <ImageUpload
+          selectedImage={formData.image}
+          onImageSelect={(image) => handleChange('image', image)}
+        />
+      </div>
       
       <Button type="submit" className="w-full" disabled={loading}>
         {loading ? "Creating..." : "Create Service"}

@@ -12,6 +12,7 @@ export interface ServiceFormData {
   location: string;
   contact_info: string;
   availability: string;
+  image: string | null;
   works: WorkItem[];
 }
 
