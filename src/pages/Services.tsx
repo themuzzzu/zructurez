@@ -16,17 +16,27 @@ const Services = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
 
-  const { data: services, isLoading, refetch } = useQuery({
+  const { data: services, isLoading, error, refetch } = useQuery({
     queryKey: ['services'],
     queryFn: async () => {
+      console.log('Fetching services...');
+      
       // First, get all services
       const { data: servicesData, error: servicesError } = await supabase
         .from('services')
         .select('*');
 
+      console.log('Services data:', servicesData);
+      console.log('Services error:', servicesError);
+
       if (servicesError) {
         toast.error("Failed to load services");
         throw servicesError;
+      }
+
+      if (!servicesData || servicesData.length === 0) {
+        console.log('No services found');
+        return [];
       }
 
       // Then, get the profiles for these services
@@ -35,6 +45,9 @@ const Services = () => {
         .select('id, username, avatar_url')
         .in('id', servicesData.map(service => service.user_id));
 
+      console.log('Profiles data:', profilesData);
+      console.log('Profiles error:', profilesError);
+
       if (profilesError) {
         toast.error("Failed to load profiles");
         throw profilesError;
@@ -42,17 +55,23 @@ const Services = () => {
 
       // Get current user
       const { data: { user } } = await supabase.auth.getUser();
+      console.log('Current user:', user);
 
       // Combine the data
       const servicesWithProfiles = servicesData.map(service => ({
         ...service,
-        profiles: profilesData.find(profile => profile.id === service.user_id),
+        profiles: profilesData?.find(profile => profile.id === service.user_id),
         isOwner: service.user_id === user?.id
       }));
 
-      return servicesWithProfiles || [];
+      console.log('Combined services with profiles:', servicesWithProfiles);
+      return servicesWithProfiles;
     }
   });
+
+  if (error) {
+    console.error('Query error:', error);
+  }
 
   const filteredServices = services?.filter(service => 
     (selectedCategory === "all" || service.category.toLowerCase() === selectedCategory.toLowerCase()) &&
@@ -62,6 +81,8 @@ const Services = () => {
       service.category.toLowerCase().includes(searchQuery.toLowerCase())
     )
   );
+
+  console.log('Filtered services:', filteredServices);
 
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
@@ -95,7 +116,11 @@ const Services = () => {
           </div>
 
           {showCreateForm ? (
-            <CreateServiceForm onSuccess={() => setShowCreateForm(false)} />
+            <CreateServiceForm onSuccess={() => {
+              setShowCreateForm(false);
+              refetch();
+              toast.success("Service created successfully!");
+            }} />
           ) : (
             <>
               <div className="flex flex-col gap-6">
