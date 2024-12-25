@@ -1,8 +1,20 @@
-import { Star, MapPin, Clock, Phone, Mail, Share2 } from "lucide-react";
+import { Star, MapPin, Clock, Phone, Mail, Share2, Trash2 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ServiceCardProps {
   id: string;
@@ -17,6 +29,8 @@ interface ServiceCardProps {
   hourlyRate: number;
   location: string;
   availability: string;
+  isOwner?: boolean;
+  onDelete?: () => void;
 }
 
 export const ServiceCard = ({
@@ -31,7 +45,9 @@ export const ServiceCard = ({
   image,
   hourlyRate,
   location,
-  availability
+  availability,
+  isOwner = false,
+  onDelete
 }: ServiceCardProps) => {
   const navigate = useNavigate();
 
@@ -43,6 +59,24 @@ export const ServiceCard = ({
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
     toast.success("Service shared!");
+  };
+
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      const { error } = await supabase
+        .from('services')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast.success("Service deleted successfully");
+      onDelete?.();
+    } catch (error) {
+      console.error('Error deleting service:', error);
+      toast.error("Failed to delete service");
+    }
   };
 
   return (
@@ -110,6 +144,31 @@ export const ServiceCard = ({
           >
             <Share2 className="h-4 w-4" />
           </Button>
+          {isOwner && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Service</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete this service? This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel onClick={(e) => e.stopPropagation()}>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
         </div>
       </div>
     </Card>

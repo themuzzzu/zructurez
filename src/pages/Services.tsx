@@ -16,7 +16,7 @@ const Services = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
 
-  const { data: services, isLoading } = useQuery({
+  const { data: services, isLoading, refetch } = useQuery({
     queryKey: ['services'],
     queryFn: async () => {
       // First, get all services
@@ -40,10 +40,14 @@ const Services = () => {
         throw profilesError;
       }
 
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+
       // Combine the data
       const servicesWithProfiles = servicesData.map(service => ({
         ...service,
-        profiles: profilesData.find(profile => profile.id === service.user_id)
+        profiles: profilesData.find(profile => profile.id === service.user_id),
+        isOwner: service.user_id === user?.id
       }));
 
       return servicesWithProfiles || [];
@@ -61,6 +65,10 @@ const Services = () => {
 
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
+  };
+
+  const handleServiceDelete = () => {
+    refetch();
   };
 
   return (
@@ -125,6 +133,8 @@ const Services = () => {
                       hourlyRate={service.price}
                       location={service.location || "Location not specified"}
                       availability={service.availability || "Contact for availability"}
+                      isOwner={service.isOwner}
+                      onDelete={handleServiceDelete}
                     />
                   ))}
                 </div>
