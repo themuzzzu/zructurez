@@ -1,6 +1,7 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createMapInstance, createMarker, initializeGeocoder, initializeAutocomplete, TADIPATRI_CENTER } from "./map-utils";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 interface MapDisplayProps {
   onLocationSelect: (location: string) => void;
@@ -12,51 +13,57 @@ export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) =
   const searchInputRef = useRef<HTMLInputElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
   const markerRef = useRef<google.maps.Marker | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!window.google?.maps) {
-      console.error('Google Maps not available');
-      toast.error("Google Maps is not available. Please refresh the page.");
-      return;
-    }
+    const initializeMap = async () => {
+      if (!window.google?.maps) {
+        console.error('Google Maps not loaded');
+        toast.error("Google Maps is not available. Please refresh the page.");
+        return;
+      }
 
-    if (!mapRef.current) return;
+      if (!mapRef.current) return;
 
-    try {
-      console.log('Initializing map...');
-      const map = createMapInstance(mapRef.current);
-      const marker = createMarker(map);
-      
-      mapInstanceRef.current = map;
-      markerRef.current = marker;
+      try {
+        console.log('Initializing map...');
+        const map = createMapInstance(mapRef.current);
+        const marker = createMarker(map);
+        
+        mapInstanceRef.current = map;
+        markerRef.current = marker;
 
-      // Initialize geocoder for initial location
-      initializeGeocoder(
-        new google.maps.LatLng(TADIPATRI_CENTER.lat, TADIPATRI_CENTER.lng),
-        onLocationSelect
-      );
+        // Initialize geocoder for initial location
+        initializeGeocoder(
+          new google.maps.LatLng(TADIPATRI_CENTER.lat, TADIPATRI_CENTER.lng),
+          onLocationSelect
+        );
 
-      // Handle map clicks
-      map.addListener("click", (e: google.maps.MapMouseEvent) => {
-        if (e.latLng) {
-          marker.setPosition(e.latLng);
-          initializeGeocoder(e.latLng, onLocationSelect);
-        }
-      });
+        // Handle map clicks
+        map.addListener("click", (e: google.maps.MapMouseEvent) => {
+          if (e.latLng) {
+            marker.setPosition(e.latLng);
+            initializeGeocoder(e.latLng, onLocationSelect);
+          }
+        });
 
-      // Handle marker drag
-      marker.addListener("dragend", () => {
-        const position = marker.getPosition();
-        if (position) {
-          initializeGeocoder(position, onLocationSelect);
-        }
-      });
+        // Handle marker drag
+        marker.addListener("dragend", () => {
+          const position = marker.getPosition();
+          if (position) {
+            initializeGeocoder(position, onLocationSelect);
+          }
+        });
 
-      console.log('Map initialized successfully');
-    } catch (error) {
-      console.error("Error initializing map:", error);
-      toast.error("Failed to initialize map. Please try again.");
-    }
+        console.log('Map initialized successfully');
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error initializing map:", error);
+        toast.error("Failed to initialize map. Please try again.");
+      }
+    };
+
+    initializeMap();
   }, [onLocationSelect]);
 
   // Update map when search input changes
@@ -75,9 +82,20 @@ export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) =
     );
 
     return () => {
-      google.maps.event.clearInstanceListeners(autocomplete);
+      if (autocomplete) {
+        google.maps.event.clearInstanceListeners(autocomplete);
+      }
     };
   }, [onLocationSelect]);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center space-y-4 min-h-[400px] bg-gray-50 rounded-md border">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-sm text-muted-foreground">Loading map...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
