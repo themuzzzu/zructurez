@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
-import { MapPin } from "lucide-react";
+import { MapPin, Search } from "lucide-react";
 import { toast } from "sonner";
+import { Input } from "../ui/input";
 
 interface MapLocationSelectorProps {
   value: string;
@@ -14,6 +15,9 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<string>(value);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchInput, setSearchInput] = useState("");
+  const [autocomplete, setAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
+  const [marker, setMarker] = useState<google.maps.Marker | null>(null);
 
   // Tadipatri coordinates
   const TADIPATRI_CENTER = {
@@ -55,13 +59,15 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
         streetViewControl: false,
       });
 
-      const marker = new google.maps.Marker({
+      const markerInstance = new google.maps.Marker({
         map: mapInstance,
         draggable: true,
         position: mapInstance.getCenter(),
       });
 
-      // Initialize geocoder
+      setMarker(markerInstance);
+
+      // Initialize geocoder and get initial location name
       const geocoder = new google.maps.Geocoder();
       geocoder.geocode(
         { location: TADIPATRI_CENTER },
@@ -72,17 +78,38 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
         }
       );
 
+      // Initialize Places Autocomplete
+      const autocompleteInput = document.getElementById('location-search') as HTMLInputElement;
+      if (autocompleteInput) {
+        const autocompleteInstance = new google.maps.places.Autocomplete(autocompleteInput, {
+          componentRestrictions: { country: 'IN' },
+          fields: ['formatted_address', 'geometry']
+        });
+
+        autocompleteInstance.addListener('place_changed', () => {
+          const place = autocompleteInstance.getPlace();
+          if (place.geometry?.location && place.formatted_address) {
+            mapInstance.setCenter(place.geometry.location);
+            markerInstance.setPosition(place.geometry.location);
+            setSelectedLocation(place.formatted_address);
+            mapInstance.setZoom(16);
+          }
+        });
+
+        setAutocomplete(autocompleteInstance);
+      }
+
       // Handle map clicks
       mapInstance.addListener("click", (e: google.maps.MapMouseEvent) => {
         if (e.latLng) {
-          marker.setPosition(e.latLng);
+          markerInstance.setPosition(e.latLng);
           updateLocationFromLatLng(e.latLng);
         }
       });
 
       // Handle marker drag
-      marker.addListener("dragend", () => {
-        const position = marker.getPosition();
+      markerInstance.addListener("dragend", () => {
+        const position = markerInstance.getPosition();
         if (position) {
           updateLocationFromLatLng(position);
         }
@@ -145,11 +172,25 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
             <DialogTitle>Select Location</DialogTitle>
           </DialogHeader>
           
-          <div 
-            id="map" 
-            className="w-full h-[400px] rounded-md border mb-4"
-            ref={(el) => el && !map && initializeMap(el)}
-          />
+          <div className="space-y-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                id="location-search"
+                type="text"
+                placeholder="Search for a location..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+
+            <div 
+              id="map" 
+              className="w-full h-[400px] rounded-md border"
+              ref={(el) => el && !map && initializeMap(el)}
+            />
+          </div>
 
           <div className="flex justify-between">
             <div className="text-sm text-muted-foreground">
