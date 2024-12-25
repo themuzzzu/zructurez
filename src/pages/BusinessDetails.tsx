@@ -10,7 +10,7 @@ import { toast } from "sonner";
 const BusinessDetails = () => {
   const { id } = useParams();
 
-  const { data: business, isLoading } = useQuery({
+  const { data: business, isLoading, error } = useQuery({
     queryKey: ['business', id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -21,9 +21,10 @@ const BusinessDetails = () => {
           business_products (*)
         `)
         .eq('id', id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) throw new Error('Business not found');
       return data;
     }
   });
@@ -39,6 +40,26 @@ const BusinessDetails = () => {
       toast.error("No contact information available");
     }
   };
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container max-w-[1400px] pt-20 pb-16">
+          <div className="flex flex-col items-center justify-center h-[60vh] space-y-4">
+            <h2 className="text-2xl font-semibold">Business not found</h2>
+            <p className="text-muted-foreground">The business you're looking for doesn't exist or has been removed.</p>
+            <Link to="/business">
+              <Button variant="default">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Businesses
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -58,8 +79,15 @@ const BusinessDetails = () => {
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="container max-w-[1400px] pt-20 pb-16">
-          <div className="flex items-center justify-center h-[60vh]">
-            Business not found
+          <div className="flex flex-col items-center justify-center h-[60vh] space-y-4">
+            <h2 className="text-2xl font-semibold">Business not found</h2>
+            <p className="text-muted-foreground">The business you're looking for doesn't exist or has been removed.</p>
+            <Link to="/business">
+              <Button variant="default">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Businesses
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
@@ -113,7 +141,7 @@ const BusinessDetails = () => {
                 <Card className="p-6 space-y-4">
                   <h2 className="text-2xl font-semibold">Products</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {business.business_products.map((product: any) => (
+                    {business.business_products.map((product) => (
                       <Card key={product.id} className="p-4 space-y-2">
                         {product.image_url && (
                           <img
@@ -135,7 +163,7 @@ const BusinessDetails = () => {
                 <Card className="p-6 space-y-4">
                   <h2 className="text-2xl font-semibold">Portfolio</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {business.business_portfolio.map((item: any) => (
+                    {business.business_portfolio.map((item) => (
                       <Card key={item.id} className="p-4 space-y-2">
                         {item.image_url && (
                           <img
