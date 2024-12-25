@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, MapPin, Clock, Phone, Building } from "lucide-react";
+import { ArrowLeft, MapPin, Clock, Phone, Building, Mail } from "lucide-react";
 import { toast } from "sonner";
 
 const BusinessDetails = () => {
