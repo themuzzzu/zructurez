@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
 interface MapDisplayProps {
@@ -7,29 +6,20 @@ interface MapDisplayProps {
   searchInput: string;
 }
 
-export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) => {
+export const MapDisplay = ({ onLocationSelect }: MapDisplayProps) => {
   const [isLoading, setIsLoading] = useState(true);
-  const [mapUrl, setMapUrl] = useState("https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d30844.73348794849!2d77.9814011018522!3d14.904093129595012!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bb41cadcd3b8d9f%3A0xd1bff73d9d4719fc!2sTadipatri%2C%20Andhra%20Pradesh%20515411!5e0!3m2!1sen!2sin!4v1735108282438!5m2!1sen!2sin");
 
   useEffect(() => {
+    // Set default location
+    onLocationSelect("Tadipatri, Andhra Pradesh 515411");
+    
     // Simulate map loading
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    if (searchInput) {
-      const encodedLocation = encodeURIComponent(searchInput);
-      // Using the embed URL format that doesn't require an API key
-      const newMapUrl = `https://www.google.com/maps/embed/v1/search?q=${encodedLocation}&zoom=14`;
-      setMapUrl(newMapUrl);
-      onLocationSelect(searchInput);
-      toast.success("Location updated");
-    }
-  }, [searchInput, onLocationSelect]);
+  }, [onLocationSelect]);
 
   if (isLoading) {
     return (
@@ -44,7 +34,7 @@ export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) =
     <div className="space-y-4">
       <div className="w-full h-[400px] rounded-md border bg-gray-50 overflow-hidden">
         <iframe 
-          src={mapUrl}
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d30844.733356070145!2d78.00200075!3d14.90409405!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bb41cadcd3b8d9f%3A0xd1bff73d9d4719fc!2sTadipatri%2C%20Andhra%20Pradesh%20515411!5e0!3m2!1sen!2sin!4v1735109120186!5m2!1sen!2sin"
           width="100%"
           height="100%"
           style={{ border: 0 }}
@@ -52,9 +42,6 @@ export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) =
           loading="lazy"
           referrerPolicy="no-referrer-when-downgrade"
         />
-      </div>
-      <div className="text-sm text-muted-foreground">
-        Enter a location in the search box above to update the map
       </div>
     </div>
   );
