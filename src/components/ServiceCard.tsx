@@ -2,8 +2,10 @@ import { Star, MapPin, Clock, Phone, Mail, Share2 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 interface ServiceCardProps {
+  id: string;
   name: string;
   provider: string;
   avatar: string;
@@ -18,6 +20,7 @@ interface ServiceCardProps {
 }
 
 export const ServiceCard = ({
+  id,
   name,
   provider,
   avatar,
@@ -30,16 +33,23 @@ export const ServiceCard = ({
   location,
   availability
 }: ServiceCardProps) => {
-  const handleContact = () => {
+  const navigate = useNavigate();
+
+  const handleContact = (e: React.MouseEvent) => {
+    e.stopPropagation();
     toast.success("Contact request sent!");
   };
 
-  const handleShare = () => {
+  const handleShare = (e: React.MouseEvent) => {
+    e.stopPropagation();
     toast.success("Service shared!");
   };
 
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 animate-fade-up">
+    <Card 
+      className="overflow-hidden hover:shadow-lg transition-all duration-300 animate-fade-up cursor-pointer"
+      onClick={() => navigate(`/services/${id}`)}
+    >
       <div className="relative h-48">
         <img
           src={image}

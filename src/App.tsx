@@ -17,6 +17,8 @@ import Settings from "./pages/Settings";
 import Business from "./pages/Business";
 import Maps from "./pages/Maps";
 import Auth from "./pages/Auth";
+import ServiceDetails from "./pages/ServiceDetails";
+import BusinessDetails from "./pages/BusinessDetails";
 
 const queryClient = new QueryClient();
 
@@ -78,6 +80,22 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Services />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/services/:id"
+              element={
+                <ProtectedRoute>
+                  <ServiceDetails />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/business/:id"
+              element={
+                <ProtectedRoute>
+                  <BusinessDetails />
                 </ProtectedRoute>
               }
             />
