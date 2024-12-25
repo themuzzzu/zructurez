@@ -13,22 +13,39 @@ const ServiceDetails = () => {
   const { data: service, isLoading, error } = useQuery({
     queryKey: ['service', id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First get the service details
+      const { data: serviceData, error: serviceError } = await supabase
         .from('services')
-        .select(`
-          *,
-          profiles (
-            username,
-            avatar_url
-          ),
-          service_portfolio (*)
-        `)
+        .select('*')
         .eq('id', id)
         .maybeSingle();
 
-      if (error) throw error;
-      if (!data) throw new Error('Service not found');
-      return data;
+      if (serviceError) throw serviceError;
+      if (!serviceData) throw new Error('Service not found');
+
+      // Then get the profile details using the user_id
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('username, avatar_url')
+        .eq('id', serviceData.user_id)
+        .maybeSingle();
+
+      if (profileError) throw profileError;
+
+      // Get the service portfolio
+      const { data: portfolioData, error: portfolioError } = await supabase
+        .from('service_portfolio')
+        .select('*')
+        .eq('service_id', id);
+
+      if (portfolioError) throw portfolioError;
+
+      // Combine all the data
+      return {
+        ...serviceData,
+        profiles: profileData,
+        service_portfolio: portfolioData
+      };
     }
   });
 
