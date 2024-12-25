@@ -23,7 +23,8 @@ export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) =
   useEffect(() => {
     if (searchInput) {
       const encodedLocation = encodeURIComponent(searchInput);
-      const newMapUrl = `https://www.google.com/maps/embed/v1/place?key=AIzaSyBOnx38SUqt4hNkRh_DQsyGPQz_-bFvwLk&q=${encodedLocation}`;
+      // Using the embed URL format that doesn't require an API key
+      const newMapUrl = `https://www.google.com/maps/embed/v1/search?q=${encodedLocation}&zoom=14`;
       setMapUrl(newMapUrl);
       onLocationSelect(searchInput);
       toast.success("Location updated");
