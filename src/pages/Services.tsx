@@ -21,13 +21,7 @@ const Services = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('services')
-        .select(`
-          *,
-          profiles (
-            username,
-            avatar_url
-          )
-        `)
+        .select('*, profiles(username, avatar_url)')
         .eq('profiles.id', 'user_id');
 
       if (error) {
