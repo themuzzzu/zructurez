@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -14,6 +15,7 @@ export const ProfileView = () => {
   const [profile, setProfile] = useState({
     username: "",
     avatar_url: "",
+    bio: "",
   });
   const [loading, setLoading] = useState(false);
 
@@ -47,6 +49,7 @@ export const ProfileView = () => {
         .update({
           username: profile.username,
           avatar_url: profile.avatar_url,
+          bio: profile.bio,
         })
         .eq('id', user.id);
 
@@ -107,6 +110,18 @@ export const ProfileView = () => {
               onChange={(e) => setProfile({ ...profile, username: e.target.value })}
               disabled={!isEditing}
               placeholder="Enter username"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="bio">Bio</Label>
+            <Textarea
+              id="bio"
+              value={profile.bio || ""}
+              onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
+              disabled={!isEditing}
+              placeholder="Tell us about yourself"
+              className="h-32"
             />
           </div>
 
