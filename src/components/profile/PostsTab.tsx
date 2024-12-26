@@ -6,6 +6,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { CreatePost } from "@/components/CreatePost";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export const PostsTab = () => {
   const [isPostDialogOpen, setIsPostDialogOpen] = useState(false);
@@ -58,8 +59,10 @@ export const PostsTab = () => {
         />
       ))}
       <Dialog open={isPostDialogOpen} onOpenChange={setIsPostDialogOpen}>
-        <DialogContent className="sm:max-w-[600px]">
-          <CreatePost onSuccess={handlePostSuccess} />
+        <DialogContent className="sm:max-w-[600px] h-[90vh]">
+          <ScrollArea className="h-full pr-4">
+            <CreatePost onSuccess={handlePostSuccess} />
+          </ScrollArea>
         </DialogContent>
       </Dialog>
     </div>

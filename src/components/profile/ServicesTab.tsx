@@ -6,6 +6,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { CreateServiceForm } from "@/components/CreateServiceForm";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export const ServicesTab = () => {
   const [isServiceDialogOpen, setIsServiceDialogOpen] = useState(false);
@@ -40,8 +41,10 @@ export const ServicesTab = () => {
         ))}
       </div>
       <Dialog open={isServiceDialogOpen} onOpenChange={setIsServiceDialogOpen}>
-        <DialogContent className="sm:max-w-[600px]">
-          <CreateServiceForm onClose={() => setIsServiceDialogOpen(false)} />
+        <DialogContent className="sm:max-w-[600px] h-[90vh]">
+          <ScrollArea className="h-full pr-4">
+            <CreateServiceForm onClose={() => setIsServiceDialogOpen(false)} />
+          </ScrollArea>
         </DialogContent>
       </Dialog>
     </div>

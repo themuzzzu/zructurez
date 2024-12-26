@@ -6,6 +6,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { CreateBusinessListing } from "@/components/CreateBusinessListing";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export const BusinessesTab = () => {
   const [isBusinessDialogOpen, setIsBusinessDialogOpen] = useState(false);
@@ -45,8 +46,10 @@ export const BusinessesTab = () => {
         ))}
       </div>
       <Dialog open={isBusinessDialogOpen} onOpenChange={setIsBusinessDialogOpen}>
-        <DialogContent className="sm:max-w-[600px]">
-          <CreateBusinessListing onClose={() => setIsBusinessDialogOpen(false)} />
+        <DialogContent className="sm:max-w-[600px] h-[90vh]">
+          <ScrollArea className="h-full pr-4">
+            <CreateBusinessListing onClose={() => setIsBusinessDialogOpen(false)} />
+          </ScrollArea>
         </DialogContent>
       </Dialog>
     </div>
