@@ -198,6 +198,45 @@ export type Database = {
           },
         ]
       }
+      events: {
+        Row: {
+          attendees: number | null
+          created_at: string
+          date: string
+          description: string
+          id: string
+          image_url: string | null
+          location: string
+          time: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          attendees?: number | null
+          created_at?: string
+          date: string
+          description: string
+          id?: string
+          image_url?: string | null
+          location: string
+          time: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          attendees?: number | null
+          created_at?: string
+          date?: string
+          description?: string
+          id?: string
+          image_url?: string | null
+          location?: string
+          time?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       likes: {
         Row: {
           created_at: string
