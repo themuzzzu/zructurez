@@ -19,6 +19,7 @@ import Maps from "./pages/Maps";
 import Auth from "./pages/Auth";
 import ServiceDetails from "./pages/ServiceDetails";
 import BusinessDetails from "./pages/BusinessDetails";
+import Profile from "./pages/Profile";
 
 const queryClient = new QueryClient();
 
@@ -64,6 +65,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Index />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
                 </ProtectedRoute>
               }
             />
