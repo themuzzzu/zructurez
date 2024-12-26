@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar, MapPin, Clock, Users2, ArrowLeft, X } from "lucide-react";
+import { Calendar, MapPin, Clock, Users2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { useState } from "react";
@@ -69,6 +69,13 @@ const Events = () => {
 
     setIsCreating(true);
     try {
+      // Get the current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError || !user) {
+        throw new Error("User not authenticated");
+      }
+
       const { data: event, error } = await supabase
         .from("events")
         .insert({
@@ -78,6 +85,7 @@ const Events = () => {
           time: formData.time,
           location: formData.location,
           image_url: formData.image,
+          user_id: user.id, // Add the user_id here
         })
         .select()
         .single();
