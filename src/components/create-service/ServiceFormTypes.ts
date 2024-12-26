@@ -18,4 +18,5 @@ export interface ServiceFormData {
 
 export interface CreateServiceFormProps {
   onSuccess?: () => void;
+  onClose?: () => void;
 }

@@ -14,7 +14,11 @@ import { Textarea } from "./ui/textarea";
 import { ImageUpload, ACCEPTED_IMAGE_TYPES } from "./ImageUpload";
 import { createPost } from "../services/postService";
 
-export const CreatePost = () => {
+interface CreatePostProps {
+  onSuccess?: () => void;
+}
+
+export const CreatePost = ({ onSuccess }: CreatePostProps) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<string>("");
   const [content, setContent] = useState("");
@@ -41,25 +45,13 @@ export const CreatePost = () => {
       setSelectedLocation("");
       
       toast.success("Post created successfully!");
+      onSuccess?.();
     } catch (error) {
       console.error('Error creating post:', error);
       toast.error("Failed to create post. Please try again.");
     } finally {
       setIsPosting(false);
     }
-  };
-
-  const handleCategorySelect = () => {
-    toast.info("Category selection feature coming soon!");
-  };
-
-  const handlePollCreate = () => {
-    toast.info("Poll creation feature coming soon!");
-  };
-
-  const handleLocationSelect = (value: string) => {
-    setSelectedLocation(value);
-    toast.success(`Location scope set to ${value}`);
   };
 
   return (
