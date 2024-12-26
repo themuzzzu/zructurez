@@ -8,9 +8,18 @@ import { ServiceCard } from "@/components/ServiceCard";
 import { BusinessCard } from "@/components/BusinessCard";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { CreatePost } from "@/components/CreatePost";
+import { CreateServiceForm } from "@/components/CreateServiceForm";
+import { CreateBusinessListing } from "@/components/CreateBusinessListing";
 
 const Profile = () => {
   const [profile, setProfile] = useState<any>(null);
+  const [isPostDialogOpen, setIsPostDialogOpen] = useState(false);
+  const [isServiceDialogOpen, setIsServiceDialogOpen] = useState(false);
+  const [isBusinessDialogOpen, setIsBusinessDialogOpen] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -29,7 +38,7 @@ const Profile = () => {
     fetchProfile();
   }, []);
 
-  const { data: posts } = useQuery({
+  const { data: posts, refetch: refetchPosts } = useQuery({
     queryKey: ['user-posts'],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -48,7 +57,7 @@ const Profile = () => {
     },
   });
 
-  const { data: services } = useQuery({
+  const { data: services, refetch: refetchServices } = useQuery({
     queryKey: ['user-services'],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -64,7 +73,7 @@ const Profile = () => {
     },
   });
 
-  const { data: businesses } = useQuery({
+  const { data: businesses, refetch: refetchBusinesses } = useQuery({
     queryKey: ['user-businesses'],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -79,6 +88,21 @@ const Profile = () => {
       return data || [];
     },
   });
+
+  const handlePostSuccess = () => {
+    setIsPostDialogOpen(false);
+    refetchPosts();
+  };
+
+  const handleServiceSuccess = () => {
+    setIsServiceDialogOpen(false);
+    refetchServices();
+  };
+
+  const handleBusinessSuccess = () => {
+    setIsBusinessDialogOpen(false);
+    refetchBusinesses();
+  };
 
   if (!profile) return <div>Loading...</div>;
 
@@ -113,6 +137,12 @@ const Profile = () => {
               </TabsList>
 
               <TabsContent value="posts" className="space-y-4 mt-4">
+                <div className="flex justify-end mb-4">
+                  <Button onClick={() => setIsPostDialogOpen(true)}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Post
+                  </Button>
+                </div>
                 {posts?.map((post: any) => (
                   <PostCard
                     key={post.id}
@@ -131,6 +161,12 @@ const Profile = () => {
               </TabsContent>
 
               <TabsContent value="services" className="mt-4">
+                <div className="flex justify-end mb-4">
+                  <Button onClick={() => setIsServiceDialogOpen(true)}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Service
+                  </Button>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {services?.map((service: any) => (
                     <ServiceCard key={service.id} {...service} />
@@ -139,6 +175,12 @@ const Profile = () => {
               </TabsContent>
 
               <TabsContent value="businesses" className="mt-4">
+                <div className="flex justify-end mb-4">
+                  <Button onClick={() => setIsBusinessDialogOpen(true)}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Business
+                  </Button>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {businesses?.map((business: any) => (
                     <BusinessCard key={business.id} {...business} />
@@ -149,6 +191,24 @@ const Profile = () => {
           </main>
         </div>
       </div>
+
+      <Dialog open={isPostDialogOpen} onOpenChange={setIsPostDialogOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <CreatePost onSuccess={handlePostSuccess} />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isServiceDialogOpen} onOpenChange={setIsServiceDialogOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <CreateServiceForm onSuccess={handleServiceSuccess} />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isBusinessDialogOpen} onOpenChange={setIsBusinessDialogOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <CreateBusinessListing onClose={() => setIsBusinessDialogOpen(false)} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
