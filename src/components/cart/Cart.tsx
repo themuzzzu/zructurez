@@ -35,10 +35,15 @@ export const Cart = () => {
 
   const clearCartMutation = useMutation({
     mutationFn: async () => {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session?.session?.user) {
+        throw new Error('User must be logged in to clear cart');
+      }
+
       const { error } = await supabase
         .from('cart_items')
         .delete()
-        .neq('id', 'placeholder'); // Delete all items
+        .eq('user_id', session.session.user.id);
       
       if (error) throw error;
     },
