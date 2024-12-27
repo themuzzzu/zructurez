@@ -18,7 +18,7 @@ interface Product {
 
 const SAMPLE_PRODUCTS: Product[] = [
   {
-    id: "1",
+    id: "123e4567-e89b-12d3-a456-426614174000",
     title: "MacBook Pro M2",
     description: "Latest MacBook Pro with M2 chip, perfect for professionals.",
     price: 1299.99,
@@ -28,7 +28,7 @@ const SAMPLE_PRODUCTS: Product[] = [
     stock: 10
   },
   {
-    id: "2",
+    id: "223e4567-e89b-12d3-a456-426614174001",
     title: "Wireless Noise-Canceling Headphones",
     description: "Premium wireless headphones with active noise cancellation.",
     price: 249.99,
@@ -38,7 +38,7 @@ const SAMPLE_PRODUCTS: Product[] = [
     stock: 15
   },
   {
-    id: "3",
+    id: "323e4567-e89b-12d3-a456-426614174002",
     title: "Designer Denim Jacket",
     description: "Classic denim jacket with modern styling.",
     price: 89.99,
@@ -48,7 +48,7 @@ const SAMPLE_PRODUCTS: Product[] = [
     stock: 20
   },
   {
-    id: "4",
+    id: "423e4567-e89b-12d3-a456-426614174003",
     title: "Smart Watch Series 5",
     description: "Advanced smartwatch with health monitoring features.",
     price: 399.99,
