@@ -2,7 +2,7 @@ import { Card } from "./ui/card";
 import { Button } from "./ui/button";
 import { ShoppingBag, DollarSign, Share2 } from "lucide-react";
 import { toast } from "sonner";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Product {
@@ -60,6 +60,8 @@ const SAMPLE_PRODUCTS: Product[] = [
 ];
 
 export const ShoppingSection = () => {
+  const queryClient = useQueryClient();
+
   const { data: products, isLoading, isError } = useQuery({
     queryKey: ['products'],
     queryFn: async () => {
@@ -77,16 +79,53 @@ export const ShoppingSection = () => {
         return data.length > 0 ? data : SAMPLE_PRODUCTS;
       } catch (error) {
         console.error('Failed to fetch products:', error);
-        // Fallback to sample products if fetch fails
         return SAMPLE_PRODUCTS;
       }
     },
-    retry: 2, // Retry failed requests twice
-    staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
+    retry: 2,
+    staleTime: 1000 * 60 * 5,
   });
 
-  const handleAddToCart = (productId: string) => {
-    toast.success("Added to cart! Cart feature coming soon.");
+  const addToCartMutation = useMutation({
+    mutationFn: async ({ productId, quantity = 1 }: { productId: string; quantity: number }) => {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session?.session?.user) {
+        throw new Error('User must be logged in to add items to cart');
+      }
+
+      const { data, error } = await supabase
+        .from('cart_items')
+        .upsert(
+          {
+            user_id: session.session.user.id,
+            product_id: productId,
+            quantity,
+          },
+          {
+            onConflict: 'user_id, product_id',
+            ignoreDuplicates: false,
+          }
+        );
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cart'] });
+      toast.success("Added to cart!");
+    },
+    onError: (error) => {
+      console.error('Error adding to cart:', error);
+      toast.error(error instanceof Error ? error.message : "Failed to add to cart");
+    },
+  });
+
+  const handleAddToCart = async (productId: string) => {
+    try {
+      await addToCartMutation.mutateAsync({ productId, quantity: 1 });
+    } catch (error) {
+      // Error is handled in mutation callbacks
+    }
   };
 
   const handleShare = (productId: string) => {
@@ -146,9 +185,10 @@ export const ShoppingSection = () => {
                     size="sm"
                     className="gap-2"
                     onClick={() => handleAddToCart(product.id)}
+                    disabled={addToCartMutation.isPending}
                   >
                     <ShoppingBag className="h-4 w-4" />
-                    Add to Cart
+                    {addToCartMutation.isPending ? 'Adding...' : 'Add to Cart'}
                   </Button>
                   <Button
                     size="sm"
