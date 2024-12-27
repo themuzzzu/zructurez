@@ -6,6 +6,7 @@ import { useState } from "react";
 import { GeneralSettings } from "@/components/GeneralSettings";
 import { NotificationSettings } from "@/components/NotificationSettings";
 import { PrivacySettings } from "@/components/PrivacySettings";
+import { ProductsTab } from "@/components/settings/ProductsTab";
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState("profile");
@@ -18,6 +19,8 @@ const Settings = () => {
         return <NotificationSettings />;
       case "privacy":
         return <PrivacySettings />;
+      case "products":
+        return <ProductsTab />;
       default:
         return <ProfileView />;
     }
