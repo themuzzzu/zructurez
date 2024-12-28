@@ -6,13 +6,22 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft, MapPin, Clock, Phone, Building, Mail } from "lucide-react";
 import { toast } from "sonner";
+import { ErrorView } from "@/components/ErrorView";
+import { LoadingView } from "@/components/LoadingView";
 
 const BusinessDetails = () => {
   const { id } = useParams();
 
+  // Validate if id is a valid UUID
+  const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id || '');
+
   const { data: business, isLoading, error } = useQuery({
     queryKey: ['business', id],
     queryFn: async () => {
+      if (!isValidUUID) {
+        throw new Error('Invalid business ID format');
+      }
+
       const { data, error } = await supabase
         .from('businesses')
         .select(`
@@ -26,7 +35,8 @@ const BusinessDetails = () => {
       if (error) throw error;
       if (!data) throw new Error('Business not found');
       return data;
-    }
+    },
+    enabled: isValidUUID // Only run query if ID is valid UUID
   });
 
   const handleContact = () => {
@@ -41,14 +51,14 @@ const BusinessDetails = () => {
     }
   };
 
-  if (error) {
+  if (!isValidUUID) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
         <div className="container max-w-[1400px] pt-20 pb-16">
           <div className="flex flex-col items-center justify-center h-[60vh] space-y-4">
-            <h2 className="text-2xl font-semibold">Business not found</h2>
-            <p className="text-muted-foreground">The business you're looking for doesn't exist or has been removed.</p>
+            <h2 className="text-2xl font-semibold">Invalid Business ID</h2>
+            <p className="text-muted-foreground">The business ID format is invalid.</p>
             <Link to="/business">
               <Button variant="default">
                 <ArrowLeft className="h-4 w-4 mr-2" />
@@ -59,39 +69,18 @@ const BusinessDetails = () => {
         </div>
       </div>
     );
+  }
+
+  if (error) {
+    return <ErrorView />;
   }
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <div className="container max-w-[1400px] pt-20 pb-16">
-          <div className="flex items-center justify-center h-[60vh]">
-            Loading...
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingView />;
   }
 
   if (!business) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <div className="container max-w-[1400px] pt-20 pb-16">
-          <div className="flex flex-col items-center justify-center h-[60vh] space-y-4">
-            <h2 className="text-2xl font-semibold">Business not found</h2>
-            <p className="text-muted-foreground">The business you're looking for doesn't exist or has been removed.</p>
-            <Link to="/business">
-              <Button variant="default">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Businesses
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
+    return <ErrorView message="Business not found" />;
   }
 
   return (
@@ -137,6 +126,7 @@ const BusinessDetails = () => {
                 </div>
               </Card>
 
+              {/* Display Business Products */}
               {business.business_products && business.business_products.length > 0 && (
                 <Card className="p-6 space-y-4">
                   <h2 className="text-2xl font-semibold">Products</h2>
@@ -159,6 +149,7 @@ const BusinessDetails = () => {
                 </Card>
               )}
 
+              {/* Display Business Portfolio */}
               {business.business_portfolio && business.business_portfolio.length > 0 && (
                 <Card className="p-6 space-y-4">
                   <h2 className="text-2xl font-semibold">Portfolio</h2>
