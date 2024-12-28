@@ -10,6 +10,10 @@ import { ServiceProductForm } from "@/components/service-details/ServiceProductF
 import { ErrorView } from "@/components/ErrorView";
 import { LoadingView } from "@/components/LoadingView";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ShoppingCart } from "lucide-react";
+import { toast } from "sonner";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 const ServiceDetails = () => {
   const { id } = useParams();
@@ -17,13 +21,15 @@ const ServiceDetails = () => {
   const { data: service, isLoading, error } = useQuery({
     queryKey: ['service', id],
     queryFn: async () => {
-      // Fetch service details
       const { data: serviceData, error: serviceError } = await supabase
         .from('services')
         .select(`
           *,
           service_portfolio (*),
-          service_products (*)
+          service_products (
+            *,
+            product_images (*)
+          )
         `)
         .eq('id', id)
         .maybeSingle();
@@ -31,7 +37,6 @@ const ServiceDetails = () => {
       if (serviceError) throw serviceError;
       if (!serviceData) throw new Error('Service not found');
 
-      // Fetch profile data
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('username, avatar_url')
@@ -40,10 +45,12 @@ const ServiceDetails = () => {
 
       if (profileError) throw profileError;
 
-      // Fetch marketplace products for this service
       const { data: marketplaceProducts, error: marketplaceError } = await supabase
         .from('products')
-        .select('*')
+        .select(`
+          *,
+          product_images (*)
+        `)
         .eq('user_id', serviceData.user_id)
         .eq('category', 'service-product');
 
@@ -56,6 +63,33 @@ const ServiceDetails = () => {
       };
     }
   });
+
+  const handleAddToCart = async (productId: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast.error("Please log in to add items to cart");
+        return;
+      }
+
+      const { error } = await supabase
+        .from('cart_items')
+        .upsert({
+          user_id: user.id,
+          product_id: productId,
+          quantity: 1
+        }, {
+          onConflict: 'user_id,product_id'
+        });
+
+      if (error) throw error;
+      toast.success("Added to cart!");
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      toast.error("Failed to add to cart");
+    }
+  };
 
   if (error) {
     return <ErrorView />;
@@ -87,33 +121,77 @@ const ServiceDetails = () => {
               
               <ServicePortfolio items={service.service_portfolio} />
               
-              {/* Display Service Products */}
               {(service.service_products?.length > 0 || service.marketplaceProducts?.length > 0) && (
                 <Card className="p-6 space-y-4">
                   <h2 className="text-2xl font-semibold">Products</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {service.service_products?.map((product) => (
                       <Card key={product.id} className="p-4 space-y-2">
-                        {product.image_url && (
-                          <img
-                            src={product.image_url}
-                            alt={product.name}
-                            className="w-full h-48 object-cover rounded-lg"
-                          />
+                        {product.product_images && product.product_images.length > 0 ? (
+                          <Carousel className="w-full">
+                            <CarouselContent>
+                              {product.product_images.map((image, index) => (
+                                <CarouselItem key={index}>
+                                  <img
+                                    src={image.image_url}
+                                    alt={`${product.name} - Image ${index + 1}`}
+                                    className="w-full h-48 object-cover rounded-lg"
+                                  />
+                                </CarouselItem>
+                              ))}
+                            </CarouselContent>
+                            <CarouselPrevious />
+                            <CarouselNext />
+                          </Carousel>
+                        ) : (
+                          product.image_url && (
+                            <img
+                              src={product.image_url}
+                              alt={product.name}
+                              className="w-full h-48 object-cover rounded-lg"
+                            />
+                          )
                         )}
                         <h3 className="font-semibold">{product.name}</h3>
                         <p className="text-sm text-muted-foreground">{product.description}</p>
-                        <div className="font-semibold">₹{product.price}</div>
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold">₹{product.price}</span>
+                          <Button
+                            onClick={() => handleAddToCart(product.id)}
+                            className="gap-2"
+                          >
+                            <ShoppingCart className="h-4 w-4" />
+                            Add to Cart
+                          </Button>
+                        </div>
                       </Card>
                     ))}
                     {service.marketplaceProducts?.map((product) => (
                       <Card key={product.id} className="p-4 space-y-2">
-                        {product.image_url && (
-                          <img
-                            src={product.image_url}
-                            alt={product.title}
-                            className="w-full h-48 object-cover rounded-lg"
-                          />
+                        {product.product_images && product.product_images.length > 0 ? (
+                          <Carousel className="w-full">
+                            <CarouselContent>
+                              {product.product_images.map((image, index) => (
+                                <CarouselItem key={index}>
+                                  <img
+                                    src={image.image_url}
+                                    alt={`${product.title} - Image ${index + 1}`}
+                                    className="w-full h-48 object-cover rounded-lg"
+                                  />
+                                </CarouselItem>
+                              ))}
+                            </CarouselContent>
+                            <CarouselPrevious />
+                            <CarouselNext />
+                          </Carousel>
+                        ) : (
+                          product.image_url && (
+                            <img
+                              src={product.image_url}
+                              alt={product.title}
+                              className="w-full h-48 object-cover rounded-lg"
+                            />
+                          )
                         )}
                         <div className="flex items-center gap-2">
                           <h3 className="font-semibold">{product.title}</h3>
@@ -122,7 +200,16 @@ const ServiceDetails = () => {
                           </span>
                         </div>
                         <p className="text-sm text-muted-foreground">{product.description}</p>
-                        <div className="font-semibold">₹{product.price}</div>
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold">₹{product.price}</span>
+                          <Button
+                            onClick={() => handleAddToCart(product.id)}
+                            className="gap-2"
+                          >
+                            <ShoppingCart className="h-4 w-4" />
+                            Add to Cart
+                          </Button>
+                        </div>
                       </Card>
                     ))}
                   </div>
