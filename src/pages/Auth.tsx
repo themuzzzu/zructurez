@@ -28,32 +28,40 @@ const Auth = () => {
           <h1 className="text-2xl font-bold">Welcome to Zructures</h1>
           <p className="text-muted-foreground">Sign in to continue</p>
         </div>
-        <SupabaseAuth 
-          supabaseClient={supabase}
-          appearance={{
-            theme: ThemeSupa,
-            variables: {
-              default: {
-                colors: {
-                  brand: '#e31837',
-                  brandAccent: '#b31528',
+        <div className="bg-card p-6 rounded-lg shadow-lg">
+          <SupabaseAuth 
+            supabaseClient={supabase}
+            appearance={{
+              theme: ThemeSupa,
+              variables: {
+                default: {
+                  colors: {
+                    brand: '#e31837',
+                    brandAccent: '#b31528',
+                  }
                 }
+              },
+              style: {
+                button: {
+                  borderRadius: '6px',
+                  transition: 'all 0.2s ease',
+                },
+                container: {
+                  borderRadius: '8px',
+                },
+                input: {
+                  borderRadius: '6px',
+                },
+                anchor: {
+                  color: '#e31837',
+                },
               }
-            },
-            style: {
-              button: {
-                borderRadius: '6px',
-                transition: 'all 0.2s ease',
-              },
-              container: {
-                borderRadius: '8px',
-                boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-              },
-            }
-          }}
-          providers={['google']}
-          redirectTo={`${window.location.origin}/auth/callback`}
-        />
+            }}
+            providers={['google']}
+            redirectTo={`${window.location.origin}/auth/callback`}
+            onlyThirdPartyProviders
+          />
+        </div>
       </div>
     </div>
   );
