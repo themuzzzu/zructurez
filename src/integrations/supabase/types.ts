@@ -469,6 +469,35 @@ export type Database = {
           },
         ]
       }
+      service_product_images: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string
+          service_product_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url: string
+          service_product_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string
+          service_product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_product_images_service_product_id_fkey"
+            columns: ["service_product_id"]
+            isOneToOne: false
+            referencedRelation: "service_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_products: {
         Row: {
           created_at: string
