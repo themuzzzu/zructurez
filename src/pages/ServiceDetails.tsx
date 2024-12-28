@@ -28,7 +28,7 @@ const ServiceDetails = () => {
           service_portfolio (*),
           service_products (
             *,
-            product_images (*)
+            service_product_images (*)
           )
         `)
         .eq('id', id)
@@ -127,10 +127,10 @@ const ServiceDetails = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {service.service_products?.map((product) => (
                       <Card key={product.id} className="p-4 space-y-2">
-                        {product.product_images && product.product_images.length > 0 ? (
+                        {product.service_product_images && product.service_product_images.length > 0 ? (
                           <Carousel className="w-full">
                             <CarouselContent>
-                              {product.product_images.map((image, index) => (
+                              {product.service_product_images.map((image, index) => (
                                 <CarouselItem key={index}>
                                   <img
                                     src={image.image_url}
