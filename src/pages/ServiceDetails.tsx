@@ -9,6 +9,7 @@ import { ServiceContactSidebar } from "@/components/service-details/ServiceConta
 import { ServiceProductForm } from "@/components/service-details/ServiceProductForm";
 import { ErrorView } from "@/components/ErrorView";
 import { LoadingView } from "@/components/LoadingView";
+import { Card } from "@/components/ui/card";
 
 const ServiceDetails = () => {
   const { id } = useParams();
@@ -16,11 +17,13 @@ const ServiceDetails = () => {
   const { data: service, isLoading, error } = useQuery({
     queryKey: ['service', id],
     queryFn: async () => {
+      // Fetch service details
       const { data: serviceData, error: serviceError } = await supabase
         .from('services')
         .select(`
           *,
-          service_portfolio (*)
+          service_portfolio (*),
+          service_products (*)
         `)
         .eq('id', id)
         .maybeSingle();
@@ -28,6 +31,7 @@ const ServiceDetails = () => {
       if (serviceError) throw serviceError;
       if (!serviceData) throw new Error('Service not found');
 
+      // Fetch profile data
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('username, avatar_url')
@@ -36,9 +40,19 @@ const ServiceDetails = () => {
 
       if (profileError) throw profileError;
 
+      // Fetch marketplace products for this service
+      const { data: marketplaceProducts, error: marketplaceError } = await supabase
+        .from('products')
+        .select('*')
+        .eq('user_id', serviceData.user_id)
+        .eq('category', 'service-product');
+
+      if (marketplaceError) throw marketplaceError;
+
       return {
         ...serviceData,
-        profile: profileData
+        profile: profileData,
+        marketplaceProducts: marketplaceProducts || []
       };
     }
   });
@@ -72,6 +86,48 @@ const ServiceDetails = () => {
               />
               
               <ServicePortfolio items={service.service_portfolio} />
+              
+              {/* Display Service Products */}
+              {(service.service_products?.length > 0 || service.marketplaceProducts?.length > 0) && (
+                <Card className="p-6 space-y-4">
+                  <h2 className="text-2xl font-semibold">Products</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {service.service_products?.map((product) => (
+                      <Card key={product.id} className="p-4 space-y-2">
+                        {product.image_url && (
+                          <img
+                            src={product.image_url}
+                            alt={product.name}
+                            className="w-full h-48 object-cover rounded-lg"
+                          />
+                        )}
+                        <h3 className="font-semibold">{product.name}</h3>
+                        <p className="text-sm text-muted-foreground">{product.description}</p>
+                        <div className="font-semibold">₹{product.price}</div>
+                      </Card>
+                    ))}
+                    {service.marketplaceProducts?.map((product) => (
+                      <Card key={product.id} className="p-4 space-y-2">
+                        {product.image_url && (
+                          <img
+                            src={product.image_url}
+                            alt={product.title}
+                            className="w-full h-48 object-cover rounded-lg"
+                          />
+                        )}
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold">{product.title}</h3>
+                          <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
+                            Marketplace
+                          </span>
+                        </div>
+                        <p className="text-sm text-muted-foreground">{product.description}</p>
+                        <div className="font-semibold">₹{product.price}</div>
+                      </Card>
+                    ))}
+                  </div>
+                </Card>
+              )}
               
               <ServiceProductForm serviceId={service.id} />
             </div>
