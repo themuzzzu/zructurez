@@ -13,6 +13,7 @@ export const ProfileView = () => {
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState({
+    id: "",
     username: "",
     avatar_url: "",
     bio: "",
@@ -31,7 +32,7 @@ export const ProfileView = () => {
         .single();
 
       if (error) throw error;
-      if (data) setProfile(data);
+      if (data) setProfile({ ...data });
     } catch (error) {
       console.error('Error fetching profile:', error);
       toast.error('Failed to load profile');
@@ -47,6 +48,7 @@ export const ProfileView = () => {
       const { error } = await supabase
         .from('profiles')
         .update({
+          id: user.id,
           username: profile.username,
           avatar_url: profile.avatar_url,
           bio: profile.bio,
