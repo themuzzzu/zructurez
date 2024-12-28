@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { ServiceHeader } from "@/components/service-details/ServiceHeader";
@@ -64,7 +64,7 @@ const ServiceDetails = () => {
     }
   });
 
-  const handleAddToCart = async (productId: string) => {
+  const handleAddToCart = async (serviceProductId: string) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
@@ -73,7 +73,61 @@ const ServiceDetails = () => {
         return;
       }
 
-      const { error } = await supabase
+      // First, check if a corresponding product exists
+      const { data: existingProduct } = await supabase
+        .from('products')
+        .select('id')
+        .eq('category', 'service-product')
+        .eq('service_product_id', serviceProductId)
+        .single();
+
+      let productId;
+
+      if (existingProduct) {
+        productId = existingProduct.id;
+      } else {
+        // Find the service product details
+        const serviceProduct = service?.service_products?.find(p => p.id === serviceProductId);
+        if (!serviceProduct) {
+          throw new Error('Service product not found');
+        }
+
+        // Create a new product entry
+        const { data: newProduct, error: productError } = await supabase
+          .from('products')
+          .insert({
+            title: serviceProduct.name,
+            description: serviceProduct.description,
+            price: serviceProduct.price,
+            category: 'service-product',
+            service_product_id: serviceProductId,
+            stock: serviceProduct.stock || 1,
+            image_url: serviceProduct.image_url,
+            user_id: service.user_id
+          })
+          .select()
+          .single();
+
+        if (productError) throw productError;
+        productId = newProduct.id;
+
+        // Copy images if they exist
+        if (serviceProduct.service_product_images?.length > 0) {
+          const imagesToInsert = serviceProduct.service_product_images.map(image => ({
+            product_id: productId,
+            image_url: image.image_url
+          }));
+
+          const { error: imageError } = await supabase
+            .from('product_images')
+            .insert(imagesToInsert);
+
+          if (imageError) console.error('Error copying images:', imageError);
+        }
+      }
+
+      // Now add to cart
+      const { error: cartError } = await supabase
         .from('cart_items')
         .upsert({
           user_id: user.id,
@@ -83,7 +137,7 @@ const ServiceDetails = () => {
           onConflict: 'user_id,product_id'
         });
 
-      if (error) throw error;
+      if (cartError) throw cartError;
       toast.success("Added to cart!");
     } catch (error) {
       console.error('Error adding to cart:', error);
@@ -102,6 +156,8 @@ const ServiceDetails = () => {
   if (!service) {
     return <ErrorView message="Service not found" />;
   }
+
+  // ... keep existing code (JSX rendering)
 
   return (
     <div className="min-h-screen bg-background">

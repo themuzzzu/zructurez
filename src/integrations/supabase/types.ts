@@ -154,7 +154,7 @@ export type Database = {
           category?: string
           contact?: string | null
           created_at?: string
-          description?: string
+          description: string
           hours?: string | null
           id?: string
           image_url?: string | null
@@ -380,6 +380,7 @@ export type Database = {
           subcategory: string | null
           title: string
           user_id: string | null
+          service_product_id?: string; // Added this field
         }
         Insert: {
           category: string
@@ -392,6 +393,7 @@ export type Database = {
           subcategory?: string | null
           title: string
           user_id?: string | null
+          service_product_id?: string; // Added this field
         }
         Update: {
           category?: string
@@ -404,6 +406,7 @@ export type Database = {
           subcategory?: string | null
           title?: string
           user_id?: string | null
+          service_product_id?: string; // Added this field
         }
         Relationships: []
       }
@@ -426,7 +429,7 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
-          id?: string
+          id: string
           username?: string | null
         }
         Relationships: []
@@ -455,8 +458,8 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
-          service_id?: string
-          title?: string
+          service_id: string
+          title: string
           video_url?: string | null
         }
         Relationships: [
@@ -526,7 +529,7 @@ export type Database = {
           image_url?: string | null
           name?: string
           price?: number
-          service_id?: string
+          service_id: string
           stock?: number | null
         }
         Relationships: [
@@ -577,7 +580,7 @@ export type Database = {
           location?: string | null
           price?: number
           title?: string
-          user_id?: string
+          user_id: string
         }
         Relationships: []
       }
@@ -606,7 +609,7 @@ export type Tables<
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
         Database[PublicTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
       Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
