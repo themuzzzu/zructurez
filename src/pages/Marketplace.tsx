@@ -43,14 +43,16 @@ const Marketplace = () => {
             
             <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
               <SheetTrigger asChild>
-                <Button variant="outline" size="icon" className="relative">
-                  <ShoppingCart className="h-5 w-5" />
+                <div className="relative">
+                  <Button variant="outline" size="icon">
+                    <ShoppingCart className="h-5 w-5" />
+                  </Button>
                   {cartItemCount > 0 && (
-                    <span className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
+                    <span className="absolute -top-3 -right-3 h-6 w-6 rounded-full bg-red-500 text-white text-xs flex items-center justify-center shadow-sm animate-fade-in">
                       {cartItemCount}
                     </span>
                   )}
-                </Button>
+                </div>
               </SheetTrigger>
               <SheetContent className="w-[400px] sm:w-[540px]">
                 <SheetHeader>
