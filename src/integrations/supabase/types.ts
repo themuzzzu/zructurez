@@ -376,6 +376,7 @@ export type Database = {
           id: string
           image_url: string | null
           price: number
+          service_product_id: string | null
           stock: number
           subcategory: string | null
           title: string
@@ -388,6 +389,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           price: number
+          service_product_id?: string | null
           stock?: number
           subcategory?: string | null
           title: string
@@ -400,12 +402,21 @@ export type Database = {
           id?: string
           image_url?: string | null
           price?: number
+          service_product_id?: string | null
           stock?: number
           subcategory?: string | null
           title?: string
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "products_service_product_id_fkey"
+            columns: ["service_product_id"]
+            isOneToOne: false
+            referencedRelation: "service_products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
