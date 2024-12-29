@@ -8,6 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { Cart } from "./cart/Cart";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const ProfileView = () => {
   const navigate = useNavigate();
@@ -80,81 +82,94 @@ export const ProfileView = () => {
   }, []);
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle className="text-2xl font-bold">Profile</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="flex flex-col items-center gap-4">
-          <Avatar className="h-24 w-24">
-            <AvatarImage src={profile.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"} />
-            <AvatarFallback>User</AvatarFallback>
-          </Avatar>
-          {isEditing && (
-            <div className="w-full">
-              <Label htmlFor="avatar_url">Avatar URL</Label>
-              <Input
-                id="avatar_url"
-                value={profile.avatar_url || ""}
-                onChange={(e) => setProfile({ ...profile, avatar_url: e.target.value })}
-                placeholder="Enter avatar URL"
-              />
-            </div>
-          )}
-        </div>
-
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="username">Username</Label>
-            <Input
-              id="username"
-              value={profile.username || ""}
-              onChange={(e) => setProfile({ ...profile, username: e.target.value })}
-              disabled={!isEditing}
-              placeholder="Enter username"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="bio">Bio</Label>
-            <Textarea
-              id="bio"
-              value={profile.bio || ""}
-              onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
-              disabled={!isEditing}
-              placeholder="Tell us about yourself"
-              className="h-32"
-            />
-          </div>
-
-          <div className="flex justify-end gap-4">
-            {isEditing ? (
-              <>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setIsEditing(false);
-                    fetchProfile();
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button onClick={updateProfile} disabled={loading}>
-                  {loading ? "Saving..." : "Save Changes"}
-                </Button>
-              </>
-            ) : (
-              <Button onClick={() => setIsEditing(true)}>Edit Profile</Button>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">Profile</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="flex flex-col items-center gap-4">
+            <Avatar className="h-24 w-24">
+              <AvatarImage src={profile.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"} />
+              <AvatarFallback>User</AvatarFallback>
+            </Avatar>
+            {isEditing && (
+              <div className="w-full">
+                <Label htmlFor="avatar_url">Avatar URL</Label>
+                <Input
+                  id="avatar_url"
+                  value={profile.avatar_url || ""}
+                  onChange={(e) => setProfile({ ...profile, avatar_url: e.target.value })}
+                  placeholder="Enter avatar URL"
+                />
+              </div>
             )}
           </div>
 
-          <div className="pt-6 border-t">
-            <Button variant="destructive" onClick={handleSignOut}>
-              Sign Out
-            </Button>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="username">Username</Label>
+              <Input
+                id="username"
+                value={profile.username || ""}
+                onChange={(e) => setProfile({ ...profile, username: e.target.value })}
+                disabled={!isEditing}
+                placeholder="Enter username"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="bio">Bio</Label>
+              <Textarea
+                id="bio"
+                value={profile.bio || ""}
+                onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
+                disabled={!isEditing}
+                placeholder="Tell us about yourself"
+                className="h-32"
+              />
+            </div>
+
+            <div className="flex justify-end gap-4">
+              {isEditing ? (
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setIsEditing(false);
+                      fetchProfile();
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button onClick={updateProfile} disabled={loading}>
+                    {loading ? "Saving..." : "Save Changes"}
+                  </Button>
+                </>
+              ) : (
+                <Button onClick={() => setIsEditing(true)}>Edit Profile</Button>
+              )}
+            </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Shopping Cart</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Cart />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent>
+          <Button variant="destructive" onClick={handleSignOut}>
+            Sign Out
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
   );
 };

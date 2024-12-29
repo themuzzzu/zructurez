@@ -1,11 +1,10 @@
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
-import { ShoppingBag, DollarSign, Share2 } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
 import { toast } from "sonner";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductCard } from "./products/ProductCard";
-import { Cart } from "./cart/Cart";
 
 interface Product {
   id: string;
@@ -42,25 +41,19 @@ export const ShoppingSection = () => {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div className="lg:col-span-2 space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">Featured Products</h2>
-          <Button variant="outline" className="gap-2">
-            <ShoppingBag className="h-4 w-4" />
-            View All
-          </Button>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">Featured Products</h2>
+        <Button variant="outline" className="gap-2">
+          <ShoppingBag className="h-4 w-4" />
+          View All
+        </Button>
       </div>
-      
-      <div className="lg:col-span-1">
-        <Cart />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {products.map((product) => (
+          <ProductCard key={product.id} product={product} />
+        ))}
       </div>
     </div>
   );
