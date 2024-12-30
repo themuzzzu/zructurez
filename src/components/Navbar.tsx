@@ -21,6 +21,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 import { Cart } from "./cart/Cart";
+import { NotificationList } from "./notifications/NotificationList";
 import { useQuery } from "@tanstack/react-query";
 
 export const Navbar = () => {
@@ -38,6 +39,23 @@ export const Navbar = () => {
         .from('cart_items')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', session.session.user.id);
+
+      if (error) throw error;
+      return count || 0;
+    },
+  });
+
+  const { data: unreadCount = 0 } = useQuery({
+    queryKey: ['unreadCount'],
+    queryFn: async () => {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session?.session?.user) return 0;
+
+      const { count, error } = await supabase
+        .from('notifications')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', session.session.user.id)
+        .eq('read', false);
 
       if (error) throw error;
       return count || 0;
@@ -92,10 +110,28 @@ export const Navbar = () => {
         )}
 
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="relative transition-transform duration-300 hover:scale-110">
-            <Bell className="h-5 w-5" />
-            <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
-          </Button>
+          <Sheet>
+            <SheetTrigger asChild>
+              <div className="relative">
+                <Button variant="ghost" size="icon" className="relative transition-transform duration-300 hover:scale-110">
+                  <Bell className="h-5 w-5" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-2 -right-2 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center shadow-sm animate-fade-in">
+                      {unreadCount}
+                    </span>
+                  )}
+                </Button>
+              </div>
+            </SheetTrigger>
+            <SheetContent>
+              <SheetHeader>
+                <SheetTitle>Notifications</SheetTitle>
+              </SheetHeader>
+              <div className="mt-4">
+                <NotificationList />
+              </div>
+            </SheetContent>
+          </Sheet>
 
           <Sheet>
             <SheetTrigger asChild>
