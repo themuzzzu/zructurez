@@ -16,11 +16,18 @@ export const GroupChat = ({ groupId }: GroupChatProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
+    fetchCurrentUser();
     fetchMessages();
     subscribeToMessages();
   }, [groupId]);
+
+  const fetchCurrentUser = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    setCurrentUserId(user?.id || null);
+  };
 
   const fetchMessages = async () => {
     try {
@@ -97,7 +104,7 @@ export const GroupChat = ({ groupId }: GroupChatProps) => {
               key={message.id}
               content={message.content}
               timestamp={new Date(message.created_at).toLocaleString()}
-              isOwn={message.sender_id === supabase.auth.getUser()?.data?.user?.id}
+              isOwn={message.sender_id === currentUserId}
             />
           ))}
         </div>
