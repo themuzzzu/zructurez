@@ -97,7 +97,7 @@ export const GroupChat = ({ groupId }: GroupChatProps) => {
               key={message.id}
               content={message.content}
               timestamp={new Date(message.created_at).toLocaleString()}
-              isOwn={message.sender_id === supabase.auth.user()?.id}
+              isOwn={message.sender_id === supabase.auth.getUser()?.data?.user?.id}
             />
           ))}
         </div>
