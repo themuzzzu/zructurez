@@ -70,12 +70,14 @@ const ServiceDetails = () => {
       }
 
       // First, check if a corresponding product exists
-      const { data: existingProduct } = await supabase
+      const { data: existingProduct, error: existingProductError } = await supabase
         .from('products')
         .select('id')
         .eq('category', 'service-product')
         .eq('service_product_id', serviceProductId)
-        .single();
+        .maybeSingle();
+
+      if (existingProductError) throw existingProductError;
 
       let productId;
 
