@@ -1,4 +1,4 @@
-import { Bell, Search, Menu } from "lucide-react";
+import { Bell, Search, Menu, ShoppingCart } from "lucide-react";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
 import {
@@ -12,17 +12,37 @@ import {
 import {
   Sheet,
   SheetContent,
+  SheetHeader,
+  SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
+import { Cart } from "./cart/Cart";
+import { useQuery } from "@tanstack/react-query";
 
 export const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const isHomePage = location.pathname === "/";
+
+  const { data: cartItemCount = 0 } = useQuery({
+    queryKey: ['cartCount'],
+    queryFn: async () => {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session?.session?.user) return 0;
+
+      const { count, error } = await supabase
+        .from('cart_items')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', session.session.user.id);
+
+      if (error) throw error;
+      return count || 0;
+    },
+  });
 
   const handleProfileAction = async (action: string) => {
     if (action === "Sign out") {
@@ -76,6 +96,30 @@ export const Navbar = () => {
             <Bell className="h-5 w-5" />
             <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
           </Button>
+
+          <Sheet>
+            <SheetTrigger asChild>
+              <div className="relative">
+                <Button variant="ghost" size="icon" className="transition-transform duration-300 hover:scale-110">
+                  <ShoppingCart className="h-5 w-5" />
+                </Button>
+                {cartItemCount > 0 && (
+                  <span className="absolute -top-2 -right-2 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center shadow-sm animate-fade-in">
+                    {cartItemCount}
+                  </span>
+                )}
+              </div>
+            </SheetTrigger>
+            <SheetContent className="w-[400px] sm:w-[540px]">
+              <SheetHeader>
+                <SheetTitle>Shopping Cart</SheetTitle>
+              </SheetHeader>
+              <div className="mt-4">
+                <Cart />
+              </div>
+            </SheetContent>
+          </Sheet>
+
           <Separator orientation="vertical" className="h-6 hidden sm:block" />
           
           <DropdownMenu>
