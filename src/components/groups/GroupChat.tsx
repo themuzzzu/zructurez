@@ -19,14 +19,35 @@ export const GroupChat = ({ groupId }: GroupChatProps) => {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchCurrentUser();
-    fetchMessages();
-    subscribeToMessages();
+    const initializeChat = async () => {
+      try {
+        await fetchCurrentUser();
+        await fetchMessages();
+        subscribeToMessages();
+      } catch (error) {
+        console.error("Error initializing chat:", error);
+        toast.error("Failed to initialize chat");
+      }
+    };
+
+    initializeChat();
+
+    return () => {
+      // Cleanup subscription on unmount
+      const channel = supabase.channel('messages');
+      supabase.removeChannel(channel);
+    };
   }, [groupId]);
 
   const fetchCurrentUser = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    setCurrentUserId(user?.id || null);
+    try {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error) throw error;
+      setCurrentUserId(user?.id || null);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      toast.error("Failed to fetch user information");
+    }
   };
 
   const fetchMessages = async () => {
@@ -71,16 +92,13 @@ export const GroupChat = ({ groupId }: GroupChatProps) => {
   };
 
   const sendMessage = async () => {
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() || !currentUserId) return;
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
       const { error } = await supabase.from("messages").insert({
         content: newMessage.trim(),
         receiver_id: groupId,
-        sender_id: user.id,
+        sender_id: currentUserId,
       });
 
       if (error) throw error;
