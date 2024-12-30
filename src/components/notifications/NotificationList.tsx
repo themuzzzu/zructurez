@@ -3,11 +3,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { NotificationItem } from "./NotificationItem";
 import { ScrollArea } from "../ui/scroll-area";
 import { toast } from "sonner";
+import { Notification } from "@/types/notification";
 
 export const NotificationList = () => {
   const queryClient = useQueryClient();
 
-  const { data: notifications = [] } = useQuery({
+  const { data: notifications = [] } = useQuery<Notification[]>({
     queryKey: ['notifications'],
     queryFn: async () => {
       const { data: session } = await supabase.auth.getSession();
@@ -49,7 +50,7 @@ export const NotificationList = () => {
           No notifications
         </div>
       ) : (
-        notifications.map((notification: any) => (
+        notifications.map((notification) => (
           <NotificationItem
             key={notification.id}
             {...notification}

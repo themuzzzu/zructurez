@@ -1,12 +1,9 @@
 import { formatDistanceToNow } from "date-fns";
 import { Check } from "lucide-react";
 import { Button } from "../ui/button";
+import { Notification } from "@/types/notification";
 
-interface NotificationItemProps {
-  id: string;
-  message: string;
-  created_at: string;
-  read: boolean;
+interface NotificationItemProps extends Notification {
   onMarkAsRead: (id: string) => void;
 }
 
