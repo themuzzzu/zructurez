@@ -32,12 +32,16 @@ export const CreateGroupForm = ({ isOpen, onClose, onSuccess }: CreateGroupFormP
     setIsSubmitting(true);
 
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
       const { error } = await supabase
         .from('groups')
         .insert({
           name,
           description: description.trim() || null,
           image_url: imageUrl,
+          user_id: user.id
         });
 
       if (error) throw error;

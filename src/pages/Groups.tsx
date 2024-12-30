@@ -2,25 +2,14 @@ import { Navbar } from "@/components/Navbar";
 import { Sidebar } from "@/components/Sidebar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Users2, ArrowLeft, Plus, Minus } from "lucide-react";
+import { Users2, ArrowLeft, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { CreateGroupForm } from "@/components/groups/CreateGroupForm";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-
-interface Group {
-  id: string;
-  name: string;
-  description: string | null;
-  image_url: string | null;
-  created_at: string;
-  user_id: string;
-  _count?: {
-    members: number;
-  };
-}
+import { Group } from "@/components/groups/types";
 
 const Groups = () => {
   const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
@@ -45,9 +34,15 @@ const Groups = () => {
 
   const joinGroupMutation = useMutation({
     mutationFn: async (groupId: string) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
       const { error } = await supabase
         .from('group_members')
-        .insert({ group_id: groupId });
+        .insert({ 
+          group_id: groupId,
+          user_id: user.id
+        });
 
       if (error) throw error;
     },
@@ -57,24 +52,6 @@ const Groups = () => {
     },
     onError: () => {
       toast.error("Failed to join group");
-    },
-  });
-
-  const leaveGroupMutation = useMutation({
-    mutationFn: async (groupId: string) => {
-      const { error } = await supabase
-        .from('group_members')
-        .delete()
-        .eq('group_id', groupId);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['groups'] });
-      toast.success("Left the group");
-    },
-    onError: () => {
-      toast.error("Failed to leave group");
     },
   });
 
@@ -130,7 +107,7 @@ const Groups = () => {
                         className="w-full"
                         variant="default"
                         onClick={() => joinGroupMutation.mutate(group.id)}
-                        disabled={joinGroupMutation.isPending || leaveGroupMutation.isPending}
+                        disabled={joinGroupMutation.isPending}
                       >
                         <Plus className="h-4 w-4 mr-2" />
                         Join Group
