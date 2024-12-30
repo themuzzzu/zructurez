@@ -6,61 +6,81 @@ import { Users2, ArrowLeft, Plus, Minus } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { CreateGroupForm } from "@/components/groups/CreateGroupForm";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Group {
-  id: number;
+  id: string;
   name: string;
-  members: number;
-  description: string;
-  image: string;
-  joined: boolean;
+  description: string | null;
+  image_url: string | null;
+  created_at: string;
+  user_id: string;
+  _count?: {
+    members: number;
+  };
 }
 
 const Groups = () => {
-  const [groups, setGroups] = useState<Group[]>([
-    {
-      id: 1,
-      name: "Neighborhood Watch",
-      members: 156,
-      description: "Keep our community safe and informed about local security matters.",
-      image: "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=800",
-      joined: false
-    },
-    {
-      id: 2,
-      name: "Local Events & Activities",
-      members: 342,
-      description: "Share and discover exciting events happening in our area.",
-      image: "https://images.unsplash.com/photo-1511795409834-432f7b1728b2?w=800",
-      joined: false
-    },
-    {
-      id: 3,
-      name: "Community Garden Club",
-      members: 89,
-      description: "Tips, advice, and meetups for local gardening enthusiasts.",
-      image: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800",
-      joined: false
-    }
-  ]);
+  const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
+  const queryClient = useQueryClient();
 
-  const handleJoinGroup = (groupId: number) => {
-    setGroups(prevGroups =>
-      prevGroups.map(group => {
-        if (group.id === groupId) {
-          const newJoinedStatus = !group.joined;
-          const memberDelta = newJoinedStatus ? 1 : -1;
-          toast.success(newJoinedStatus ? "Successfully joined the group!" : "Left the group");
-          return {
-            ...group,
-            joined: newJoinedStatus,
-            members: group.members + memberDelta
-          };
-        }
-        return group;
-      })
-    );
-  };
+  const { data: groups, isLoading } = useQuery({
+    queryKey: ['groups'],
+    queryFn: async () => {
+      const { data: groups, error } = await supabase
+        .from('groups')
+        .select(`
+          *,
+          group_members (
+            count
+          )
+        `);
+
+      if (error) throw error;
+      return groups as Group[];
+    },
+  });
+
+  const joinGroupMutation = useMutation({
+    mutationFn: async (groupId: string) => {
+      const { error } = await supabase
+        .from('group_members')
+        .insert({ group_id: groupId });
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['groups'] });
+      toast.success("Successfully joined the group!");
+    },
+    onError: () => {
+      toast.error("Failed to join group");
+    },
+  });
+
+  const leaveGroupMutation = useMutation({
+    mutationFn: async (groupId: string) => {
+      const { error } = await supabase
+        .from('group_members')
+        .delete()
+        .eq('group_id', groupId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['groups'] });
+      toast.success("Left the group");
+    },
+    onError: () => {
+      toast.error("Failed to leave group");
+    },
+  });
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -79,43 +99,41 @@ const Groups = () => {
                   </Link>
                   <h1 className="text-3xl font-bold">Groups</h1>
                 </div>
-                <Button onClick={() => toast.info("Create group feature coming soon!")}>
+                <Button onClick={() => setIsCreateGroupOpen(true)}>
                   <Plus className="h-4 w-4 mr-2" />
                   Create Group
                 </Button>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {groups.map((group) => (
+                {groups?.map((group) => (
                   <Card key={group.id} className="overflow-hidden hover:shadow-lg transition-all duration-300 animate-fade-up">
-                    <img
-                      src={group.image}
-                      alt={group.name}
-                      className="w-full h-48 object-cover"
-                    />
+                    {group.image_url && (
+                      <img
+                        src={group.image_url}
+                        alt={group.name}
+                        className="w-full h-48 object-cover"
+                      />
+                    )}
                     <div className="p-4">
                       <h3 className="text-xl font-semibold mb-2">{group.name}</h3>
                       <div className="flex items-center text-sm text-muted-foreground mb-4">
                         <Users2 className="h-4 w-4 mr-2" />
-                        {group.members} members
+                        {group.group_members?.[0]?.count || 0} members
                       </div>
-                      <p className="text-muted-foreground mb-4 line-clamp-2">{group.description}</p>
+                      {group.description && (
+                        <p className="text-muted-foreground mb-4 line-clamp-2">
+                          {group.description}
+                        </p>
+                      )}
                       <Button 
                         className="w-full"
-                        variant={group.joined ? "destructive" : "default"}
-                        onClick={() => handleJoinGroup(group.id)}
+                        variant="default"
+                        onClick={() => joinGroupMutation.mutate(group.id)}
+                        disabled={joinGroupMutation.isPending || leaveGroupMutation.isPending}
                       >
-                        {group.joined ? (
-                          <>
-                            <Minus className="h-4 w-4 mr-2" />
-                            Leave Group
-                          </>
-                        ) : (
-                          <>
-                            <Plus className="h-4 w-4 mr-2" />
-                            Join Group
-                          </>
-                        )}
+                        <Plus className="h-4 w-4 mr-2" />
+                        Join Group
                       </Button>
                     </div>
                   </Card>
@@ -125,6 +143,12 @@ const Groups = () => {
           </main>
         </div>
       </div>
+
+      <CreateGroupForm
+        isOpen={isCreateGroupOpen}
+        onClose={() => setIsCreateGroupOpen(false)}
+        onSuccess={() => queryClient.invalidateQueries({ queryKey: ['groups'] })}
+      />
     </div>
   );
 };
