@@ -35,27 +35,29 @@ export const ChatList = ({
         {chats.map((chat) => (
           <button
             key={chat.id}
-            className={`w-full p-4 flex items-start gap-3 hover:bg-accent dark:hover:text-black transition-colors border-b ${
-              selectedChat?.id === chat.id ? 'bg-accent dark:text-black' : ''
+            className={`w-full p-4 flex items-start gap-3 hover:bg-accent/50 transition-colors border-b ${
+              selectedChat?.id === chat.id ? 'bg-accent/50' : ''
             }`}
             onClick={() => onSelectChat(chat)}
           >
             <img
               src={chat.avatar}
               alt={chat.name}
-              className="w-10 h-10 rounded-full"
+              className="w-10 h-10 rounded-full flex-shrink-0"
             />
-            <div className="flex-1 text-left">
-              <div className="flex justify-between items-start">
-                <span className="font-semibold dark:hover:text-black">{chat.name}</span>
-                <span className="text-xs text-muted-foreground">{chat.time}</span>
+            <div className="flex-1 text-left min-w-0">
+              <div className="flex justify-between items-start gap-2">
+                <span className="font-semibold truncate">{chat.name}</span>
+                <span className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
+                  {chat.time}
+                </span>
               </div>
-              <p className="text-sm text-muted-foreground truncate dark:hover:text-black">
+              <p className="text-sm text-muted-foreground truncate pr-2">
                 {chat.lastMessage}
               </p>
             </div>
             {chat.unread > 0 && (
-              <span className="bg-primary text-primary-foreground w-5 h-5 rounded-full text-xs flex items-center justify-center">
+              <span className="bg-primary text-primary-foreground min-w-[20px] h-5 rounded-full text-xs flex items-center justify-center flex-shrink-0 px-1.5">
                 {chat.unread}
               </span>
             )}
