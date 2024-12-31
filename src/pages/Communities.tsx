@@ -39,6 +39,18 @@ const Communities = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
+      // First check if user is already a member
+      const { data: existingMember } = await supabase
+        .from('group_members')
+        .select('*')
+        .eq('group_id', groupId)
+        .eq('user_id', user.id)
+        .single();
+
+      if (existingMember) {
+        throw new Error("Already a member of this group");
+      }
+
       const { error } = await supabase
         .from('group_members')
         .insert({ 
@@ -50,10 +62,14 @@ const Communities = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['groups'] });
-      toast.success("Successfully joined the community!");
+      toast.success("Successfully joined the group!");
     },
-    onError: () => {
-      toast.error("Failed to join community");
+    onError: (error) => {
+      if (error.message === "Already a member of this group") {
+        toast.error("You are already a member of this group");
+      } else {
+        toast.error("Failed to join group");
+      }
     },
   });
 
@@ -76,11 +92,11 @@ const Communities = () => {
                       <ArrowLeft className="h-5 w-5" />
                     </Button>
                   </Link>
-                  <h1 className="text-3xl font-bold">Communities</h1>
+                  <h1 className="text-3xl font-bold">Groups</h1>
                 </div>
                 <Button onClick={() => setIsCreateGroupOpen(true)}>
                   <Plus className="h-4 w-4 mr-2" />
-                  Create Community
+                  Create Group
                 </Button>
               </div>
               
@@ -115,7 +131,7 @@ const Communities = () => {
                               disabled={joinGroupMutation.isPending}
                             >
                               <Plus className="h-4 w-4 mr-2" />
-                              Join Community
+                              Join Group
                             </Button>
                             <Button
                               variant="outline"
@@ -140,7 +156,7 @@ const Communities = () => {
                       </div>
                     ) : (
                       <div className="h-full flex items-center justify-center text-muted-foreground p-4">
-                        Select a community to view the chat
+                        Select a group to view the chat
                       </div>
                     )}
                   </Card>
