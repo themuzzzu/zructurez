@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Group } from "@/components/groups/types";
 import { GroupChat } from "@/components/groups/GroupChat";
 
-const Groups = () => {
+const Communities = () => {
   const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const queryClient = useQueryClient();
@@ -50,10 +50,10 @@ const Groups = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['groups'] });
-      toast.success("Successfully joined the group!");
+      toast.success("Successfully joined the community!");
     },
     onError: () => {
-      toast.error("Failed to join group");
+      toast.error("Failed to join community");
     },
   });
 
@@ -76,11 +76,11 @@ const Groups = () => {
                       <ArrowLeft className="h-5 w-5" />
                     </Button>
                   </Link>
-                  <h1 className="text-3xl font-bold">Groups</h1>
+                  <h1 className="text-3xl font-bold">Communities</h1>
                 </div>
                 <Button onClick={() => setIsCreateGroupOpen(true)}>
                   <Plus className="h-4 w-4 mr-2" />
-                  Create Group
+                  Create Community
                 </Button>
               </div>
               
@@ -115,7 +115,7 @@ const Groups = () => {
                               disabled={joinGroupMutation.isPending}
                             >
                               <Plus className="h-4 w-4 mr-2" />
-                              Join Group
+                              Join Community
                             </Button>
                             <Button
                               variant="outline"
@@ -140,7 +140,7 @@ const Groups = () => {
                       </div>
                     ) : (
                       <div className="h-full flex items-center justify-center text-muted-foreground p-4">
-                        Select a group to view the chat
+                        Select a community to view the chat
                       </div>
                     )}
                   </Card>
@@ -160,4 +160,4 @@ const Groups = () => {
   );
 };
 
-export default Groups;
+export default Communities;

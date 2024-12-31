@@ -10,7 +10,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import Index from "./pages/Index";
 import Marketplace from "./pages/Marketplace";
 import Services from "./pages/Services";
-import Groups from "./pages/Groups";
+import Communities from "./pages/Communities";
 import Messages from "./pages/Messages";
 import Events from "./pages/Events";
 import Settings from "./pages/Settings";
@@ -109,10 +109,10 @@ const App = () => (
               }
             />
             <Route
-              path="/groups"
+              path="/communities"
               element={
                 <ProtectedRoute>
-                  <Groups />
+                  <Communities />
                 </ProtectedRoute>
               }
             />
