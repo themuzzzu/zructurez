@@ -3,7 +3,7 @@ import { Sidebar } from "@/components/Sidebar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { ChatList } from "@/components/chat/ChatList";
@@ -23,19 +23,22 @@ const SAMPLE_CHATS: Chat[] = [
         id: "1",
         content: "Hi there! Could you help me with my garden?",
         timestamp: "Yesterday 2:30 PM",
-        senderId: "sarah"
+        senderId: "sarah",
+        read: false
       },
       {
         id: "2",
         content: "Of course! What do you need help with?",
         timestamp: "Yesterday 2:35 PM",
-        senderId: "me"
+        senderId: "me",
+        read: true
       },
       {
         id: "3",
         content: "Thanks for the help with the garden!",
         timestamp: "2m ago",
-        senderId: "sarah"
+        senderId: "sarah",
+        read: false
       }
     ]
   },
@@ -65,6 +68,27 @@ const Messages = () => {
   const [chats, setChats] = useState<Chat[]>(SAMPLE_CHATS);
   const [searchQuery, setSearchQuery] = useState("");
 
+  const handleSelectChat = (chat: Chat) => {
+    // Mark all messages as read when selecting a chat
+    const updatedChats = chats.map(c => {
+      if (c.id === chat.id) {
+        const updatedMessages = c.messages.map(msg => ({
+          ...msg,
+          read: true
+        }));
+        return {
+          ...c,
+          messages: updatedMessages,
+          unread: 0 // Reset unread count
+        };
+      }
+      return c;
+    });
+    
+    setChats(updatedChats);
+    setSelectedChat(updatedChats.find(c => c.id === chat.id) || null);
+  };
+
   const handleSendMessage = () => {
     if (!message.trim() || !selectedChat) return;
 
@@ -72,7 +96,8 @@ const Messages = () => {
       id: Date.now().toString(),
       content: message,
       timestamp: new Date().toLocaleTimeString(),
-      senderId: "me"
+      senderId: "me",
+      read: true
     };
 
     const updatedChats = chats.map(chat => {
@@ -117,7 +142,7 @@ const Messages = () => {
                 <ChatList
                   chats={filteredChats}
                   selectedChat={selectedChat}
-                  onSelectChat={setSelectedChat}
+                  onSelectChat={handleSelectChat}
                   searchQuery={searchQuery}
                   onSearchChange={setSearchQuery}
                 />
