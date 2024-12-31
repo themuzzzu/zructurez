@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Group } from "@/components/groups/types";
 import { GroupChat } from "@/components/groups/GroupChat";
 
-const Groups = () => {
+const Communities = () => {
   const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const queryClient = useQueryClient();
@@ -76,7 +76,7 @@ const Groups = () => {
                       <ArrowLeft className="h-5 w-5" />
                     </Button>
                   </Link>
-                  <h1 className="text-3xl font-bold">Groups</h1>
+                  <h1 className="text-3xl font-bold">Communities</h1>
                 </div>
                 <Button onClick={() => setIsCreateGroupOpen(true)}>
                   <Plus className="h-4 w-4 mr-2" />
@@ -160,4 +160,4 @@ const Groups = () => {
   );
 };
 
-export default Groups;
+export default Communities;

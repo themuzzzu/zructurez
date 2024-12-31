@@ -9,7 +9,7 @@ export function Sidebar({ className, ...props }: SidebarProps) {
   
   const navigation = [
     { name: "Feed", href: "/", icon: Home },
-    { name: "Groups", href: "/communities", icon: Users2 },
+    { name: "Communities", href: "/communities", icon: Users2 },
     { name: "Messages", href: "/messages", icon: MessageSquare },
     { name: "Events", href: "/events", icon: Calendar },
     { name: "Marketplace", href: "/marketplace", icon: ShoppingBag },
