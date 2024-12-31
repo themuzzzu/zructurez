@@ -33,7 +33,6 @@ export const GroupChat = ({ groupId }: GroupChatProps) => {
     initializeChat();
 
     return () => {
-      // Cleanup subscription on unmount
       const channel = supabase.channel('messages');
       supabase.removeChannel(channel);
     };
@@ -60,6 +59,20 @@ export const GroupChat = ({ groupId }: GroupChatProps) => {
 
       if (error) throw error;
       setMessages(messages || []);
+
+      // Mark messages as read
+      if (messages && messages.length > 0 && currentUserId) {
+        const { error: updateError } = await supabase
+          .from("messages")
+          .update({ read: true })
+          .eq("receiver_id", groupId)
+          .eq("read", false)
+          .neq("sender_id", currentUserId);
+
+        if (updateError) {
+          console.error("Error marking messages as read:", updateError);
+        }
+      }
     } catch (error) {
       console.error("Error fetching messages:", error);
       toast.error("Failed to load messages");
@@ -79,9 +92,21 @@ export const GroupChat = ({ groupId }: GroupChatProps) => {
           table: "messages",
           filter: `receiver_id=eq.${groupId}`,
         },
-        (payload) => {
+        async (payload) => {
           const newMessage = payload.new as Message;
           setMessages((current) => [...current, newMessage]);
+          
+          // Mark new message as read if it's not from current user
+          if (currentUserId && newMessage.sender_id !== currentUserId) {
+            const { error } = await supabase
+              .from("messages")
+              .update({ read: true })
+              .eq("id", newMessage.id);
+
+            if (error) {
+              console.error("Error marking new message as read:", error);
+            }
+          }
         }
       )
       .subscribe();
