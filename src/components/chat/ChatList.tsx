@@ -35,8 +35,8 @@ export const ChatList = ({
         {chats.map((chat) => (
           <button
             key={chat.id}
-            className={`w-full p-4 flex items-start gap-3 hover:bg-accent/50 transition-colors border-b ${
-              selectedChat?.id === chat.id ? 'bg-accent/50' : ''
+            className={`w-full p-4 flex items-start gap-3 hover:bg-accent/50 transition-colors ${
+              selectedChat?.id === chat.id ? 'bg-accent' : ''
             }`}
             onClick={() => onSelectChat(chat)}
           >
@@ -57,9 +57,9 @@ export const ChatList = ({
               </p>
             </div>
             {chat.unread > 0 && (
-              <span className="bg-primary text-primary-foreground min-w-[20px] h-5 rounded-full text-xs flex items-center justify-center flex-shrink-0 px-1.5">
+              <div className="bg-[#ea384c] text-white min-w-[20px] h-5 rounded-full text-xs flex items-center justify-center flex-shrink-0 px-1.5 animate-pulse">
                 {chat.unread}
-              </span>
+              </div>
             )}
           </button>
         ))}
