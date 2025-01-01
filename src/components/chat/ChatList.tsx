@@ -47,12 +47,14 @@ export const ChatList = ({
             />
             <div className="flex-1 text-left min-w-0">
               <div className="flex justify-between items-start gap-2">
-                <span className="font-semibold truncate text-black">{chat.name}</span>
-                <span className="text-xs text-black/70 whitespace-nowrap flex-shrink-0">
+                <span className="font-semibold truncate text-foreground">
+                  {chat.name}
+                </span>
+                <span className="text-xs text-foreground/70 whitespace-nowrap flex-shrink-0">
                   {chat.time}
                 </span>
               </div>
-              <p className="text-sm text-black/80 truncate pr-2">
+              <p className="text-sm text-foreground/80 truncate pr-2">
                 {chat.lastMessage}
               </p>
             </div>
