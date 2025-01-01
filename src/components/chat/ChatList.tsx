@@ -57,9 +57,9 @@ export const ChatList = ({
               </p>
             </div>
             {chat.unread > 0 && (
-              <div className="bg-[#ea384c] text-white min-w-[20px] h-5 rounded-full text-xs flex items-center justify-center flex-shrink-0 px-1.5 animate-pulse">
+              <span className="bg-[#ea384c] text-white text-xs font-medium px-2.5 py-0.5 rounded-full animate-pulse flex-shrink-0">
                 {chat.unread}
-              </div>
+              </span>
             )}
           </button>
         ))}
