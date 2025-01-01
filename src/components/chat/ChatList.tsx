@@ -22,7 +22,7 @@ export const ChatList = ({
     <div className="w-80 border-r">
       <div className="p-4 border-b">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-black/70" />
           <Input
             placeholder="Search messages..."
             className="pl-10"
@@ -36,7 +36,7 @@ export const ChatList = ({
           <button
             key={chat.id}
             className={`w-full p-4 flex items-start gap-3 hover:bg-[#fde5e8] transition-colors ${
-              selectedChat?.id === chat.id ? 'bg-accent text-black' : ''
+              selectedChat?.id === chat.id ? 'bg-[#fde5e8]' : ''
             }`}
             onClick={() => onSelectChat(chat)}
           >
@@ -47,14 +47,14 @@ export const ChatList = ({
             />
             <div className="flex-1 text-left min-w-0">
               <div className="flex justify-between items-start gap-2">
-                <span className={`font-semibold truncate ${selectedChat?.id === chat.id ? 'text-black' : 'text-black/90'}`}>
+                <span className="font-semibold truncate text-black">
                   {chat.name}
                 </span>
-                <span className={`text-xs whitespace-nowrap flex-shrink-0 ${selectedChat?.id === chat.id ? 'text-black/70' : 'text-black/60'}`}>
+                <span className="text-xs whitespace-nowrap flex-shrink-0 text-black">
                   {chat.time}
                 </span>
               </div>
-              <p className={`text-sm truncate pr-2 ${selectedChat?.id === chat.id ? 'text-black/80' : 'text-black/70'}`}>
+              <p className="text-sm truncate pr-2 text-black">
                 {chat.lastMessage}
               </p>
             </div>
