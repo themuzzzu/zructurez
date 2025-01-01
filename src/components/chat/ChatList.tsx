@@ -35,8 +35,8 @@ export const ChatList = ({
         {chats.map((chat) => (
           <button
             key={chat.id}
-            className={`w-full p-4 flex items-start gap-3 hover:bg-accent/50 transition-colors ${
-              selectedChat?.id === chat.id ? 'bg-accent' : ''
+            className={`w-full p-4 flex items-start gap-3 hover:bg-[#fde5e8] transition-colors ${
+              selectedChat?.id === chat.id ? 'bg-accent text-black' : ''
             }`}
             onClick={() => onSelectChat(chat)}
           >
@@ -47,14 +47,14 @@ export const ChatList = ({
             />
             <div className="flex-1 text-left min-w-0">
               <div className="flex justify-between items-start gap-2">
-                <span className="font-semibold truncate text-foreground">
+                <span className={`font-semibold truncate ${selectedChat?.id === chat.id ? 'text-black' : 'text-black/90'}`}>
                   {chat.name}
                 </span>
-                <span className="text-xs text-foreground/70 whitespace-nowrap flex-shrink-0">
+                <span className={`text-xs whitespace-nowrap flex-shrink-0 ${selectedChat?.id === chat.id ? 'text-black/70' : 'text-black/60'}`}>
                   {chat.time}
                 </span>
               </div>
-              <p className="text-sm text-foreground/80 truncate pr-2">
+              <p className={`text-sm truncate pr-2 ${selectedChat?.id === chat.id ? 'text-black/80' : 'text-black/70'}`}>
                 {chat.lastMessage}
               </p>
             </div>
