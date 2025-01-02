@@ -55,7 +55,7 @@ export const ChatWindow = ({
                 className={`max-w-[70%] rounded-lg p-3 ${
                   msg.senderId === "me"
                     ? "bg-primary text-primary-foreground"
-                    : "bg-[#FFDEE2] text-foreground"
+                    : "bg-[#FFDEE2] text-black/80"
                 }`}
               >
                 <p>{msg.content}</p>
