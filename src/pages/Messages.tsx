@@ -65,6 +65,18 @@ const Messages = () => {
   const [chats, setChats] = useState<Chat[]>(SAMPLE_CHATS);
   const [searchQuery, setSearchQuery] = useState("");
 
+  const handleSelectChat = (chat: Chat) => {
+    // Clear unread count when selecting a chat
+    const updatedChats = chats.map(c => {
+      if (c.id === chat.id) {
+        return { ...c, unread: 0 };
+      }
+      return c;
+    });
+    setChats(updatedChats);
+    setSelectedChat(chat);
+  };
+
   const handleSendMessage = () => {
     if (!message.trim() || !selectedChat) return;
 
@@ -117,7 +129,7 @@ const Messages = () => {
                 <ChatList
                   chats={filteredChats}
                   selectedChat={selectedChat}
-                  onSelectChat={setSelectedChat}
+                  onSelectChat={handleSelectChat}
                   searchQuery={searchQuery}
                   onSearchChange={setSearchQuery}
                 />

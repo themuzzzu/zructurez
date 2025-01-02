@@ -35,8 +35,8 @@ export const ChatList = ({
         {chats.map((chat) => (
           <button
             key={chat.id}
-            className={`w-full p-4 flex items-start gap-3 hover:bg-[#fde5e8] transition-colors ${
-              selectedChat?.id === chat.id ? 'bg-[#fde5e8]' : ''
+            className={`w-full p-4 flex items-start gap-3 hover:bg-gray-100 transition-colors ${
+              selectedChat?.id === chat.id ? 'bg-gray-100' : ''
             }`}
             onClick={() => onSelectChat(chat)}
           >
