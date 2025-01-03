@@ -1,6 +1,5 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   Home,
@@ -12,7 +11,6 @@ import {
   Settings,
   Briefcase,
   Map,
-  Hash,
 } from "lucide-react";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
@@ -20,17 +18,6 @@ interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 export const Sidebar = ({ className }: SidebarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
-
-  const categories = [
-    { name: "General", icon: Hash },
-    { name: "Events", icon: Calendar },
-    { name: "News", icon: MessageSquare },
-    { name: "Questions", icon: MessageSquare },
-    { name: "Recommendations", icon: MessageSquare },
-    { name: "Lost & Found", icon: MessageSquare },
-    { name: "Community", icon: Users },
-    { name: "Services", icon: Wrench },
-  ];
 
   const routes = [
     { name: "Home", path: "/", icon: Home },
@@ -61,29 +48,6 @@ export const Sidebar = ({ className }: SidebarProps) => {
             </Button>
           );
         })}
-      </div>
-      <div className="mt-4">
-        <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
-          Categories
-        </h2>
-        <div className="space-y-1">
-          {categories.map((category) => {
-            const Icon = category.icon;
-            return (
-              <Button
-                key={category.name}
-                variant="ghost"
-                className="w-full justify-start"
-                onClick={() => {
-                  navigate(`/?category=${category.name.toLowerCase()}`);
-                }}
-              >
-                <Icon className="mr-2 h-4 w-4" />
-                {category.name}
-              </Button>
-            );
-          })}
-        </div>
       </div>
     </div>
   );
