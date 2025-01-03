@@ -46,8 +46,8 @@ export const Sidebar = ({ className }: SidebarProps) => {
 
   return (
     <ScrollArea className={cn("pb-12", className)}>
-      <div className="space-y-4 py-4">
-        <div className="px-3 py-2">
+      <div className="space-y-4">
+        <div className="py-2">
           <div className="space-y-1">
             {routes.map((route) => {
               const Icon = route.icon;
@@ -78,7 +78,6 @@ export const Sidebar = ({ className }: SidebarProps) => {
                   variant="ghost"
                   className="w-full justify-start"
                   onClick={() => {
-                    // Handle category selection
                     navigate(`/?category=${category.name.toLowerCase()}`);
                   }}
                 >
