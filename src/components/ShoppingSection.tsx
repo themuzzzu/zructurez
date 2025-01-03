@@ -17,14 +17,29 @@ interface Product {
   stock: number;
 }
 
-export const ShoppingSection = () => {
+interface ShoppingSectionProps {
+  searchQuery: string;
+  selectedCategory: string;
+}
+
+export const ShoppingSection = ({ searchQuery, selectedCategory }: ShoppingSectionProps) => {
   const { data: products, isLoading, isError } = useQuery({
-    queryKey: ['products'],
+    queryKey: ['products', searchQuery, selectedCategory],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('products')
         .select('*')
         .order('created_at', { ascending: false });
+
+      if (searchQuery) {
+        query = query.ilike('title', `%${searchQuery}%`);
+      }
+
+      if (selectedCategory && selectedCategory !== 'all') {
+        query = query.eq('category', selectedCategory);
+      }
+
+      const { data, error } = await query;
       
       if (error) throw error;
       return data;
@@ -38,6 +53,14 @@ export const ShoppingSection = () => {
   if (isError) {
     toast.error("Failed to load products");
     return <div className="text-center text-red-500">Error loading products</div>;
+  }
+
+  if (!products?.length) {
+    return (
+      <div className="text-center text-muted-foreground py-8">
+        No products found. Try adjusting your search or filters.
+      </div>
+    );
   }
 
   return (

@@ -7,9 +7,13 @@ import { Cart } from "@/components/cart/Cart";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { SearchInput } from "@/components/SearchInput";
+import { ServiceCategoryFilter } from "@/components/ServiceCategoryFilter";
 
 const Marketplace = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
 
   const { data: cartItemCount = 0 } = useQuery({
     queryKey: ['cartCount'],
@@ -26,6 +30,10 @@ const Marketplace = () => {
       return count || 0;
     },
   });
+
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
+  };
 
   return (
     <div className="min-h-screen bg-background pt-20 pb-16">
@@ -65,7 +73,17 @@ const Marketplace = () => {
             </Sheet>
           </div>
 
-          <ShoppingSection />
+          <div className="space-y-4">
+            <SearchInput 
+              placeholder="Search products..."
+              value={searchQuery}
+              onChange={setSearchQuery}
+              className="max-w-xl mx-auto"
+            />
+            <ServiceCategoryFilter onCategoryChange={handleCategoryChange} />
+          </div>
+
+          <ShoppingSection searchQuery={searchQuery} selectedCategory={selectedCategory} />
         </div>
       </div>
     </div>
