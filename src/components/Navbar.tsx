@@ -1,4 +1,4 @@
-import { Bell, Search, Menu, ShoppingCart, Flame, Clock, ThumbsUp, TrendingUp } from "lucide-react";
+import { Bell, Search, Menu, ShoppingCart } from "lucide-react";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
 import {
@@ -18,22 +18,15 @@ import {
 } from "@/components/ui/sheet";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 import { Cart } from "./cart/Cart";
 import { NotificationList } from "./notifications/NotificationList";
 import { useQuery } from "@tanstack/react-query";
-import { CategoryFilter } from "./CategoryFilter";
+import { SearchBox } from "./search/SearchBox";
 
-interface NavbarProps {
-  onSortChange?: (sort: string) => void;
-  onCategorySelect?: (category: string | null) => void;
-}
-
-export const Navbar = ({ onSortChange, onCategorySelect }: NavbarProps) => {
+export const Navbar = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const isHomePage = location.pathname === "/";
 
   const { data: cartItemCount = 0 } = useQuery({
     queryKey: ['cartCount'],
@@ -101,23 +94,8 @@ export const Navbar = ({ onSortChange, onCategorySelect }: NavbarProps) => {
           </Sheet>
           <h1 className="text-xl font-bold text-primary">Zructures</h1>
         </div>
-        
-        {isHomePage && (
-          <div className="hidden md:flex flex-col flex-1 max-w-xl mx-4 gap-4">
-            <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <input
-                type="search"
-                placeholder="Search neighborhoods, topics, posts..."
-                className="w-full pl-10 pr-4 py-2 border rounded-full bg-background focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300"
-              />
-            </div>
-            <CategoryFilter 
-              onCategorySelect={onCategorySelect}
-              onSortChange={onSortChange}
-            />
-          </div>
-        )}
+
+        <SearchBox className="flex-1 max-w-xl mx-4 hidden md:block" />
 
         <div className="flex items-center gap-2">
           <Sheet>

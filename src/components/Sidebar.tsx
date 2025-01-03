@@ -1,46 +1,95 @@
 import { cn } from "@/lib/utils";
-import { Home, Users2, MessageSquare, Calendar, ShoppingBag, Map, Settings, Wrench, Building2 } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useLocation, useNavigate } from "react-router-dom";
+import {
+  Home,
+  Store,
+  Wrench,
+  Users,
+  MessageSquare,
+  Calendar,
+  Settings,
+  Briefcase,
+  Map,
+  Hash,
+} from "lucide-react";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
-export function Sidebar({ className, ...props }: SidebarProps) {
+export const Sidebar = ({ className }: SidebarProps) => {
+  const navigate = useNavigate();
   const location = useLocation();
-  
-  const navigation = [
-    { name: "Feed", href: "/", icon: Home },
-    { name: "Communities", href: "/communities", icon: Users2 },
-    { name: "Messages", href: "/messages", icon: MessageSquare },
-    { name: "Events", href: "/events", icon: Calendar },
-    { name: "Marketplace", href: "/marketplace", icon: ShoppingBag },
-    { name: "Services", href: "/services", icon: Wrench },
-    { name: "Business", href: "/business", icon: Building2 },
-    { name: "Maps", href: "/maps", icon: Map },
-    { name: "Settings", href: "/settings", icon: Settings },
+
+  const categories = [
+    { name: "General", icon: Hash },
+    { name: "Events", icon: Calendar },
+    { name: "News", icon: MessageSquare },
+    { name: "Questions", icon: MessageSquare },
+    { name: "Recommendations", icon: MessageSquare },
+    { name: "Lost & Found", icon: MessageSquare },
+    { name: "Community", icon: Users },
+    { name: "Services", icon: Wrench },
+  ];
+
+  const routes = [
+    { name: "Home", path: "/", icon: Home },
+    { name: "Marketplace", path: "/marketplace", icon: Store },
+    { name: "Services", path: "/services", icon: Wrench },
+    { name: "Communities", path: "/communities", icon: Users },
+    { name: "Messages", path: "/messages", icon: MessageSquare },
+    { name: "Events", path: "/events", icon: Calendar },
+    { name: "Business", path: "/business", icon: Briefcase },
+    { name: "Maps", path: "/maps", icon: Map },
+    { name: "Settings", path: "/settings", icon: Settings },
   ];
 
   return (
-    <aside className={cn("pb-12", className)} {...props}>
-      <nav className="space-y-1">
-        {navigation.map((item) => {
-          const isActive = location.pathname === item.href;
-          const Icon = item.icon;
-          
-          return (
-            <Link
-              key={item.name}
-              to={item.href}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent dark:hover:text-black dark:focus:text-black",
-                isActive && "bg-accent font-medium dark:text-black"
-              )}
-            >
-              <Icon className="h-4 w-4" />
-              {item.name}
-            </Link>
-          );
-        })}
-      </nav>
-    </aside>
+    <ScrollArea className={cn("pb-12", className)}>
+      <div className="space-y-4 py-4">
+        <div className="px-3 py-2">
+          <div className="space-y-1">
+            {routes.map((route) => {
+              const Icon = route.icon;
+              return (
+                <Button
+                  key={route.path}
+                  variant={location.pathname === route.path ? "secondary" : "ghost"}
+                  className="w-full justify-start"
+                  onClick={() => navigate(route.path)}
+                >
+                  <Icon className="mr-2 h-4 w-4" />
+                  {route.name}
+                </Button>
+              );
+            })}
+          </div>
+        </div>
+        <div className="px-3 py-2">
+          <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
+            Categories
+          </h2>
+          <div className="space-y-1">
+            {categories.map((category) => {
+              const Icon = category.icon;
+              return (
+                <Button
+                  key={category.name}
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => {
+                    // Handle category selection
+                    navigate(`/?category=${category.name.toLowerCase()}`);
+                  }}
+                >
+                  <Icon className="mr-2 h-4 w-4" />
+                  {category.name}
+                </Button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </ScrollArea>
   );
-}
+};
