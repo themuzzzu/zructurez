@@ -15,16 +15,25 @@ interface Product {
   subcategory: string | null;
   image_url: string | null;
   stock: number;
+  is_discounted?: boolean;
+  is_used?: boolean;
 }
 
 interface ShoppingSectionProps {
   searchQuery: string;
-  selectedCategory: string;
+  selectedCategory: string | null;
+  showDiscounted: boolean;
+  showUsed: boolean;
 }
 
-export const ShoppingSection = ({ searchQuery, selectedCategory }: ShoppingSectionProps) => {
+export const ShoppingSection = ({ 
+  searchQuery, 
+  selectedCategory,
+  showDiscounted,
+  showUsed 
+}: ShoppingSectionProps) => {
   const { data: products, isLoading, isError } = useQuery({
-    queryKey: ['products', searchQuery, selectedCategory],
+    queryKey: ['products', searchQuery, selectedCategory, showDiscounted, showUsed],
     queryFn: async () => {
       let query = supabase
         .from('products')
@@ -35,8 +44,16 @@ export const ShoppingSection = ({ searchQuery, selectedCategory }: ShoppingSecti
         query = query.ilike('title', `%${searchQuery}%`);
       }
 
-      if (selectedCategory && selectedCategory !== 'all') {
+      if (selectedCategory) {
         query = query.eq('category', selectedCategory);
+      }
+
+      if (showDiscounted) {
+        query = query.eq('is_discounted', true);
+      }
+
+      if (showUsed) {
+        query = query.eq('is_used', true);
       }
 
       const { data, error } = await query;

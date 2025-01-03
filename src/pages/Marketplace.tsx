@@ -8,12 +8,14 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { SearchInput } from "@/components/SearchInput";
-import { ServiceCategoryFilter } from "@/components/ServiceCategoryFilter";
+import { ProductFilters } from "@/components/marketplace/ProductFilters";
 
 const Marketplace = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [showDiscounted, setShowDiscounted] = useState(false);
+  const [showUsed, setShowUsed] = useState(false);
 
   const { data: cartItemCount = 0 } = useQuery({
     queryKey: ['cartCount'],
@@ -30,10 +32,6 @@ const Marketplace = () => {
       return count || 0;
     },
   });
-
-  const handleCategoryChange = (category: string) => {
-    setSelectedCategory(category);
-  };
 
   return (
     <div className="min-h-screen bg-background pt-20 pb-16">
@@ -80,10 +78,22 @@ const Marketplace = () => {
               onChange={setSearchQuery}
               className="max-w-xl mx-auto"
             />
-            <ServiceCategoryFilter onCategoryChange={handleCategoryChange} />
+            <ProductFilters 
+              selectedCategory={selectedCategory}
+              onCategorySelect={setSelectedCategory}
+              showDiscounted={showDiscounted}
+              onDiscountedChange={() => setShowDiscounted(!showDiscounted)}
+              showUsed={showUsed}
+              onUsedChange={() => setShowUsed(!showUsed)}
+            />
           </div>
 
-          <ShoppingSection searchQuery={searchQuery} selectedCategory={selectedCategory} />
+          <ShoppingSection 
+            searchQuery={searchQuery} 
+            selectedCategory={selectedCategory === "All" ? null : selectedCategory}
+            showDiscounted={showDiscounted}
+            showUsed={showUsed}
+          />
         </div>
       </div>
     </div>
