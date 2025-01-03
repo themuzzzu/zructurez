@@ -482,6 +482,8 @@ export type Database = {
           description: string
           id: string
           image_url: string | null
+          is_discounted: boolean | null
+          is_used: boolean | null
           price: number
           service_product_id: string | null
           stock: number
@@ -495,6 +497,8 @@ export type Database = {
           description: string
           id?: string
           image_url?: string | null
+          is_discounted?: boolean | null
+          is_used?: boolean | null
           price: number
           service_product_id?: string | null
           stock?: number
@@ -508,6 +512,8 @@ export type Database = {
           description?: string
           id?: string
           image_url?: string | null
+          is_discounted?: boolean | null
+          is_used?: boolean | null
           price?: number
           service_product_id?: string | null
           stock?: number
