@@ -9,15 +9,41 @@ import { useQuery } from "@tanstack/react-query";
 
 const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<string>('latest');
 
   const { data: posts, isLoading, error } = useQuery({
     queryKey: ['posts', selectedCategory],
     queryFn: getPosts,
   });
 
+  const sortPosts = (posts: any[]) => {
+    if (!posts) return [];
+    
+    switch (sortBy) {
+      case 'trending':
+        // Sort by a combination of recency and engagement (likes + comments)
+        return [...posts].sort((a, b) => {
+          const aScore = (a.likes + a.comments) * (1 / ((Date.now() - new Date(a.created_at).getTime()) / 3600000 + 2));
+          const bScore = (b.likes + b.comments) * (1 / ((Date.now() - new Date(b.created_at).getTime()) / 3600000 + 2));
+          return bScore - aScore;
+        });
+      case 'top':
+        // Sort by total engagement (likes + comments)
+        return [...posts].sort((a, b) => (b.likes + b.comments) - (a.likes + a.comments));
+      case 'latest':
+      default:
+        // Sort by creation date (newest first)
+        return [...posts].sort((a, b) => 
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+    }
+  };
+
   const filteredPosts = selectedCategory
     ? posts?.filter(post => post.category === selectedCategory)
     : posts;
+
+  const sortedPosts = sortPosts(filteredPosts);
 
   return (
     <div className="min-h-screen bg-background">
@@ -28,7 +54,10 @@ const Index = () => {
           <main className="flex-1 max-w-2xl mx-auto lg:mx-0">
             <div className="space-y-6">
               <CreatePost />
-              <CategoryFilter onCategorySelect={setSelectedCategory} />
+              <CategoryFilter 
+                onCategorySelect={setSelectedCategory}
+                onSortChange={setSortBy}
+              />
               <div className="space-y-4">
                 {isLoading ? (
                   <div className="text-center py-8">Loading posts...</div>
@@ -36,12 +65,12 @@ const Index = () => {
                   <div className="text-center py-8 text-red-500">
                     Error loading posts. Please try again later.
                   </div>
-                ) : filteredPosts?.length === 0 ? (
+                ) : sortedPosts?.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
                     No posts found. Be the first to post!
                   </div>
                 ) : (
-                  filteredPosts?.map((post) => (
+                  sortedPosts?.map((post) => (
                     <PostCard
                       key={post.id}
                       id={post.id}
