@@ -1,7 +1,6 @@
-import { Search, TrendingUp } from "lucide-react";
-import { Input } from "../ui/input";
-import { useState } from "react";
+import { Search, TrendingUp, Hash } from "lucide-react";
 import { Button } from "../ui/button";
+import { useState } from "react";
 import {
   Command,
   CommandEmpty,
@@ -9,12 +8,14 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
+  CommandSeparator,
 } from "@/components/ui/command";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 interface SearchBoxProps {
   className?: string;
@@ -23,6 +24,8 @@ interface SearchBoxProps {
 export const SearchBox = ({ className }: SearchBoxProps) => {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const trendingTopics = [
     { topic: "Community Center", count: "2.5K posts" },
@@ -31,6 +34,22 @@ export const SearchBox = ({ className }: SearchBoxProps) => {
     { topic: "Local Business", count: "950 posts" },
     { topic: "Community Garden", count: "820 posts" },
   ];
+
+  const categories = [
+    "General",
+    "Events",
+    "News",
+    "Questions",
+    "Recommendations",
+    "Lost & Found",
+    "Community",
+    "Services",
+  ];
+
+  const handleCategorySelect = (category: string) => {
+    navigate(`/?category=${category.toLowerCase()}`);
+    setOpen(false);
+  };
 
   return (
     <div className={className}>
@@ -68,6 +87,19 @@ export const SearchBox = ({ className }: SearchBoxProps) => {
                     <span className="text-sm text-muted-foreground">
                       {item.count}
                     </span>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+              <CommandSeparator />
+              <CommandGroup heading="Categories">
+                {categories.map((category) => (
+                  <CommandItem
+                    key={category}
+                    onSelect={() => handleCategorySelect(category)}
+                    className="flex items-center"
+                  >
+                    <Hash className="mr-2 h-4 w-4 text-muted-foreground" />
+                    {category}
                   </CommandItem>
                 ))}
               </CommandGroup>
