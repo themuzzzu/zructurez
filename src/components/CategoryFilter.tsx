@@ -19,17 +19,13 @@ export const CategoryFilter = ({ onCategorySelect, onSortChange }: CategoryFilte
     "Services",
   ];
 
-  const handleSortChange = (sort: string) => {
-    onSortChange?.(sort);
-  };
-
   return (
-    <div className="space-y-4">
-      <div className="flex gap-2 pb-2">
+    <div className="flex gap-2 items-center">
+      <div className="flex gap-2">
         <Button
           variant="outline"
           size="sm"
-          onClick={() => handleSortChange('trending')}
+          onClick={() => onSortChange?.('trending')}
           className="flex items-center gap-1"
         >
           <Flame className="h-4 w-4 text-orange-500" />
@@ -38,7 +34,7 @@ export const CategoryFilter = ({ onCategorySelect, onSortChange }: CategoryFilte
         <Button
           variant="outline"
           size="sm"
-          onClick={() => handleSortChange('latest')}
+          onClick={() => onSortChange?.('latest')}
           className="flex items-center gap-1"
         >
           <Clock className="h-4 w-4" />
@@ -47,20 +43,20 @@ export const CategoryFilter = ({ onCategorySelect, onSortChange }: CategoryFilte
         <Button
           variant="outline"
           size="sm"
-          onClick={() => handleSortChange('top')}
+          onClick={() => onSortChange?.('top')}
           className="flex items-center gap-1"
         >
           <ThumbsUp className="h-4 w-4" />
           Top
         </Button>
       </div>
-      <ScrollArea className="w-full whitespace-nowrap">
-        <div className="flex w-max space-x-2 p-1">
+      <ScrollArea className="w-full">
+        <div className="flex space-x-2">
           <Button
             variant="outline"
             size="sm"
             onClick={() => onCategorySelect(null)}
-            className="flex items-center gap-1"
+            className="flex items-center gap-1 whitespace-nowrap"
           >
             <TrendingUp className="h-4 w-4" />
             All
@@ -71,6 +67,7 @@ export const CategoryFilter = ({ onCategorySelect, onSortChange }: CategoryFilte
               variant="outline"
               size="sm"
               onClick={() => onCategorySelect(category)}
+              className="whitespace-nowrap"
             >
               {category}
             </Button>

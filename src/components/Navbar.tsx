@@ -1,4 +1,4 @@
-import { Bell, Search, Menu, ShoppingCart } from "lucide-react";
+import { Bell, Search, Menu, ShoppingCart, Flame, Clock, ThumbsUp, TrendingUp } from "lucide-react";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
 import {
@@ -23,8 +23,14 @@ import { Sidebar } from "./Sidebar";
 import { Cart } from "./cart/Cart";
 import { NotificationList } from "./notifications/NotificationList";
 import { useQuery } from "@tanstack/react-query";
+import { CategoryFilter } from "./CategoryFilter";
 
-export const Navbar = () => {
+interface NavbarProps {
+  onSortChange?: (sort: string) => void;
+  onCategorySelect?: (category: string | null) => void;
+}
+
+export const Navbar = ({ onSortChange, onCategorySelect }: NavbarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const isHomePage = location.pathname === "/";
@@ -97,7 +103,7 @@ export const Navbar = () => {
         </div>
         
         {isHomePage && (
-          <div className="hidden md:flex items-center gap-4 flex-1 max-w-xl mx-4">
+          <div className="hidden md:flex flex-col flex-1 max-w-xl mx-4 gap-4">
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
@@ -106,6 +112,10 @@ export const Navbar = () => {
                 className="w-full pl-10 pr-4 py-2 border rounded-full bg-background focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300"
               />
             </div>
+            <CategoryFilter 
+              onCategorySelect={onCategorySelect}
+              onSortChange={onSortChange}
+            />
           </div>
         )}
 

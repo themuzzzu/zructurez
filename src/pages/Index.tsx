@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { CreatePost } from "@/components/CreatePost";
-import { CategoryFilter } from "@/components/CategoryFilter";
 import { PostCard } from "@/components/PostCard";
 import { Sidebar } from "@/components/Sidebar";
 import { getPosts } from "@/services/postService";
@@ -21,18 +20,15 @@ const Index = () => {
     
     switch (sortBy) {
       case 'trending':
-        // Sort by a combination of recency and engagement (likes + comments)
         return [...posts].sort((a, b) => {
           const aScore = (a.likes + a.comments) * (1 / ((Date.now() - new Date(a.created_at).getTime()) / 3600000 + 2));
           const bScore = (b.likes + b.comments) * (1 / ((Date.now() - new Date(b.created_at).getTime()) / 3600000 + 2));
           return bScore - aScore;
         });
       case 'top':
-        // Sort by total engagement (likes + comments)
         return [...posts].sort((a, b) => (b.likes + b.comments) - (a.likes + a.comments));
       case 'latest':
       default:
-        // Sort by creation date (newest first)
         return [...posts].sort((a, b) => 
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         );
@@ -47,17 +43,16 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      <Navbar 
+        onCategorySelect={setSelectedCategory}
+        onSortChange={setSortBy}
+      />
       <div className="container max-w-[1400px] pt-20 pb-16 px-4">
         <div className="flex gap-6">
           <Sidebar className="w-64 hidden lg:block sticky top-24 h-[calc(100vh-6rem)]" />
           <main className="flex-1 max-w-2xl mx-auto lg:mx-0">
             <div className="space-y-6">
               <CreatePost />
-              <CategoryFilter 
-                onCategorySelect={setSelectedCategory}
-                onSortChange={setSortBy}
-              />
               <div className="space-y-4">
                 {isLoading ? (
                   <div className="text-center py-8">Loading posts...</div>
