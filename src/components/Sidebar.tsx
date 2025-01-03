@@ -45,50 +45,46 @@ export const Sidebar = ({ className }: SidebarProps) => {
   ];
 
   return (
-    <ScrollArea className={cn("pb-12", className)}>
-      <div className="space-y-4">
-        <div className="py-2">
-          <div className="space-y-1">
-            {routes.map((route) => {
-              const Icon = route.icon;
-              return (
-                <Button
-                  key={route.path}
-                  variant={location.pathname === route.path ? "secondary" : "ghost"}
-                  className="w-full justify-start"
-                  onClick={() => navigate(route.path)}
-                >
-                  <Icon className="mr-2 h-4 w-4" />
-                  {route.name}
-                </Button>
-              );
-            })}
-          </div>
-        </div>
-        <div className="px-3 py-2">
-          <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
-            Categories
-          </h2>
-          <div className="space-y-1">
-            {categories.map((category) => {
-              const Icon = category.icon;
-              return (
-                <Button
-                  key={category.name}
-                  variant="ghost"
-                  className="w-full justify-start"
-                  onClick={() => {
-                    navigate(`/?category=${category.name.toLowerCase()}`);
-                  }}
-                >
-                  <Icon className="mr-2 h-4 w-4" />
-                  {category.name}
-                </Button>
-              );
-            })}
-          </div>
+    <div className={cn("h-screen", className)}>
+      <div className="space-y-1">
+        {routes.map((route) => {
+          const Icon = route.icon;
+          return (
+            <Button
+              key={route.path}
+              variant={location.pathname === route.path ? "secondary" : "ghost"}
+              className="w-full justify-start"
+              onClick={() => navigate(route.path)}
+            >
+              <Icon className="mr-2 h-4 w-4" />
+              {route.name}
+            </Button>
+          );
+        })}
+      </div>
+      <div className="mt-4">
+        <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
+          Categories
+        </h2>
+        <div className="space-y-1">
+          {categories.map((category) => {
+            const Icon = category.icon;
+            return (
+              <Button
+                key={category.name}
+                variant="ghost"
+                className="w-full justify-start"
+                onClick={() => {
+                  navigate(`/?category=${category.name.toLowerCase()}`);
+                }}
+              >
+                <Icon className="mr-2 h-4 w-4" />
+                {category.name}
+              </Button>
+            );
+          })}
         </div>
       </div>
-    </ScrollArea>
+    </div>
   );
 };
