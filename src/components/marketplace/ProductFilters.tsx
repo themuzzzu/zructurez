@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Check, Tags, Recycle } from "lucide-react";
+import { Check, Tags, Recycle, Award } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const categories = [
   "All",
@@ -35,6 +36,10 @@ interface ProductFiltersProps {
   onDiscountedChange: () => void;
   showUsed: boolean;
   onUsedChange: () => void;
+  showBranded: boolean;
+  onBrandedChange: () => void;
+  sortOption: string;
+  onSortChange: (value: string) => void;
 }
 
 export const ProductFilters = ({
@@ -44,6 +49,10 @@ export const ProductFilters = ({
   onDiscountedChange,
   showUsed,
   onUsedChange,
+  showBranded,
+  onBrandedChange,
+  sortOption,
+  onSortChange,
 }: ProductFiltersProps) => {
   return (
     <div className="space-y-4">
@@ -63,33 +72,60 @@ export const ProductFilters = ({
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
 
-      <div className="flex gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          className={cn(
-            "gap-2",
-            showDiscounted && "bg-primary text-primary-foreground"
-          )}
-          onClick={onDiscountedChange}
-        >
-          <Tags className="h-4 w-4" />
-          Discounted
-          {showDiscounted && <Check className="h-4 w-4" />}
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className={cn(
-            "gap-2",
-            showUsed && "bg-primary text-primary-foreground"
-          )}
-          onClick={onUsedChange}
-        >
-          <Recycle className="h-4 w-4" />
-          Used Products
-          {showUsed && <Check className="h-4 w-4" />}
-        </Button>
+      <div className="flex flex-wrap gap-2 items-center justify-between">
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className={cn(
+              "gap-2",
+              showDiscounted && "bg-primary text-primary-foreground"
+            )}
+            onClick={onDiscountedChange}
+          >
+            <Tags className="h-4 w-4" />
+            Discounted
+            {showDiscounted && <Check className="h-4 w-4" />}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className={cn(
+              "gap-2",
+              showUsed && "bg-primary text-primary-foreground"
+            )}
+            onClick={onUsedChange}
+          >
+            <Recycle className="h-4 w-4" />
+            Used Products
+            {showUsed && <Check className="h-4 w-4" />}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className={cn(
+              "gap-2",
+              showBranded && "bg-primary text-primary-foreground"
+            )}
+            onClick={onBrandedChange}
+          >
+            <Award className="h-4 w-4" />
+            Branded
+            {showBranded && <Check className="h-4 w-4" />}
+          </Button>
+        </div>
+        
+        <Select value={sortOption} onValueChange={onSortChange}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Sort by..." />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="newest">Newest First</SelectItem>
+            <SelectItem value="oldest">Oldest First</SelectItem>
+            <SelectItem value="price-asc">Price: Low to High</SelectItem>
+            <SelectItem value="price-desc">Price: High to Low</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
     </div>
   );

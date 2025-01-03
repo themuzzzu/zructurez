@@ -17,6 +17,8 @@ interface Product {
   stock: number;
   is_discounted?: boolean;
   is_used?: boolean;
+  is_branded?: boolean;
+  created_at: string;
 }
 
 interface ShoppingSectionProps {
@@ -24,21 +26,24 @@ interface ShoppingSectionProps {
   selectedCategory: string | null;
   showDiscounted: boolean;
   showUsed: boolean;
+  showBranded: boolean;
+  sortOption: string;
 }
 
 export const ShoppingSection = ({ 
   searchQuery, 
   selectedCategory,
   showDiscounted,
-  showUsed 
+  showUsed,
+  showBranded,
+  sortOption
 }: ShoppingSectionProps) => {
   const { data: products, isLoading, isError } = useQuery({
-    queryKey: ['products', searchQuery, selectedCategory, showDiscounted, showUsed],
+    queryKey: ['products', searchQuery, selectedCategory, showDiscounted, showUsed, showBranded, sortOption],
     queryFn: async () => {
       let query = supabase
         .from('products')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .select('*');
 
       if (searchQuery) {
         query = query.ilike('title', `%${searchQuery}%`);
@@ -54,6 +59,28 @@ export const ShoppingSection = ({
 
       if (showUsed) {
         query = query.eq('is_used', true);
+      }
+
+      if (showBranded) {
+        query = query.eq('is_branded', true);
+      }
+
+      // Apply sorting
+      switch (sortOption) {
+        case 'newest':
+          query = query.order('created_at', { ascending: false });
+          break;
+        case 'oldest':
+          query = query.order('created_at', { ascending: true });
+          break;
+        case 'price-asc':
+          query = query.order('price', { ascending: true });
+          break;
+        case 'price-desc':
+          query = query.order('price', { ascending: false });
+          break;
+        default:
+          query = query.order('created_at', { ascending: false });
       }
 
       const { data, error } = await query;
