@@ -1,6 +1,7 @@
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { MapLocationSelector } from "../create-service/MapLocationSelector";
+import { BusinessHoursSelect } from "./BusinessHoursSelect";
 
 interface BusinessContactInfoProps {
   formData: {
@@ -32,15 +33,10 @@ export const BusinessContactInfo = ({ formData, onChange }: BusinessContactInfoP
         />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="hours">Business Hours</Label>
-        <Input
-          id="hours"
-          value={formData.hours}
-          onChange={(e) => onChange("hours", e.target.value)}
-          placeholder="e.g., Mon-Fri: 9AM-5PM"
-        />
-      </div>
+      <BusinessHoursSelect
+        value={formData.hours}
+        onChange={(value) => onChange("hours", value)}
+      />
     </>
   );
 };
