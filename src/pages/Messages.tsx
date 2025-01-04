@@ -13,13 +13,13 @@ import type { Chat, Message } from "@/types/chat";
 // Using proper UUIDs for the sample data
 const SAMPLE_CHATS: Chat[] = [
   {
-    id: "1",
+    id: "feb4a063-6dfc-4b6f-a1d9-0fc2c57c04d1",
     name: "Sarah Johnson",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah",
     lastMessage: "Thanks for the help with the garden!",
     time: "2m ago",
     unread: 2,
-    userId: "feb4a063-6dfc-4b6f-a1d9-0fc2c57c04d1", // Proper UUID format
+    userId: "feb4a063-6dfc-4b6f-a1d9-0fc2c57c04d1",
     messages: [
       {
         id: "1",
@@ -42,7 +42,7 @@ const SAMPLE_CHATS: Chat[] = [
     ]
   },
   {
-    id: "2",
+    id: "feb4a063-6dfc-4b6f-a1d9-0fc2c57c04d2",
     name: "Mike Peterson",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Mike",
     lastMessage: "When is the next community meeting?",
@@ -52,7 +52,7 @@ const SAMPLE_CHATS: Chat[] = [
     messages: []
   },
   {
-    id: "3",
+    id: "feb4a063-6dfc-4b6f-a1d9-0fc2c57c04d3",
     name: "Emma Wilson",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emma",
     lastMessage: "I found your lost cat!",

@@ -41,29 +41,30 @@ export const ChatMenu = ({
 
   const handleMuteNotifications = async () => {
     try {
-      const user = await supabase.auth.getUser();
-      if (!user.data.user) {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
         throw new Error("User not authenticated");
       }
 
       const { error } = await supabase
         .from('notifications')
         .update({ muted: !isMuted })
-        .eq('user_id', user.data.user.id);
+        .eq('user_id', user.id);
 
       if (error) throw error;
 
       setIsMuted(!isMuted);
       toast.success(isMuted ? "Notifications unmuted" : "Notifications muted");
     } catch (error) {
+      console.error('Error updating notifications:', error);
       toast.error("Failed to update notification settings");
     }
   };
 
   const handleClearMessages = async () => {
     try {
-      const user = await supabase.auth.getUser();
-      if (!user.data.user) {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
         throw new Error("User not authenticated");
       }
 
@@ -71,7 +72,7 @@ export const ChatMenu = ({
         .from('messages')
         .delete()
         .match({ 
-          sender_id: user.data.user.id,
+          sender_id: user.id,
           receiver_id: selectedChat.userId 
         });
 
@@ -79,6 +80,7 @@ export const ChatMenu = ({
       
       toast.success("Messages cleared successfully");
     } catch (error) {
+      console.error('Error clearing messages:', error);
       toast.error("Failed to clear messages");
     }
   };
