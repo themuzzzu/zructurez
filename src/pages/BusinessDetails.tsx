@@ -8,6 +8,7 @@ import { ArrowLeft, MapPin, Clock, Phone, Building, Mail } from "lucide-react";
 import { toast } from "sonner";
 import { ErrorView } from "@/components/ErrorView";
 import { LoadingView } from "@/components/LoadingView";
+import { BusinessOfferings } from "@/components/business-details/BusinessOfferings";
 
 const BusinessDetails = () => {
   const { id } = useParams();
@@ -15,7 +16,7 @@ const BusinessDetails = () => {
   // Validate if id is a valid UUID
   const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id || '');
 
-  const { data: business, isLoading, error } = useQuery({
+  const { data: business, isLoading, error, refetch } = useQuery({
     queryKey: ['business', id],
     queryFn: async () => {
       if (!isValidUUID) {
@@ -36,8 +37,18 @@ const BusinessDetails = () => {
       if (!data) throw new Error('Business not found');
       return data;
     },
-    enabled: isValidUUID // Only run query if ID is valid UUID
+    enabled: isValidUUID
   });
+
+  const { data: currentUser } = useQuery({
+    queryKey: ['current-user'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      return user;
+    },
+  });
+
+  const isOwner = currentUser?.id === business?.user_id;
 
   const handleContact = () => {
     if (business?.contact) {
@@ -125,6 +136,13 @@ const BusinessDetails = () => {
                   </div>
                 </div>
               </Card>
+
+              {isOwner && (
+                <BusinessOfferings 
+                  businessId={business.id} 
+                  onSuccess={refetch}
+                />
+              )}
 
               {/* Display Business Products */}
               {business.business_products && business.business_products.length > 0 && (
