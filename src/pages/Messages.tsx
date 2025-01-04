@@ -11,19 +11,19 @@ import { useNavigate } from "react-router-dom";
 
 const SAMPLE_CHATS: Chat[] = [
   {
-    id: "feb4a063-6dfc-4b6f-a1d9-0fc2c57c04d1",
+    id: "d7bed21c-5a38-402b-ac0a-4ee011247c77",
     name: "Sarah Johnson",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah",
     lastMessage: "Thanks for the help with the garden!",
     time: "2m ago",
     unread: 2,
-    userId: "feb4a063-6dfc-4b6f-a1d9-0fc2c57c04d1",
+    userId: "d7bed21c-5a38-402b-ac0a-4ee011247c77",
     messages: [
       {
         id: "1",
         content: "Hi there! Could you help me with my garden?",
         timestamp: "Yesterday 2:30 PM",
-        senderId: "feb4a063-6dfc-4b6f-a1d9-0fc2c57c04d1"
+        senderId: "d7bed21c-5a38-402b-ac0a-4ee011247c77"
       },
       {
         id: "2",
@@ -35,28 +35,28 @@ const SAMPLE_CHATS: Chat[] = [
         id: "3",
         content: "Thanks for the help with the garden!",
         timestamp: "2m ago",
-        senderId: "feb4a063-6dfc-4b6f-a1d9-0fc2c57c04d1"
+        senderId: "d7bed21c-5a38-402b-ac0a-4ee011247c77"
       }
     ]
   },
   {
-    id: "feb4a063-6dfc-4b6f-a1d9-0fc2c57c04d2",
+    id: "e9e34f2c-9587-4bd7-9a58-d2c9db66a743",
     name: "Mike Peterson",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Mike",
     lastMessage: "When is the next community meeting?",
     time: "1h ago",
     unread: 0,
-    userId: "feb4a063-6dfc-4b6f-a1d9-0fc2c57c04d2",
+    userId: "e9e34f2c-9587-4bd7-9a58-d2c9db66a743",
     messages: []
   },
   {
-    id: "feb4a063-6dfc-4b6f-a1d9-0fc2c57c04d3",
+    id: "f6b3d8a1-4e12-4c3a-9e2d-8c4f1c9b7b5a",
     name: "Emma Wilson",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emma",
     lastMessage: "I found your lost cat!",
     time: "3h ago",
     unread: 1,
-    userId: "feb4a063-6dfc-4b6f-a1d9-0fc2c57c04d3",
+    userId: "f6b3d8a1-4e12-4c3a-9e2d-8c4f1c9b7b5a",
     messages: []
   }
 ];
