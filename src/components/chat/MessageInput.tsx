@@ -1,4 +1,4 @@
-import { Send, Smile } from "lucide-react";
+import { Send, Smile, Cat, Bird } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -13,6 +13,10 @@ interface MessageInputProps {
 export const MessageInput = ({ message, onMessageChange, onSubmit }: MessageInputProps) => {
   const handleEmojiClick = (emojiData: EmojiClickData) => {
     onMessageChange(message + emojiData.emoji);
+  };
+
+  const handleQuickEmoji = (emoji: string) => {
+    onMessageChange(message + emoji);
   };
 
   return (
@@ -40,6 +44,24 @@ export const MessageInput = ({ message, onMessageChange, onSubmit }: MessageInpu
           />
         </PopoverContent>
       </Popover>
+      <Button
+        variant="ghost"
+        size="icon"
+        type="button"
+        onClick={() => handleQuickEmoji("🐱")}
+        className="text-muted-foreground hover:text-foreground shrink-0"
+      >
+        <Cat className="h-5 w-5" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        type="button"
+        onClick={() => handleQuickEmoji("🐧")}
+        className="text-muted-foreground hover:text-foreground shrink-0"
+      >
+        <Bird className="h-5 w-5" />
+      </Button>
       <Input
         placeholder="Type a message..."
         value={message}
