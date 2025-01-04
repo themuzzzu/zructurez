@@ -18,8 +18,6 @@ interface CreateBusinessFormProps {
 export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: CreateBusinessFormProps) => {
   const [loading, setLoading] = useState(false);
   const [pendingImage, setPendingImage] = useState<string | null>(null);
-  const [imagePosition, setImagePosition] = useState({ x: 50, y: 50 });
-  const [imageScale, setImageScale] = useState(1);
   const [formData, setFormData] = useState({
     name: "",
     category: "",

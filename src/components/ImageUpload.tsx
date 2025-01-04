@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import { X } from "lucide-react";
 import { toast } from "sonner";
@@ -17,7 +17,11 @@ interface ImageUploadProps {
 export const ImageUpload = ({ selectedImage, onImageSelect }: ImageUploadProps) => {
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 50, y: 50 });
-  const [displayImage, setDisplayImage] = useState(selectedImage);
+  const [previewImage, setPreviewImage] = useState<string | null>(selectedImage);
+
+  useEffect(() => {
+    setPreviewImage(selectedImage);
+  }, [selectedImage]);
 
   const handleFileUpload = (file: File) => {
     if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
@@ -33,8 +37,7 @@ export const ImageUpload = ({ selectedImage, onImageSelect }: ImageUploadProps) 
     const reader = new FileReader();
     reader.onload = (e) => {
       const result = e.target?.result as string;
-      setDisplayImage(result);
-      onImageSelect(result);
+      setPreviewImage(result);
       setScale(1);
       setPosition({ x: 50, y: 50 });
       toast.success("Photo uploaded successfully!");
@@ -103,6 +106,10 @@ export const ImageUpload = ({ selectedImage, onImageSelect }: ImageUploadProps) 
     });
   };
 
+  const handleSave = () => {
+    onImageSelect(previewImage);
+  };
+
   return (
     <div className="space-y-4">
       <UploadButtons 
@@ -110,11 +117,11 @@ export const ImageUpload = ({ selectedImage, onImageSelect }: ImageUploadProps) 
         onFileSelect={handleFileUpload}
       />
 
-      {selectedImage && (
+      {previewImage && (
         <div className="space-y-4">
           <div className="relative h-48 overflow-hidden rounded-lg group">
             <img
-              src={selectedImage}
+              src={previewImage}
               alt="Preview"
               className="w-full h-full object-cover transition-transform duration-300"
               style={{
@@ -127,7 +134,7 @@ export const ImageUpload = ({ selectedImage, onImageSelect }: ImageUploadProps) 
               size="icon"
               className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
               onClick={() => {
-                setDisplayImage(null);
+                setPreviewImage(null);
                 onImageSelect(null);
               }}
             >
@@ -138,6 +145,12 @@ export const ImageUpload = ({ selectedImage, onImageSelect }: ImageUploadProps) 
           <div className="space-y-4 p-4 border rounded-lg">
             <ImageZoomControl scale={scale} onScaleChange={setScale} />
             <ImagePositionControls onPositionChange={handlePositionChange} />
+            <Button 
+              className="w-full" 
+              onClick={handleSave}
+            >
+              Apply Changes
+            </Button>
           </div>
         </div>
       )}
