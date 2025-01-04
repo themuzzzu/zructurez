@@ -7,7 +7,9 @@ import { LoadingView } from "@/components/LoadingView";
 import { BusinessHeader } from "@/components/business-details/BusinessHeader";
 import { BusinessProfile } from "@/components/business-details/BusinessProfile";
 import { BusinessContent } from "@/components/business-details/BusinessContent";
-import { BusinessEditButton } from "@/components/business-details/BusinessEditButton";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { CreateBusinessForm } from "@/components/CreateBusinessForm";
 import { useState } from "react";
 
 const BusinessDetails = () => {
@@ -97,16 +99,21 @@ const BusinessDetails = () => {
         </div>
       </div>
 
-      {isOwner && isEditing && (
-        <BusinessEditButton
-          business={business}
-          onSuccess={() => {
-            setIsEditing(false);
-            refetch();
-          }}
-          onClose={() => setIsEditing(false)}
-        />
-      )}
+      <Dialog open={isEditing} onOpenChange={setIsEditing}>
+        <DialogContent className="sm:max-w-[600px] h-[90vh]">
+          <DialogTitle>Edit Business</DialogTitle>
+          <ScrollArea className="h-full pr-4">
+            <CreateBusinessForm
+              initialData={business}
+              onSuccess={() => {
+                setIsEditing(false);
+                refetch();
+              }}
+              onCancel={() => setIsEditing(false)}
+            />
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
