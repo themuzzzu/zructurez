@@ -9,11 +9,13 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Group } from "@/components/groups/types";
 import { GroupChat } from "@/components/groups/GroupChat";
+import { useNavigate } from "react-router-dom";
 
 const Communities = () => {
   const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
@@ -37,7 +39,6 @@ const Communities = () => {
 
       if (groupsError) throw groupsError;
 
-      // Process the data to get member counts
       const processedGroups = groupsData.map(group => ({
         ...group,
         group_members: {
@@ -88,11 +89,18 @@ const Communities = () => {
       <Navbar />
       <div className="pt-16">
         <div className="flex h-[calc(100vh-4rem)]">
-          {/* Groups List */}
           <div className="w-[400px] border-r bg-background">
-            <div className="p-4 border-b flex justify-between items-center">
+            <div className="p-4 border-b flex items-center gap-2">
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => navigate('/')}
+                className="shrink-0"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
               <h1 className="text-2xl font-bold">Groups</h1>
-              <Button onClick={() => setIsCreateGroupOpen(true)} size="sm">
+              <Button onClick={() => setIsCreateGroupOpen(true)} size="sm" className="ml-auto">
                 <Plus className="h-4 w-4 mr-2" />
                 New Group
               </Button>
@@ -134,7 +142,6 @@ const Communities = () => {
             </div>
           </div>
 
-          {/* Chat Area */}
           <div className="flex-1 bg-background">
             {selectedGroup ? (
               <GroupChat groupId={selectedGroup.id} />

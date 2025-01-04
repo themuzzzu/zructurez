@@ -6,8 +6,9 @@ import { toast } from "sonner";
 import { ChatList } from "@/components/chat/ChatList";
 import { ChatWindow } from "@/components/chat/ChatWindow";
 import type { Chat, Message } from "@/types/chat";
+import { ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
-// Using proper UUIDs for the sample data
 const SAMPLE_CHATS: Chat[] = [
   {
     id: "feb4a063-6dfc-4b6f-a1d9-0fc2c57c04d1",
@@ -65,6 +66,7 @@ const Messages = () => {
   const [message, setMessage] = useState("");
   const [chats, setChats] = useState<Chat[]>(SAMPLE_CHATS);
   const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
 
   const handleSelectChat = (chat: Chat) => {
     const updatedChats = chats.map(c => {
@@ -115,6 +117,17 @@ const Messages = () => {
       <div className="pt-16">
         <div className="flex h-[calc(100vh-4rem)]">
           <div className="w-[400px] border-r bg-background">
+            <div className="p-4 border-b flex items-center gap-2">
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => navigate('/')}
+                className="shrink-0"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <h1 className="text-2xl font-bold">Messages</h1>
+            </div>
             <ChatList
               chats={filteredChats}
               selectedChat={selectedChat}
