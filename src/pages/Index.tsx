@@ -58,7 +58,7 @@ const PostList = ({ selectedCategory }: { selectedCategory: string | null }) => 
 
 const BusinessSection = () => {
   const { data: business, isLoading } = useQuery({
-    queryKey: ['featured-business'],
+    queryKey: ['business'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('businesses')
@@ -152,8 +152,8 @@ const Index = () => {
                 </div>
                 <ScrollBar orientation="horizontal" />
               </ScrollArea>
-              <BusinessSection />
               <CreatePost />
+              <BusinessSection />
               <PostList selectedCategory={selectedCategory} />
             </div>
           </div>
