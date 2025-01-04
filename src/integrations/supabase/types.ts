@@ -386,6 +386,7 @@ export type Database = {
           created_at: string
           id: string
           message: string
+          muted: boolean | null
           read: boolean | null
           user_id: string
         }
@@ -393,6 +394,7 @@ export type Database = {
           created_at?: string
           id?: string
           message: string
+          muted?: boolean | null
           read?: boolean | null
           user_id: string
         }
@@ -400,6 +402,7 @@ export type Database = {
           created_at?: string
           id?: string
           message?: string
+          muted?: boolean | null
           read?: boolean | null
           user_id?: string
         }
