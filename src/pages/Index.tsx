@@ -27,7 +27,7 @@ const PostList = ({ selectedCategory }: { selectedCategory: string | null }) => 
 
   if (!filteredPosts?.length) {
     return (
-      <div className="text-center py-8 text-muted-foreground">
+      <div className="text-center py-8 text-gray-400">
         No posts found. Be the first to post!
       </div>
     );
@@ -77,8 +77,8 @@ const Index = () => {
         <main className="flex-1 ml-64 pt-16 px-4 bg-[#0a0a0a]">
           <div className="max-w-2xl mx-auto">
             <div className="space-y-6">
-              <div className="bg-[#141414] rounded-lg p-4 shadow-sm">
-                <h2 className="text-lg font-semibold mb-3">Categories</h2>
+              <div className="bg-[#141414] rounded-lg p-4 shadow-sm border border-[#1a1a1a]">
+                <h2 className="text-lg font-semibold mb-3 text-gray-200">Categories</h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                   {categories.map((category) => {
                     const Icon = category.icon;
@@ -86,7 +86,7 @@ const Index = () => {
                       <Button
                         key={category.name}
                         variant="outline"
-                        className="w-full justify-start bg-[#1a1a1a] hover:bg-[#252525] border-[#2a2a2a]"
+                        className="w-full justify-start bg-[#1a1a1a] hover:bg-[#252525] border-[#2a2a2a] text-gray-200"
                         onClick={() => {
                           const searchParams = new URLSearchParams(window.location.search);
                           searchParams.set('category', category.name.toLowerCase());

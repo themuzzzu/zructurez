@@ -55,7 +55,7 @@ export const CreatePost = ({ onSuccess }: CreatePostProps) => {
   };
 
   return (
-    <Card className="p-4 bg-card">
+    <Card className="p-4 bg-[#141414] border-[#1a1a1a]">
       <div className="flex items-start gap-4">
         <img
           src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"
@@ -67,7 +67,7 @@ export const CreatePost = ({ onSuccess }: CreatePostProps) => {
             placeholder="Share something with your neighborhood..."
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="min-h-[100px] bg-background text-black dark:text-white hover:bg-background/90 focus:bg-background/90 transition-colors duration-300"
+            className="min-h-[100px] bg-[#1a1a1a] text-gray-200 hover:bg-[#1f1f1f] focus:bg-[#1f1f1f] transition-colors duration-300 border-[#2a2a2a]"
           />
 
           <ImageUpload 
@@ -96,7 +96,7 @@ export const CreatePost = ({ onSuccess }: CreatePostProps) => {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="text-muted-foreground"
+                className="text-gray-400 hover:text-gray-200 hover:bg-[#252525]"
               >
                 <ImageIcon className="h-4 w-4 mr-2" />
                 Photo
@@ -105,7 +105,7 @@ export const CreatePost = ({ onSuccess }: CreatePostProps) => {
             <Button 
               variant="ghost" 
               size="sm" 
-              className="text-muted-foreground"
+              className="text-gray-400 hover:text-gray-200 hover:bg-[#252525]"
               onClick={() => toast.info("Category selection feature coming soon!")}
             >
               <Tag className="h-4 w-4 mr-2" />
@@ -114,24 +114,24 @@ export const CreatePost = ({ onSuccess }: CreatePostProps) => {
             <Button 
               variant="ghost" 
               size="sm" 
-              className="text-muted-foreground"
+              className="text-gray-400 hover:text-gray-200 hover:bg-[#252525]"
               onClick={() => toast.info("Poll creation feature coming soon!")}
             >
               <ListChecks className="h-4 w-4 mr-2" />
               Poll
             </Button>
             <Select onValueChange={setSelectedLocation} value={selectedLocation}>
-              <SelectTrigger className="w-[140px]">
+              <SelectTrigger className="w-[140px] bg-[#1a1a1a] border-[#2a2a2a]">
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="text-muted-foreground -ml-3"
+                  className="text-gray-400 hover:text-gray-200 -ml-3"
                 >
                   <MapPin className="h-4 w-4 mr-2" />
                   {selectedLocation || "Location"}
                 </Button>
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-[#1a1a1a] border-[#2a2a2a]">
                 <SelectItem value="local">Local</SelectItem>
                 <SelectItem value="district">District</SelectItem>
                 <SelectItem value="state">State</SelectItem>
@@ -139,7 +139,7 @@ export const CreatePost = ({ onSuccess }: CreatePostProps) => {
               </SelectContent>
             </Select>
             <Button 
-              className="ml-auto"
+              className="ml-auto bg-primary hover:bg-secondary"
               onClick={handleCreatePost}
               disabled={isPosting || !content.trim()}
             >
