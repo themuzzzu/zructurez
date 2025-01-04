@@ -2,12 +2,14 @@ import { useState } from "react";
 import { Label } from "../ui/label";
 import { Checkbox } from "../ui/checkbox";
 import { Input } from "../ui/input";
-import { Button } from "../ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 
 interface DaySchedule {
   isOpen: boolean;
   openTime: string;
   closeTime: string;
+  openPeriod: "AM" | "PM";
+  closePeriod: "AM" | "PM";
 }
 
 interface BusinessHours {
@@ -22,19 +24,21 @@ interface BusinessHoursSelectProps {
 export const BusinessHoursSelect = ({ value, onChange }: BusinessHoursSelectProps) => {
   // Parse initial value if it exists
   const initialHours: BusinessHours = value ? JSON.parse(value) : {
-    monday: { isOpen: false, openTime: "09:00", closeTime: "17:00" },
-    tuesday: { isOpen: false, openTime: "09:00", closeTime: "17:00" },
-    wednesday: { isOpen: false, openTime: "09:00", closeTime: "17:00" },
-    thursday: { isOpen: false, openTime: "09:00", closeTime: "17:00" },
-    friday: { isOpen: false, openTime: "09:00", closeTime: "17:00" },
-    saturday: { isOpen: false, openTime: "09:00", closeTime: "17:00" },
-    sunday: { isOpen: false, openTime: "09:00", closeTime: "17:00" },
+    monday: { isOpen: false, openTime: "09:00", closeTime: "05:00", openPeriod: "AM", closePeriod: "PM" },
+    tuesday: { isOpen: false, openTime: "09:00", closeTime: "05:00", openPeriod: "AM", closePeriod: "PM" },
+    wednesday: { isOpen: false, openTime: "09:00", closeTime: "05:00", openPeriod: "AM", closePeriod: "PM" },
+    thursday: { isOpen: false, openTime: "09:00", closeTime: "05:00", openPeriod: "AM", closePeriod: "PM" },
+    friday: { isOpen: false, openTime: "09:00", closeTime: "05:00", openPeriod: "AM", closePeriod: "PM" },
+    saturday: { isOpen: false, openTime: "09:00", closeTime: "05:00", openPeriod: "AM", closePeriod: "PM" },
+    sunday: { isOpen: false, openTime: "09:00", closeTime: "05:00", openPeriod: "AM", closePeriod: "PM" },
   };
 
   const [hours, setHours] = useState<BusinessHours>(initialHours);
   const [useUniformHours, setUseUniformHours] = useState(true);
   const [uniformOpenTime, setUniformOpenTime] = useState("09:00");
-  const [uniformCloseTime, setUniformCloseTime] = useState("17:00");
+  const [uniformCloseTime, setUniformCloseTime] = useState("05:00");
+  const [uniformOpenPeriod, setUniformOpenPeriod] = useState<"AM" | "PM">("AM");
+  const [uniformClosePeriod, setUniformClosePeriod] = useState<"AM" | "PM">("PM");
 
   const handleDayToggle = (day: string, checked: boolean) => {
     const updatedHours = {
@@ -43,7 +47,9 @@ export const BusinessHoursSelect = ({ value, onChange }: BusinessHoursSelectProp
         ...hours[day], 
         isOpen: checked,
         openTime: useUniformHours ? uniformOpenTime : hours[day].openTime,
-        closeTime: useUniformHours ? uniformCloseTime : hours[day].closeTime
+        closeTime: useUniformHours ? uniformCloseTime : hours[day].closeTime,
+        openPeriod: useUniformHours ? uniformOpenPeriod : hours[day].openPeriod,
+        closePeriod: useUniformHours ? uniformClosePeriod : hours[day].closePeriod,
       },
     };
     setHours(updatedHours);
@@ -59,11 +65,39 @@ export const BusinessHoursSelect = ({ value, onChange }: BusinessHoursSelectProp
     onChange(JSON.stringify(updatedHours));
   };
 
+  const handlePeriodChange = (day: string, field: 'openPeriod' | 'closePeriod', value: "AM" | "PM") => {
+    const updatedHours = {
+      ...hours,
+      [day]: { ...hours[day], [field]: value },
+    };
+    setHours(updatedHours);
+    onChange(JSON.stringify(updatedHours));
+  };
+
   const handleUniformTimeChange = (field: 'openTime' | 'closeTime', value: string) => {
     if (field === 'openTime') {
       setUniformOpenTime(value);
     } else {
       setUniformCloseTime(value);
+    }
+
+    if (useUniformHours) {
+      const updatedHours = { ...hours };
+      Object.keys(updatedHours).forEach(day => {
+        if (updatedHours[day].isOpen) {
+          updatedHours[day][field] = value;
+        }
+      });
+      setHours(updatedHours);
+      onChange(JSON.stringify(updatedHours));
+    }
+  };
+
+  const handleUniformPeriodChange = (field: 'openPeriod' | 'closePeriod', value: "AM" | "PM") => {
+    if (field === 'openPeriod') {
+      setUniformOpenPeriod(value);
+    } else {
+      setUniformClosePeriod(value);
     }
 
     if (useUniformHours) {
@@ -110,6 +144,18 @@ export const BusinessHoursSelect = ({ value, onChange }: BusinessHoursSelectProp
                 onChange={(e) => handleUniformTimeChange('openTime', e.target.value)}
                 className="w-32"
               />
+              <Select
+                value={uniformOpenPeriod}
+                onValueChange={(value) => handleUniformPeriodChange('openPeriod', value as "AM" | "PM")}
+              >
+                <SelectTrigger className="w-20">
+                  <SelectValue placeholder="AM/PM" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="AM">AM</SelectItem>
+                  <SelectItem value="PM">PM</SelectItem>
+                </SelectContent>
+              </Select>
               <span>to</span>
               <Input
                 type="time"
@@ -117,6 +163,18 @@ export const BusinessHoursSelect = ({ value, onChange }: BusinessHoursSelectProp
                 onChange={(e) => handleUniformTimeChange('closeTime', e.target.value)}
                 className="w-32"
               />
+              <Select
+                value={uniformClosePeriod}
+                onValueChange={(value) => handleUniformPeriodChange('closePeriod', value as "AM" | "PM")}
+              >
+                <SelectTrigger className="w-20">
+                  <SelectValue placeholder="AM/PM" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="AM">AM</SelectItem>
+                  <SelectItem value="PM">PM</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           )}
         </div>
@@ -141,6 +199,18 @@ export const BusinessHoursSelect = ({ value, onChange }: BusinessHoursSelectProp
                   onChange={(e) => handleTimeChange(id, 'openTime', e.target.value)}
                   className="w-32"
                 />
+                <Select
+                  value={hours[id].openPeriod}
+                  onValueChange={(value) => handlePeriodChange(id, 'openPeriod', value as "AM" | "PM")}
+                >
+                  <SelectTrigger className="w-20">
+                    <SelectValue placeholder="AM/PM" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="AM">AM</SelectItem>
+                    <SelectItem value="PM">PM</SelectItem>
+                  </SelectContent>
+                </Select>
                 <span>to</span>
                 <Input
                   type="time"
@@ -148,6 +218,18 @@ export const BusinessHoursSelect = ({ value, onChange }: BusinessHoursSelectProp
                   onChange={(e) => handleTimeChange(id, 'closeTime', e.target.value)}
                   className="w-32"
                 />
+                <Select
+                  value={hours[id].closePeriod}
+                  onValueChange={(value) => handlePeriodChange(id, 'closePeriod', value as "AM" | "PM")}
+                >
+                  <SelectTrigger className="w-20">
+                    <SelectValue placeholder="AM/PM" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="AM">AM</SelectItem>
+                    <SelectItem value="PM">PM</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             )}
           </div>
