@@ -1,4 +1,3 @@
-import { Message } from "@/types/chat";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -16,7 +15,6 @@ export const useMessageForwarding = () => {
         return;
       }
 
-      // For now just show a toast - implement actual forwarding later
       toast.success("Message forwarding will be implemented soon!");
     } catch (error) {
       console.error("Error forwarding message:", error);
