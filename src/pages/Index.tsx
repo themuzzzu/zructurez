@@ -6,8 +6,8 @@ import { Sidebar } from "@/components/Sidebar";
 import { getPosts } from "@/services/postService";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Hash, MessageSquare, Users, Wrench } from "lucide-react";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
 import { LoadingView } from "@/components/LoadingView";
 
 const PostList = ({ selectedCategory }: { selectedCategory: string | null }) => {
@@ -55,19 +55,28 @@ const PostList = ({ selectedCategory }: { selectedCategory: string | null }) => 
 };
 
 const Index = () => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const selectedCategory = searchParams.get('category');
 
   const categories = [
-    { name: "General", icon: Hash },
-    { name: "Events", icon: MessageSquare },
-    { name: "News", icon: MessageSquare },
-    { name: "Questions", icon: MessageSquare },
-    { name: "Recommendations", icon: MessageSquare },
-    { name: "Lost & Found", icon: MessageSquare },
-    { name: "Community", icon: Users },
-    { name: "Services", icon: Wrench },
+    "All",
+    "General",
+    "News",
+    "Events",
+    "Questions",
+    "Recommendations",
+    "Lost & Found",
+    "Community",
   ];
+
+  const handleCategorySelect = (category: string) => {
+    if (category === "All") {
+      searchParams.delete('category');
+    } else {
+      searchParams.set('category', category.toLowerCase());
+    }
+    setSearchParams(searchParams);
+  };
 
   return (
     <div className="min-h-screen bg-[#0a0a0a]">
@@ -77,30 +86,25 @@ const Index = () => {
         <main className="flex-1 ml-64 pt-16 px-4 bg-[#0a0a0a]">
           <div className="max-w-2xl mx-auto">
             <div className="space-y-6">
-              <div className="bg-[#141414] rounded-lg p-4 shadow-sm border border-[#1a1a1a]">
-                <h2 className="text-lg font-semibold mb-3 text-gray-200">Categories</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                  {categories.map((category) => {
-                    const Icon = category.icon;
-                    return (
-                      <Button
-                        key={category.name}
-                        variant="outline"
-                        className="w-full justify-start bg-[#1a1a1a] hover:bg-[#252525] border-[#2a2a2a] text-gray-200"
-                        onClick={() => {
-                          const searchParams = new URLSearchParams(window.location.search);
-                          searchParams.set('category', category.name.toLowerCase());
-                          window.history.pushState(null, '', `?${searchParams.toString()}`);
-                          window.dispatchEvent(new PopStateEvent('popstate'));
-                        }}
-                      >
-                        <Icon className="mr-2 h-4 w-4" />
-                        {category.name}
-                      </Button>
-                    );
-                  })}
+              <ScrollArea className="w-full whitespace-nowrap rounded-md">
+                <div className="flex space-x-2 p-4">
+                  {categories.map((category) => (
+                    <button
+                      key={category}
+                      onClick={() => handleCategorySelect(category)}
+                      className={cn(
+                        "px-4 py-2 rounded-full text-sm font-medium transition-colors",
+                        selectedCategory === category.toLowerCase() || (!selectedCategory && category === "All")
+                          ? "bg-primary text-white"
+                          : "bg-[#222222] text-gray-300 hover:bg-[#333333]"
+                      )}
+                    >
+                      {category}
+                    </button>
+                  ))}
                 </div>
-              </div>
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
               <CreatePost />
               <PostList selectedCategory={selectedCategory} />
             </div>
