@@ -18,6 +18,8 @@ export const ImageUpload = ({ selectedImage, onImageSelect }: ImageUploadProps) 
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 50, y: 50 });
   const [previewImage, setPreviewImage] = useState<string | null>(selectedImage);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     setPreviewImage(selectedImage);
@@ -82,28 +84,25 @@ export const ImageUpload = ({ selectedImage, onImageSelect }: ImageUploadProps) 
     }
   };
 
-  const handlePositionChange = (direction: 'up' | 'down' | 'left' | 'right') => {
-    setPosition(prev => {
-      const step = 2;
-      const newPosition = { ...prev };
-      
-      switch (direction) {
-        case 'up':
-          newPosition.y = Math.max(0, prev.y - step);
-          break;
-        case 'down':
-          newPosition.y = Math.min(100, prev.y + step);
-          break;
-        case 'left':
-          newPosition.x = Math.max(0, prev.x - step);
-          break;
-        case 'right':
-          newPosition.x = Math.min(100, prev.x + step);
-          break;
-      }
-      
-      return newPosition;
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    setIsDragging(true);
+    setDragStart({
+      x: e.clientX - position.x,
+      y: e.clientY - position.y,
     });
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDragging) return;
+    
+    const newX = Math.max(0, Math.min(100, e.clientX - dragStart.x));
+    const newY = Math.max(0, Math.min(100, e.clientY - dragStart.y));
+    
+    setPosition({ x: newX, y: newY });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
   };
 
   const handleSave = () => {
@@ -119,14 +118,22 @@ export const ImageUpload = ({ selectedImage, onImageSelect }: ImageUploadProps) 
 
       {previewImage && (
         <div className="space-y-4">
-          <div className="relative h-48 overflow-hidden rounded-lg group">
+          <div 
+            className="relative h-48 overflow-hidden rounded-lg group cursor-move"
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+          >
             <img
               src={previewImage}
               alt="Preview"
               className="w-full h-full object-cover transition-transform duration-300"
               style={{
                 transform: `scale(${scale})`,
-                objectPosition: `${position.x}% ${position.y}%`
+                objectPosition: `${position.x}% ${position.y}%`,
+                userSelect: 'none',
+                pointerEvents: 'none'
               }}
             />
             <Button
@@ -144,7 +151,7 @@ export const ImageUpload = ({ selectedImage, onImageSelect }: ImageUploadProps) 
 
           <div className="space-y-4 p-4 border rounded-lg">
             <ImageZoomControl scale={scale} onScaleChange={setScale} />
-            <ImagePositionControls onPositionChange={handlePositionChange} />
+            <ImagePositionControls onPositionChange={(x, y) => setPosition({ x, y })} />
             <Button 
               className="w-full" 
               onClick={handleSave}
