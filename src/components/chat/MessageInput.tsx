@@ -1,4 +1,4 @@
-import { Send, Smile, Cat, Bird } from "lucide-react";
+import { Send, Smile } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -37,6 +37,26 @@ export const MessageInput = ({ message, onMessageChange, onSubmit }: MessageInpu
           side="top" 
           align="start"
         >
+          <div className="p-2 border-b flex gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              type="button"
+              onClick={() => handleQuickEmoji("🐱")}
+              className="text-xl"
+            >
+              🐱
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              type="button"
+              onClick={() => handleQuickEmoji("🐧")}
+              className="text-xl"
+            >
+              🐧
+            </Button>
+          </div>
           <EmojiPicker
             onEmojiClick={handleEmojiClick}
             width="100%"
@@ -44,24 +64,6 @@ export const MessageInput = ({ message, onMessageChange, onSubmit }: MessageInpu
           />
         </PopoverContent>
       </Popover>
-      <Button
-        variant="ghost"
-        size="icon"
-        type="button"
-        onClick={() => handleQuickEmoji("🐱")}
-        className="text-muted-foreground hover:text-foreground shrink-0"
-      >
-        <Cat className="h-5 w-5" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        type="button"
-        onClick={() => handleQuickEmoji("🐧")}
-        className="text-muted-foreground hover:text-foreground shrink-0"
-      >
-        <Bird className="h-5 w-5" />
-      </Button>
       <Input
         placeholder="Type a message..."
         value={message}
