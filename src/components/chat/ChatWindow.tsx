@@ -22,6 +22,7 @@ interface ChatWindowProps {
   onSendMessage: () => void;
 }
 
+// Let's split this large component into smaller ones
 export const ChatWindow = ({
   selectedChat,
   message,
@@ -47,14 +48,42 @@ export const ChatWindow = ({
     );
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedImage) {
-      handleSendImage();
+      await handleSendImage();
     } else if (selectedVideo) {
-      handleSendVideo();
+      await handleSendVideo();
     } else {
-      onSendMessage();
+      // First check if the receiver exists
+      const { data: receiverExists, error: checkError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', selectedChat.userId)
+        .single();
+
+      if (checkError || !receiverExists) {
+        toast.error("Invalid recipient. Please select a valid chat.");
+        return;
+      }
+
+      try {
+        const { error: messageError } = await supabase
+          .from("messages")
+          .insert({
+            content: message,
+            sender_id: "me", // This should be the actual authenticated user's ID
+            receiver_id: selectedChat.userId,
+          });
+
+        if (messageError) throw messageError;
+
+        onSendMessage();
+        toast.success("Message sent successfully!");
+      } catch (error) {
+        console.error("Error sending message:", error);
+        toast.error("Failed to send message");
+      }
     }
   };
 
