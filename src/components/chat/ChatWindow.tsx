@@ -71,7 +71,7 @@ export const ChatWindow = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1 flex flex-col relative">
       <ChatHeader
         chat={selectedChat}
         isMuted={isMuted}
@@ -81,10 +81,12 @@ export const ChatWindow = ({
         isSelectMode={isSelectMode}
       />
 
-      <ChatMessages 
-        chat={selectedChat} 
-        onForwardMessage={handleForwardMessage}
-      />
+      <div className="flex-1 overflow-y-auto pb-24">
+        <ChatMessages 
+          chat={selectedChat} 
+          onForwardMessage={handleForwardMessage}
+        />
+      </div>
 
       <ChatInput
         message={message}
