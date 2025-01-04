@@ -57,7 +57,7 @@ const PostList = ({ selectedCategory }: { selectedCategory: string | null }) => 
 };
 
 const BusinessSection = () => {
-  const { data: businesses } = useQuery({
+  const { data: businesses, isLoading } = useQuery({
     queryKey: ['featured-businesses'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -70,7 +70,11 @@ const BusinessSection = () => {
     },
   });
 
-  return businesses && businesses.length > 0 ? (
+  if (isLoading || !businesses || businesses.length === 0) {
+    return null;
+  }
+
+  return (
     <div className="space-y-4 bg-black/90 p-6 rounded-lg shadow-lg mb-6">
       <h2 className="text-xl font-semibold text-white">Featured Businesses</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -94,7 +98,7 @@ const BusinessSection = () => {
         ))}
       </div>
     </div>
-  ) : null;
+  );
 };
 
 const Index = () => {
