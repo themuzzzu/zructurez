@@ -18,7 +18,8 @@ interface BusinessCardProps {
   verified: boolean;
   serviceName: string;
   cost: number;
-  price?: number; // Added price field
+  appointment_price?: number;
+  consultation_price?: number;
 }
 
 export const BusinessCard = ({
@@ -33,9 +34,8 @@ export const BusinessCard = ({
   contact,
   hours,
   verified,
-  serviceName,
-  cost,
-  price
+  appointment_price,
+  consultation_price
 }: BusinessCardProps) => {
   const navigate = useNavigate();
 
@@ -66,8 +66,17 @@ export const BusinessCard = ({
           {hours}
         </div>
         {verified && <Badge variant="outline">Verified</Badge>}
-        <div className="flex items-center justify-between mt-4">
-          <span className="font-semibold">Starting from ₹{price || cost}</span>
+        <div className="flex flex-col gap-2 mt-4">
+          {appointment_price && (
+            <div className="text-sm">
+              <span className="font-semibold">Appointment:</span> ₹{appointment_price}
+            </div>
+          )}
+          {consultation_price && (
+            <div className="text-sm">
+              <span className="font-semibold">Consultation:</span> ₹{consultation_price}
+            </div>
+          )}
           <Button onClick={(e) => {
             e.stopPropagation();
             window.location.href = `tel:${contact}`;

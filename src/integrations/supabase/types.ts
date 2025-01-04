@@ -123,7 +123,9 @@ export type Database = {
       }
       businesses: {
         Row: {
+          appointment_price: number | null
           category: string
+          consultation_price: number | null
           contact: string | null
           created_at: string
           description: string
@@ -137,7 +139,9 @@ export type Database = {
           video_url: string | null
         }
         Insert: {
+          appointment_price?: number | null
           category: string
+          consultation_price?: number | null
           contact?: string | null
           created_at?: string
           description: string
@@ -151,7 +155,9 @@ export type Database = {
           video_url?: string | null
         }
         Update: {
+          appointment_price?: number | null
           category?: string
+          consultation_price?: number | null
           contact?: string | null
           created_at?: string
           description?: string

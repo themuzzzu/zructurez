@@ -1,19 +1,11 @@
 import { useState } from "react";
 import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Textarea } from "./ui/textarea";
-import { Label } from "./ui/label";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { ImageUpload } from "./ImageUpload";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
-import { MapLocationSelector } from "./create-service/MapLocationSelector";
+import { BusinessBasicInfo } from "./business-form/BusinessBasicInfo";
+import { BusinessPricing } from "./business-form/BusinessPricing";
+import { BusinessContactInfo } from "./business-form/BusinessContactInfo";
 
 interface CreateBusinessFormProps {
   onSuccess?: () => void;
@@ -30,8 +22,13 @@ export const CreateBusinessForm = ({ onSuccess, onCancel }: CreateBusinessFormPr
     contact: "",
     hours: "",
     image: null as string | null,
-    price: "", // Added price field
+    appointment_price: "",
+    consultation_price: "",
   });
+
+  const handleChange = (name: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,7 +80,8 @@ export const CreateBusinessForm = ({ onSuccess, onCancel }: CreateBusinessFormPr
           contact: formData.contact,
           hours: formData.hours,
           image_url: imageUrl,
-          price: formData.price ? parseFloat(formData.price) : null, // Added price
+          appointment_price: formData.appointment_price ? parseFloat(formData.appointment_price) : null,
+          consultation_price: formData.consultation_price ? parseFloat(formData.consultation_price) : null,
         }])
         .select()
         .single();
@@ -102,96 +100,15 @@ export const CreateBusinessForm = ({ onSuccess, onCancel }: CreateBusinessFormPr
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="name">Business Name *</Label>
-        <Input
-          id="name"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          placeholder="Enter your business name"
-          required
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="category">Category *</Label>
-        <Select
-          value={formData.category}
-          onValueChange={(value) => setFormData({ ...formData, category: value })}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select a category" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="healthcare">Healthcare</SelectItem>
-            <SelectItem value="driving-school">Driving School</SelectItem>
-            <SelectItem value="restaurant">Restaurant</SelectItem>
-            <SelectItem value="retail">Retail</SelectItem>
-            <SelectItem value="education">Education</SelectItem>
-            <SelectItem value="fitness">Fitness</SelectItem>
-            <SelectItem value="beauty">Beauty & Wellness</SelectItem>
-            <SelectItem value="professional">Professional Services</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="description">Description *</Label>
-        <Textarea
-          id="description"
-          value={formData.description}
-          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-          placeholder="Describe your business"
-          required
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="price">Starting Price (₹)</Label>
-        <Input
-          id="price"
-          type="number"
-          min="0"
-          step="0.01"
-          value={formData.price}
-          onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-          placeholder="Enter starting price"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label>Location</Label>
-        <MapLocationSelector
-          value={formData.location}
-          onChange={(location) => setFormData({ ...formData, location })}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="contact">Contact Information</Label>
-        <Input
-          id="contact"
-          value={formData.contact}
-          onChange={(e) => setFormData({ ...formData, contact: e.target.value })}
-          placeholder="Phone number or email"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="hours">Business Hours</Label>
-        <Input
-          id="hours"
-          value={formData.hours}
-          onChange={(e) => setFormData({ ...formData, hours: e.target.value })}
-          placeholder="e.g., Mon-Fri: 9AM-5PM"
-        />
-      </div>
+      <BusinessBasicInfo formData={formData} onChange={handleChange} />
+      <BusinessPricing formData={formData} onChange={handleChange} />
+      <BusinessContactInfo formData={formData} onChange={handleChange} />
 
       <div className="space-y-2">
         <Label>Business Image</Label>
         <ImageUpload
           selectedImage={formData.image}
-          onImageSelect={(image) => setFormData({ ...formData, image })}
+          onImageSelect={(image) => handleChange("image", image)}
         />
       </div>
 
