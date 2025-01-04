@@ -8,7 +8,6 @@ import { addComment, getComments } from "@/services/postService";
 
 interface CommentSectionProps {
   postId: string;
-  initialComments: any[];
 }
 
 export const CommentSection = ({ postId }: CommentSectionProps) => {
