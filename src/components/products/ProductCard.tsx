@@ -4,6 +4,12 @@ import { ShoppingBag, DollarSign, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Product {
   id: string;
@@ -56,8 +62,28 @@ export const ProductCard = ({ product }: ProductCardProps) => {
     },
   });
 
-  const handleShare = () => {
-    toast.success("Share feature coming soon!");
+  const handleShare = async (platform: 'copy' | 'whatsapp' | 'facebook' | 'twitter') => {
+    const productUrl = `${window.location.origin}/marketplace?product=${product.id}`;
+    
+    switch (platform) {
+      case 'copy':
+        try {
+          await navigator.clipboard.writeText(productUrl);
+          toast.success("Link copied to clipboard!");
+        } catch (error) {
+          toast.error("Failed to copy link");
+        }
+        break;
+      case 'whatsapp':
+        window.open(`https://wa.me/?text=${encodeURIComponent(`Check out this product: ${product.title} - ${productUrl}`)}`, '_blank');
+        break;
+      case 'facebook':
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(productUrl)}`, '_blank');
+        break;
+      case 'twitter':
+        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out this product: ${product.title}`)}&url=${encodeURIComponent(productUrl)}`, '_blank');
+        break;
+    }
   };
 
   return (
@@ -99,13 +125,30 @@ export const ProductCard = ({ product }: ProductCardProps) => {
               <ShoppingBag className="h-4 w-4" />
               {addToCartMutation.isPending ? 'Adding...' : 'Add to Cart'}
             </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={handleShare}
-            >
-              <Share2 className="h-4 w-4" />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                >
+                  <Share2 className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={() => handleShare('copy')}>
+                  Copy Link
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleShare('whatsapp')}>
+                  Share on WhatsApp
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleShare('facebook')}>
+                  Share on Facebook
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleShare('twitter')}>
+                  Share on Twitter
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
