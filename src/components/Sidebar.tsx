@@ -11,6 +11,7 @@ import {
   Settings,
   Briefcase,
   Map,
+  Building,
 } from "lucide-react";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
@@ -23,6 +24,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
     { name: "Home", path: "/", icon: Home },
     { name: "Marketplace", path: "/marketplace", icon: Store },
     { name: "Services", path: "/services", icon: Wrench },
+    { name: "Business", path: "/business", icon: Building },
     { name: "Jobs", path: "/jobs", icon: Briefcase },
     { name: "Communities", path: "/communities", icon: Users },
     { name: "Messages", path: "/messages", icon: MessageSquare },
@@ -42,10 +44,10 @@ export const Sidebar = ({ className }: SidebarProps) => {
             <Button
               key={route.path}
               variant={isActive ? "secondary" : "ghost"}
-              className="w-full justify-start h-12 px-3 gap-4 hover:bg-accent/50"
+              className="w-full justify-start h-10 px-3 gap-3 hover:bg-accent/50"
               onClick={() => navigate(route.path)}
             >
-              <Icon className="h-5 w-5 shrink-0" />
+              <Icon className="h-4 w-4 shrink-0" />
               <span className="text-sm font-medium">{route.name}</span>
             </Button>
           );
