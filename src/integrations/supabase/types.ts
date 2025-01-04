@@ -124,6 +124,7 @@ export type Database = {
       businesses: {
         Row: {
           appointment_price: number | null
+          bio: string | null
           category: string
           consultation_price: number | null
           contact: string | null
@@ -137,9 +138,11 @@ export type Database = {
           user_id: string
           verified: boolean | null
           video_url: string | null
+          website: string | null
         }
         Insert: {
           appointment_price?: number | null
+          bio?: string | null
           category: string
           consultation_price?: number | null
           contact?: string | null
@@ -153,9 +156,11 @@ export type Database = {
           user_id: string
           verified?: boolean | null
           video_url?: string | null
+          website?: string | null
         }
         Update: {
           appointment_price?: number | null
+          bio?: string | null
           category?: string
           consultation_price?: number | null
           contact?: string | null
@@ -169,6 +174,7 @@ export type Database = {
           user_id?: string
           verified?: boolean | null
           video_url?: string | null
+          website?: string | null
         }
         Relationships: []
       }
