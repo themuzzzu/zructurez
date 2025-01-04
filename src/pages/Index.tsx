@@ -73,8 +73,8 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="flex">
-        <Sidebar className="w-16 fixed left-0 top-0 pt-16" />
-        <main className="flex-1 ml-16 pt-16 px-4">
+        <Sidebar className="w-64 fixed left-0 top-0 pt-16" />
+        <main className="flex-1 ml-64 pt-16 px-4">
           <div className="max-w-2xl mx-auto">
             <div className="space-y-6">
               <div className="bg-card rounded-lg p-4 shadow-sm">

@@ -12,7 +12,6 @@ import {
   Briefcase,
   Map,
 } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -28,36 +27,28 @@ export const Sidebar = ({ className }: SidebarProps) => {
     { name: "Communities", path: "/communities", icon: Users },
     { name: "Messages", path: "/messages", icon: MessageSquare },
     { name: "Events", path: "/events", icon: Calendar },
-    { name: "Business", path: "/business", icon: Briefcase },
     { name: "Maps", path: "/maps", icon: Map },
     { name: "Settings", path: "/settings", icon: Settings },
   ];
 
   return (
-    <div className={cn("h-screen border-r", className)}>
-      <div className="space-y-2 p-2">
-        <TooltipProvider delayDuration={0}>
-          {routes.map((route) => {
-            const Icon = route.icon;
-            return (
-              <Tooltip key={route.path}>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant={location.pathname === route.path ? "secondary" : "ghost"}
-                    className="w-full p-3 justify-center h-12"
-                    onClick={() => navigate(route.path)}
-                  >
-                    <Icon className="h-5 w-5" />
-                    <span className="sr-only">{route.name}</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="right" className="font-medium">
-                  {route.name}
-                </TooltipContent>
-              </Tooltip>
-            );
-          })}
-        </TooltipProvider>
+    <div className={cn("h-screen border-r bg-card", className)}>
+      <div className="space-y-1 p-3">
+        {routes.map((route) => {
+          const Icon = route.icon;
+          const isActive = location.pathname === route.path;
+          return (
+            <Button
+              key={route.path}
+              variant={isActive ? "secondary" : "ghost"}
+              className="w-full justify-start h-12 px-3 gap-4 hover:bg-accent/50"
+              onClick={() => navigate(route.path)}
+            >
+              <Icon className="h-5 w-5 shrink-0" />
+              <span className="text-sm font-medium">{route.name}</span>
+            </Button>
+          );
+        })}
       </div>
     </div>
   );
