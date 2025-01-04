@@ -1,6 +1,5 @@
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { ChatList } from "@/components/chat/ChatList";
@@ -149,21 +148,25 @@ const Messages = () => {
       <Navbar />
       <div className="pt-16">
         <div className="flex h-[calc(100vh-4rem)]">
-          <div className="w-[400px] border-r bg-background flex flex-col">
-            <div className="p-4 border-b flex items-center gap-2">
+          <div className="w-[400px] border-r border-[#2a2a2a] flex flex-col">
+            <div className="p-4 border-b border-[#2a2a2a] flex items-center gap-2">
               <Button 
                 variant="ghost" 
                 size="icon"
                 onClick={() => navigate('/')}
-                className="shrink-0"
+                className="shrink-0 hover:bg-[#1a1a1a]"
               >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
-              <h1 className="text-2xl font-bold">Messages</h1>
+              <h1 className="text-2xl font-bold text-foreground">Messages</h1>
             </div>
-            <Tabs defaultValue="chats" className="flex-1 flex flex-col" onValueChange={setActiveTab}>
+            <Tabs 
+              defaultValue="chats" 
+              className="flex-1 flex flex-col" 
+              onValueChange={setActiveTab}
+            >
               <div className="px-4 pt-2">
-                <TabsList className="w-full">
+                <TabsList className="w-full bg-[#1a1a1a]/50">
                   <TabsTrigger value="chats" className="flex-1">Chats</TabsTrigger>
                   <TabsTrigger value="groups" className="flex-1">Groups</TabsTrigger>
                 </TabsList>
@@ -190,7 +193,7 @@ const Messages = () => {
               </div>
             </Tabs>
           </div>
-          <div className="flex-1 bg-background">
+          <div className="flex-1">
             <ChatWindow
               selectedChat={selectedChat}
               message={message}
