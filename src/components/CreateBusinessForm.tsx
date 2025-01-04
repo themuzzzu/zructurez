@@ -6,6 +6,7 @@ import { ImageUpload } from "./ImageUpload";
 import { BusinessBasicInfo } from "./business-form/BusinessBasicInfo";
 import { BusinessPricing } from "./business-form/BusinessPricing";
 import { BusinessContactInfo } from "./business-form/BusinessContactInfo";
+import { Label } from "./ui/label";
 
 interface CreateBusinessFormProps {
   onSuccess?: () => void;
