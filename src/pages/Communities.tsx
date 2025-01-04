@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Users2, ArrowLeft, Plus, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CreateGroupForm } from "@/components/groups/CreateGroupForm";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,38 +17,91 @@ const Communities = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
+  // Check authentication status on mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error || !session) {
+        toast.error("Please sign in to access communities");
+        navigate('/auth');
+      }
+    };
+    
+    checkAuth();
+
+    // Subscribe to auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT' || !session) {
+        navigate('/auth');
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [navigate]);
+
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      return user;
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error) throw error;
+      
+      // Get the profile data
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user?.id)
+        .maybeSingle();
+        
+      if (profileError) {
+        console.error('Error fetching profile:', profileError);
+        return null;
+      }
+      
+      return profile;
     },
+    retry: 1,
+    onError: (error) => {
+      console.error('Error fetching user:', error);
+      toast.error("Error loading user data");
+    }
   });
 
   const { data: groups, isLoading } = useQuery({
     queryKey: ['groups'],
     queryFn: async () => {
-      const { data: groupsData, error: groupsError } = await supabase
-        .from('groups')
-        .select(`
-          *,
-          group_members!inner (
-            user_id
-          )
-        `);
+      try {
+        const { data: groupsData, error: groupsError } = await supabase
+          .from('groups')
+          .select(`
+            *,
+            group_members!inner (
+              user_id
+            )
+          `);
 
-      if (groupsError) throw groupsError;
+        if (groupsError) throw groupsError;
 
-      const processedGroups = groupsData.map(group => ({
-        ...group,
-        group_members: {
-          count: group.group_members.length,
-          members: group.group_members.map((member: any) => member.user_id)
-        }
-      }));
+        const processedGroups = groupsData.map(group => ({
+          ...group,
+          group_members: {
+            count: group.group_members.length,
+            members: group.group_members.map((member: any) => member.user_id)
+          }
+        }));
 
-      return processedGroups;
+        return processedGroups;
+      } catch (error) {
+        console.error('Error fetching groups:', error);
+        throw error;
+      }
     },
+    enabled: !!currentUser, // Only fetch groups if we have a user
+    onError: (error) => {
+      console.error('Error fetching groups:', error);
+      toast.error("Failed to load groups");
+    }
   });
 
   const joinGroupMutation = useMutation({
@@ -76,13 +129,8 @@ const Communities = () => {
   });
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
-
-  const isGroupMember = (group: typeof groups[0]) => {
-    if (!currentUser) return false;
-    return group.group_members.members.includes(currentUser.id);
-  };
 
   return (
     <div className="min-h-screen bg-background">
