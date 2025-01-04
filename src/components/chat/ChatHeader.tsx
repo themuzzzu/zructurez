@@ -19,8 +19,18 @@ export const ChatHeader = ({
   setIsSelectMode,
   isSelectMode,
 }: ChatHeaderProps) => {
-  // Format the last seen time - using a mock time for now
-  const lastSeen = formatDistanceToNow(new Date(chat.time), { addSuffix: true });
+  // Format the last seen time
+  const getLastSeen = () => {
+    try {
+      // If chat.time is already a timestamp or valid date string, use it directly
+      if (chat.time.includes('ago')) {
+        return chat.time; // Return the existing relative time string
+      }
+      return formatDistanceToNow(new Date(chat.time), { addSuffix: true });
+    } catch (error) {
+      return 'recently'; // Fallback text if date parsing fails
+    }
+  };
 
   return (
     <div className="p-4 border-b">
@@ -34,7 +44,7 @@ export const ChatHeader = ({
             />
             <div>
               <span className="font-semibold">{chat.name}</span>
-              <p className="text-xs text-muted-foreground">last seen {lastSeen}</p>
+              <p className="text-xs text-muted-foreground">last seen {getLastSeen()}</p>
             </div>
           </div>
         </div>
