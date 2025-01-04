@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/sheet";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 import { Cart } from "./cart/Cart";
 import { NotificationList } from "./notifications/NotificationList";
@@ -27,6 +27,8 @@ import { SearchBox } from "./search/SearchBox";
 
 export const Navbar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isHomePage = location.pathname === "/";
 
   const { data: cartItemCount = 0 } = useQuery({
     queryKey: ['cartCount'],
@@ -95,7 +97,9 @@ export const Navbar = () => {
           <h1 className="text-xl font-bold text-primary">Zructures</h1>
         </div>
 
-        <SearchBox className="flex-1 max-w-xl mx-4 hidden md:block" />
+        {isHomePage && (
+          <SearchBox className="flex-1 max-w-xl mx-4 hidden md:block" />
+        )}
 
         <div className="flex items-center gap-2">
           <Sheet>
