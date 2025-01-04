@@ -70,6 +70,11 @@ export const MessageBubble = ({ content, timestamp, isOwn, messageId, onForward 
 
   const handleDeleteMessage = async () => {
     try {
+      // Validate that messageId is a valid UUID
+      if (!messageId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+        throw new Error('Invalid message ID format');
+      }
+
       const { error } = await supabase
         .from('messages')
         .delete()
