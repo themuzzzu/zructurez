@@ -79,6 +79,14 @@ export const ChatDialogs = ({
           <DocumentUpload
             onDocumentUpload={async (file) => {
               try {
+                // Get the current user
+                const { data: { user }, error: userError } = await supabase.auth.getUser();
+                
+                if (userError || !user) {
+                  toast.error("You must be logged in to upload documents");
+                  return;
+                }
+
                 const fileName = `${Date.now()}_${file.name}`;
                 const filePath = `chat-documents/${fileName}`;
 
@@ -98,7 +106,7 @@ export const ChatDialogs = ({
                     title: file.name,
                     file_url: publicUrl,
                     file_type: file.type,
-                    user_id: "me",
+                    user_id: user.id, // Use the actual user ID
                   });
 
                 if (docError) throw docError;
@@ -119,12 +127,19 @@ export const ChatDialogs = ({
         onOpenChange={setShowPollDialog}
         onCreatePoll={async (question, options) => {
           try {
+            const { data: { user }, error: userError } = await supabase.auth.getUser();
+            
+            if (userError || !user) {
+              toast.error("You must be logged in to create polls");
+              return;
+            }
+
             const { error } = await supabase
               .from("polls")
               .insert({
                 question,
                 options,
-                user_id: "me",
+                user_id: user.id,
               });
 
             if (error) throw error;
@@ -143,11 +158,18 @@ export const ChatDialogs = ({
         onOpenChange={setShowContactDialog}
         onShareContact={async (contactData) => {
           try {
+            const { data: { user }, error: userError } = await supabase.auth.getUser();
+            
+            if (userError || !user) {
+              toast.error("You must be logged in to share contacts");
+              return;
+            }
+
             const { error } = await supabase
               .from("shared_contacts")
               .insert({
                 contact_data: contactData,
-                user_id: "me",
+                user_id: user.id,
                 shared_with_id: selectedChat.userId,
               });
 
