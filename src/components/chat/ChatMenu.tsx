@@ -68,12 +68,14 @@ export const ChatMenu = ({
         throw new Error("User not authenticated");
       }
 
-      // Delete messages where either user is sender or receiver
+      // Delete messages between the two users using a more precise query
       const { error } = await supabase
         .from('messages')
         .delete()
-        .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
-        .and(`sender_id.eq.${selectedChat.userId},receiver_id.eq.${selectedChat.userId}`);
+        .or(
+          `and(sender_id.eq.${user.id},receiver_id.eq.${selectedChat.userId}),` +
+          `and(sender_id.eq.${selectedChat.userId},receiver_id.eq.${user.id})`
+        );
 
       if (error) {
         console.error('Error details:', error);
