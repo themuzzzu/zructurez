@@ -155,12 +155,14 @@ export const ChatWindow = ({
       </ScrollArea>
 
       <div className="p-4 border-t">
-        <AttachmentButtons onAttachment={handleAttachment} />
-        <MessageInput 
-          message={message}
-          onMessageChange={onMessageChange}
-          onSubmit={handleSubmit}
-        />
+        <div className="flex items-center gap-2 mb-2">
+          <AttachmentButtons onAttachment={handleAttachment} />
+          <MessageInput 
+            message={message}
+            onMessageChange={onMessageChange}
+            onSubmit={handleSubmit}
+          />
+        </div>
       </div>
 
       <ContactInfoDialog

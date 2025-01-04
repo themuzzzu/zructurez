@@ -1,5 +1,12 @@
-import { Camera, Image, FileText, Users, MessageSquare, BarChart2, Pencil } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Camera, Image, FileText, Users, BarChart2, Pencil } from "lucide-react";
 import { toast } from "sonner";
 
 interface AttachmentButtonsProps {
@@ -8,49 +15,42 @@ interface AttachmentButtonsProps {
 
 export const AttachmentButtons = ({ onAttachment }: AttachmentButtonsProps) => {
   return (
-    <div className="flex gap-2 mb-2">
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => onAttachment("photo")}
-      >
-        <Image className="h-5 w-5" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => onAttachment("camera")}
-      >
-        <Camera className="h-5 w-5" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => onAttachment("document")}
-      >
-        <FileText className="h-5 w-5" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => onAttachment("contact")}
-      >
-        <Users className="h-5 w-5" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => onAttachment("poll")}
-      >
-        <BarChart2 className="h-5 w-5" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => onAttachment("drawing")}
-      >
-        <Pencil className="h-5 w-5" />
-      </Button>
-    </div>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="hover:bg-accent hover:text-accent-foreground"
+        >
+          <Plus className="h-5 w-5" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start">
+        <DropdownMenuItem onClick={() => onAttachment("photo")}>
+          <Image className="mr-2 h-4 w-4" />
+          <span>Photo</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => onAttachment("camera")}>
+          <Camera className="mr-2 h-4 w-4" />
+          <span>Camera</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => onAttachment("document")}>
+          <FileText className="mr-2 h-4 w-4" />
+          <span>Document</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => onAttachment("contact")}>
+          <Users className="mr-2 h-4 w-4" />
+          <span>Contact</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => onAttachment("poll")}>
+          <BarChart2 className="mr-2 h-4 w-4" />
+          <span>Poll</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => onAttachment("drawing")}>
+          <Pencil className="mr-2 h-4 w-4" />
+          <span>Drawing</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
