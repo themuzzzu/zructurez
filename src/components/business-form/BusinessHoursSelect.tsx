@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Label } from "../ui/label";
 import { Checkbox } from "../ui/checkbox";
 import { Input } from "../ui/input";
@@ -21,19 +21,40 @@ interface BusinessHoursSelectProps {
   onChange: (value: string) => void;
 }
 
+const defaultSchedule = {
+  isOpen: false,
+  openTime: "09:00",
+  closeTime: "05:00",
+  openPeriod: "AM" as const,
+  closePeriod: "PM" as const,
+};
+
+const defaultHours: BusinessHours = {
+  monday: { ...defaultSchedule },
+  tuesday: { ...defaultSchedule },
+  wednesday: { ...defaultSchedule },
+  thursday: { ...defaultSchedule },
+  friday: { ...defaultSchedule },
+  saturday: { ...defaultSchedule },
+  sunday: { ...defaultSchedule },
+};
+
 export const BusinessHoursSelect = ({ value, onChange }: BusinessHoursSelectProps) => {
-  // Parse initial value if it exists
-  const initialHours: BusinessHours = value ? JSON.parse(value) : {
-    monday: { isOpen: false, openTime: "09:00", closeTime: "05:00", openPeriod: "AM", closePeriod: "PM" },
-    tuesday: { isOpen: false, openTime: "09:00", closeTime: "05:00", openPeriod: "AM", closePeriod: "PM" },
-    wednesday: { isOpen: false, openTime: "09:00", closeTime: "05:00", openPeriod: "AM", closePeriod: "PM" },
-    thursday: { isOpen: false, openTime: "09:00", closeTime: "05:00", openPeriod: "AM", closePeriod: "PM" },
-    friday: { isOpen: false, openTime: "09:00", closeTime: "05:00", openPeriod: "AM", closePeriod: "PM" },
-    saturday: { isOpen: false, openTime: "09:00", closeTime: "05:00", openPeriod: "AM", closePeriod: "PM" },
-    sunday: { isOpen: false, openTime: "09:00", closeTime: "05:00", openPeriod: "AM", closePeriod: "PM" },
+  // Try to parse the value as JSON, if it fails use default hours
+  const parseInitialHours = (inputValue: string): BusinessHours => {
+    if (!inputValue) return defaultHours;
+    
+    try {
+      return JSON.parse(inputValue);
+    } catch (e) {
+      // If parsing fails, it's likely a legacy format or invalid
+      // Return default hours but don't throw an error
+      console.log("Using default hours format - could not parse:", inputValue);
+      return defaultHours;
+    }
   };
 
-  const [hours, setHours] = useState<BusinessHours>(initialHours);
+  const [hours, setHours] = useState<BusinessHours>(parseInitialHours(value));
   const [useUniformHours, setUseUniformHours] = useState(true);
   const [uniformOpenTime, setUniformOpenTime] = useState("09:00");
   const [uniformCloseTime, setUniformCloseTime] = useState("05:00");
