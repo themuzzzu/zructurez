@@ -77,7 +77,7 @@ export const PostCard = ({
   };
 
   return (
-    <Card className="overflow-hidden bg-[#1A1F2C] border-[#2A2F3C] shadow-lg">
+    <Card className="overflow-hidden bg-black/90 border-zinc-800 shadow-lg">
       <div className="p-4">
         <div className="flex items-center gap-3 mb-4">
           <Avatar>
@@ -100,7 +100,7 @@ export const PostCard = ({
         <p className="mb-4 text-gray-200">{content}</p>
 
         {image && (
-          <div className="relative mb-4 rounded-lg overflow-hidden bg-[#222632]">
+          <div className="relative mb-4 rounded-lg overflow-hidden bg-black/50">
             <img
               src={image}
               alt="Post content"
@@ -123,7 +123,7 @@ export const PostCard = ({
           <Button
             variant="ghost"
             size="sm"
-            className="text-gray-400 hover:text-gray-200 hover:bg-[#272B38]"
+            className="text-gray-400 hover:text-gray-200 hover:bg-black/60"
             onClick={() => likeMutation.mutate()}
           >
             <Heart
@@ -137,7 +137,7 @@ export const PostCard = ({
           <Button
             variant="ghost"
             size="sm"
-            className="text-gray-400 hover:text-gray-200 hover:bg-[#272B38]"
+            className="text-gray-400 hover:text-gray-200 hover:bg-black/60"
             onClick={() => setShowComments(!showComments)}
           >
             <MessageSquare className="h-4 w-4 mr-2" />
@@ -146,7 +146,7 @@ export const PostCard = ({
           <Button
             variant="ghost"
             size="sm"
-            className="text-gray-400 hover:text-gray-200 hover:bg-[#272B38]"
+            className="text-gray-400 hover:text-gray-200 hover:bg-black/60"
             onClick={() => toast.info("Sharing coming soon!")}
           >
             <Share2 className="h-4 w-4 mr-2" />
@@ -156,7 +156,7 @@ export const PostCard = ({
       </div>
 
       {showComments && (
-        <div className="border-t border-[#2A2F3C]">
+        <div className="border-t border-zinc-800">
           <CommentSection postId={id} />
         </div>
       )}
