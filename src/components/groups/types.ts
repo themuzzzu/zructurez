@@ -5,10 +5,10 @@ export interface Group {
   image_url: string | null;
   created_at: string;
   user_id: string;
-  group_members?: {
+  group_members: {
     count: number;
-    user_id: string;
-  }[];
+    members: string[];
+  };
 }
 
 export interface Message {

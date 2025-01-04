@@ -25,21 +25,39 @@ const Communities = () => {
     },
   });
 
+  // First query to get all groups with member count
   const { data: groups, isLoading } = useQuery({
     queryKey: ['groups'],
     queryFn: async () => {
-      const { data: groups, error } = await supabase
+      // First, get all groups with their basic info and member count
+      const { data: groupsData, error: groupsError } = await supabase
         .from('groups')
         .select(`
           *,
-          group_members (
-            count,
-            user_id
-          )
+          group_members:group_members(count)
         `);
 
-      if (error) throw error;
-      return groups as (Group & { group_members: { count: number; user_id: string }[] })[];
+      if (groupsError) throw groupsError;
+
+      // Then, for each group, get the list of member user_ids
+      const groupsWithMembers = await Promise.all(
+        groupsData.map(async (group) => {
+          const { data: members } = await supabase
+            .from('group_members')
+            .select('user_id')
+            .eq('group_id', group.id);
+
+          return {
+            ...group,
+            group_members: {
+              count: group.group_members[0]?.count || 0,
+              members: members?.map(m => m.user_id) || []
+            }
+          };
+        })
+      );
+
+      return groupsWithMembers;
     },
   });
 
@@ -73,7 +91,7 @@ const Communities = () => {
 
   const isGroupMember = (group: typeof groups[0]) => {
     if (!currentUser) return false;
-    return group.group_members.some(member => member.user_id === currentUser.id);
+    return group.group_members.members.includes(currentUser.id);
   };
 
   return (
@@ -115,7 +133,7 @@ const Communities = () => {
                           <h3 className="text-xl font-semibold mb-2">{group.name}</h3>
                           <div className="flex items-center text-sm text-muted-foreground mb-4">
                             <Users2 className="h-4 w-4 mr-2" />
-                            {group.group_members?.[0]?.count || 0} members
+                            {group.group_members.count} members
                           </div>
                           {group.description && (
                             <p className="text-muted-foreground mb-4 line-clamp-2">
