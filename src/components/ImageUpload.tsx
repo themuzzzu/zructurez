@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Button } from "./ui/button";
-import { X, Camera, ImagePlus, ZoomIn, ZoomOut, Move } from "lucide-react";
+import { X } from "lucide-react";
 import { toast } from "sonner";
-import { Slider } from "./ui/slider";
+import { ImagePositionControls } from "./image-upload/ImagePositionControls";
+import { ImageZoomControl } from "./image-upload/ImageZoomControl";
+import { UploadButtons } from "./image-upload/UploadButtons";
 
 export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 export const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
@@ -14,7 +16,8 @@ interface ImageUploadProps {
 
 export const ImageUpload = ({ selectedImage, onImageSelect }: ImageUploadProps) => {
   const [scale, setScale] = useState(1);
-  const [position, setPosition] = useState({ x: 50, y: 50 }); // percentage values
+  const [position, setPosition] = useState({ x: 50, y: 50 });
+  const [isAdjusting, setIsAdjusting] = useState(false);
 
   const handleFileUpload = (file: File) => {
     if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
@@ -30,17 +33,11 @@ export const ImageUpload = ({ selectedImage, onImageSelect }: ImageUploadProps) 
     const reader = new FileReader();
     reader.onload = (e) => {
       onImageSelect(e.target?.result as string);
-      setScale(1); // Reset scale when new image is uploaded
-      setPosition({ x: 50, y: 50 }); // Reset position
+      setScale(1);
+      setPosition({ x: 50, y: 50 });
       toast.success("Photo uploaded successfully!");
     };
     reader.readAsDataURL(file);
-  };
-
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    handleFileUpload(file);
   };
 
   const handleCameraCapture = async () => {
@@ -80,60 +77,34 @@ export const ImageUpload = ({ selectedImage, onImageSelect }: ImageUploadProps) 
     }
   };
 
-  const handleRemoveImage = () => {
-    onImageSelect(null);
-    setScale(1);
-    setPosition({ x: 50, y: 50 });
-    toast.info("Photo removed");
-  };
-
   const handlePositionChange = (direction: 'up' | 'down' | 'left' | 'right') => {
+    setIsAdjusting(true);
     setPosition(prev => {
-      const step = 5;
+      const step = 2; // Reduced step size from 5 to 2
+      const newPosition = { ...prev };
+      
       switch (direction) {
         case 'up':
-          return { ...prev, y: Math.max(0, prev.y - step) };
+          newPosition.y = Math.max(0, prev.y - step);
+          break;
         case 'down':
-          return { ...prev, y: Math.min(100, prev.y + step) };
+          newPosition.y = Math.min(100, prev.y + step);
+          break;
         case 'left':
-          return { ...prev, x: Math.max(0, prev.x - step) };
+          newPosition.x = Math.max(0, prev.x - step);
+          break;
         case 'right':
-          return { ...prev, x: Math.min(100, prev.x + step) };
-        default:
-          return prev;
+          newPosition.x = Math.min(100, prev.x + step);
+          break;
       }
+      
+      return newPosition;
     });
   };
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-4">
-        <Button
-          type="button"
-          variant="outline"
-          className="flex items-center gap-2"
-          onClick={() => document.getElementById('photo-upload')?.click()}
-        >
-          <ImagePlus className="h-4 w-4" />
-          Choose Image
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          className="flex items-center gap-2"
-          onClick={handleCameraCapture}
-        >
-          <Camera className="h-4 w-4" />
-          Take Photo
-        </Button>
-        <input
-          id="photo-upload"
-          type="file"
-          accept={ACCEPTED_IMAGE_TYPES.join(',')}
-          onChange={handlePhotoUpload}
-          className="hidden"
-        />
-      </div>
+      <UploadButtons onCameraCapture={handleCameraCapture} />
 
       {selectedImage && (
         <div className="space-y-4">
@@ -151,65 +122,15 @@ export const ImageUpload = ({ selectedImage, onImageSelect }: ImageUploadProps) 
               variant="destructive"
               size="icon"
               className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-              onClick={handleRemoveImage}
+              onClick={() => onImageSelect(null)}
             >
               <X className="h-4 w-4" />
             </Button>
           </div>
 
           <div className="space-y-4 p-4 border rounded-lg">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <ZoomIn className="h-4 w-4" />
-                <span className="text-sm">Zoom</span>
-              </div>
-              <Slider
-                value={[scale * 100]}
-                onValueChange={(value) => setScale(value[0] / 100)}
-                min={100}
-                max={200}
-                step={5}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Move className="h-4 w-4" />
-                <span className="text-sm">Position</span>
-              </div>
-              <div className="flex justify-center gap-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => handlePositionChange('up')}
-                >
-                  ↑
-                </Button>
-              </div>
-              <div className="flex justify-center gap-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => handlePositionChange('left')}
-                >
-                  ←
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => handlePositionChange('down')}
-                >
-                  ↓
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => handlePositionChange('right')}
-                >
-                  →
-                </Button>
-              </div>
-            </div>
+            <ImageZoomControl scale={scale} onScaleChange={setScale} />
+            <ImagePositionControls onPositionChange={handlePositionChange} />
           </div>
         </div>
       )}
