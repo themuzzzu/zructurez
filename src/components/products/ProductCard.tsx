@@ -1,6 +1,6 @@
 import { Card } from "../ui/card";
 import { Button } from "../ui/button";
-import { ShoppingBag, DollarSign, Share2 } from "lucide-react";
+import { ShoppingBag, IndianRupee, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -86,6 +86,15 @@ export const ProductCard = ({ product }: ProductCardProps) => {
     }
   };
 
+  // Format price in Indian Rupees
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0,
+    }).format(price);
+  };
+
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 bg-[#0a0a0a] border-border">
       {product.image_url && (
@@ -103,9 +112,9 @@ export const ProductCard = ({ product }: ProductCardProps) => {
               {product.category} {product.subcategory && `• ${product.subcategory}`}
             </div>
           </div>
-          <span className="text-lg font-bold text-primary flex items-center">
-            <DollarSign className="h-4 w-4" />
-            {product.price}
+          <span className="text-lg font-bold text-primary flex items-center gap-1">
+            <IndianRupee className="h-4 w-4" />
+            {formatPrice(product.price).replace('₹', '')}
           </span>
         </div>
         
