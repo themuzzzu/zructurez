@@ -606,6 +606,7 @@ export type Database = {
           description: string
           id: string
           image_url: string | null
+          is_branded: boolean | null
           is_discounted: boolean | null
           is_used: boolean | null
           price: number
@@ -621,6 +622,7 @@ export type Database = {
           description: string
           id?: string
           image_url?: string | null
+          is_branded?: boolean | null
           is_discounted?: boolean | null
           is_used?: boolean | null
           price: number
@@ -636,6 +638,7 @@ export type Database = {
           description?: string
           id?: string
           image_url?: string | null
+          is_branded?: boolean | null
           is_discounted?: boolean | null
           is_used?: boolean | null
           price?: number
