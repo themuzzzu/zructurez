@@ -77,15 +77,15 @@ export const PostCard = ({
   };
 
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden bg-[#1A1F2C] border-[#2A2F3C] shadow-lg">
       <div className="p-4">
         <div className="flex items-center gap-3 mb-4">
           <Avatar>
             <img src={avatar} alt={author} className="h-10 w-10 rounded-full" />
           </Avatar>
           <div>
-            <div className="font-semibold">{author}</div>
-            <div className="text-sm text-muted-foreground flex items-center gap-2">
+            <div className="font-semibold text-gray-200">{author}</div>
+            <div className="text-sm text-gray-400 flex items-center gap-2">
               <span>{time}</span>
               {category && (
                 <>
@@ -97,10 +97,10 @@ export const PostCard = ({
           </div>
         </div>
 
-        <p className="mb-4">{content}</p>
+        <p className="mb-4 text-gray-200">{content}</p>
 
         {image && (
-          <div className="relative mb-4 rounded-lg overflow-hidden bg-muted">
+          <div className="relative mb-4 rounded-lg overflow-hidden bg-[#222632]">
             <img
               src={image}
               alt="Post content"
@@ -123,7 +123,7 @@ export const PostCard = ({
           <Button
             variant="ghost"
             size="sm"
-            className="text-muted-foreground hover:text-foreground"
+            className="text-gray-400 hover:text-gray-200 hover:bg-[#272B38]"
             onClick={() => likeMutation.mutate()}
           >
             <Heart
@@ -137,7 +137,7 @@ export const PostCard = ({
           <Button
             variant="ghost"
             size="sm"
-            className="text-muted-foreground hover:text-foreground"
+            className="text-gray-400 hover:text-gray-200 hover:bg-[#272B38]"
             onClick={() => setShowComments(!showComments)}
           >
             <MessageSquare className="h-4 w-4 mr-2" />
@@ -146,7 +146,7 @@ export const PostCard = ({
           <Button
             variant="ghost"
             size="sm"
-            className="text-muted-foreground hover:text-foreground"
+            className="text-gray-400 hover:text-gray-200 hover:bg-[#272B38]"
             onClick={() => toast.info("Sharing coming soon!")}
           >
             <Share2 className="h-4 w-4 mr-2" />
@@ -156,7 +156,7 @@ export const PostCard = ({
       </div>
 
       {showComments && (
-        <div className="border-t">
+        <div className="border-t border-[#2A2F3C]">
           <CommentSection postId={id} />
         </div>
       )}

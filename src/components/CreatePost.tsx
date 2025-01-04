@@ -55,7 +55,7 @@ export const CreatePost = ({ onSuccess }: CreatePostProps) => {
   };
 
   return (
-    <Card className="p-4 bg-[#141414] border-[#1a1a1a]">
+    <Card className="p-4 bg-[#1A1F2C] border-[#2A2F3C] shadow-lg">
       <div className="flex items-start gap-4">
         <img
           src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"
@@ -67,7 +67,7 @@ export const CreatePost = ({ onSuccess }: CreatePostProps) => {
             placeholder="Share something with your neighborhood..."
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="min-h-[100px] bg-[#1a1a1a] text-gray-200 hover:bg-[#1f1f1f] focus:bg-[#1f1f1f] transition-colors duration-300 border-[#2a2a2a]"
+            className="min-h-[100px] bg-[#222632] text-gray-200 hover:bg-[#272B38] focus:bg-[#272B38] transition-colors duration-300 border-[#2A2F3C] placeholder:text-gray-400"
           />
 
           <ImageUpload 
@@ -96,7 +96,7 @@ export const CreatePost = ({ onSuccess }: CreatePostProps) => {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="text-gray-400 hover:text-gray-200 hover:bg-[#252525]"
+                className="text-gray-400 hover:text-gray-200 hover:bg-[#272B38]"
               >
                 <ImageIcon className="h-4 w-4 mr-2" />
                 Photo
@@ -105,7 +105,7 @@ export const CreatePost = ({ onSuccess }: CreatePostProps) => {
             <Button 
               variant="ghost" 
               size="sm" 
-              className="text-gray-400 hover:text-gray-200 hover:bg-[#252525]"
+              className="text-gray-400 hover:text-gray-200 hover:bg-[#272B38]"
               onClick={() => toast.info("Category selection feature coming soon!")}
             >
               <Tag className="h-4 w-4 mr-2" />
@@ -114,14 +114,14 @@ export const CreatePost = ({ onSuccess }: CreatePostProps) => {
             <Button 
               variant="ghost" 
               size="sm" 
-              className="text-gray-400 hover:text-gray-200 hover:bg-[#252525]"
+              className="text-gray-400 hover:text-gray-200 hover:bg-[#272B38]"
               onClick={() => toast.info("Poll creation feature coming soon!")}
             >
               <ListChecks className="h-4 w-4 mr-2" />
               Poll
             </Button>
             <Select onValueChange={setSelectedLocation} value={selectedLocation}>
-              <SelectTrigger className="w-[140px] bg-[#1a1a1a] border-[#2a2a2a]">
+              <SelectTrigger className="w-[140px] bg-[#222632] border-[#2A2F3C]">
                 <Button 
                   variant="ghost" 
                   size="sm" 
@@ -131,7 +131,7 @@ export const CreatePost = ({ onSuccess }: CreatePostProps) => {
                   {selectedLocation || "Location"}
                 </Button>
               </SelectTrigger>
-              <SelectContent className="bg-[#1a1a1a] border-[#2a2a2a]">
+              <SelectContent className="bg-[#1A1F2C] border-[#2A2F3C]">
                 <SelectItem value="local">Local</SelectItem>
                 <SelectItem value="district">District</SelectItem>
                 <SelectItem value="state">State</SelectItem>
