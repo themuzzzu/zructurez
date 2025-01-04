@@ -30,6 +30,7 @@ export const CreateBusinessForm = ({ onSuccess, onCancel }: CreateBusinessFormPr
     contact: "",
     hours: "",
     image: null as string | null,
+    price: "", // Added price field
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -82,6 +83,7 @@ export const CreateBusinessForm = ({ onSuccess, onCancel }: CreateBusinessFormPr
           contact: formData.contact,
           hours: formData.hours,
           image_url: imageUrl,
+          price: formData.price ? parseFloat(formData.price) : null, // Added price
         }])
         .select()
         .single();
@@ -141,6 +143,19 @@ export const CreateBusinessForm = ({ onSuccess, onCancel }: CreateBusinessFormPr
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
           placeholder="Describe your business"
           required
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="price">Starting Price (₹)</Label>
+        <Input
+          id="price"
+          type="number"
+          min="0"
+          step="0.01"
+          value={formData.price}
+          onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+          placeholder="Enter starting price"
         />
       </div>
 
