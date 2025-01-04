@@ -230,6 +230,33 @@ export type Database = {
           },
         ]
       }
+      documents: {
+        Row: {
+          created_at: string
+          file_type: string
+          file_url: string
+          id: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_type: string
+          file_url: string
+          id?: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          file_type?: string
+          file_url?: string
+          id?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       events: {
         Row: {
           attendees: number | null
@@ -404,6 +431,65 @@ export type Database = {
           message?: string
           muted?: boolean | null
           read?: boolean | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      poll_votes: {
+        Row: {
+          created_at: string
+          id: string
+          option_index: number
+          poll_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          option_index: number
+          poll_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          option_index?: number
+          poll_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_votes_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      polls: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          options: Json
+          question: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          options: Json
+          question: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          options?: Json
+          question?: string
           user_id?: string
         }
         Relationships: []
@@ -704,6 +790,30 @@ export type Database = {
           location?: string | null
           price?: number
           title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      shared_contacts: {
+        Row: {
+          contact_data: Json
+          created_at: string
+          id: string
+          shared_with_id: string
+          user_id: string
+        }
+        Insert: {
+          contact_data: Json
+          created_at?: string
+          id?: string
+          shared_with_id: string
+          user_id: string
+        }
+        Update: {
+          contact_data?: Json
+          created_at?: string
+          id?: string
+          shared_with_id?: string
           user_id?: string
         }
         Relationships: []

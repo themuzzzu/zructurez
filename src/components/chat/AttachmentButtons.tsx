@@ -6,8 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Camera, Image, FileText, Users, BarChart2, Pencil } from "lucide-react";
-import { toast } from "sonner";
+import { Camera, Image, FileText, Users, BarChart2, Pencil, Video } from "lucide-react";
 
 interface AttachmentButtonsProps {
   onAttachment: (type: string) => void;
@@ -29,6 +28,10 @@ export const AttachmentButtons = ({ onAttachment }: AttachmentButtonsProps) => {
         <DropdownMenuItem onClick={() => onAttachment("photo")}>
           <Image className="mr-2 h-4 w-4" />
           <span>Photo</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => onAttachment("video")}>
+          <Video className="mr-2 h-4 w-4" />
+          <span>Video</span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => onAttachment("camera")}>
           <Camera className="mr-2 h-4 w-4" />

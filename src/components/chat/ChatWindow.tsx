@@ -10,6 +10,10 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AttachmentButtons } from "./AttachmentButtons";
 import { MessageInput } from "./MessageInput";
+import { PollDialog } from "./PollDialog";
+import { ContactDialog } from "./ContactDialog";
+import { DocumentUpload } from "./DocumentUpload";
+import { VideoUpload } from "./VideoUpload";
 
 interface ChatWindowProps {
   selectedChat: Chat | null;
@@ -28,7 +32,12 @@ export const ChatWindow = ({
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [showImageUpload, setShowImageUpload] = useState(false);
+  const [showVideoUpload, setShowVideoUpload] = useState(false);
+  const [showDocumentUpload, setShowDocumentUpload] = useState(false);
+  const [showPollDialog, setShowPollDialog] = useState(false);
+  const [showContactDialog, setShowContactDialog] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
 
   if (!selectedChat) {
     return (
@@ -42,6 +51,8 @@ export const ChatWindow = ({
     e.preventDefault();
     if (selectedImage) {
       handleSendImage();
+    } else if (selectedVideo) {
+      handleSendVideo();
     } else {
       onSendMessage();
     }
@@ -87,6 +98,46 @@ export const ChatWindow = ({
     }
   };
 
+  const handleSendVideo = async () => {
+    if (!selectedVideo || !selectedChat) return;
+
+    try {
+      const file = await fetch(selectedVideo).then((r) => r.blob());
+      const fileExt = "mp4";
+      const fileName = `${Date.now()}.${fileExt}`;
+      const filePath = `chat-videos/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("chat-videos")
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("chat-videos")
+        .getPublicUrl(filePath);
+
+      const { error: messageError } = await supabase
+        .from("messages")
+        .insert({
+          content: message || "Sent a video",
+          sender_id: "me",
+          receiver_id: selectedChat.userId,
+          video_url: publicUrl,
+        });
+
+      if (messageError) throw messageError;
+
+      setSelectedVideo(null);
+      setShowVideoUpload(false);
+      onMessageChange("");
+      toast.success("Video sent successfully!");
+    } catch (error) {
+      console.error("Error sending video:", error);
+      toast.error("Failed to send video");
+    }
+  };
+
   const handleForwardMessage = (content: string) => {
     onMessageChange(content);
   };
@@ -96,17 +147,17 @@ export const ChatWindow = ({
       case "photo":
         setShowImageUpload(true);
         break;
-      case "camera":
-        toast.info("Camera feature coming soon!");
+      case "video":
+        setShowVideoUpload(true);
         break;
       case "document":
-        toast.info("Document upload feature coming soon!");
+        setShowDocumentUpload(true);
         break;
       case "contact":
-        toast.info("Contact sharing feature coming soon!");
+        setShowContactDialog(true);
         break;
       case "poll":
-        toast.info("Poll feature coming soon!");
+        setShowPollDialog(true);
         break;
       case "drawing":
         toast.info("Drawing feature coming soon!");
@@ -179,6 +230,103 @@ export const ChatWindow = ({
           />
         </DialogContent>
       </Dialog>
+
+      <Dialog open={showVideoUpload} onOpenChange={setShowVideoUpload}>
+        <DialogContent>
+          <VideoUpload
+            selectedVideo={selectedVideo}
+            onVideoSelect={setSelectedVideo}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showDocumentUpload} onOpenChange={setShowDocumentUpload}>
+        <DialogContent>
+          <DocumentUpload
+            onDocumentUpload={async (file) => {
+              try {
+                const fileName = `${Date.now()}_${file.name}`;
+                const filePath = `chat-documents/${fileName}`;
+
+                const { error: uploadError } = await supabase.storage
+                  .from("chat-documents")
+                  .upload(filePath, file);
+
+                if (uploadError) throw uploadError;
+
+                const { data: { publicUrl } } = supabase.storage
+                  .from("chat-documents")
+                  .getPublicUrl(filePath);
+
+                const { error: docError } = await supabase
+                  .from("documents")
+                  .insert({
+                    title: file.name,
+                    file_url: publicUrl,
+                    file_type: file.type,
+                    user_id: "me",
+                  });
+
+                if (docError) throw docError;
+
+                setShowDocumentUpload(false);
+                toast.success("Document uploaded successfully!");
+              } catch (error) {
+                console.error("Error uploading document:", error);
+                toast.error("Failed to upload document");
+              }
+            }}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <PollDialog
+        open={showPollDialog}
+        onOpenChange={setShowPollDialog}
+        onCreatePoll={async (question, options) => {
+          try {
+            const { error } = await supabase
+              .from("polls")
+              .insert({
+                question,
+                options,
+                user_id: "me",
+              });
+
+            if (error) throw error;
+
+            setShowPollDialog(false);
+            toast.success("Poll created successfully!");
+          } catch (error) {
+            console.error("Error creating poll:", error);
+            toast.error("Failed to create poll");
+          }
+        }}
+      />
+
+      <ContactDialog
+        open={showContactDialog}
+        onOpenChange={setShowContactDialog}
+        onShareContact={async (contactData) => {
+          try {
+            const { error } = await supabase
+              .from("shared_contacts")
+              .insert({
+                contact_data: contactData,
+                user_id: "me",
+                shared_with_id: selectedChat.userId,
+              });
+
+            if (error) throw error;
+
+            setShowContactDialog(false);
+            toast.success("Contact shared successfully!");
+          } catch (error) {
+            console.error("Error sharing contact:", error);
+            toast.error("Failed to share contact");
+          }
+        }}
+      />
     </div>
   );
 };
