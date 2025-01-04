@@ -1,66 +1,58 @@
 import { useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { LoadingView } from "@/components/LoadingView";
 import { useQueryClient } from "@tanstack/react-query";
 
-export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+}
+
+export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    // Check current session
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
-      if (error) {
+    // Check initial session
+    const checkSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setIsAuthenticated(!!session);
+      } catch (error) {
         console.error('Error checking session:', error);
-        toast.error("Session error. Please sign in again.");
-        navigate('/auth');
-        return;
+        setIsAuthenticated(false);
+      } finally {
+        setIsLoading(false);
       }
-      setSession(session);
-      setLoading(false);
-    });
+    };
 
-    // Set up real-time session listener
+    checkSession();
+
+    // Subscribe to auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_OUT') {
+        setIsAuthenticated(false);
         navigate('/auth');
         queryClient.clear(); // Clear query cache on logout
       } else if (event === 'SIGNED_IN' && session) {
-        // Verify the session is valid
-        const { error: sessionError } = await supabase.auth.getUser();
-        if (sessionError) {
-          console.error('Session verification failed:', sessionError);
-          toast.error("Session expired. Please sign in again.");
-          navigate('/auth');
-          return;
-        }
+        setIsAuthenticated(true);
       }
-      setSession(session);
     });
 
-    // Cleanup subscription
     return () => {
       subscription.unsubscribe();
     };
   }, [navigate, queryClient]);
 
-  // Show loading state
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-white"></div>
-      </div>
-    );
+  if (isLoading) {
+    return <LoadingView />;
   }
 
-  // Redirect to auth if no session
-  if (!session) {
+  if (!isAuthenticated) {
     return <Navigate to="/auth" replace />;
   }
 
