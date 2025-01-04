@@ -6,14 +6,13 @@ import { useState } from "react";
 import { MessageBubble } from "../MessageBubble";
 import { ImageUpload } from "../ImageUpload";
 import { Dialog, DialogContent } from "../ui/dialog";
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { AttachmentButtons } from "./AttachmentButtons";
 import { MessageInput } from "./MessageInput";
 import { PollDialog } from "./PollDialog";
 import { ContactDialog } from "./ContactDialog";
 import { DocumentUpload } from "./DocumentUpload";
 import { VideoUpload } from "./VideoUpload";
+import { useMessageHandling } from "./hooks/useMessageHandling";
 
 interface ChatWindowProps {
   selectedChat: Chat | null;
@@ -22,7 +21,6 @@ interface ChatWindowProps {
   onSendMessage: () => void;
 }
 
-// Let's split this large component into smaller ones
 export const ChatWindow = ({
   selectedChat,
   message,
@@ -37,8 +35,16 @@ export const ChatWindow = ({
   const [showDocumentUpload, setShowDocumentUpload] = useState(false);
   const [showPollDialog, setShowPollDialog] = useState(false);
   const [showContactDialog, setShowContactDialog] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
+
+  const {
+    selectedImage,
+    setSelectedImage,
+    selectedVideo,
+    setSelectedVideo,
+    handleSendMessage,
+    handleSendImage,
+    handleSendVideo,
+  } = useMessageHandling(selectedChat, message, onMessageChange, onSendMessage);
 
   if (!selectedChat) {
     return (
@@ -55,120 +61,8 @@ export const ChatWindow = ({
     } else if (selectedVideo) {
       await handleSendVideo();
     } else {
-      // First check if the receiver exists
-      const { data: receiverExists, error: checkError } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('id', selectedChat.userId)
-        .single();
-
-      if (checkError || !receiverExists) {
-        toast.error("Invalid recipient. Please select a valid chat.");
-        return;
-      }
-
-      try {
-        const { error: messageError } = await supabase
-          .from("messages")
-          .insert({
-            content: message,
-            sender_id: "me", // This should be the actual authenticated user's ID
-            receiver_id: selectedChat.userId,
-          });
-
-        if (messageError) throw messageError;
-
-        onSendMessage();
-        toast.success("Message sent successfully!");
-      } catch (error) {
-        console.error("Error sending message:", error);
-        toast.error("Failed to send message");
-      }
+      await handleSendMessage();
     }
-  };
-
-  const handleSendImage = async () => {
-    if (!selectedImage || !selectedChat) return;
-
-    try {
-      const file = await fetch(selectedImage).then((r) => r.blob());
-      const fileExt = "jpg";
-      const fileName = `${Date.now()}.${fileExt}`;
-      const filePath = `chat-images/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("chat-images")
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from("chat-images")
-        .getPublicUrl(filePath);
-
-      const { error: messageError } = await supabase
-        .from("messages")
-        .insert({
-          content: message || "Sent an image",
-          sender_id: "me",
-          receiver_id: selectedChat.userId,
-          image_url: publicUrl,
-        });
-
-      if (messageError) throw messageError;
-
-      setSelectedImage(null);
-      setShowImageUpload(false);
-      onMessageChange("");
-      toast.success("Image sent successfully!");
-    } catch (error) {
-      console.error("Error sending image:", error);
-      toast.error("Failed to send image");
-    }
-  };
-
-  const handleSendVideo = async () => {
-    if (!selectedVideo || !selectedChat) return;
-
-    try {
-      const file = await fetch(selectedVideo).then((r) => r.blob());
-      const fileExt = "mp4";
-      const fileName = `${Date.now()}.${fileExt}`;
-      const filePath = `chat-videos/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("chat-videos")
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from("chat-videos")
-        .getPublicUrl(filePath);
-
-      const { error: messageError } = await supabase
-        .from("messages")
-        .insert({
-          content: message || "Sent a video",
-          sender_id: "me",
-          receiver_id: selectedChat.userId,
-          video_url: publicUrl,
-        });
-
-      if (messageError) throw messageError;
-
-      setSelectedVideo(null);
-      setShowVideoUpload(false);
-      onMessageChange("");
-      toast.success("Video sent successfully!");
-    } catch (error) {
-      console.error("Error sending video:", error);
-      toast.error("Failed to send video");
-    }
-  };
-
-  const handleForwardMessage = (content: string) => {
-    onMessageChange(content);
   };
 
   const handleAttachment = (type: string) => {
