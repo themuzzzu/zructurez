@@ -78,7 +78,6 @@ export const ImageUpload = ({ selectedImage, onImageSelect }: ImageUploadProps) 
   };
 
   const handlePositionChange = (direction: 'up' | 'down' | 'left' | 'right') => {
-    setIsAdjusting(true);
     setPosition(prev => {
       const step = 2;
       const newPosition = { ...prev };

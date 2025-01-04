@@ -16,7 +16,15 @@ export const ImagePositionControls = ({ onPositionChange }: ImagePositionControl
         <Button
           variant="outline"
           size="icon"
-          onClick={() => onPositionChange('up')}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            const interval = setInterval(() => onPositionChange('up'), 50);
+            const cleanup = () => {
+              clearInterval(interval);
+              window.removeEventListener('mouseup', cleanup);
+            };
+            window.addEventListener('mouseup', cleanup);
+          }}
         >
           ↑
         </Button>
@@ -25,21 +33,45 @@ export const ImagePositionControls = ({ onPositionChange }: ImagePositionControl
         <Button
           variant="outline"
           size="icon"
-          onClick={() => onPositionChange('left')}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            const interval = setInterval(() => onPositionChange('left'), 50);
+            const cleanup = () => {
+              clearInterval(interval);
+              window.removeEventListener('mouseup', cleanup);
+            };
+            window.addEventListener('mouseup', cleanup);
+          }}
         >
           ←
         </Button>
         <Button
           variant="outline"
           size="icon"
-          onClick={() => onPositionChange('down')}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            const interval = setInterval(() => onPositionChange('down'), 50);
+            const cleanup = () => {
+              clearInterval(interval);
+              window.removeEventListener('mouseup', cleanup);
+            };
+            window.addEventListener('mouseup', cleanup);
+          }}
         >
           ↓
         </Button>
         <Button
           variant="outline"
           size="icon"
-          onClick={() => onPositionChange('right')}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            const interval = setInterval(() => onPositionChange('right'), 50);
+            const cleanup = () => {
+              clearInterval(interval);
+              window.removeEventListener('mouseup', cleanup);
+            };
+            window.addEventListener('mouseup', cleanup);
+          }}
         >
           →
         </Button>
