@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Label } from "../ui/label";
 import { Checkbox } from "../ui/checkbox";
 import { Input } from "../ui/input";
+import { Button } from "../ui/button";
 
 interface DaySchedule {
   isOpen: boolean;
@@ -31,11 +32,19 @@ export const BusinessHoursSelect = ({ value, onChange }: BusinessHoursSelectProp
   };
 
   const [hours, setHours] = useState<BusinessHours>(initialHours);
+  const [useUniformHours, setUseUniformHours] = useState(true);
+  const [uniformOpenTime, setUniformOpenTime] = useState("09:00");
+  const [uniformCloseTime, setUniformCloseTime] = useState("17:00");
 
   const handleDayToggle = (day: string, checked: boolean) => {
     const updatedHours = {
       ...hours,
-      [day]: { ...hours[day], isOpen: checked },
+      [day]: { 
+        ...hours[day], 
+        isOpen: checked,
+        openTime: useUniformHours ? uniformOpenTime : hours[day].openTime,
+        closeTime: useUniformHours ? uniformCloseTime : hours[day].closeTime
+      },
     };
     setHours(updatedHours);
     onChange(JSON.stringify(updatedHours));
@@ -50,6 +59,25 @@ export const BusinessHoursSelect = ({ value, onChange }: BusinessHoursSelectProp
     onChange(JSON.stringify(updatedHours));
   };
 
+  const handleUniformTimeChange = (field: 'openTime' | 'closeTime', value: string) => {
+    if (field === 'openTime') {
+      setUniformOpenTime(value);
+    } else {
+      setUniformCloseTime(value);
+    }
+
+    if (useUniformHours) {
+      const updatedHours = { ...hours };
+      Object.keys(updatedHours).forEach(day => {
+        if (updatedHours[day].isOpen) {
+          updatedHours[day][field] = value;
+        }
+      });
+      setHours(updatedHours);
+      onChange(JSON.stringify(updatedHours));
+    }
+  };
+
   const days = [
     { id: 'monday', label: 'Monday' },
     { id: 'tuesday', label: 'Tuesday' },
@@ -61,8 +89,39 @@ export const BusinessHoursSelect = ({ value, onChange }: BusinessHoursSelectProp
   ];
 
   return (
-    <div className="space-y-4">
-      <Label>Business Hours</Label>
+    <div className="space-y-6">
+      <div>
+        <Label>Business Hours</Label>
+        <div className="mt-2 space-y-4">
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="uniform-hours"
+              checked={useUniformHours}
+              onCheckedChange={(checked) => setUseUniformHours(checked as boolean)}
+            />
+            <Label htmlFor="uniform-hours">Use same hours for all days</Label>
+          </div>
+
+          {useUniformHours && (
+            <div className="flex items-center space-x-2 ml-6">
+              <Input
+                type="time"
+                value={uniformOpenTime}
+                onChange={(e) => handleUniformTimeChange('openTime', e.target.value)}
+                className="w-32"
+              />
+              <span>to</span>
+              <Input
+                type="time"
+                value={uniformCloseTime}
+                onChange={(e) => handleUniformTimeChange('closeTime', e.target.value)}
+                className="w-32"
+              />
+            </div>
+          )}
+        </div>
+      </div>
+
       <div className="space-y-4">
         {days.map(({ id, label }) => (
           <div key={id} className="flex items-start space-x-4">
@@ -74,7 +133,7 @@ export const BusinessHoursSelect = ({ value, onChange }: BusinessHoursSelectProp
               />
               <Label htmlFor={id}>{label}</Label>
             </div>
-            {hours[id].isOpen && (
+            {hours[id].isOpen && !useUniformHours && (
               <div className="flex items-center space-x-2">
                 <Input
                   type="time"
