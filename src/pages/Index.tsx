@@ -72,10 +72,10 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="container max-w-[1400px] pt-16 px-4">
-        <div className="flex gap-6">
-          <Sidebar className="w-64 hidden lg:block sticky top-16 shrink-0" />
-          <main className="flex-1 max-w-2xl mx-auto lg:mx-0">
+      <div className="flex">
+        <Sidebar className="w-16 fixed left-0 top-0 pt-16" />
+        <main className="flex-1 ml-16 pt-16 px-4">
+          <div className="max-w-2xl mx-auto">
             <div className="space-y-6">
               <div className="bg-card rounded-lg p-4 shadow-sm">
                 <h2 className="text-lg font-semibold mb-3">Categories</h2>
@@ -104,8 +104,8 @@ const Index = () => {
               <CreatePost />
               <PostList selectedCategory={selectedCategory} />
             </div>
-          </main>
-        </div>
+          </div>
+        </main>
       </div>
     </div>
   );

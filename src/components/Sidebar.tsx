@@ -12,6 +12,7 @@ import {
   Briefcase,
   Map,
 } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -33,22 +34,30 @@ export const Sidebar = ({ className }: SidebarProps) => {
   ];
 
   return (
-    <div className={cn("h-screen", className)}>
-      <div className="space-y-1">
-        {routes.map((route) => {
-          const Icon = route.icon;
-          return (
-            <Button
-              key={route.path}
-              variant={location.pathname === route.path ? "secondary" : "ghost"}
-              className="w-full justify-start"
-              onClick={() => navigate(route.path)}
-            >
-              <Icon className="mr-2 h-4 w-4" />
-              {route.name}
-            </Button>
-          );
-        })}
+    <div className={cn("h-screen border-r", className)}>
+      <div className="space-y-2 p-2">
+        <TooltipProvider delayDuration={0}>
+          {routes.map((route) => {
+            const Icon = route.icon;
+            return (
+              <Tooltip key={route.path}>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant={location.pathname === route.path ? "secondary" : "ghost"}
+                    className="w-full p-3 justify-center h-12"
+                    onClick={() => navigate(route.path)}
+                  >
+                    <Icon className="h-5 w-5" />
+                    <span className="sr-only">{route.name}</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="font-medium">
+                  {route.name}
+                </TooltipContent>
+              </Tooltip>
+            );
+          })}
+        </TooltipProvider>
       </div>
     </div>
   );
