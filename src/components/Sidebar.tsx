@@ -34,7 +34,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
   ];
 
   return (
-    <div className={cn("h-screen border-r bg-card overflow-y-auto", className)}>
+    <div className={cn("h-screen border-r bg-[#0a0a0a] overflow-y-auto", className)}>
       <div className="space-y-1 p-3">
         {routes.map((route) => {
           const Icon = route.icon;
