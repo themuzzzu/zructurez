@@ -3,6 +3,7 @@ import { MessageBubble } from "../MessageBubble";
 import { Chat } from "@/types/chat";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface ChatMessagesProps {
   chat: Chat;
@@ -13,6 +14,37 @@ export const ChatMessages = ({ chat, onForwardMessage }: ChatMessagesProps) => {
   const [messages, setMessages] = useState(chat.messages || []);
 
   useEffect(() => {
+    // Fetch existing messages first
+    const fetchMessages = async () => {
+      try {
+        const { data, error } = await supabase
+          .from(chat.type === 'group' ? 'group_messages' : 'messages')
+          .select('*')
+          .eq(chat.type === 'group' ? 'group_id' : 'receiver_id', chat.userId)
+          .order('created_at', { ascending: true });
+
+        if (error) {
+          console.error("Error fetching messages:", error);
+          toast.error("Failed to load messages");
+          return;
+        }
+
+        const formattedMessages = data.map(msg => ({
+          id: msg.id,
+          content: msg.content,
+          timestamp: new Date(msg.created_at).toLocaleString(),
+          senderId: msg.sender_id
+        }));
+
+        setMessages(formattedMessages);
+      } catch (error) {
+        console.error("Error in fetchMessages:", error);
+        toast.error("Failed to load messages");
+      }
+    };
+
+    fetchMessages();
+
     // Subscribe to real-time updates
     const channel = supabase
       .channel('chat_messages')
@@ -27,6 +59,7 @@ export const ChatMessages = ({ chat, onForwardMessage }: ChatMessagesProps) => {
             : `or(sender_id.eq.${chat.userId},receiver_id.eq.${chat.userId})`
         },
         (payload) => {
+          console.log("Received real-time update:", payload);
           if (payload.eventType === 'INSERT') {
             const newMessage = {
               id: payload.new.id,
@@ -38,9 +71,15 @@ export const ChatMessages = ({ chat, onForwardMessage }: ChatMessagesProps) => {
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log("Subscription status:", status);
+        if (status === 'SUBSCRIBED') {
+          console.log("Successfully subscribed to chat messages");
+        }
+      });
 
     return () => {
+      console.log("Cleaning up subscription");
       supabase.removeChannel(channel);
     };
   }, [chat.userId, chat.type]);
