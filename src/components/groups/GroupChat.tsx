@@ -87,25 +87,32 @@ export const GroupChat = ({ groupId }: GroupChatProps) => {
       .on(
         "postgres_changes",
         {
-          event: "INSERT",
+          event: "*", // Listen to all changes
           schema: "public",
           table: "messages",
           filter: `receiver_id=eq.${groupId}`,
         },
         async (payload) => {
-          const newMessage = payload.new as Message;
-          setMessages((current) => [...current, newMessage]);
-          
-          // Mark new message as read if it's not from current user
-          if (currentUserId && newMessage.sender_id !== currentUserId) {
-            const { error } = await supabase
-              .from("messages")
-              .update({ read: true })
-              .eq("id", newMessage.id);
+          if (payload.eventType === "INSERT") {
+            const newMessage = payload.new as Message;
+            setMessages((current) => [...current, newMessage]);
+            
+            // Mark new message as read if it's not from current user
+            if (currentUserId && newMessage.sender_id !== currentUserId) {
+              const { error } = await supabase
+                .from("messages")
+                .update({ read: true })
+                .eq("id", newMessage.id);
 
-            if (error) {
-              console.error("Error marking new message as read:", error);
+              if (error) {
+                console.error("Error marking new message as read:", error);
+              }
             }
+          } else if (payload.eventType === "DELETE") {
+            const deletedMessage = payload.old as Message;
+            setMessages((current) => 
+              current.filter((msg) => msg.id !== deletedMessage.id)
+            );
           }
         }
       )
