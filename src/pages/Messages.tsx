@@ -1,72 +1,52 @@
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { ChatList } from "@/components/chat/ChatList";
 import { ChatWindow } from "@/components/chat/ChatWindow";
 import type { Chat, Message } from "@/types/chat";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
-const SAMPLE_CHATS: Chat[] = [
-  {
-    id: "d7bed21c-5a38-402b-ac0a-4ee011247c77",
-    name: "Sarah Johnson",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah",
-    lastMessage: "Thanks for the help with the garden!",
-    time: "2m ago",
-    unread: 2,
-    userId: "d7bed21c-5a38-402b-ac0a-4ee011247c77",
-    messages: [
-      {
-        id: "1",
-        content: "Hi there! Could you help me with my garden?",
-        timestamp: "Yesterday 2:30 PM",
-        senderId: "d7bed21c-5a38-402b-ac0a-4ee011247c77"
-      },
-      {
-        id: "2",
-        content: "Of course! What do you need help with?",
-        timestamp: "Yesterday 2:35 PM",
-        senderId: "me"
-      },
-      {
-        id: "3",
-        content: "Thanks for the help with the garden!",
-        timestamp: "2m ago",
-        senderId: "d7bed21c-5a38-402b-ac0a-4ee011247c77"
-      }
-    ]
-  },
-  {
-    id: "e9e34f2c-9587-4bd7-9a58-d2c9db66a743",
-    name: "Mike Peterson",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Mike",
-    lastMessage: "When is the next community meeting?",
-    time: "1h ago",
-    unread: 0,
-    userId: "e9e34f2c-9587-4bd7-9a58-d2c9db66a743",
-    messages: []
-  },
-  {
-    id: "f6b3d8a1-4e12-4c3a-9e2d-8c4f1c9b7b5a",
-    name: "Emma Wilson",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emma",
-    lastMessage: "I found your lost cat!",
-    time: "3h ago",
-    unread: 1,
-    userId: "f6b3d8a1-4e12-4c3a-9e2d-8c4f1c9b7b5a",
-    messages: []
-  }
-];
+import { supabase } from "@/integrations/supabase/client";
 
 const Messages = () => {
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [message, setMessage] = useState("");
-  const [chats, setChats] = useState<Chat[]>(SAMPLE_CHATS);
+  const [chats, setChats] = useState<Chat[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const loadInitialChats = async () => {
+      try {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, username, avatar_url')
+          .limit(3);
+
+        if (profiles) {
+          const sampleChats: Chat[] = profiles.map(profile => ({
+            id: profile.id,
+            name: profile.username || 'Anonymous',
+            avatar: profile.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.id}`,
+            lastMessage: "Hey there!",
+            time: "2m ago",
+            unread: Math.floor(Math.random() * 3),
+            userId: profile.id,
+            messages: []
+          }));
+
+          setChats(sampleChats);
+        }
+      } catch (error) {
+        console.error('Error loading chats:', error);
+        toast.error("Failed to load chats");
+      }
+    };
+
+    loadInitialChats();
+  }, []);
 
   const handleSelectChat = (chat: Chat) => {
     const updatedChats = chats.map(c => {
