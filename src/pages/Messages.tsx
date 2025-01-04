@@ -1,11 +1,8 @@
 import { Navbar } from "@/components/Navbar";
-import { Sidebar } from "@/components/Sidebar";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { ArrowLeft } from "lucide-react";
+import { Search } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Link } from "react-router-dom";
 import { ChatList } from "@/components/chat/ChatList";
 import { ChatWindow } from "@/components/chat/ChatWindow";
 import type { Chat, Message } from "@/types/chat";
@@ -70,7 +67,6 @@ const Messages = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleSelectChat = (chat: Chat) => {
-    // Clear unread count when selecting a chat
     const updatedChats = chats.map(c => {
       if (c.id === chat.id) {
         return { ...c, unread: 0 };
@@ -116,36 +112,25 @@ const Messages = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="container max-w-[1400px] pt-20 pb-16">
-        <div className="flex gap-6">
-          <Sidebar className="w-64 hidden lg:block" />
-          <main className="flex-1">
-            <div className="flex items-center gap-4 mb-4">
-              <Link to="/">
-                <Button variant="ghost" size="icon">
-                  <ArrowLeft className="h-5 w-5" />
-                </Button>
-              </Link>
-              <h1 className="text-3xl font-bold">Messages</h1>
-            </div>
-            <Card className="h-[calc(100vh-140px)]">
-              <div className="flex h-full">
-                <ChatList
-                  chats={filteredChats}
-                  selectedChat={selectedChat}
-                  onSelectChat={handleSelectChat}
-                  searchQuery={searchQuery}
-                  onSearchChange={setSearchQuery}
-                />
-                <ChatWindow
-                  selectedChat={selectedChat}
-                  message={message}
-                  onMessageChange={setMessage}
-                  onSendMessage={handleSendMessage}
-                />
-              </div>
-            </Card>
-          </main>
+      <div className="pt-16">
+        <div className="flex h-[calc(100vh-4rem)]">
+          <div className="w-[400px] border-r bg-background">
+            <ChatList
+              chats={filteredChats}
+              selectedChat={selectedChat}
+              onSelectChat={handleSelectChat}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+            />
+          </div>
+          <div className="flex-1 bg-background">
+            <ChatWindow
+              selectedChat={selectedChat}
+              message={message}
+              onMessageChange={setMessage}
+              onSendMessage={handleSendMessage}
+            />
+          </div>
         </div>
       </div>
     </div>
