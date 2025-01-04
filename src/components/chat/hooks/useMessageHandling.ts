@@ -22,20 +22,25 @@ export const useMessageHandling = (
         return;
       }
 
-      // First check if the receiver exists in profiles table
-      const { data: receiverProfile, error: profileError } = await supabase
+      // Check if receiver exists in profiles table
+      const { data: receiverExists, error: checkError } = await supabase
         .from('profiles')
         .select('id')
         .eq('id', selectedChat.userId)
-        .single();
+        .maybeSingle();
 
-      if (profileError || !receiverProfile) {
-        console.error("Error checking receiver profile:", profileError);
+      if (checkError) {
+        console.error("Error checking receiver:", checkError);
+        toast.error("Error verifying recipient");
+        return;
+      }
+
+      if (!receiverExists) {
+        console.error("Receiver profile not found:", selectedChat.userId);
         toast.error("Invalid recipient. Please select a valid chat.");
         return;
       }
 
-      // If we have a valid profile, proceed with sending the message
       const { error: messageError } = await supabase
         .from("messages")
         .insert({
