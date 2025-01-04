@@ -1,6 +1,6 @@
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
+import { Checkbox } from "../ui/checkbox";
 
 interface BusinessPricingProps {
   formData: {
@@ -11,37 +11,37 @@ interface BusinessPricingProps {
 }
 
 export const BusinessPricing = ({ formData, onChange }: BusinessPricingProps) => {
-  const handlePriceTypeChange = (value: string) => {
-    if (value === 'appointment') {
-      onChange("consultation_price", "");
-    } else {
-      onChange("appointment_price", "");
+  const handlePriceTypeChange = (type: string, checked: boolean) => {
+    if (!checked) {
+      onChange(type === 'appointment' ? "appointment_price" : "consultation_price", "");
     }
   };
-
-  const currentType = formData.appointment_price ? 'appointment' : 'consultation';
 
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label>Price Type</Label>
-        <RadioGroup
-          defaultValue={currentType}
-          onValueChange={handlePriceTypeChange}
-          className="flex flex-col space-y-1"
-        >
+        <Label>Price Types</Label>
+        <div className="flex flex-col space-y-2">
           <div className="flex items-center space-x-2">
-            <RadioGroupItem value="appointment" id="appointment" />
+            <Checkbox 
+              id="appointment"
+              checked={!!formData.appointment_price}
+              onCheckedChange={(checked) => handlePriceTypeChange('appointment', checked as boolean)}
+            />
             <Label htmlFor="appointment">Appointment Price</Label>
           </div>
           <div className="flex items-center space-x-2">
-            <RadioGroupItem value="consultation" id="consultation" />
+            <Checkbox 
+              id="consultation"
+              checked={!!formData.consultation_price}
+              onCheckedChange={(checked) => handlePriceTypeChange('consultation', checked as boolean)}
+            />
             <Label htmlFor="consultation">Consultation Price</Label>
           </div>
-        </RadioGroup>
+        </div>
       </div>
 
-      {currentType === 'appointment' ? (
+      {!!formData.appointment_price || formData.appointment_price === "" ? (
         <div className="space-y-2">
           <Label htmlFor="appointment_price">Appointment Price (₹)</Label>
           <Input
@@ -54,7 +54,9 @@ export const BusinessPricing = ({ formData, onChange }: BusinessPricingProps) =>
             placeholder="Enter appointment price"
           />
         </div>
-      ) : (
+      ) : null}
+
+      {!!formData.consultation_price || formData.consultation_price === "" ? (
         <div className="space-y-2">
           <Label htmlFor="consultation_price">Consultation Price (₹)</Label>
           <Input
@@ -67,7 +69,7 @@ export const BusinessPricing = ({ formData, onChange }: BusinessPricingProps) =>
             placeholder="Enter consultation price"
           />
         </div>
-      )}
+      ) : null}
     </div>
   );
 };
