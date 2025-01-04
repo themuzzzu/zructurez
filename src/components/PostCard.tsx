@@ -38,6 +38,7 @@ export const PostCard = ({
   const [showComments, setShowComments] = useState(false);
   const [isLikedState, setIsLikedState] = useState(isLiked);
   const [likesCount, setLikesCount] = useState(likes);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const queryClient = useQueryClient();
 
   const likeMutation = useMutation({
@@ -70,6 +71,11 @@ export const PostCard = ({
     },
   });
 
+  const handleImageLoad = (event: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = event.target as HTMLImageElement;
+    setImageLoaded(true);
+  };
+
   return (
     <Card className="overflow-hidden">
       <div className="p-4">
@@ -94,14 +100,22 @@ export const PostCard = ({
         <p className="mb-4">{content}</p>
 
         {image && (
-          <div className="relative mb-4 rounded-lg overflow-hidden">
-            <AspectRatio ratio={16 / 9} className="bg-muted">
-              <img
-                src={image}
-                alt="Post content"
-                className="w-full h-full object-contain bg-muted"
-              />
-            </AspectRatio>
+          <div className="relative mb-4 rounded-lg overflow-hidden bg-muted">
+            <img
+              src={image}
+              alt="Post content"
+              className={cn(
+                "w-full transition-opacity duration-200",
+                imageLoaded ? "opacity-100" : "opacity-0"
+              )}
+              style={{
+                maxHeight: "calc(100vh - 200px)",
+                objectFit: "contain",
+                margin: "0 auto",
+                display: "block"
+              }}
+              onLoad={handleImageLoad}
+            />
           </div>
         )}
 
