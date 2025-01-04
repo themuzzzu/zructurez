@@ -152,7 +152,6 @@ const Index = () => {
                 </div>
                 <ScrollBar orientation="horizontal" />
               </ScrollArea>
-              
               <BusinessSection />
               <CreatePost />
               <PostList selectedCategory={selectedCategory} />
