@@ -17,6 +17,14 @@ const Communities = () => {
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const queryClient = useQueryClient();
 
+  const { data: currentUser } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      return user;
+    },
+  });
+
   const { data: groups, isLoading } = useQuery({
     queryKey: ['groups'],
     queryFn: async () => {
@@ -25,12 +33,13 @@ const Communities = () => {
         .select(`
           *,
           group_members (
-            count
+            count,
+            user_id
           )
         `);
 
       if (error) throw error;
-      return groups as Group[];
+      return groups as (Group & { group_members: { count: number; user_id: string }[] })[];
     },
   });
 
@@ -38,18 +47,6 @@ const Communities = () => {
     mutationFn: async (groupId: string) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
-
-      // First check if user is already a member
-      const { data: existingMember } = await supabase
-        .from('group_members')
-        .select('*')
-        .eq('group_id', groupId)
-        .eq('user_id', user.id)
-        .single();
-
-      if (existingMember) {
-        throw new Error("Already a member of this group");
-      }
 
       const { error } = await supabase
         .from('group_members')
@@ -65,17 +62,19 @@ const Communities = () => {
       toast.success("Successfully joined the group!");
     },
     onError: (error) => {
-      if (error.message === "Already a member of this group") {
-        toast.error("You are already a member of this group");
-      } else {
-        toast.error("Failed to join group");
-      }
+      console.error('Error joining group:', error);
+      toast.error("Failed to join group");
     },
   });
 
   if (isLoading) {
     return <div>Loading...</div>;
   }
+
+  const isGroupMember = (group: typeof groups[0]) => {
+    if (!currentUser) return false;
+    return group.group_members.some(member => member.user_id === currentUser.id);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -124,15 +123,17 @@ const Communities = () => {
                             </p>
                           )}
                           <div className="flex gap-2">
-                            <Button 
-                              className="flex-1"
-                              variant="default"
-                              onClick={() => joinGroupMutation.mutate(group.id)}
-                              disabled={joinGroupMutation.isPending}
-                            >
-                              <Plus className="h-4 w-4 mr-2" />
-                              Join Group
-                            </Button>
+                            {!isGroupMember(group) && (
+                              <Button 
+                                className="flex-1"
+                                variant="default"
+                                onClick={() => joinGroupMutation.mutate(group.id)}
+                                disabled={joinGroupMutation.isPending}
+                              >
+                                <Plus className="h-4 w-4 mr-2" />
+                                Join Group
+                              </Button>
+                            )}
                             <Button
                               variant="outline"
                               onClick={() => setSelectedGroup(group)}
