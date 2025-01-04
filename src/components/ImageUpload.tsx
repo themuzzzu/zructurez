@@ -17,7 +17,7 @@ interface ImageUploadProps {
 export const ImageUpload = ({ selectedImage, onImageSelect }: ImageUploadProps) => {
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 50, y: 50 });
-  const [isAdjusting, setIsAdjusting] = useState(false);
+  const [displayImage, setDisplayImage] = useState(selectedImage);
 
   const handleFileUpload = (file: File) => {
     if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
@@ -32,7 +32,9 @@ export const ImageUpload = ({ selectedImage, onImageSelect }: ImageUploadProps) 
     
     const reader = new FileReader();
     reader.onload = (e) => {
-      onImageSelect(e.target?.result as string);
+      const result = e.target?.result as string;
+      setDisplayImage(result);
+      onImageSelect(result);
       setScale(1);
       setPosition({ x: 50, y: 50 });
       toast.success("Photo uploaded successfully!");
@@ -124,7 +126,10 @@ export const ImageUpload = ({ selectedImage, onImageSelect }: ImageUploadProps) 
               variant="destructive"
               size="icon"
               className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-              onClick={() => onImageSelect(null)}
+              onClick={() => {
+                setDisplayImage(null);
+                onImageSelect(null);
+              }}
             >
               <X className="h-4 w-4" />
             </Button>
