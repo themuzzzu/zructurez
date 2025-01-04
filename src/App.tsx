@@ -20,6 +20,7 @@ import Auth from "./pages/Auth";
 import ServiceDetails from "./pages/ServiceDetails";
 import BusinessDetails from "./pages/BusinessDetails";
 import Profile from "./pages/Profile";
+import Jobs from "./pages/Jobs";
 
 const queryClient = new QueryClient();
 
@@ -89,6 +90,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Services />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/jobs"
+              element={
+                <ProtectedRoute>
+                  <Jobs />
                 </ProtectedRoute>
               }
             />

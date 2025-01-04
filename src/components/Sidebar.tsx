@@ -23,6 +23,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
     { name: "Home", path: "/", icon: Home },
     { name: "Marketplace", path: "/marketplace", icon: Store },
     { name: "Services", path: "/services", icon: Wrench },
+    { name: "Jobs", path: "/jobs", icon: Briefcase },
     { name: "Communities", path: "/communities", icon: Users },
     { name: "Messages", path: "/messages", icon: MessageSquare },
     { name: "Events", path: "/events", icon: Calendar },
