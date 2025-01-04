@@ -24,16 +24,8 @@ export const Sidebar = ({ className }: SidebarProps) => {
     { name: "Marketplace", path: "/marketplace", icon: Store },
     { name: "Services", path: "/services", icon: Wrench },
     { name: "Jobs", path: "/jobs", icon: Briefcase },
-    { 
-      type: "separator",
-      label: "Social"
-    },
     { name: "Communities", path: "/communities", icon: Users },
     { name: "Messages", path: "/messages", icon: MessageSquare },
-    { 
-      type: "separator",
-      label: "Other"
-    },
     { name: "Events", path: "/events", icon: Calendar },
     { name: "Maps", path: "/maps", icon: Map },
     { name: "Settings", path: "/settings", icon: Settings },
@@ -42,18 +34,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
   return (
     <div className={cn("h-screen border-r bg-card overflow-y-auto", className)}>
       <div className="space-y-1 p-3">
-        {routes.map((route, index) => {
-          if (route.type === "separator") {
-            return (
-              <div 
-                key={index}
-                className="px-3 py-2 text-xs font-semibold text-muted-foreground"
-              >
-                {route.label}
-              </div>
-            );
-          }
-
+        {routes.map((route) => {
           const Icon = route.icon;
           const isActive = location.pathname === route.path;
 
