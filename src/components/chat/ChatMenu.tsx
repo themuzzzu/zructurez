@@ -9,6 +9,7 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Chat } from "@/types/chat";
+import { useState } from "react";
 
 interface ChatMenuProps {
   selectedChat: Chat;
@@ -27,6 +28,8 @@ export const ChatMenu = ({
   setIsSelectMode,
   isSelectMode,
 }: ChatMenuProps) => {
+  const [isBlocked, setIsBlocked] = useState(false);
+
   const handleViewContactInfo = () => {
     setShowContactInfo(true);
   };
@@ -69,7 +72,7 @@ export const ChatMenu = ({
         .delete()
         .match({ 
           sender_id: user.data.user.id,
-          receiver_id: selectedChat.id 
+          receiver_id: selectedChat.userId 
         });
 
       if (error) throw error;
@@ -82,10 +85,21 @@ export const ChatMenu = ({
 
   const handleBlockContact = async () => {
     try {
-      // Implement blocking logic here
+      // In a real app, you would update a blocked_users table in the database
+      setIsBlocked(true);
       toast.success("Contact blocked successfully");
     } catch (error) {
       toast.error("Failed to block contact");
+    }
+  };
+
+  const handleUnblockContact = async () => {
+    try {
+      // In a real app, you would remove the entry from blocked_users table
+      setIsBlocked(false);
+      toast.success("Contact unblocked successfully");
+    } catch (error) {
+      toast.error("Failed to unblock contact");
     }
   };
 
@@ -109,12 +123,21 @@ export const ChatMenu = ({
         <DropdownMenuItem onClick={handleClearMessages}>
           Clear messages
         </DropdownMenuItem>
-        <DropdownMenuItem 
-          onClick={handleBlockContact}
-          className="text-destructive"
-        >
-          Block contact
-        </DropdownMenuItem>
+        {isBlocked ? (
+          <DropdownMenuItem 
+            onClick={handleUnblockContact}
+            className="text-primary"
+          >
+            Unblock contact
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuItem 
+            onClick={handleBlockContact}
+            className="text-destructive"
+          >
+            Block contact
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
