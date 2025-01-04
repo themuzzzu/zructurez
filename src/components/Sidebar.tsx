@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useState } from "react";
 import {
   Home,
   Store,
@@ -12,6 +13,8 @@ import {
   Briefcase,
   Map,
   Building,
+  PanelLeftClose,
+  PanelLeft,
 } from "lucide-react";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
@@ -19,6 +22,7 @@ interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 export const Sidebar = ({ className }: SidebarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const routes = [
     { name: "Home", path: "/", icon: Home },
@@ -34,7 +38,25 @@ export const Sidebar = ({ className }: SidebarProps) => {
   ];
 
   return (
-    <div className={cn("h-screen border-r bg-[#0a0a0a] overflow-y-auto", className)}>
+    <div className={cn(
+      "h-screen border-r bg-[#0a0a0a] overflow-y-auto transition-all duration-300",
+      isCollapsed ? "w-16" : "w-64",
+      className
+    )}>
+      <div className="flex justify-end p-2">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="hover:bg-accent/50"
+        >
+          {isCollapsed ? (
+            <PanelLeft className="h-4 w-4" />
+          ) : (
+            <PanelLeftClose className="h-4 w-4" />
+          )}
+        </Button>
+      </div>
       <div className="space-y-1 p-3">
         {routes.map((route) => {
           const Icon = route.icon;
@@ -44,11 +66,16 @@ export const Sidebar = ({ className }: SidebarProps) => {
             <Button
               key={route.path}
               variant={isActive ? "secondary" : "ghost"}
-              className="w-full justify-start h-10 px-3 gap-3 hover:bg-accent/50"
+              className={cn(
+                "w-full justify-start h-10 px-3 gap-3 hover:bg-accent/50",
+                isCollapsed && "justify-center px-0"
+              )}
               onClick={() => navigate(route.path)}
             >
               <Icon className="h-4 w-4 shrink-0" />
-              <span className="text-sm font-medium">{route.name}</span>
+              {!isCollapsed && (
+                <span className="text-sm font-medium">{route.name}</span>
+              )}
             </Button>
           );
         })}
