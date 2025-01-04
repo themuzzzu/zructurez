@@ -17,6 +17,7 @@ interface CreateBusinessFormProps {
 
 export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: CreateBusinessFormProps) => {
   const [loading, setLoading] = useState(false);
+  const [pendingImage, setPendingImage] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     category: "",
@@ -46,6 +47,7 @@ export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: CreateB
         bio: initialData.bio || "",
         website: initialData.website || "",
       });
+      setPendingImage(initialData.image_url || null);
     }
   }, [initialData]);
 
@@ -67,9 +69,9 @@ export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: CreateB
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("No user found");
 
-      let imageUrl = formData.image;
-      if (formData.image && !formData.image.startsWith('http')) {
-        const base64Data = formData.image.split(',')[1];
+      let imageUrl = pendingImage;
+      if (pendingImage && !pendingImage.startsWith('http')) {
+        const base64Data = pendingImage.split(',')[1];
         const byteCharacters = atob(base64Data);
         const byteNumbers = new Array(byteCharacters.length);
         for (let i = 0; i < byteCharacters.length; i++) {
@@ -143,8 +145,8 @@ export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: CreateB
       <div className="space-y-2">
         <Label>Business Image</Label>
         <ImageUpload
-          selectedImage={formData.image}
-          onImageSelect={(image) => handleChange("image", image)}
+          selectedImage={pendingImage}
+          onImageSelect={(image) => setPendingImage(image)}
         />
       </div>
 
