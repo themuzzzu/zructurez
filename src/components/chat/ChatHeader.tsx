@@ -22,20 +22,26 @@ export const ChatHeader = ({
   // Format the last seen time
   const getLastSeen = () => {
     try {
-      // If chat.time is already a timestamp or valid date string, use it directly
       if (chat.time.includes('ago')) {
-        return chat.time; // Return the existing relative time string
+        return chat.time;
       }
       return formatDistanceToNow(new Date(chat.time), { addSuffix: true });
     } catch (error) {
-      return 'recently'; // Fallback text if date parsing fails
+      return 'recently';
     }
+  };
+
+  const handleProfileClick = () => {
+    setShowContactInfo(true);
   };
 
   return (
     <div className="p-4 border-b">
       <div className="flex items-center justify-between">
-        <div className="flex flex-col">
+        <div 
+          className="flex flex-col cursor-pointer hover:opacity-80 transition-opacity"
+          onClick={handleProfileClick}
+        >
           <div className="flex items-center gap-3">
             <img
               src={chat.avatar}
