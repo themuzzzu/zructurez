@@ -417,6 +417,7 @@ export type Database = {
         Row: {
           content: string
           created_at: string
+          expires_at: string | null
           id: string
           read: boolean | null
           receiver_id: string
@@ -425,6 +426,7 @@ export type Database = {
         Insert: {
           content: string
           created_at?: string
+          expires_at?: string | null
           id?: string
           read?: boolean | null
           receiver_id: string
@@ -433,6 +435,7 @@ export type Database = {
         Update: {
           content?: string
           created_at?: string
+          expires_at?: string | null
           id?: string
           read?: boolean | null
           receiver_id?: string
@@ -855,6 +858,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cleanup_expired_messages: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       get_sample_user_id: {
         Args: Record<PropertyKey, never>
         Returns: string
