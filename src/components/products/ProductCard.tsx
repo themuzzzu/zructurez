@@ -87,7 +87,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
   };
 
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-all duration-300">
+    <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 bg-[#0a0a0a] border-border">
       {product.image_url && (
         <img
           src={product.image_url}
@@ -98,7 +98,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
       <div className="p-4">
         <div className="flex justify-between items-start mb-2">
           <div>
-            <h3 className="text-lg font-semibold">{product.title}</h3>
+            <h3 className="text-lg font-semibold text-foreground">{product.title}</h3>
             <div className="text-sm text-muted-foreground">
               {product.category} {product.subcategory && `• ${product.subcategory}`}
             </div>
