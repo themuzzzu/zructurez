@@ -32,7 +32,6 @@ export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: CreateB
     website: "",
   });
 
-  // Only set initial data when the component mounts or when initialData changes
   useEffect(() => {
     if (initialData) {
       setFormData({
@@ -71,28 +70,36 @@ export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: CreateB
       if (!user) throw new Error("No user found");
 
       let imageUrl = pendingImage;
-      if (pendingImage && !pendingImage.startsWith('http')) {
-        const base64Data = pendingImage.split(',')[1];
-        const byteCharacters = atob(base64Data);
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-          byteNumbers[i] = byteCharacters.charCodeAt(i);
+
+      // Only process the image if it's new (base64) or different from the current one
+      if (pendingImage && 
+          (pendingImage.startsWith('data:') || 
+           (initialData && pendingImage !== initialData.image_url))) {
+        
+        // If it's a base64 image, upload it
+        if (pendingImage.startsWith('data:')) {
+          const base64Data = pendingImage.split(',')[1];
+          const byteCharacters = atob(base64Data);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          const blob = new Blob([byteArray], { type: 'image/jpeg' });
+
+          const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}`;
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('business-images')
+            .upload(fileName, blob);
+
+          if (uploadError) throw uploadError;
+
+          const { data: { publicUrl } } = supabase.storage
+            .from('business-images')
+            .getPublicUrl(fileName);
+
+          imageUrl = publicUrl;
         }
-        const byteArray = new Uint8Array(byteNumbers);
-        const blob = new Blob([byteArray], { type: 'image/jpeg' });
-
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}`;
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('business-images')
-          .upload(fileName, blob);
-
-        if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('business-images')
-          .getPublicUrl(fileName);
-
-        imageUrl = publicUrl;
       }
 
       const businessData = {
