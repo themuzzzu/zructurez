@@ -14,5 +14,5 @@ export interface Chat {
   unread: number;
   userId: string;
   messages: Message[];
-  type: 'chat' | 'group'; // Added type property to distinguish between chats and groups
+  type: 'chat' | 'group';
 }

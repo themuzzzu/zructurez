@@ -22,34 +22,60 @@ export const useMessageHandling = (
         return;
       }
 
-      // First check if the receiver exists in profiles table
-      const { data: receiverProfile, error: profileError } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('id', selectedChat.userId)
-        .maybeSingle();
+      if (selectedChat.type === 'group') {
+        // Handle group message
+        const { error: membershipError } = await supabase
+          .from('group_members')
+          .select('*')
+          .eq('group_id', selectedChat.userId)
+          .eq('user_id', user.id)
+          .single();
 
-      if (profileError) {
-        console.error("Error checking receiver profile:", profileError);
-        toast.error("Error verifying recipient");
-        return;
+        if (membershipError) {
+          console.error("Error checking group membership:", membershipError);
+          toast.error("You must be a member of this group to send messages");
+          return;
+        }
+
+        const { error: messageError } = await supabase
+          .from("group_messages")
+          .insert({
+            content: message,
+            sender_id: user.id,
+            group_id: selectedChat.userId,
+          });
+
+        if (messageError) throw messageError;
+      } else {
+        // Handle direct message
+        const { data: receiverProfile, error: profileError } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('id', selectedChat.userId)
+          .maybeSingle();
+
+        if (profileError) {
+          console.error("Error checking receiver profile:", profileError);
+          toast.error("Error verifying recipient");
+          return;
+        }
+
+        if (!receiverProfile) {
+          console.error("Receiver profile not found:", selectedChat.userId);
+          toast.error("Cannot send message - recipient not found");
+          return;
+        }
+
+        const { error: messageError } = await supabase
+          .from("messages")
+          .insert({
+            content: message,
+            sender_id: user.id,
+            receiver_id: selectedChat.userId,
+          });
+
+        if (messageError) throw messageError;
       }
-
-      if (!receiverProfile) {
-        console.error("Receiver profile not found:", selectedChat.userId);
-        toast.error("Cannot send message - recipient not found");
-        return;
-      }
-
-      const { error: messageError } = await supabase
-        .from("messages")
-        .insert({
-          content: message,
-          sender_id: user.id,
-          receiver_id: selectedChat.userId,
-        });
-
-      if (messageError) throw messageError;
 
       onMessageChange("");
       onSendMessage();
