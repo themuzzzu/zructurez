@@ -4,7 +4,6 @@ import { Avatar } from "./ui/avatar";
 import { Button } from "./ui/button";
 import { Heart, MessageSquare, Share2 } from "lucide-react";
 import { CommentSection } from "./CommentSection";
-import { AspectRatio } from "./ui/aspect-ratio";
 import { cn } from "@/lib/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -78,7 +77,7 @@ export const PostCard = ({
 
   return (
     <Card className="overflow-hidden">
-      <div className="p-4">
+      <div className={cn("p-4", !image && "pb-0")}>
         <div className="flex items-center gap-3 mb-4">
           <Avatar>
             <img src={avatar} alt={author} className="h-10 w-10 rounded-full" />
@@ -98,27 +97,29 @@ export const PostCard = ({
         </div>
 
         <p className="mb-4">{content}</p>
+      </div>
 
-        {image && (
-          <div className="relative mb-4 rounded-lg overflow-hidden bg-muted">
-            <img
-              src={image}
-              alt="Post content"
-              className={cn(
-                "w-full transition-opacity duration-200",
-                imageLoaded ? "opacity-100" : "opacity-0"
-              )}
-              style={{
-                maxHeight: "calc(100vh - 200px)",
-                objectFit: "contain",
-                margin: "0 auto",
-                display: "block"
-              }}
-              onLoad={handleImageLoad}
-            />
-          </div>
-        )}
+      {image && (
+        <div className="relative mb-4 bg-muted">
+          <img
+            src={image}
+            alt="Post content"
+            className={cn(
+              "w-full transition-opacity duration-200",
+              imageLoaded ? "opacity-100" : "opacity-0"
+            )}
+            style={{
+              maxHeight: "calc(100vh - 200px)",
+              objectFit: "contain",
+              margin: "0 auto",
+              display: "block"
+            }}
+            onLoad={handleImageLoad}
+          />
+        </div>
+      )}
 
+      <div className="px-4 pb-4">
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
