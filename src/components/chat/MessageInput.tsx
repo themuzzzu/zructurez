@@ -16,14 +16,14 @@ export const MessageInput = ({ message, onMessageChange, onSubmit }: MessageInpu
   };
 
   return (
-    <form onSubmit={onSubmit} className="flex gap-2 items-center">
+    <form onSubmit={onSubmit} className="flex gap-2 items-center w-full">
       <Popover>
         <PopoverTrigger asChild>
           <Button 
             variant="ghost" 
             size="icon"
             type="button"
-            className="text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground shrink-0"
           >
             <Smile className="h-5 w-5" />
           </Button>
@@ -44,9 +44,9 @@ export const MessageInput = ({ message, onMessageChange, onSubmit }: MessageInpu
         placeholder="Type a message..."
         value={message}
         onChange={(e) => onMessageChange(e.target.value)}
-        className="flex-1"
+        className="flex-1 min-w-0"
       />
-      <Button type="submit" size="icon">
+      <Button type="submit" size="icon" className="shrink-0">
         <Send className="h-4 w-4" />
       </Button>
     </form>
