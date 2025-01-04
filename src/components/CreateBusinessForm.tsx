@@ -32,6 +32,7 @@ export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: CreateB
     website: "",
   });
 
+  // Only set initial data when the component mounts or when initialData changes
   useEffect(() => {
     if (initialData) {
       setFormData({
