@@ -8,7 +8,7 @@ import { CreateBusinessForm } from "../CreateBusinessForm";
 interface BusinessEditButtonProps {
   business: any;
   onSuccess: () => void;
-  onClose?: () => void;  // Added this prop as optional
+  onClose?: () => void;
 }
 
 export const BusinessEditButton = ({ business, onSuccess, onClose }: BusinessEditButtonProps) => {
@@ -16,7 +16,7 @@ export const BusinessEditButton = ({ business, onSuccess, onClose }: BusinessEdi
 
   const handleClose = () => {
     setIsDialogOpen(false);
-    onClose?.();  // Call onClose if provided
+    onClose?.();
   };
 
   return (
