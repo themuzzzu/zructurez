@@ -14,11 +14,10 @@ const Index = () => {
   const [searchParams] = useSearchParams();
   const selectedCategory = searchParams.get('category');
 
-  const { data: posts, isLoading, error } = useQuery({
+  const { data: posts } = useQuery({
     queryKey: ['posts', selectedCategory],
     queryFn: getPosts,
-    staleTime: 1000 * 60, // Cache data for 1 minute
-    suspense: true,
+    gcTime: 1000 * 60, // Cache data for 1 minute
   });
 
   const categories = [
@@ -71,33 +70,21 @@ const Index = () => {
                 </div>
                 <CreatePost />
                 <div className="space-y-4">
-                  {isLoading ? (
-                    <LoadingView />
-                  ) : error ? (
-                    <div className="text-center py-8 text-red-500">
-                      Error loading posts. Please try again later.
-                    </div>
-                  ) : filteredPosts?.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      No posts found. Be the first to post!
-                    </div>
-                  ) : (
-                    filteredPosts?.map((post) => (
-                      <PostCard
-                        key={post.id}
-                        id={post.id}
-                        author={post.profiles?.username || "Anonymous"}
-                        avatar={post.profiles?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${post.user_id}`}
-                        time={new Date(post.created_at).toLocaleString()}
-                        content={post.content}
-                        category={post.category || "General"}
-                        likes={post.likes}
-                        comments={post.comments}
-                        image={post.image_url}
-                        isLiked={post.user_has_liked}
-                      />
-                    ))
-                  )}
+                  {filteredPosts?.map((post) => (
+                    <PostCard
+                      key={post.id}
+                      id={post.id}
+                      author={post.profiles?.username || "Anonymous"}
+                      avatar={post.profiles?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${post.user_id}`}
+                      time={new Date(post.created_at).toLocaleString()}
+                      content={post.content}
+                      category={post.category || "General"}
+                      likes={post.likes}
+                      comments={post.comments}
+                      image={post.image_url}
+                      isLiked={post.user_has_liked}
+                    />
+                  ))}
                 </div>
               </div>
             </Suspense>
