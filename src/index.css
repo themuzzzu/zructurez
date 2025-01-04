@@ -4,47 +4,47 @@
 
 @layer base {
   :root {
-    --background: 0 0% 8%;
+    --background: 0 0% 5%;
     --foreground: 0 0% 98%;
-    --card: 0 0% 10%;
+    --card: 0 0% 7%;
     --card-foreground: 0 0% 98%;
-    --popover: 0 0% 10%;
+    --popover: 0 0% 7%;
     --popover-foreground: 0 0% 98%;
     --primary: 352 84% 49%;
     --primary-foreground: 0 0% 100%;
     --secondary: 352 78% 39%;
     --secondary-foreground: 0 0% 100%;
-    --muted: 0 0% 15%;
+    --muted: 0 0% 12%;
     --muted-foreground: 0 0% 70%;
-    --accent: 0 0% 15%;
+    --accent: 0 0% 12%;
     --accent-foreground: 0 0% 98%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 15%;
-    --input: 0 0% 15%;
+    --border: 0 0% 12%;
+    --input: 0 0% 12%;
     --ring: 352 84% 49%;
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 0 0% 8%;
+    --background: 0 0% 5%;
     --foreground: 0 0% 98%;
-    --card: 0 0% 10%;
+    --card: 0 0% 7%;
     --card-foreground: 0 0% 98%;
-    --popover: 0 0% 10%;
+    --popover: 0 0% 7%;
     --popover-foreground: 0 0% 98%;
     --primary: 352 84% 49%;
     --primary-foreground: 0 0% 98%;
     --secondary: 352 78% 39%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 15%;
+    --muted: 0 0% 12%;
     --muted-foreground: 0 0% 70%;
-    --accent: 0 0% 15%;
+    --accent: 0 0% 12%;
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 15%;
-    --input: 0 0% 15%;
+    --border: 0 0% 12%;
+    --input: 0 0% 12%;
     --ring: 352 84% 49%;
   }
 
@@ -52,7 +52,6 @@
     @apply bg-primary/20 text-foreground;
   }
 
-  /* Dark mode selection color - applying to all elements */
   .dark *::selection {
     @apply bg-black text-white;
   }
@@ -61,7 +60,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-[#141414] text-foreground;
+    @apply bg-[#0a0a0a] text-foreground;
   }
 }
 

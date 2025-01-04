@@ -70,14 +70,14 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#141414]">
+    <div className="min-h-screen bg-[#0a0a0a]">
       <Navbar />
       <div className="flex">
-        <Sidebar className="w-64 fixed left-0 top-0 pt-16 bg-[#141414]" />
-        <main className="flex-1 ml-64 pt-16 px-4 bg-[#141414]">
+        <Sidebar className="w-64 fixed left-0 top-0 pt-16 bg-[#0a0a0a]" />
+        <main className="flex-1 ml-64 pt-16 px-4 bg-[#0a0a0a]">
           <div className="max-w-2xl mx-auto">
             <div className="space-y-6">
-              <div className="bg-[#1a1a1a] rounded-lg p-4 shadow-sm">
+              <div className="bg-[#141414] rounded-lg p-4 shadow-sm">
                 <h2 className="text-lg font-semibold mb-3">Categories</h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                   {categories.map((category) => {
@@ -86,7 +86,7 @@ const Index = () => {
                       <Button
                         key={category.name}
                         variant="outline"
-                        className="w-full justify-start bg-[#1f1f1f] hover:bg-[#252525] border-[#2a2a2a]"
+                        className="w-full justify-start bg-[#1a1a1a] hover:bg-[#252525] border-[#2a2a2a]"
                         onClick={() => {
                           const searchParams = new URLSearchParams(window.location.search);
                           searchParams.set('category', category.name.toLowerCase());
