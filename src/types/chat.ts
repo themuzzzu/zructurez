@@ -12,6 +12,7 @@ export interface Chat {
   lastMessage: string;
   time: string;
   unread: number;
-  userId: string; // Added userId field for proper UUID handling
+  userId: string;
   messages: Message[];
+  type: 'chat' | 'group'; // Added type property to distinguish between chats and groups
 }
