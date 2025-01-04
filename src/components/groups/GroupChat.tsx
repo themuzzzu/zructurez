@@ -33,7 +33,7 @@ export const GroupChat = ({ groupId }: GroupChatProps) => {
     initializeChat();
 
     return () => {
-      const channel = supabase.channel('messages');
+      const channel = supabase.channel('group_messages');
       supabase.removeChannel(channel);
     };
   }, [groupId]);
@@ -51,31 +51,14 @@ export const GroupChat = ({ groupId }: GroupChatProps) => {
 
   const fetchMessages = async () => {
     try {
-      // First, get all members of the group
-      const { data: members, error: membersError } = await supabase
-        .from("group_members")
-        .select("user_id")
-        .eq("group_id", groupId);
-
-      if (membersError) throw membersError;
-
-      if (!members || members.length === 0) {
-        setMessages([]);
-        return;
-      }
-
-      const memberIds = members.map(member => member.user_id);
-
-      // Then fetch messages where both sender and receiver are group members
-      const { data: messages, error: messagesError } = await supabase
-        .from("messages")
+      const { data: messages, error } = await supabase
+        .from("group_messages")
         .select("*")
-        .eq("receiver_id", groupId)
+        .eq("group_id", groupId)
         .order("created_at", { ascending: true });
 
-      if (messagesError) throw messagesError;
+      if (error) throw error;
       setMessages(messages || []);
-
     } catch (error) {
       console.error("Error fetching messages:", error);
       toast.error("Failed to load messages");
@@ -86,14 +69,14 @@ export const GroupChat = ({ groupId }: GroupChatProps) => {
 
   const subscribeToMessages = () => {
     const channel = supabase
-      .channel("messages")
+      .channel("group_messages")
       .on(
         "postgres_changes",
         {
           event: "*",
           schema: "public",
-          table: "messages",
-          filter: `receiver_id=eq.${groupId}`,
+          table: "group_messages",
+          filter: `group_id=eq.${groupId}`,
         },
         async (payload) => {
           if (payload.eventType === "INSERT") {
@@ -126,10 +109,10 @@ export const GroupChat = ({ groupId }: GroupChatProps) => {
         return;
       }
 
-      const { error } = await supabase.from("messages").insert({
+      const { error } = await supabase.from("group_messages").insert({
         content: newMessage.trim(),
         sender_id: currentUserId,
-        receiver_id: groupId, // Using groupId as receiver_id for group messages
+        group_id: groupId,
       });
 
       if (error) throw error;

@@ -16,7 +16,7 @@ export interface Message {
   timestamp?: string;
   senderId?: string;
   sender_id: string;
-  receiver_id: string;
+  group_id: string;
   created_at: string;
   read?: boolean;
 }
