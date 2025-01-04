@@ -22,22 +22,22 @@ export const useMessageHandling = (
         return;
       }
 
-      // Check if receiver exists in profiles table
-      const { data: receiverExists, error: checkError } = await supabase
+      // First check if the receiver exists in profiles table
+      const { data: receiverProfile, error: profileError } = await supabase
         .from('profiles')
         .select('id')
         .eq('id', selectedChat.userId)
         .maybeSingle();
 
-      if (checkError) {
-        console.error("Error checking receiver:", checkError);
+      if (profileError) {
+        console.error("Error checking receiver profile:", profileError);
         toast.error("Error verifying recipient");
         return;
       }
 
-      if (!receiverExists) {
+      if (!receiverProfile) {
         console.error("Receiver profile not found:", selectedChat.userId);
-        toast.error("Invalid recipient. Please select a valid chat.");
+        toast.error("Cannot send message - recipient not found");
         return;
       }
 
@@ -67,6 +67,18 @@ export const useMessageHandling = (
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         toast.error("You must be logged in to send images");
+        return;
+      }
+
+      // Check if receiver exists
+      const { data: receiverProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', selectedChat.userId)
+        .maybeSingle();
+
+      if (profileError || !receiverProfile) {
+        toast.error("Cannot send image - recipient not found");
         return;
       }
 
@@ -112,6 +124,18 @@ export const useMessageHandling = (
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         toast.error("You must be logged in to send videos");
+        return;
+      }
+
+      // Check if receiver exists
+      const { data: receiverProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', selectedChat.userId)
+        .maybeSingle();
+
+      if (profileError || !receiverProfile) {
+        toast.error("Cannot send video - recipient not found");
         return;
       }
 
