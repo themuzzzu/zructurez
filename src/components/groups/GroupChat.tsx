@@ -134,6 +134,10 @@ export const GroupChat = ({ groupId }: GroupChatProps) => {
     }
   };
 
+  const handleForwardMessage = (content: string) => {
+    setNewMessage(content);
+  };
+
   if (loading) {
     return <div className="p-4">Loading messages...</div>;
   }
@@ -145,9 +149,11 @@ export const GroupChat = ({ groupId }: GroupChatProps) => {
           {messages.map((message) => (
             <MessageBubble
               key={message.id}
+              messageId={message.id}
               content={message.content}
               timestamp={new Date(message.created_at).toLocaleString()}
               isOwn={message.sender_id === currentUserId}
+              onForward={handleForwardMessage}
             />
           ))}
         </div>
