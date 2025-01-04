@@ -10,20 +10,22 @@ import { ChatList } from "@/components/chat/ChatList";
 import { ChatWindow } from "@/components/chat/ChatWindow";
 import type { Chat, Message } from "@/types/chat";
 
+// Using proper UUIDs for the sample data
 const SAMPLE_CHATS: Chat[] = [
   {
-    id: 1,
+    id: "1",
     name: "Sarah Johnson",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah",
     lastMessage: "Thanks for the help with the garden!",
     time: "2m ago",
     unread: 2,
+    userId: "feb4a063-6dfc-4b6f-a1d9-0fc2c57c04d1", // Proper UUID format
     messages: [
       {
         id: "1",
         content: "Hi there! Could you help me with my garden?",
         timestamp: "Yesterday 2:30 PM",
-        senderId: "sarah"
+        senderId: "feb4a063-6dfc-4b6f-a1d9-0fc2c57c04d1"
       },
       {
         id: "2",
@@ -35,26 +37,28 @@ const SAMPLE_CHATS: Chat[] = [
         id: "3",
         content: "Thanks for the help with the garden!",
         timestamp: "2m ago",
-        senderId: "sarah"
+        senderId: "feb4a063-6dfc-4b6f-a1d9-0fc2c57c04d1"
       }
     ]
   },
   {
-    id: 2,
+    id: "2",
     name: "Mike Peterson",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Mike",
     lastMessage: "When is the next community meeting?",
     time: "1h ago",
     unread: 0,
+    userId: "feb4a063-6dfc-4b6f-a1d9-0fc2c57c04d2",
     messages: []
   },
   {
-    id: 3,
+    id: "3",
     name: "Emma Wilson",
     avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emma",
     lastMessage: "I found your lost cat!",
     time: "3h ago",
     unread: 1,
+    userId: "feb4a063-6dfc-4b6f-a1d9-0fc2c57c04d3",
     messages: []
   }
 ];

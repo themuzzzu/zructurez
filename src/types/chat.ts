@@ -6,11 +6,12 @@ export interface Message {
 }
 
 export interface Chat {
-  id: number;
+  id: string;
   name: string;
   avatar: string;
   lastMessage: string;
   time: string;
   unread: number;
+  userId: string; // Added userId field for proper UUID handling
   messages: Message[];
 }
