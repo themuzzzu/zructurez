@@ -12,16 +12,22 @@ import {
   Check,
   X,
   ArrowLeft,
-  MessageCircle
+  MessageCircle,
+  Trash2,
+  Forward
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface MessageBubbleProps {
   content: string;
   timestamp: string;
   isOwn: boolean;
+  messageId: string;
+  onForward?: (content: string) => void;
 }
 
-export const MessageBubble = ({ content, timestamp, isOwn }: MessageBubbleProps) => {
+export const MessageBubble = ({ content, timestamp, isOwn, messageId, onForward }: MessageBubbleProps) => {
   const handleMarkUnread = () => {
     // Implementation for marking as unread
     console.log("Marked as unread");
@@ -62,6 +68,28 @@ export const MessageBubble = ({ content, timestamp, isOwn }: MessageBubbleProps)
     console.log("Chat closed");
   };
 
+  const handleDeleteMessage = async () => {
+    try {
+      const { error } = await supabase
+        .from('messages')
+        .delete()
+        .eq('id', messageId);
+
+      if (error) throw error;
+      toast.success("Message deleted successfully");
+    } catch (error) {
+      console.error('Error deleting message:', error);
+      toast.error("Failed to delete message");
+    }
+  };
+
+  const handleForwardMessage = () => {
+    if (onForward) {
+      onForward(content);
+      toast.success("Message ready to forward");
+    }
+  };
+
   return (
     <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-4`}>
       <ContextMenu>
@@ -99,6 +127,14 @@ export const MessageBubble = ({ content, timestamp, isOwn }: MessageBubbleProps)
           <ContextMenuItem onClick={handleArchive}>
             <Archive className="mr-2 h-4 w-4" />
             <span>Archive</span>
+          </ContextMenuItem>
+          <ContextMenuItem onClick={handleForwardMessage}>
+            <Forward className="mr-2 h-4 w-4" />
+            <span>Forward message</span>
+          </ContextMenuItem>
+          <ContextMenuItem onClick={handleDeleteMessage} className="text-destructive">
+            <Trash2 className="mr-2 h-4 w-4" />
+            <span>Delete message</span>
           </ContextMenuItem>
           <ContextMenuItem onClick={handleClearMessage}>
             <Check className="mr-2 h-4 w-4" />

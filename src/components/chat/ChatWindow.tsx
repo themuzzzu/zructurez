@@ -6,6 +6,7 @@ import { Chat } from "@/types/chat";
 import { ChatMenu } from "./ChatMenu";
 import { ContactInfoDialog } from "./ContactInfoDialog";
 import { useState } from "react";
+import { MessageBubble } from "../MessageBubble";
 
 interface ChatWindowProps {
   selectedChat: Chat | null;
@@ -37,6 +38,10 @@ export const ChatWindow = ({
     onSendMessage();
   };
 
+  const handleForwardMessage = (content: string) => {
+    onMessageChange(content);
+  };
+
   return (
     <div className="flex-1 flex flex-col">
       <div className="p-4 border-b">
@@ -63,25 +68,14 @@ export const ChatWindow = ({
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-4">
           {selectedChat.messages?.map((msg) => (
-            <div
+            <MessageBubble
               key={msg.id}
-              className={`flex ${
-                msg.senderId === "me" ? "justify-end" : "justify-start"
-              }`}
-            >
-              <div
-                className={`max-w-[70%] rounded-lg p-3 ${
-                  msg.senderId === "me"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-[#FFDEE2] text-black/80"
-                } ${isSelectMode ? "cursor-pointer select-none hover:opacity-80" : ""}`}
-              >
-                <p>{msg.content}</p>
-                <span className="text-xs opacity-70 mt-1 block">
-                  {msg.timestamp}
-                </span>
-              </div>
-            </div>
+              messageId={msg.id}
+              content={msg.content}
+              timestamp={msg.timestamp}
+              isOwn={msg.senderId === "me"}
+              onForward={handleForwardMessage}
+            />
           ))}
         </div>
       </ScrollArea>
