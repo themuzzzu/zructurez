@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,9 +11,10 @@ import { Label } from "./ui/label";
 interface CreateBusinessFormProps {
   onSuccess?: () => void;
   onCancel?: () => void;
+  initialData?: any;
 }
 
-export const CreateBusinessForm = ({ onSuccess, onCancel }: CreateBusinessFormProps) => {
+export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: CreateBusinessFormProps) => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -26,6 +27,22 @@ export const CreateBusinessForm = ({ onSuccess, onCancel }: CreateBusinessFormPr
     appointment_price: "",
     consultation_price: "",
   });
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        name: initialData.name || "",
+        category: initialData.category || "",
+        description: initialData.description || "",
+        location: initialData.location || "",
+        contact: initialData.contact || "",
+        hours: initialData.hours || "",
+        image: initialData.image_url || null,
+        appointment_price: initialData.appointment_price?.toString() || "",
+        consultation_price: initialData.consultation_price?.toString() || "",
+      });
+    }
+  }, [initialData]);
 
   const handleChange = (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -45,8 +62,8 @@ export const CreateBusinessForm = ({ onSuccess, onCancel }: CreateBusinessFormPr
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("No user found");
 
-      let imageUrl = null;
-      if (formData.image) {
+      let imageUrl = formData.image;
+      if (formData.image && !formData.image.startsWith('http')) {
         const base64Data = formData.image.split(',')[1];
         const byteCharacters = atob(base64Data);
         const byteNumbers = new Array(byteCharacters.length);
@@ -70,30 +87,42 @@ export const CreateBusinessForm = ({ onSuccess, onCancel }: CreateBusinessFormPr
         imageUrl = publicUrl;
       }
 
-      const { data: business, error } = await supabase
-        .from('businesses')
-        .insert([{
-          user_id: user.id,
-          name: formData.name,
-          category: formData.category,
-          description: formData.description,
-          location: formData.location,
-          contact: formData.contact,
-          hours: formData.hours,
-          image_url: imageUrl,
-          appointment_price: formData.appointment_price ? parseFloat(formData.appointment_price) : null,
-          consultation_price: formData.consultation_price ? parseFloat(formData.consultation_price) : null,
-        }])
-        .select()
-        .single();
+      const businessData = {
+        user_id: user.id,
+        name: formData.name,
+        category: formData.category,
+        description: formData.description,
+        location: formData.location,
+        contact: formData.contact,
+        hours: formData.hours,
+        image_url: imageUrl,
+        appointment_price: formData.appointment_price ? parseFloat(formData.appointment_price) : null,
+        consultation_price: formData.consultation_price ? parseFloat(formData.consultation_price) : null,
+      };
 
-      if (error) throw error;
+      if (initialData) {
+        // Update existing business
+        const { error } = await supabase
+          .from('businesses')
+          .update(businessData)
+          .eq('id', initialData.id);
 
-      toast.success("Business registered successfully!");
+        if (error) throw error;
+        toast.success("Business updated successfully!");
+      } else {
+        // Create new business
+        const { error } = await supabase
+          .from('businesses')
+          .insert([businessData]);
+
+        if (error) throw error;
+        toast.success("Business registered successfully!");
+      }
+
       onSuccess?.();
     } catch (error) {
       console.error('Error:', error);
-      toast.error("Failed to register business. Please try again.");
+      toast.error(initialData ? "Failed to update business" : "Failed to register business");
     } finally {
       setLoading(false);
     }
@@ -118,7 +147,7 @@ export const CreateBusinessForm = ({ onSuccess, onCancel }: CreateBusinessFormPr
           Cancel
         </Button>
         <Button type="submit" disabled={loading}>
-          {loading ? "Registering..." : "Register Business"}
+          {loading ? (initialData ? "Updating..." : "Registering...") : (initialData ? "Update Business" : "Register Business")}
         </Button>
       </div>
     </form>

@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { ErrorView } from "@/components/ErrorView";
 import { LoadingView } from "@/components/LoadingView";
 import { BusinessOfferings } from "@/components/business-details/BusinessOfferings";
+import { BusinessEditButton } from "@/components/business-details/BusinessEditButton";
 
 const BusinessDetails = () => {
   const { id } = useParams();
@@ -99,16 +100,24 @@ const BusinessDetails = () => {
       <Navbar />
       <div className="container max-w-[1400px] pt-20 pb-16">
         <div className="space-y-6">
-          <div className="flex items-center gap-4">
-            <Link to="/business">
-              <Button variant="ghost" size="icon">
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-            </Link>
-            <div>
-              <h1 className="text-3xl font-bold">{business.name}</h1>
-              <div className="text-muted-foreground">{business.category}</div>
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <Link to="/business">
+                <Button variant="ghost" size="icon">
+                  <ArrowLeft className="h-5 w-5" />
+                </Button>
+              </Link>
+              <div>
+                <h1 className="text-3xl font-bold">{business.name}</h1>
+                <div className="text-muted-foreground">{business.category}</div>
+              </div>
             </div>
+            {isOwner && (
+              <BusinessEditButton 
+                business={business}
+                onSuccess={refetch}
+              />
+            )}
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
