@@ -88,7 +88,7 @@ export const CreateBusinessListing = ({ onClose }: CreateBusinessListingProps) =
   };
 
   return (
-    <Card className="p-6 animate-fade-up">
+    <Card className="p-6 max-h-[85vh] overflow-y-auto">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-semibold">List Your Business</h2>
         <Button variant="ghost" size="icon" onClick={onClose}>
