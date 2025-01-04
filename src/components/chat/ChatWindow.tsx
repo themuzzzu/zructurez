@@ -1,8 +1,14 @@
-import { Send } from "lucide-react";
+import { Send, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Chat } from "@/types/chat";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface ChatWindowProps {
   selectedChat: Chat | null;
@@ -33,13 +39,39 @@ export const ChatWindow = ({
   return (
     <div className="flex-1 flex flex-col">
       <div className="p-4 border-b">
-        <div className="flex items-center gap-3">
-          <img
-            src={selectedChat.avatar}
-            alt={selectedChat.name}
-            className="w-10 h-10 rounded-full"
-          />
-          <span className="font-semibold">{selectedChat.name}</span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <img
+              src={selectedChat.avatar}
+              alt={selectedChat.name}
+              className="w-10 h-10 rounded-full"
+            />
+            <span className="font-semibold">{selectedChat.name}</span>
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <MoreVertical className="h-5 w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuItem>
+                View contact info
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                Select messages
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                Mute notifications
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                Clear messages
+              </DropdownMenuItem>
+              <DropdownMenuItem className="text-destructive">
+                Block contact
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
       <ScrollArea className="flex-1 p-4">
