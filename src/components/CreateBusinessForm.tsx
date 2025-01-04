@@ -6,6 +6,7 @@ import { ImageUpload } from "./ImageUpload";
 import { BusinessBasicInfo } from "./business-form/BusinessBasicInfo";
 import { BusinessPricing } from "./business-form/BusinessPricing";
 import { BusinessContactInfo } from "./business-form/BusinessContactInfo";
+import { BusinessProfileInfo } from "./business-form/BusinessProfileInfo";
 import { Label } from "./ui/label";
 
 interface CreateBusinessFormProps {
@@ -26,6 +27,8 @@ export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: CreateB
     image: null as string | null,
     appointment_price: "",
     consultation_price: "",
+    bio: "",
+    website: "",
   });
 
   useEffect(() => {
@@ -40,6 +43,8 @@ export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: CreateB
         image: initialData.image_url || null,
         appointment_price: initialData.appointment_price?.toString() || "",
         consultation_price: initialData.consultation_price?.toString() || "",
+        bio: initialData.bio || "",
+        website: initialData.website || "",
       });
     }
   }, [initialData]);
@@ -98,10 +103,11 @@ export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: CreateB
         image_url: imageUrl,
         appointment_price: formData.appointment_price ? parseFloat(formData.appointment_price) : null,
         consultation_price: formData.consultation_price ? parseFloat(formData.consultation_price) : null,
+        bio: formData.bio,
+        website: formData.website,
       };
 
       if (initialData) {
-        // Update existing business
         const { error } = await supabase
           .from('businesses')
           .update(businessData)
@@ -110,7 +116,6 @@ export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: CreateB
         if (error) throw error;
         toast.success("Business updated successfully!");
       } else {
-        // Create new business
         const { error } = await supabase
           .from('businesses')
           .insert([businessData]);
@@ -131,6 +136,7 @@ export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: CreateB
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <BusinessBasicInfo formData={formData} onChange={handleChange} />
+      <BusinessProfileInfo formData={formData} onChange={handleChange} />
       <BusinessPricing formData={formData} onChange={handleChange} />
       <BusinessContactInfo formData={formData} onChange={handleChange} />
 
