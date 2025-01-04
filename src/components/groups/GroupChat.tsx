@@ -51,28 +51,31 @@ export const GroupChat = ({ groupId }: GroupChatProps) => {
 
   const fetchMessages = async () => {
     try {
-      const { data: messages, error } = await supabase
+      // First, get all members of the group
+      const { data: members, error: membersError } = await supabase
+        .from("group_members")
+        .select("user_id")
+        .eq("group_id", groupId);
+
+      if (membersError) throw membersError;
+
+      if (!members || members.length === 0) {
+        setMessages([]);
+        return;
+      }
+
+      const memberIds = members.map(member => member.user_id);
+
+      // Then fetch messages where both sender and receiver are group members
+      const { data: messages, error: messagesError } = await supabase
         .from("messages")
         .select("*")
         .eq("receiver_id", groupId)
         .order("created_at", { ascending: true });
 
-      if (error) throw error;
+      if (messagesError) throw messagesError;
       setMessages(messages || []);
 
-      // Mark messages as read
-      if (messages && messages.length > 0 && currentUserId) {
-        const { error: updateError } = await supabase
-          .from("messages")
-          .update({ read: true })
-          .eq("receiver_id", groupId)
-          .eq("read", false)
-          .neq("sender_id", currentUserId);
-
-        if (updateError) {
-          console.error("Error marking messages as read:", updateError);
-        }
-      }
     } catch (error) {
       console.error("Error fetching messages:", error);
       toast.error("Failed to load messages");
@@ -87,7 +90,7 @@ export const GroupChat = ({ groupId }: GroupChatProps) => {
       .on(
         "postgres_changes",
         {
-          event: "*", // Listen to all changes
+          event: "*",
           schema: "public",
           table: "messages",
           filter: `receiver_id=eq.${groupId}`,
@@ -96,23 +99,6 @@ export const GroupChat = ({ groupId }: GroupChatProps) => {
           if (payload.eventType === "INSERT") {
             const newMessage = payload.new as Message;
             setMessages((current) => [...current, newMessage]);
-            
-            // Mark new message as read if it's not from current user
-            if (currentUserId && newMessage.sender_id !== currentUserId) {
-              const { error } = await supabase
-                .from("messages")
-                .update({ read: true })
-                .eq("id", newMessage.id);
-
-              if (error) {
-                console.error("Error marking new message as read:", error);
-              }
-            }
-          } else if (payload.eventType === "DELETE") {
-            const deletedMessage = payload.old as Message;
-            setMessages((current) => 
-              current.filter((msg) => msg.id !== deletedMessage.id)
-            );
           }
         }
       )
@@ -127,10 +113,23 @@ export const GroupChat = ({ groupId }: GroupChatProps) => {
     if (!newMessage.trim() || !currentUserId) return;
 
     try {
+      // Verify the group exists and user is a member
+      const { data: membership, error: membershipError } = await supabase
+        .from("group_members")
+        .select("*")
+        .eq("group_id", groupId)
+        .eq("user_id", currentUserId)
+        .single();
+
+      if (membershipError || !membership) {
+        toast.error("You must be a member of this group to send messages");
+        return;
+      }
+
       const { error } = await supabase.from("messages").insert({
         content: newMessage.trim(),
-        receiver_id: groupId,
         sender_id: currentUserId,
+        receiver_id: groupId, // Using groupId as receiver_id for group messages
       });
 
       if (error) throw error;
