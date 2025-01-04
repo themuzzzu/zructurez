@@ -71,35 +71,31 @@ export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: CreateB
 
       let imageUrl = pendingImage;
 
-      // Only process the image if it's new (base64) or different from the current one
-      if (pendingImage && 
-          (pendingImage.startsWith('data:') || 
-           (initialData && pendingImage !== initialData.image_url))) {
+      // Handle image upload if there's a new image (base64)
+      if (pendingImage && pendingImage.startsWith('data:')) {
+        const base64Data = pendingImage.split(',')[1];
+        const byteCharacters = atob(base64Data);
+        const byteNumbers = new Array(byteCharacters.length);
         
-        // If it's a base64 image, upload it
-        if (pendingImage.startsWith('data:')) {
-          const base64Data = pendingImage.split(',')[1];
-          const byteCharacters = atob(base64Data);
-          const byteNumbers = new Array(byteCharacters.length);
-          for (let i = 0; i < byteCharacters.length; i++) {
-            byteNumbers[i] = byteCharacters.charCodeAt(i);
-          }
-          const byteArray = new Uint8Array(byteNumbers);
-          const blob = new Blob([byteArray], { type: 'image/jpeg' });
-
-          const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}`;
-          const { data: uploadData, error: uploadError } = await supabase.storage
-            .from('business-images')
-            .upload(fileName, blob);
-
-          if (uploadError) throw uploadError;
-
-          const { data: { publicUrl } } = supabase.storage
-            .from('business-images')
-            .getPublicUrl(fileName);
-
-          imageUrl = publicUrl;
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
         }
+        
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'image/jpeg' });
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}`;
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('business-images')
+          .upload(fileName, blob);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('business-images')
+          .getPublicUrl(fileName);
+
+        imageUrl = publicUrl;
       }
 
       const businessData = {
@@ -118,6 +114,16 @@ export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: CreateB
       };
 
       if (initialData) {
+        // If updating and there's a new image, delete the old one
+        if (initialData.image_url && imageUrl !== initialData.image_url) {
+          const oldFileName = initialData.image_url.split('/').pop();
+          if (oldFileName) {
+            await supabase.storage
+              .from('business-images')
+              .remove([oldFileName]);
+          }
+        }
+
         const { error } = await supabase
           .from('businesses')
           .update(businessData)
