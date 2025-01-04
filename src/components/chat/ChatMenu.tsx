@@ -68,18 +68,28 @@ export const ChatMenu = ({
         throw new Error("User not authenticated");
       }
 
-      // Delete messages between the two users using a more precise query
-      const { error } = await supabase
+      // First delete messages where current user is sender
+      const { error: error1 } = await supabase
         .from('messages')
         .delete()
-        .or(
-          `and(sender_id.eq.${user.id},receiver_id.eq.${selectedChat.userId}),` +
-          `and(sender_id.eq.${selectedChat.userId},receiver_id.eq.${user.id})`
-        );
+        .eq('sender_id', user.id)
+        .eq('receiver_id', selectedChat.userId);
 
-      if (error) {
-        console.error('Error details:', error);
-        throw error;
+      if (error1) {
+        console.error('Error deleting sent messages:', error1);
+        throw error1;
+      }
+
+      // Then delete messages where current user is receiver
+      const { error: error2 } = await supabase
+        .from('messages')
+        .delete()
+        .eq('sender_id', selectedChat.userId)
+        .eq('receiver_id', user.id);
+
+      if (error2) {
+        console.error('Error deleting received messages:', error2);
+        throw error2;
       }
       
       toast.success("Messages cleared successfully");
