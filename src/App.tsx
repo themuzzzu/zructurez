@@ -21,6 +21,7 @@ import ServiceDetails from "./pages/ServiceDetails";
 import BusinessDetails from "./pages/BusinessDetails";
 import Profile from "./pages/Profile";
 import Jobs from "./pages/Jobs";
+import Groups from "./pages/Messages"; // We'll reuse Messages component for Groups temporarily
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -49,6 +50,7 @@ const App = () => (
             <Route path="/business/:id" element={<ProtectedRoute><BusinessDetails /></ProtectedRoute>} />
             <Route path="/communities" element={<ProtectedRoute><Communities /></ProtectedRoute>} />
             <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
+            <Route path="/groups" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
             <Route path="/events" element={<ProtectedRoute><Events /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/business" element={<ProtectedRoute><Business /></ProtectedRoute>} />
