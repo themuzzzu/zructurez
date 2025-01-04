@@ -8,10 +8,16 @@ import { CreateBusinessForm } from "../CreateBusinessForm";
 interface BusinessEditButtonProps {
   business: any;
   onSuccess: () => void;
+  onClose?: () => void;  // Added this prop as optional
 }
 
-export const BusinessEditButton = ({ business, onSuccess }: BusinessEditButtonProps) => {
+export const BusinessEditButton = ({ business, onSuccess, onClose }: BusinessEditButtonProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const handleClose = () => {
+    setIsDialogOpen(false);
+    onClose?.();  // Call onClose if provided
+  };
 
   return (
     <>
@@ -25,7 +31,7 @@ export const BusinessEditButton = ({ business, onSuccess }: BusinessEditButtonPr
         Edit Business
       </Button>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog open={isDialogOpen} onOpenChange={handleClose}>
         <DialogContent className="sm:max-w-[600px] h-[90vh]">
           <DialogTitle>Edit Business</DialogTitle>
           <ScrollArea className="h-full pr-4">
@@ -35,7 +41,7 @@ export const BusinessEditButton = ({ business, onSuccess }: BusinessEditButtonPr
                 setIsDialogOpen(false);
                 onSuccess();
               }}
-              onCancel={() => setIsDialogOpen(false)}
+              onCancel={handleClose}
             />
           </ScrollArea>
         </DialogContent>
