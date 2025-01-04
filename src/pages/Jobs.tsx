@@ -4,10 +4,13 @@ import { Sidebar } from "@/components/Sidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Briefcase, MapPin, Building, Clock } from "lucide-react";
+import { Briefcase, MapPin, Building, Clock, ListPlus } from "lucide-react";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { CreateBusinessListing } from "@/components/CreateBusinessListing";
 
 const Jobs = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const jobs = [
     {
@@ -54,7 +57,20 @@ const Jobs = () => {
           <Sidebar className="w-64 hidden lg:block sticky top-16 shrink-0" />
           <main className="flex-1 space-y-6">
             <div className="flex flex-col gap-4">
-              <h1 className="text-3xl font-bold">Find Your Next Opportunity</h1>
+              <div className="flex justify-between items-center">
+                <h1 className="text-3xl font-bold">Find Your Next Opportunity</h1>
+                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="flex items-center gap-2">
+                      <ListPlus className="h-4 w-4" />
+                      Post a Job
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl">
+                    <CreateBusinessListing onClose={() => setIsDialogOpen(false)} />
+                  </DialogContent>
+                </Dialog>
+              </div>
               <div className="flex gap-4">
                 <Input
                   placeholder="Search jobs by title, company, or location..."
