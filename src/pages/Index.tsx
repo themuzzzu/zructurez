@@ -1,4 +1,4 @@
-import { useState, Suspense } from "react";
+import { useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { CreatePost } from "@/components/CreatePost";
 import { PostCard } from "@/components/PostCard";
@@ -11,11 +11,15 @@ import { Hash, MessageSquare, Users, Wrench } from "lucide-react";
 import { LoadingView } from "@/components/LoadingView";
 
 const PostList = ({ selectedCategory }: { selectedCategory: string | null }) => {
-  const { data: posts } = useQuery({
+  const { data: posts, isLoading } = useQuery({
     queryKey: ['posts', selectedCategory],
     queryFn: getPosts,
     staleTime: 1000 * 60, // Cache data for 1 minute
   });
+
+  if (isLoading) {
+    return <LoadingView />;
+  }
 
   const filteredPosts = selectedCategory
     ? posts?.filter(post => post.category?.toLowerCase() === selectedCategory.toLowerCase())
@@ -98,9 +102,7 @@ const Index = () => {
                 </div>
               </div>
               <CreatePost />
-              <Suspense fallback={<LoadingView />}>
-                <PostList selectedCategory={selectedCategory} />
-              </Suspense>
+              <PostList selectedCategory={selectedCategory} />
             </div>
           </main>
         </div>
