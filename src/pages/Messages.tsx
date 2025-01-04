@@ -96,7 +96,7 @@ const Messages = () => {
       <Navbar />
       <div className="pt-16">
         <div className="flex h-[calc(100vh-4rem)]">
-          <div className="w-[400px] border-r bg-background">
+          <div className="w-[400px] border-r bg-background flex flex-col">
             <div className="p-4 border-b flex items-center gap-2">
               <Button 
                 variant="ghost" 
@@ -108,13 +108,15 @@ const Messages = () => {
               </Button>
               <h1 className="text-2xl font-bold">Messages</h1>
             </div>
-            <ChatList
-              chats={filteredChats}
-              selectedChat={selectedChat}
-              onSelectChat={handleSelectChat}
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-            />
+            <div className="flex-1 overflow-y-auto">
+              <ChatList
+                chats={filteredChats}
+                selectedChat={selectedChat}
+                onSelectChat={handleSelectChat}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+              />
+            </div>
           </div>
           <div className="flex-1 bg-background">
             <ChatWindow
