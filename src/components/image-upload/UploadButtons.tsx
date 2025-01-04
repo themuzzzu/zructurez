@@ -3,9 +3,10 @@ import { ImagePlus, Camera } from "lucide-react";
 
 interface UploadButtonsProps {
   onCameraCapture: () => void;
+  onFileSelect: (file: File) => void;
 }
 
-export const UploadButtons = ({ onCameraCapture }: UploadButtonsProps) => {
+export const UploadButtons = ({ onCameraCapture, onFileSelect }: UploadButtonsProps) => {
   return (
     <div className="flex items-center gap-4">
       <Button
@@ -33,8 +34,7 @@ export const UploadButtons = ({ onCameraCapture }: UploadButtonsProps) => {
         onChange={(e) => {
           const file = e.target.files?.[0];
           if (file) {
-            // We'll handle this in the parent component
-            e.target.form?.dispatchEvent(new Event('submit', { cancelable: true }));
+            onFileSelect(file);
           }
         }}
         className="hidden"

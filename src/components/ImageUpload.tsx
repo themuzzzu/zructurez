@@ -80,7 +80,7 @@ export const ImageUpload = ({ selectedImage, onImageSelect }: ImageUploadProps) 
   const handlePositionChange = (direction: 'up' | 'down' | 'left' | 'right') => {
     setIsAdjusting(true);
     setPosition(prev => {
-      const step = 2; // Reduced step size from 5 to 2
+      const step = 2;
       const newPosition = { ...prev };
       
       switch (direction) {
@@ -104,7 +104,10 @@ export const ImageUpload = ({ selectedImage, onImageSelect }: ImageUploadProps) 
 
   return (
     <div className="space-y-4">
-      <UploadButtons onCameraCapture={handleCameraCapture} />
+      <UploadButtons 
+        onCameraCapture={handleCameraCapture}
+        onFileSelect={handleFileUpload}
+      />
 
       {selectedImage && (
         <div className="space-y-4">
