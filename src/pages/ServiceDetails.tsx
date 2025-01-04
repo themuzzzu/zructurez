@@ -69,11 +69,21 @@ const ServiceDetails = () => {
         return;
       }
 
-      // First, check if a corresponding product exists
+      // First, check if the service product exists
+      const { data: serviceProduct, error: serviceProductError } = await supabase
+        .from('service_products')
+        .select('*')
+        .eq('id', serviceProductId)
+        .single();
+
+      if (serviceProductError || !serviceProduct) {
+        throw new Error('Service product not found');
+      }
+
+      // Check if a corresponding product exists
       const { data: existingProduct, error: existingProductError } = await supabase
         .from('products')
         .select('id')
-        .eq('category', 'service-product')
         .eq('service_product_id', serviceProductId)
         .maybeSingle();
 
@@ -84,12 +94,6 @@ const ServiceDetails = () => {
       if (existingProduct) {
         productId = existingProduct.id;
       } else {
-        // Find the service product details
-        const serviceProduct = service?.service_products?.find(p => p.id === serviceProductId);
-        if (!serviceProduct) {
-          throw new Error('Service product not found');
-        }
-
         // Create a new product entry
         const { data: newProduct, error: productError } = await supabase
           .from('products')
@@ -101,7 +105,7 @@ const ServiceDetails = () => {
             service_product_id: serviceProductId,
             stock: serviceProduct.stock || 1,
             image_url: serviceProduct.image_url,
-            user_id: service.user_id
+            user_id: service?.user_id
           })
           .select()
           .single();
@@ -110,8 +114,13 @@ const ServiceDetails = () => {
         productId = newProduct.id;
 
         // Copy images if they exist
-        if (serviceProduct.service_product_images?.length > 0) {
-          const imagesToInsert = serviceProduct.service_product_images.map(image => ({
+        const { data: serviceProductImages, error: imagesError } = await supabase
+          .from('service_product_images')
+          .select('image_url')
+          .eq('service_product_id', serviceProductId);
+
+        if (!imagesError && serviceProductImages?.length > 0) {
+          const imagesToInsert = serviceProductImages.map(image => ({
             product_id: productId,
             image_url: image.image_url
           }));
