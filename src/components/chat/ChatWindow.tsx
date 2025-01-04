@@ -1,6 +1,3 @@
-import { Send, Camera, Image, FileText, Users, MessageSquare, Poll, Pencil } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Chat } from "@/types/chat";
 import { ChatMenu } from "./ChatMenu";
@@ -11,6 +8,8 @@ import { ImageUpload } from "../ImageUpload";
 import { Dialog, DialogContent } from "../ui/dialog";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { AttachmentButtons } from "./AttachmentButtons";
+import { MessageInput } from "./MessageInput";
 
 interface ChatWindowProps {
   selectedChat: Chat | null;
@@ -57,24 +56,21 @@ export const ChatWindow = ({
       const fileName = `${Date.now()}.${fileExt}`;
       const filePath = `chat-images/${fileName}`;
 
-      // Upload image to Supabase Storage
       const { error: uploadError } = await supabase.storage
         .from("chat-images")
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from("chat-images")
         .getPublicUrl(filePath);
 
-      // Send message with image
       const { error: messageError } = await supabase
         .from("messages")
         .insert({
           content: message || "Sent an image",
-          sender_id: "me", // Replace with actual user ID
+          sender_id: "me",
           receiver_id: selectedChat.userId,
           image_url: publicUrl,
         });
@@ -101,23 +97,18 @@ export const ChatWindow = ({
         setShowImageUpload(true);
         break;
       case "camera":
-        // Implement camera functionality
         toast.info("Camera feature coming soon!");
         break;
       case "document":
-        // Implement document upload
         toast.info("Document upload feature coming soon!");
         break;
       case "contact":
-        // Implement contact sharing
         toast.info("Contact sharing feature coming soon!");
         break;
       case "poll":
-        // Implement poll creation
         toast.info("Poll feature coming soon!");
         break;
       case "drawing":
-        // Implement drawing feature
         toast.info("Drawing feature coming soon!");
         break;
       default:
@@ -164,60 +155,12 @@ export const ChatWindow = ({
       </ScrollArea>
 
       <div className="p-4 border-t">
-        <div className="flex gap-2 mb-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => handleAttachment("photo")}
-          >
-            <Image className="h-5 w-5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => handleAttachment("camera")}
-          >
-            <Camera className="h-5 w-5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => handleAttachment("document")}
-          >
-            <FileText className="h-5 w-5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => handleAttachment("contact")}
-          >
-            <Users className="h-5 w-5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => handleAttachment("poll")}
-          >
-            <Poll className="h-5 w-5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => handleAttachment("drawing")}
-          >
-            <Pencil className="h-5 w-5" />
-          </Button>
-        </div>
-        <form onSubmit={handleSubmit} className="flex gap-2">
-          <Input
-            placeholder="Type a message..."
-            value={message}
-            onChange={(e) => onMessageChange(e.target.value)}
-          />
-          <Button type="submit" size="icon">
-            <Send className="h-4 w-4" />
-          </Button>
-        </form>
+        <AttachmentButtons onAttachment={handleAttachment} />
+        <MessageInput 
+          message={message}
+          onMessageChange={onMessageChange}
+          onSubmit={handleSubmit}
+        />
       </div>
 
       <ContactInfoDialog
