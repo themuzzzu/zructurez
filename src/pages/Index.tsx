@@ -9,6 +9,8 @@ import { useSearchParams } from "react-router-dom";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { LoadingView } from "@/components/LoadingView";
+import { BusinessCard } from "@/components/BusinessCard";
+import { supabase } from "@/integrations/supabase/client";
 
 const PostList = ({ selectedCategory }: { selectedCategory: string | null }) => {
   const { data: posts, isLoading } = useQuery({
@@ -52,6 +54,47 @@ const PostList = ({ selectedCategory }: { selectedCategory: string | null }) => 
       ))}
     </div>
   );
+};
+
+const BusinessSection = () => {
+  const { data: businesses } = useQuery({
+    queryKey: ['featured-businesses'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('businesses')
+        .select('*')
+        .limit(3);
+      
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
+  return businesses && businesses.length > 0 ? (
+    <div className="space-y-4 bg-black/90 p-6 rounded-lg shadow-lg mb-6">
+      <h2 className="text-xl font-semibold text-white">Featured Businesses</h2>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {businesses.map((business) => (
+          <BusinessCard
+            key={business.id}
+            id={business.id}
+            name={business.name}
+            category={business.category}
+            description={business.description}
+            image={business.image_url || "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=800"}
+            rating={4.5}
+            reviews={10}
+            location={business.location || "Location not specified"}
+            contact={business.contact || "Contact not available"}
+            hours={business.hours || "Hours not specified"}
+            verified={business.verified || false}
+            serviceName="Featured Service"
+            cost={0}
+          />
+        ))}
+      </div>
+    </div>
+  ) : null;
 };
 
 const Index = () => {
@@ -105,6 +148,8 @@ const Index = () => {
                 </div>
                 <ScrollBar orientation="horizontal" />
               </ScrollArea>
+              
+              <BusinessSection />
               <CreatePost />
               <PostList selectedCategory={selectedCategory} />
             </div>
