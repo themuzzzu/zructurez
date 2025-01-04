@@ -1,18 +1,19 @@
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Chat } from "@/types/chat";
-import { ChatMenu } from "./ChatMenu";
-import { ContactInfoDialog } from "./ContactInfoDialog";
 import { useState } from "react";
-import { MessageBubble } from "../MessageBubble";
+import { Chat } from "@/types/chat";
+import { ContactInfoDialog } from "./ContactInfoDialog";
 import { ImageUpload } from "../ImageUpload";
 import { Dialog, DialogContent } from "../ui/dialog";
-import { AttachmentButtons } from "./AttachmentButtons";
-import { MessageInput } from "./MessageInput";
 import { PollDialog } from "./PollDialog";
 import { ContactDialog } from "./ContactDialog";
 import { DocumentUpload } from "./DocumentUpload";
 import { VideoUpload } from "./VideoUpload";
 import { useMessageHandling } from "./hooks/useMessageHandling";
+import { useMessageForwarding } from "./hooks/useMessageForwarding";
+import { ChatHeader } from "./ChatHeader";
+import { ChatMessages } from "./ChatMessages";
+import { ChatInput } from "./ChatInput";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ChatWindowProps {
   selectedChat: Chat | null;
@@ -45,6 +46,8 @@ export const ChatWindow = ({
     handleSendImage,
     handleSendVideo,
   } = useMessageHandling(selectedChat, message, onMessageChange, onSendMessage);
+
+  const { handleForwardMessage } = useMessageForwarding();
 
   if (!selectedChat) {
     return (
@@ -92,52 +95,26 @@ export const ChatWindow = ({
 
   return (
     <div className="flex-1 flex flex-col">
-      <div className="p-4 border-b">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img
-              src={selectedChat.avatar}
-              alt={selectedChat.name}
-              className="w-10 h-10 rounded-full"
-            />
-            <span className="font-semibold">{selectedChat.name}</span>
-          </div>
-          <ChatMenu
-            selectedChat={selectedChat}
-            isMuted={isMuted}
-            setIsMuted={setIsMuted}
-            setShowContactInfo={setShowContactInfo}
-            setIsSelectMode={setIsSelectMode}
-            isSelectMode={isSelectMode}
-          />
-        </div>
-      </div>
+      <ChatHeader
+        chat={selectedChat}
+        isMuted={isMuted}
+        setIsMuted={setIsMuted}
+        setShowContactInfo={setShowContactInfo}
+        setIsSelectMode={setIsSelectMode}
+        isSelectMode={isSelectMode}
+      />
 
-      <ScrollArea className="flex-1 p-4">
-        <div className="space-y-4">
-          {selectedChat.messages?.map((msg) => (
-            <MessageBubble
-              key={msg.id}
-              messageId={msg.id}
-              content={msg.content}
-              timestamp={msg.timestamp}
-              isOwn={msg.senderId === "me"}
-              onForward={handleForwardMessage}
-            />
-          ))}
-        </div>
-      </ScrollArea>
+      <ChatMessages 
+        chat={selectedChat} 
+        onForwardMessage={handleForwardMessage}
+      />
 
-      <div className="p-4 border-t">
-        <div className="flex items-center gap-2 mb-2">
-          <AttachmentButtons onAttachment={handleAttachment} />
-          <MessageInput 
-            message={message}
-            onMessageChange={onMessageChange}
-            onSubmit={handleSubmit}
-          />
-        </div>
-      </div>
+      <ChatInput
+        message={message}
+        onMessageChange={onMessageChange}
+        onSubmit={handleSubmit}
+        onAttachment={handleAttachment}
+      />
 
       <ContactInfoDialog
         open={showContactInfo}

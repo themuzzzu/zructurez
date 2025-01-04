@@ -15,28 +15,28 @@ export const useMessageHandling = (
   const handleSendMessage = async () => {
     if (!selectedChat) return;
 
-    // First check if the receiver exists
-    const { data: receiverExists, error: checkError } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('id', selectedChat.userId)
-      .maybeSingle();
-
-    if (checkError) {
-      console.error("Error checking receiver:", checkError);
-      toast.error("Error verifying recipient");
-      return;
-    }
-
-    if (!receiverExists) {
-      toast.error("Invalid recipient. Please select a valid chat.");
-      return;
-    }
-
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         toast.error("You must be logged in to send messages");
+        return;
+      }
+
+      // Check if receiver exists in profiles table
+      const { data: receiverExists, error: checkError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', selectedChat.userId)
+        .maybeSingle();
+
+      if (checkError) {
+        console.error("Error checking receiver:", checkError);
+        toast.error("Error verifying recipient");
+        return;
+      }
+
+      if (!receiverExists) {
+        toast.error("Invalid recipient. Please select a valid chat.");
         return;
       }
 
@@ -63,6 +63,12 @@ export const useMessageHandling = (
     if (!selectedImage || !selectedChat) return;
 
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("You must be logged in to send images");
+        return;
+      }
+
       const file = await fetch(selectedImage).then((r) => r.blob());
       const fileExt = "jpg";
       const fileName = `${Date.now()}.${fileExt}`;
@@ -82,7 +88,7 @@ export const useMessageHandling = (
         .from("messages")
         .insert({
           content: message || "Sent an image",
-          sender_id: "me",
+          sender_id: user.id,
           receiver_id: selectedChat.userId,
           image_url: publicUrl,
         });
@@ -102,6 +108,12 @@ export const useMessageHandling = (
     if (!selectedVideo || !selectedChat) return;
 
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("You must be logged in to send videos");
+        return;
+      }
+
       const file = await fetch(selectedVideo).then((r) => r.blob());
       const fileExt = "mp4";
       const fileName = `${Date.now()}.${fileExt}`;
@@ -121,7 +133,7 @@ export const useMessageHandling = (
         .from("messages")
         .insert({
           content: message || "Sent a video",
-          sender_id: "me",
+          sender_id: user.id,
           receiver_id: selectedChat.userId,
           video_url: publicUrl,
         });
