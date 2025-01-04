@@ -7,6 +7,7 @@ export interface Group {
   user_id: string;
   group_members?: {
     count: number;
+    user_id: string;
   }[];
 }
 
