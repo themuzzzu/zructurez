@@ -40,6 +40,8 @@ export const BusinessProfile = ({
   owners,
   staff_details,
 }: BusinessProfileProps) => {
+  const hasValidStaff = staff_details && staff_details.length > 0 && staff_details.some(staff => staff.name);
+
   return (
     <div className="space-y-6">
       {/* Business Image */}
@@ -132,7 +134,7 @@ export const BusinessProfile = ({
       )}
 
       {/* Staff Section */}
-      {staff_details && staff_details.length > 0 && (
+      {hasValidStaff && (
         <Card className="p-6">
           <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
             <Users className="h-4 w-4" />
@@ -140,7 +142,7 @@ export const BusinessProfile = ({
           </h3>
           <div className="grid gap-6">
             {staff_details.map((staff, index) => (
-              <BusinessStaffCard key={index} {...staff} />
+              staff.name && <BusinessStaffCard key={index} {...staff} />
             ))}
           </div>
         </Card>
