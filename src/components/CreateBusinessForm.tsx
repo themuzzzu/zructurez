@@ -99,8 +99,16 @@ export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: FormPro
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (initialData && !window.confirm('Are you sure you want to update this business?')) {
+      return;
+    }
+    await handleSubmit(e);
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={onSubmit} className="space-y-4">
       <BusinessBasicInfo formData={formData} onChange={handleChange} />
       <BusinessProfileInfo formData={formData} onChange={handleChange} />
       <BusinessPricing formData={formData} onChange={handleChange} />
