@@ -43,7 +43,7 @@ export const OwnerFormFields = ({ owner, onUpdate, onUpdateImage }: OwnerFormPro
       </div>
 
       <div>
-        <Label>Qualifications (Optional)</Label>
+        <Label>Qualifications</Label>
         <Input
           placeholder="Qualifications (e.g., MBA, PhD)"
           value={owner.qualifications || ""}

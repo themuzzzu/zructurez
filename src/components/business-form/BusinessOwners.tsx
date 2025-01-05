@@ -39,10 +39,10 @@ export const BusinessOwners = ({ owners = [], onChange }: BusinessOwnersProps) =
 
   return (
     <div className="space-y-4">
-      <Label>Business Owners</Label>
+      <Label>Owner Details</Label>
       
       {owners.map((owner, index) => (
-        <Card key={index} className="p-4">
+        <Card key={index} className="p-6">
           <div className="flex justify-between items-start gap-4">
             <OwnerFormFields
               owner={owner}

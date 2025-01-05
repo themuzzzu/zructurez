@@ -20,46 +20,37 @@ export const BusinessOwnerCard = ({
 }: BusinessOwnerCardProps) => {
   return (
     <div className="space-y-4">
-      <Card className="p-4">
-        <div className="flex items-start gap-4">
-          <Avatar className="h-12 w-12">
+      <Card className="p-6">
+        <div className="flex items-start gap-6">
+          <Avatar className="h-16 w-16">
             <AvatarImage 
               src={image_url || undefined} 
               alt={name}
             />
             <AvatarFallback>{name?.[0]?.toUpperCase() || 'O'}</AvatarFallback>
           </Avatar>
-          <div>
-            <h4 className="font-semibold">{name}</h4>
-            <div className="text-sm text-muted-foreground">{role}</div>
-            {position && (
-              <div className="text-sm text-muted-foreground">{position}</div>
-            )}
-            {experience && (
-              <div className="text-sm text-muted-foreground">
-                Experience: {experience}
-              </div>
-            )}
-            {qualifications && (
-              <div className="text-sm text-muted-foreground">
-                Qualifications: {qualifications}
-              </div>
-            )}
+          <div className="flex-1 space-y-2">
+            <h4 className="text-xl font-semibold">{name}</h4>
+            <div className="text-sm text-muted-foreground space-y-1">
+              <div>{role}</div>
+              {position && <div>{position}</div>}
+              {experience && <div>Experience: {experience}</div>}
+              {qualifications && <div>Qualifications: {qualifications}</div>}
+            </div>
           </div>
         </div>
-      </Card>
-
-      {image_url && (
-        <Card className="overflow-hidden w-[300px]">
-          <div className="relative aspect-square">
-            <img
-              src={image_url}
-              alt={name}
-              className="w-full h-full object-cover"
-            />
+        {image_url && (
+          <div className="mt-4">
+            <div className="relative w-[300px] aspect-square overflow-hidden rounded-lg">
+              <img
+                src={image_url}
+                alt={name}
+                className="w-full h-full object-cover"
+              />
+            </div>
           </div>
-        </Card>
-      )}
+        )}
+      </Card>
     </div>
   );
 };
