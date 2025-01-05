@@ -15,36 +15,28 @@ export const BusinessStaffCard = ({
   image_url,
 }: BusinessStaffCardProps) => {
   return (
-    <Card className="p-4">
+    <Card className="p-6">
       <div className="flex items-start gap-4">
-        <Avatar className="h-12 w-12">
+        <Avatar className="h-20 w-20">
           <AvatarImage 
             src={image_url || undefined} 
-            alt={name} 
+            alt={name}
+            className="object-cover" 
           />
-          <AvatarFallback>{name?.[0]?.toUpperCase() || 'S'}</AvatarFallback>
+          <AvatarFallback className="text-2xl">{name?.[0]?.toUpperCase() || 'S'}</AvatarFallback>
         </Avatar>
-        <div>
-          <h4 className="font-semibold">{name}</h4>
+        <div className="flex-1">
+          <h4 className="text-xl font-semibold">{name}</h4>
           {position && (
-            <div className="text-sm text-muted-foreground">{position}</div>
+            <div className="text-muted-foreground mt-1">{position}</div>
           )}
           {experience && (
-            <div className="text-sm text-muted-foreground">
+            <div className="text-muted-foreground mt-2">
               Experience: {experience}
             </div>
           )}
         </div>
       </div>
-      {image_url && (
-        <div className="mt-4 w-full h-64 overflow-hidden rounded-md">
-          <img
-            src={image_url}
-            alt={name}
-            className="w-full h-full object-cover"
-          />
-        </div>
-      )}
     </Card>
   );
 };

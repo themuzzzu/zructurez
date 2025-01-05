@@ -27,18 +27,10 @@ export const BusinessOwnerCard = ({
               <AvatarImage 
                 src={image_url || undefined} 
                 alt={name}
+                className="object-cover"
               />
-              <AvatarFallback className="text-2xl">{name?.[0]?.toUpperCase() || 'O'}</AvatarFallback>
+              <AvatarFallback className="text-4xl">{name?.[0]?.toUpperCase() || 'O'}</AvatarFallback>
             </Avatar>
-            {image_url && (
-              <div className="w-full max-w-[300px] aspect-square overflow-hidden rounded-lg">
-                <img
-                  src={image_url}
-                  alt={name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            )}
           </div>
           
           <div className="flex-1 space-y-4">
