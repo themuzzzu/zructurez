@@ -85,6 +85,7 @@ const BusinessDetails = () => {
                 contact={business.contact}
                 verified={business.verified}
                 image_url={business.image_url}
+                bio={business.bio}
               />
 
               <BusinessContent
