@@ -1,5 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
+import { User } from "lucide-react";
 
 interface BusinessStaffCardProps {
   name: string;
@@ -14,6 +15,8 @@ export const BusinessStaffCard = ({
   experience,
   image_url,
 }: BusinessStaffCardProps) => {
+  console.log("BusinessStaffCard image_url:", image_url); // Debug log
+
   return (
     <Card className="p-6">
       <div className="flex items-start gap-4">
@@ -23,10 +26,14 @@ export const BusinessStaffCard = ({
               src={image_url} 
               alt={name}
               className="object-cover"
+              onError={(e) => {
+                console.error("Error loading staff image:", e);
+                e.currentTarget.src = ""; // Clear src on error
+              }}
             />
           ) : (
-            <AvatarFallback className="text-2xl">
-              {name?.[0]?.toUpperCase() || 'S'}
+            <AvatarFallback className="text-2xl bg-primary/10">
+              <User className="h-8 w-8 text-primary" />
             </AvatarFallback>
           )}
         </Avatar>

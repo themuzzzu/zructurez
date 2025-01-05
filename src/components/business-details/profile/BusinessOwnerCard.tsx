@@ -1,5 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
+import { User } from "lucide-react";
 
 interface BusinessOwnerCardProps {
   name: string;
@@ -18,6 +19,8 @@ export const BusinessOwnerCard = ({
   qualifications,
   image_url,
 }: BusinessOwnerCardProps) => {
+  console.log("BusinessOwnerCard image_url:", image_url); // Debug log
+
   return (
     <div className="space-y-4">
       <Card className="p-8">
@@ -29,10 +32,14 @@ export const BusinessOwnerCard = ({
                   src={image_url} 
                   alt={name}
                   className="object-cover"
+                  onError={(e) => {
+                    console.error("Error loading owner image:", e);
+                    e.currentTarget.src = ""; // Clear src on error
+                  }}
                 />
               ) : (
-                <AvatarFallback className="text-4xl">
-                  {name?.[0]?.toUpperCase() || 'O'}
+                <AvatarFallback className="text-4xl bg-primary/10">
+                  <User className="h-12 w-12 text-primary" />
                 </AvatarFallback>
               )}
             </Avatar>
