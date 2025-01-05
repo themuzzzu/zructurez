@@ -81,6 +81,7 @@ export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: CreateB
 
       let imageUrl = pendingImage;
 
+      // Handle main business image upload
       if (pendingImage && 
           (pendingImage.startsWith('data:') || 
            (initialData && pendingImage !== initialData.image_url))) {
@@ -110,6 +111,41 @@ export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: CreateB
         }
       }
 
+      // Process owners' data and handle their images
+      const processedOwners = await Promise.all(formData.owners.map(async (owner) => {
+        let ownerImageUrl = owner.image_url;
+        
+        // If the owner has a new image (base64 string), upload it
+        if (owner.image_url && owner.image_url.startsWith('data:')) {
+          const base64Data = owner.image_url.split(',')[1];
+          const byteCharacters = atob(base64Data);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          const blob = new Blob([byteArray], { type: 'image/jpeg' });
+
+          const fileName = `owner-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('business-images')
+            .upload(fileName, blob);
+
+          if (uploadError) throw uploadError;
+
+          const { data: { publicUrl } } = supabase.storage
+            .from('business-images')
+            .getPublicUrl(fileName);
+
+          ownerImageUrl = publicUrl;
+        }
+
+        return {
+          ...owner,
+          image_url: ownerImageUrl
+        };
+      }));
+
       const businessData = {
         user_id: user.id,
         name: formData.name,
@@ -125,17 +161,31 @@ export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: CreateB
         website: formData.website,
         image_scale: imageScale,
         image_position: imagePosition as Json,
-        owners: JSON.parse(JSON.stringify(formData.owners)) as Json,
+        owners: JSON.parse(JSON.stringify(processedOwners)) as Json,
         staff_details: JSON.parse(JSON.stringify(formData.staff_details)) as Json,
       };
 
       if (initialData) {
+        // Handle deletion of old images
         if (initialData.image_url && imageUrl !== initialData.image_url) {
           const oldFileName = initialData.image_url.split('/').pop();
           if (oldFileName) {
             await supabase.storage
               .from('business-images')
               .remove([oldFileName]);
+          }
+        }
+
+        // Handle deletion of old owner images
+        const oldOwners = initialData.owners || [];
+        for (const oldOwner of oldOwners) {
+          if (oldOwner.image_url && !processedOwners.some(newOwner => newOwner.image_url === oldOwner.image_url)) {
+            const oldFileName = oldOwner.image_url.split('/').pop();
+            if (oldFileName) {
+              await supabase.storage
+                .from('business-images')
+                .remove([oldFileName]);
+            }
           }
         }
 

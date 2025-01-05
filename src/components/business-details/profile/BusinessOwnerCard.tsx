@@ -25,7 +25,7 @@ export const BusinessOwnerCard = ({
           <Avatar className="h-12 w-12">
             <AvatarImage 
               src={image_url || undefined} 
-              alt={name} 
+              alt={name}
             />
             <AvatarFallback>{name?.[0]?.toUpperCase() || 'O'}</AvatarFallback>
           </Avatar>
