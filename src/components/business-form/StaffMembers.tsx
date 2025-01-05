@@ -29,6 +29,24 @@ const TEST_STAFF = [
     position: "Nutritionist",
     experience: "5 years",
     image_url: null
+  },
+  {
+    name: "Sarah Thompson",
+    position: "Physical Therapist",
+    experience: "8 years",
+    image_url: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80"
+  },
+  {
+    name: "David Kim",
+    position: "Acupuncturist",
+    experience: "15 years",
+    image_url: "https://images.unsplash.com/photo-1556157382-97eda2d62296?auto=format&fit=crop&q=80"
+  },
+  {
+    name: "Lisa Martinez",
+    position: "Wellness Coach",
+    experience: "6 years",
+    image_url: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80"
   }
 ];
 

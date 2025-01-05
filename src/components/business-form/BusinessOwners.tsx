@@ -20,6 +20,22 @@ const TEST_OWNERS: Owner[] = [
     experience: "15 years",
     qualifications: "MD, Board Certified",
     image_url: null
+  },
+  {
+    name: "Dr. Emily Chen",
+    role: "Co-Owner",
+    position: "Chief Medical Officer",
+    experience: "12 years",
+    qualifications: "MD, PhD in Integrative Medicine",
+    image_url: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&q=80"
+  },
+  {
+    name: "Dr. James Wilson",
+    role: "Partner",
+    position: "Research Director",
+    experience: "10 years",
+    qualifications: "PhD in Clinical Research, Board Certified",
+    image_url: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80"
   }
 ];
 
