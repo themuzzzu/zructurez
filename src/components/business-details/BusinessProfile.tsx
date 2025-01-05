@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { MapPin, Clock, Phone, Mail, Building, Users } from "lucide-react";
+import { MapPin, Clock, Phone, Mail, Building, Users, Globe } from "lucide-react";
 import { BusinessOwnerCard } from "./profile/BusinessOwnerCard";
 import { BusinessStaffCard } from "./profile/BusinessStaffCard";
 
@@ -12,6 +12,7 @@ interface BusinessProfileProps {
   verified?: boolean;
   image_url?: string;
   bio?: string;
+  website?: string;
   owners?: { 
     name: string; 
     role: string; 
@@ -35,6 +36,7 @@ export const BusinessProfile = ({
   verified,
   image_url,
   bio,
+  website,
   owners,
   staff_details,
 }: BusinessProfileProps) => {
@@ -62,19 +64,19 @@ export const BusinessProfile = ({
           )}
         </div>
         
-        <p className="text-muted-foreground">{description}</p>
+        <p className="text-muted-foreground break-words">{description}</p>
 
         <div className="grid gap-4">
           {location && (
             <div className="flex items-center gap-2 text-muted-foreground">
-              <MapPin className="h-4 w-4" />
-              <span>{location}</span>
+              <MapPin className="h-4 w-4 shrink-0" />
+              <span className="break-words">{location}</span>
             </div>
           )}
           
           {hours && (
             <div className="flex items-center gap-2 text-muted-foreground">
-              <Clock className="h-4 w-4" />
+              <Clock className="h-4 w-4 shrink-0" />
               <span>{hours}</span>
             </div>
           )}
@@ -82,11 +84,25 @@ export const BusinessProfile = ({
           {contact && (
             <div className="flex items-center gap-2 text-muted-foreground">
               {contact.includes('@') ? (
-                <Mail className="h-4 w-4" />
+                <Mail className="h-4 w-4 shrink-0" />
               ) : (
-                <Phone className="h-4 w-4" />
+                <Phone className="h-4 w-4 shrink-0" />
               )}
               <span>{contact}</span>
+            </div>
+          )}
+
+          {website && (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Globe className="h-4 w-4 shrink-0" />
+              <a 
+                href={website} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="hover:text-primary transition-colors break-words"
+              >
+                {website}
+              </a>
             </div>
           )}
         </div>
@@ -96,7 +112,7 @@ export const BusinessProfile = ({
       {bio && (
         <Card className="p-6">
           <h2 className="text-2xl font-semibold mb-4">Bio</h2>
-          <p className="text-muted-foreground">{bio}</p>
+          <p className="text-muted-foreground break-words">{bio}</p>
         </Card>
       )}
 
