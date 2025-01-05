@@ -16,11 +16,9 @@ export const BusinessOwnerCard = ({
   experience,
   image_url,
 }: BusinessOwnerCardProps) => {
-  console.log("Owner image URL:", image_url); // Debug log
-
   return (
     <Card className="p-4">
-      <div className="flex items-start gap-4 mb-4">
+      <div className="flex items-start gap-4">
         <Avatar className="h-12 w-12">
           <AvatarImage 
             src={image_url || undefined} 
@@ -42,7 +40,7 @@ export const BusinessOwnerCard = ({
         </div>
       </div>
       {image_url && (
-        <div className="w-full h-64 overflow-hidden rounded-md">
+        <div className="mt-4 w-full h-64 overflow-hidden rounded-md">
           <img
             src={image_url}
             alt={name}

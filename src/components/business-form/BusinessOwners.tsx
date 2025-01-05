@@ -26,13 +26,11 @@ export const BusinessOwners = ({ owners = [], onChange }: BusinessOwnersProps) =
     experience: "",
     image_url: null,
   });
-  const [pendingImage, setPendingImage] = useState<string | null>(null);
 
   const handleAddOwner = () => {
     if (newOwner.name && newOwner.role) {
-      onChange([...owners, { ...newOwner, image_url: pendingImage }]);
+      onChange([...owners, { ...newOwner }]);
       setNewOwner({ name: "", role: "", position: "", experience: "", image_url: null });
-      setPendingImage(null);
     }
   };
 
@@ -126,8 +124,8 @@ export const BusinessOwners = ({ owners = [], onChange }: BusinessOwnersProps) =
         <div className="space-y-2">
           <Label>Profile Picture (optional)</Label>
           <ImageUpload
-            selectedImage={pendingImage}
-            onImageSelect={setPendingImage}
+            selectedImage={newOwner.image_url}
+            onImageSelect={(image) => setNewOwner({ ...newOwner, image_url: image })}
             initialScale={1}
             initialPosition={{ x: 50, y: 50 }}
           />
