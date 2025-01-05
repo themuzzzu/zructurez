@@ -4,15 +4,7 @@ import { Plus, X } from "lucide-react";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { ImageUpload } from "../ImageUpload";
-
-interface Owner {
-  name: string;
-  role: string;
-  position: string;
-  experience?: string;
-  qualifications?: string;
-  image_url?: string | null;
-}
+import type { Owner } from "./types/owner";
 
 interface BusinessOwnersProps {
   owners: Owner[];
@@ -56,6 +48,7 @@ export const BusinessOwners = ({ owners = [], onChange }: BusinessOwnersProps) =
     image_url: null,
   });
   const [pendingImage, setPendingImage] = useState<string | null>(null);
+  const [pendingOwnerIndex, setPendingOwnerIndex] = useState<number | null>(null);
 
   // Add test data if owners array is empty
   if (owners.length === 0) {
@@ -88,9 +81,23 @@ export const BusinessOwners = ({ owners = [], onChange }: BusinessOwnersProps) =
   };
 
   const handleUpdateOwnerImage = (index: number, imageUrl: string | null) => {
-    const updatedOwners = [...owners];
-    updatedOwners[index] = { ...updatedOwners[index], image_url: imageUrl };
-    onChange(updatedOwners);
+    setPendingOwnerIndex(index);
+    setPendingImage(imageUrl);
+  };
+
+  const handleSaveImage = (index: number) => {
+    if (pendingImage && pendingOwnerIndex === index) {
+      const updatedOwners = [...owners];
+      updatedOwners[index] = { ...updatedOwners[index], image_url: pendingImage };
+      onChange(updatedOwners);
+      setPendingImage(null);
+      setPendingOwnerIndex(null);
+    }
+  };
+
+  const handleCancelImage = () => {
+    setPendingImage(null);
+    setPendingOwnerIndex(null);
   };
 
   return (
@@ -129,11 +136,21 @@ export const BusinessOwners = ({ owners = [], onChange }: BusinessOwnersProps) =
               <div className="space-y-2">
                 <Label>Profile Picture (optional)</Label>
                 <ImageUpload
-                  selectedImage={owner.image_url}
+                  selectedImage={pendingOwnerIndex === index ? pendingImage : owner.image_url}
                   onImageSelect={(image) => handleUpdateOwnerImage(index, image)}
                   initialScale={1}
                   initialPosition={{ x: 50, y: 50 }}
                 />
+                {pendingOwnerIndex === index && pendingImage && (
+                  <div className="flex justify-end gap-2 mt-2">
+                    <Button variant="outline" onClick={handleCancelImage}>
+                      Cancel
+                    </Button>
+                    <Button onClick={() => handleSaveImage(index)}>
+                      Save Image
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
             <Button
