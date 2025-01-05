@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
-import { Button } from "./ui/button";
-import { X } from "lucide-react";
 import { toast } from "sonner";
-import { ImagePositionControls } from "./image-upload/ImagePositionControls";
-import { ImageZoomControl } from "./image-upload/ImageZoomControl";
+import { ImagePreview } from "./image-upload/ImagePreview";
+import { ImageControls } from "./image-upload/ImageControls";
 import { UploadButtons } from "./image-upload/UploadButtons";
 
 export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -23,13 +21,13 @@ export interface ImageUploadProps {
   onPositionChange?: (position: ImagePosition) => void;
 }
 
-export const ImageUpload = ({ 
-  selectedImage, 
+export const ImageUpload = ({
+  selectedImage,
   onImageSelect,
   initialScale = 1,
   initialPosition = { x: 50, y: 50 },
   onScaleChange,
-  onPositionChange
+  onPositionChange,
 }: ImageUploadProps) => {
   const [scale, setScale] = useState(initialScale);
   const [position, setPosition] = useState(initialPosition);
@@ -110,7 +108,7 @@ export const ImageUpload = ({
     }
   };
 
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
     setDragStart({
       x: e.clientX - position.x,
@@ -118,7 +116,7 @@ export const ImageUpload = ({
     });
   };
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging) return;
     
     const newX = Math.max(0, Math.min(100, e.clientX - dragStart.x));
@@ -150,51 +148,30 @@ export const ImageUpload = ({
 
       {previewImage && (
         <div className="space-y-4">
-          <div 
-            className="relative h-48 overflow-hidden rounded-lg group cursor-move"
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
-          >
-            <img
-              src={previewImage}
-              alt="Preview"
-              className="w-full h-full object-cover transition-transform duration-300"
-              style={{
-                transform: `scale(${scale})`,
-                objectPosition: `${position.x}% ${position.y}%`,
-                userSelect: 'none',
-                pointerEvents: 'none'
-              }}
-            />
-            <Button
-              variant="destructive"
-              size="icon"
-              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-              onClick={() => {
-                setPreviewImage(null);
-                onImageSelect(null);
-              }}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
+          <ImagePreview
+            previewImage={previewImage}
+            scale={scale}
+            position={position}
+            onImageRemove={() => {
+              setPreviewImage(null);
+              onImageSelect(null);
+            }}
+            isDragging={isDragging}
+            onDragStart={handleMouseDown}
+            onDragMove={handleMouseMove}
+            onDragEnd={handleMouseUp}
+          />
 
-          <div className="space-y-4 p-4 border rounded-lg">
-            <ImageZoomControl scale={scale} onScaleChange={handleScaleChange} />
-            <ImagePositionControls onPositionChange={(x, y) => {
+          <ImageControls
+            scale={scale}
+            onScaleChange={handleScaleChange}
+            onPositionChange={(x, y) => {
               const newPosition = { x, y };
               setPosition(newPosition);
               onPositionChange?.(newPosition);
-            }} />
-            <Button 
-              className="w-full" 
-              onClick={handleSave}
-            >
-              Apply Changes
-            </Button>
-          </div>
+            }}
+            onSave={handleSave}
+          />
         </div>
       )}
     </div>
