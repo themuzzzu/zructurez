@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MapPin, Clock, Phone, Mail, Building, Users, Award, Briefcase } from "lucide-react";
 
 interface BusinessProfileProps {
@@ -10,8 +11,19 @@ interface BusinessProfileProps {
   verified?: boolean;
   image_url?: string;
   bio?: string;
-  owners?: { name: string; role: string; position: string; experience?: string; }[];
-  staff_details?: { name: string; position: string; experience?: string; }[];
+  owners?: { 
+    name: string; 
+    role: string; 
+    position: string; 
+    experience?: string;
+    image_url?: string | null;
+  }[];
+  staff_details?: { 
+    name: string; 
+    position: string; 
+    experience?: string;
+    image_url?: string | null;
+  }[];
 }
 
 export const BusinessProfile = ({
@@ -89,25 +101,36 @@ export const BusinessProfile = ({
               <Building className="h-4 w-4" />
               Owners
             </h3>
-            <div className="grid gap-2">
+            <div className="grid gap-4">
               {owners.map((owner, index) => (
-                <div key={index} className="p-3 bg-muted/50 rounded-md space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">{owner.name}</span>
-                    <Badge variant="secondary">{owner.role}</Badge>
+                <div key={index} className="flex items-start gap-4 p-4 bg-muted/50 rounded-lg">
+                  <Avatar className="h-16 w-16">
+                    {owner.image_url ? (
+                      <AvatarImage src={owner.image_url} alt={owner.name} />
+                    ) : (
+                      <AvatarFallback>
+                        {owner.name.split(' ').map(n => n[0]).join('')}
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
+                  <div className="flex-1 space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-lg">{owner.name}</span>
+                      <Badge variant="secondary">{owner.role}</Badge>
+                    </div>
+                    {owner.position && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Briefcase className="h-3 w-3" />
+                        <span>{owner.position}</span>
+                      </div>
+                    )}
+                    {owner.experience && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Award className="h-3 w-3" />
+                        <span>{owner.experience}</span>
+                      </div>
+                    )}
                   </div>
-                  {owner.position && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Briefcase className="h-3 w-3" />
-                      <span>{owner.position}</span>
-                    </div>
-                  )}
-                  {owner.experience && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Award className="h-3 w-3" />
-                      <span>{owner.experience}</span>
-                    </div>
-                  )}
                 </div>
               ))}
             </div>
@@ -120,19 +143,30 @@ export const BusinessProfile = ({
               <Users className="h-4 w-4" />
               Staff
             </h3>
-            <div className="grid gap-2">
+            <div className="grid gap-4">
               {staff_details.map((staff, index) => (
-                <div key={index} className="p-3 bg-muted/50 rounded-md space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">{staff.name}</span>
-                    {staff.position && <Badge variant="secondary">{staff.position}</Badge>}
-                  </div>
-                  {staff.experience && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Award className="h-3 w-3" />
-                      <span>{staff.experience}</span>
+                <div key={index} className="flex items-start gap-4 p-4 bg-muted/50 rounded-lg">
+                  <Avatar className="h-16 w-16">
+                    {staff.image_url ? (
+                      <AvatarImage src={staff.image_url} alt={staff.name} />
+                    ) : (
+                      <AvatarFallback>
+                        {staff.name.split(' ').map(n => n[0]).join('')}
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
+                  <div className="flex-1 space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-lg">{staff.name}</span>
+                      {staff.position && <Badge variant="secondary">{staff.position}</Badge>}
                     </div>
-                  )}
+                    {staff.experience && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Award className="h-3 w-3" />
+                        <span>{staff.experience}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
