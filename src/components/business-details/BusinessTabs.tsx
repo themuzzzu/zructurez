@@ -52,6 +52,8 @@ export const BusinessTabs = ({ business, isOwner, onRefetch }: BusinessTabsProps
           <BusinessServicesTab
             appointmentPrice={business.appointment_price}
             consultationPrice={business.consultation_price}
+            businessId={business.id}
+            onSuccess={onRefetch}
           />
         </TabsContent>
       </div>
