@@ -137,6 +137,9 @@ export type Database = {
           image_url: string | null
           location: string | null
           name: string
+          owner_profession: string | null
+          owner_qualification: string | null
+          staff_details: Json | null
           user_id: string
           verified: boolean | null
           video_url: string | null
@@ -157,6 +160,9 @@ export type Database = {
           image_url?: string | null
           location?: string | null
           name: string
+          owner_profession?: string | null
+          owner_qualification?: string | null
+          staff_details?: Json | null
           user_id: string
           verified?: boolean | null
           video_url?: string | null
@@ -177,6 +183,9 @@ export type Database = {
           image_url?: string | null
           location?: string | null
           name?: string
+          owner_profession?: string | null
+          owner_qualification?: string | null
+          staff_details?: Json | null
           user_id?: string
           verified?: boolean | null
           video_url?: string | null

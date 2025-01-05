@@ -32,6 +32,9 @@ export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: CreateB
     consultation_price: "",
     bio: "",
     website: "",
+    owner_profession: "",
+    owner_qualification: "",
+    staff_details: [] as { name: string; role: string }[],
   });
 
   useEffect(() => {
@@ -48,9 +51,11 @@ export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: CreateB
         consultation_price: initialData.consultation_price?.toString() || "",
         bio: initialData.bio || "",
         website: initialData.website || "",
+        owner_profession: initialData.owner_profession || "",
+        owner_qualification: initialData.owner_qualification || "",
+        staff_details: initialData.staff_details || [],
       });
       setPendingImage(initialData.image_url || null);
-      // Initialize image scale and position if they exist in initialData
       if (initialData.image_scale) setImageScale(initialData.image_scale);
       if (initialData.image_position) setImagePosition(initialData.image_position);
     }
@@ -122,6 +127,9 @@ export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: CreateB
         website: formData.website,
         image_scale: imageScale,
         image_position: imagePosition,
+        owner_profession: formData.owner_profession || null,
+        owner_qualification: formData.owner_qualification || null,
+        staff_details: formData.staff_details,
       };
 
       if (initialData) {

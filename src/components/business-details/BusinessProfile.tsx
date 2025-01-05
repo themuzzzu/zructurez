@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { MapPin, Clock, Phone, Mail, Building } from "lucide-react";
+import { MapPin, Clock, Phone, Mail, Building, GraduationCap, Users } from "lucide-react";
 
 interface BusinessProfileProps {
   description: string;
@@ -10,6 +10,9 @@ interface BusinessProfileProps {
   verified?: boolean;
   image_url?: string;
   bio?: string;
+  owner_profession?: string;
+  owner_qualification?: string;
+  staff_details?: { name: string; role: string }[];
 }
 
 export const BusinessProfile = ({
@@ -20,6 +23,9 @@ export const BusinessProfile = ({
   verified,
   image_url,
   bio,
+  owner_profession,
+  owner_qualification,
+  staff_details,
 }: BusinessProfileProps) => {
   return (
     <div className="space-y-6">
@@ -77,7 +83,38 @@ export const BusinessProfile = ({
               <span>{contact}</span>
             </div>
           )}
+
+          {owner_profession && (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Building className="h-4 w-4" />
+              <span>Owner's Profession: {owner_profession}</span>
+            </div>
+          )}
+
+          {owner_qualification && (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <GraduationCap className="h-4 w-4" />
+              <span>Owner's Qualification: {owner_qualification}</span>
+            </div>
+          )}
         </div>
+
+        {staff_details && staff_details.length > 0 && (
+          <div className="pt-4">
+            <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Staff
+            </h3>
+            <div className="grid gap-2">
+              {staff_details.map((staff, index) => (
+                <div key={index} className="flex items-center justify-between p-2 bg-muted/50 rounded-md">
+                  <span className="font-medium">{staff.name}</span>
+                  <span className="text-muted-foreground">{staff.role}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </Card>
     </div>
   );
