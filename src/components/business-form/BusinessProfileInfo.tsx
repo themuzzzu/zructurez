@@ -4,26 +4,30 @@ import { Label } from "../ui/label";
 import { Button } from "../ui/button";
 import { Plus, X } from "lucide-react";
 import { useState } from "react";
+import { BusinessOwners } from "./BusinessOwners";
 
 interface BusinessProfileInfoProps {
   formData: {
     bio: string;
     website: string;
-    owner_profession?: string;
-    owner_qualification?: string;
-    staff_details?: { name: string; role: string }[];
+    owners: { name: string; role: string; position: string; experience: string; }[];
+    staff_details: { name: string; position: string; experience: string; }[];
   };
   onChange: (name: string, value: any) => void;
 }
 
 export const BusinessProfileInfo = ({ formData, onChange }: BusinessProfileInfoProps) => {
-  const [newStaffMember, setNewStaffMember] = useState({ name: "", role: "" });
+  const [newStaffMember, setNewStaffMember] = useState({ 
+    name: "", 
+    position: "", 
+    experience: "" 
+  });
 
   const handleAddStaffMember = () => {
-    if (newStaffMember.name && newStaffMember.role) {
+    if (newStaffMember.name) {
       const currentStaff = formData.staff_details || [];
       onChange("staff_details", [...currentStaff, newStaffMember]);
-      setNewStaffMember({ name: "", role: "" });
+      setNewStaffMember({ name: "", position: "", experience: "" });
     }
   };
 
@@ -56,67 +60,84 @@ export const BusinessProfileInfo = ({ formData, onChange }: BusinessProfileInfoP
         />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="owner_profession">Owner's Profession (Optional)</Label>
-        <Input
-          id="owner_profession"
-          value={formData.owner_profession || ""}
-          onChange={(e) => onChange("owner_profession", e.target.value)}
-          placeholder="e.g., Doctor, Chef, Instructor"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="owner_qualification">Owner's Qualification (Optional)</Label>
-        <Input
-          id="owner_qualification"
-          value={formData.owner_qualification || ""}
-          onChange={(e) => onChange("owner_qualification", e.target.value)}
-          placeholder="e.g., MD, MBA, PhD"
-        />
-      </div>
+      <BusinessOwners
+        owners={formData.owners || []}
+        onChange={(owners) => onChange("owners", owners)}
+      />
 
       <div className="space-y-4">
         <Label>Staff Details (Optional)</Label>
         
         {(formData.staff_details || []).map((staff, index) => (
-          <div key={index} className="flex items-center gap-2 bg-muted/50 p-2 rounded-md">
-            <div className="flex-1">
-              <p className="text-sm font-medium">{staff.name}</p>
-              <p className="text-sm text-muted-foreground">{staff.role}</p>
+          <div key={index} className="grid gap-2 p-4 border rounded-lg bg-muted/50">
+            <div className="flex justify-between items-start">
+              <div className="grid gap-2 flex-1">
+                <Input
+                  placeholder="Staff Name"
+                  value={staff.name}
+                  onChange={(e) => {
+                    const updatedStaff = [...formData.staff_details];
+                    updatedStaff[index] = { ...staff, name: e.target.value };
+                    onChange("staff_details", updatedStaff);
+                  }}
+                />
+                <Input
+                  placeholder="Position (e.g., HOD, Senior Doctor)"
+                  value={staff.position}
+                  onChange={(e) => {
+                    const updatedStaff = [...formData.staff_details];
+                    updatedStaff[index] = { ...staff, position: e.target.value };
+                    onChange("staff_details", updatedStaff);
+                  }}
+                />
+                <Input
+                  placeholder="Experience (optional)"
+                  value={staff.experience}
+                  onChange={(e) => {
+                    const updatedStaff = [...formData.staff_details];
+                    updatedStaff[index] = { ...staff, experience: e.target.value };
+                    onChange("staff_details", updatedStaff);
+                  }}
+                />
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => handleRemoveStaffMember(index)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
             </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={() => handleRemoveStaffMember(index)}
-            >
-              <X className="h-4 w-4" />
-            </Button>
           </div>
         ))}
 
-        <div className="space-y-2">
-          <div className="flex gap-2">
-            <Input
-              placeholder="Staff Name"
-              value={newStaffMember.name}
-              onChange={(e) => setNewStaffMember(prev => ({ ...prev, name: e.target.value }))}
-            />
-            <Input
-              placeholder="Role"
-              value={newStaffMember.role}
-              onChange={(e) => setNewStaffMember(prev => ({ ...prev, role: e.target.value }))}
-            />
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleAddStaffMember}
-              disabled={!newStaffMember.name || !newStaffMember.role}
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
-          </div>
+        <div className="grid gap-2">
+          <Input
+            placeholder="Staff Name"
+            value={newStaffMember.name}
+            onChange={(e) => setNewStaffMember(prev => ({ ...prev, name: e.target.value }))}
+          />
+          <Input
+            placeholder="Position"
+            value={newStaffMember.position}
+            onChange={(e) => setNewStaffMember(prev => ({ ...prev, position: e.target.value }))}
+          />
+          <Input
+            placeholder="Experience"
+            value={newStaffMember.experience}
+            onChange={(e) => setNewStaffMember(prev => ({ ...prev, experience: e.target.value }))}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleAddStaffMember}
+            disabled={!newStaffMember.name}
+            className="w-full"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add Staff Member
+          </Button>
         </div>
       </div>
     </>
