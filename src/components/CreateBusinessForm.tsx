@@ -9,6 +9,7 @@ import { BusinessContactInfo } from "./business-form/BusinessContactInfo";
 import { BusinessProfileInfo } from "./business-form/BusinessProfileInfo";
 import { Label } from "./ui/label";
 import { BusinessFormData } from "./business-form/types";
+import { Json } from "@/integrations/supabase/types";
 
 interface CreateBusinessFormProps {
   onSuccess?: () => void;
@@ -123,9 +124,9 @@ export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: CreateB
         bio: formData.bio,
         website: formData.website,
         image_scale: imageScale,
-        image_position: imagePosition,
-        owners: formData.owners,
-        staff_details: formData.staff_details,
+        image_position: imagePosition as Json,
+        owners: formData.owners as Json,
+        staff_details: formData.staff_details as Json,
       };
 
       if (initialData) {
