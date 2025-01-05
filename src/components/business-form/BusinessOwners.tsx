@@ -21,27 +21,27 @@ interface BusinessOwnersProps {
 
 const TEST_OWNERS = [
   {
-    name: "Dr. Sarah Johnson",
-    role: "Medical Director",
-    position: "Chief of Surgery",
-    experience: "15 years",
-    qualifications: "MD, Board Certified in Surgery",
-    image_url: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=400"
+    name: "Dr. Michael Anderson",
+    role: "Founder & Medical Director",
+    position: "Chief Dental Surgeon",
+    experience: "20 years",
+    qualifications: "DDS, Board Certified in Implant Dentistry",
+    image_url: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=400"
   },
   {
-    name: "Dr. Emily Chen",
+    name: "Dr. Lisa Wong",
     role: "Co-Owner",
-    position: "Head of Pediatrics",
-    experience: "12 years",
-    qualifications: "MD, Fellowship in Pediatric Care",
+    position: "Head of Orthodontics",
+    experience: "15 years",
+    qualifications: "DDS, MS in Orthodontics",
     image_url: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&q=80&w=400"
   },
   {
-    name: "Dr. James Wilson",
+    name: "Dr. David Miller",
     role: "Partner",
-    position: "Chief of Internal Medicine",
-    experience: "18 years",
-    qualifications: "MD, PhD in Clinical Research",
+    position: "Director of Pediatric Dentistry",
+    experience: "12 years",
+    qualifications: "DDS, Pediatric Dentistry Specialist",
     image_url: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=400"
   }
 ];
