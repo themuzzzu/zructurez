@@ -40,11 +40,11 @@ export const BusinessOwnerCard = ({
         </div>
       </div>
       {image_url && (
-        <div className="mt-4 w-full h-64 overflow-hidden rounded-md">
+        <div className="mt-4 relative aspect-video w-full overflow-hidden rounded-md">
           <img
             src={image_url}
             alt={name}
-            className="w-full h-full object-cover"
+            className="object-cover w-full h-full"
           />
         </div>
       )}
