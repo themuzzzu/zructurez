@@ -1,11 +1,10 @@
-import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Award, Briefcase } from "lucide-react";
+import { Card } from "@/components/ui/card";
 
 interface BusinessOwnerCardProps {
   name: string;
   role: string;
-  position?: string;
+  position: string;
   experience?: string;
   image_url?: string | null;
 }
@@ -17,48 +16,40 @@ export const BusinessOwnerCard = ({
   experience,
   image_url,
 }: BusinessOwnerCardProps) => {
+  console.log("Owner image URL:", image_url); // Debug log
+
   return (
-    <Card className="overflow-hidden">
-      <div className="p-4 border-b">
-        <div className="flex items-center gap-3">
-          <Avatar className="h-10 w-10">
-            {image_url ? (
-              <AvatarImage src={image_url} alt={name} />
-            ) : (
-              <AvatarFallback>
-                {name.split(' ').map(n => n[0]).join('')}
-              </AvatarFallback>
-            )}
-          </Avatar>
-          <div>
-            <h4 className="font-semibold">{name}</h4>
-            <p className="text-sm text-muted-foreground">{role}</p>
-          </div>
+    <Card className="p-4">
+      <div className="flex items-start gap-4 mb-4">
+        <Avatar className="h-12 w-12">
+          <AvatarImage 
+            src={image_url || undefined} 
+            alt={name} 
+          />
+          <AvatarFallback>{name?.[0]?.toUpperCase() || 'O'}</AvatarFallback>
+        </Avatar>
+        <div>
+          <h4 className="font-semibold">{name}</h4>
+          <div className="text-sm text-muted-foreground">{role}</div>
+          {position && (
+            <div className="text-sm text-muted-foreground">{position}</div>
+          )}
+          {experience && (
+            <div className="text-sm text-muted-foreground">
+              Experience: {experience}
+            </div>
+          )}
         </div>
       </div>
       {image_url && (
-        <div className="w-full">
+        <div className="w-full h-64 overflow-hidden rounded-md">
           <img
             src={image_url}
             alt={name}
-            className="w-full h-64 object-cover"
+            className="w-full h-full object-cover"
           />
         </div>
       )}
-      <div className="p-4 space-y-2">
-        {position && (
-          <div className="flex items-center gap-2 text-sm">
-            <Briefcase className="h-4 w-4" />
-            <span>{position}</span>
-          </div>
-        )}
-        {experience && (
-          <div className="flex items-center gap-2 text-sm">
-            <Award className="h-4 w-4" />
-            <span>{experience}</span>
-          </div>
-        )}
-      </div>
     </Card>
   );
 };
