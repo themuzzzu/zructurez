@@ -4,6 +4,8 @@ import { ImageUpload } from "../../ImageUpload";
 import type { Owner, OwnerFormProps } from "../types/owner";
 
 export const OwnerFormFields = ({ owner, onUpdate, onUpdateImage }: OwnerFormProps) => {
+  console.log("Current owner data:", owner); // Add this to debug
+
   return (
     <div className="grid gap-4 flex-1">
       <div>
@@ -56,7 +58,7 @@ export const OwnerFormFields = ({ owner, onUpdate, onUpdateImage }: OwnerFormPro
         <ImageUpload
           selectedImage={owner.image_url}
           onImageSelect={(image) => {
-            console.log("Owner image selected:", image);
+            console.log("Image selected for owner:", image); // Add this to debug
             onUpdateImage?.(image);
           }}
           initialScale={1}
