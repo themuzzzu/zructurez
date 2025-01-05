@@ -8,6 +8,7 @@ import { BusinessPricing } from "./business-form/BusinessPricing";
 import { BusinessContactInfo } from "./business-form/BusinessContactInfo";
 import { BusinessProfileInfo } from "./business-form/BusinessProfileInfo";
 import { Label } from "./ui/label";
+import { BusinessFormData } from "./business-form/types";
 
 interface CreateBusinessFormProps {
   onSuccess?: () => void;
@@ -20,21 +21,20 @@ export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: CreateB
   const [pendingImage, setPendingImage] = useState<string | null>(null);
   const [imageScale, setImageScale] = useState(1);
   const [imagePosition, setImagePosition] = useState({ x: 50, y: 50 });
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<BusinessFormData>({
     name: "",
     category: "",
     description: "",
     location: "",
     contact: "",
     hours: "",
-    image: null as string | null,
+    image: null,
     appointment_price: "",
     consultation_price: "",
     bio: "",
     website: "",
-    owner_profession: "",
-    owner_qualification: "",
-    staff_details: [] as { name: string; role: string }[],
+    owners: [{ name: "", role: "Primary Owner", position: "", experience: "" }],
+    staff_details: [],
   });
 
   useEffect(() => {
@@ -51,8 +51,7 @@ export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: CreateB
         consultation_price: initialData.consultation_price?.toString() || "",
         bio: initialData.bio || "",
         website: initialData.website || "",
-        owner_profession: initialData.owner_profession || "",
-        owner_qualification: initialData.owner_qualification || "",
+        owners: initialData.owners || [{ name: "", role: "Primary Owner", position: "", experience: "" }],
         staff_details: initialData.staff_details || [],
       });
       setPendingImage(initialData.image_url || null);
@@ -61,7 +60,7 @@ export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: CreateB
     }
   }, [initialData]);
 
-  const handleChange = (name: string, value: string) => {
+  const handleChange = (name: string, value: any) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -81,12 +80,10 @@ export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: CreateB
 
       let imageUrl = pendingImage;
 
-      // Only process the image if it's new (base64) or different from the current one
       if (pendingImage && 
           (pendingImage.startsWith('data:') || 
            (initialData && pendingImage !== initialData.image_url))) {
         
-        // If it's a base64 image, upload it
         if (pendingImage.startsWith('data:')) {
           const base64Data = pendingImage.split(',')[1];
           const byteCharacters = atob(base64Data);
@@ -127,13 +124,11 @@ export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: CreateB
         website: formData.website,
         image_scale: imageScale,
         image_position: imagePosition,
-        owner_profession: formData.owner_profession || null,
-        owner_qualification: formData.owner_qualification || null,
+        owners: formData.owners,
         staff_details: formData.staff_details,
       };
 
       if (initialData) {
-        // If updating and there's a new image, delete the old one
         if (initialData.image_url && imageUrl !== initialData.image_url) {
           const oldFileName = initialData.image_url.split('/').pop();
           if (oldFileName) {
