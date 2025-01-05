@@ -34,7 +34,7 @@ export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: CreateB
     consultation_price: "",
     bio: "",
     website: "",
-    owners: [{ name: "", role: "Primary Owner", position: "", experience: "" }],
+    owners: [{ name: "", role: "Primary Owner", position: "", experience: "", image_url: null }],
     staff_details: [],
   });
 
@@ -52,7 +52,7 @@ export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: CreateB
         consultation_price: initialData.consultation_price?.toString() || "",
         bio: initialData.bio || "",
         website: initialData.website || "",
-        owners: initialData.owners || [{ name: "", role: "Primary Owner", position: "", experience: "" }],
+        owners: initialData.owners || [{ name: "", role: "Primary Owner", position: "", experience: "", image_url: null }],
         staff_details: initialData.staff_details || [],
       });
       setPendingImage(initialData.image_url || null);
@@ -63,6 +63,37 @@ export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: CreateB
 
   const handleChange = (name: string, value: any) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const uploadImage = async (base64Image: string, prefix: string = '') => {
+    if (!base64Image.startsWith('data:')) {
+      return base64Image; // Return existing URL if it's not a base64 string
+    }
+
+    const base64Data = base64Image.split(',')[1];
+    const byteCharacters = atob(base64Data);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    const blob = new Blob([byteArray], { type: 'image/jpeg' });
+
+    const fileName = `${prefix}${Date.now()}-${Math.random().toString(36).substring(7)}`;
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('business-images')
+      .upload(fileName, blob);
+
+    if (uploadError) {
+      console.error('Upload error:', uploadError);
+      throw uploadError;
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('business-images')
+      .getPublicUrl(fileName);
+
+    return publicUrl;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -79,72 +110,59 @@ export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: CreateB
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("No user found");
 
-      let imageUrl = pendingImage;
-
-      // Handle main business image upload
-      if (pendingImage && 
-          (pendingImage.startsWith('data:') || 
-           (initialData && pendingImage !== initialData.image_url))) {
-        
-        if (pendingImage.startsWith('data:')) {
-          const base64Data = pendingImage.split(',')[1];
-          const byteCharacters = atob(base64Data);
-          const byteNumbers = new Array(byteCharacters.length);
-          for (let i = 0; i < byteCharacters.length; i++) {
-            byteNumbers[i] = byteCharacters.charCodeAt(i);
-          }
-          const byteArray = new Uint8Array(byteNumbers);
-          const blob = new Blob([byteArray], { type: 'image/jpeg' });
-
-          const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}`;
-          const { data: uploadData, error: uploadError } = await supabase.storage
-            .from('business-images')
-            .upload(fileName, blob);
-
-          if (uploadError) throw uploadError;
-
-          const { data: { publicUrl } } = supabase.storage
-            .from('business-images')
-            .getPublicUrl(fileName);
-
-          imageUrl = publicUrl;
+      // Upload main business image
+      let imageUrl = null;
+      try {
+        if (pendingImage) {
+          imageUrl = await uploadImage(pendingImage, 'business-');
         }
+      } catch (error) {
+        console.error('Error uploading main image:', error);
+        toast.error("Failed to upload main business image");
+        return;
       }
 
-      // Process owners' data and handle their images
+      // Process owners' images
       const processedOwners = await Promise.all(formData.owners.map(async (owner) => {
         let ownerImageUrl = owner.image_url;
-        
-        // If the owner has a new image (base64 string), upload it
-        if (owner.image_url && owner.image_url.startsWith('data:')) {
-          const base64Data = owner.image_url.split(',')[1];
-          const byteCharacters = atob(base64Data);
-          const byteNumbers = new Array(byteCharacters.length);
-          for (let i = 0; i < byteCharacters.length; i++) {
-            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        try {
+          if (owner.image_url && owner.image_url.startsWith('data:')) {
+            ownerImageUrl = await uploadImage(owner.image_url, 'owner-');
           }
-          const byteArray = new Uint8Array(byteNumbers);
-          const blob = new Blob([byteArray], { type: 'image/jpeg' });
-
-          const fileName = `owner-${Date.now()}-${Math.random().toString(36).substring(7)}`;
-          const { data: uploadData, error: uploadError } = await supabase.storage
-            .from('business-images')
-            .upload(fileName, blob);
-
-          if (uploadError) throw uploadError;
-
-          const { data: { publicUrl } } = supabase.storage
-            .from('business-images')
-            .getPublicUrl(fileName);
-
-          ownerImageUrl = publicUrl;
+        } catch (error) {
+          console.error('Error uploading owner image:', error);
+          toast.error(`Failed to upload image for owner ${owner.name}`);
+          throw error;
         }
-
         return {
           ...owner,
           image_url: ownerImageUrl
         };
       }));
+
+      // Clean up old images if updating
+      if (initialData) {
+        if (initialData.image_url && imageUrl !== initialData.image_url) {
+          const oldFileName = initialData.image_url.split('/').pop();
+          if (oldFileName) {
+            await supabase.storage
+              .from('business-images')
+              .remove([oldFileName]);
+          }
+        }
+
+        const oldOwners = initialData.owners || [];
+        for (const oldOwner of oldOwners) {
+          if (oldOwner.image_url && !processedOwners.some(newOwner => newOwner.image_url === oldOwner.image_url)) {
+            const oldFileName = oldOwner.image_url.split('/').pop();
+            if (oldFileName) {
+              await supabase.storage
+                .from('business-images')
+                .remove([oldFileName]);
+            }
+          }
+        }
+      }
 
       const businessData = {
         user_id: user.id,
@@ -166,29 +184,6 @@ export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: CreateB
       };
 
       if (initialData) {
-        // Handle deletion of old images
-        if (initialData.image_url && imageUrl !== initialData.image_url) {
-          const oldFileName = initialData.image_url.split('/').pop();
-          if (oldFileName) {
-            await supabase.storage
-              .from('business-images')
-              .remove([oldFileName]);
-          }
-        }
-
-        // Handle deletion of old owner images
-        const oldOwners = initialData.owners || [];
-        for (const oldOwner of oldOwners) {
-          if (oldOwner.image_url && !processedOwners.some(newOwner => newOwner.image_url === oldOwner.image_url)) {
-            const oldFileName = oldOwner.image_url.split('/').pop();
-            if (oldFileName) {
-              await supabase.storage
-                .from('business-images')
-                .remove([oldFileName]);
-            }
-          }
-        }
-
         const { error } = await supabase
           .from('businesses')
           .update(businessData)
