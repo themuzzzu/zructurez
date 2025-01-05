@@ -37,7 +37,7 @@ export const BusinessOwnerCard = ({
         </div>
       </div>
       {image_url && (
-        <div className="relative aspect-square">
+        <div className="relative aspect-square w-full">
           <img
             src={image_url}
             alt={name}
