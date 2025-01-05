@@ -9,6 +9,7 @@ interface BusinessProfileProps {
   contact?: string;
   verified?: boolean;
   image_url?: string;
+  bio?: string;
 }
 
 export const BusinessProfile = ({
@@ -18,6 +19,7 @@ export const BusinessProfile = ({
   contact,
   verified,
   image_url,
+  bio,
 }: BusinessProfileProps) => {
   return (
     <div className="space-y-6">
@@ -31,6 +33,13 @@ export const BusinessProfile = ({
         </div>
       )}
       
+      {bio && (
+        <Card className="p-6">
+          <h2 className="text-2xl font-semibold mb-4">Bio</h2>
+          <p className="text-muted-foreground">{bio}</p>
+        </Card>
+      )}
+
       <Card className="p-6 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-semibold">About</h2>
