@@ -51,11 +51,11 @@ export const BusinessOwnerCard = ({
 
       {image_url && (
         <Card className="overflow-hidden w-[300px]">
-          <div className="relative">
+          <div className="relative aspect-square">
             <img
               src={image_url}
               alt={name}
-              className="w-full h-auto object-cover"
+              className="w-full h-full object-cover"
             />
           </div>
         </Card>

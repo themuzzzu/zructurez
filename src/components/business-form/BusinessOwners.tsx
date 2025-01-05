@@ -31,6 +31,7 @@ export const BusinessOwners = ({ owners = [], onChange }: BusinessOwnersProps) =
   };
 
   const handleUpdateOwnerImage = (index: number, imageUrl: string | null) => {
+    console.log("Updating owner image at index", index, "with URL:", imageUrl);
     const updatedOwners = [...owners];
     updatedOwners[index] = { ...updatedOwners[index], image_url: imageUrl };
     onChange(updatedOwners);

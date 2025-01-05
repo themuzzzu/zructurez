@@ -55,7 +55,10 @@ export const OwnerFormFields = ({ owner, onUpdate, onUpdateImage }: OwnerFormPro
         <Label>Profile Picture</Label>
         <ImageUpload
           selectedImage={owner.image_url}
-          onImageSelect={(image) => onUpdateImage?.(image)}
+          onImageSelect={(image) => {
+            console.log("Owner image selected:", image);
+            onUpdateImage?.(image);
+          }}
           initialScale={1}
           initialPosition={{ x: 50, y: 50 }}
         />
