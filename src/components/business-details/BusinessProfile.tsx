@@ -1,7 +1,8 @@
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MapPin, Clock, Phone, Mail, Building, Users, Award, Briefcase } from "lucide-react";
+import { MapPin, Clock, Phone, Mail, Building, Users } from "lucide-react";
+import { BusinessOwnerCard } from "./profile/BusinessOwnerCard";
+import { BusinessStaffCard } from "./profile/BusinessStaffCard";
 
 interface BusinessProfileProps {
   description: string;
@@ -104,48 +105,7 @@ export const BusinessProfile = ({
             </h3>
             <div className="grid gap-6">
               {owners.map((owner, index) => (
-                <Card key={index} className="overflow-hidden">
-                  <div className="p-4 border-b">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-10 w-10">
-                        {owner.image_url ? (
-                          <AvatarImage src={owner.image_url} alt={owner.name} />
-                        ) : (
-                          <AvatarFallback>
-                            {owner.name.split(' ').map(n => n[0]).join('')}
-                          </AvatarFallback>
-                        )}
-                      </Avatar>
-                      <div>
-                        <h4 className="font-semibold">{owner.name}</h4>
-                        <p className="text-sm text-muted-foreground">{owner.role}</p>
-                      </div>
-                    </div>
-                  </div>
-                  {owner.image_url && (
-                    <div className="relative aspect-square">
-                      <img
-                        src={owner.image_url}
-                        alt={owner.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  )}
-                  <div className="p-4 space-y-2">
-                    {owner.position && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <Briefcase className="h-4 w-4" />
-                        <span>{owner.position}</span>
-                      </div>
-                    )}
-                    {owner.experience && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <Award className="h-4 w-4" />
-                        <span>{owner.experience}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                <BusinessOwnerCard key={index} {...owner} />
               ))}
             </div>
           </div>
@@ -159,42 +119,7 @@ export const BusinessProfile = ({
             </h3>
             <div className="grid gap-6">
               {staff_details.map((staff, index) => (
-                <Card key={index} className="overflow-hidden">
-                  <div className="p-4 border-b">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-10 w-10">
-                        {staff.image_url ? (
-                          <AvatarImage src={staff.image_url} alt={staff.name} />
-                        ) : (
-                          <AvatarFallback>
-                            {staff.name.split(' ').map(n => n[0]).join('')}
-                          </AvatarFallback>
-                        )}
-                      </Avatar>
-                      <div>
-                        <h4 className="font-semibold">{staff.name}</h4>
-                        <p className="text-sm text-muted-foreground">{staff.position}</p>
-                      </div>
-                    </div>
-                  </div>
-                  {staff.image_url && (
-                    <div className="relative aspect-square">
-                      <img
-                        src={staff.image_url}
-                        alt={staff.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  )}
-                  {staff.experience && (
-                    <div className="p-4">
-                      <div className="flex items-center gap-2 text-sm">
-                        <Award className="h-4 w-4" />
-                        <span>{staff.experience}</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                <BusinessStaffCard key={index} {...staff} />
               ))}
             </div>
           </div>
