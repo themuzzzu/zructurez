@@ -18,6 +18,8 @@ interface CreateBusinessFormProps {
 export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: CreateBusinessFormProps) => {
   const [loading, setLoading] = useState(false);
   const [pendingImage, setPendingImage] = useState<string | null>(null);
+  const [imageScale, setImageScale] = useState(1);
+  const [imagePosition, setImagePosition] = useState({ x: 50, y: 50 });
   const [formData, setFormData] = useState({
     name: "",
     category: "",
@@ -48,6 +50,9 @@ export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: CreateB
         website: initialData.website || "",
       });
       setPendingImage(initialData.image_url || null);
+      // Initialize image scale and position if they exist in initialData
+      if (initialData.image_scale) setImageScale(initialData.image_scale);
+      if (initialData.image_position) setImagePosition(initialData.image_position);
     }
   }, [initialData]);
 
@@ -71,31 +76,35 @@ export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: CreateB
 
       let imageUrl = pendingImage;
 
-      // Handle image upload if there's a new image (base64)
-      if (pendingImage && pendingImage.startsWith('data:')) {
-        const base64Data = pendingImage.split(',')[1];
-        const byteCharacters = atob(base64Data);
-        const byteNumbers = new Array(byteCharacters.length);
+      // Only process the image if it's new (base64) or different from the current one
+      if (pendingImage && 
+          (pendingImage.startsWith('data:') || 
+           (initialData && pendingImage !== initialData.image_url))) {
         
-        for (let i = 0; i < byteCharacters.length; i++) {
-          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        // If it's a base64 image, upload it
+        if (pendingImage.startsWith('data:')) {
+          const base64Data = pendingImage.split(',')[1];
+          const byteCharacters = atob(base64Data);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          const blob = new Blob([byteArray], { type: 'image/jpeg' });
+
+          const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}`;
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('business-images')
+            .upload(fileName, blob);
+
+          if (uploadError) throw uploadError;
+
+          const { data: { publicUrl } } = supabase.storage
+            .from('business-images')
+            .getPublicUrl(fileName);
+
+          imageUrl = publicUrl;
         }
-        
-        const byteArray = new Uint8Array(byteNumbers);
-        const blob = new Blob([byteArray], { type: 'image/jpeg' });
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}`;
-        
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('business-images')
-          .upload(fileName, blob);
-
-        if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('business-images')
-          .getPublicUrl(fileName);
-
-        imageUrl = publicUrl;
       }
 
       const businessData = {
@@ -111,6 +120,8 @@ export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: CreateB
         consultation_price: formData.consultation_price ? parseFloat(formData.consultation_price) : null,
         bio: formData.bio,
         website: formData.website,
+        image_scale: imageScale,
+        image_position: imagePosition,
       };
 
       if (initialData) {
@@ -161,6 +172,10 @@ export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: CreateB
         <ImageUpload
           selectedImage={pendingImage}
           onImageSelect={(image) => setPendingImage(image)}
+          initialScale={imageScale}
+          initialPosition={imagePosition}
+          onScaleChange={setImageScale}
+          onPositionChange={setImagePosition}
         />
       </div>
 
