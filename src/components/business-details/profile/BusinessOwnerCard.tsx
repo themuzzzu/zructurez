@@ -50,12 +50,12 @@ export const BusinessOwnerCard = ({
       </Card>
 
       {image_url && (
-        <Card className="overflow-hidden">
-          <div className="aspect-[16/9] relative">
+        <Card className="overflow-hidden w-[300px]">
+          <div className="relative">
             <img
               src={image_url}
               alt={name}
-              className="object-cover w-full h-full"
+              className="w-full h-auto object-cover"
             />
           </div>
         </Card>
