@@ -19,34 +19,34 @@ interface StaffMembersProps {
 
 const TEST_STAFF = [
   {
-    name: "Dr. Sarah Johnson",
-    position: "Medical Director",
-    experience: "15 years",
-    image_url: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80"
-  },
-  {
-    name: "Dr. Emily Chen",
-    position: "Chief Medical Officer",
-    experience: "12 years",
-    image_url: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&q=80"
-  },
-  {
-    name: "Michael Chen",
-    position: "Senior Massage Therapist",
+    name: "Dr. Michael Chen",
+    position: "Senior Cardiologist",
     experience: "10 years",
-    image_url: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80"
+    image_url: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=400"
   },
   {
-    name: "Emma Rodriguez",
-    position: "Nutritionist",
-    experience: "5 years",
-    image_url: "https://images.unsplash.com/photo-1614608682850-e0d6ed316d47?auto=format&fit=crop&q=80"
-  },
-  {
-    name: "Sarah Thompson",
-    position: "Physical Therapist",
+    name: "Dr. Emma Rodriguez",
+    position: "Neurologist",
     experience: "8 years",
-    image_url: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80"
+    image_url: "https://images.unsplash.com/photo-1614608682850-e0d6ed316d47?auto=format&fit=crop&q=80&w=400"
+  },
+  {
+    name: "Dr. Sarah Thompson",
+    position: "Orthopedic Surgeon",
+    experience: "12 years",
+    image_url: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=400"
+  },
+  {
+    name: "Dr. David Kim",
+    position: "Anesthesiologist",
+    experience: "15 years",
+    image_url: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=400"
+  },
+  {
+    name: "Dr. Lisa Martinez",
+    position: "Emergency Medicine",
+    experience: "9 years",
+    image_url: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=400"
   }
 ];
 

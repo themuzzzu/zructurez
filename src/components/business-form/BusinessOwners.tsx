@@ -22,19 +22,27 @@ interface BusinessOwnersProps {
 const TEST_OWNERS = [
   {
     name: "Dr. Sarah Johnson",
-    role: "Primary Owner",
-    position: "Medical Director",
+    role: "Medical Director",
+    position: "Chief of Surgery",
     experience: "15 years",
-    qualifications: "MD, Board Certified",
-    image_url: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&q=80"
+    qualifications: "MD, Board Certified in Surgery",
+    image_url: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=400"
+  },
+  {
+    name: "Dr. Emily Chen",
+    role: "Co-Owner",
+    position: "Head of Pediatrics",
+    experience: "12 years",
+    qualifications: "MD, Fellowship in Pediatric Care",
+    image_url: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&q=80&w=400"
   },
   {
     name: "Dr. James Wilson",
     role: "Partner",
-    position: "Research Director",
-    experience: "10 years",
-    qualifications: "PhD in Clinical Research",
-    image_url: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80"
+    position: "Chief of Internal Medicine",
+    experience: "18 years",
+    qualifications: "MD, PhD in Clinical Research",
+    image_url: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=400"
   }
 ];
 
