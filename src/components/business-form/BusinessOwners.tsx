@@ -21,28 +21,28 @@ interface BusinessOwnersProps {
 
 const TEST_OWNERS = [
   {
-    name: "Dr. Michael Anderson",
-    role: "Founder & Medical Director",
-    position: "Chief Dental Surgeon",
-    experience: "20 years",
-    qualifications: "DDS, Board Certified in Implant Dentistry",
-    image_url: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=400"
+    name: "Isabella Martinez",
+    role: "Founder & CEO",
+    position: "Master Aesthetician",
+    experience: "18 years",
+    qualifications: "Licensed Aesthetician, Certified Spa Director",
+    image_url: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=400"
   },
   {
-    name: "Dr. Lisa Wong",
+    name: "Sophie Chen",
     role: "Co-Owner",
-    position: "Head of Orthodontics",
+    position: "Wellness Director",
     experience: "15 years",
-    qualifications: "DDS, MS in Orthodontics",
+    qualifications: "PhD in Holistic Medicine, Certified Yoga Instructor",
     image_url: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&q=80&w=400"
   },
   {
-    name: "Dr. David Miller",
+    name: "Amanda Thompson",
     role: "Partner",
-    position: "Director of Pediatric Dentistry",
+    position: "Head of Therapeutic Services",
     experience: "12 years",
-    qualifications: "DDS, Pediatric Dentistry Specialist",
-    image_url: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=400"
+    qualifications: "Licensed Massage Therapist, Aromatherapy Specialist",
+    image_url: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=400"
   }
 ];
 
