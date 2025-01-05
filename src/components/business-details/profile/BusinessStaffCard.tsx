@@ -35,11 +35,11 @@ export const BusinessStaffCard = ({
         </div>
       </div>
       {image_url && (
-        <div className="relative aspect-square w-full">
+        <div className="w-full">
           <img
             src={image_url}
             alt={name}
-            className="w-full h-full object-cover"
+            className="w-full h-64 object-cover"
           />
         </div>
       )}
