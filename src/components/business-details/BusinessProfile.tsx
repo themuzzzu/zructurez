@@ -18,6 +18,7 @@ interface BusinessProfileProps {
     role: string; 
     position: string; 
     experience?: string;
+    qualifications?: string;
     image_url?: string | null;
   }[];
   staff_details?: { 
@@ -123,7 +124,7 @@ export const BusinessProfile = ({
         <Card className="p-6">
           <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
             <Building className="h-4 w-4" />
-            Owners
+            Owner
           </h3>
           <div className="grid gap-6">
             {owners.map((owner, index) => (
