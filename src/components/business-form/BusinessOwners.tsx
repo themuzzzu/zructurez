@@ -12,8 +12,32 @@ interface BusinessOwnersProps {
   onChange: (owners: Owner[]) => void;
 }
 
+const TEST_OWNERS: Owner[] = [
+  {
+    name: "Jane Smith",
+    role: "Primary Owner",
+    position: "CEO",
+    experience: "10 years",
+    qualifications: "MBA, Business Administration",
+    image_url: "https://images.unsplash.com/photo-1649972904349-6e44c42644a7"
+  },
+  {
+    name: "John Doe",
+    role: "Co-Owner",
+    position: "CTO",
+    experience: "8 years",
+    qualifications: "MS Computer Science",
+    image_url: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b"
+  }
+];
+
 export const BusinessOwners = ({ owners = [], onChange }: BusinessOwnersProps) => {
   const [showAddForm, setShowAddForm] = useState(false);
+
+  // Add test data if owners array is empty
+  if (owners.length === 0) {
+    onChange(TEST_OWNERS);
+  }
 
   const handleAddOwner = (newOwner: Owner) => {
     console.log("Adding new owner:", newOwner);

@@ -17,6 +17,21 @@ interface StaffMembersProps {
   onChange: (staff: StaffMember[]) => void;
 }
 
+const TEST_STAFF = [
+  {
+    name: "Sarah Johnson",
+    position: "Senior Developer",
+    experience: "5 years",
+    image_url: "https://images.unsplash.com/photo-1518770660439-4636190af475"
+  },
+  {
+    name: "Mike Wilson",
+    position: "UX Designer",
+    experience: "3 years",
+    image_url: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6"
+  }
+];
+
 export const StaffMembers = ({ staff = [], onChange }: StaffMembersProps) => {
   const [newStaff, setNewStaff] = useState<StaffMember>({
     name: "",
@@ -25,6 +40,11 @@ export const StaffMembers = ({ staff = [], onChange }: StaffMembersProps) => {
     image_url: null,
   });
   const [pendingImage, setPendingImage] = useState<string | null>(null);
+
+  // Add test data if staff array is empty
+  if (staff.length === 0) {
+    onChange(TEST_STAFF);
+  }
 
   const handleAddStaff = () => {
     if (newStaff.name && newStaff.position) {
