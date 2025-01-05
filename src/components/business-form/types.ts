@@ -3,12 +3,14 @@ export interface Owner {
   role: string;
   position: string;
   experience: string;
+  image_url?: string | null;
 }
 
 export interface StaffMember {
-  name: string;
-  position: string;
-  experience: string;
+  name: string | null;
+  position: string | null;
+  experience: string | null;
+  image_url?: string | null;
 }
 
 export interface BusinessFormData {

@@ -3,6 +3,7 @@ import { Textarea } from "../ui/textarea";
 import { Label } from "../ui/label";
 import { BusinessFormData } from "./types";
 import { BusinessOwners } from "./BusinessOwners";
+import { StaffMembers } from "./StaffMembers";
 
 interface BusinessProfileInfoProps {
   formData: BusinessFormData;
@@ -37,6 +38,11 @@ export const BusinessProfileInfo = ({ formData, onChange }: BusinessProfileInfoP
       <BusinessOwners
         owners={formData.owners}
         onChange={(owners) => onChange("owners", owners)}
+      />
+
+      <StaffMembers
+        staff={formData.staff_details}
+        onChange={(staff) => onChange("staff_details", staff)}
       />
     </>
   );

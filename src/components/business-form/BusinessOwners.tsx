@@ -3,12 +3,14 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
 import { Plus, X } from "lucide-react";
+import { ImageUpload } from "../ImageUpload";
 
 interface Owner {
   name: string;
   role: string;
   position: string;
   experience: string;
+  image_url?: string | null;
 }
 
 interface BusinessOwnersProps {
@@ -22,12 +24,15 @@ export const BusinessOwners = ({ owners = [], onChange }: BusinessOwnersProps) =
     role: "",
     position: "",
     experience: "",
+    image_url: null,
   });
+  const [pendingImage, setPendingImage] = useState<string | null>(null);
 
   const handleAddOwner = () => {
     if (newOwner.name && newOwner.role) {
-      onChange([...owners, newOwner]);
-      setNewOwner({ name: "", role: "", position: "", experience: "" });
+      onChange([...owners, { ...newOwner, image_url: pendingImage }]);
+      setNewOwner({ name: "", role: "", position: "", experience: "", image_url: null });
+      setPendingImage(null);
     }
   };
 
@@ -38,6 +43,12 @@ export const BusinessOwners = ({ owners = [], onChange }: BusinessOwnersProps) =
   const handleUpdateOwner = (index: number, field: keyof Owner, value: string) => {
     const updatedOwners = [...owners];
     updatedOwners[index] = { ...updatedOwners[index], [field]: value };
+    onChange(updatedOwners);
+  };
+
+  const handleUpdateOwnerImage = (index: number, imageUrl: string | null) => {
+    const updatedOwners = [...owners];
+    updatedOwners[index] = { ...updatedOwners[index], image_url: imageUrl };
     onChange(updatedOwners);
   };
 
@@ -69,6 +80,15 @@ export const BusinessOwners = ({ owners = [], onChange }: BusinessOwnersProps) =
                 value={owner.experience}
                 onChange={(e) => handleUpdateOwner(index, "experience", e.target.value)}
               />
+              <div className="space-y-2">
+                <Label>Profile Picture (optional)</Label>
+                <ImageUpload
+                  selectedImage={owner.image_url}
+                  onImageSelect={(image) => handleUpdateOwnerImage(index, image)}
+                  initialScale={1}
+                  initialPosition={{ x: 50, y: 50 }}
+                />
+              </div>
             </div>
             <Button
               type="button"
@@ -103,6 +123,15 @@ export const BusinessOwners = ({ owners = [], onChange }: BusinessOwnersProps) =
           value={newOwner.experience}
           onChange={(e) => setNewOwner({ ...newOwner, experience: e.target.value })}
         />
+        <div className="space-y-2">
+          <Label>Profile Picture (optional)</Label>
+          <ImageUpload
+            selectedImage={pendingImage}
+            onImageSelect={setPendingImage}
+            initialScale={1}
+            initialPosition={{ x: 50, y: 50 }}
+          />
+        </div>
         <Button
           type="button"
           variant="outline"
