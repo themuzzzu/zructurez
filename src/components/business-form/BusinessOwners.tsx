@@ -14,20 +14,12 @@ interface BusinessOwnersProps {
 
 const TEST_OWNERS: Owner[] = [
   {
-    name: "Jane Smith",
+    name: "Dr. Sarah Johnson",
     role: "Primary Owner",
-    position: "CEO",
-    experience: "10 years",
-    qualifications: "MBA, Business Administration",
-    image_url: "https://images.unsplash.com/photo-1649972904349-6e44c42644a7"
-  },
-  {
-    name: "John Doe",
-    role: "Co-Owner",
-    position: "CTO",
-    experience: "8 years",
-    qualifications: "MS Computer Science",
-    image_url: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b"
+    position: "Medical Director",
+    experience: "15 years",
+    qualifications: "MD, Board Certified",
+    image_url: null
   }
 ];
 

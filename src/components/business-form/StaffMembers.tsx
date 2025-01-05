@@ -19,16 +19,16 @@ interface StaffMembersProps {
 
 const TEST_STAFF = [
   {
-    name: "Sarah Johnson",
-    position: "Senior Developer",
-    experience: "5 years",
-    image_url: "https://images.unsplash.com/photo-1518770660439-4636190af475"
+    name: "Michael Chen",
+    position: "Senior Massage Therapist",
+    experience: "10 years",
+    image_url: null
   },
   {
-    name: "Mike Wilson",
-    position: "UX Designer",
-    experience: "3 years",
-    image_url: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6"
+    name: "Emma Rodriguez",
+    position: "Nutritionist",
+    experience: "5 years",
+    image_url: null
   }
 ];
 
