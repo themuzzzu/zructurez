@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { PostCard } from "@/components/PostCard";
+import { CreatePost } from "@/components/CreatePost";
 import type { Business } from "@/types/business";
 
 interface BusinessPostsTabProps {
@@ -11,6 +12,7 @@ export const BusinessPostsTab = ({ business }: BusinessPostsTabProps) => {
     <Card className="p-6">
       <h2 className="text-2xl font-semibold mb-4">Posts</h2>
       <div className="space-y-4">
+        <CreatePost onSuccess={() => window.location.reload()} />
         {business.posts.map((post) => (
           <PostCard
             key={post.id}

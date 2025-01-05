@@ -33,7 +33,10 @@ export const BusinessTabs = ({ business, isOwner, onRefetch }: BusinessTabsProps
         </TabsContent>
 
         <TabsContent value="portfolio">
-          <BusinessPortfolioTab portfolio={business.business_portfolio} />
+          <BusinessPortfolioTab 
+            portfolio={business.business_portfolio} 
+            businessId={isOwner ? business.id : undefined}
+          />
         </TabsContent>
 
         <TabsContent value="products">
