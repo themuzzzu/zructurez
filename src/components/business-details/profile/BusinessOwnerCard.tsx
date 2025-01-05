@@ -20,36 +20,55 @@ export const BusinessOwnerCard = ({
 }: BusinessOwnerCardProps) => {
   return (
     <div className="space-y-4">
-      <Card className="p-6">
-        <div className="flex items-start gap-6">
-          <Avatar className="h-16 w-16">
-            <AvatarImage 
-              src={image_url || undefined} 
-              alt={name}
-            />
-            <AvatarFallback>{name?.[0]?.toUpperCase() || 'O'}</AvatarFallback>
-          </Avatar>
-          <div className="flex-1 space-y-2">
-            <h4 className="text-xl font-semibold">{name}</h4>
-            <div className="text-sm text-muted-foreground space-y-1">
-              <div>{role}</div>
-              {position && <div>{position}</div>}
-              {experience && <div>Experience: {experience}</div>}
-              {qualifications && <div>Qualifications: {qualifications}</div>}
+      <Card className="p-8">
+        <div className="flex flex-col md:flex-row gap-8">
+          <div className="flex flex-col items-center space-y-4">
+            <Avatar className="h-32 w-32">
+              <AvatarImage 
+                src={image_url || undefined} 
+                alt={name}
+              />
+              <AvatarFallback className="text-2xl">{name?.[0]?.toUpperCase() || 'O'}</AvatarFallback>
+            </Avatar>
+            {image_url && (
+              <div className="w-full max-w-[300px] aspect-square overflow-hidden rounded-lg">
+                <img
+                  src={image_url}
+                  alt={name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+          </div>
+          
+          <div className="flex-1 space-y-4">
+            <div>
+              <h4 className="text-2xl font-semibold">{name}</h4>
+              <div className="text-lg text-muted-foreground">{role}</div>
+            </div>
+            
+            <div className="space-y-2 text-muted-foreground">
+              {position && (
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">Position:</span>
+                  <span>{position}</span>
+                </div>
+              )}
+              {experience && (
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">Experience:</span>
+                  <span>{experience}</span>
+                </div>
+              )}
+              {qualifications && (
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">Qualifications:</span>
+                  <span>{qualifications}</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
-        {image_url && (
-          <div className="mt-4">
-            <div className="relative w-[300px] aspect-square overflow-hidden rounded-lg">
-              <img
-                src={image_url}
-                alt={name}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          </div>
-        )}
       </Card>
     </div>
   );
