@@ -11,10 +11,14 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { CreateBusinessForm } from "@/components/CreateBusinessForm";
 import { useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card } from "@/components/ui/card";
+import { PostCard } from "@/components/PostCard";
 
 const BusinessDetails = () => {
   const { id } = useParams();
   const [isEditing, setIsEditing] = useState(false);
+  const [activeTab, setActiveTab] = useState("about");
 
   const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id || '');
 
@@ -30,7 +34,8 @@ const BusinessDetails = () => {
         .select(`
           *,
           business_portfolio (*),
-          business_products (*)
+          business_products (*),
+          posts (*)
         `)
         .eq('id', id)
         .maybeSingle();
@@ -76,27 +81,114 @@ const BusinessDetails = () => {
             onEdit={() => setIsEditing(true)}
           />
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 space-y-6">
-              <BusinessProfile
-                description={business.description}
-                location={business.location}
-                hours={business.hours}
-                contact={business.contact}
-                verified={business.verified}
-                image_url={business.image_url}
-                bio={business.bio}
-              />
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid grid-cols-6 w-full">
+              <TabsTrigger value="about">About</TabsTrigger>
+              <TabsTrigger value="products">Products</TabsTrigger>
+              <TabsTrigger value="services">Services</TabsTrigger>
+              <TabsTrigger value="staff">Staff</TabsTrigger>
+              <TabsTrigger value="portfolio">Notable Works</TabsTrigger>
+              <TabsTrigger value="posts">Posts</TabsTrigger>
+            </TabsList>
 
-              <BusinessContent
-                businessId={business.id}
-                isOwner={isOwner}
-                business_products={business.business_products}
-                business_portfolio={business.business_portfolio}
-                onSuccess={refetch}
-              />
+            <div className="mt-6">
+              <TabsContent value="about">
+                <BusinessProfile
+                  description={business.description}
+                  location={business.location}
+                  hours={business.hours}
+                  contact={business.contact}
+                  verified={business.verified}
+                  image_url={business.image_url}
+                  bio={business.bio}
+                  owners={business.owners}
+                  staff_details={business.staff_details}
+                />
+              </TabsContent>
+
+              <TabsContent value="products">
+                <BusinessContent
+                  businessId={business.id}
+                  isOwner={isOwner}
+                  business_products={business.business_products}
+                  business_portfolio={[]}
+                  onSuccess={refetch}
+                />
+              </TabsContent>
+
+              <TabsContent value="services">
+                <Card className="p-6">
+                  <h2 className="text-2xl font-semibold mb-4">Services</h2>
+                  {business.appointment_price && (
+                    <div className="mb-2">
+                      <span className="font-medium">Appointment Price:</span> ₹{business.appointment_price}
+                    </div>
+                  )}
+                  {business.consultation_price && (
+                    <div>
+                      <span className="font-medium">Consultation Price:</span> ₹{business.consultation_price}
+                    </div>
+                  )}
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="staff">
+                <Card className="p-6">
+                  <h2 className="text-2xl font-semibold mb-4">Staff</h2>
+                  <div className="grid gap-4">
+                    {business.staff_details?.map((staff: any, index: number) => (
+                      <div key={index} className="p-4 border rounded-lg">
+                        <h3 className="font-medium">{staff.name}</h3>
+                        {staff.position && <p className="text-muted-foreground">{staff.position}</p>}
+                        {staff.experience && <p className="text-sm text-muted-foreground">Experience: {staff.experience}</p>}
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="portfolio">
+                <Card className="p-6">
+                  <h2 className="text-2xl font-semibold mb-4">Notable Works</h2>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {business.business_portfolio?.map((item: any) => (
+                      <div key={item.id} className="border rounded-lg overflow-hidden">
+                        {item.image_url && (
+                          <img src={item.image_url} alt={item.title} className="w-full h-48 object-cover" />
+                        )}
+                        <div className="p-4">
+                          <h3 className="font-medium">{item.title}</h3>
+                          <p className="text-sm text-muted-foreground">{item.description}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="posts">
+                <Card className="p-6">
+                  <h2 className="text-2xl font-semibold mb-4">Posts</h2>
+                  <div className="space-y-4">
+                    {business.posts?.map((post: any) => (
+                      <PostCard
+                        key={post.id}
+                        id={post.id}
+                        author={business.name}
+                        avatar={business.image_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${business.id}`}
+                        time={new Date(post.created_at).toLocaleDateString()}
+                        content={post.content}
+                        category={post.category}
+                        image={post.image_url}
+                        likes={0}
+                        comments={0}
+                      />
+                    ))}
+                  </div>
+                </Card>
+              </TabsContent>
             </div>
-          </div>
+          </Tabs>
         </div>
       </div>
 
