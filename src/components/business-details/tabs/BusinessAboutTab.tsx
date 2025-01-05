@@ -15,6 +15,7 @@ export const BusinessAboutTab = ({ business }: BusinessAboutTabProps) => {
       verified={business.verified}
       image_url={business.image_url}
       bio={business.bio}
+      website={business.website}
       owners={business.owners}
       staff_details={business.staff_details}
     />
