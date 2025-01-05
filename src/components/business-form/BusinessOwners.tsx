@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
-import { Plus, X } from "lucide-react";
+import { Plus, X, UserPlus } from "lucide-react";
 import { ImageUpload } from "../ImageUpload";
 import { Card } from "../ui/card";
 
@@ -20,6 +20,7 @@ interface BusinessOwnersProps {
 }
 
 export const BusinessOwners = ({ owners = [], onChange }: BusinessOwnersProps) => {
+  const [showAddForm, setShowAddForm] = useState(false);
   const [newOwner, setNewOwner] = useState<Owner>({
     name: "",
     role: "Primary Owner",
@@ -38,6 +39,7 @@ export const BusinessOwners = ({ owners = [], onChange }: BusinessOwnersProps) =
         experience: "",
         image_url: null,
       });
+      setShowAddForm(false); // Hide form after adding
     }
   };
 
@@ -111,66 +113,108 @@ export const BusinessOwners = ({ owners = [], onChange }: BusinessOwnersProps) =
                 />
               </div>
             </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={() => handleRemoveOwner(index)}
-            >
-              <X className="h-4 w-4" />
-            </Button>
+            {index > 0 && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => handleRemoveOwner(index)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         </Card>
       ))}
 
-      <div className="grid gap-4 p-4 border rounded-lg bg-muted/50">
-        <div>
-          <Label>Name</Label>
-          <Input
-            placeholder="New Owner Name"
-            value={newOwner.name}
-            onChange={(e) => setNewOwner({ ...newOwner, name: e.target.value })}
-          />
-        </div>
-        
-        <div>
-          <Label>Role</Label>
-          <Input
-            placeholder="Role"
-            value={newOwner.role}
-            onChange={(e) => setNewOwner({ ...newOwner, role: e.target.value })}
-          />
-        </div>
-        
-        <div>
-          <Label>Position</Label>
-          <Input
-            placeholder="Position"
-            value={newOwner.position}
-            onChange={(e) => setNewOwner({ ...newOwner, position: e.target.value })}
-          />
-        </div>
-        
-        <div>
-          <Label>Experience</Label>
-          <Input
-            placeholder="Experience (optional)"
-            value={newOwner.experience}
-            onChange={(e) => setNewOwner({ ...newOwner, experience: e.target.value })}
-          />
-        </div>
-
+      {!showAddForm ? (
         <Button
           type="button"
           variant="outline"
-          onClick={handleAddOwner}
-          disabled={!newOwner.name || !newOwner.role}
+          onClick={() => setShowAddForm(true)}
           className="w-full"
         >
-          <Plus className="h-4 w-4 mr-2" />
-          Add Owner
+          <UserPlus className="h-4 w-4 mr-2" />
+          Add Another Owner
         </Button>
-      </div>
+      ) : (
+        <Card className="p-4 space-y-4">
+          <div className="grid gap-4">
+            <div>
+              <Label>Name</Label>
+              <Input
+                placeholder="New Owner Name"
+                value={newOwner.name}
+                onChange={(e) => setNewOwner({ ...newOwner, name: e.target.value })}
+              />
+            </div>
+            
+            <div>
+              <Label>Role</Label>
+              <Input
+                placeholder="Role"
+                value={newOwner.role}
+                onChange={(e) => setNewOwner({ ...newOwner, role: e.target.value })}
+              />
+            </div>
+            
+            <div>
+              <Label>Position</Label>
+              <Input
+                placeholder="Position"
+                value={newOwner.position}
+                onChange={(e) => setNewOwner({ ...newOwner, position: e.target.value })}
+              />
+            </div>
+            
+            <div>
+              <Label>Experience</Label>
+              <Input
+                placeholder="Experience (optional)"
+                value={newOwner.experience}
+                onChange={(e) => setNewOwner({ ...newOwner, experience: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Profile Picture</Label>
+              <ImageUpload
+                selectedImage={newOwner.image_url}
+                onImageSelect={(image) => setNewOwner({ ...newOwner, image_url: image })}
+                initialScale={1}
+                initialPosition={{ x: 50, y: 50 }}
+              />
+            </div>
+
+            <div className="flex gap-2 justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setShowAddForm(false);
+                  setNewOwner({
+                    name: "",
+                    role: "Primary Owner",
+                    position: "",
+                    experience: "",
+                    image_url: null,
+                  });
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={handleAddOwner}
+                disabled={!newOwner.name || !newOwner.role}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Owner
+              </Button>
+            </div>
+          </div>
+        </Card>
+      )}
     </div>
   );
 };
