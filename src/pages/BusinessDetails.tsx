@@ -14,6 +14,7 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { PostCard } from "@/components/PostCard";
+import type { Business } from "@/types/business";
 
 const BusinessDetails = () => {
   const { id } = useParams();
@@ -42,7 +43,14 @@ const BusinessDetails = () => {
 
       if (error) throw error;
       if (!data) throw new Error('Business not found');
-      return data;
+      
+      // Parse JSON fields
+      return {
+        ...data,
+        staff_details: Array.isArray(data.staff_details) ? data.staff_details : [],
+        owners: Array.isArray(data.owners) ? data.owners : [],
+        posts: data.posts || []
+      } as Business;
     },
     enabled: isValidUUID
   });
@@ -136,7 +144,7 @@ const BusinessDetails = () => {
                 <Card className="p-6">
                   <h2 className="text-2xl font-semibold mb-4">Staff</h2>
                   <div className="grid gap-4">
-                    {business.staff_details?.map((staff: any, index: number) => (
+                    {business.staff_details.map((staff, index) => (
                       <div key={index} className="p-4 border rounded-lg">
                         <h3 className="font-medium">{staff.name}</h3>
                         {staff.position && <p className="text-muted-foreground">{staff.position}</p>}
@@ -151,7 +159,7 @@ const BusinessDetails = () => {
                 <Card className="p-6">
                   <h2 className="text-2xl font-semibold mb-4">Notable Works</h2>
                   <div className="grid gap-4 md:grid-cols-2">
-                    {business.business_portfolio?.map((item: any) => (
+                    {business.business_portfolio.map((item) => (
                       <div key={item.id} className="border rounded-lg overflow-hidden">
                         {item.image_url && (
                           <img src={item.image_url} alt={item.title} className="w-full h-48 object-cover" />
@@ -170,7 +178,7 @@ const BusinessDetails = () => {
                 <Card className="p-6">
                   <h2 className="text-2xl font-semibold mb-4">Posts</h2>
                   <div className="space-y-4">
-                    {business.posts?.map((post: any) => (
+                    {business.posts.map((post) => (
                       <PostCard
                         key={post.id}
                         id={post.id}
