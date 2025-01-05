@@ -39,16 +39,6 @@ export const BusinessProfile = ({
 }: BusinessProfileProps) => {
   return (
     <div className="space-y-6">
-      {image_url && (
-        <div className="relative h-[300px] w-full overflow-hidden rounded-lg">
-          <img
-            src={image_url}
-            alt="Business cover"
-            className="h-full w-full object-cover"
-          />
-        </div>
-      )}
-      
       {bio && (
         <Card className="p-6">
           <h2 className="text-2xl font-semibold mb-4">Bio</h2>
@@ -101,37 +91,52 @@ export const BusinessProfile = ({
               <Building className="h-4 w-4" />
               Owners
             </h3>
-            <div className="grid gap-4">
+            <div className="grid gap-6">
               {owners.map((owner, index) => (
-                <div key={index} className="flex items-start gap-4 p-4 bg-muted/50 rounded-lg">
-                  <Avatar className="h-16 w-16">
-                    {owner.image_url ? (
-                      <AvatarImage src={owner.image_url} alt={owner.name} />
-                    ) : (
-                      <AvatarFallback>
-                        {owner.name.split(' ').map(n => n[0]).join('')}
-                      </AvatarFallback>
-                    )}
-                  </Avatar>
-                  <div className="flex-1 space-y-1">
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium text-lg">{owner.name}</span>
-                      <Badge variant="secondary">{owner.role}</Badge>
+                <Card key={index} className="overflow-hidden">
+                  <div className="flex flex-col">
+                    <div className="p-4 border-b">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
+                          {owner.image_url ? (
+                            <AvatarImage src={owner.image_url} alt={owner.name} />
+                          ) : (
+                            <AvatarFallback>
+                              {owner.name.split(' ').map(n => n[0]).join('')}
+                            </AvatarFallback>
+                          )}
+                        </Avatar>
+                        <div>
+                          <h4 className="font-semibold">{owner.name}</h4>
+                          <p className="text-sm text-muted-foreground">{owner.role}</p>
+                        </div>
+                      </div>
                     </div>
-                    {owner.position && (
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Briefcase className="h-3 w-3" />
-                        <span>{owner.position}</span>
+                    {owner.image_url && (
+                      <div className="relative aspect-square">
+                        <img
+                          src={owner.image_url}
+                          alt={owner.name}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
                     )}
-                    {owner.experience && (
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Award className="h-3 w-3" />
-                        <span>{owner.experience}</span>
-                      </div>
-                    )}
+                    <div className="p-4 space-y-2">
+                      {owner.position && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <Briefcase className="h-4 w-4" />
+                          <span>{owner.position}</span>
+                        </div>
+                      )}
+                      {owner.experience && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <Award className="h-4 w-4" />
+                          <span>{owner.experience}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
+                </Card>
               ))}
             </div>
           </div>
@@ -143,31 +148,46 @@ export const BusinessProfile = ({
               <Users className="h-4 w-4" />
               Staff
             </h3>
-            <div className="grid gap-4">
+            <div className="grid gap-6">
               {staff_details.map((staff, index) => (
-                <div key={index} className="flex items-start gap-4 p-4 bg-muted/50 rounded-lg">
-                  <Avatar className="h-16 w-16">
-                    {staff.image_url ? (
-                      <AvatarImage src={staff.image_url} alt={staff.name} />
-                    ) : (
-                      <AvatarFallback>
-                        {staff.name.split(' ').map(n => n[0]).join('')}
-                      </AvatarFallback>
-                    )}
-                  </Avatar>
-                  <div className="flex-1 space-y-1">
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium text-lg">{staff.name}</span>
-                      {staff.position && <Badge variant="secondary">{staff.position}</Badge>}
+                <Card key={index} className="overflow-hidden">
+                  <div className="flex flex-col">
+                    <div className="p-4 border-b">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
+                          {staff.image_url ? (
+                            <AvatarImage src={staff.image_url} alt={staff.name} />
+                          ) : (
+                            <AvatarFallback>
+                              {staff.name.split(' ').map(n => n[0]).join('')}
+                            </AvatarFallback>
+                          )}
+                        </Avatar>
+                        <div>
+                          <h4 className="font-semibold">{staff.name}</h4>
+                          <p className="text-sm text-muted-foreground">{staff.position}</p>
+                        </div>
+                      </div>
                     </div>
+                    {staff.image_url && (
+                      <div className="relative aspect-square">
+                        <img
+                          src={staff.image_url}
+                          alt={staff.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
                     {staff.experience && (
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Award className="h-3 w-3" />
-                        <span>{staff.experience}</span>
+                      <div className="p-4">
+                        <div className="flex items-center gap-2 text-sm">
+                          <Award className="h-4 w-4" />
+                          <span>{staff.experience}</span>
+                        </div>
                       </div>
                     )}
                   </div>
-                </div>
+                </Card>
               ))}
             </div>
           </div>
