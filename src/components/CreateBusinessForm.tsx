@@ -125,8 +125,8 @@ export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: CreateB
         website: formData.website,
         image_scale: imageScale,
         image_position: imagePosition as Json,
-        owners: formData.owners as Json,
-        staff_details: formData.staff_details as Json,
+        owners: JSON.parse(JSON.stringify(formData.owners)) as Json,
+        staff_details: JSON.parse(JSON.stringify(formData.staff_details)) as Json,
       };
 
       if (initialData) {
