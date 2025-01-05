@@ -16,15 +16,18 @@ export const BusinessOwners = ({ owners = [], onChange }: BusinessOwnersProps) =
   const [showAddForm, setShowAddForm] = useState(false);
 
   const handleAddOwner = (newOwner: Owner) => {
+    console.log("Adding new owner:", newOwner);
     onChange([...owners, newOwner]);
     setShowAddForm(false);
   };
 
   const handleRemoveOwner = (index: number) => {
+    console.log("Removing owner at index:", index);
     onChange(owners.filter((_, i) => i !== index));
   };
 
   const handleUpdateOwner = (index: number, field: keyof Owner, value: string) => {
+    console.log(`Updating owner at index ${index}, field: ${field}, value:`, value);
     const updatedOwners = [...owners];
     updatedOwners[index] = { ...updatedOwners[index], [field]: value };
     onChange(updatedOwners);

@@ -4,7 +4,12 @@ import { ImageUpload } from "../../ImageUpload";
 import type { Owner, OwnerFormProps } from "../types/owner";
 
 export const OwnerFormFields = ({ owner, onUpdate, onUpdateImage }: OwnerFormProps) => {
-  console.log("Current owner data:", owner); // Add this to debug
+  console.log("Rendering OwnerFormFields with owner:", owner);
+
+  const handleImageSelect = (image: string | null) => {
+    console.log("Image selected in OwnerFormFields:", image);
+    onUpdateImage?.(image);
+  };
 
   return (
     <div className="grid gap-4 flex-1">
@@ -57,10 +62,7 @@ export const OwnerFormFields = ({ owner, onUpdate, onUpdateImage }: OwnerFormPro
         <Label>Profile Picture</Label>
         <ImageUpload
           selectedImage={owner.image_url}
-          onImageSelect={(image) => {
-            console.log("Image selected for owner:", image); // Add this to debug
-            onUpdateImage?.(image);
-          }}
+          onImageSelect={handleImageSelect}
           initialScale={1}
           initialPosition={{ x: 50, y: 50 }}
         />
