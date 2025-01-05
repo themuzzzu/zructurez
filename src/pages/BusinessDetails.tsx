@@ -10,7 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { CreateBusinessForm } from "@/components/CreateBusinessForm";
 import { useState } from "react";
 import { BusinessTabs } from "@/components/business-details/BusinessTabs";
-import type { Business } from "@/types/business";
+import type { Business, StaffMember, BusinessOwner } from "@/types/business";
 
 const BusinessDetails = () => {
   const { id } = useParams();
@@ -39,17 +39,36 @@ const BusinessDetails = () => {
       if (error) throw error;
       if (!data) throw new Error('Business not found');
       
-      // Parse JSON fields
-      return {
+      // Parse JSON fields with proper typing
+      const parsedData: Business = {
         ...data,
-        staff_details: Array.isArray(data.staff_details) ? data.staff_details : [],
-        owners: Array.isArray(data.owners) ? data.owners : [],
-        image_position: data.image_position ? {
-          x: Number(data.image_position.x) || 50,
-          y: Number(data.image_position.y) || 50
-        } : { x: 50, y: 50 },
-        posts: data.posts || []
-      } as Business;
+        staff_details: Array.isArray(data.staff_details) 
+          ? data.staff_details.map((staff: any): StaffMember => ({
+              name: staff.name || null,
+              position: staff.position || null,
+              experience: staff.experience || null
+            }))
+          : [],
+        owners: Array.isArray(data.owners)
+          ? data.owners.map((owner: any): BusinessOwner => ({
+              name: owner.name || null,
+              role: owner.role || 'Primary Owner',
+              position: owner.position || null,
+              experience: owner.experience || null
+            }))
+          : [],
+        image_position: typeof data.image_position === 'object' && data.image_position
+          ? {
+              x: Number(data.image_position.x) || 50,
+              y: Number(data.image_position.y) || 50
+            }
+          : { x: 50, y: 50 },
+        posts: data.posts || [],
+        business_portfolio: data.business_portfolio || [],
+        business_products: data.business_products || []
+      };
+
+      return parsedData;
     },
     enabled: isValidUUID
   });

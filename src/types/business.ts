@@ -29,7 +29,7 @@ export interface Business {
   bio: string | null;
   website: string | null;
   image_scale: number | null;
-  image_position: { x: number; y: number } | null;
+  image_position: { x: number; y: number };
   staff_details: StaffMember[];
   owners: BusinessOwner[];
   business_portfolio: Array<{
@@ -52,5 +52,9 @@ export interface Business {
     image_url: string | null;
     category: string | null;
     created_at: string;
+    business_id: string | null;
+    profile_id: string;
+    user_id: string;
+    location: string | null;
   }>;
 }
