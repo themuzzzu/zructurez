@@ -182,20 +182,14 @@ export const useBusinessForm = (initialData?: any, onSuccess?: () => void) => {
           .update(businessData)
           .eq('id', initialData.id);
 
-        if (error) {
-          console.error('Update error:', error);
-          throw error;
-        }
+        if (error) throw error;
         toast.success("Business updated successfully!");
       } else {
         const { error } = await supabase
           .from('businesses')
           .insert([businessData]);
 
-        if (error) {
-          console.error('Insert error:', error);
-          throw error;
-        }
+        if (error) throw error;
         toast.success("Business registered successfully!");
       }
 
