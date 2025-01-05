@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { ImagePreview } from "./image-upload/ImagePreview";
 import { ImageControls } from "./image-upload/ImageControls";
 import { UploadButtons } from "./image-upload/UploadButtons";
+import { Button } from "./ui/button";
 
 export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 export const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
@@ -34,6 +35,9 @@ export const ImageUpload = ({
   const [previewImage, setPreviewImage] = useState<string | null>(selectedImage);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [pendingImage, setPendingImage] = useState<string | null>(null);
+  const [pendingScale, setPendingScale] = useState(initialScale);
+  const [pendingPosition, setPendingPosition] = useState(initialPosition);
 
   useEffect(() => {
     setPreviewImage(selectedImage);
@@ -61,12 +65,12 @@ export const ImageUpload = ({
     const reader = new FileReader();
     reader.onload = (e) => {
       const result = e.target?.result as string;
+      setPendingImage(result);
+      setPendingScale(1);
+      setPendingPosition({ x: 50, y: 50 });
       setPreviewImage(result);
       setScale(1);
       setPosition({ x: 50, y: 50 });
-      onScaleChange?.(1);
-      onPositionChange?.({ x: 50, y: 50 });
-      toast.success("Photo uploaded successfully!");
     };
     reader.readAsDataURL(file);
   };
@@ -124,7 +128,6 @@ export const ImageUpload = ({
     
     const newPosition = { x: newX, y: newY };
     setPosition(newPosition);
-    onPositionChange?.(newPosition);
   };
 
   const handleMouseUp = () => {
@@ -133,16 +136,28 @@ export const ImageUpload = ({
 
   const handleSave = () => {
     onImageSelect(previewImage);
+    onScaleChange?.(scale);
+    onPositionChange?.(position);
+    toast.success("Image settings saved!");
+  };
+
+  const handleCancel = () => {
+    if (pendingImage) {
+      setPreviewImage(selectedImage);
+      setScale(initialScale);
+      setPosition(initialPosition);
+      setPendingImage(null);
+      setPendingScale(initialScale);
+      setPendingPosition(initialPosition);
+    }
   };
 
   const handleScaleChange = (newScale: number) => {
     setScale(newScale);
-    onScaleChange?.(newScale);
   };
 
   const handlePositionChange = (newPosition: ImagePosition) => {
     setPosition(newPosition);
-    onPositionChange?.(newPosition);
   };
 
   return (
@@ -161,6 +176,7 @@ export const ImageUpload = ({
             onImageRemove={() => {
               setPreviewImage(null);
               onImageSelect(null);
+              setPendingImage(null);
             }}
             isDragging={isDragging}
             onDragStart={handleMouseDown}
@@ -175,10 +191,20 @@ export const ImageUpload = ({
             onPositionChange={(x, y) => {
               const newPosition = { x, y };
               setPosition(newPosition);
-              onPositionChange?.(newPosition);
             }}
             onSave={handleSave}
           />
+
+          {pendingImage && (
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={handleCancel}>
+                Cancel
+              </Button>
+              <Button onClick={handleSave}>
+                Save Changes
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </div>
