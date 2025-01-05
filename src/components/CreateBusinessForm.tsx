@@ -21,6 +21,64 @@ const TEST_BUSINESS = {
   appointment_price: "150",
   consultation_price: "75",
   image: "https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?auto=format&fit=crop&q=80&w=1000",
+  owners: [
+    {
+      name: "Isabella Martinez",
+      role: "Founder & CEO",
+      position: "Master Aesthetician",
+      experience: "18 years",
+      qualifications: "Licensed Aesthetician, Certified Spa Director",
+      image_url: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=400"
+    },
+    {
+      name: "Sophie Chen",
+      role: "Co-Owner",
+      position: "Wellness Director",
+      experience: "15 years",
+      qualifications: "PhD in Holistic Medicine, Certified Yoga Instructor",
+      image_url: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&q=80&w=400"
+    },
+    {
+      name: "Amanda Thompson",
+      role: "Partner",
+      position: "Head of Therapeutic Services",
+      experience: "12 years",
+      qualifications: "Licensed Massage Therapist, Aromatherapy Specialist",
+      image_url: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=400"
+    }
+  ],
+  staff_details: [
+    {
+      name: "Sarah Williams",
+      position: "Senior Massage Therapist",
+      experience: "10 years",
+      image_url: "https://images.unsplash.com/photo-1614608682850-e0d6ed316d47?auto=format&fit=crop&q=80&w=400"
+    },
+    {
+      name: "Emily Davis",
+      position: "Skincare Specialist",
+      experience: "8 years",
+      image_url: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=400"
+    },
+    {
+      name: "Maria Rodriguez",
+      position: "Yoga Instructor",
+      experience: "6 years",
+      image_url: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&q=80&w=400"
+    },
+    {
+      name: "Jessica Kim",
+      position: "Nail Artist",
+      experience: "7 years",
+      image_url: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=400"
+    },
+    {
+      name: "David Chen",
+      position: "Acupuncturist",
+      experience: "12 years",
+      image_url: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=400"
+    }
+  ]
 };
 
 export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: FormProps) => {
