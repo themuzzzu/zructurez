@@ -51,13 +51,7 @@ export const BusinessProfile = ({
         </div>
       )}
 
-      {bio && (
-        <Card className="p-6">
-          <h2 className="text-2xl font-semibold mb-4">Bio</h2>
-          <p className="text-muted-foreground">{bio}</p>
-        </Card>
-      )}
-
+      {/* About Section */}
       <Card className="p-6 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-semibold">About</h2>
@@ -70,7 +64,7 @@ export const BusinessProfile = ({
         
         <p className="text-muted-foreground">{description}</p>
 
-        <div className="grid gap-4 pt-4">
+        <div className="grid gap-4">
           {location && (
             <div className="flex items-center gap-2 text-muted-foreground">
               <MapPin className="h-4 w-4" />
@@ -96,35 +90,45 @@ export const BusinessProfile = ({
             </div>
           )}
         </div>
-
-        {owners && owners.length > 0 && (
-          <div className="pt-4">
-            <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-              <Building className="h-4 w-4" />
-              Owners
-            </h3>
-            <div className="grid gap-6">
-              {owners.map((owner, index) => (
-                <BusinessOwnerCard key={index} {...owner} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {staff_details && staff_details.length > 0 && (
-          <div className="pt-4">
-            <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Staff
-            </h3>
-            <div className="grid gap-6">
-              {staff_details.map((staff, index) => (
-                <BusinessStaffCard key={index} {...staff} />
-              ))}
-            </div>
-          </div>
-        )}
       </Card>
+
+      {/* Bio Section */}
+      {bio && (
+        <Card className="p-6">
+          <h2 className="text-2xl font-semibold mb-4">Bio</h2>
+          <p className="text-muted-foreground">{bio}</p>
+        </Card>
+      )}
+
+      {/* Owners Section */}
+      {owners && owners.length > 0 && (
+        <Card className="p-6">
+          <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
+            <Building className="h-4 w-4" />
+            Owners
+          </h3>
+          <div className="grid gap-6">
+            {owners.map((owner, index) => (
+              <BusinessOwnerCard key={index} {...owner} />
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {/* Staff Section */}
+      {staff_details && staff_details.length > 0 && (
+        <Card className="p-6">
+          <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            Staff
+          </h3>
+          <div className="grid gap-6">
+            {staff_details.map((staff, index) => (
+              <BusinessStaffCard key={index} {...staff} />
+            ))}
+          </div>
+        </Card>
+      )}
     </div>
   );
 };
