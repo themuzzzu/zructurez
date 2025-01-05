@@ -18,12 +18,17 @@ export const BusinessStaffCard = ({
     <Card className="p-6">
       <div className="flex items-start gap-4">
         <Avatar className="h-20 w-20">
-          <AvatarImage 
-            src={image_url || undefined} 
-            alt={name}
-            className="object-cover" 
-          />
-          <AvatarFallback className="text-2xl">{name?.[0]?.toUpperCase() || 'S'}</AvatarFallback>
+          {image_url ? (
+            <AvatarImage 
+              src={image_url} 
+              alt={name}
+              className="object-cover"
+            />
+          ) : (
+            <AvatarFallback className="text-2xl">
+              {name?.[0]?.toUpperCase() || 'S'}
+            </AvatarFallback>
+          )}
         </Avatar>
         <div className="flex-1">
           <h4 className="text-xl font-semibold">{name}</h4>

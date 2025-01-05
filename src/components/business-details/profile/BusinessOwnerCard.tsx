@@ -24,12 +24,17 @@ export const BusinessOwnerCard = ({
         <div className="flex flex-col md:flex-row gap-8">
           <div className="flex flex-col items-center space-y-4">
             <Avatar className="h-32 w-32">
-              <AvatarImage 
-                src={image_url || undefined} 
-                alt={name}
-                className="object-cover"
-              />
-              <AvatarFallback className="text-4xl">{name?.[0]?.toUpperCase() || 'O'}</AvatarFallback>
+              {image_url ? (
+                <AvatarImage 
+                  src={image_url} 
+                  alt={name}
+                  className="object-cover"
+                />
+              ) : (
+                <AvatarFallback className="text-4xl">
+                  {name?.[0]?.toUpperCase() || 'O'}
+                </AvatarFallback>
+              )}
             </Avatar>
           </div>
           
