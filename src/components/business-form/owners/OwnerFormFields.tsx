@@ -1,14 +1,52 @@
 import { Input } from "../../ui/input";
 import { Label } from "../../ui/label";
 import { ImageUpload } from "../../ImageUpload";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import type { Owner, OwnerFormProps } from "../types/owner";
 
 export const OwnerFormFields = ({ owner, onUpdate, onUpdateImage }: OwnerFormProps) => {
   console.log("Rendering OwnerFormFields with owner:", owner);
 
-  const handleImageSelect = (image: string | null) => {
-    console.log("Image selected in OwnerFormFields:", image);
-    onUpdateImage?.(image);
+  const handleImageSelect = async (image: string | null) => {
+    if (!image) {
+      console.log("No image selected");
+      onUpdateImage?.(null);
+      return;
+    }
+
+    try {
+      // Convert base64 to blob
+      const base64Data = image.split(',')[1];
+      const blob = await fetch(`data:image/jpeg;base64,${base64Data}`).then(res => res.blob());
+      
+      // Upload to Supabase Storage
+      const fileName = `${crypto.randomUUID()}.jpg`;
+      const { data, error } = await supabase.storage
+        .from('business-images')
+        .upload(`owners/${fileName}`, blob, {
+          contentType: 'image/jpeg',
+          upsert: false
+        });
+
+      if (error) {
+        console.error("Error uploading image:", error);
+        toast.error("Failed to upload image");
+        return;
+      }
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('business-images')
+        .getPublicUrl(`owners/${fileName}`);
+
+      console.log("Image uploaded successfully:", publicUrl);
+      onUpdateImage?.(publicUrl);
+      toast.success("Image uploaded successfully");
+    } catch (error) {
+      console.error("Error handling image:", error);
+      toast.error("Failed to process image");
+    }
   };
 
   return (

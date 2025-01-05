@@ -19,7 +19,7 @@ export const BusinessOwnerCard = ({
   qualifications,
   image_url,
 }: BusinessOwnerCardProps) => {
-  console.log("BusinessOwnerCard image_url:", image_url); // Debug log
+  console.log("BusinessOwnerCard image_url:", image_url);
 
   return (
     <div className="space-y-4">

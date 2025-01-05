@@ -15,7 +15,7 @@ export const BusinessStaffCard = ({
   experience,
   image_url,
 }: BusinessStaffCardProps) => {
-  console.log("BusinessStaffCard image_url:", image_url); // Debug log
+  console.log("BusinessStaffCard image_url:", image_url);
 
   return (
     <Card className="p-6">
