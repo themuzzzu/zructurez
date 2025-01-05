@@ -12,11 +12,22 @@ export const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "im
 interface ImageUploadProps {
   selectedImage: string | null;
   onImageSelect: (image: string | null) => void;
+  initialScale?: number;
+  initialPosition?: { x: number; y: number };
+  onScaleChange?: (scale: number) => void;
+  onPositionChange?: (position: { x: number; y: number }) => void;
 }
 
-export const ImageUpload = ({ selectedImage, onImageSelect }: ImageUploadProps) => {
-  const [scale, setScale] = useState(1);
-  const [position, setPosition] = useState({ x: 50, y: 50 });
+export const ImageUpload = ({ 
+  selectedImage, 
+  onImageSelect,
+  initialScale = 1,
+  initialPosition = { x: 50, y: 50 },
+  onScaleChange,
+  onPositionChange
+}: ImageUploadProps) => {
+  const [scale, setScale] = useState(initialScale);
+  const [position, setPosition] = useState(initialPosition);
   const [previewImage, setPreviewImage] = useState<string | null>(selectedImage);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
@@ -24,6 +35,14 @@ export const ImageUpload = ({ selectedImage, onImageSelect }: ImageUploadProps) 
   useEffect(() => {
     setPreviewImage(selectedImage);
   }, [selectedImage]);
+
+  useEffect(() => {
+    setScale(initialScale);
+  }, [initialScale]);
+
+  useEffect(() => {
+    setPosition(initialPosition);
+  }, [initialPosition]);
 
   const handleFileUpload = (file: File) => {
     if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
@@ -42,6 +61,8 @@ export const ImageUpload = ({ selectedImage, onImageSelect }: ImageUploadProps) 
       setPreviewImage(result);
       setScale(1);
       setPosition({ x: 50, y: 50 });
+      onScaleChange?.(1);
+      onPositionChange?.({ x: 50, y: 50 });
       toast.success("Photo uploaded successfully!");
     };
     reader.readAsDataURL(file);
@@ -99,6 +120,7 @@ export const ImageUpload = ({ selectedImage, onImageSelect }: ImageUploadProps) 
     const newY = Math.max(0, Math.min(100, e.clientY - dragStart.y));
     
     setPosition({ x: newX, y: newY });
+    onPositionChange?.({ x: newX, y: newY });
   };
 
   const handleMouseUp = () => {
@@ -107,6 +129,11 @@ export const ImageUpload = ({ selectedImage, onImageSelect }: ImageUploadProps) 
 
   const handleSave = () => {
     onImageSelect(previewImage);
+  };
+
+  const handleScaleChange = (newScale: number) => {
+    setScale(newScale);
+    onScaleChange?.(newScale);
   };
 
   return (
@@ -150,8 +177,12 @@ export const ImageUpload = ({ selectedImage, onImageSelect }: ImageUploadProps) 
           </div>
 
           <div className="space-y-4 p-4 border rounded-lg">
-            <ImageZoomControl scale={scale} onScaleChange={setScale} />
-            <ImagePositionControls onPositionChange={(x, y) => setPosition({ x, y })} />
+            <ImageZoomControl scale={scale} onScaleChange={handleScaleChange} />
+            <ImagePositionControls onPositionChange={(x, y) => {
+              const newPosition = { x, y };
+              setPosition(newPosition);
+              onPositionChange?.(newPosition);
+            }} />
             <Button 
               className="w-full" 
               onClick={handleSave}

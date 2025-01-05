@@ -132,6 +132,8 @@ export type Database = {
           description: string
           hours: string | null
           id: string
+          image_position: Json | null
+          image_scale: number | null
           image_url: string | null
           location: string | null
           name: string
@@ -150,6 +152,8 @@ export type Database = {
           description: string
           hours?: string | null
           id?: string
+          image_position?: Json | null
+          image_scale?: number | null
           image_url?: string | null
           location?: string | null
           name: string
@@ -168,6 +172,8 @@ export type Database = {
           description?: string
           hours?: string | null
           id?: string
+          image_position?: Json | null
+          image_scale?: number | null
           image_url?: string | null
           location?: string | null
           name?: string
