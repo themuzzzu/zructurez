@@ -6,6 +6,7 @@ interface BusinessOwnerCardProps {
   role: string;
   position: string;
   experience?: string;
+  qualifications?: string;
   image_url?: string | null;
 }
 
@@ -14,6 +15,7 @@ export const BusinessOwnerCard = ({
   role,
   position,
   experience,
+  qualifications,
   image_url,
 }: BusinessOwnerCardProps) => {
   return (
@@ -36,6 +38,11 @@ export const BusinessOwnerCard = ({
             {experience && (
               <div className="text-sm text-muted-foreground">
                 Experience: {experience}
+              </div>
+            )}
+            {qualifications && (
+              <div className="text-sm text-muted-foreground">
+                Qualifications: {qualifications}
               </div>
             )}
           </div>
