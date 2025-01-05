@@ -122,8 +122,9 @@ export const ImageUpload = ({
     const newX = Math.max(0, Math.min(100, e.clientX - dragStart.x));
     const newY = Math.max(0, Math.min(100, e.clientY - dragStart.y));
     
-    setPosition({ x: newX, y: newY });
-    onPositionChange?.({ x: newX, y: newY });
+    const newPosition = { x: newX, y: newY };
+    setPosition(newPosition);
+    onPositionChange?.(newPosition);
   };
 
   const handleMouseUp = () => {
@@ -137,6 +138,11 @@ export const ImageUpload = ({
   const handleScaleChange = (newScale: number) => {
     setScale(newScale);
     onScaleChange?.(newScale);
+  };
+
+  const handlePositionChange = (newPosition: ImagePosition) => {
+    setPosition(newPosition);
+    onPositionChange?.(newPosition);
   };
 
   return (
@@ -160,6 +166,7 @@ export const ImageUpload = ({
             onDragStart={handleMouseDown}
             onDragMove={handleMouseMove}
             onDragEnd={handleMouseUp}
+            onPositionChange={handlePositionChange}
           />
 
           <ImageControls
