@@ -1,4 +1,5 @@
-import { Owner, StaffMember } from "../../../types/business";
+import type { StaffMember } from "../../../types/business";
+import type { Owner } from "./owner";
 
 export interface BusinessFormData {
   name: string;
