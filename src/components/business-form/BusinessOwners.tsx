@@ -4,6 +4,7 @@ import { Label } from "../ui/label";
 import { Button } from "../ui/button";
 import { Plus, X } from "lucide-react";
 import { ImageUpload } from "../ImageUpload";
+import { Card } from "../ui/card";
 
 interface Owner {
   name: string;
@@ -21,7 +22,7 @@ interface BusinessOwnersProps {
 export const BusinessOwners = ({ owners = [], onChange }: BusinessOwnersProps) => {
   const [newOwner, setNewOwner] = useState<Owner>({
     name: "",
-    role: "",
+    role: "Primary Owner",
     position: "",
     experience: "",
     image_url: null,
@@ -30,7 +31,13 @@ export const BusinessOwners = ({ owners = [], onChange }: BusinessOwnersProps) =
   const handleAddOwner = () => {
     if (newOwner.name && newOwner.role) {
       onChange([...owners, { ...newOwner }]);
-      setNewOwner({ name: "", role: "", position: "", experience: "", image_url: null });
+      setNewOwner({
+        name: "",
+        role: "Primary Owner",
+        position: "",
+        experience: "",
+        image_url: null,
+      });
     }
   };
 
@@ -55,31 +62,47 @@ export const BusinessOwners = ({ owners = [], onChange }: BusinessOwnersProps) =
       <Label>Business Owners</Label>
       
       {owners.map((owner, index) => (
-        <div key={index} className="grid gap-2 p-4 border rounded-lg bg-muted/50">
-          <div className="flex justify-between items-start">
-            <div className="grid gap-2 flex-1">
-              <Input
-                placeholder="Owner Name"
-                value={owner.name}
-                onChange={(e) => handleUpdateOwner(index, "name", e.target.value)}
-              />
-              <Input
-                placeholder="Role (e.g., Primary Owner, Co-Owner)"
-                value={owner.role}
-                onChange={(e) => handleUpdateOwner(index, "role", e.target.value)}
-              />
-              <Input
-                placeholder="Position (e.g., Principal, Chief Doctor)"
-                value={owner.position}
-                onChange={(e) => handleUpdateOwner(index, "position", e.target.value)}
-              />
-              <Input
-                placeholder="Experience (optional)"
-                value={owner.experience}
-                onChange={(e) => handleUpdateOwner(index, "experience", e.target.value)}
-              />
+        <Card key={index} className="p-4 space-y-4">
+          <div className="flex justify-between items-start gap-4">
+            <div className="grid gap-4 flex-1">
+              <div>
+                <Label>Name</Label>
+                <Input
+                  placeholder="Owner Name"
+                  value={owner.name}
+                  onChange={(e) => handleUpdateOwner(index, "name", e.target.value)}
+                />
+              </div>
+              
+              <div>
+                <Label>Role</Label>
+                <Input
+                  placeholder="Role (e.g., Primary Owner, Co-Owner)"
+                  value={owner.role}
+                  onChange={(e) => handleUpdateOwner(index, "role", e.target.value)}
+                />
+              </div>
+              
+              <div>
+                <Label>Position</Label>
+                <Input
+                  placeholder="Position (e.g., Principal, Chief Doctor)"
+                  value={owner.position}
+                  onChange={(e) => handleUpdateOwner(index, "position", e.target.value)}
+                />
+              </div>
+              
+              <div>
+                <Label>Experience</Label>
+                <Input
+                  placeholder="Experience (e.g., 5 years)"
+                  value={owner.experience}
+                  onChange={(e) => handleUpdateOwner(index, "experience", e.target.value)}
+                />
+              </div>
+
               <div className="space-y-2">
-                <Label>Profile Picture (optional)</Label>
+                <Label>Profile Picture</Label>
                 <ImageUpload
                   selectedImage={owner.image_url}
                   onImageSelect={(image) => handleUpdateOwnerImage(index, image)}
@@ -97,39 +120,46 @@ export const BusinessOwners = ({ owners = [], onChange }: BusinessOwnersProps) =
               <X className="h-4 w-4" />
             </Button>
           </div>
-        </div>
+        </Card>
       ))}
 
-      <div className="grid gap-2">
-        <Input
-          placeholder="New Owner Name"
-          value={newOwner.name}
-          onChange={(e) => setNewOwner({ ...newOwner, name: e.target.value })}
-        />
-        <Input
-          placeholder="Role"
-          value={newOwner.role}
-          onChange={(e) => setNewOwner({ ...newOwner, role: e.target.value })}
-        />
-        <Input
-          placeholder="Position"
-          value={newOwner.position}
-          onChange={(e) => setNewOwner({ ...newOwner, position: e.target.value })}
-        />
-        <Input
-          placeholder="Experience (optional)"
-          value={newOwner.experience}
-          onChange={(e) => setNewOwner({ ...newOwner, experience: e.target.value })}
-        />
-        <div className="space-y-2">
-          <Label>Profile Picture (optional)</Label>
-          <ImageUpload
-            selectedImage={newOwner.image_url}
-            onImageSelect={(image) => setNewOwner({ ...newOwner, image_url: image })}
-            initialScale={1}
-            initialPosition={{ x: 50, y: 50 }}
+      <div className="grid gap-4 p-4 border rounded-lg bg-muted/50">
+        <div>
+          <Label>Name</Label>
+          <Input
+            placeholder="New Owner Name"
+            value={newOwner.name}
+            onChange={(e) => setNewOwner({ ...newOwner, name: e.target.value })}
           />
         </div>
+        
+        <div>
+          <Label>Role</Label>
+          <Input
+            placeholder="Role"
+            value={newOwner.role}
+            onChange={(e) => setNewOwner({ ...newOwner, role: e.target.value })}
+          />
+        </div>
+        
+        <div>
+          <Label>Position</Label>
+          <Input
+            placeholder="Position"
+            value={newOwner.position}
+            onChange={(e) => setNewOwner({ ...newOwner, position: e.target.value })}
+          />
+        </div>
+        
+        <div>
+          <Label>Experience</Label>
+          <Input
+            placeholder="Experience (optional)"
+            value={newOwner.experience}
+            onChange={(e) => setNewOwner({ ...newOwner, experience: e.target.value })}
+          />
+        </div>
+
         <Button
           type="button"
           variant="outline"
