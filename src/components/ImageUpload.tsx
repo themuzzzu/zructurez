@@ -9,13 +9,18 @@ import { UploadButtons } from "./image-upload/UploadButtons";
 export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 export const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
-interface ImageUploadProps {
+interface ImagePosition {
+  x: number;
+  y: number;
+}
+
+export interface ImageUploadProps {
   selectedImage: string | null;
   onImageSelect: (image: string | null) => void;
   initialScale?: number;
-  initialPosition?: { x: number; y: number };
+  initialPosition?: ImagePosition;
   onScaleChange?: (scale: number) => void;
-  onPositionChange?: (position: { x: number; y: number }) => void;
+  onPositionChange?: (position: ImagePosition) => void;
 }
 
 export const ImageUpload = ({ 
