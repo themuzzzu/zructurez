@@ -57,7 +57,7 @@ const BusinessDetails = () => {
               experience: owner.experience || null
             }))
           : [],
-        image_position: typeof data.image_position === 'object' && data.image_position
+        image_position: typeof data.image_position === 'object' && data.image_position !== null && !Array.isArray(data.image_position)
           ? {
               x: Number(data.image_position.x) || 50,
               y: Number(data.image_position.y) || 50
