@@ -1,212 +1,29 @@
-import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { ImageUpload } from "./ImageUpload";
 import { BusinessBasicInfo } from "./business-form/BusinessBasicInfo";
 import { BusinessPricing } from "./business-form/BusinessPricing";
 import { BusinessContactInfo } from "./business-form/BusinessContactInfo";
 import { BusinessProfileInfo } from "./business-form/BusinessProfileInfo";
 import { Label } from "./ui/label";
-import { BusinessFormData } from "./business-form/types";
-import { Json } from "@/integrations/supabase/types";
+import { useBusinessForm } from "./business-form/useBusinessForm";
+import type { FormProps } from "./business-form/types/form";
 
-interface CreateBusinessFormProps {
-  onSuccess?: () => void;
-  onCancel?: () => void;
-  initialData?: any;
-}
-
-export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: CreateBusinessFormProps) => {
-  const [loading, setLoading] = useState(false);
-  const [pendingImage, setPendingImage] = useState<string | null>(null);
-  const [imageScale, setImageScale] = useState(1);
-  const [imagePosition, setImagePosition] = useState({ x: 50, y: 50 });
-  const [formData, setFormData] = useState<BusinessFormData>({
-    name: "",
-    category: "",
-    description: "",
-    location: "",
-    contact: "",
-    hours: "",
-    image: null,
-    appointment_price: "",
-    consultation_price: "",
-    bio: "",
-    website: "",
-    owners: [{ name: "", role: "Primary Owner", position: "", experience: "", image_url: null }],
-    staff_details: [],
-  });
-
-  useEffect(() => {
-    if (initialData) {
-      setFormData({
-        name: initialData.name || "",
-        category: initialData.category || "",
-        description: initialData.description || "",
-        location: initialData.location || "",
-        contact: initialData.contact || "",
-        hours: initialData.hours || "",
-        image: initialData.image_url || null,
-        appointment_price: initialData.appointment_price?.toString() || "",
-        consultation_price: initialData.consultation_price?.toString() || "",
-        bio: initialData.bio || "",
-        website: initialData.website || "",
-        owners: initialData.owners || [{ name: "", role: "Primary Owner", position: "", experience: "", image_url: null }],
-        staff_details: initialData.staff_details || [],
-      });
-      setPendingImage(initialData.image_url || null);
-      if (initialData.image_scale) setImageScale(initialData.image_scale);
-      if (initialData.image_position) setImagePosition(initialData.image_position);
-    }
-  }, [initialData]);
+export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: FormProps) => {
+  const {
+    formData,
+    setFormData,
+    loading,
+    pendingImage,
+    setPendingImage,
+    imageScale,
+    setImageScale,
+    imagePosition,
+    setImagePosition,
+    handleSubmit,
+  } = useBusinessForm(initialData, onSuccess);
 
   const handleChange = (name: string, value: any) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const uploadImage = async (base64Image: string, prefix: string = '') => {
-    if (!base64Image.startsWith('data:')) {
-      return base64Image; // Return existing URL if it's not a base64 string
-    }
-
-    const base64Data = base64Image.split(',')[1];
-    const byteCharacters = atob(base64Data);
-    const byteNumbers = new Array(byteCharacters.length);
-    for (let i = 0; i < byteCharacters.length; i++) {
-      byteNumbers[i] = byteCharacters.charCodeAt(i);
-    }
-    const byteArray = new Uint8Array(byteNumbers);
-    const blob = new Blob([byteArray], { type: 'image/jpeg' });
-
-    const fileName = `${prefix}${Date.now()}-${Math.random().toString(36).substring(7)}`;
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('business-images')
-      .upload(fileName, blob);
-
-    if (uploadError) {
-      console.error('Upload error:', uploadError);
-      throw uploadError;
-    }
-
-    const { data: { publicUrl } } = supabase.storage
-      .from('business-images')
-      .getPublicUrl(fileName);
-
-    return publicUrl;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.name || !formData.category || !formData.description) {
-      toast.error("Please fill in all required fields");
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("No user found");
-
-      // Upload main business image
-      let imageUrl = null;
-      try {
-        if (pendingImage) {
-          imageUrl = await uploadImage(pendingImage, 'business-');
-        }
-      } catch (error) {
-        console.error('Error uploading main image:', error);
-        toast.error("Failed to upload main business image");
-        return;
-      }
-
-      // Process owners' images
-      const processedOwners = await Promise.all(formData.owners.map(async (owner) => {
-        let ownerImageUrl = owner.image_url;
-        try {
-          if (owner.image_url && owner.image_url.startsWith('data:')) {
-            ownerImageUrl = await uploadImage(owner.image_url, 'owner-');
-          }
-        } catch (error) {
-          console.error('Error uploading owner image:', error);
-          toast.error(`Failed to upload image for owner ${owner.name}`);
-          throw error;
-        }
-        return {
-          ...owner,
-          image_url: ownerImageUrl
-        };
-      }));
-
-      // Clean up old images if updating
-      if (initialData) {
-        if (initialData.image_url && imageUrl !== initialData.image_url) {
-          const oldFileName = initialData.image_url.split('/').pop();
-          if (oldFileName) {
-            await supabase.storage
-              .from('business-images')
-              .remove([oldFileName]);
-          }
-        }
-
-        const oldOwners = initialData.owners || [];
-        for (const oldOwner of oldOwners) {
-          if (oldOwner.image_url && !processedOwners.some(newOwner => newOwner.image_url === oldOwner.image_url)) {
-            const oldFileName = oldOwner.image_url.split('/').pop();
-            if (oldFileName) {
-              await supabase.storage
-                .from('business-images')
-                .remove([oldFileName]);
-            }
-          }
-        }
-      }
-
-      const businessData = {
-        user_id: user.id,
-        name: formData.name,
-        category: formData.category,
-        description: formData.description,
-        location: formData.location,
-        contact: formData.contact,
-        hours: formData.hours,
-        image_url: imageUrl,
-        appointment_price: formData.appointment_price ? parseFloat(formData.appointment_price) : null,
-        consultation_price: formData.consultation_price ? parseFloat(formData.consultation_price) : null,
-        bio: formData.bio,
-        website: formData.website,
-        image_scale: imageScale,
-        image_position: imagePosition as Json,
-        owners: JSON.parse(JSON.stringify(processedOwners)) as Json,
-        staff_details: JSON.parse(JSON.stringify(formData.staff_details)) as Json,
-      };
-
-      if (initialData) {
-        const { error } = await supabase
-          .from('businesses')
-          .update(businessData)
-          .eq('id', initialData.id);
-
-        if (error) throw error;
-        toast.success("Business updated successfully!");
-      } else {
-        const { error } = await supabase
-          .from('businesses')
-          .insert([businessData]);
-
-        if (error) throw error;
-        toast.success("Business registered successfully!");
-      }
-
-      onSuccess?.();
-    } catch (error) {
-      console.error('Error:', error);
-      toast.error(initialData ? "Failed to update business" : "Failed to register business");
-    } finally {
-      setLoading(false);
-    }
   };
 
   return (
