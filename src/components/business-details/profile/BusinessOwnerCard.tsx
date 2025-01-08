@@ -1,6 +1,4 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
-import { User } from "lucide-react";
 
 interface BusinessOwnerCardProps {
   name: string;
@@ -8,7 +6,6 @@ interface BusinessOwnerCardProps {
   position: string;
   experience?: string;
   qualifications?: string;
-  image_url?: string | null;
 }
 
 export const BusinessOwnerCard = ({
@@ -17,28 +14,11 @@ export const BusinessOwnerCard = ({
   position,
   experience,
   qualifications,
-  image_url,
 }: BusinessOwnerCardProps) => {
   return (
     <div className="space-y-4">
       <Card className="p-8">
-        <div className="flex flex-col md:flex-row gap-8">
-          <div className="flex flex-col items-center space-y-4">
-            <Avatar className="h-32 w-32">
-              {image_url ? (
-                <AvatarImage 
-                  src={image_url} 
-                  alt={name}
-                  className="object-cover"
-                />
-              ) : (
-                <AvatarFallback className="text-4xl bg-primary/10">
-                  <User className="h-12 w-12 text-primary" />
-                </AvatarFallback>
-              )}
-            </Avatar>
-          </div>
-          
+        <div className="flex flex-col gap-8">
           <div className="flex-1 space-y-4">
             <div>
               <h4 className="text-2xl font-semibold">{name}</h4>

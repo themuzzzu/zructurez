@@ -12,7 +12,6 @@ export const NewOwnerForm = ({ onAdd, onCancel }: NewOwnerFormProps) => {
     position: "",
     experience: "",
     qualifications: "",
-    image_url: null,
   });
 
   const handleUpdate = (field: keyof Owner, value: string) => {
