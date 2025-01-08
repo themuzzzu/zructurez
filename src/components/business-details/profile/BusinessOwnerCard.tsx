@@ -7,6 +7,7 @@ interface BusinessOwnerCardProps {
   experience?: string;
   qualifications?: string;
   bio?: string;
+  image_url?: string | null;
 }
 
 export const BusinessOwnerCard = ({
@@ -16,11 +17,13 @@ export const BusinessOwnerCard = ({
   experience,
   qualifications,
   bio,
+  image_url,
 }: BusinessOwnerCardProps) => {
   return (
     <div className="space-y-4">
       <Card className="p-8">
-        <div className="flex flex-col gap-8">
+        <div className="flex gap-8">
+          {/* Text Content */}
           <div className="flex-1 space-y-4">
             <div>
               <h4 className="text-2xl font-semibold">{name}</h4>
@@ -54,6 +57,19 @@ export const BusinessOwnerCard = ({
               )}
             </div>
           </div>
+
+          {/* Image Section */}
+          {image_url && (
+            <div className="w-1/3 min-w-[200px]">
+              <div className="relative aspect-square w-full overflow-hidden rounded-lg">
+                <img
+                  src={image_url}
+                  alt={`${name}'s profile`}
+                  className="object-cover w-full h-full"
+                />
+              </div>
+            </div>
+          )}
         </div>
       </Card>
     </div>
