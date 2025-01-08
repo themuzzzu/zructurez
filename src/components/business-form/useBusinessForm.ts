@@ -10,28 +10,29 @@ export const useBusinessForm = (initialData?: any, onSuccess?: () => void) => {
   const [imageScale, setImageScale] = useState(1);
   const [imagePosition, setImagePosition] = useState({ x: 50, y: 50 });
 
-const [formData, setFormData] = useState<BusinessFormData>({
-  name: "",
-  category: "",
-  description: "",
-  location: "",
-  contact: "",
-  hours: "",
-  image: null,
-  appointment_price: "",
-  consultation_price: "",
-  bio: "",
-  website: "",
-  owners: [{ 
-    name: "", 
-    role: "Primary Owner", 
-    position: "", 
-    experience: "", 
-    qualifications: "",
-    image_url: null 
-  }],
-  staff_details: [],
-});
+  const [formData, setFormData] = useState<BusinessFormData>({
+    name: "",
+    category: "",
+    description: "",
+    location: "",
+    contact: "",
+    hours: "",
+    image: null,
+    appointment_price: "",
+    consultation_price: "",
+    bio: "",
+    website: "",
+    owners: [{ 
+      name: "", 
+      role: "Primary Owner", 
+      position: "", 
+      experience: "", 
+      qualifications: "",
+      bio: "",
+      image_url: null 
+    }],
+    staff_details: [],
+  });
 
   useEffect(() => {
     if (initialData) {
@@ -47,7 +48,15 @@ const [formData, setFormData] = useState<BusinessFormData>({
         consultation_price: initialData.consultation_price?.toString() || "",
         bio: initialData.bio || "",
         website: initialData.website || "",
-        owners: initialData.owners || [{ name: "", role: "Primary Owner", position: "", experience: "", image_url: null }],
+        owners: initialData.owners || [{ 
+          name: "", 
+          role: "Primary Owner", 
+          position: "", 
+          experience: "", 
+          qualifications: "",
+          bio: "",
+          image_url: null 
+        }],
         staff_details: initialData.staff_details || [],
       });
       setPendingImage(initialData.image_url || null);
@@ -108,7 +117,6 @@ const [formData, setFormData] = useState<BusinessFormData>({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("No user found");
 
-      // Upload main business image
       let imageUrl = null;
       try {
         if (pendingImage) {
@@ -122,24 +130,22 @@ const [formData, setFormData] = useState<BusinessFormData>({
       }
 
       // Process owners' images
-
-// Process owners' images
-const processedOwners = await Promise.all(formData.owners.map(async (owner) => {
-  let ownerImageUrl = owner.image_url;
-  try {
-    if (owner.image_url && owner.image_url.startsWith('data:')) {
-      ownerImageUrl = await uploadImage(owner.image_url, 'owner-');
-    }
-  } catch (error) {
-    console.error('Error uploading owner image:', error);
-    toast.error(`Failed to upload image for owner ${owner.name}`);
-    throw error;
-  }
-  return {
-    ...owner,
-    image_url: ownerImageUrl
-  };
-}));
+      const processedOwners = await Promise.all(formData.owners.map(async (owner) => {
+        let ownerImageUrl = owner.image_url;
+        try {
+          if (owner.image_url && owner.image_url.startsWith('data:')) {
+            ownerImageUrl = await uploadImage(owner.image_url, 'owner-');
+          }
+        } catch (error) {
+          console.error('Error uploading owner image:', error);
+          toast.error(`Failed to upload image for owner ${owner.name}`);
+          throw error;
+        }
+        return {
+          ...owner,
+          image_url: ownerImageUrl
+        };
+      }));
 
       // Clean up old images if updating
       if (initialData) {
