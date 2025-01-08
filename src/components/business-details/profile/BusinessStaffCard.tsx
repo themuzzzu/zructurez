@@ -4,12 +4,14 @@ interface BusinessStaffCardProps {
   name: string;
   position: string;
   experience?: string;
+  bio?: string;
 }
 
 export const BusinessStaffCard = ({
   name,
   position,
   experience,
+  bio,
 }: BusinessStaffCardProps) => {
   return (
     <Card className="p-6">
@@ -21,6 +23,11 @@ export const BusinessStaffCard = ({
         {experience && (
           <div className="text-muted-foreground">
             Experience: {experience}
+          </div>
+        )}
+        {bio && (
+          <div className="text-muted-foreground mt-2">
+            <p className="text-sm leading-relaxed">{bio}</p>
           </div>
         )}
       </div>

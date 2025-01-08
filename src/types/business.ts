@@ -3,12 +3,14 @@ export interface BusinessOwner {
   role: string;
   position: string | null;
   experience: string | null;
+  bio?: string | null;
 }
 
 export interface StaffMember {
   name: string | null;
   position: string | null;
   experience: string | null;
+  bio?: string | null;
 }
 
 export interface Business {

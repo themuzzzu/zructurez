@@ -6,6 +6,7 @@ interface BusinessOwnerCardProps {
   position: string;
   experience?: string;
   qualifications?: string;
+  bio?: string;
 }
 
 export const BusinessOwnerCard = ({
@@ -14,6 +15,7 @@ export const BusinessOwnerCard = ({
   position,
   experience,
   qualifications,
+  bio,
 }: BusinessOwnerCardProps) => {
   return (
     <div className="space-y-4">
@@ -42,6 +44,12 @@ export const BusinessOwnerCard = ({
                 <div className="flex items-center gap-2">
                   <span className="font-medium">Qualifications:</span>
                   <span>{qualifications}</span>
+                </div>
+              )}
+              {bio && (
+                <div className="flex flex-col gap-2 mt-4">
+                  <span className="font-medium">Bio:</span>
+                  <p className="text-sm leading-relaxed">{bio}</p>
                 </div>
               )}
             </div>

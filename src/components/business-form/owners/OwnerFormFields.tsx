@@ -1,4 +1,5 @@
 import { Input } from "../../ui/input";
+import { Textarea } from "../../ui/textarea";
 import type { Owner } from "../types/owner";
 
 interface OwnerFormFieldsProps {
@@ -7,7 +8,7 @@ interface OwnerFormFieldsProps {
   position: string;
   experience: string;
   qualifications?: string;
-  image_url?: string | null;
+  bio?: string;
   onUpdate: (field: keyof Owner, value: string) => void;
 }
 
@@ -17,6 +18,7 @@ export const OwnerFormFields = ({
   position,
   experience,
   qualifications = "",
+  bio = "",
   onUpdate,
 }: OwnerFormFieldsProps) => {
   return (
@@ -45,6 +47,12 @@ export const OwnerFormFields = ({
         placeholder="Qualifications (optional)"
         value={qualifications}
         onChange={(e) => onUpdate("qualifications", e.target.value)}
+      />
+      <Textarea
+        placeholder="Bio (optional)"
+        value={bio}
+        onChange={(e) => onUpdate("bio", e.target.value)}
+        className="min-h-[100px]"
       />
     </div>
   );
