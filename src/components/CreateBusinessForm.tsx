@@ -8,7 +8,6 @@ import { Label } from "./ui/label";
 import { useBusinessForm } from "./business-form/useBusinessForm";
 import type { FormProps } from "./business-form/types/form";
 
-// Test data for quick business creation
 const TEST_BUSINESS = {
   name: "Serenity Spa & Wellness Center",
   category: "beauty",

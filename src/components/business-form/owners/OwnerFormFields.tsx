@@ -16,7 +16,7 @@ export const OwnerFormFields = ({
   role,
   position,
   experience,
-  qualifications,
+  qualifications = "",
   onUpdate,
 }: OwnerFormFieldsProps) => {
   return (
@@ -43,7 +43,7 @@ export const OwnerFormFields = ({
       />
       <Input
         placeholder="Qualifications (optional)"
-        value={qualifications || ""}
+        value={qualifications}
         onChange={(e) => onUpdate("qualifications", e.target.value)}
       />
     </div>
