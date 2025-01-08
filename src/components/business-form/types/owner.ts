@@ -4,14 +4,12 @@ export interface Owner {
   position: string;
   experience: string;
   qualifications?: string;
-  image_url?: string | null;
 }
 
 export interface OwnerFormProps {
   owner: Owner;
   onUpdate: (field: keyof Owner, value: string) => void;
   onRemove?: () => void;
-  onUpdateImage?: (imageUrl: string | null) => void;
 }
 
 export interface NewOwnerFormProps {
