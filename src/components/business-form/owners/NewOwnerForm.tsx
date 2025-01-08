@@ -19,16 +19,11 @@ export const NewOwnerForm = ({ onAdd, onCancel }: NewOwnerFormProps) => {
     setNewOwner({ ...newOwner, [field]: value });
   };
 
-  const handleUpdateImage = (imageUrl: string | null) => {
-    setNewOwner({ ...newOwner, image_url: imageUrl });
-  };
-
   return (
     <Card className="p-4 space-y-4">
       <OwnerFormFields
-        owner={newOwner}
+        {...newOwner}
         onUpdate={handleUpdate}
-        onUpdateImage={handleUpdateImage}
       />
 
       <div className="flex gap-2 justify-end">

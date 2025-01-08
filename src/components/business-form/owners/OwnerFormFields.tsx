@@ -1,4 +1,5 @@
 import { Input } from "../../ui/input";
+import type { Owner } from "../types/owner";
 
 interface OwnerFormFieldsProps {
   name: string;
@@ -6,7 +7,8 @@ interface OwnerFormFieldsProps {
   position: string;
   experience: string;
   qualifications?: string;
-  onUpdate: (field: string, value: string) => void;
+  image_url?: string | null;
+  onUpdate: (field: keyof Owner, value: string) => void;
 }
 
 export const OwnerFormFields = ({

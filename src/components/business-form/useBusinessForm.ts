@@ -9,21 +9,29 @@ export const useBusinessForm = (initialData?: any, onSuccess?: () => void) => {
   const [pendingImage, setPendingImage] = useState<string | null>(null);
   const [imageScale, setImageScale] = useState(1);
   const [imagePosition, setImagePosition] = useState({ x: 50, y: 50 });
-  const [formData, setFormData] = useState<BusinessFormData>({
-    name: "",
-    category: "",
-    description: "",
-    location: "",
-    contact: "",
-    hours: "",
-    image: null,
-    appointment_price: "",
-    consultation_price: "",
-    bio: "",
-    website: "",
-    owners: [{ name: "", role: "Primary Owner", position: "", experience: "", image_url: null }],
-    staff_details: [],
-  });
+
+const [formData, setFormData] = useState<BusinessFormData>({
+  name: "",
+  category: "",
+  description: "",
+  location: "",
+  contact: "",
+  hours: "",
+  image: null,
+  appointment_price: "",
+  consultation_price: "",
+  bio: "",
+  website: "",
+  owners: [{ 
+    name: "", 
+    role: "Primary Owner", 
+    position: "", 
+    experience: "", 
+    qualifications: "",
+    image_url: null 
+  }],
+  staff_details: [],
+});
 
   useEffect(() => {
     if (initialData) {
@@ -114,22 +122,24 @@ export const useBusinessForm = (initialData?: any, onSuccess?: () => void) => {
       }
 
       // Process owners' images
-      const processedOwners = await Promise.all(formData.owners.map(async (owner) => {
-        let ownerImageUrl = owner.image_url;
-        try {
-          if (owner.image_url && owner.image_url.startsWith('data:')) {
-            ownerImageUrl = await uploadImage(owner.image_url, 'owner-');
-          }
-        } catch (error) {
-          console.error('Error uploading owner image:', error);
-          toast.error(`Failed to upload image for owner ${owner.name}`);
-          throw error;
-        }
-        return {
-          ...owner,
-          image_url: ownerImageUrl
-        };
-      }));
+
+// Process owners' images
+const processedOwners = await Promise.all(formData.owners.map(async (owner) => {
+  let ownerImageUrl = owner.image_url;
+  try {
+    if (owner.image_url && owner.image_url.startsWith('data:')) {
+      ownerImageUrl = await uploadImage(owner.image_url, 'owner-');
+    }
+  } catch (error) {
+    console.error('Error uploading owner image:', error);
+    toast.error(`Failed to upload image for owner ${owner.name}`);
+    throw error;
+  }
+  return {
+    ...owner,
+    image_url: ownerImageUrl
+  };
+}));
 
       // Clean up old images if updating
       if (initialData) {

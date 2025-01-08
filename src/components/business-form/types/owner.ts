@@ -4,6 +4,7 @@ export interface Owner {
   position: string;
   experience: string;
   qualifications?: string;
+  image_url?: string | null;
 }
 
 export interface OwnerFormProps {
