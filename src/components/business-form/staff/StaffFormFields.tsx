@@ -13,7 +13,7 @@ export const StaffFormFields = ({
   onUpdate,
 }: StaffFormFieldsProps) => {
   return (
-    <div className="grid gap-2 flex-1">
+    <div className="grid gap-4 flex-1">
       <Input
         placeholder="Staff Name"
         value={name}
@@ -39,7 +39,7 @@ export const StaffFormFields = ({
         <Label>Staff Photo</Label>
         <ImageUpload
           selectedImage={image_url}
-          onImageSelect={(image) => onUpdate("image_url", image)}
+          onImageSelect={(image) => onUpdate("image_url", image || "")}
           initialScale={1}
           initialPosition={{ x: 50, y: 50 }}
         />

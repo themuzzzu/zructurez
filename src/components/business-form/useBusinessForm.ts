@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { BusinessFormData } from "./types/form";
 import { Json } from "@/integrations/supabase/types";
+import { uploadBusinessImage, processOwnerImages, processStaffImages } from "./hooks/useImageUpload";
 
 export const useBusinessForm = (initialData?: any, onSuccess?: () => void) => {
   const [loading, setLoading] = useState(false);
@@ -65,44 +66,6 @@ export const useBusinessForm = (initialData?: any, onSuccess?: () => void) => {
     }
   }, [initialData]);
 
-  const uploadImage = async (base64Image: string, prefix: string = '') => {
-    if (!base64Image.startsWith('data:')) {
-      return base64Image;
-    }
-
-    try {
-      const base64Data = base64Image.split(',')[1];
-      const byteCharacters = atob(base64Data);
-      const byteNumbers = new Array(byteCharacters.length);
-      
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
-      }
-      
-      const byteArray = new Uint8Array(byteNumbers);
-      const blob = new Blob([byteArray], { type: 'image/jpeg' });
-      const fileName = `${prefix}${Date.now()}-${Math.random().toString(36).substring(7)}`;
-      
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('business-images')
-        .upload(fileName, blob);
-
-      if (uploadError) {
-        console.error('Upload error:', uploadError);
-        throw uploadError;
-      }
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('business-images')
-        .getPublicUrl(fileName);
-
-      return publicUrl;
-    } catch (error) {
-      console.error('Error in uploadImage:', error);
-      throw error;
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -120,7 +83,7 @@ export const useBusinessForm = (initialData?: any, onSuccess?: () => void) => {
       let imageUrl = null;
       try {
         if (pendingImage) {
-          imageUrl = await uploadImage(pendingImage, 'business-');
+          imageUrl = await uploadBusinessImage(pendingImage, 'business-');
         }
       } catch (error) {
         console.error('Error uploading main image:', error);
@@ -129,23 +92,9 @@ export const useBusinessForm = (initialData?: any, onSuccess?: () => void) => {
         return;
       }
 
-      // Process owners' images
-      const processedOwners = await Promise.all(formData.owners.map(async (owner) => {
-        let ownerImageUrl = owner.image_url;
-        try {
-          if (owner.image_url && owner.image_url.startsWith('data:')) {
-            ownerImageUrl = await uploadImage(owner.image_url, 'owner-');
-          }
-        } catch (error) {
-          console.error('Error uploading owner image:', error);
-          toast.error(`Failed to upload image for owner ${owner.name}`);
-          throw error;
-        }
-        return {
-          ...owner,
-          image_url: ownerImageUrl
-        };
-      }));
+      // Process owners' and staff images
+      const processedOwners = await processOwnerImages(formData.owners);
+      const processedStaff = await processStaffImages(formData.staff_details);
 
       // Clean up old images if updating
       if (initialData) {
@@ -187,7 +136,7 @@ export const useBusinessForm = (initialData?: any, onSuccess?: () => void) => {
         image_scale: imageScale,
         image_position: imagePosition as Json,
         owners: JSON.parse(JSON.stringify(processedOwners)) as Json,
-        staff_details: JSON.parse(JSON.stringify(formData.staff_details)) as Json,
+        staff_details: JSON.parse(JSON.stringify(processedStaff)) as Json,
       };
 
       console.log('Submitting business data:', businessData);
