@@ -1,11 +1,14 @@
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export const uploadBusinessImage = async (base64Image: string, prefix: string = '') => {
+  // If the image is already a URL, return it
   if (!base64Image.startsWith('data:')) {
     return base64Image;
   }
 
   try {
+    // Convert base64 to blob
     const base64Data = base64Image.split(',')[1];
     const byteCharacters = atob(base64Data);
     const byteNumbers = new Array(byteCharacters.length);
@@ -16,8 +19,11 @@ export const uploadBusinessImage = async (base64Image: string, prefix: string = 
     
     const byteArray = new Uint8Array(byteNumbers);
     const blob = new Blob([byteArray], { type: 'image/jpeg' });
+    
+    // Generate unique filename
     const fileName = `${prefix}${Date.now()}-${Math.random().toString(36).substring(7)}`;
     
+    // Upload to Supabase Storage
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('business-images')
       .upload(fileName, blob);
@@ -27,6 +33,7 @@ export const uploadBusinessImage = async (base64Image: string, prefix: string = 
       throw uploadError;
     }
 
+    // Get public URL
     const { data: { publicUrl } } = supabase.storage
       .from('business-images')
       .getPublicUrl(fileName);
@@ -47,7 +54,7 @@ export const processOwnerImages = async (owners: any[]) => {
       }
     } catch (error) {
       console.error('Error uploading owner image:', error);
-      throw error;
+      toast.error(`Failed to upload image for owner ${owner.name}`);
     }
     return {
       ...owner,
@@ -65,7 +72,7 @@ export const processStaffImages = async (staffDetails: any[]) => {
       }
     } catch (error) {
       console.error('Error uploading staff image:', error);
-      throw error;
+      toast.error(`Failed to upload image for staff member ${staff.name}`);
     }
     return {
       ...staff,
