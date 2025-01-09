@@ -4,12 +4,14 @@ import { Textarea } from "../ui/textarea";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
 import { Plus, X } from "lucide-react";
+import { ImageUpload } from "../ImageUpload";
 
 interface StaffMember {
   name: string;
   position: string;
   experience: string;
   bio?: string;
+  image_url?: string | null;
 }
 
 interface StaffMembersProps {
@@ -22,7 +24,8 @@ const TEST_STAFF = [
     name: "Sarah Williams",
     position: "Senior Massage Therapist",
     experience: "10 years",
-    bio: "Specializing in deep tissue and sports massage therapy with a focus on injury recovery."
+    bio: "Specializing in deep tissue and sports massage therapy with a focus on injury recovery.",
+    image_url: "https://images.unsplash.com/photo-1614608682850-e0d6ed316d47?auto=format&fit=crop&q=80&w=400"
   },
   {
     name: "Emily Davis",
@@ -56,6 +59,7 @@ export const StaffMembers = ({ staff = [], onChange }: StaffMembersProps) => {
     position: "",
     experience: "",
     bio: "",
+    image_url: null,
   });
 
   // Add test data if staff array is empty
@@ -66,7 +70,7 @@ export const StaffMembers = ({ staff = [], onChange }: StaffMembersProps) => {
   const handleAddStaff = () => {
     if (newStaff.name && newStaff.position) {
       onChange([...staff, newStaff]);
-      setNewStaff({ name: "", position: "", experience: "", bio: "" });
+      setNewStaff({ name: "", position: "", experience: "", bio: "", image_url: null });
     }
   };
 
@@ -109,6 +113,15 @@ export const StaffMembers = ({ staff = [], onChange }: StaffMembersProps) => {
                 onChange={(e) => handleUpdateStaff(index, "bio", e.target.value)}
                 className="min-h-[100px]"
               />
+              <div className="space-y-2">
+                <Label>Staff Photo</Label>
+                <ImageUpload
+                  selectedImage={member.image_url}
+                  onImageSelect={(image) => handleUpdateStaff(index, "image_url", image)}
+                  initialScale={1}
+                  initialPosition={{ x: 50, y: 50 }}
+                />
+              </div>
             </div>
             <Button
               type="button"
@@ -144,6 +157,15 @@ export const StaffMembers = ({ staff = [], onChange }: StaffMembersProps) => {
           onChange={(e) => setNewStaff({ ...newStaff, bio: e.target.value })}
           className="min-h-[100px]"
         />
+        <div className="space-y-2">
+          <Label>Staff Photo</Label>
+          <ImageUpload
+            selectedImage={newStaff.image_url}
+            onImageSelect={(image) => setNewStaff({ ...newStaff, image_url: image })}
+            initialScale={1}
+            initialPosition={{ x: 50, y: 50 }}
+          />
+        </div>
         <Button
           type="button"
           variant="outline"

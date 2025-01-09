@@ -1,5 +1,6 @@
 import { Input } from "../../ui/input";
 import { Textarea } from "../../ui/textarea";
+import { ImageUpload } from "../../ImageUpload";
 import type { Owner } from "../types/owner";
 
 interface OwnerFormFieldsProps {
@@ -9,6 +10,7 @@ interface OwnerFormFieldsProps {
   experience: string;
   qualifications?: string;
   bio?: string;
+  image_url?: string | null;
   onUpdate: (field: keyof Owner, value: string) => void;
 }
 
@@ -19,6 +21,7 @@ export const OwnerFormFields = ({
   experience,
   qualifications = "",
   bio = "",
+  image_url,
   onUpdate,
 }: OwnerFormFieldsProps) => {
   return (
@@ -54,6 +57,14 @@ export const OwnerFormFields = ({
         onChange={(e) => onUpdate("bio", e.target.value)}
         className="min-h-[100px]"
       />
+      <div className="space-y-2">
+        <ImageUpload
+          selectedImage={image_url}
+          onImageSelect={(image) => onUpdate("image_url", image)}
+          initialScale={1}
+          initialPosition={{ x: 50, y: 50 }}
+        />
+      </div>
     </div>
   );
 };
