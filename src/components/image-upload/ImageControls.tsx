@@ -2,11 +2,6 @@ import { ImageZoomControl } from "./ImageZoomControl";
 import { ImagePositionControls } from "./ImagePositionControls";
 import { Button } from "../ui/button";
 
-interface ImagePosition {
-  x: number;
-  y: number;
-}
-
 interface ImageControlsProps {
   scale: number;
   onScaleChange: (scale: number) => void;

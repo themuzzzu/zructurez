@@ -129,6 +129,13 @@ export const ImageUpload = ({
     setIsDragging(false);
   };
 
+  const handleSave = () => {
+    onImageSelect(previewImage);
+    onScaleChange?.(scale);
+    onPositionChange?.(position);
+    toast.success("Image settings saved!");
+  };
+
   return (
     <div className="space-y-4">
       <UploadButtons 
@@ -150,6 +157,10 @@ export const ImageUpload = ({
             onDragStart={handleMouseDown}
             onDragMove={handleMouseMove}
             onDragEnd={handleMouseUp}
+            onPositionChange={(newPosition) => {
+              setPosition(newPosition);
+              onPositionChange?.(newPosition);
+            }}
           />
 
           <ImageControls
@@ -163,6 +174,7 @@ export const ImageUpload = ({
               setPosition(newPosition);
               onPositionChange?.(newPosition);
             }}
+            onSave={handleSave}
           />
         </div>
       )}

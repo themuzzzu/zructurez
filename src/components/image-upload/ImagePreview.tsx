@@ -22,6 +22,7 @@ export const ImagePreview = ({
   previewImage,
   scale,
   position,
+  onPositionChange,
   onImageRemove,
   isDragging,
   onDragStart,
