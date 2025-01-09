@@ -129,6 +129,7 @@ export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: FormPro
               initialPosition={imagePosition}
               onScaleChange={setImageScale}
               onPositionChange={setImagePosition}
+              skipAutoSave={true}
             />
           </div>
         </div>

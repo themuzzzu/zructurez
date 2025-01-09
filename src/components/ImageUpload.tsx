@@ -20,6 +20,7 @@ export interface ImageUploadProps {
   initialPosition?: ImagePosition;
   onScaleChange?: (scale: number) => void;
   onPositionChange?: (position: ImagePosition) => void;
+  skipAutoSave?: boolean;
 }
 
 export const ImageUpload = ({
@@ -29,6 +30,7 @@ export const ImageUpload = ({
   initialPosition = { x: 50, y: 50 },
   onScaleChange,
   onPositionChange,
+  skipAutoSave = false,
 }: ImageUploadProps) => {
   const [scale, setScale] = useState(initialScale);
   const [position, setPosition] = useState(initialPosition);
@@ -71,6 +73,12 @@ export const ImageUpload = ({
       setPreviewImage(result);
       setScale(1);
       setPosition({ x: 50, y: 50 });
+      
+      if (!skipAutoSave) {
+        onImageSelect(result);
+        onScaleChange?.(1);
+        onPositionChange?.({ x: 50, y: 50 });
+      }
     };
     reader.readAsDataURL(file);
   };
@@ -138,7 +146,9 @@ export const ImageUpload = ({
     onImageSelect(previewImage);
     onScaleChange?.(scale);
     onPositionChange?.(position);
-    toast.success("Image settings saved!");
+    if (!skipAutoSave) {
+      toast.success("Image settings saved!");
+    }
   };
 
   const handleCancel = () => {
@@ -154,10 +164,16 @@ export const ImageUpload = ({
 
   const handleScaleChange = (newScale: number) => {
     setScale(newScale);
+    if (!skipAutoSave) {
+      onScaleChange?.(newScale);
+    }
   };
 
   const handlePositionChange = (newPosition: ImagePosition) => {
     setPosition(newPosition);
+    if (!skipAutoSave) {
+      onPositionChange?.(newPosition);
+    }
   };
 
   return (
@@ -191,11 +207,14 @@ export const ImageUpload = ({
             onPositionChange={(x, y) => {
               const newPosition = { x, y };
               setPosition(newPosition);
+              if (!skipAutoSave) {
+                onPositionChange?.(newPosition);
+              }
             }}
             onSave={handleSave}
           />
 
-          {pendingImage && (
+          {(pendingImage || skipAutoSave) && (
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={handleCancel}>
                 Cancel
