@@ -107,25 +107,34 @@ export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: FormPro
   };
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
-      <BusinessBasicInfo formData={formData} onChange={handleChange} />
-      <BusinessProfileInfo formData={formData} onChange={handleChange} />
-      <BusinessPricing formData={formData} onChange={handleChange} />
-      <BusinessContactInfo formData={formData} onChange={handleChange} />
+    <form onSubmit={onSubmit} className="space-y-6">
+      <div className="space-y-8">
+        <div className="space-y-4">
+          <BusinessBasicInfo formData={formData} onChange={handleChange} />
+          <BusinessProfileInfo formData={formData} onChange={handleChange} />
+          <BusinessPricing formData={formData} onChange={handleChange} />
+          <BusinessContactInfo formData={formData} onChange={handleChange} />
+        </div>
 
-      <div className="space-y-2">
-        <Label>Business Image</Label>
-        <ImageUpload
-          selectedImage={pendingImage || formData.image}
-          onImageSelect={(image) => setPendingImage(image)}
-          initialScale={imageScale}
-          initialPosition={imagePosition}
-          onScaleChange={setImageScale}
-          onPositionChange={setImagePosition}
-        />
+        <div className="space-y-4 border-t pt-6">
+          <div className="space-y-2">
+            <Label className="text-lg font-semibold">Business Image</Label>
+            <p className="text-sm text-muted-foreground">
+              Upload a high-quality image that represents your business. This will be displayed on your business profile.
+            </p>
+            <ImageUpload
+              selectedImage={pendingImage || formData.image}
+              onImageSelect={(image) => setPendingImage(image)}
+              initialScale={imageScale}
+              initialPosition={imagePosition}
+              onScaleChange={setImageScale}
+              onPositionChange={setImagePosition}
+            />
+          </div>
+        </div>
       </div>
 
-      <div className="flex gap-2 justify-end">
+      <div className="flex gap-2 justify-end pt-4 border-t">
         <Button variant="outline" type="button" onClick={onCancel} disabled={loading}>
           Cancel
         </Button>
