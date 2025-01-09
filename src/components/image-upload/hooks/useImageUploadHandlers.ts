@@ -9,6 +9,9 @@ interface UseImageUploadHandlersProps {
   setScale: (scale: number) => void;
   setPosition: (position: ImagePosition) => void;
   onImageSelect: (image: string | null) => void;
+  onScaleChange?: (scale: number) => void;
+  onPositionChange?: (position: ImagePosition) => void;
+  skipAutoSave?: boolean;
 }
 
 export const useImageUploadHandlers = ({
@@ -16,6 +19,9 @@ export const useImageUploadHandlers = ({
   setScale,
   setPosition,
   onImageSelect,
+  onScaleChange,
+  onPositionChange,
+  skipAutoSave = false,
 }: UseImageUploadHandlersProps) => {
   const handleFileUpload = (file: File) => {
     if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
@@ -34,7 +40,12 @@ export const useImageUploadHandlers = ({
       setPreviewImage(result);
       setScale(1);
       setPosition({ x: 50, y: 50 });
-      onImageSelect(result);
+      
+      if (!skipAutoSave) {
+        onImageSelect(result);
+        onScaleChange?.(1);
+        onPositionChange?.({ x: 50, y: 50 });
+      }
     };
     reader.readAsDataURL(file);
   };

@@ -9,12 +9,14 @@ export const useImageUploadState = (
   onImageSelect: (image: string | null) => void,
   onScaleChange?: (scale: number) => void,
   onPositionChange?: (position: ImagePosition) => void,
+  skipAutoSave = false
 ) => {
   const [scale, setScale] = useState(initialScale);
   const [position, setPosition] = useState(initialPosition);
   const [previewImage, setPreviewImage] = useState<string | null>(selectedImage);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [pendingImage, setPendingImage] = useState<string | null>(null);
 
   useEffect(() => {
     setPreviewImage(selectedImage);
@@ -32,7 +34,9 @@ export const useImageUploadState = (
     onImageSelect(previewImage);
     onScaleChange?.(scale);
     onPositionChange?.(position);
-    toast.success("Image settings saved!");
+    if (!skipAutoSave) {
+      toast.success("Image settings saved!");
+    }
   };
 
   return {
@@ -46,6 +50,8 @@ export const useImageUploadState = (
     setIsDragging,
     dragStart,
     setDragStart,
+    pendingImage,
+    setPendingImage,
     handleSave,
   };
 };

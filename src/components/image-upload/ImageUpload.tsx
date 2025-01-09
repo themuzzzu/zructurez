@@ -3,6 +3,7 @@ import { useImageUploadHandlers } from "./hooks/useImageUploadHandlers";
 import { ImagePreview } from "./ImagePreview";
 import { ImageControls } from "./ImageControls";
 import { UploadButtons } from "./UploadButtons";
+import { Button } from "../ui/button";
 import type { ImageUploadProps } from "./types";
 
 export const ImageUpload = ({
@@ -12,6 +13,7 @@ export const ImageUpload = ({
   initialPosition = { x: 50, y: 50 },
   onScaleChange,
   onPositionChange,
+  skipAutoSave = false,
 }: ImageUploadProps) => {
   const {
     scale,
@@ -24,6 +26,8 @@ export const ImageUpload = ({
     setIsDragging,
     dragStart,
     setDragStart,
+    pendingImage,
+    setPendingImage,
     handleSave,
   } = useImageUploadState(
     selectedImage,
@@ -31,7 +35,8 @@ export const ImageUpload = ({
     initialPosition,
     onImageSelect,
     onScaleChange,
-    onPositionChange
+    onPositionChange,
+    skipAutoSave
   );
 
   const { handleFileUpload, handleCameraCapture } = useImageUploadHandlers({
@@ -39,6 +44,9 @@ export const ImageUpload = ({
     setScale,
     setPosition,
     onImageSelect,
+    onScaleChange,
+    onPositionChange,
+    skipAutoSave,
   });
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -57,11 +65,22 @@ export const ImageUpload = ({
     
     const newPosition = { x: newX, y: newY };
     setPosition(newPosition);
-    onPositionChange?.(newPosition);
+    if (!skipAutoSave) {
+      onPositionChange?.(newPosition);
+    }
   };
 
   const handleMouseUp = () => {
     setIsDragging(false);
+  };
+
+  const handleCancel = () => {
+    if (pendingImage) {
+      setPreviewImage(selectedImage);
+      setScale(initialScale);
+      setPosition(initialPosition);
+      setPendingImage(null);
+    }
   };
 
   return (
@@ -80,6 +99,7 @@ export const ImageUpload = ({
             onImageRemove={() => {
               setPreviewImage(null);
               onImageSelect(null);
+              setPendingImage(null);
             }}
             isDragging={isDragging}
             onDragStart={handleMouseDown}
@@ -87,7 +107,9 @@ export const ImageUpload = ({
             onDragEnd={handleMouseUp}
             onPositionChange={(newPosition) => {
               setPosition(newPosition);
-              onPositionChange?.(newPosition);
+              if (!skipAutoSave) {
+                onPositionChange?.(newPosition);
+              }
             }}
           />
 
@@ -95,15 +117,30 @@ export const ImageUpload = ({
             scale={scale}
             onScaleChange={(newScale) => {
               setScale(newScale);
-              onScaleChange?.(newScale);
+              if (!skipAutoSave) {
+                onScaleChange?.(newScale);
+              }
             }}
             onPositionChange={(x, y) => {
               const newPosition = { x, y };
               setPosition(newPosition);
-              onPositionChange?.(newPosition);
+              if (!skipAutoSave) {
+                onPositionChange?.(newPosition);
+              }
             }}
             onSave={handleSave}
           />
+
+          {(pendingImage || skipAutoSave) && (
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={handleCancel}>
+                Cancel
+              </Button>
+              <Button onClick={handleSave}>
+                Save Changes
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </div>
