@@ -23,14 +23,17 @@ export const uploadBusinessImage = async (base64Image: string, prefix: string = 
     // Generate unique filename with timestamp and random string
     const timestamp = Date.now();
     const randomString = Math.random().toString(36).substring(7);
-    const fileName = `${prefix}${timestamp}-${randomString}`;
+    const fileName = `${prefix}${timestamp}-${randomString}.jpg`;
     
     console.log('Uploading image with filename:', fileName);
     
     // Upload to Supabase Storage
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('business-images')
-      .upload(fileName, blob);
+      .upload(fileName, blob, {
+        contentType: 'image/jpeg',
+        upsert: true
+      });
 
     if (uploadError) {
       console.error('Upload error:', uploadError);
