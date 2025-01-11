@@ -138,7 +138,7 @@ export const CategoryFilter = ({
               </div>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Salary Ranges</SelectItem>
+              <SelectItem value="all">All Salary Ranges</SelectItem>
               {salaryRanges.map((range) => (
                 <SelectItem key={range.value} value={range.value}>
                   {range.label}
