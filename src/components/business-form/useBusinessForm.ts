@@ -75,6 +75,7 @@ export const useBusinessForm = (initialData?: any, onSuccess?: () => void) => {
     }
 
     setLoading(true);
+    console.log("Starting form submission...");
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -83,7 +84,9 @@ export const useBusinessForm = (initialData?: any, onSuccess?: () => void) => {
       let imageUrl = null;
       try {
         if (pendingImage) {
+          console.log("Uploading main business image...");
           imageUrl = await uploadBusinessImage(pendingImage, 'business-');
+          console.log("Main business image uploaded:", imageUrl);
         }
       } catch (error) {
         console.error('Error uploading main image:', error);
@@ -93,12 +96,17 @@ export const useBusinessForm = (initialData?: any, onSuccess?: () => void) => {
       }
 
       // Process owners' and staff images
+      console.log("Processing owner images...");
       const processedOwners = await processOwnerImages(formData.owners);
+      console.log("Processed owners:", processedOwners);
+      
+      console.log("Processing staff images...");
       const processedStaff = await processStaffImages(formData.staff_details);
+      console.log("Processed staff:", processedStaff);
 
       // Clean up old images if updating
       if (initialData) {
-        if (initialData.image_url && imageUrl !== initialData.image_url) {
+        if (initialData.image_url && imageUrl && imageUrl !== initialData.image_url) {
           const oldFileName = initialData.image_url.split('/').pop();
           if (oldFileName) {
             await supabase.storage
@@ -128,7 +136,7 @@ export const useBusinessForm = (initialData?: any, onSuccess?: () => void) => {
         location: formData.location,
         contact: formData.contact,
         hours: formData.hours,
-        image_url: imageUrl,
+        image_url: imageUrl || initialData?.image_url,
         appointment_price: formData.appointment_price ? parseFloat(formData.appointment_price) : null,
         consultation_price: formData.consultation_price ? parseFloat(formData.consultation_price) : null,
         bio: formData.bio,

@@ -20,8 +20,12 @@ export const uploadBusinessImage = async (base64Image: string, prefix: string = 
     const byteArray = new Uint8Array(byteNumbers);
     const blob = new Blob([byteArray], { type: 'image/jpeg' });
     
-    // Generate unique filename
-    const fileName = `${prefix}${Date.now()}-${Math.random().toString(36).substring(7)}`;
+    // Generate unique filename with timestamp and random string
+    const timestamp = Date.now();
+    const randomString = Math.random().toString(36).substring(7);
+    const fileName = `${prefix}${timestamp}-${randomString}`;
+    
+    console.log('Uploading image with filename:', fileName);
     
     // Upload to Supabase Storage
     const { data: uploadData, error: uploadError } = await supabase.storage
@@ -38,6 +42,7 @@ export const uploadBusinessImage = async (base64Image: string, prefix: string = 
       .from('business-images')
       .getPublicUrl(fileName);
 
+    console.log('Image uploaded successfully:', publicUrl);
     return publicUrl;
   } catch (error) {
     console.error('Error in uploadImage:', error);
@@ -46,11 +51,14 @@ export const uploadBusinessImage = async (base64Image: string, prefix: string = 
 };
 
 export const processOwnerImages = async (owners: any[]) => {
+  console.log('Processing owner images for:', owners);
   return Promise.all(owners.map(async (owner) => {
     let ownerImageUrl = owner.image_url;
     try {
       if (owner.image_url && owner.image_url.startsWith('data:')) {
+        console.log('Uploading owner image for:', owner.name);
         ownerImageUrl = await uploadBusinessImage(owner.image_url, 'owner-');
+        console.log('Owner image uploaded:', ownerImageUrl);
       }
     } catch (error) {
       console.error('Error uploading owner image:', error);
@@ -64,11 +72,14 @@ export const processOwnerImages = async (owners: any[]) => {
 };
 
 export const processStaffImages = async (staffDetails: any[]) => {
+  console.log('Processing staff images for:', staffDetails);
   return Promise.all(staffDetails.map(async (staff) => {
     let staffImageUrl = staff.image_url;
     try {
       if (staff.image_url && staff.image_url.startsWith('data:')) {
+        console.log('Uploading staff image for:', staff.name);
         staffImageUrl = await uploadBusinessImage(staff.image_url, 'staff-');
+        console.log('Staff image uploaded:', staffImageUrl);
       }
     } catch (error) {
       console.error('Error uploading staff image:', error);
