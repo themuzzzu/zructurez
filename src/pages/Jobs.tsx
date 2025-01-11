@@ -14,6 +14,8 @@ const Jobs = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedJobType, setSelectedJobType] = useState<string | null>(null);
+  const [selectedSalaryRange, setSelectedSalaryRange] = useState<string | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState("");
   const navigate = useNavigate();
 
   const jobs = [
@@ -23,7 +25,7 @@ const Jobs = () => {
       company: "Tech Corp",
       location: "San Francisco, CA",
       type: "mnc",
-      salary: "$120,000 - $150,000",
+      salary: 130000,
       posted: "2 days ago",
     },
     {
@@ -32,7 +34,7 @@ const Jobs = () => {
       company: "Innovation Labs",
       location: "New York, NY",
       type: "mnc",
-      salary: "$130,000 - $160,000",
+      salary: 145000,
       posted: "1 day ago",
     },
     {
@@ -41,7 +43,7 @@ const Jobs = () => {
       company: "Creative Studio",
       location: "Los Angeles, CA",
       type: "local",
-      salary: "$90,000 - $120,000",
+      salary: 95000,
       posted: "3 days ago",
     },
     {
@@ -50,18 +52,38 @@ const Jobs = () => {
       company: "Government Office",
       location: "Washington, DC",
       type: "government",
-      salary: "$45,000 - $55,000",
+      salary: 50000,
       posted: "5 days ago",
     },
   ];
 
-  const filteredJobs = jobs.filter(
-    (job) =>
-      (selectedJobType ? job.type === selectedJobType : true) &&
-      (job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  const getSalaryRange = (salary: number): string => {
+    if (salary <= 50000) return "0-50000";
+    if (salary <= 100000) return "50000-100000";
+    if (salary <= 150000) return "100000-150000";
+    return "150000+";
+  };
+
+  const formatSalary = (salary: number): string => {
+    return `$${salary.toLocaleString()}`;
+  };
+
+  const filteredJobs = jobs.filter((job) => {
+    const matchesJobType = selectedJobType ? job.type === selectedJobType : true;
+    const matchesSalaryRange = selectedSalaryRange 
+      ? getSalaryRange(job.salary) === selectedSalaryRange 
+      : true;
+    const matchesLocation = selectedLocation 
+      ? job.location.toLowerCase().includes(selectedLocation.toLowerCase()) 
+      : true;
+    const matchesSearch = searchQuery
+      ? job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         job.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        job.location.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+        job.location.toLowerCase().includes(searchQuery.toLowerCase())
+      : true;
+
+    return matchesJobType && matchesSalaryRange && matchesLocation && matchesSearch;
+  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -106,6 +128,9 @@ const Jobs = () => {
               <CategoryFilter 
                 onCategorySelect={() => {}} 
                 onJobTypeSelect={setSelectedJobType}
+                onSalaryRangeSelect={setSelectedSalaryRange}
+                onLocationSelect={setSelectedLocation}
+                selectedLocation={selectedLocation}
               />
             </div>
 
@@ -140,8 +165,8 @@ const Jobs = () => {
                       </div>
                     </div>
                     <div className="text-sm">
-                      <span className="font-medium">Salary Range: </span>
-                      {job.salary}
+                      <span className="font-medium">Salary: </span>
+                      {formatSalary(job.salary)}
                     </div>
                   </div>
                 </Card>
