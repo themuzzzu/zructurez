@@ -8,10 +8,12 @@ import { Briefcase, MapPin, Building, Clock, ListPlus, ArrowLeft } from "lucide-
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { CreateBusinessListing } from "@/components/CreateBusinessListing";
 import { useNavigate } from "react-router-dom";
+import { CategoryFilter } from "@/components/CategoryFilter";
 
 const Jobs = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedJobType, setSelectedJobType] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const jobs = [
@@ -20,7 +22,7 @@ const Jobs = () => {
       title: "Software Engineer",
       company: "Tech Corp",
       location: "San Francisco, CA",
-      type: "Full-time",
+      type: "mnc",
       salary: "$120,000 - $150,000",
       posted: "2 days ago",
     },
@@ -29,7 +31,7 @@ const Jobs = () => {
       title: "Product Manager",
       company: "Innovation Labs",
       location: "New York, NY",
-      type: "Full-time",
+      type: "mnc",
       salary: "$130,000 - $160,000",
       posted: "1 day ago",
     },
@@ -38,17 +40,27 @@ const Jobs = () => {
       title: "UX Designer",
       company: "Creative Studio",
       location: "Los Angeles, CA",
-      type: "Contract",
+      type: "local",
       salary: "$90,000 - $120,000",
       posted: "3 days ago",
+    },
+    {
+      id: 4,
+      title: "Administrative Assistant",
+      company: "Government Office",
+      location: "Washington, DC",
+      type: "government",
+      salary: "$45,000 - $55,000",
+      posted: "5 days ago",
     },
   ];
 
   const filteredJobs = jobs.filter(
     (job) =>
-      job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.location.toLowerCase().includes(searchQuery.toLowerCase())
+      (selectedJobType ? job.type === selectedJobType : true) &&
+      (job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        job.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        job.location.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   return (
@@ -91,6 +103,10 @@ const Jobs = () => {
                   </DialogContent>
                 </Dialog>
               </div>
+              <CategoryFilter 
+                onCategorySelect={() => {}} 
+                onJobTypeSelect={setSelectedJobType}
+              />
             </div>
 
             <div className="grid gap-4">
@@ -114,7 +130,9 @@ const Jobs = () => {
                       </div>
                       <div className="flex items-center gap-1">
                         <Briefcase className="h-4 w-4" />
-                        {job.type}
+                        {job.type === 'government' ? 'Government' : 
+                         job.type === 'local' ? 'Local' : 
+                         job.type === 'mnc' ? 'MNC' : job.type}
                       </div>
                       <div className="flex items-center gap-1">
                         <Clock className="h-4 w-4" />
