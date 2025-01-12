@@ -26,7 +26,7 @@ export const OwnerFormFields = ({
   image_url,
   onUpdate,
 }: OwnerFormFieldsProps) => {
-  const handleImageSelect = (image: string | null) => {
+  const handleImageSelect = async (image: string | null) => {
     console.log('Selected image:', image);
     if (image) {
       onUpdate("image_url", image);
