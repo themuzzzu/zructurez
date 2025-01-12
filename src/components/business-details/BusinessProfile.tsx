@@ -124,9 +124,9 @@ export const BusinessProfile = ({
         <Card className="p-6">
           <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
             <Building className="h-4 w-4" />
-            Owner
+            Owners
           </h3>
-          <div className="grid gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {owners.map((owner, index) => (
               <BusinessOwnerCard key={index} {...owner} />
             ))}
@@ -141,7 +141,7 @@ export const BusinessProfile = ({
             <Users className="h-4 w-4" />
             Staff
           </h3>
-          <div className="grid gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {staff_details.map((staff, index) => (
               staff.name && <BusinessStaffCard key={index} {...staff} />
             ))}
