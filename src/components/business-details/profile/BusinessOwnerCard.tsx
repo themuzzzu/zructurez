@@ -29,6 +29,10 @@ export const BusinessOwnerCard = ({
             src={image_url}
             alt={`${name}'s profile`}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            onError={(e) => {
+              console.error('Error loading image:', image_url);
+              e.currentTarget.src = '/placeholder.svg';
+            }}
           />
         ) : (
           <div className="w-full h-full bg-muted flex items-center justify-center">

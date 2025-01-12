@@ -84,9 +84,15 @@ export const OwnerFormFields = ({
 
       <div className="space-y-2">
         <Label>Owner Photo</Label>
+        <p className="text-sm text-muted-foreground mb-2">
+          Upload a professional photo of the owner. This will be displayed on the business profile.
+        </p>
         <ImageUpload
           selectedImage={image_url}
-          onImageSelect={(image) => onUpdate("image_url", image || "")}
+          onImageSelect={(image) => {
+            console.log('Selected image:', image);
+            onUpdate("image_url", image || "");
+          }}
           initialScale={1}
           initialPosition={{ x: 50, y: 50 }}
           skipAutoSave={true}
