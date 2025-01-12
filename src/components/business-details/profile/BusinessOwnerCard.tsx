@@ -19,26 +19,24 @@ export const BusinessOwnerCard = ({
   bio,
   image_url,
 }: BusinessOwnerCardProps) => {
+  const fallbackImage = "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=400";
+
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    console.log('Image failed to load:', image_url);
+    e.currentTarget.src = fallbackImage;
+  };
+
   return (
     <div className="grid grid-cols-1 gap-4">
       {/* Image Card with Overlay */}
       <Card className="relative aspect-[4/3] overflow-hidden group cursor-pointer">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80 z-10" />
-        {image_url ? (
-          <img
-            src={image_url}
-            alt={`${name}'s profile`}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-            onError={(e) => {
-              console.error('Error loading image:', image_url);
-              e.currentTarget.src = '/placeholder.svg';
-            }}
-          />
-        ) : (
-          <div className="w-full h-full bg-muted flex items-center justify-center">
-            <span className="text-muted-foreground">No image available</span>
-          </div>
-        )}
+        <img
+          src={image_url || fallbackImage}
+          alt={`${name}'s profile`}
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          onError={handleImageError}
+        />
         <div className="absolute bottom-0 left-0 right-0 p-4 text-white z-20">
           <h4 className="text-xl font-semibold">{name}</h4>
           <p className="text-sm opacity-90">{role}</p>

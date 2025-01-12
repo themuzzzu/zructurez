@@ -3,6 +3,7 @@ import { Textarea } from "../../ui/textarea";
 import { ImageUpload } from "../../ImageUpload";
 import type { Owner } from "../types/owner";
 import { Label } from "../../ui/label";
+import { toast } from "sonner";
 
 interface OwnerFormFieldsProps {
   name: string;
@@ -25,6 +26,14 @@ export const OwnerFormFields = ({
   image_url,
   onUpdate,
 }: OwnerFormFieldsProps) => {
+  const handleImageSelect = (image: string | null) => {
+    console.log('Selected image:', image);
+    if (image) {
+      onUpdate("image_url", image);
+      toast.success("Image uploaded successfully");
+    }
+  };
+
   return (
     <div className="grid gap-4 flex-1">
       <div className="space-y-2">
@@ -89,10 +98,7 @@ export const OwnerFormFields = ({
         </p>
         <ImageUpload
           selectedImage={image_url}
-          onImageSelect={(image) => {
-            console.log('Selected image:', image);
-            onUpdate("image_url", image || "");
-          }}
+          onImageSelect={handleImageSelect}
           initialScale={1}
           initialPosition={{ x: 50, y: 50 }}
           skipAutoSave={true}

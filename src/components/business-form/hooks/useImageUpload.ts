@@ -8,6 +8,8 @@ export const uploadBusinessImage = async (base64Image: string, prefix: string = 
   }
 
   try {
+    console.log('Starting image upload process...');
+    
     // Convert base64 to blob
     const base64Data = base64Image.split(',')[1];
     const byteCharacters = atob(base64Data);
@@ -37,6 +39,7 @@ export const uploadBusinessImage = async (base64Image: string, prefix: string = 
 
     if (uploadError) {
       console.error('Upload error:', uploadError);
+      toast.error('Failed to upload image. Please try again.');
       throw uploadError;
     }
 
