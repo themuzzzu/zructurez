@@ -49,6 +49,7 @@ export const uploadBusinessImage = async (base64Image: string, prefix: string = 
     return publicUrl;
   } catch (error) {
     console.error('Error in uploadImage:', error);
+    toast.error('Failed to upload image. Please try again.');
     throw error;
   }
 };
