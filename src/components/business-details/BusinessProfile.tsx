@@ -47,12 +47,15 @@ export const BusinessProfile = ({
     <div className="space-y-6">
       {/* Business Image */}
       {image_url && (
-        <div className="relative aspect-video w-full overflow-hidden rounded-lg">
-          <img
-            src={image_url}
-            alt="Business"
-            className="object-cover w-full h-full"
-          />
+        <div className="w-full rounded-lg overflow-hidden">
+          <div className="relative w-full max-h-[600px]">
+            <img
+              src={image_url}
+              alt="Business"
+              className="w-full h-auto object-contain rounded-lg"
+              style={{ maxHeight: '600px' }}
+            />
+          </div>
         </div>
       )}
 
