@@ -2,6 +2,7 @@ import { Input } from "../../ui/input";
 import { Textarea } from "../../ui/textarea";
 import { Label } from "../../ui/label";
 import { ImageUpload } from "../../ImageUpload";
+import { toast } from "sonner";
 import type { StaffMember } from "../types/staff";
 
 interface StaffFormFieldsProps {
@@ -21,6 +22,14 @@ export const StaffFormFields = ({
   image_url,
   onUpdate,
 }: StaffFormFieldsProps) => {
+  const handleImageSelect = async (image: string | null) => {
+    console.log('Selected staff image:', image);
+    if (image) {
+      onUpdate("image_url", image);
+      toast.success("Staff image uploaded successfully!");
+    }
+  };
+
   return (
     <div className="grid gap-4 flex-1">
       <div className="space-y-2">
@@ -64,7 +73,7 @@ export const StaffFormFields = ({
         <Label>Staff Photo</Label>
         <ImageUpload
           selectedImage={image_url}
-          onImageSelect={(image) => onUpdate("image_url", image || "")}
+          onImageSelect={handleImageSelect}
           initialScale={1}
           initialPosition={{ x: 50, y: 50 }}
           skipAutoSave={true}
