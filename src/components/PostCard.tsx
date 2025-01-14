@@ -57,7 +57,12 @@ export const PostCard = ({
         const { error } = await supabase
           .from('likes')
           .insert([{ post_id: id, user_id: user.id }]);
-        if (error) throw error;
+        
+        // If we get a duplicate key error, it means the user has already liked the post
+        // We can ignore this error as it doesn't affect the user experience
+        if (error && error.code !== '23505') {
+          throw error;
+        }
       }
     },
     onSuccess: () => {
@@ -65,9 +70,12 @@ export const PostCard = ({
       setLikesCount(prev => isLikedState ? prev - 1 : prev + 1);
       queryClient.invalidateQueries({ queryKey: ['posts'] });
     },
-    onError: (error) => {
-      console.error('Error toggling like:', error);
-      toast.error("Failed to update like");
+    onError: (error: any) => {
+      // Only show error toast if it's not a duplicate key error
+      if (error.code !== '23505') {
+        console.error('Error toggling like:', error);
+        toast.error("Failed to update like");
+      }
     },
   });
 
