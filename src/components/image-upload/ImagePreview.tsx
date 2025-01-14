@@ -1,57 +1,51 @@
-import { Button } from "../ui/button";
 import { X } from "lucide-react";
-
-interface ImagePosition {
-  x: number;
-  y: number;
-}
+import { Button } from "../ui/button";
+import { ImagePosition } from "./types";
 
 interface ImagePreviewProps {
   previewImage: string;
   scale: number;
   position: ImagePosition;
-  onPositionChange: (position: ImagePosition) => void;
   onImageRemove: () => void;
   isDragging: boolean;
   onDragStart: (e: React.MouseEvent) => void;
   onDragMove: (e: React.MouseEvent) => void;
   onDragEnd: () => void;
+  onPositionChange: (position: ImagePosition) => void;
 }
 
 export const ImagePreview = ({
   previewImage,
   scale,
   position,
-  onPositionChange,
   onImageRemove,
   isDragging,
   onDragStart,
   onDragMove,
   onDragEnd,
+  onPositionChange,
 }: ImagePreviewProps) => {
   return (
-    <div 
-      className="relative h-48 overflow-hidden rounded-lg group cursor-move"
-      onMouseDown={onDragStart}
-      onMouseMove={onDragMove}
-      onMouseUp={onDragEnd}
-      onMouseLeave={onDragEnd}
-    >
-      <img
-        src={previewImage}
-        alt="Preview"
-        className="w-full h-full object-cover transition-transform duration-300"
+    <div className="relative aspect-video w-full overflow-hidden rounded-lg border">
+      <div
+        className="absolute inset-0"
         style={{
           transform: `scale(${scale})`,
-          objectPosition: `${position.x}% ${position.y}%`,
-          userSelect: 'none',
-          pointerEvents: 'none'
+          backgroundImage: `url(${previewImage})`,
+          backgroundPosition: `${position.x}% ${position.y}%`,
+          backgroundSize: "cover",
+          cursor: isDragging ? "grabbing" : "grab",
         }}
+        onMouseDown={onDragStart}
+        onMouseMove={onDragMove}
+        onMouseUp={onDragEnd}
+        onMouseLeave={onDragEnd}
       />
       <Button
+        type="button"
         variant="destructive"
         size="icon"
-        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        className="absolute right-2 top-2"
         onClick={onImageRemove}
       >
         <X className="h-4 w-4" />

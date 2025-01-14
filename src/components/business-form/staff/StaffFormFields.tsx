@@ -1,7 +1,7 @@
 import { Input } from "../../ui/input";
 import { Textarea } from "../../ui/textarea";
 import { Label } from "../../ui/label";
-import { ImageUpload } from "../../ImageUpload";
+import { ImageUpload } from "../../image-upload/ImageUpload";
 import { toast } from "sonner";
 import type { StaffMember } from "../types/staff";
 

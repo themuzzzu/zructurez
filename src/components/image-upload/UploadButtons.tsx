@@ -1,5 +1,5 @@
+import { Camera, Upload } from "lucide-react";
 import { Button } from "../ui/button";
-import { ImagePlus, Camera } from "lucide-react";
 
 interface UploadButtonsProps {
   onCameraCapture: () => void;
@@ -8,37 +8,34 @@ interface UploadButtonsProps {
 
 export const UploadButtons = ({ onCameraCapture, onFileSelect }: UploadButtonsProps) => {
   return (
-    <div className="flex items-center gap-4">
+    <div className="flex gap-2">
       <Button
         type="button"
         variant="outline"
-        className="flex items-center gap-2"
-        onClick={() => document.getElementById('photo-upload')?.click()}
+        className="flex-1"
+        onClick={() => {
+          const input = document.createElement("input");
+          input.type = "file";
+          input.accept = "image/*";
+          input.onchange = (e) => {
+            const file = (e.target as HTMLInputElement).files?.[0];
+            if (file) onFileSelect(file);
+          };
+          input.click();
+        }}
       >
-        <ImagePlus className="h-4 w-4" />
-        Choose Image
+        <Upload className="mr-2 h-4 w-4" />
+        Upload
       </Button>
       <Button
         type="button"
         variant="outline"
-        className="flex items-center gap-2"
+        className="flex-1"
         onClick={onCameraCapture}
       >
-        <Camera className="h-4 w-4" />
-        Take Photo
+        <Camera className="mr-2 h-4 w-4" />
+        Camera
       </Button>
-      <input
-        id="photo-upload"
-        type="file"
-        accept="image/jpeg,image/jpg,image/png,image/webp"
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (file) {
-            onFileSelect(file);
-          }
-        }}
-        className="hidden"
-      />
     </div>
   );
 };
