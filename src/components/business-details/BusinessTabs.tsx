@@ -17,26 +17,15 @@ export const BusinessTabs = ({ business, isOwner, onRefetch }: BusinessTabsProps
     <Tabs defaultValue="about" className="w-full">
       <TabsList className="grid grid-cols-5 w-full">
         <TabsTrigger value="about">About</TabsTrigger>
-        <TabsTrigger value="posts">Posts</TabsTrigger>
-        <TabsTrigger value="portfolio">Notable Works</TabsTrigger>
         <TabsTrigger value="products">Products</TabsTrigger>
         <TabsTrigger value="services">Services</TabsTrigger>
+        <TabsTrigger value="portfolio">Notable Works</TabsTrigger>
+        <TabsTrigger value="posts">Posts</TabsTrigger>
       </TabsList>
 
       <div className="mt-6">
         <TabsContent value="about">
           <BusinessAboutTab business={business} />
-        </TabsContent>
-
-        <TabsContent value="posts">
-          <BusinessPostsTab business={business} />
-        </TabsContent>
-
-        <TabsContent value="portfolio">
-          <BusinessPortfolioTab 
-            portfolio={business.business_portfolio} 
-            businessId={isOwner ? business.id : undefined}
-          />
         </TabsContent>
 
         <TabsContent value="products">
@@ -55,6 +44,17 @@ export const BusinessTabs = ({ business, isOwner, onRefetch }: BusinessTabsProps
             businessId={business.id}
             onSuccess={onRefetch}
           />
+        </TabsContent>
+
+        <TabsContent value="portfolio">
+          <BusinessPortfolioTab 
+            portfolio={business.business_portfolio} 
+            businessId={isOwner ? business.id : undefined}
+          />
+        </TabsContent>
+
+        <TabsContent value="posts">
+          <BusinessPostsTab business={business} />
         </TabsContent>
       </div>
     </Tabs>
