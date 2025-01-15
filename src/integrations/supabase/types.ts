@@ -648,7 +648,9 @@ export type Database = {
       }
       products: {
         Row: {
+          brand_name: string | null
           category: string
+          condition: string | null
           created_at: string
           description: string
           id: string
@@ -656,6 +658,7 @@ export type Database = {
           is_branded: boolean | null
           is_discounted: boolean | null
           is_used: boolean | null
+          model: string | null
           price: number
           service_product_id: string | null
           stock: number
@@ -664,7 +667,9 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          brand_name?: string | null
           category: string
+          condition?: string | null
           created_at?: string
           description: string
           id?: string
@@ -672,6 +677,7 @@ export type Database = {
           is_branded?: boolean | null
           is_discounted?: boolean | null
           is_used?: boolean | null
+          model?: string | null
           price: number
           service_product_id?: string | null
           stock?: number
@@ -680,7 +686,9 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          brand_name?: string | null
           category?: string
+          condition?: string | null
           created_at?: string
           description?: string
           id?: string
@@ -688,6 +696,7 @@ export type Database = {
           is_branded?: boolean | null
           is_discounted?: boolean | null
           is_used?: boolean | null
+          model?: string | null
           price?: number
           service_product_id?: string | null
           stock?: number
