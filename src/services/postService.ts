@@ -62,6 +62,7 @@ export const addComment = async (postId: string, content: string) => {
       .insert({
         post_id: postId,
         user_id: user.id,
+        profile_id: user.id, // Add this line to include profile_id
         content: content
       });
 
