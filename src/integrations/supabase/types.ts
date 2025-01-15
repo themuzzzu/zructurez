@@ -711,6 +711,7 @@ export type Database = {
           bio: string | null
           created_at: string
           id: string
+          location: string | null
           username: string | null
         }
         Insert: {
@@ -718,6 +719,7 @@ export type Database = {
           bio?: string | null
           created_at?: string
           id: string
+          location?: string | null
           username?: string | null
         }
         Update: {
@@ -725,6 +727,7 @@ export type Database = {
           bio?: string | null
           created_at?: string
           id?: string
+          location?: string | null
           username?: string | null
         }
         Relationships: []

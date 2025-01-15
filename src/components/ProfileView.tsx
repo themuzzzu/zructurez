@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Cart } from "./cart/Cart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { LocationSelector } from "./LocationSelector";
 
 export const ProfileView = () => {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ export const ProfileView = () => {
     username: "",
     avatar_url: "",
     bio: "",
+    location: "",
   });
   const [loading, setLoading] = useState(false);
 
@@ -56,6 +58,7 @@ export const ProfileView = () => {
           username: profile.username,
           avatar_url: profile.avatar_url,
           bio: profile.bio,
+          location: profile.location,
         })
         .eq('id', user.id);
 
@@ -78,7 +81,6 @@ export const ProfileView = () => {
         return;
       }
 
-      // Update all future messages to expire after 24 hours
       const { error } = await supabase
         .from('messages')
         .update({
@@ -144,6 +146,23 @@ export const ProfileView = () => {
                 disabled={!isEditing}
                 placeholder="Enter username"
               />
+            </div>
+
+            <div>
+              <Label htmlFor="location">Location</Label>
+              {isEditing ? (
+                <LocationSelector
+                  value={profile.location || ""}
+                  onChange={(value) => setProfile({ ...profile, location: value })}
+                />
+              ) : (
+                <Input
+                  id="location"
+                  value={profile.location || ""}
+                  disabled
+                  placeholder="No location set"
+                />
+              )}
             </div>
 
             <div>
