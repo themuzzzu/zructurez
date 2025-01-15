@@ -1,8 +1,9 @@
-import { Star, MapPin, Clock, Phone } from "lucide-react";
+import { Star, MapPin, Clock, Phone, Share2, MessageSquare } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 interface BusinessCardProps {
   id: string;
@@ -39,6 +40,34 @@ export const BusinessCard = ({
 }: BusinessCardProps) => {
   const navigate = useNavigate();
 
+  const handleShare = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const businessUrl = `${window.location.origin}/business/${id}`;
+    
+    if (navigator.share) {
+      navigator.share({
+        title: name,
+        text: `Check out ${name} - ${description}`,
+        url: businessUrl
+      }).catch(() => {
+        // Fallback if share fails
+        navigator.clipboard.writeText(businessUrl);
+        toast.success("Link copied to clipboard!");
+      });
+    } else {
+      // Fallback for browsers that don't support share API
+      navigator.clipboard.writeText(businessUrl);
+      toast.success("Link copied to clipboard!");
+    }
+  };
+
+  const handleWhatsApp = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const greeting = `Hi! I found your business profile for ${name}. I'm interested in learning more about your services.`;
+    const whatsappUrl = `https://wa.me/${contact.replace(/\D/g, '')}?text=${encodeURIComponent(greeting)}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
   return (
     <Card 
       className="overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer"
@@ -46,7 +75,10 @@ export const BusinessCard = ({
     >
       <img src={image} alt={name} className="w-full h-48 object-cover" />
       <div className="p-4">
-        <h3 className="font-semibold text-lg">{name}</h3>
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold text-lg">{name}</h3>
+          {verified && <Badge variant="outline">Verified</Badge>}
+        </div>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <span>{category}</span>
           <span>•</span>
@@ -65,7 +97,7 @@ export const BusinessCard = ({
           <Clock className="h-4 w-4" />
           {hours}
         </div>
-        {verified && <Badge variant="outline">Verified</Badge>}
+        
         <div className="flex flex-col gap-2 mt-4">
           {appointment_price && (
             <div className="text-sm">
@@ -77,12 +109,34 @@ export const BusinessCard = ({
               <span className="font-semibold">Consultation:</span> ₹{consultation_price}
             </div>
           )}
-          <Button onClick={(e) => {
-            e.stopPropagation();
-            window.location.href = `tel:${contact}`;
-          }} className="flex items-center gap-1">
+          <div className="flex gap-2">
+            <Button 
+              onClick={handleWhatsApp} 
+              className="flex-1 flex items-center gap-1"
+              variant="default"
+            >
+              <MessageSquare className="h-4 w-4" />
+              Message
+            </Button>
+            <Button
+              onClick={handleShare}
+              variant="outline"
+              className="flex items-center gap-1"
+            >
+              <Share2 className="h-4 w-4" />
+              Share
+            </Button>
+          </div>
+          <Button 
+            onClick={(e) => {
+              e.stopPropagation();
+              window.location.href = `tel:${contact}`;
+            }} 
+            variant="outline"
+            className="flex items-center gap-1"
+          >
             <Phone className="h-4 w-4" />
-            Contact
+            Call
           </Button>
         </div>
       </div>
