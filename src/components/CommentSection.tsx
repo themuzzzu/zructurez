@@ -80,14 +80,14 @@ export const CommentSection = ({ postId }: CommentSectionProps) => {
           <div key={comment.id} className="flex gap-4 animate-fade-up">
             <Avatar>
               <img
-                src={comment.profiles?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.user_id}`}
-                alt={`${comment.profiles?.username || 'Anonymous'}'s avatar`}
+                src={comment.profile?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.user_id}`}
+                alt={`${comment.profile?.username || 'Anonymous'}'s avatar`}
                 className="h-8 w-8 rounded-full"
               />
             </Avatar>
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                <span className="font-semibold">{comment.profiles?.username || 'Anonymous'}</span>
+                <span className="font-semibold">{comment.profile?.username || 'Anonymous'}</span>
                 <span className="text-sm text-muted-foreground">
                   {new Date(comment.created_at).toLocaleString()}
                 </span>

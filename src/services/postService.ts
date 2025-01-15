@@ -35,7 +35,7 @@ export const getComments = async (postId: string) => {
       .from('comments')
       .select(`
         *,
-        profiles (username, avatar_url)
+        profile:profiles!comments_profile_id_fkey (username, avatar_url)
       `)
       .eq('post_id', postId)
       .order('created_at', { ascending: false });

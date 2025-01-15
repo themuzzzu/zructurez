@@ -138,6 +138,7 @@ export type Database = {
           location: string | null
           name: string
           owners: Json | null
+          show_in_services: boolean | null
           staff_details: Json | null
           user_id: string
           verified: boolean | null
@@ -160,6 +161,7 @@ export type Database = {
           location?: string | null
           name: string
           owners?: Json | null
+          show_in_services?: boolean | null
           staff_details?: Json | null
           user_id: string
           verified?: boolean | null
@@ -182,6 +184,7 @@ export type Database = {
           location?: string | null
           name?: string
           owners?: Json | null
+          show_in_services?: boolean | null
           staff_details?: Json | null
           user_id?: string
           verified?: boolean | null
@@ -228,6 +231,7 @@ export type Database = {
           created_at: string
           id: string
           post_id: string
+          profile_id: string
           user_id: string
         }
         Insert: {
@@ -235,6 +239,7 @@ export type Database = {
           created_at?: string
           id?: string
           post_id: string
+          profile_id: string
           user_id: string
         }
         Update: {
@@ -242,6 +247,7 @@ export type Database = {
           created_at?: string
           id?: string
           post_id?: string
+          profile_id?: string
           user_id?: string
         }
         Relationships: [
@@ -250,6 +256,13 @@ export type Database = {
             columns: ["post_id"]
             isOneToOne: false
             referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comments_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
