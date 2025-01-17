@@ -18,6 +18,10 @@ export const BusinessAboutTab = ({ business }: BusinessAboutTabProps) => {
       website={business.website}
       owners={business.owners}
       staff_details={business.staff_details}
+      category={business.category}
+      appointment_price={business.appointment_price}
+      consultation_price={business.consultation_price}
+      business_products={business.business_products}
     />
   );
 };

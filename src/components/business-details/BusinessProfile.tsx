@@ -1,8 +1,9 @@
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { MapPin, Clock, Phone, Mail, Building, Users, Globe } from "lucide-react";
+import { MapPin, Clock, Phone, Mail, Building, Users, Globe, Menu } from "lucide-react";
 import { BusinessOwnerCard } from "./profile/BusinessOwnerCard";
 import { BusinessStaffCard } from "./profile/BusinessStaffCard";
+import { ServiceMenuCard } from "./profile/ServiceMenuCard";
 
 interface BusinessProfileProps {
   description: string;
@@ -27,6 +28,14 @@ interface BusinessProfileProps {
     experience?: string;
     image_url?: string | null;
   }[];
+  category?: string;
+  appointment_price?: number;
+  consultation_price?: number;
+  business_products?: Array<{
+    name: string;
+    price: number;
+    description: string;
+  }>;
 }
 
 export const BusinessProfile = ({
@@ -40,6 +49,10 @@ export const BusinessProfile = ({
   website,
   owners,
   staff_details,
+  category,
+  appointment_price,
+  consultation_price,
+  business_products,
 }: BusinessProfileProps) => {
   const hasValidStaff = staff_details && staff_details.length > 0 && staff_details.some(staff => staff.name);
 
@@ -113,6 +126,16 @@ export const BusinessProfile = ({
           )}
         </div>
       </Card>
+
+      {/* Service Menu/Info Card */}
+      {(category || appointment_price || consultation_price || (business_products && business_products.length > 0)) && (
+        <ServiceMenuCard
+          category={category}
+          appointment_price={appointment_price}
+          consultation_price={consultation_price}
+          business_products={business_products}
+        />
+      )}
 
       {/* Bio Section */}
       {bio && (
