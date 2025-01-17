@@ -23,13 +23,13 @@ export const ServiceMenuCard = ({
     <Card className="p-6">
       <div className="flex items-center gap-2 mb-4">
         <Menu className="h-5 w-5" />
-        <h3 className="text-lg font-semibold">Service Menu</h3>
+        <h3 className="text-lg font-semibold">Details of Business</h3>
       </div>
 
       {category && (
         <div className="mb-4">
           <span className="text-sm font-medium">Category:</span>
-          <span className="ml-2 text-muted-foreground">{category}</span>
+          <span className="ml-2 text-muted-foreground capitalize">{category}</span>
         </div>
       )}
 
