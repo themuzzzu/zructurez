@@ -78,6 +78,20 @@ export const BusinessBasicInfo = ({ formData, onChange }: BusinessBasicInfoProps
           placeholder="Enter consultation price"
         />
       </div>
+
+      {/* Product Categories Section */}
+      <div className="space-y-2">
+        <Label>Product Categories</Label>
+        <div className="text-sm text-muted-foreground">
+          You can add products with categories like:
+          <ul className="list-disc list-inside mt-2 space-y-1">
+            <li>Food: Veg, Non-veg, Beverages</li>
+            <li>Fashion: Formal, Casual, Classic</li>
+            <li>Beauty: Skincare, Haircare, Makeup</li>
+            <li>And more based on your business type</li>
+          </ul>
+        </div>
+      </div>
     </>
   );
 };
