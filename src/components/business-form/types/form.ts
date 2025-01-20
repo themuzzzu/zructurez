@@ -22,7 +22,7 @@ export interface BusinessFormData {
   website: string;
   owners: Owner[];
   staff_details: StaffMember[];
-  business_products?: BusinessProduct[];
+  business_products: BusinessProduct[]; // Removed the optional ? since we always initialize it as an empty array
 }
 
 export interface FormProps {
