@@ -33,6 +33,7 @@ export const useBusinessForm = (initialData?: any, onSuccess?: () => void) => {
       image_url: null 
     }],
     staff_details: [],
+    business_products: []
   });
 
   useEffect(() => {
@@ -59,6 +60,7 @@ export const useBusinessForm = (initialData?: any, onSuccess?: () => void) => {
           image_url: null 
         }],
         staff_details: initialData.staff_details || [],
+        business_products: initialData.business_products || []
       });
       setPendingImage(initialData.image_url || null);
       if (initialData.image_scale) setImageScale(initialData.image_scale);
