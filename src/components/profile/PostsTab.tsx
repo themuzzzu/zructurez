@@ -52,9 +52,10 @@ export const PostsTab = () => {
           time={new Date(post.created_at).toLocaleString()}
           content={post.content}
           category={post.category || "General"}
-          likes={post.likes}
-          comments={post.comments}
+          likes={post.likes || 0}
+          comments={post.comments || 0}
           image={post.image_url}
+          views={post.views || 0}
           isLiked={post.user_has_liked}
         />
       ))}
