@@ -39,6 +39,7 @@ export interface Business {
     title: string;
     description: string | null;
     image_url: string | null;
+    views: number | null;
   }>;
   business_products: Array<{
     id: string;
@@ -58,5 +59,6 @@ export interface Business {
     profile_id: string;
     user_id: string;
     location: string | null;
+    views: number | null;
   }>;
 }

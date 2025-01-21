@@ -13,6 +13,7 @@ interface PostCardProps {
   likes: number;
   comments: number;
   views?: number;
+  isLiked?: boolean;
 }
 
 export const PostCard = ({ 
@@ -25,7 +26,8 @@ export const PostCard = ({
   image, 
   likes, 
   comments,
-  views = 0 
+  views = 0,
+  isLiked = false
 }: PostCardProps) => {
   useEffect(() => {
     // Increment view count when post is rendered
