@@ -53,6 +53,7 @@ export type Database = {
           id: string
           image_url: string | null
           title: string
+          views: number | null
         }
         Insert: {
           business_id: string
@@ -61,6 +62,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           title: string
+          views?: number | null
         }
         Update: {
           business_id?: string
@@ -69,6 +71,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           title?: string
+          views?: number | null
         }
         Relationships: [
           {
@@ -577,6 +580,7 @@ export type Database = {
           location: string | null
           profile_id: string
           user_id: string
+          views: number | null
         }
         Insert: {
           business_id?: string | null
@@ -588,6 +592,7 @@ export type Database = {
           location?: string | null
           profile_id: string
           user_id: string
+          views?: number | null
         }
         Update: {
           business_id?: string | null
@@ -599,6 +604,7 @@ export type Database = {
           location?: string | null
           profile_id?: string
           user_id?: string
+          views?: number | null
         }
         Relationships: [
           {
@@ -660,11 +666,13 @@ export type Database = {
           is_used: boolean | null
           model: string | null
           price: number
+          reach: number | null
           service_product_id: string | null
           stock: number
           subcategory: string | null
           title: string
           user_id: string | null
+          views: number | null
         }
         Insert: {
           brand_name?: string | null
@@ -679,11 +687,13 @@ export type Database = {
           is_used?: boolean | null
           model?: string | null
           price: number
+          reach?: number | null
           service_product_id?: string | null
           stock?: number
           subcategory?: string | null
           title: string
           user_id?: string | null
+          views?: number | null
         }
         Update: {
           brand_name?: string | null
@@ -698,11 +708,13 @@ export type Database = {
           is_used?: boolean | null
           model?: string | null
           price?: number
+          reach?: number | null
           service_product_id?: string | null
           stock?: number
           subcategory?: string | null
           title?: string
           user_id?: string | null
+          views?: number | null
         }
         Relationships: [
           {
@@ -750,6 +762,7 @@ export type Database = {
           service_id: string
           title: string
           video_url: string | null
+          views: number | null
         }
         Insert: {
           created_at?: string
@@ -759,6 +772,7 @@ export type Database = {
           service_id: string
           title: string
           video_url?: string | null
+          views?: number | null
         }
         Update: {
           created_at?: string
@@ -768,6 +782,7 @@ export type Database = {
           service_id?: string
           title?: string
           video_url?: string | null
+          views?: number | null
         }
         Relationships: [
           {
@@ -927,6 +942,13 @@ export type Database = {
       get_sample_user_id: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      increment_views: {
+        Args: {
+          table_name: string
+          record_id: string
+        }
+        Returns: undefined
       }
     }
     Enums: {

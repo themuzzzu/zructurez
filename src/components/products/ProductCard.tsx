@@ -1,6 +1,6 @@
 import { Card } from "../ui/card";
 import { Button } from "../ui/button";
-import { ShoppingBag, IndianRupee, Share2 } from "lucide-react";
+import { ShoppingBag, IndianRupee, Share2, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,6 +10,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useEffect } from "react";
+import { incrementViews } from "@/services/postService";
 
 interface Product {
   id: string;
@@ -20,6 +22,8 @@ interface Product {
   subcategory: string | null;
   image_url: string | null;
   stock: number;
+  views?: number;
+  reach?: number;
 }
 
 interface ProductCardProps {
@@ -95,6 +99,11 @@ export const ProductCard = ({ product }: ProductCardProps) => {
     }).format(price);
   };
 
+  useEffect(() => {
+    // Increment view count when product is rendered
+    incrementViews('products', product.id);
+  }, [product.id]);
+
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 bg-[#0a0a0a] border-border">
       {product.image_url && (
@@ -159,6 +168,10 @@ export const ProductCard = ({ product }: ProductCardProps) => {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
+        </div>
+        <div className="flex items-center gap-2 text-muted-foreground mt-2">
+          <Eye className="h-4 w-4" />
+          <span>{product.views || 0} views</span>
         </div>
       </div>
     </Card>

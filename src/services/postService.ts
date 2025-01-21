@@ -182,3 +182,16 @@ export const deletePost = async (postId: string) => {
     throw error;
   }
 };
+
+export const incrementViews = async (tableType: 'posts' | 'products' | 'business_portfolio' | 'service_portfolio', id: string) => {
+  try {
+    const { error } = await supabase.rpc('increment_views', {
+      table_name: tableType,
+      record_id: id
+    });
+
+    if (error) throw error;
+  } catch (error) {
+    console.error(`Error incrementing views for ${tableType}:`, error);
+  }
+};

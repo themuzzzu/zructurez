@@ -1,14 +1,6 @@
-import { useState } from "react";
-import { Card } from "./ui/card";
-import { Avatar } from "./ui/avatar";
-import { Button } from "./ui/button";
-import { Heart, MessageSquare, Share2 } from "lucide-react";
-import { CommentSection } from "./CommentSection";
-import { AspectRatio } from "./ui/aspect-ratio";
-import { cn } from "@/lib/utils";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { useEffect } from "react";
+import { Eye } from "lucide-react";
+import { incrementViews } from "@/services/postService";
 
 interface PostCardProps {
   id: string;
@@ -17,157 +9,52 @@ interface PostCardProps {
   time: string;
   content: string;
   category?: string;
-  likes?: number;
-  comments?: number;
   image?: string | null;
-  isLiked?: boolean;
+  likes: number;
+  comments: number;
+  views?: number;
 }
 
-export const PostCard = ({
-  id,
-  author,
-  avatar,
-  time,
-  content,
-  category,
-  likes = 0,
-  comments = 0,
-  image,
-  isLiked = false,
+export const PostCard = ({ 
+  id, 
+  author, 
+  avatar, 
+  time, 
+  content, 
+  category, 
+  image, 
+  likes, 
+  comments,
+  views = 0 
 }: PostCardProps) => {
-  const [showComments, setShowComments] = useState(false);
-  const [isLikedState, setIsLikedState] = useState(isLiked);
-  const [likesCount, setLikesCount] = useState(likes);
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const queryClient = useQueryClient();
-
-  const likeMutation = useMutation({
-    mutationFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("User not authenticated");
-
-      if (isLikedState) {
-        const { error } = await supabase
-          .from('likes')
-          .delete()
-          .eq('post_id', id)
-          .eq('user_id', user.id);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from('likes')
-          .insert([{ post_id: id, user_id: user.id }]);
-        
-        // If we get a duplicate key error, it means the user has already liked the post
-        // We can ignore this error as it doesn't affect the user experience
-        if (error && error.code !== '23505') {
-          throw error;
-        }
-      }
-    },
-    onSuccess: () => {
-      setIsLikedState(!isLikedState);
-      setLikesCount(prev => isLikedState ? prev - 1 : prev + 1);
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
-    },
-    onError: (error: any) => {
-      // Only show error toast if it's not a duplicate key error
-      if (error.code !== '23505') {
-        console.error('Error toggling like:', error);
-        toast.error("Failed to update like");
-      }
-    },
-  });
-
-  const handleImageLoad = (event: React.SyntheticEvent<HTMLImageElement>) => {
-    const img = event.target as HTMLImageElement;
-    setImageLoaded(true);
-  };
+  useEffect(() => {
+    // Increment view count when post is rendered
+    incrementViews('posts', id);
+  }, [id]);
 
   return (
-    <Card className="overflow-hidden bg-black/90 border-zinc-800 shadow-lg">
-      <div className="p-4">
-        <div className="flex items-center gap-3 mb-4">
-          <Avatar>
-            <img src={avatar} alt={author} className="h-10 w-10 rounded-full" />
-          </Avatar>
-          <div>
-            <div className="font-semibold text-gray-200">{author}</div>
-            <div className="text-sm text-gray-400 flex items-center gap-2">
-              <span>{time}</span>
-              {category && (
-                <>
-                  <span>•</span>
-                  <span>{category}</span>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <p className="mb-4 text-gray-200">{content}</p>
-
-        {image && (
-          <div className="relative mb-4 rounded-lg overflow-hidden bg-black/50">
-            <img
-              src={image}
-              alt="Post content"
-              className={cn(
-                "w-full transition-opacity duration-200",
-                imageLoaded ? "opacity-100" : "opacity-0"
-              )}
-              style={{
-                maxHeight: "calc(100vh - 200px)",
-                objectFit: "contain",
-                margin: "0 auto",
-                display: "block"
-              }}
-              onLoad={handleImageLoad}
-            />
-          </div>
-        )}
-
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-gray-400 hover:text-gray-200 hover:bg-black/60"
-            onClick={() => likeMutation.mutate()}
-          >
-            <Heart
-              className={cn(
-                "h-4 w-4 mr-2",
-                isLikedState ? "fill-current text-red-500" : ""
-              )}
-            />
-            {likesCount}
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-gray-400 hover:text-gray-200 hover:bg-black/60"
-            onClick={() => setShowComments(!showComments)}
-          >
-            <MessageSquare className="h-4 w-4 mr-2" />
-            {comments}
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-gray-400 hover:text-gray-200 hover:bg-black/60"
-            onClick={() => toast.info("Sharing coming soon!")}
-          >
-            <Share2 className="h-4 w-4 mr-2" />
-            Share
-          </Button>
+    <div className="flex flex-col p-4 border rounded-lg">
+      {image && <img src={image} alt={content} className="w-full h-48 object-cover rounded-md" />}
+      <div className="flex items-center mt-2">
+        <img src={avatar} alt={author} className="w-10 h-10 rounded-full" />
+        <div className="ml-2">
+          <h3 className="font-semibold">{author}</h3>
+          <p className="text-sm text-muted-foreground">{time}</p>
         </div>
       </div>
-
-      {showComments && (
-        <div className="border-t border-zinc-800">
-          <CommentSection postId={id} />
+      <p className="mt-2">{content}</p>
+      <div className="flex items-center gap-4 mt-2 text-muted-foreground">
+        <div className="flex items-center gap-1">
+          <Eye className="h-4 w-4" />
+          {views}
         </div>
-      )}
-    </Card>
+        <div className="flex items-center gap-1">
+          <span className="font-medium">{likes}</span> Likes
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="font-medium">{comments}</span> Comments
+        </div>
+      </div>
+    </div>
   );
 };
