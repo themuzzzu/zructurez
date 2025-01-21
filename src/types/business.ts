@@ -1,3 +1,18 @@
+export interface BusinessOwner {
+  name: string | null;
+  role: string;
+  position: string | null;
+  experience: string | null;
+  bio?: string | null;
+}
+
+export interface StaffMember {
+  name: string | null;
+  position: string | null;
+  experience: string | null;
+  bio?: string | null;
+}
+
 export interface Business {
   id: string;
   user_id: string;
@@ -17,17 +32,8 @@ export interface Business {
   website: string | null;
   image_scale: number | null;
   image_position: { x: number; y: number } | null;
-  staff_details: Array<{
-    name: string | null;
-    position: string | null;
-    experience: string | null;
-  }> | null;
-  owners: Array<{
-    name: string | null;
-    role: string;
-    position: string | null;
-    experience: string | null;
-  }> | null;
+  staff_details: Array<StaffMember> | null;
+  owners: Array<BusinessOwner> | null;
   show_in_services: boolean | null;
   business_portfolio: Array<{
     id: string;
