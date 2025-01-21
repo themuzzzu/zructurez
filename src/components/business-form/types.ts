@@ -13,6 +13,13 @@ export interface StaffMember {
   image_url?: string | null;
 }
 
+export interface BusinessProduct {
+  name: string;
+  price: number;
+  description: string;
+  category: string;
+}
+
 export interface BusinessFormData {
   name: string;
   category: string;
@@ -27,4 +34,5 @@ export interface BusinessFormData {
   website: string;
   owners: Owner[];
   staff_details: StaffMember[];
+  business_products: BusinessProduct[];
 }
