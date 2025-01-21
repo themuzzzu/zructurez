@@ -1,5 +1,4 @@
-import type { StaffMember } from "../../../types/business";
-import type { Owner } from "./owner";
+import type { StaffMember, BusinessOwner } from "../../../types/business";
 
 interface BusinessProduct {
   name: string;
@@ -20,7 +19,7 @@ export interface BusinessFormData {
   consultation_price: string;
   bio: string;
   website: string;
-  owners: Owner[];
+  owners: BusinessOwner[];
   staff_details: StaffMember[];
   business_products: BusinessProduct[];
 }
