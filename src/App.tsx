@@ -21,7 +21,7 @@ import ServiceDetails from "./pages/ServiceDetails";
 import BusinessDetails from "./pages/BusinessDetails";
 import Profile from "./pages/Profile";
 import Jobs from "./pages/Jobs";
-import Groups from "./pages/Messages"; // We'll reuse Messages component for Groups temporarily
+import ProductDetails from "./pages/ProductDetails";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -44,13 +44,13 @@ const App = () => (
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/marketplace" element={<ProtectedRoute><Marketplace /></ProtectedRoute>} />
+            <Route path="/marketplace/:id" element={<ProtectedRoute><ProductDetails /></ProtectedRoute>} />
             <Route path="/services" element={<ProtectedRoute><Services /></ProtectedRoute>} />
             <Route path="/jobs" element={<ProtectedRoute><Jobs /></ProtectedRoute>} />
             <Route path="/services/:id" element={<ProtectedRoute><ServiceDetails /></ProtectedRoute>} />
             <Route path="/business/:id" element={<ProtectedRoute><BusinessDetails /></ProtectedRoute>} />
             <Route path="/communities" element={<ProtectedRoute><Communities /></ProtectedRoute>} />
             <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
-            <Route path="/groups" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
             <Route path="/events" element={<ProtectedRoute><Events /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/business" element={<ProtectedRoute><Business /></ProtectedRoute>} />
