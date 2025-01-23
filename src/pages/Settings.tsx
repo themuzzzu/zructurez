@@ -9,6 +9,7 @@ import { PrivacySettings } from "@/components/PrivacySettings";
 import { ProductsTab } from "@/components/settings/ProductsTab";
 import { BusinessSettings } from "@/components/settings/BusinessSettings";
 import { ServiceSettings } from "@/components/settings/ServiceSettings";
+import { AdvertisementsTab } from "@/components/settings/AdvertisementsTab";
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState("profile");
@@ -27,6 +28,8 @@ const Settings = () => {
         return <BusinessSettings />;
       case "services":
         return <ServiceSettings />;
+      case "advertisements":
+        return <AdvertisementsTab />;
       default:
         return <ProfileView />;
     }
