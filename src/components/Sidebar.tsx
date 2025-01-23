@@ -39,7 +39,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
 
   return (
     <div className={cn(
-      "h-screen border-r bg-[#0a0a0a] overflow-y-auto transition-all duration-300",
+      "h-screen border-r bg-background overflow-y-auto transition-all duration-300",
       isCollapsed ? "w-16" : "w-64",
       className
     )}>
