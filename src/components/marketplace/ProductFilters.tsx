@@ -1,33 +1,6 @@
-import { Button } from "@/components/ui/button";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Check, Tags, Recycle, Award } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-const categories = [
-  "All",
-  "Electronics",
-  "Groceries",
-  "Home & Kitchen",
-  "Fashion",
-  "Beauty & Personal Care",
-  "Health & Wellness",
-  "Baby Products",
-  "Toys & Games",
-  "Sports & Outdoors",
-  "Books & Media",
-  "Automotive",
-  "Pet Supplies",
-  "Office Products",
-  "Tools & Home Improvement",
-  "Garden & Outdoor",
-  "Furniture",
-  "Appliances",
-  "Arts & Crafts",
-  "Jewelry",
-  "Food & Beverages",
-  "Industrial & Scientific"
-];
 
 interface ProductFiltersProps {
   selectedCategory: string;
@@ -38,6 +11,8 @@ interface ProductFiltersProps {
   onUsedChange: () => void;
   showBranded: boolean;
   onBrandedChange: () => void;
+  showOpenOnly: boolean;
+  onOpenOnlyChange: () => void;
   sortOption: string;
   onSortChange: (value: string) => void;
 }
@@ -51,73 +26,68 @@ export const ProductFilters = ({
   onUsedChange,
   showBranded,
   onBrandedChange,
+  showOpenOnly,
+  onOpenOnlyChange,
   sortOption,
   onSortChange,
 }: ProductFiltersProps) => {
   return (
-    <div className="space-y-4">
-      <ScrollArea className="w-full whitespace-nowrap pb-2">
-        <div className="flex w-max space-x-2 p-1">
-          {categories.map((category) => (
-            <Button
-              key={category}
-              variant={selectedCategory === category ? "default" : "outline"}
-              className="text-sm"
-              onClick={() => onCategorySelect(category)}
-            >
-              {category}
-            </Button>
-          ))}
+    <div className="flex flex-wrap gap-6 items-center justify-between p-4 border rounded-lg">
+      <div className="space-y-4">
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="open-only"
+              checked={showOpenOnly}
+              onCheckedChange={onOpenOnlyChange}
+            />
+            <Label htmlFor="open-only">Open Only</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="discounted"
+              checked={showDiscounted}
+              onCheckedChange={onDiscountedChange}
+            />
+            <Label htmlFor="discounted">Discounted</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="used"
+              checked={showUsed}
+              onCheckedChange={onUsedChange}
+            />
+            <Label htmlFor="used">Used</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="branded"
+              checked={showBranded}
+              onCheckedChange={onBrandedChange}
+            />
+            <Label htmlFor="branded">Branded</Label>
+          </div>
         </div>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
+      </div>
 
-      <div className="flex flex-wrap gap-2 items-center justify-between">
-        <div className="flex flex-wrap gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className={cn(
-              "gap-2",
-              showDiscounted && "bg-primary text-primary-foreground"
-            )}
-            onClick={onDiscountedChange}
-          >
-            <Tags className="h-4 w-4" />
-            Discounted
-            {showDiscounted && <Check className="h-4 w-4" />}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className={cn(
-              "gap-2",
-              showUsed && "bg-primary text-primary-foreground"
-            )}
-            onClick={onUsedChange}
-          >
-            <Recycle className="h-4 w-4" />
-            Used Products
-            {showUsed && <Check className="h-4 w-4" />}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className={cn(
-              "gap-2",
-              showBranded && "bg-primary text-primary-foreground"
-            )}
-            onClick={onBrandedChange}
-          >
-            <Award className="h-4 w-4" />
-            Branded
-            {showBranded && <Check className="h-4 w-4" />}
-          </Button>
-        </div>
-        
+      <div className="flex items-center space-x-4">
+        <Select value={selectedCategory} onValueChange={onCategorySelect}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Category" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="All">All Categories</SelectItem>
+            <SelectItem value="Electronics">Electronics</SelectItem>
+            <SelectItem value="Clothing">Clothing</SelectItem>
+            <SelectItem value="Home">Home & Garden</SelectItem>
+            <SelectItem value="Sports">Sports</SelectItem>
+            <SelectItem value="Books">Books</SelectItem>
+          </SelectContent>
+        </Select>
+
         <Select value={sortOption} onValueChange={onSortChange}>
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Sort by..." />
+            <SelectValue placeholder="Sort by" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="newest">Newest First</SelectItem>

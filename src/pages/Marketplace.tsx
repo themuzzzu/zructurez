@@ -17,6 +17,7 @@ const Marketplace = () => {
   const [showDiscounted, setShowDiscounted] = useState(false);
   const [showUsed, setShowUsed] = useState(false);
   const [showBranded, setShowBranded] = useState(false);
+  const [showOpenOnly, setShowOpenOnly] = useState(true);
   const [sortOption, setSortOption] = useState("newest");
 
   const { data: cartItemCount = 0 } = useQuery({
@@ -89,6 +90,8 @@ const Marketplace = () => {
               onUsedChange={() => setShowUsed(!showUsed)}
               showBranded={showBranded}
               onBrandedChange={() => setShowBranded(!showBranded)}
+              showOpenOnly={showOpenOnly}
+              onOpenOnlyChange={() => setShowOpenOnly(!showOpenOnly)}
               sortOption={sortOption}
               onSortChange={setSortOption}
             />
@@ -100,6 +103,7 @@ const Marketplace = () => {
             showDiscounted={showDiscounted}
             showUsed={showUsed}
             showBranded={showBranded}
+            showOpenOnly={showOpenOnly}
             sortOption={sortOption}
           />
         </div>

@@ -189,6 +189,7 @@ export type Database = {
           image_position: Json | null
           image_scale: number | null
           image_url: string | null
+          is_open: boolean | null
           location: string | null
           name: string
           owners: Json | null
@@ -212,6 +213,7 @@ export type Database = {
           image_position?: Json | null
           image_scale?: number | null
           image_url?: string | null
+          is_open?: boolean | null
           location?: string | null
           name: string
           owners?: Json | null
@@ -235,6 +237,7 @@ export type Database = {
           image_position?: Json | null
           image_scale?: number | null
           image_url?: string | null
+          is_open?: boolean | null
           location?: string | null
           name?: string
           owners?: Json | null
@@ -924,6 +927,7 @@ export type Database = {
           description: string
           id: string
           image_url: string | null
+          is_open: boolean | null
           location: string | null
           price: number
           title: string
@@ -937,6 +941,7 @@ export type Database = {
           description: string
           id?: string
           image_url?: string | null
+          is_open?: boolean | null
           location?: string | null
           price: number
           title: string
@@ -950,6 +955,7 @@ export type Database = {
           description?: string
           id?: string
           image_url?: string | null
+          is_open?: boolean | null
           location?: string | null
           price?: number
           title?: string

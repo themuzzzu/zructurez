@@ -10,27 +10,13 @@ import { useState } from "react";
 import { CreateProductForm } from "./marketplace/CreateProductForm";
 import { ScrollArea } from "./ui/scroll-area";
 
-interface Product {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  category: string;
-  subcategory: string | null;
-  image_url: string | null;
-  stock: number;
-  is_discounted?: boolean;
-  is_used?: boolean;
-  is_branded?: boolean;
-  created_at: string;
-}
-
 interface ShoppingSectionProps {
   searchQuery: string;
   selectedCategory: string | null;
   showDiscounted: boolean;
   showUsed: boolean;
   showBranded: boolean;
+  showOpenOnly: boolean;
   sortOption: string;
 }
 
@@ -40,12 +26,13 @@ export const ShoppingSection = ({
   showDiscounted,
   showUsed,
   showBranded,
+  showOpenOnly,
   sortOption
 }: ShoppingSectionProps) => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   const { data: products, isLoading, isError } = useQuery({
-    queryKey: ['products', searchQuery, selectedCategory, showDiscounted, showUsed, showBranded, sortOption],
+    queryKey: ['products', searchQuery, selectedCategory, showDiscounted, showUsed, showBranded, showOpenOnly, sortOption],
     queryFn: async () => {
       let query = supabase
         .from('products')
@@ -69,6 +56,10 @@ export const ShoppingSection = ({
 
       if (showBranded) {
         query = query.eq('is_branded', true);
+      }
+
+      if (showOpenOnly) {
+        query = query.eq('is_open', true);
       }
 
       // Apply sorting
