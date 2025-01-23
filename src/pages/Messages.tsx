@@ -22,49 +22,79 @@ const Messages = () => {
   useEffect(() => {
     const loadInitialChats = async () => {
       try {
-        // Load direct chats
-        const { data: profiles } = await supabase
-          .from('profiles')
-          .select('id, username, avatar_url')
-          .limit(3);
-
-        if (profiles) {
-          const sampleChats: Chat[] = profiles.map(profile => ({
-            id: profile.id,
-            name: profile.username || 'Anonymous',
-            avatar: profile.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.id}`,
-            lastMessage: "Hey there!",
-            time: "2m ago",
-            unread: Math.floor(Math.random() * 3),
-            userId: profile.id,
-            messages: [],
-            type: 'chat'
-          }));
-
-          setChats(sampleChats);
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          toast.error("Please login to view messages");
+          return;
         }
+
+        // Load direct chats (get unique users from messages)
+        const { data: messages, error: messagesError } = await supabase
+          .from('messages')
+          .select('*, sender:profiles!sender_id(*), receiver:profiles!receiver_id(*)')
+          .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+          .order('created_at', { ascending: false });
+
+        if (messagesError) {
+          console.error("Error loading messages:", messagesError);
+          toast.error("Failed to load messages");
+          return;
+        }
+
+        // Create unique chats from messages
+        const uniqueChats = new Map();
+        messages?.forEach(msg => {
+          const otherUser = msg.sender_id === user.id ? msg.receiver : msg.sender;
+          if (otherUser && !uniqueChats.has(otherUser.id)) {
+            uniqueChats.set(otherUser.id, {
+              id: otherUser.id,
+              name: otherUser.username || 'Anonymous',
+              avatar: otherUser.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${otherUser.id}`,
+              lastMessage: msg.content,
+              time: new Date(msg.created_at).toLocaleString(),
+              unread: 0,
+              userId: otherUser.id,
+              messages: [],
+              type: 'chat'
+            });
+          }
+        });
+
+        setChats(Array.from(uniqueChats.values()));
 
         // Load groups
-        const { data: groupsData } = await supabase
-          .from('groups')
-          .select('id, name, image_url, description')
-          .limit(3);
+        const { data: userGroups, error: groupsError } = await supabase
+          .from('group_members')
+          .select(`
+            group:groups (
+              id,
+              name,
+              description,
+              image_url,
+              created_at
+            )
+          `)
+          .eq('user_id', user.id);
 
-        if (groupsData) {
-          const sampleGroups: Chat[] = groupsData.map(group => ({
-            id: group.id,
-            name: group.name,
-            avatar: group.image_url || `https://api.dicebear.com/7.x/initials/svg?seed=${group.name}`,
-            lastMessage: "Latest group message",
-            time: "5m ago",
-            unread: Math.floor(Math.random() * 5),
-            userId: group.id,
-            messages: [],
-            type: 'group'
-          }));
-
-          setGroups(sampleGroups);
+        if (groupsError) {
+          console.error("Error loading groups:", groupsError);
+          toast.error("Failed to load groups");
+          return;
         }
+
+        const formattedGroups = userGroups?.map(({ group }) => ({
+          id: group.id,
+          name: group.name,
+          avatar: group.image_url || `https://api.dicebear.com/7.x/initials/svg?seed=${group.name}`,
+          lastMessage: group.description || "No messages yet",
+          time: new Date(group.created_at).toLocaleString(),
+          unread: 0,
+          userId: group.id,
+          messages: [],
+          type: 'group'
+        })) || [];
+
+        setGroups(formattedGroups);
       } catch (error) {
         console.error('Error loading chats:', error);
         toast.error("Failed to load messages");
@@ -95,48 +125,44 @@ const Messages = () => {
     setSelectedChat(chat);
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!message.trim() || !selectedChat) return;
 
-    const newMessage = {
-      id: Date.now().toString(),
-      content: message,
-      timestamp: new Date().toLocaleTimeString(),
-      senderId: "me"
-    };
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("Please login to send messages");
+        return;
+      }
 
-    if (selectedChat.type === 'chat') {
-      const updatedChats = chats.map(chat => {
-        if (chat.id === selectedChat.id) {
-          return {
-            ...chat,
-            messages: [...(chat.messages || []), newMessage],
-            lastMessage: message,
-            time: "Just now"
-          };
-        }
-        return chat;
-      });
-      setChats(updatedChats);
-      setSelectedChat(updatedChats.find(chat => chat.id === selectedChat.id) || null);
-    } else {
-      const updatedGroups = groups.map(group => {
-        if (group.id === selectedChat.id) {
-          return {
-            ...group,
-            messages: [...(group.messages || []), newMessage],
-            lastMessage: message,
-            time: "Just now"
-          };
-        }
-        return group;
-      });
-      setGroups(updatedGroups);
-      setSelectedChat(updatedGroups.find(group => group.id === selectedChat.id) || null);
+      if (selectedChat.type === 'chat') {
+        const { error: messageError } = await supabase
+          .from('messages')
+          .insert({
+            content: message,
+            sender_id: user.id,
+            receiver_id: selectedChat.userId,
+          });
+
+        if (messageError) throw messageError;
+      } else {
+        const { error: groupMessageError } = await supabase
+          .from('group_messages')
+          .insert({
+            content: message,
+            sender_id: user.id,
+            group_id: selectedChat.userId,
+          });
+
+        if (groupMessageError) throw groupMessageError;
+      }
+
+      setMessage("");
+      toast.success("Message sent!");
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast.error("Failed to send message");
     }
-
-    setMessage("");
-    toast.success("Message sent!");
   };
 
   const filteredItems = (activeTab === 'chats' ? chats : groups).filter(item => 
