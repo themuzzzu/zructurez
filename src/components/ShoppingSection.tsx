@@ -26,13 +26,13 @@ export const ShoppingSection = ({
   showDiscounted,
   showUsed,
   showBranded,
-  showOpenOnly,
+  showOpenOnly, // We'll keep this prop but not use it in the query
   sortOption
 }: ShoppingSectionProps) => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   const { data: products, isLoading, isError } = useQuery({
-    queryKey: ['products', searchQuery, selectedCategory, showDiscounted, showUsed, showBranded, showOpenOnly, sortOption],
+    queryKey: ['products', searchQuery, selectedCategory, showDiscounted, showUsed, showBranded, sortOption],
     queryFn: async () => {
       let query = supabase
         .from('products')
@@ -58,9 +58,7 @@ export const ShoppingSection = ({
         query = query.eq('is_branded', true);
       }
 
-      if (showOpenOnly) {
-        query = query.eq('is_open', true);
-      }
+      // Removed showOpenOnly filter since there's no is_open column
 
       // Apply sorting
       switch (sortOption) {
