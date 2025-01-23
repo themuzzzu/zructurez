@@ -10,7 +10,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { SearchInput } from "@/components/SearchInput";
 import { ProductFilters } from "@/components/marketplace/ProductFilters";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { ProductDetails } from "@/pages/ProductDetails";
+import ProductDetails from "@/pages/ProductDetails";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "@/components/ui/toaster";
+import { Home } from "@/pages/Index";
+import { Marketplace } from "@/pages/Marketplace";
+import { NotFound } from "@/pages/NotFound";
+
+// Create a client
+const queryClient = new QueryClient();
 
 const App = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
