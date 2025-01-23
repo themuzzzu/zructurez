@@ -10,13 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { SearchInput } from "@/components/SearchInput";
 import { ProductFilters } from "@/components/marketplace/ProductFilters";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import ProductDetails from "@/pages/ProductDetails";
-import { ThemeProvider } from "@/components/ThemeProvider";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/toaster";
-
-// Create a client
-const queryClient = new QueryClient();
+import { ProductDetails } from "@/pages/ProductDetails";
 
 const App = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -50,11 +44,11 @@ const App = () => {
         <BrowserRouter>
           <Toaster />
           <Routes>
-            <Route path="/" element={<div>Home Page</div>} />
-            <Route path="/marketplace" element={<div>Marketplace</div>} />
+            <Route path="/" element={<Home />} />
+            <Route path="/marketplace" element={<Marketplace />} />
             <Route path="/marketplace/:id" element={<ProductDetails />} />
             <Route path="/cart" element={<Cart />} />
-            <Route path="*" element={<div>404 - Page Not Found</div>} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </QueryClientProvider>
