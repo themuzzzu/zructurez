@@ -16,7 +16,7 @@ interface ShoppingSectionProps {
   showDiscounted: boolean;
   showUsed: boolean;
   showBranded: boolean;
-  showOpenOnly: boolean;
+  showOpenOnly: boolean; // We'll keep this prop but won't use it for filtering
   sortOption: string;
 }
 
@@ -26,13 +26,13 @@ export const ShoppingSection = ({
   showDiscounted,
   showUsed,
   showBranded,
-  showOpenOnly,
+  showOpenOnly, // Kept for props consistency
   sortOption
 }: ShoppingSectionProps) => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   const { data: products, isLoading, isError } = useQuery({
-    queryKey: ['products', searchQuery, selectedCategory, showDiscounted, showUsed, showBranded, showOpenOnly, sortOption],
+    queryKey: ['products', searchQuery, selectedCategory, showDiscounted, showUsed, showBranded, sortOption],
     queryFn: async () => {
       let query = supabase
         .from('products')
@@ -58,9 +58,7 @@ export const ShoppingSection = ({
         query = query.eq('is_branded', true);
       }
 
-      if (showOpenOnly) {
-        query = query.eq('is_open', true);
-      }
+      // Removed is_open filter since it doesn't exist in products table
 
       // Apply sorting
       switch (sortOption) {
