@@ -51,7 +51,7 @@ const App = () => (
             <Route path="/business/:id" element={<ProtectedRoute><BusinessDetails /></ProtectedRoute>} />
             <Route path="/communities" element={<ProtectedRoute><Communities /></ProtectedRoute>} />
             <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
-            <Route path="/groups" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
+            <Route path="/groups" element={<ProtectedRoute><Groups /></ProtectedRoute>} />
             <Route path="/events" element={<ProtectedRoute><Events /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/business" element={<ProtectedRoute><Business /></ProtectedRoute>} />
