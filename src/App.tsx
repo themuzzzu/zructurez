@@ -14,9 +14,6 @@ import ProductDetails from "@/pages/ProductDetails";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
-import Home from "@/pages/Index";
-import Marketplace from "@/pages/Marketplace";
-import NotFound from "@/pages/NotFound";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -53,11 +50,11 @@ const App = () => {
         <BrowserRouter>
           <Toaster />
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/marketplace" element={<Marketplace />} />
+            <Route path="/" element={<div>Home Page</div>} />
+            <Route path="/marketplace" element={<div>Marketplace</div>} />
             <Route path="/marketplace/:id" element={<ProductDetails />} />
             <Route path="/cart" element={<Cart />} />
-            <Route path="*" element={<NotFound />} />
+            <Route path="*" element={<div>404 - Page Not Found</div>} />
           </Routes>
         </BrowserRouter>
       </QueryClientProvider>
