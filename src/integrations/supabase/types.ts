@@ -16,6 +16,7 @@ export type Database = {
           description: string
           end_date: string
           id: string
+          image_url: string | null
           location: string
           reach: number | null
           reference_id: string
@@ -31,6 +32,7 @@ export type Database = {
           description: string
           end_date: string
           id?: string
+          image_url?: string | null
           location: string
           reach?: number | null
           reference_id: string
@@ -46,6 +48,7 @@ export type Database = {
           description?: string
           end_date?: string
           id?: string
+          image_url?: string | null
           location?: string
           reach?: number | null
           reference_id?: string
