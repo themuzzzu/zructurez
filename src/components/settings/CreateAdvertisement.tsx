@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { LocationSelector } from "@/components/LocationSelector";
+import { ImageUpload } from "@/components/ImageUpload";
 
 export const CreateAdvertisement = ({ onClose }: { onClose: () => void }) => {
   const [loading, setLoading] = useState(false);
@@ -21,6 +22,7 @@ export const CreateAdvertisement = ({ onClose }: { onClose: () => void }) => {
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const [selectedItemId, setSelectedItemId] = useState("");
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   const { data: businesses } = useQuery({
     queryKey: ['user-businesses'],
@@ -73,6 +75,35 @@ export const CreateAdvertisement = ({ onClose }: { onClose: () => void }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
+      let finalImageUrl = imageUrl;
+      if (imageUrl && imageUrl.startsWith('data:')) {
+        const timestamp = Date.now();
+        const fileName = `ad-${timestamp}.jpg`;
+        
+        // Convert base64 to blob
+        const base64Data = imageUrl.split(',')[1];
+        const byteCharacters = atob(base64Data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'image/jpeg' });
+        
+        // Upload to Supabase Storage
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('business-images')
+          .upload(fileName, blob);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('business-images')
+          .getPublicUrl(fileName);
+
+        finalImageUrl = publicUrl;
+      }
+
       const { error } = await supabase.from('advertisements').insert({
         user_id: user.id,
         title,
@@ -83,6 +114,7 @@ export const CreateAdvertisement = ({ onClose }: { onClose: () => void }) => {
         budget: parseFloat(budget),
         start_date: startDate.toISOString(),
         end_date: endDate.toISOString(),
+        image_url: finalImageUrl,
       });
 
       if (error) throw error;
@@ -159,17 +191,26 @@ export const CreateAdvertisement = ({ onClose }: { onClose: () => void }) => {
       </div>
 
       <div>
+        <Label>Advertisement Image</Label>
+        <ImageUpload
+          selectedImage={imageUrl}
+          onImageSelect={setImageUrl}
+          skipAutoSave
+        />
+      </div>
+
+      <div>
         <Label>Location</Label>
         <LocationSelector value={location} onChange={setLocation} />
       </div>
 
       <div>
-        <Label>Budget ($)</Label>
+        <Label>Budget (₹)</Label>
         <Input
           type="number"
           value={budget}
           onChange={(e) => setBudget(e.target.value)}
-          placeholder="Enter budget"
+          placeholder="Enter budget in rupees"
           min="0"
           step="0.01"
           required

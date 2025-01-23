@@ -71,13 +71,24 @@ export const AdvertisementsTab = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
-                <p className="text-sm">{ad.description}</p>
-                <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                  <span>📍 {ad.location}</span>
-                  <span>💰 ${ad.budget}</span>
-                  <span>📅 {format(new Date(ad.start_date), 'MMM d, yyyy')} - {format(new Date(ad.end_date), 'MMM d, yyyy')}</span>
-                  {ad.reach > 0 && <span>👥 {ad.reach} reached</span>}
+              <div className="grid md:grid-cols-2 gap-4">
+                {ad.image_url && (
+                  <div className="aspect-video relative rounded-lg overflow-hidden">
+                    <img
+                      src={ad.image_url}
+                      alt={ad.title}
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+                <div className="space-y-2">
+                  <p className="text-sm">{ad.description}</p>
+                  <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                    <span>📍 {ad.location}</span>
+                    <span>💰 ₹{ad.budget}</span>
+                    <span>📅 {format(new Date(ad.start_date), 'MMM d, yyyy')} - {format(new Date(ad.end_date), 'MMM d, yyyy')}</span>
+                    {ad.reach > 0 && <span>👥 {ad.reach} reached</span>}
+                  </div>
                 </div>
               </div>
             </CardContent>
