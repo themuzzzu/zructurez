@@ -10,7 +10,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { SearchInput } from "@/components/SearchInput";
 import { ProductFilters } from "@/components/marketplace/ProductFilters";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { ProductDetails } from "@/pages/ProductDetails";
+import ProductDetails from "@/pages/ProductDetails";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "sonner";
+import { Home } from "@/pages/Index";
+import { Marketplace } from "@/pages/Marketplace";
+import { NotFound } from "@/pages/NotFound";
+
+const queryClient = new QueryClient();
 
 const App = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -19,7 +27,6 @@ const App = () => {
   const [showDiscounted, setShowDiscounted] = useState(false);
   const [showUsed, setShowUsed] = useState(false);
   const [showBranded, setShowBranded] = useState(false);
-  const [showOpenOnly, setShowOpenOnly] = useState(true);
   const [sortOption, setSortOption] = useState("newest");
 
   const { data: cartItemCount = 0 } = useQuery({
