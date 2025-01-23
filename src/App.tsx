@@ -14,9 +14,8 @@ import ProductDetails from "@/pages/ProductDetails";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
-import { Home } from "@/pages/Index";
-import { Marketplace } from "@/pages/Marketplace";
-import { NotFound } from "@/pages/NotFound";
+import Home from "@/pages/Index";
+import Marketplace from "@/pages/Marketplace";
 
 const queryClient = new QueryClient();
 
@@ -55,7 +54,7 @@ const App = () => {
             <Route path="/marketplace" element={<Marketplace />} />
             <Route path="/marketplace/:id" element={<ProductDetails />} />
             <Route path="/cart" element={<Cart />} />
-            <Route path="*" element={<NotFound />} />
+            <Route path="*" element={<div>Page not found</div>} />
           </Routes>
         </BrowserRouter>
       </QueryClientProvider>
