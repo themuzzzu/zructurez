@@ -14,9 +14,9 @@ import ProductDetails from "@/pages/ProductDetails";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
-import { Home } from "@/pages/Index";
-import { Marketplace } from "@/pages/Marketplace";
-import { NotFound } from "@/pages/NotFound";
+import Home from "@/pages/Index";
+import Marketplace from "@/pages/Marketplace";
+import NotFound from "@/pages/NotFound";
 
 // Create a client
 const queryClient = new QueryClient();
