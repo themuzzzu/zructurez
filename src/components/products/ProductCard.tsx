@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useEffect } from "react";
 import { incrementViews } from "@/services/postService";
+import { Link } from "react-router-dom";
 
 interface Product {
   id: string;
@@ -67,7 +68,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
   });
 
   const handleShare = async (platform: 'copy' | 'whatsapp' | 'facebook' | 'twitter') => {
-    const productUrl = `${window.location.origin}/marketplace?product=${product.id}`;
+    const productUrl = `${window.location.origin}/marketplace/${product.id}`;
     
     switch (platform) {
       case 'copy':
@@ -90,45 +91,41 @@ export const ProductCard = ({ product }: ProductCardProps) => {
     }
   };
 
-  // Format price in Indian Rupees
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0,
-    }).format(price);
-  };
-
   useEffect(() => {
-    // Increment view count when product is rendered
     incrementViews('products', product.id);
   }, [product.id]);
 
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 bg-[#0a0a0a] border-border">
-      {product.image_url && (
-        <img
-          src={product.image_url}
-          alt={product.title}
-          className="w-full h-48 object-cover"
-        />
-      )}
-      <div className="p-4">
-        <div className="flex justify-between items-start mb-2">
-          <div>
-            <h3 className="text-lg font-semibold text-foreground">{product.title}</h3>
-            <div className="text-sm text-muted-foreground">
-              {product.category} {product.subcategory && `• ${product.subcategory}`}
+      <Link to={`/marketplace/${product.id}`}>
+        {product.image_url && (
+          <img
+            src={product.image_url}
+            alt={product.title}
+            className="w-full h-48 object-cover"
+          />
+        )}
+        <div className="p-4">
+          <div className="flex justify-between items-start mb-2">
+            <div>
+              <h3 className="text-lg font-semibold text-foreground">{product.title}</h3>
+              <div className="text-sm text-muted-foreground">
+                {product.category} {product.subcategory && `• ${product.subcategory}`}
+              </div>
             </div>
+            <span className="text-lg font-bold text-primary flex items-center gap-1">
+              <IndianRupee className="h-4 w-4" />
+              {new Intl.NumberFormat('en-IN', {
+                maximumFractionDigits: 0,
+              }).format(product.price)}
+            </span>
           </div>
-          <span className="text-lg font-bold text-primary flex items-center gap-1">
-            <IndianRupee className="h-4 w-4" />
-            {formatPrice(product.price).replace('₹', '')}
-          </span>
+          
+          <p className="text-muted-foreground text-sm mb-4">{product.description}</p>
         </div>
-        
-        <p className="text-muted-foreground text-sm mb-4">{product.description}</p>
-        
+      </Link>
+      
+      <div className="p-4 pt-0">
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">
             {product.stock} in stock
