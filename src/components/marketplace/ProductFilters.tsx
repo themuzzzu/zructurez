@@ -11,6 +11,8 @@ interface ProductFiltersProps {
   onUsedChange: () => void;
   showBranded: boolean;
   onBrandedChange: () => void;
+  showOpenOnly: boolean;
+  onOpenOnlyChange: () => void;
   sortOption: string;
   onSortChange: (value: string) => void;
 }
@@ -24,6 +26,8 @@ export const ProductFilters = ({
   onUsedChange,
   showBranded,
   onBrandedChange,
+  showOpenOnly,
+  onOpenOnlyChange,
   sortOption,
   onSortChange,
 }: ProductFiltersProps) => {
@@ -31,6 +35,14 @@ export const ProductFilters = ({
     <div className="flex flex-wrap gap-6 items-center justify-between p-4 border rounded-lg">
       <div className="space-y-4">
         <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="open-only"
+              checked={showOpenOnly}
+              onCheckedChange={onOpenOnlyChange}
+            />
+            <Label htmlFor="open-only">Open Only</Label>
+          </div>
           <div className="flex items-center space-x-2">
             <Switch
               id="discounted"
