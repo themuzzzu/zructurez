@@ -7,6 +7,7 @@ import Marketplace from "@/pages/Marketplace";
 import ProductDetails from "@/pages/ProductDetails";
 import { Cart } from "@/components/cart/Cart";
 import NotFound from "@/pages/NotFound";
+import { Navbar } from "@/components/Navbar";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -23,13 +24,16 @@ const App = () => {
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <BrowserRouter>
           <Toaster />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/marketplace" element={<Marketplace />} />
-            <Route path="/marketplace/:id" element={<ProductDetails />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <Navbar />
+          <main className="container mx-auto px-4 py-8">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/marketplace" element={<Marketplace />} />
+              <Route path="/marketplace/:id" element={<ProductDetails />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </main>
         </BrowserRouter>
       </ThemeProvider>
     </QueryClientProvider>
