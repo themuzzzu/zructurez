@@ -13,6 +13,7 @@ import {
 import { useEffect } from "react";
 import { incrementViews } from "@/services/postService";
 import { Link } from "react-router-dom";
+import { Badge } from "../ui/badge";
 
 interface Product {
   id: string;
@@ -25,6 +26,7 @@ interface Product {
   stock: number;
   views?: number;
   reach?: number;
+  is_discounted?: boolean;
 }
 
 interface ProductCardProps {
@@ -33,6 +35,12 @@ interface ProductCardProps {
 
 export const ProductCard = ({ product }: ProductCardProps) => {
   const queryClient = useQueryClient();
+
+  // Calculate discounted price (20% off for discounted items)
+  const discountPercentage = product.is_discounted ? 20 : 0;
+  const discountedPrice = product.is_discounted 
+    ? product.price * (1 - discountPercentage / 100)
+    : product.price;
 
   const addToCartMutation = useMutation({
     mutationFn: async ({ productId, quantity = 1 }: { productId: string; quantity: number }) => {
@@ -96,7 +104,12 @@ export const ProductCard = ({ product }: ProductCardProps) => {
   }, [product.id]);
 
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 bg-[#0a0a0a] border-border">
+    <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 bg-[#0a0a0a] border-border relative">
+      {product.is_discounted && (
+        <Badge className="absolute top-2 right-2 bg-primary text-white">
+          {discountPercentage}% OFF
+        </Badge>
+      )}
       <Link to={`/marketplace/${product.id}`}>
         {product.image_url && (
           <img
@@ -113,12 +126,31 @@ export const ProductCard = ({ product }: ProductCardProps) => {
                 {product.category} {product.subcategory && `• ${product.subcategory}`}
               </div>
             </div>
-            <span className="text-lg font-bold text-primary flex items-center gap-1">
-              <IndianRupee className="h-4 w-4" />
-              {new Intl.NumberFormat('en-IN', {
-                maximumFractionDigits: 0,
-              }).format(product.price)}
-            </span>
+            <div className="flex flex-col items-end">
+              {product.is_discounted ? (
+                <>
+                  <span className="text-lg font-bold text-primary flex items-center gap-1">
+                    <IndianRupee className="h-4 w-4" />
+                    {new Intl.NumberFormat('en-IN', {
+                      maximumFractionDigits: 0,
+                    }).format(discountedPrice)}
+                  </span>
+                  <span className="text-sm text-muted-foreground line-through flex items-center gap-1">
+                    <IndianRupee className="h-3 w-3" />
+                    {new Intl.NumberFormat('en-IN', {
+                      maximumFractionDigits: 0,
+                    }).format(product.price)}
+                  </span>
+                </>
+              ) : (
+                <span className="text-lg font-bold text-primary flex items-center gap-1">
+                  <IndianRupee className="h-4 w-4" />
+                  {new Intl.NumberFormat('en-IN', {
+                    maximumFractionDigits: 0,
+                  }).format(product.price)}
+                </span>
+              )}
+            </div>
           </div>
           
           <p className="text-muted-foreground text-sm mb-4">{product.description}</p>
