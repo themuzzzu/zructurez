@@ -16,7 +16,6 @@ interface ShoppingSectionProps {
   showDiscounted: boolean;
   showUsed: boolean;
   showBranded: boolean;
-  showOpenOnly: boolean;
   sortOption: string;
 }
 
@@ -26,7 +25,6 @@ export const ShoppingSection = ({
   showDiscounted,
   showUsed,
   showBranded,
-  showOpenOnly, // We'll keep this prop but not use it in the query
   sortOption
 }: ShoppingSectionProps) => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -57,8 +55,6 @@ export const ShoppingSection = ({
       if (showBranded) {
         query = query.eq('is_branded', true);
       }
-
-      // Removed showOpenOnly filter since there's no is_open column
 
       // Apply sorting
       switch (sortOption) {
