@@ -126,14 +126,14 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-background">
       <Navbar />
       <div className="flex">
-        <Sidebar className="w-64 fixed left-0 top-0 pt-16 bg-black" />
-        <main className="flex-1 ml-64 pt-16 px-4 bg-black">
+        <Sidebar className="w-64 fixed left-0 top-0 pt-16" />
+        <main className="flex-1 ml-64 pt-16 px-4 bg-background">
           <div className="max-w-2xl mx-auto">
             <div className="space-y-6">
-              <ScrollArea className="w-full whitespace-nowrap rounded-md bg-black/90 shadow-lg">
+              <ScrollArea className="w-full whitespace-nowrap rounded-md border bg-background shadow-lg">
                 <div className="flex space-x-2 p-4">
                   {categories.map((category) => (
                     <button
@@ -142,8 +142,8 @@ const Index = () => {
                       className={cn(
                         "px-4 py-2 rounded-full text-sm font-medium transition-colors",
                         selectedCategory === category.toLowerCase() || (!selectedCategory && category === "All")
-                          ? "bg-primary text-white shadow-lg"
-                          : "bg-black/60 text-gray-300 hover:bg-black/80 hover:text-white"
+                          ? "bg-primary text-primary-foreground shadow-lg"
+                          : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
                       )}
                     >
                       {category}
