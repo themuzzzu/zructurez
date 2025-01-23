@@ -1,59 +1,65 @@
-import { Button } from "@/components/ui/button";
-import { ShoppingSection } from "@/components/ShoppingSection";
-import { ArrowLeft, ShoppingCart } from "lucide-react";
-import { Link } from "react-router-dom";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Cart } from "@/components/cart/Cart";
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { SearchInput } from "@/components/SearchInput";
-import { ProductFilters } from "@/components/marketplace/ProductFilters";
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { ProductDetails } from "@/pages/ProductDetails";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 
-const App = () => {
-  const [isCartOpen, setIsCartOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [showDiscounted, setShowDiscounted] = useState(false);
-  const [showUsed, setShowUsed] = useState(false);
-  const [showBranded, setShowBranded] = useState(false);
-  const [showOpenOnly, setShowOpenOnly] = useState(true);
-  const [sortOption, setSortOption] = useState("newest");
+// Page imports
+import Index from "./pages/Index";
+import Marketplace from "./pages/Marketplace";
+import Services from "./pages/Services";
+import Communities from "./pages/Communities";
+import Messages from "./pages/Messages";
+import Events from "./pages/Events";
+import Settings from "./pages/Settings";
+import Business from "./pages/Business";
+import Maps from "./pages/Maps";
+import Auth from "./pages/Auth";
+import ServiceDetails from "./pages/ServiceDetails";
+import BusinessDetails from "./pages/BusinessDetails";
+import Profile from "./pages/Profile";
+import Jobs from "./pages/Jobs";
+import Groups from "./pages/Messages"; // We'll reuse Messages component for Groups temporarily
 
-  const { data: cartItemCount = 0 } = useQuery({
-    queryKey: ['cartCount'],
-    queryFn: async () => {
-      const { data: session } = await supabase.auth.getSession();
-      if (!session?.session?.user) return 0;
-
-      const { count, error } = await supabase
-        .from('cart_items')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', session.session.user.id);
-
-      if (error) throw error;
-      return count || 0;
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
     },
-  });
+  },
+});
 
-  return (
-    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <QueryClientProvider client={queryClient}>
+const App = () => (
+  <ThemeProvider defaultTheme="system" storageKey="app-theme">
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
         <BrowserRouter>
-          <Toaster />
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/marketplace" element={<Marketplace />} />
-            <Route path="/marketplace/:id" element={<ProductDetails />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="*" element={<NotFound />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path="/marketplace" element={<ProtectedRoute><Marketplace /></ProtectedRoute>} />
+            <Route path="/services" element={<ProtectedRoute><Services /></ProtectedRoute>} />
+            <Route path="/jobs" element={<ProtectedRoute><Jobs /></ProtectedRoute>} />
+            <Route path="/services/:id" element={<ProtectedRoute><ServiceDetails /></ProtectedRoute>} />
+            <Route path="/business/:id" element={<ProtectedRoute><BusinessDetails /></ProtectedRoute>} />
+            <Route path="/communities" element={<ProtectedRoute><Communities /></ProtectedRoute>} />
+            <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
+            <Route path="/groups" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
+            <Route path="/events" element={<ProtectedRoute><Events /></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+            <Route path="/business" element={<ProtectedRoute><Business /></ProtectedRoute>} />
+            <Route path="/maps" element={<ProtectedRoute><Maps /></ProtectedRoute>} />
           </Routes>
         </BrowserRouter>
-      </QueryClientProvider>
-    </ThemeProvider>
-  );
-};
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ThemeProvider>
+);
 
 export default App;
