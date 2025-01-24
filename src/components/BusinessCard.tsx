@@ -105,92 +105,93 @@ export const BusinessCard = ({
 
   return (
     <Card 
-      className="overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer w-full max-w-sm"
+      className="overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer w-full max-w-[360px] bg-black/95 text-white"
       onClick={() => navigate(`/business/${id}`)}
     >
-      <img src={image} alt={name} className="w-full h-40 object-cover" />
-      <div className="p-4">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="font-semibold text-base truncate max-w-[60%]">{name}</h3>
-          <div className="flex gap-1.5">
-            {verified && <Badge variant="outline" className="text-xs px-2 py-0.5">Verified</Badge>}
-            <Badge 
-              variant={isOpen ? "success" : "destructive"}
-              className="text-xs px-2 py-0.5 min-w-[70px] text-center whitespace-nowrap"
-            >
-              {isOpen ? "Open" : "Closed"}
-            </Badge>
-          </div>
-        </div>
-
-        <div className="mb-3">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
-            <span className="font-medium truncate max-w-[150px]">{category}</span>
-            <span>•</span>
-            <div className="flex items-center gap-0.5 whitespace-nowrap">
-              <Star className="h-3 w-3 text-yellow-400 fill-current" />
-              <span>{rating}</span>
-              <span>({reviews})</span>
+      <img src={image} alt={name} className="w-full h-48 object-cover" />
+      <div className="p-4 space-y-3">
+        <div className="flex items-start justify-between gap-2">
+          <div className="space-y-1 flex-1">
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold text-lg line-clamp-1">{name}</h3>
+              {verified && (
+                <Badge variant="outline" className="text-xs px-2 py-0.5">
+                  Verified
+                </Badge>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-300">{category}</span>
+              <Badge 
+                variant={isOpen ? "success" : "destructive"}
+                className="text-xs px-2 py-0.5"
+              >
+                {isOpen ? "Open" : "Closed"}
+              </Badge>
             </div>
           </div>
-          
-          <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{description}</p>
         </div>
 
-        <div className="space-y-2 mb-3">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <MapPin className="h-3 w-3 shrink-0" />
+        <div className="flex items-center gap-1 text-sm text-yellow-400">
+          <Star className="h-4 w-4 fill-current" />
+          <span>{rating}</span>
+          <span className="text-gray-400">({reviews} reviews)</span>
+        </div>
+
+        <p className="text-sm text-gray-300 line-clamp-2">{description}</p>
+
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2 text-sm text-gray-300">
+            <MapPin className="h-4 w-4 shrink-0" />
             <span className="truncate">{location}</span>
           </div>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Clock className="h-3 w-3 shrink-0" />
+          <div className="flex items-center gap-2 text-sm text-gray-300">
+            <Clock className="h-4 w-4 shrink-0" />
             <span className="truncate">{hours}</span>
           </div>
         </div>
-        
+
         {(appointment_price || consultation_price) && (
-          <div className="space-y-1.5 mb-3">
+          <div className="space-y-1 text-sm text-gray-300">
             {appointment_price && (
-              <div className="text-xs">
-                <span className="font-semibold">Appointment:</span> ₹{appointment_price}
+              <div>
+                <span className="font-medium">Appointment:</span> ₹{appointment_price}
               </div>
             )}
             {consultation_price && (
-              <div className="text-xs">
-                <span className="font-semibold">Consultation:</span> ₹{consultation_price}
+              <div>
+                <span className="font-medium">Consultation:</span> ₹{consultation_price}
               </div>
             )}
           </div>
         )}
 
-        <div className="space-y-2">
-          <div className="flex gap-2">
-            <Button 
-              onClick={handleWhatsApp} 
-              className="flex-1 flex items-center justify-center gap-1.5 py-1.5 h-8 text-xs"
-              variant="default"
-            >
-              <MessageSquare className="h-3 w-3" />
-              Message
-            </Button>
-            <Button
-              onClick={handleShare}
-              variant="outline"
-              className="min-w-[80px] flex items-center justify-center gap-1.5 py-1.5 h-8 text-xs"
-            >
-              <Share2 className="h-3 w-3" />
-              Share
-            </Button>
-          </div>
+        <div className="grid grid-cols-2 gap-2 pt-2">
+          <Button 
+            onClick={handleWhatsApp}
+            className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700"
+            variant="default"
+          >
+            <MessageSquare className="h-4 w-4" />
+            Message
+          </Button>
+          <Button
+            onClick={handleShare}
+            variant="outline"
+            className="w-full flex items-center justify-center gap-2 border-gray-700 hover:bg-gray-800"
+          >
+            <Share2 className="h-4 w-4" />
+            Share
+          </Button>
           <Button 
             onClick={(e) => {
               e.stopPropagation();
               window.location.href = `tel:${contact}`;
             }} 
             variant="outline"
-            className="w-full flex items-center justify-center gap-1.5 py-1.5 h-8 text-xs"
+            className="w-full col-span-2 flex items-center justify-center gap-2 border-gray-700 hover:bg-gray-800"
           >
-            <Phone className="h-3 w-3" />
+            <Phone className="h-4 w-4" />
             Call
           </Button>
         </div>
