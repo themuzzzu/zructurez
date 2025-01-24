@@ -8,6 +8,7 @@ import { Select } from "@/components/ui/select";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
 
 interface BusinessHeaderProps {
   id: string;
@@ -124,10 +125,13 @@ export const BusinessHeader = ({ id, name, category, isOwner, isOpen = true, onE
               <ArrowLeft className="h-5 w-5" />
             </Button>
           </Link>
-          <div>
+          <div className="flex items-center gap-2">
             <h1 className="text-3xl font-bold">{name}</h1>
-            <div className="text-muted-foreground">{category}</div>
+            <Badge variant={open ? "success" : "destructive"}>
+              {open ? "Open" : "Closed"}
+            </Badge>
           </div>
+          <div className="text-muted-foreground">{category}</div>
         </div>
         {isOwner && onEdit && (
           <Button onClick={onEdit}>Edit Business</Button>
