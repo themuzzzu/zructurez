@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Profile } from "@/types/profile";
+import { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
 
 interface ChatMessagesProps {
   chat: Chat;
@@ -101,14 +102,14 @@ export const ChatMessages = ({ chat, onForwardMessage }: ChatMessagesProps) => {
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: 'INSERT',
           schema: 'public',
           table: chat.type === 'group' ? 'group_messages' : 'messages',
           filter: chat.type === 'group' 
             ? `group_id=eq.${chat.userId}`
             : `or(sender_id.eq.${chat.userId},receiver_id.eq.${chat.userId})`
         },
-        async (payload: { new: MessageBase; eventType: string }) => {
+        async (payload: RealtimePostgresChangesPayload<MessageBase>) => {
           if (payload.eventType === 'INSERT') {
             const { data: profileData } = await supabase
               .from('profiles')
