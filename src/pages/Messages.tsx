@@ -37,10 +37,10 @@ const Messages = () => {
           return;
         }
 
-        // Load direct chats
+        // Load direct messages
         const { data: messages, error: messagesError } = await supabase
           .from('messages')
-          .select('*, sender:profiles!sender_id(*)')
+          .select('*')
           .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
           .order('created_at', { ascending: false });
 
@@ -54,16 +54,18 @@ const Messages = () => {
         const uniqueChats = new Map<string, Chat>();
         
         if (messages) {
-          // First, get all unique receiver IDs
-          const receiverIds = [...new Set(messages.map(msg => 
-            msg.sender_id === user.id ? msg.receiver_id : msg.sender_id
-          ))];
+          // First, get all unique user IDs (both senders and receivers)
+          const userIds = new Set<string>();
+          messages.forEach(msg => {
+            userIds.add(msg.sender_id);
+            userIds.add(msg.receiver_id);
+          });
 
           // Fetch all relevant profiles in one go
           const { data: profiles, error: profilesError } = await supabase
             .from('profiles')
             .select('*')
-            .in('id', receiverIds);
+            .in('id', Array.from(userIds));
 
           if (profilesError) {
             console.error("Error loading profiles:", profilesError);
@@ -97,7 +99,6 @@ const Messages = () => {
 
         setChats(Array.from(uniqueChats.values()));
 
-        // Load groups
         const { data: userGroups, error: groupsError } = await supabase
           .from('group_members')
           .select(`
@@ -130,6 +131,7 @@ const Messages = () => {
         })) || [];
 
         setGroups(formattedGroups);
+
       } catch (error) {
         console.error('Error loading chats:', error);
         toast.error("Failed to load messages");
