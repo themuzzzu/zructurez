@@ -9,6 +9,14 @@ import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Profile } from "@/types/profile";
+
+interface MessageWithProfile {
+  sender: Profile;
+  receiver: Profile;
+  content: string;
+  created_at: string;
+}
 
 const Messages = () => {
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
@@ -28,10 +36,10 @@ const Messages = () => {
           return;
         }
 
-        // Load direct chats (get unique users from messages)
+        // Load direct chats
         const { data: messages, error: messagesError } = await supabase
           .from('messages')
-          .select('*, sender:profiles!sender_id(*), receiver:profiles!receiver_id(*)')
+          .select('*, sender:profiles!sender_id(*)')
           .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
           .order('created_at', { ascending: false });
 
@@ -42,23 +50,30 @@ const Messages = () => {
         }
 
         // Create unique chats from messages
-        const uniqueChats = new Map();
-        messages?.forEach(msg => {
-          const otherUser = msg.sender_id === user.id ? msg.receiver : msg.sender;
-          if (otherUser && !uniqueChats.has(otherUser.id)) {
-            uniqueChats.set(otherUser.id, {
-              id: otherUser.id,
-              name: otherUser.username || 'Anonymous',
-              avatar: otherUser.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${otherUser.id}`,
-              lastMessage: msg.content,
-              time: new Date(msg.created_at).toLocaleString(),
-              unread: 0,
-              userId: otherUser.id,
-              messages: [],
-              type: 'chat'
-            });
-          }
-        });
+        const uniqueChats = new Map<string, Chat>();
+        
+        if (messages) {
+          messages.forEach(msg => {
+            const otherUserId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id;
+            
+            if (!uniqueChats.has(otherUserId)) {
+              // Fetch other user's profile
+              const otherUser = msg.sender_id === user.id ? msg.receiver : msg.sender;
+              
+              uniqueChats.set(otherUserId, {
+                id: otherUserId,
+                name: otherUser?.username || 'Anonymous',
+                avatar: otherUser?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${otherUserId}`,
+                lastMessage: msg.content,
+                time: new Date(msg.created_at).toLocaleString(),
+                unread: 0,
+                userId: otherUserId,
+                messages: [],
+                type: 'chat' as const
+              });
+            }
+          });
+        }
 
         setChats(Array.from(uniqueChats.values()));
 
@@ -82,7 +97,7 @@ const Messages = () => {
           return;
         }
 
-        const formattedGroups = userGroups?.map(({ group }) => ({
+        const formattedGroups: Chat[] = userGroups?.map(({ group }) => ({
           id: group.id,
           name: group.name,
           avatar: group.image_url || `https://api.dicebear.com/7.x/initials/svg?seed=${group.name}`,
@@ -91,7 +106,7 @@ const Messages = () => {
           unread: 0,
           userId: group.id,
           messages: [],
-          type: 'group'
+          type: 'group' as const
         })) || [];
 
         setGroups(formattedGroups);
