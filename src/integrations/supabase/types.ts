@@ -198,6 +198,7 @@ export type Database = {
           user_id: string
           verified: boolean | null
           video_url: string | null
+          wait_time: string | null
           website: string | null
         }
         Insert: {
@@ -222,6 +223,7 @@ export type Database = {
           user_id: string
           verified?: boolean | null
           video_url?: string | null
+          wait_time?: string | null
           website?: string | null
         }
         Update: {
@@ -246,6 +248,7 @@ export type Database = {
           user_id?: string
           verified?: boolean | null
           video_url?: string | null
+          wait_time?: string | null
           website?: string | null
         }
         Relationships: []
