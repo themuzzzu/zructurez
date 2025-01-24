@@ -11,40 +11,37 @@ interface ChatMessagesProps {
   onForwardMessage: (messageId: string) => void;
 }
 
-interface MessageWithProfiles {
+type MessageWithProfile = {
   id: string;
   content: string;
   timestamp: string;
   senderId: string;
   sender?: Profile;
-  receiver?: Profile;
-}
+};
 
-interface DirectMessage {
+type BaseMessage = {
   id: string;
   content: string;
   created_at: string;
   sender_id: string;
+};
+
+type DirectMessage = BaseMessage & {
   receiver_id: string;
   read?: boolean;
   expires_at?: string;
-}
+};
 
-interface GroupMessage {
-  id: string;
-  content: string;
-  created_at: string;
-  sender_id: string;
+type GroupMessage = BaseMessage & {
   group_id: string;
-}
+};
 
 export const ChatMessages = ({ chat, onForwardMessage }: ChatMessagesProps) => {
-  const [messages, setMessages] = useState<MessageWithProfiles[]>([]);
+  const [messages, setMessages] = useState<MessageWithProfile[]>([]);
 
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-        // First, fetch messages
         const { data: messagesData, error: messagesError } = await supabase
           .from(chat.type === 'group' ? 'group_messages' : 'messages')
           .select('*')
@@ -57,19 +54,14 @@ export const ChatMessages = ({ chat, onForwardMessage }: ChatMessagesProps) => {
           return;
         }
 
-        // Then, fetch profiles for all unique user IDs in messages
-        const userIds = new Set<string>();
-        messagesData.forEach((msg: DirectMessage | GroupMessage) => {
-          userIds.add(msg.sender_id);
-          if ('receiver_id' in msg) {
-            userIds.add(msg.receiver_id);
-          }
-        });
+        // Get unique sender IDs
+        const senderIds = [...new Set(messagesData.map(msg => msg.sender_id))];
 
-        const { data: profilesData, error: profilesError } = await supabase
+        // Fetch profiles for senders
+        const { data: profiles, error: profilesError } = await supabase
           .from('profiles')
           .select('*')
-          .in('id', Array.from(userIds));
+          .in('id', senderIds);
 
         if (profilesError) {
           console.error("Error fetching profiles:", profilesError);
@@ -77,17 +69,16 @@ export const ChatMessages = ({ chat, onForwardMessage }: ChatMessagesProps) => {
           return;
         }
 
-        // Create a map of profiles for easy lookup
-        const profilesMap = new Map(profilesData.map(profile => [profile.id, profile]));
+        // Create a map of profiles
+        const profileMap = new Map(profiles?.map(profile => [profile.id, profile]));
 
-        // Combine messages with profile data
+        // Format messages with profile data
         const formattedMessages = messagesData.map((msg: DirectMessage | GroupMessage) => ({
           id: msg.id,
           content: msg.content,
           timestamp: new Date(msg.created_at).toLocaleString(),
           senderId: msg.sender_id,
-          sender: profilesMap.get(msg.sender_id),
-          receiver: 'receiver_id' in msg ? profilesMap.get(msg.receiver_id) : undefined
+          sender: profileMap.get(msg.sender_id)
         }));
 
         setMessages(formattedMessages);
@@ -113,9 +104,7 @@ export const ChatMessages = ({ chat, onForwardMessage }: ChatMessagesProps) => {
             : `or(sender_id.eq.${chat.userId},receiver_id.eq.${chat.userId})`
         },
         async (payload) => {
-          console.log("Received real-time update:", payload);
           if (payload.eventType === 'INSERT') {
-            // Fetch the sender's profile
             const { data: profileData } = await supabase
               .from('profiles')
               .select('*')
@@ -133,15 +122,9 @@ export const ChatMessages = ({ chat, onForwardMessage }: ChatMessagesProps) => {
           }
         }
       )
-      .subscribe((status) => {
-        console.log("Subscription status:", status);
-        if (status === 'SUBSCRIBED') {
-          console.log("Successfully subscribed to chat messages");
-        }
-      });
+      .subscribe();
 
     return () => {
-      console.log("Cleaning up subscription");
       supabase.removeChannel(channel);
     };
   }, [chat.userId, chat.type]);
