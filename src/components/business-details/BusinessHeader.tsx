@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -136,23 +136,31 @@ export const BusinessHeader = ({ id, name, category, isOwner, isOpen = true, onE
           )}
 
           {(temporarilyUnavailable || !open) && (
-            <div className="flex items-center gap-2">
-              <Input
-                type="text"
-                placeholder="Available in... (e.g., 30 mins)"
-                value={waitTime}
-                onChange={(e) => setWaitTime(e.target.value)}
-                className="w-48"
-                disabled={loading}
-              />
-              <Button 
-                variant="secondary" 
-                onClick={updateWaitTime}
-                disabled={!waitTime || loading}
-              >
-                Set Wait Time
-              </Button>
-            </div>
+            <>
+              <div className="flex items-center gap-2">
+                <Input
+                  type="text"
+                  placeholder="Available in... (e.g., 30 mins)"
+                  value={waitTime}
+                  onChange={(e) => setWaitTime(e.target.value)}
+                  className="w-48"
+                  disabled={loading}
+                />
+                <Button 
+                  variant="secondary" 
+                  onClick={updateWaitTime}
+                  disabled={!waitTime || loading}
+                >
+                  Set Wait Time
+                </Button>
+              </div>
+              {waitTime && (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Clock className="h-4 w-4" />
+                  <span className="text-sm">Available in {waitTime}</span>
+                </div>
+              )}
+            </>
           )}
         </div>
       )}
