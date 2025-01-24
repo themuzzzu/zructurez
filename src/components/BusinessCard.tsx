@@ -109,14 +109,14 @@ export const BusinessCard = ({
       onClick={() => navigate(`/business/${id}`)}
     >
       <img src={image} alt={name} className="w-full h-48 object-cover" />
-      <div className="p-5">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="font-semibold text-lg truncate max-w-[60%]">{name}</h3>
+      <div className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold text-lg truncate max-w-[75%]">{name}</h3>
           <div className="flex gap-2">
             {verified && <Badge variant="outline">Verified</Badge>}
             <Badge 
               variant={isOpen ? "success" : "destructive"}
-              className="min-w-[80px] text-center"
+              className="min-w-[90px] text-center"
             >
               {isOpen ? "Open" : "Closed"}
             </Badge>
@@ -125,7 +125,7 @@ export const BusinessCard = ({
 
         <div className="mb-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-            <span className="font-medium truncate max-w-[200px]">{category}</span>
+            <span className="font-medium truncate max-w-[250px]">{category}</span>
             <span>•</span>
             <div className="flex items-center whitespace-nowrap">
               <Star className="h-4 w-4 text-yellow-400 fill-current" />
@@ -137,7 +137,7 @@ export const BusinessCard = ({
           <p className="text-sm text-muted-foreground line-clamp-3">{description}</p>
         </div>
 
-        <div className="space-y-2 mb-4">
+        <div className="space-y-3 mb-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <MapPin className="h-4 w-4 shrink-0" />
             <span className="truncate">{location}</span>
@@ -163,7 +163,7 @@ export const BusinessCard = ({
           </div>
         )}
 
-        <div className="space-y-2">
+        <div className="space-y-3">
           <div className="flex gap-2">
             <Button 
               onClick={handleWhatsApp} 
@@ -176,7 +176,7 @@ export const BusinessCard = ({
             <Button
               onClick={handleShare}
               variant="outline"
-              className="min-w-[100px] flex items-center justify-center gap-2"
+              className="min-w-[120px] flex items-center justify-center gap-2"
             >
               <Share2 className="h-4 w-4" />
               Share
