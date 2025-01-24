@@ -13,9 +13,10 @@ import { Profile } from "@/types/profile";
 
 interface MessageWithProfile {
   sender: Profile;
-  receiver: Profile;
   content: string;
   created_at: string;
+  receiver_id: string;
+  sender_id: string;
 }
 
 const Messages = () => {
@@ -53,17 +54,36 @@ const Messages = () => {
         const uniqueChats = new Map<string, Chat>();
         
         if (messages) {
+          // First, get all unique receiver IDs
+          const receiverIds = [...new Set(messages.map(msg => 
+            msg.sender_id === user.id ? msg.receiver_id : msg.sender_id
+          ))];
+
+          // Fetch all relevant profiles in one go
+          const { data: profiles, error: profilesError } = await supabase
+            .from('profiles')
+            .select('*')
+            .in('id', receiverIds);
+
+          if (profilesError) {
+            console.error("Error loading profiles:", profilesError);
+            toast.error("Failed to load user profiles");
+            return;
+          }
+
+          // Create a map of profiles for easy lookup
+          const profilesMap = new Map(profiles?.map(profile => [profile.id, profile]));
+
           messages.forEach(msg => {
             const otherUserId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id;
             
             if (!uniqueChats.has(otherUserId)) {
-              // Fetch other user's profile
-              const otherUser = msg.sender_id === user.id ? msg.receiver : msg.sender;
+              const otherUserProfile = profilesMap.get(otherUserId);
               
               uniqueChats.set(otherUserId, {
                 id: otherUserId,
-                name: otherUser?.username || 'Anonymous',
-                avatar: otherUser?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${otherUserId}`,
+                name: otherUserProfile?.username || 'Anonymous',
+                avatar: otherUserProfile?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${otherUserId}`,
                 lastMessage: msg.content,
                 time: new Date(msg.created_at).toLocaleString(),
                 unread: 0,
