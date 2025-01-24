@@ -29,7 +29,7 @@ const checkAvailability = (hours: string): boolean => {
   try {
     const hoursData = JSON.parse(hours);
     const now = new Date();
-    const dayOfWeek = now.toLocaleLowerCase().slice(0, 3);
+    const dayOfWeek = now.toLocaleString('en-US', { weekday: 'short' }).toLowerCase();
     const currentTime = now.getHours() * 100 + now.getMinutes();
 
     if (!hoursData[dayOfWeek]?.isOpen) return false;
