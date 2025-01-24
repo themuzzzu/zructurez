@@ -11,7 +11,7 @@ interface ChatMessagesProps {
   onForwardMessage: (messageId: string) => void;
 }
 
-// Separate base message type to avoid recursion
+// Base message type without recursion
 type BaseMessage = {
   id: string;
   content: string;
@@ -19,19 +19,19 @@ type BaseMessage = {
   sender_id: string;
 };
 
-// Extend base type for direct messages
+// Separate type for direct messages
 type DirectMessage = BaseMessage & {
   receiver_id: string;
   read?: boolean;
   expires_at?: string;
 };
 
-// Extend base type for group messages
+// Separate type for group messages
 type GroupMessage = BaseMessage & {
   group_id: string;
 };
 
-// Separate type for messages with profile data
+// Type for formatted messages with profile data
 type FormattedMessage = {
   id: string;
   content: string;
@@ -58,8 +58,12 @@ export const ChatMessages = ({ chat, onForwardMessage }: ChatMessagesProps) => {
           return;
         }
 
+        if (!messagesData) {
+          return;
+        }
+
         // Get unique sender IDs
-        const senderIds = [...new Set(messagesData?.map(msg => msg.sender_id) || [])];
+        const senderIds = [...new Set(messagesData.map(msg => msg.sender_id))];
 
         // Fetch profiles for senders
         const { data: profiles, error: profilesError } = await supabase
@@ -77,13 +81,13 @@ export const ChatMessages = ({ chat, onForwardMessage }: ChatMessagesProps) => {
         const profileMap = new Map(profiles?.map(profile => [profile.id, profile]));
 
         // Format messages with profile data
-        const formattedMessages = messagesData?.map((msg: DirectMessage | GroupMessage) => ({
+        const formattedMessages = messagesData.map((msg: DirectMessage | GroupMessage) => ({
           id: msg.id,
           content: msg.content,
           timestamp: new Date(msg.created_at).toLocaleString(),
           senderId: msg.sender_id,
           sender: profileMap.get(msg.sender_id)
-        })) || [];
+        }));
 
         setMessages(formattedMessages);
       } catch (error) {
