@@ -109,32 +109,32 @@ export const BusinessCard = ({
       onClick={() => navigate(`/business/${id}`)}
     >
       <img src={image} alt={name} className="w-full h-48 object-cover" />
-      <div className="p-4">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="font-semibold text-lg truncate max-w-[70%]">{name}</h3>
+      <div className="p-5">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-semibold text-lg truncate max-w-[60%]">{name}</h3>
           <div className="flex gap-2">
             {verified && <Badge variant="outline">Verified</Badge>}
             <Badge 
               variant={isOpen ? "success" : "destructive"}
-              className="min-w-[70px] text-center"
+              className="min-w-[80px] text-center"
             >
               {isOpen ? "Open" : "Closed"}
             </Badge>
           </div>
         </div>
 
-        <div className="mb-3">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span className="font-medium truncate">{category}</span>
+        <div className="mb-4">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+            <span className="font-medium truncate max-w-[200px]">{category}</span>
             <span>•</span>
-            <div className="flex items-center">
+            <div className="flex items-center whitespace-nowrap">
               <Star className="h-4 w-4 text-yellow-400 fill-current" />
               <span className="ml-1">{rating}</span>
               <span className="ml-1">({reviews})</span>
             </div>
           </div>
           
-          <p className="text-sm text-muted-foreground mt-2 line-clamp-3">{description}</p>
+          <p className="text-sm text-muted-foreground line-clamp-3">{description}</p>
         </div>
 
         <div className="space-y-2 mb-4">
@@ -149,7 +149,7 @@ export const BusinessCard = ({
         </div>
         
         {(appointment_price || consultation_price) && (
-          <div className="space-y-1 mb-4">
+          <div className="space-y-2 mb-4">
             {appointment_price && (
               <div className="text-sm">
                 <span className="font-semibold">Appointment:</span> ₹{appointment_price}
@@ -176,7 +176,7 @@ export const BusinessCard = ({
             <Button
               onClick={handleShare}
               variant="outline"
-              className="flex items-center gap-2"
+              className="min-w-[100px] flex items-center justify-center gap-2"
             >
               <Share2 className="h-4 w-4" />
               Share
