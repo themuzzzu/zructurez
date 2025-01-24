@@ -94,9 +94,6 @@ const Messages = () => {
 
   const loadGroups = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
       const { data: userGroups, error: groupsError } = await supabase
         .from('group_members')
         .select(`
@@ -112,8 +109,7 @@ const Messages = () => {
               user_id
             )
           )
-        `)
-        .eq('user_id', user.id);
+        `);
 
       if (groupsError) throw groupsError;
 

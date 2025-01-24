@@ -11,7 +11,6 @@ import { NotFound } from "@/components/NotFound";
 import Index from "./pages/Index";
 import Marketplace from "./pages/Marketplace";
 import Services from "./pages/Services";
-import Communities from "./pages/Communities";
 import Messages from "./pages/Messages";
 import Events from "./pages/Events";
 import Settings from "./pages/Settings";
@@ -48,7 +47,6 @@ const App = () => (
             <Route path="/jobs" element={<ProtectedRoute><Jobs /></ProtectedRoute>} />
             <Route path="/services/:id" element={<ProtectedRoute><ServiceDetails /></ProtectedRoute>} />
             <Route path="/business/:id" element={<ProtectedRoute><BusinessDetails /></ProtectedRoute>} />
-            <Route path="/communities" element={<ProtectedRoute><Communities /></ProtectedRoute>} />
             <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
             <Route path="/events" element={<ProtectedRoute><Events /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
