@@ -245,6 +245,7 @@ export const CreateProductForm = ({ businessId, onSuccess }: CreateProductFormPr
             placeholder="Enter model or version (optional)"
           />
         </div>
+      </div>
 
       <Button type="submit" className="w-full" disabled={loading}>
         {loading ? "Creating Product..." : "Create Product"}

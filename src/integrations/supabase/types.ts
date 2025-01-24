@@ -737,12 +737,14 @@ export type Database = {
           condition: string | null
           created_at: string
           description: string
+          discount_percentage: number | null
           id: string
           image_url: string | null
           is_branded: boolean | null
           is_discounted: boolean | null
           is_used: boolean | null
           model: string | null
+          original_price: number | null
           price: number
           reach: number | null
           service_product_id: string | null
@@ -758,12 +760,14 @@ export type Database = {
           condition?: string | null
           created_at?: string
           description: string
+          discount_percentage?: number | null
           id?: string
           image_url?: string | null
           is_branded?: boolean | null
           is_discounted?: boolean | null
           is_used?: boolean | null
           model?: string | null
+          original_price?: number | null
           price: number
           reach?: number | null
           service_product_id?: string | null
@@ -779,12 +783,14 @@ export type Database = {
           condition?: string | null
           created_at?: string
           description?: string
+          discount_percentage?: number | null
           id?: string
           image_url?: string | null
           is_branded?: boolean | null
           is_discounted?: boolean | null
           is_used?: boolean | null
           model?: string | null
+          original_price?: number | null
           price?: number
           reach?: number | null
           service_product_id?: string | null
