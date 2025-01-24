@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -17,11 +18,14 @@ interface BusinessHeaderProps {
   onEdit?: () => void;
 }
 
+type ClosureReason = 'food_break' | 'sick' | 'holiday' | 'other';
+
 export const BusinessHeader = ({ id, name, category, isOwner, isOpen = true, onEdit }: BusinessHeaderProps) => {
   const [loading, setLoading] = useState(false);
   const [waitTime, setWaitTime] = useState("");
   const [open, setOpen] = useState(isOpen);
   const [temporarilyUnavailable, setTemporarilyUnavailable] = useState(false);
+  const [closureReason, setClosureReason] = useState<ClosureReason | ''>('');
 
   const handleStatusChange = async (checked: boolean) => {
     setLoading(true);
@@ -30,7 +34,8 @@ export const BusinessHeader = ({ id, name, category, isOwner, isOpen = true, onE
         .from('businesses')
         .update({ 
           is_open: checked,
-          wait_time: checked ? null : waitTime // Clear wait time when opening
+          wait_time: checked ? null : waitTime,
+          closure_reason: checked ? null : closureReason
         } as any)
         .eq('id', id);
 
@@ -39,6 +44,7 @@ export const BusinessHeader = ({ id, name, category, isOwner, isOpen = true, onE
       if (checked) {
         setTemporarilyUnavailable(false);
         setWaitTime("");
+        setClosureReason('');
       }
       toast.success(`Business is now ${checked ? 'open' : 'closed'}`);
     } catch (error) {
@@ -52,15 +58,18 @@ export const BusinessHeader = ({ id, name, category, isOwner, isOpen = true, onE
   const handleTemporaryStatus = async (checked: boolean) => {
     setTemporarilyUnavailable(checked);
     if (!checked) {
-      // Clear wait time when becoming available
       try {
         const { error } = await supabase
           .from('businesses')
-          .update({ wait_time: null } as any)
+          .update({ 
+            wait_time: null,
+            closure_reason: null
+          } as any)
           .eq('id', id);
 
         if (error) throw error;
         setWaitTime("");
+        setClosureReason('');
       } catch (error) {
         console.error('Error clearing wait time:', error);
         toast.error("Failed to update availability");
@@ -75,7 +84,10 @@ export const BusinessHeader = ({ id, name, category, isOwner, isOpen = true, onE
     try {
       const { error } = await supabase
         .from('businesses')
-        .update({ wait_time: waitTime } as any)
+        .update({ 
+          wait_time: waitTime,
+          closure_reason: closureReason || null
+        } as any)
         .eq('id', id);
 
       if (error) throw error;
@@ -85,6 +97,21 @@ export const BusinessHeader = ({ id, name, category, isOwner, isOpen = true, onE
       toast.error("Failed to update wait time");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const getReasonLabel = (reason: string) => {
+    switch (reason) {
+      case 'food_break':
+        return 'Food Break';
+      case 'sick':
+        return 'Sick Leave';
+      case 'holiday':
+        return 'Holiday';
+      case 'other':
+        return 'Other';
+      default:
+        return '';
     }
   };
 
@@ -137,29 +164,47 @@ export const BusinessHeader = ({ id, name, category, isOwner, isOpen = true, onE
 
           {(temporarilyUnavailable || !open) && (
             <>
-              <div className="flex items-center gap-2">
-                <Input
-                  type="text"
-                  placeholder="Available in... (e.g., 30 mins)"
-                  value={waitTime}
-                  onChange={(e) => setWaitTime(e.target.value)}
-                  className="w-48"
-                  disabled={loading}
-                />
-                <Button 
-                  variant="secondary" 
-                  onClick={updateWaitTime}
-                  disabled={!waitTime || loading}
-                >
-                  Set Wait Time
-                </Button>
-              </div>
-              {waitTime && (
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Clock className="h-4 w-4" />
-                  <span className="text-sm">Available in {waitTime}</span>
+              <div className="flex flex-col gap-4 w-full">
+                <div className="flex items-center gap-2">
+                  <Select
+                    value={closureReason}
+                    onValueChange={(value) => setClosureReason(value as ClosureReason)}
+                    disabled={loading}
+                  >
+                    <option value="">Select a reason</option>
+                    <option value="food_break">Food Break</option>
+                    <option value="sick">Sick Leave</option>
+                    <option value="holiday">Holiday</option>
+                    <option value="other">Other</option>
+                  </Select>
                 </div>
-              )}
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="text"
+                    placeholder="Available in... (e.g., 30 mins)"
+                    value={waitTime}
+                    onChange={(e) => setWaitTime(e.target.value)}
+                    className="w-48"
+                    disabled={loading}
+                  />
+                  <Button 
+                    variant="secondary" 
+                    onClick={updateWaitTime}
+                    disabled={!waitTime || loading}
+                  >
+                    Set Wait Time
+                  </Button>
+                </div>
+                {waitTime && (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Clock className="h-4 w-4" />
+                    <span className="text-sm">
+                      Available in {waitTime}
+                      {closureReason && ` (${getReasonLabel(closureReason)})`}
+                    </span>
+                  </div>
+                )}
+              </div>
             </>
           )}
         </div>
