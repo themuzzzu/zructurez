@@ -109,47 +109,47 @@ export const BusinessCard = ({
       onClick={() => navigate(`/business/${id}`)}
     >
       <img src={image} alt={name} className="w-full h-48 object-cover" />
-      <div className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-lg truncate max-w-[75%]">{name}</h3>
+      <div className="p-8">
+        <div className="flex items-center justify-between mb-5">
+          <h3 className="font-semibold text-xl truncate max-w-[70%]">{name}</h3>
           <div className="flex gap-2">
             {verified && <Badge variant="outline">Verified</Badge>}
             <Badge 
               variant={isOpen ? "success" : "destructive"}
-              className="min-w-[90px] text-center"
+              className="min-w-[100px] text-center whitespace-nowrap"
             >
               {isOpen ? "Open" : "Closed"}
             </Badge>
           </div>
         </div>
 
-        <div className="mb-4">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-            <span className="font-medium truncate max-w-[250px]">{category}</span>
+        <div className="mb-6">
+          <div className="flex items-center gap-3 text-sm text-muted-foreground mb-3">
+            <span className="font-medium text-base truncate max-w-[300px]">{category}</span>
             <span>•</span>
-            <div className="flex items-center whitespace-nowrap">
+            <div className="flex items-center gap-1 whitespace-nowrap">
               <Star className="h-4 w-4 text-yellow-400 fill-current" />
               <span className="ml-1">{rating}</span>
               <span className="ml-1">({reviews})</span>
             </div>
           </div>
           
-          <p className="text-sm text-muted-foreground line-clamp-3">{description}</p>
+          <p className="text-sm text-muted-foreground line-clamp-3 mb-2">{description}</p>
         </div>
 
-        <div className="space-y-3 mb-4">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="space-y-4 mb-6">
+          <div className="flex items-center gap-3 text-sm text-muted-foreground">
             <MapPin className="h-4 w-4 shrink-0" />
             <span className="truncate">{location}</span>
           </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="flex items-center gap-3 text-sm text-muted-foreground">
             <Clock className="h-4 w-4 shrink-0" />
             <span className="truncate">{hours}</span>
           </div>
         </div>
         
         {(appointment_price || consultation_price) && (
-          <div className="space-y-2 mb-4">
+          <div className="space-y-3 mb-6">
             {appointment_price && (
               <div className="text-sm">
                 <span className="font-semibold">Appointment:</span> ₹{appointment_price}
@@ -163,22 +163,22 @@ export const BusinessCard = ({
           </div>
         )}
 
-        <div className="space-y-3">
-          <div className="flex gap-2">
+        <div className="space-y-4">
+          <div className="flex gap-3">
             <Button 
               onClick={handleWhatsApp} 
-              className="flex-1 flex items-center justify-center gap-2"
+              className="flex-1 flex items-center justify-center gap-2 py-6"
               variant="default"
             >
-              <MessageSquare className="h-4 w-4" />
+              <MessageSquare className="h-5 w-5" />
               Message
             </Button>
             <Button
               onClick={handleShare}
               variant="outline"
-              className="min-w-[120px] flex items-center justify-center gap-2"
+              className="min-w-[140px] flex items-center justify-center gap-2 py-6"
             >
-              <Share2 className="h-4 w-4" />
+              <Share2 className="h-5 w-5" />
               Share
             </Button>
           </div>
@@ -188,9 +188,9 @@ export const BusinessCard = ({
               window.location.href = `tel:${contact}`;
             }} 
             variant="outline"
-            className="w-full flex items-center justify-center gap-2"
+            className="w-full flex items-center justify-center gap-2 py-6"
           >
-            <Phone className="h-4 w-4" />
+            <Phone className="h-5 w-5" />
             Call
           </Button>
         </div>
