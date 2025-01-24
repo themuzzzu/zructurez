@@ -21,23 +21,50 @@ export const BusinessHeader = ({ id, name, category, isOwner, isOpen = true, onE
   const [loading, setLoading] = useState(false);
   const [waitTime, setWaitTime] = useState("");
   const [open, setOpen] = useState(isOpen);
+  const [temporarilyUnavailable, setTemporarilyUnavailable] = useState(false);
 
   const handleStatusChange = async (checked: boolean) => {
     setLoading(true);
     try {
       const { error } = await supabase
         .from('businesses')
-        .update({ is_open: checked })
+        .update({ 
+          is_open: checked,
+          wait_time: checked ? null : waitTime // Clear wait time when opening
+        } as any)
         .eq('id', id);
 
       if (error) throw error;
       setOpen(checked);
+      if (checked) {
+        setTemporarilyUnavailable(false);
+        setWaitTime("");
+      }
       toast.success(`Business is now ${checked ? 'open' : 'closed'}`);
     } catch (error) {
       console.error('Error updating business status:', error);
       toast.error("Failed to update business status");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleTemporaryStatus = async (checked: boolean) => {
+    setTemporarilyUnavailable(checked);
+    if (!checked) {
+      // Clear wait time when becoming available
+      try {
+        const { error } = await supabase
+          .from('businesses')
+          .update({ wait_time: null } as any)
+          .eq('id', id);
+
+        if (error) throw error;
+        setWaitTime("");
+      } catch (error) {
+        console.error('Error clearing wait time:', error);
+        toast.error("Failed to update availability");
+      }
     }
   };
 
@@ -48,7 +75,7 @@ export const BusinessHeader = ({ id, name, category, isOwner, isOpen = true, onE
     try {
       const { error } = await supabase
         .from('businesses')
-        .update({ wait_time: waitTime } as any) // Type assertion needed due to schema sync issue
+        .update({ wait_time: waitTime } as any)
         .eq('id', id);
 
       if (error) throw error;
@@ -94,23 +121,39 @@ export const BusinessHeader = ({ id, name, category, isOwner, isOpen = true, onE
             </Label>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Input
-              type="text"
-              placeholder="Wait time (e.g., 30 mins)"
-              value={waitTime}
-              onChange={(e) => setWaitTime(e.target.value)}
-              className="w-40"
-              disabled={!open || loading}
-            />
-            <Button 
-              variant="secondary" 
-              onClick={updateWaitTime}
-              disabled={!open || !waitTime || loading}
-            >
-              Set Wait Time
-            </Button>
-          </div>
+          {open && (
+            <div className="flex items-center gap-2">
+              <Switch
+                id="temporary-status"
+                checked={temporarilyUnavailable}
+                onCheckedChange={handleTemporaryStatus}
+                disabled={loading || !open}
+              />
+              <Label htmlFor="temporary-status">
+                Temporarily Unavailable
+              </Label>
+            </div>
+          )}
+
+          {(temporarilyUnavailable || !open) && (
+            <div className="flex items-center gap-2">
+              <Input
+                type="text"
+                placeholder="Available in... (e.g., 30 mins)"
+                value={waitTime}
+                onChange={(e) => setWaitTime(e.target.value)}
+                className="w-48"
+                disabled={loading}
+              />
+              <Button 
+                variant="secondary" 
+                onClick={updateWaitTime}
+                disabled={!waitTime || loading}
+              >
+                Set Wait Time
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </div>
