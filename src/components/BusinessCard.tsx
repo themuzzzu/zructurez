@@ -1,4 +1,4 @@
-import { Star, MapPin, Clock, Phone, Share2, MessageSquare } from "lucide-react";
+import { Star, MapPin, Clock, Phone, Share2, MessageSquare, ChevronDown } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
@@ -108,26 +108,25 @@ export const BusinessCard = ({
       className="overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer w-full max-w-[360px] bg-black/95 text-white"
       onClick={() => navigate(`/business/${id}`)}
     >
-      <img src={image} alt={name} className="w-full h-48 object-cover" />
-      <div className="p-4 space-y-3">
-        <div className="flex items-start justify-between gap-2">
-          <div className="space-y-1 flex-1">
+      <img src={image} alt={name} className="w-full h-40 object-cover" />
+      <div className="p-4 space-y-4">
+        <div className="space-y-2">
+          <h3 className="font-semibold text-xl line-clamp-1">{name}</h3>
+          
+          <div className="flex flex-col gap-1">
+            <span className="text-sm text-gray-300">{category}</span>
             <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-lg line-clamp-1">{name}</h3>
-              {verified && (
-                <Badge variant="outline" className="text-xs px-2 py-0.5">
-                  Verified
-                </Badge>
-              )}
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-300">{category}</span>
               <Badge 
                 variant={isOpen ? "success" : "destructive"}
                 className="text-xs px-2 py-0.5"
               >
                 {isOpen ? "Open" : "Closed"}
               </Badge>
+              {verified && (
+                <Badge variant="outline" className="text-xs px-2 py-0.5">
+                  Verified
+                </Badge>
+              )}
             </div>
           </div>
         </div>
@@ -138,16 +137,23 @@ export const BusinessCard = ({
           <span className="text-gray-400">({reviews} reviews)</span>
         </div>
 
-        <p className="text-sm text-gray-300 line-clamp-2">{description}</p>
+        <div className="relative">
+          <p className="text-sm text-gray-300 line-clamp-5 mb-2">{description}</p>
+          {description.length > 250 && (
+            <div className="absolute bottom-0 right-0 bg-gradient-to-l from-black/95 to-transparent px-2">
+              <ChevronDown className="h-4 w-4 text-gray-400" />
+            </div>
+          )}
+        </div>
 
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-2 text-sm text-gray-300">
-            <MapPin className="h-4 w-4 shrink-0" />
-            <span className="truncate">{location}</span>
+        <div className="space-y-2">
+          <div className="flex items-start gap-2 text-sm text-gray-300">
+            <MapPin className="h-4 w-4 shrink-0 mt-1" />
+            <span className="flex-1">{location}</span>
           </div>
-          <div className="flex items-center gap-2 text-sm text-gray-300">
-            <Clock className="h-4 w-4 shrink-0" />
-            <span className="truncate">{hours}</span>
+          <div className="flex items-start gap-2 text-sm text-gray-300">
+            <Clock className="h-4 w-4 shrink-0 mt-1" />
+            <span className="flex-1">{hours}</span>
           </div>
         </div>
 
