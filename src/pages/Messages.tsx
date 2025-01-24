@@ -1,92 +1,97 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ChatWindow } from "@/components/chat/ChatWindow";
 import { ChatList } from "@/components/chat/ChatList";
-import { toast } from "sonner";
+import { ChatWindow } from "@/components/chat/ChatWindow";
+import { GroupList } from "@/components/groups/GroupList";
+import { GroupChat } from "@/components/groups/GroupChat";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { Home, ArrowLeft } from "lucide-react";
 import type { Chat } from "@/types/chat";
+import type { Group } from "@/types/group";
+import { toast } from "sonner";
 
 const Messages = () => {
-  const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [chats, setChats] = useState<Chat[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState("");
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
+  const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadChats();
+    loadGroups();
   }, []);
 
   const loadChats = async () => {
     try {
-      setLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
-
       if (!user) {
         toast.error("Please log in to view messages");
         return;
       }
 
-      // Load direct messages
       const { data: messages, error: messagesError } = await supabase
         .from('messages')
         .select('*')
         .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
         .order('created_at', { ascending: false });
 
-      if (messagesError) {
-        console.error("Error loading messages:", messagesError);
-        toast.error("Failed to load messages");
-        return;
-      }
+      if (messagesError) throw messagesError;
 
-      // Create a map to store unique chats
-      const uniqueChats = new Map<string, Chat>();
-      
-      if (messages) {
-        // First, get all unique user IDs (both senders and receivers)
-        const userIds = new Set<string>();
-        messages.forEach(msg => {
-          userIds.add(msg.sender_id);
-          userIds.add(msg.receiver_id);
-        });
+      // Get unique user IDs from messages
+      const userIds = new Set<string>();
+      messages?.forEach(msg => {
+        userIds.add(msg.sender_id === user.id ? msg.receiver_id : msg.sender_id);
+      });
 
-        // Fetch all relevant profiles in one go
-        const { data: profiles } = await supabase
-          .from('profiles')
-          .select('*')
-          .in('id', Array.from(userIds));
+      // Fetch profiles for all users
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('*')
+        .in('id', Array.from(userIds));
 
-        if (!profiles) {
-          console.error("No profiles found");
-          return;
+      if (profilesError) throw profilesError;
+
+      // Create chat objects
+      const chatMap = new Map<string, Chat>();
+      messages?.forEach(msg => {
+        const otherUserId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id;
+        const profile = profiles?.find(p => p.id === otherUserId);
+        
+        if (!profile) return;
+
+        if (!chatMap.has(otherUserId)) {
+          chatMap.set(otherUserId, {
+            id: otherUserId,
+            name: profile.username || 'Unknown User',
+            avatar: profile.avatar_url || '/placeholder.svg',
+            lastMessage: msg.content,
+            time: new Date(msg.created_at).toLocaleTimeString(),
+            unread: msg.receiver_id === user.id && !msg.read ? 1 : 0,
+            userId: otherUserId,
+            messages: [],
+            type: 'chat'
+          });
         }
+      });
 
-        // Create a map of profiles for easy lookup
-        const profilesMap = new Map(profiles.map(profile => [profile.id, profile]));
+      setChats(Array.from(chatMap.values()));
+    } catch (error) {
+      console.error('Error loading chats:', error);
+      toast.error("Failed to load chats");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        messages.forEach(msg => {
-          const otherUserId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id;
-          const otherUserProfile = profilesMap.get(otherUserId);
+  const loadGroups = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
-          if (!otherUserProfile) return;
-
-          if (!uniqueChats.has(otherUserId)) {
-            uniqueChats.set(otherUserId, {
-              id: otherUserId,
-              name: otherUserProfile.username || 'Unknown User',
-              avatar: otherUserProfile.avatar_url || '/placeholder.svg',
-              lastMessage: msg.content,
-              time: new Date(msg.created_at).toLocaleTimeString(),
-              unread: msg.receiver_id === user.id && !msg.read ? 1 : 0,
-              userId: otherUserId,
-              messages: [],
-              type: 'chat'
-            });
-          }
-        });
-      }
-
-      // Load groups
       const { data: userGroups, error: groupsError } = await supabase
         .from('group_members')
         .select(`
@@ -94,86 +99,130 @@ const Messages = () => {
           groups (
             id,
             name,
+            description,
             image_url,
-            description
+            created_at,
+            user_id,
+            group_members (
+              user_id
+            )
           )
         `)
         .eq('user_id', user.id);
 
-      if (groupsError) {
-        console.error("Error loading groups:", groupsError);
-        return;
-      }
+      if (groupsError) throw groupsError;
 
-      const formattedGroups = userGroups?.map(membership => ({
-        id: membership.groups.id,
-        name: membership.groups.name,
-        avatar: membership.groups.image_url || '/placeholder.svg',
-        lastMessage: '',
-        time: '',
-        unread: 0,
-        userId: user.id,
-        messages: [],
-        type: 'group' as const
-      })) || [];
+      const formattedGroups = userGroups.map(membership => ({
+        ...membership.groups,
+        group_members: {
+          count: membership.groups.group_members.length,
+          members: membership.groups.group_members.map((m: any) => m.user_id)
+        }
+      }));
 
-      setChats([...Array.from(uniqueChats.values()), ...formattedGroups]);
-
+      setGroups(formattedGroups);
     } catch (error) {
-      console.error('Error loading chats:', error);
-      toast.error("Failed to load messages");
-    } finally {
-      setLoading(false);
+      console.error('Error loading groups:', error);
+      toast.error("Failed to load groups");
     }
   };
 
   const handleSelectChat = (chat: Chat) => {
     setSelectedChat(chat);
+    setSelectedGroup(null);
+  };
+
+  const handleSelectGroup = (group: Group) => {
+    setSelectedGroup(group);
+    setSelectedChat(null);
+  };
+
+  const handleBack = () => {
+    setSelectedChat(null);
+    setSelectedGroup(null);
   };
 
   const handleSendMessage = () => {
-    // This will be called after a message is sent successfully
-    loadChats(); // Reload chats to show the new message
+    loadChats(); // Reload chats after sending a message
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
 
   return (
     <div className="flex h-screen bg-background">
-      <div 
-        className={`${
-          selectedChat ? 'hidden md:flex' : 'flex'
-        } w-full md:w-80 border-r flex-shrink-0`}
-      >
-        <ChatList
-          chats={chats}
-          selectedChat={selectedChat}
-          onSelectChat={handleSelectChat}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-        />
+      <div className={`${
+        (selectedChat || selectedGroup) ? 'hidden md:flex' : 'flex'
+      } w-full md:w-80 border-r flex-col`}>
+        <div className="p-4 border-b flex items-center justify-between">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate('/')}
+            className="hover:bg-accent/50"
+          >
+            <Home className="h-5 w-5" />
+          </Button>
+          <h1 className="text-xl font-semibold">Messages</h1>
+          <div className="w-10" /> {/* Spacer for alignment */}
+        </div>
+        
+        {/* Chats Section */}
+        <div className="flex-1 overflow-hidden">
+          <h2 className="px-4 py-2 font-semibold text-sm text-muted-foreground">Direct Messages</h2>
+          <ChatList
+            chats={chats}
+            selectedChat={selectedChat}
+            onSelectChat={handleSelectChat}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+          />
+          
+          {/* Groups Section */}
+          <h2 className="px-4 py-2 font-semibold text-sm text-muted-foreground mt-4">Groups</h2>
+          <GroupList
+            groups={groups}
+            selectedGroup={selectedGroup}
+            onSelectGroup={handleSelectGroup}
+          />
+        </div>
       </div>
-      <div 
-        className={`${
-          selectedChat ? 'flex' : 'hidden md:flex'
-        } flex-1 flex-col`}
-      >
-        {selectedChat ? (
+
+      <div className={`${
+        (selectedChat || selectedGroup) ? 'flex' : 'hidden md:flex'
+      } flex-1 flex-col`}>
+        {(selectedChat || selectedGroup) && (
+          <div className="p-4 border-b flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleBack}
+              className="md:hidden hover:bg-accent/50"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <span className="font-semibold">
+              {selectedChat?.name || selectedGroup?.name}
+            </span>
+          </div>
+        )}
+        
+        {selectedChat && (
           <ChatWindow
             selectedChat={selectedChat}
-            message={message}
-            onMessageChange={setMessage}
-            onSendMessage={handleSendMessage}
+            onBack={handleBack}
+            onMessageSent={handleSendMessage}
           />
-        ) : (
+        )}
+        
+        {selectedGroup && (
+          <GroupChat groupId={selectedGroup.id} />
+        )}
+        
+        {!selectedChat && !selectedGroup && (
           <div className="flex items-center justify-center h-full text-muted-foreground">
-            Select a chat to start messaging
+            Select a chat or group to start messaging
           </div>
         )}
       </div>
