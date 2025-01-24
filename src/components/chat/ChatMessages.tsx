@@ -12,21 +12,21 @@ interface ChatMessagesProps {
   onForwardMessage: (messageId: string) => void;
 }
 
-// Define message types without recursive references
-interface MessageBase {
+// Define a simple message type without recursive references
+interface Message {
   id: string;
   content: string;
   created_at: string;
   sender_id: string;
 }
 
-interface DirectMessageType extends MessageBase {
+interface DirectMessage extends Message {
   receiver_id: string;
   read?: boolean;
   expires_at?: string | null;
 }
 
-interface GroupMessageType extends MessageBase {
+interface GroupMessage extends Message {
   group_id: string;
 }
 
@@ -109,7 +109,7 @@ export const ChatMessages = ({ chat, onForwardMessage }: ChatMessagesProps) => {
             ? `group_id=eq.${chat.userId}`
             : `or(sender_id.eq.${chat.userId},receiver_id.eq.${chat.userId})`
         },
-        async (payload: RealtimePostgresChangesPayload<MessageBase>) => {
+        async (payload: RealtimePostgresChangesPayload<Message>) => {
           if (payload.eventType === 'INSERT') {
             const { data: profileData } = await supabase
               .from('profiles')
