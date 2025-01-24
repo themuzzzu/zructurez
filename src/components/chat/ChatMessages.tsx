@@ -59,7 +59,7 @@ export const ChatMessages = ({ chat, onForwardMessage }: ChatMessagesProps) => {
         }
 
         // Get unique sender IDs
-        const senderIds = [...new Set(messagesData.map(msg => msg.sender_id))];
+        const senderIds = [...new Set(messagesData?.map(msg => msg.sender_id) || [])];
 
         // Fetch profiles for senders
         const { data: profiles, error: profilesError } = await supabase
@@ -77,13 +77,13 @@ export const ChatMessages = ({ chat, onForwardMessage }: ChatMessagesProps) => {
         const profileMap = new Map(profiles?.map(profile => [profile.id, profile]));
 
         // Format messages with profile data
-        const formattedMessages = messagesData.map((msg: DirectMessage | GroupMessage) => ({
+        const formattedMessages = messagesData?.map((msg: DirectMessage | GroupMessage) => ({
           id: msg.id,
           content: msg.content,
           timestamp: new Date(msg.created_at).toLocaleString(),
           senderId: msg.sender_id,
           sender: profileMap.get(msg.sender_id)
-        }));
+        })) || [];
 
         setMessages(formattedMessages);
       } catch (error) {
