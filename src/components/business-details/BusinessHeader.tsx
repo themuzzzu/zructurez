@@ -48,7 +48,7 @@ export const BusinessHeader = ({ id, name, category, isOwner, isOpen = true, onE
     try {
       const { error } = await supabase
         .from('businesses')
-        .update({ wait_time: waitTime })
+        .update({ wait_time: waitTime } as any) // Type assertion needed due to schema sync issue
         .eq('id', id);
 
       if (error) throw error;
