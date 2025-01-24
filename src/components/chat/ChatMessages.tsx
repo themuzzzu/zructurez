@@ -3,28 +3,7 @@ import { MessageBubble } from "../MessageBubble";
 import { ScrollArea } from "../ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
-
-// Base message type without recursion
-type BaseMessage = {
-  id: string;
-  content: string;
-  created_at: string;
-  sender_id: string;
-};
-
-// Separate types for direct and group messages
-type DirectMessage = BaseMessage & {
-  receiver_id: string;
-  read?: boolean;
-  expires_at?: string;
-};
-
-type GroupMessage = BaseMessage & {
-  group_id: string;
-};
-
-// Union type for all message types
-type Message = DirectMessage | GroupMessage;
+import type { Message } from "@/types/chat";
 
 interface ChatMessagesProps {
   messages: Message[];
@@ -56,7 +35,7 @@ export const ChatMessages = ({ messages, currentUserId, isGroup, onForwardMessag
           schema: 'public',
           table: 'messages',
         },
-        (payload: { new: Message }) => {
+        (payload) => {
           // Handle new message
           console.log('New message received:', payload.new);
         }
@@ -75,8 +54,8 @@ export const ChatMessages = ({ messages, currentUserId, isGroup, onForwardMessag
           <MessageBubble
             key={message.id}
             content={message.content}
-            timestamp={format(new Date(message.created_at), 'p')}
-            isOwn={message.sender_id === currentUserId}
+            timestamp={format(new Date(message.timestamp), 'p')}
+            isOwn={message.senderId === currentUserId}
             messageId={message.id}
             onForward={onForwardMessage}
           />
