@@ -7,7 +7,7 @@ import { ChatHeader } from "./ChatHeader";
 import { ChatMessages } from "./ChatMessages";
 import { ChatInput } from "./ChatInput";
 import { ChatDialogs } from "./ChatDialogs";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "../../hooks/useAuth";
 
 interface ChatWindowProps {
   selectedChat: Chat | null;
