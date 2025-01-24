@@ -20,6 +20,24 @@ interface MessageWithProfiles {
   receiver?: Profile;
 }
 
+interface DirectMessage {
+  id: string;
+  content: string;
+  created_at: string;
+  sender_id: string;
+  receiver_id: string;
+  read?: boolean;
+  expires_at?: string;
+}
+
+interface GroupMessage {
+  id: string;
+  content: string;
+  created_at: string;
+  sender_id: string;
+  group_id: string;
+}
+
 export const ChatMessages = ({ chat, onForwardMessage }: ChatMessagesProps) => {
   const [messages, setMessages] = useState<MessageWithProfiles[]>([]);
 
@@ -41,9 +59,11 @@ export const ChatMessages = ({ chat, onForwardMessage }: ChatMessagesProps) => {
 
         // Then, fetch profiles for all unique user IDs in messages
         const userIds = new Set<string>();
-        messagesData.forEach(msg => {
+        messagesData.forEach((msg: DirectMessage | GroupMessage) => {
           userIds.add(msg.sender_id);
-          if (msg.receiver_id) userIds.add(msg.receiver_id);
+          if ('receiver_id' in msg) {
+            userIds.add(msg.receiver_id);
+          }
         });
 
         const { data: profilesData, error: profilesError } = await supabase
@@ -61,13 +81,13 @@ export const ChatMessages = ({ chat, onForwardMessage }: ChatMessagesProps) => {
         const profilesMap = new Map(profilesData.map(profile => [profile.id, profile]));
 
         // Combine messages with profile data
-        const formattedMessages = messagesData.map(msg => ({
+        const formattedMessages = messagesData.map((msg: DirectMessage | GroupMessage) => ({
           id: msg.id,
           content: msg.content,
           timestamp: new Date(msg.created_at).toLocaleString(),
           senderId: msg.sender_id,
           sender: profilesMap.get(msg.sender_id),
-          receiver: msg.receiver_id ? profilesMap.get(msg.receiver_id) : undefined
+          receiver: 'receiver_id' in msg ? profilesMap.get(msg.receiver_id) : undefined
         }));
 
         setMessages(formattedMessages);
