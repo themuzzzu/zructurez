@@ -18,6 +18,8 @@ interface Product {
   title: string;
   description: string;
   price: number;
+  original_price?: number | null;
+  discount_percentage?: number | null;
   category: string;
   subcategory: string | null;
   image_url: string | null;
@@ -121,10 +123,22 @@ export const ProductCard = ({ product }: ProductCardProps) => {
               {product.category} {product.subcategory && `• ${product.subcategory}`}
             </div>
           </div>
-          <span className="text-lg font-bold text-primary flex items-center gap-1">
-            <IndianRupee className="h-4 w-4" />
-            {formatPrice(product.price).replace('₹', '')}
-          </span>
+          <div className="text-right">
+            <span className="text-lg font-bold text-primary flex items-center gap-1">
+              <IndianRupee className="h-4 w-4" />
+              {formatPrice(product.price).replace('₹', '')}
+            </span>
+            {product.original_price && (
+              <div className="flex flex-col items-end">
+                <span className="text-sm text-muted-foreground line-through">
+                  ₹{formatPrice(product.original_price).replace('₹', '')}
+                </span>
+                <span className="text-xs text-green-500">
+                  {product.discount_percentage}% off
+                </span>
+              </div>
+            )}
+          </div>
         </div>
         
         <p className="text-muted-foreground text-sm mb-4">{product.description}</p>

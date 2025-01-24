@@ -25,6 +25,7 @@ export const CreateProductForm = ({ businessId, onSuccess }: CreateProductFormPr
     stock: "1",
     image: null as string | null,
     is_discounted: false,
+    discount_percentage: "",
     is_used: false,
     is_branded: false,
     brand_name: "",
@@ -37,6 +38,11 @@ export const CreateProductForm = ({ businessId, onSuccess }: CreateProductFormPr
     
     if (!formData.title || !formData.description || !formData.price || !formData.category) {
       toast.error("Please fill in all required fields");
+      return;
+    }
+
+    if (formData.is_discounted && !formData.discount_percentage) {
+      toast.error("Please enter discount percentage");
       return;
     }
 
@@ -71,13 +77,20 @@ export const CreateProductForm = ({ businessId, onSuccess }: CreateProductFormPr
         imageUrl = publicUrl;
       }
 
+      const originalPrice = parseFloat(formData.price);
+      const discountedPrice = formData.is_discounted 
+        ? originalPrice - (originalPrice * (parseFloat(formData.discount_percentage) / 100))
+        : originalPrice;
+
       const { error } = await supabase
         .from('products')
         .insert([{
           user_id: user.id,
           title: formData.title,
           description: formData.description,
-          price: parseFloat(formData.price),
+          price: discountedPrice,
+          original_price: formData.is_discounted ? originalPrice : null,
+          discount_percentage: formData.is_discounted ? parseFloat(formData.discount_percentage) : null,
           category: formData.category,
           subcategory: formData.subcategory || null,
           image_url: imageUrl,
@@ -189,26 +202,30 @@ export const CreateProductForm = ({ businessId, onSuccess }: CreateProductFormPr
           />
         </div>
 
-        <div className="flex items-center justify-between">
-          <Label htmlFor="is_used">Used Item</Label>
-          <Switch
-            id="is_used"
-            checked={formData.is_used}
-            onCheckedChange={(checked) => setFormData({ ...formData, is_used: checked })}
-          />
-        </div>
+        {formData.is_discounted && (
+          <div className="space-y-2">
+            <Label htmlFor="discount_percentage">Discount Percentage (%)</Label>
+            <Input
+              id="discount_percentage"
+              type="number"
+              min="0"
+              max="100"
+              step="0.01"
+              value={formData.discount_percentage}
+              onChange={(e) => setFormData({ ...formData, discount_percentage: e.target.value })}
+              placeholder="Enter discount percentage"
+              required
+            />
+            {formData.price && formData.discount_percentage && (
+              <div className="text-sm text-muted-foreground">
+                Original Price: ₹{formData.price}
+                <br />
+                Discounted Price: ₹{(parseFloat(formData.price) - (parseFloat(formData.price) * (parseFloat(formData.discount_percentage) / 100))).toFixed(2)}
+              </div>
+            )}
+          </div>
+        )}
 
-        <div className="flex items-center justify-between">
-          <Label htmlFor="is_branded">Branded Item</Label>
-          <Switch
-            id="is_branded"
-            checked={formData.is_branded}
-            onCheckedChange={(checked) => setFormData({ ...formData, is_branded: checked })}
-          />
-        </div>
-      </div>
-
-      {formData.is_branded && (
         <div className="space-y-2">
           <Label htmlFor="brand_name">Brand Name</Label>
           <Input
@@ -218,38 +235,16 @@ export const CreateProductForm = ({ businessId, onSuccess }: CreateProductFormPr
             placeholder="Enter brand name"
           />
         </div>
-      )}
 
-      {formData.is_used && (
         <div className="space-y-2">
-          <Label htmlFor="condition">Condition</Label>
-          <Select
-            value={formData.condition}
-            onValueChange={(value) => setFormData({ ...formData, condition: value })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select condition" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="like-new">Like New</SelectItem>
-              <SelectItem value="excellent">Excellent</SelectItem>
-              <SelectItem value="good">Good</SelectItem>
-              <SelectItem value="fair">Fair</SelectItem>
-              <SelectItem value="poor">Poor</SelectItem>
-            </SelectContent>
-          </Select>
+          <Label htmlFor="model">Model/Version</Label>
+          <Input
+            id="model"
+            value={formData.model}
+            onChange={(e) => setFormData({ ...formData, model: e.target.value })}
+            placeholder="Enter model or version (optional)"
+          />
         </div>
-      )}
-
-      <div className="space-y-2">
-        <Label htmlFor="model">Model/Version</Label>
-        <Input
-          id="model"
-          value={formData.model}
-          onChange={(e) => setFormData({ ...formData, model: e.target.value })}
-          placeholder="Enter model or version (optional)"
-        />
-      </div>
 
       <Button type="submit" className="w-full" disabled={loading}>
         {loading ? "Creating Product..." : "Create Product"}
