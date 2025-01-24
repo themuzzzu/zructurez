@@ -4,6 +4,7 @@ import { Switch } from "@/components/ui/switch";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { BusinessVerification } from "./BusinessVerification";
 
 export const BusinessSettings = () => {
   const { data: businesses, isLoading } = useQuery({
@@ -53,25 +54,31 @@ export const BusinessSettings = () => {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Business Settings</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {businesses.map((business) => (
-          <div key={business.id} className="space-y-4">
-            <h3 className="font-semibold text-lg">{business.name}</h3>
-            <div className="flex items-center justify-between">
-              <Label htmlFor={`show-in-services-${business.id}`}>Show in Services Page</Label>
-              <Switch
-                id={`show-in-services-${business.id}`}
-                checked={business.show_in_services}
-                onCheckedChange={() => handleShowInServicesChange(business.id, business.show_in_services)}
-              />
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Business Settings</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {businesses.map((business) => (
+            <div key={business.id} className="space-y-4">
+              <h3 className="font-semibold text-lg">{business.name}</h3>
+              <div className="flex items-center justify-between">
+                <Label htmlFor={`show-in-services-${business.id}`}>Show in Services Page</Label>
+                <Switch
+                  id={`show-in-services-${business.id}`}
+                  checked={business.show_in_services}
+                  onCheckedChange={() => handleShowInServicesChange(business.id, business.show_in_services)}
+                />
+              </div>
             </div>
-          </div>
-        ))}
-      </CardContent>
-    </Card>
+          ))}
+        </CardContent>
+      </Card>
+
+      {businesses.map((business) => (
+        <BusinessVerification key={business.id} businessId={business.id} />
+      ))}
+    </div>
   );
 };

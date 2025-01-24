@@ -177,6 +177,7 @@ export type Database = {
       }
       businesses: {
         Row: {
+          aadhar_number: string | null
           appointment_price: number | null
           bio: string | null
           category: string
@@ -185,6 +186,7 @@ export type Database = {
           contact: string | null
           created_at: string
           description: string
+          gst_number: string | null
           hours: string | null
           id: string
           image_position: Json | null
@@ -194,15 +196,20 @@ export type Database = {
           location: string | null
           name: string
           owners: Json | null
+          pan_number: string | null
           show_in_services: boolean | null
           staff_details: Json | null
           user_id: string
+          verification_documents: Json | null
+          verification_status: string | null
+          verification_submitted_at: string | null
           verified: boolean | null
           video_url: string | null
           wait_time: string | null
           website: string | null
         }
         Insert: {
+          aadhar_number?: string | null
           appointment_price?: number | null
           bio?: string | null
           category: string
@@ -211,6 +218,7 @@ export type Database = {
           contact?: string | null
           created_at?: string
           description: string
+          gst_number?: string | null
           hours?: string | null
           id?: string
           image_position?: Json | null
@@ -220,15 +228,20 @@ export type Database = {
           location?: string | null
           name: string
           owners?: Json | null
+          pan_number?: string | null
           show_in_services?: boolean | null
           staff_details?: Json | null
           user_id: string
+          verification_documents?: Json | null
+          verification_status?: string | null
+          verification_submitted_at?: string | null
           verified?: boolean | null
           video_url?: string | null
           wait_time?: string | null
           website?: string | null
         }
         Update: {
+          aadhar_number?: string | null
           appointment_price?: number | null
           bio?: string | null
           category?: string
@@ -237,6 +250,7 @@ export type Database = {
           contact?: string | null
           created_at?: string
           description?: string
+          gst_number?: string | null
           hours?: string | null
           id?: string
           image_position?: Json | null
@@ -246,9 +260,13 @@ export type Database = {
           location?: string | null
           name?: string
           owners?: Json | null
+          pan_number?: string | null
           show_in_services?: boolean | null
           staff_details?: Json | null
           user_id?: string
+          verification_documents?: Json | null
+          verification_status?: string | null
+          verification_submitted_at?: string | null
           verified?: boolean | null
           video_url?: string | null
           wait_time?: string | null
