@@ -180,6 +180,7 @@ export type Database = {
           appointment_price: number | null
           bio: string | null
           category: string
+          closure_reason: string | null
           consultation_price: number | null
           contact: string | null
           created_at: string
@@ -205,6 +206,7 @@ export type Database = {
           appointment_price?: number | null
           bio?: string | null
           category: string
+          closure_reason?: string | null
           consultation_price?: number | null
           contact?: string | null
           created_at?: string
@@ -230,6 +232,7 @@ export type Database = {
           appointment_price?: number | null
           bio?: string | null
           category?: string
+          closure_reason?: string | null
           consultation_price?: number | null
           contact?: string | null
           created_at?: string
