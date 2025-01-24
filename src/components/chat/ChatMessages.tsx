@@ -11,37 +11,34 @@ interface ChatMessagesProps {
   onForwardMessage: (messageId: string) => void;
 }
 
-// Base message type without recursion
-type BaseMessage = {
+// Define message types without recursive references
+interface MessageBase {
   id: string;
   content: string;
   created_at: string;
   sender_id: string;
-};
+}
 
-// Separate type for direct messages
-type DirectMessage = BaseMessage & {
+interface DirectMessageType extends MessageBase {
   receiver_id: string;
   read?: boolean;
-  expires_at?: string;
-};
+  expires_at?: string | null;
+}
 
-// Separate type for group messages
-type GroupMessage = BaseMessage & {
+interface GroupMessageType extends MessageBase {
   group_id: string;
-};
+}
 
-// Type for formatted messages with profile data
-type FormattedMessage = {
+interface DisplayMessage {
   id: string;
   content: string;
   timestamp: string;
   senderId: string;
-  sender?: Profile;
-};
+  sender?: Profile | null;
+}
 
 export const ChatMessages = ({ chat, onForwardMessage }: ChatMessagesProps) => {
-  const [messages, setMessages] = useState<FormattedMessage[]>([]);
+  const [messages, setMessages] = useState<DisplayMessage[]>([]);
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -81,12 +78,12 @@ export const ChatMessages = ({ chat, onForwardMessage }: ChatMessagesProps) => {
         const profileMap = new Map(profiles?.map(profile => [profile.id, profile]));
 
         // Format messages with profile data
-        const formattedMessages = messagesData.map((msg: DirectMessage | GroupMessage) => ({
+        const formattedMessages: DisplayMessage[] = messagesData.map((msg) => ({
           id: msg.id,
           content: msg.content,
           timestamp: new Date(msg.created_at).toLocaleString(),
           senderId: msg.sender_id,
-          sender: profileMap.get(msg.sender_id)
+          sender: profileMap.get(msg.sender_id) || null
         }));
 
         setMessages(formattedMessages);
@@ -111,7 +108,7 @@ export const ChatMessages = ({ chat, onForwardMessage }: ChatMessagesProps) => {
             ? `group_id=eq.${chat.userId}`
             : `or(sender_id.eq.${chat.userId},receiver_id.eq.${chat.userId})`
         },
-        async (payload) => {
+        async (payload: { new: MessageBase; eventType: string }) => {
           if (payload.eventType === 'INSERT') {
             const { data: profileData } = await supabase
               .from('profiles')
@@ -119,12 +116,12 @@ export const ChatMessages = ({ chat, onForwardMessage }: ChatMessagesProps) => {
               .eq('id', payload.new.sender_id)
               .single();
 
-            const newMessage: FormattedMessage = {
+            const newMessage: DisplayMessage = {
               id: payload.new.id,
               content: payload.new.content,
               timestamp: new Date(payload.new.created_at).toLocaleString(),
               senderId: payload.new.sender_id,
-              sender: profileData
+              sender: profileData || null
             };
             setMessages(prev => [...prev, newMessage]);
           }
