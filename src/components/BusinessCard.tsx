@@ -109,47 +109,47 @@ export const BusinessCard = ({
       onClick={() => navigate(`/business/${id}`)}
     >
       <img src={image} alt={name} className="w-full h-48 object-cover" />
-      <div className="p-6 space-y-4">
-        <div className="flex items-center justify-between gap-2">
-          <h3 className="font-semibold text-xl truncate max-w-[65%]">{name}</h3>
-          <div className="flex gap-2 flex-shrink-0">
+      <div className="p-4">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="font-semibold text-lg truncate max-w-[70%]">{name}</h3>
+          <div className="flex gap-2">
             {verified && <Badge variant="outline">Verified</Badge>}
             <Badge 
               variant={isOpen ? "success" : "destructive"}
-              className="min-w-[80px] text-center whitespace-nowrap"
+              className="min-w-[70px] text-center"
             >
               {isOpen ? "Open" : "Closed"}
             </Badge>
           </div>
         </div>
 
-        <div className="space-y-2">
+        <div className="mb-3">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span className="font-medium truncate max-w-[150px]">{category}</span>
+            <span className="font-medium truncate">{category}</span>
             <span>•</span>
-            <div className="flex items-center flex-shrink-0 whitespace-nowrap">
+            <div className="flex items-center">
               <Star className="h-4 w-4 text-yellow-400 fill-current" />
               <span className="ml-1">{rating}</span>
               <span className="ml-1">({reviews})</span>
             </div>
           </div>
           
-          <p className="text-sm text-muted-foreground leading-relaxed py-2 line-clamp-3">{description}</p>
+          <p className="text-sm text-muted-foreground mt-2 line-clamp-3">{description}</p>
         </div>
 
-        <div className="space-y-2">
-          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+        <div className="space-y-2 mb-4">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <MapPin className="h-4 w-4 shrink-0" />
             <span className="truncate">{location}</span>
           </div>
-          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Clock className="h-4 w-4 shrink-0" />
             <span className="truncate">{hours}</span>
           </div>
         </div>
         
         {(appointment_price || consultation_price) && (
-          <div className="space-y-2 pt-2">
+          <div className="space-y-1 mb-4">
             {appointment_price && (
               <div className="text-sm">
                 <span className="font-semibold">Appointment:</span> ₹{appointment_price}
@@ -163,11 +163,11 @@ export const BusinessCard = ({
           </div>
         )}
 
-        <div className="flex flex-col gap-2 pt-2">
+        <div className="space-y-2">
           <div className="flex gap-2">
             <Button 
               onClick={handleWhatsApp} 
-              className="flex-1 flex items-center justify-center gap-2 min-w-[120px]"
+              className="flex-1 flex items-center justify-center gap-2"
               variant="default"
             >
               <MessageSquare className="h-4 w-4" />
@@ -176,7 +176,7 @@ export const BusinessCard = ({
             <Button
               onClick={handleShare}
               variant="outline"
-              className="flex items-center justify-center gap-2 min-w-[120px] whitespace-nowrap"
+              className="flex items-center gap-2"
             >
               <Share2 className="h-4 w-4" />
               Share
@@ -188,7 +188,7 @@ export const BusinessCard = ({
               window.location.href = `tel:${contact}`;
             }} 
             variant="outline"
-            className="flex items-center justify-center gap-2"
+            className="w-full flex items-center justify-center gap-2"
           >
             <Phone className="h-4 w-4" />
             Call
