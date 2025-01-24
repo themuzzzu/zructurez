@@ -38,6 +38,8 @@ export interface Business {
   staff_details: Array<StaffMember> | null;
   owners: Array<BusinessOwner> | null;
   show_in_services: boolean | null;
+  is_open: boolean | null;
+  wait_time?: string | null;
   business_portfolio: Array<{
     id: string;
     title: string;

@@ -101,9 +101,11 @@ const BusinessDetails = () => {
       <div className="container max-w-[1400px] pt-20 pb-16">
         <div className="space-y-6">
           <BusinessHeader
+            id={business.id}
             name={business.name}
             category={business.category}
             isOwner={isOwner}
+            isOpen={business.is_open}
             onEdit={() => setIsEditing(true)}
           />
 
