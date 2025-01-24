@@ -111,7 +111,14 @@ export const BusinessCard = ({
       <img src={image} alt={name} className="w-full h-40 object-cover" />
       <div className="p-4 space-y-4">
         <div className="space-y-2">
-          <h3 className="font-semibold text-xl line-clamp-1">{name}</h3>
+          <div className="relative">
+            <h3 className="font-semibold text-xl pr-8">{name}</h3>
+            {name.length > 25 && (
+              <div className="absolute top-1/2 right-0 -translate-y-1/2 bg-gradient-to-l from-black/95 to-transparent px-2">
+                <ChevronDown className="h-4 w-4 text-gray-400" />
+              </div>
+            )}
+          </div>
           
           <div className="flex flex-col gap-1">
             <span className="text-sm text-gray-300">{category}</span>
@@ -138,8 +145,8 @@ export const BusinessCard = ({
         </div>
 
         <div className="relative">
-          <p className="text-sm text-gray-300 line-clamp-5 mb-2">{description}</p>
-          {description.length > 250 && (
+          <p className="text-sm text-gray-300 line-clamp-3 mb-2">{description}</p>
+          {description.length > 150 && (
             <div className="absolute bottom-0 right-0 bg-gradient-to-l from-black/95 to-transparent px-2">
               <ChevronDown className="h-4 w-4 text-gray-400" />
             </div>
@@ -149,11 +156,25 @@ export const BusinessCard = ({
         <div className="space-y-2">
           <div className="flex items-start gap-2 text-sm text-gray-300">
             <MapPin className="h-4 w-4 shrink-0 mt-1" />
-            <span className="flex-1">{location}</span>
+            <div className="flex-1 relative">
+              <span className="inline-block pr-6">{location}</span>
+              {location.length > 35 && (
+                <div className="absolute top-0 right-0 bg-gradient-to-l from-black/95 to-transparent px-2">
+                  <ChevronDown className="h-4 w-4 text-gray-400" />
+                </div>
+              )}
+            </div>
           </div>
           <div className="flex items-start gap-2 text-sm text-gray-300">
             <Clock className="h-4 w-4 shrink-0 mt-1" />
-            <span className="flex-1">{hours}</span>
+            <div className="flex-1 relative">
+              <span className="inline-block pr-6">{hours}</span>
+              {hours.length > 35 && (
+                <div className="absolute top-0 right-0 bg-gradient-to-l from-black/95 to-transparent px-2">
+                  <ChevronDown className="h-4 w-4 text-gray-400" />
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
