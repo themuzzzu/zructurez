@@ -11,14 +11,7 @@ interface ChatMessagesProps {
   onForwardMessage: (messageId: string) => void;
 }
 
-type MessageWithProfile = {
-  id: string;
-  content: string;
-  timestamp: string;
-  senderId: string;
-  sender?: Profile;
-};
-
+// Separate base message type to avoid recursion
 type BaseMessage = {
   id: string;
   content: string;
@@ -26,18 +19,29 @@ type BaseMessage = {
   sender_id: string;
 };
 
+// Extend base type for direct messages
 type DirectMessage = BaseMessage & {
   receiver_id: string;
   read?: boolean;
   expires_at?: string;
 };
 
+// Extend base type for group messages
 type GroupMessage = BaseMessage & {
   group_id: string;
 };
 
+// Separate type for messages with profile data
+type FormattedMessage = {
+  id: string;
+  content: string;
+  timestamp: string;
+  senderId: string;
+  sender?: Profile;
+};
+
 export const ChatMessages = ({ chat, onForwardMessage }: ChatMessagesProps) => {
-  const [messages, setMessages] = useState<MessageWithProfile[]>([]);
+  const [messages, setMessages] = useState<FormattedMessage[]>([]);
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -111,7 +115,7 @@ export const ChatMessages = ({ chat, onForwardMessage }: ChatMessagesProps) => {
               .eq('id', payload.new.sender_id)
               .single();
 
-            const newMessage = {
+            const newMessage: FormattedMessage = {
               id: payload.new.id,
               content: payload.new.content,
               timestamp: new Date(payload.new.created_at).toLocaleString(),
