@@ -127,12 +127,8 @@ const Messages = () => {
     }
   };
 
-  const handleChatSelect = (chat: Chat) => {
+  const handleSelectChat = (chat: Chat) => {
     setSelectedChat(chat);
-  };
-
-  const handleBack = () => {
-    setSelectedChat(null);
   };
 
   const handleSendMessage = () => {
@@ -158,7 +154,7 @@ const Messages = () => {
         <ChatList
           chats={chats}
           selectedChat={selectedChat}
-          onSelectChat={handleChatSelect}
+          onSelectChat={handleSelectChat}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
         />
