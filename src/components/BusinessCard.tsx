@@ -111,10 +111,13 @@ export const BusinessCard = ({
       <img src={image} alt={name} className="w-full h-48 object-cover" />
       <div className="p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-xl">{name}</h3>
-          <div className="flex gap-2">
+          <h3 className="font-semibold text-xl truncate max-w-[70%]">{name}</h3>
+          <div className="flex gap-2 flex-shrink-0">
             {verified && <Badge variant="outline">Verified</Badge>}
-            <Badge variant={isOpen ? "success" : "destructive"}>
+            <Badge 
+              variant={isOpen ? "success" : "destructive"}
+              className="min-w-[70px] text-center"
+            >
               {isOpen ? "Open" : "Closed"}
             </Badge>
           </div>
@@ -122,26 +125,26 @@ export const BusinessCard = ({
 
         <div className="space-y-1">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span className="font-medium">{category}</span>
+            <span className="font-medium truncate">{category}</span>
             <span>•</span>
-            <div className="flex items-center">
+            <div className="flex items-center flex-shrink-0">
               <Star className="h-4 w-4 text-yellow-400 fill-current" />
               <span className="ml-1">{rating}</span>
               <span className="ml-1">({reviews})</span>
             </div>
           </div>
           
-          <p className="text-sm text-muted-foreground leading-relaxed py-2">{description}</p>
+          <p className="text-sm text-muted-foreground leading-relaxed py-2 line-clamp-2">{description}</p>
         </div>
 
         <div className="space-y-2">
           <div className="flex items-center gap-3 text-sm text-muted-foreground">
             <MapPin className="h-4 w-4 shrink-0" />
-            <span>{location}</span>
+            <span className="truncate">{location}</span>
           </div>
           <div className="flex items-center gap-3 text-sm text-muted-foreground">
             <Clock className="h-4 w-4 shrink-0" />
-            <span>{hours}</span>
+            <span className="truncate">{hours}</span>
           </div>
         </div>
         
@@ -164,7 +167,7 @@ export const BusinessCard = ({
           <div className="flex gap-2">
             <Button 
               onClick={handleWhatsApp} 
-              className="flex-1 flex items-center gap-2"
+              className="flex-1 flex items-center justify-center gap-2 min-w-[100px]"
               variant="default"
             >
               <MessageSquare className="h-4 w-4" />
@@ -173,7 +176,7 @@ export const BusinessCard = ({
             <Button
               onClick={handleShare}
               variant="outline"
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 min-w-[100px]"
             >
               <Share2 className="h-4 w-4" />
               Share
@@ -185,7 +188,7 @@ export const BusinessCard = ({
               window.location.href = `tel:${contact}`;
             }} 
             variant="outline"
-            className="flex items-center gap-2"
+            className="flex items-center justify-center gap-2"
           >
             <Phone className="h-4 w-4" />
             Call
