@@ -7,6 +7,7 @@ import { ChatHeader } from "./ChatHeader";
 import { ChatMessages } from "./ChatMessages";
 import { ChatInput } from "./ChatInput";
 import { ChatDialogs } from "./ChatDialogs";
+import { useAuth } from "@/hooks/useAuth";
 
 interface ChatWindowProps {
   selectedChat: Chat | null;
@@ -23,6 +24,7 @@ export const ChatWindow = ({
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [message, setMessage] = useState("");
+  const { user } = useAuth();
 
   const {
     showImageUpload,
@@ -83,7 +85,9 @@ export const ChatWindow = ({
 
       <div className="flex-1 overflow-y-auto">
         <ChatMessages 
-          chat={selectedChat} 
+          messages={selectedChat.messages}
+          currentUserId={user?.id || ''}
+          isGroup={selectedChat.type === 'group'}
           onForwardMessage={handleForwardMessage}
         />
       </div>

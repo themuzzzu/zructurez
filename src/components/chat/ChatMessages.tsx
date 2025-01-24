@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { MessageBubble } from "../MessageBubble";
 import { ScrollArea } from "../ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
+import { format } from "date-fns";
 
 // Base message type without recursion
 type BaseMessage = {
@@ -29,9 +30,10 @@ interface ChatMessagesProps {
   messages: Message[];
   currentUserId: string;
   isGroup?: boolean;
+  onForwardMessage?: (messageId: string) => void;
 }
 
-export const ChatMessages = ({ messages, currentUserId, isGroup }: ChatMessagesProps) => {
+export const ChatMessages = ({ messages, currentUserId, isGroup, onForwardMessage }: ChatMessagesProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -72,9 +74,11 @@ export const ChatMessages = ({ messages, currentUserId, isGroup }: ChatMessagesP
         {messages.map((message) => (
           <MessageBubble
             key={message.id}
-            message={message.content}
-            isOutgoing={message.sender_id === currentUserId}
-            timestamp={new Date(message.created_at)}
+            content={message.content}
+            timestamp={format(new Date(message.created_at), 'p')}
+            isOwn={message.sender_id === currentUserId}
+            messageId={message.id}
+            onForward={onForwardMessage}
           />
         ))}
       </div>
