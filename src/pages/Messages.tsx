@@ -8,8 +8,9 @@ import type { Chat } from "@/types/chat";
 const Messages = () => {
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [chats, setChats] = useState<Chat[]>([]);
-  const [groups, setGroups] = useState<Chat[]>([]);
   const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     loadChats();
@@ -79,14 +80,13 @@ const Messages = () => {
               unread: msg.receiver_id === user.id && !msg.read ? 1 : 0,
               userId: otherUserId,
               messages: [],
-              type: 'chat' as const
+              type: 'chat'
             });
           }
         });
       }
 
-      setChats(Array.from(uniqueChats.values()));
-
+      // Load groups
       const { data: userGroups, error: groupsError } = await supabase
         .from('group_members')
         .select(`
@@ -117,7 +117,7 @@ const Messages = () => {
         type: 'group' as const
       })) || [];
 
-      setGroups(formattedGroups);
+      setChats([...Array.from(uniqueChats.values()), ...formattedGroups]);
 
     } catch (error) {
       console.error('Error loading chats:', error);
@@ -133,6 +133,11 @@ const Messages = () => {
 
   const handleBack = () => {
     setSelectedChat(null);
+  };
+
+  const handleSendMessage = () => {
+    // This will be called after a message is sent successfully
+    loadChats(); // Reload chats to show the new message
   };
 
   if (loading) {
@@ -151,9 +156,11 @@ const Messages = () => {
         } w-full md:w-80 border-r flex-shrink-0`}
       >
         <ChatList
-          chats={[...chats, ...groups]}
+          chats={chats}
           selectedChat={selectedChat}
-          onChatSelect={handleChatSelect}
+          onSelectChat={handleChatSelect}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
         />
       </div>
       <div 
@@ -162,7 +169,12 @@ const Messages = () => {
         } flex-1 flex-col`}
       >
         {selectedChat ? (
-          <ChatWindow chat={selectedChat} onBack={handleBack} />
+          <ChatWindow
+            selectedChat={selectedChat}
+            message={message}
+            onMessageChange={setMessage}
+            onSendMessage={handleSendMessage}
+          />
         ) : (
           <div className="flex items-center justify-center h-full text-muted-foreground">
             Select a chat to start messaging
