@@ -10,20 +10,19 @@ import { ChatDialogs } from "./ChatDialogs";
 
 interface ChatWindowProps {
   selectedChat: Chat | null;
-  message: string;
-  onMessageChange: (message: string) => void;
-  onSendMessage: () => void;
+  onBack?: () => void;
+  onMessageSent?: () => void;
 }
 
 export const ChatWindow = ({
   selectedChat,
-  message,
-  onMessageChange,
-  onSendMessage,
+  onBack,
+  onMessageSent,
 }: ChatWindowProps) => {
   const [showContactInfo, setShowContactInfo] = useState(false);
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [message, setMessage] = useState("");
 
   const {
     showImageUpload,
@@ -47,7 +46,7 @@ export const ChatWindow = ({
     handleSendMessage,
     handleSendImage,
     handleSendVideo,
-  } = useMessageHandling(selectedChat, message, onMessageChange, onSendMessage);
+  } = useMessageHandling(selectedChat, message, setMessage, onMessageSent);
 
   const { handleForwardMessage } = useMessageForwarding();
 
@@ -79,6 +78,7 @@ export const ChatWindow = ({
         setShowContactInfo={setShowContactInfo}
         setIsSelectMode={setIsSelectMode}
         isSelectMode={isSelectMode}
+        onBack={onBack}
       />
 
       <div className="flex-1 overflow-y-auto">
@@ -90,7 +90,7 @@ export const ChatWindow = ({
 
       <ChatInput
         message={message}
-        onMessageChange={onMessageChange}
+        onMessageChange={setMessage}
         onSubmit={handleSubmit}
         onAttachment={handleAttachment}
       />
