@@ -105,80 +105,80 @@ export const BusinessCard = ({
 
   return (
     <Card 
-      className="overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer"
+      className="overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer w-full max-w-sm"
       onClick={() => navigate(`/business/${id}`)}
     >
-      <img src={image} alt={name} className="w-full h-48 object-cover" />
-      <div className="p-8">
-        <div className="flex items-center justify-between mb-5">
-          <h3 className="font-semibold text-xl truncate max-w-[70%]">{name}</h3>
-          <div className="flex gap-2">
-            {verified && <Badge variant="outline">Verified</Badge>}
+      <img src={image} alt={name} className="w-full h-40 object-cover" />
+      <div className="p-4">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-semibold text-base truncate max-w-[60%]">{name}</h3>
+          <div className="flex gap-1.5">
+            {verified && <Badge variant="outline" className="text-xs px-2 py-0.5">Verified</Badge>}
             <Badge 
               variant={isOpen ? "success" : "destructive"}
-              className="min-w-[100px] text-center whitespace-nowrap"
+              className="text-xs px-2 py-0.5 min-w-[70px] text-center whitespace-nowrap"
             >
               {isOpen ? "Open" : "Closed"}
             </Badge>
           </div>
         </div>
 
-        <div className="mb-6">
-          <div className="flex items-center gap-3 text-sm text-muted-foreground mb-3">
-            <span className="font-medium text-base truncate max-w-[300px]">{category}</span>
+        <div className="mb-3">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+            <span className="font-medium truncate max-w-[150px]">{category}</span>
             <span>•</span>
-            <div className="flex items-center gap-1 whitespace-nowrap">
-              <Star className="h-4 w-4 text-yellow-400 fill-current" />
-              <span className="ml-1">{rating}</span>
-              <span className="ml-1">({reviews})</span>
+            <div className="flex items-center gap-0.5 whitespace-nowrap">
+              <Star className="h-3 w-3 text-yellow-400 fill-current" />
+              <span>{rating}</span>
+              <span>({reviews})</span>
             </div>
           </div>
           
-          <p className="text-sm text-muted-foreground line-clamp-3 mb-2">{description}</p>
+          <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{description}</p>
         </div>
 
-        <div className="space-y-4 mb-6">
-          <div className="flex items-center gap-3 text-sm text-muted-foreground">
-            <MapPin className="h-4 w-4 shrink-0" />
+        <div className="space-y-2 mb-3">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <MapPin className="h-3 w-3 shrink-0" />
             <span className="truncate">{location}</span>
           </div>
-          <div className="flex items-center gap-3 text-sm text-muted-foreground">
-            <Clock className="h-4 w-4 shrink-0" />
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Clock className="h-3 w-3 shrink-0" />
             <span className="truncate">{hours}</span>
           </div>
         </div>
         
         {(appointment_price || consultation_price) && (
-          <div className="space-y-3 mb-6">
+          <div className="space-y-1.5 mb-3">
             {appointment_price && (
-              <div className="text-sm">
+              <div className="text-xs">
                 <span className="font-semibold">Appointment:</span> ₹{appointment_price}
               </div>
             )}
             {consultation_price && (
-              <div className="text-sm">
+              <div className="text-xs">
                 <span className="font-semibold">Consultation:</span> ₹{consultation_price}
               </div>
             )}
           </div>
         )}
 
-        <div className="space-y-4">
-          <div className="flex gap-3">
+        <div className="space-y-2">
+          <div className="flex gap-2">
             <Button 
               onClick={handleWhatsApp} 
-              className="flex-1 flex items-center justify-center gap-2 py-6"
+              className="flex-1 flex items-center justify-center gap-1.5 py-1.5 h-8 text-xs"
               variant="default"
             >
-              <MessageSquare className="h-5 w-5" />
+              <MessageSquare className="h-3 w-3" />
               Message
             </Button>
             <Button
               onClick={handleShare}
               variant="outline"
-              className="min-w-[140px] flex items-center justify-center gap-2 py-6"
+              className="min-w-[80px] flex items-center justify-center gap-1.5 py-1.5 h-8 text-xs"
             >
-              <Share2 className="h-5 w-5" />
+              <Share2 className="h-3 w-3" />
               Share
             </Button>
           </div>
@@ -188,9 +188,9 @@ export const BusinessCard = ({
               window.location.href = `tel:${contact}`;
             }} 
             variant="outline"
-            className="w-full flex items-center justify-center gap-2 py-6"
+            className="w-full flex items-center justify-center gap-1.5 py-1.5 h-8 text-xs"
           >
-            <Phone className="h-5 w-5" />
+            <Phone className="h-3 w-3" />
             Call
           </Button>
         </div>
