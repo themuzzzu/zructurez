@@ -23,6 +23,42 @@ interface BusinessCardProps {
   consultation_price?: number;
 }
 
+const checkAvailability = (hours: string): boolean => {
+  if (!hours) return false;
+
+  try {
+    const hoursData = JSON.parse(hours);
+    const now = new Date();
+    const dayOfWeek = now.toLocaleLowerCase().slice(0, 3);
+    const currentTime = now.getHours() * 100 + now.getMinutes();
+
+    if (!hoursData[dayOfWeek]?.isOpen) return false;
+
+    const { openTime, closeTime, openPeriod, closePeriod } = hoursData[dayOfWeek];
+    
+    const parseTime = (time: string, period: 'AM' | 'PM'): number => {
+      const [hours, minutes] = time.split(':').map(Number);
+      let adjustedHours = hours;
+      
+      if (period === 'PM' && hours !== 12) {
+        adjustedHours += 12;
+      } else if (period === 'AM' && hours === 12) {
+        adjustedHours = 0;
+      }
+      
+      return adjustedHours * 100 + minutes;
+    };
+
+    const openTimeNum = parseTime(openTime, openPeriod);
+    const closeTimeNum = parseTime(closeTime, closePeriod);
+
+    return currentTime >= openTimeNum && currentTime <= closeTimeNum;
+  } catch (error) {
+    console.error('Error parsing business hours:', error);
+    return false;
+  }
+};
+
 export const BusinessCard = ({
   id,
   name,
@@ -39,6 +75,7 @@ export const BusinessCard = ({
   consultation_price
 }: BusinessCardProps) => {
   const navigate = useNavigate();
+  const isOpen = checkAvailability(hours);
 
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -50,12 +87,10 @@ export const BusinessCard = ({
         text: `Check out ${name} - ${description}`,
         url: businessUrl
       }).catch(() => {
-        // Fallback if share fails
         navigator.clipboard.writeText(businessUrl);
         toast.success("Link copied to clipboard!");
       });
     } else {
-      // Fallback for browsers that don't support share API
       navigator.clipboard.writeText(businessUrl);
       toast.success("Link copied to clipboard!");
     }
@@ -77,7 +112,12 @@ export const BusinessCard = ({
       <div className="p-4">
         <div className="flex items-center justify-between">
           <h3 className="font-semibold text-lg">{name}</h3>
-          {verified && <Badge variant="outline">Verified</Badge>}
+          <div className="flex gap-2">
+            {verified && <Badge variant="outline">Verified</Badge>}
+            <Badge variant={isOpen ? "success" : "destructive"}>
+              {isOpen ? "Open" : "Closed"}
+            </Badge>
+          </div>
         </div>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <span>{category}</span>
