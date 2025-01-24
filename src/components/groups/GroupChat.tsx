@@ -17,11 +17,13 @@ export const GroupChat = ({ groupId }: GroupChatProps) => {
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [isMember, setIsMember] = useState(false);
 
   useEffect(() => {
     const initializeChat = async () => {
       try {
         await fetchCurrentUser();
+        await checkGroupMembership();
         await fetchMessages();
         subscribeToMessages();
       } catch (error) {
@@ -46,6 +48,25 @@ export const GroupChat = ({ groupId }: GroupChatProps) => {
     } catch (error) {
       console.error("Error fetching user:", error);
       toast.error("Failed to fetch user information");
+    }
+  };
+
+  const checkGroupMembership = async () => {
+    if (!currentUserId) return;
+    
+    try {
+      const { data: membership, error } = await supabase
+        .from("group_members")
+        .select("*")
+        .eq("group_id", groupId)
+        .eq("user_id", currentUserId)
+        .maybeSingle();
+
+      if (error) throw error;
+      setIsMember(!!membership);
+    } catch (error) {
+      console.error("Error checking group membership:", error);
+      toast.error("Failed to verify group membership");
     }
   };
 
@@ -93,22 +114,14 @@ export const GroupChat = ({ groupId }: GroupChatProps) => {
   };
 
   const sendMessage = async () => {
-    if (!newMessage.trim() || !currentUserId) return;
+    if (!newMessage.trim() || !currentUserId || !isMember) {
+      if (!isMember) {
+        toast.error("You must be a member of this group to send messages");
+      }
+      return;
+    }
 
     try {
-      // Verify the group exists and user is a member
-      const { data: membership, error: membershipError } = await supabase
-        .from("group_members")
-        .select("*")
-        .eq("group_id", groupId)
-        .eq("user_id", currentUserId)
-        .single();
-
-      if (membershipError || !membership) {
-        toast.error("You must be a member of this group to send messages");
-        return;
-      }
-
       const { error } = await supabase.from("group_messages").insert({
         content: newMessage.trim(),
         sender_id: currentUserId,
@@ -129,6 +142,10 @@ export const GroupChat = ({ groupId }: GroupChatProps) => {
 
   if (loading) {
     return <div className="p-4">Loading messages...</div>;
+  }
+
+  if (!isMember) {
+    return <div className="p-4">You are not a member of this group.</div>;
   }
 
   return (
