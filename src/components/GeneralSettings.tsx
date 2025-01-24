@@ -5,13 +5,24 @@ import { useTheme } from "@/components/ThemeProvider";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 import { type Theme } from "@/components/ThemeProvider";
+import { useState, useEffect } from "react";
 
 export const GeneralSettings = () => {
   const { theme, setTheme } = useTheme();
+  const [separateGroupsAndChats, setSeparateGroupsAndChats] = useState(() => {
+    const saved = localStorage.getItem("separateGroupsAndChats");
+    return saved ? JSON.parse(saved) : false;
+  });
 
   const handleThemeChange = (value: Theme) => {
     setTheme(value);
     toast.success(`Theme changed to ${value} mode`);
+  };
+
+  const handleSeparateGroupsChange = (checked: boolean) => {
+    setSeparateGroupsAndChats(checked);
+    localStorage.setItem("separateGroupsAndChats", JSON.stringify(checked));
+    toast.success(`Messages view ${checked ? 'separated' : 'combined'}`);
   };
 
   return (
@@ -43,7 +54,19 @@ export const GeneralSettings = () => {
         </div>
 
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Preferences</h3>
+          <h3 className="text-lg font-semibold">Messages Preferences</h3>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="separate-groups">Separate groups and chats</Label>
+            <Switch 
+              id="separate-groups" 
+              checked={separateGroupsAndChats}
+              onCheckedChange={handleSeparateGroupsChange}
+            />
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Other Preferences</h3>
           <div className="flex items-center justify-between">
             <Label htmlFor="email-notifications">Show online status</Label>
             <Switch id="email-notifications" />

@@ -6,10 +6,11 @@ import { GroupList } from "@/components/groups/GroupList";
 import { GroupChat } from "@/components/groups/GroupChat";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Home, ArrowLeft } from "lucide-react";
+import { Home, ArrowLeft, Users2, MessageCircle } from "lucide-react";
 import type { Chat } from "@/types/chat";
 import type { Group } from "@/types/group";
 import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Messages = () => {
   const [chats, setChats] = useState<Chat[]>([]);
@@ -18,6 +19,10 @@ const Messages = () => {
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
+  const [separateView] = useState(() => {
+    const saved = localStorage.getItem("separateGroupsAndChats");
+    return saved ? JSON.parse(saved) : false;
+  });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -143,7 +148,7 @@ const Messages = () => {
   };
 
   const handleSendMessage = () => {
-    loadChats(); // Reload chats after sending a message
+    loadChats();
   };
 
   if (loading) {
@@ -165,28 +170,55 @@ const Messages = () => {
             <Home className="h-5 w-5" />
           </Button>
           <h1 className="text-xl font-semibold">Messages</h1>
-          <div className="w-10" /> {/* Spacer for alignment */}
+          <div className="w-10" />
         </div>
         
-        {/* Chats Section */}
-        <div className="flex-1 overflow-hidden">
-          <h2 className="px-4 py-2 font-semibold text-sm text-muted-foreground">Direct Messages</h2>
-          <ChatList
-            chats={chats}
-            selectedChat={selectedChat}
-            onSelectChat={handleSelectChat}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-          />
-          
-          {/* Groups Section */}
-          <h2 className="px-4 py-2 font-semibold text-sm text-muted-foreground mt-4">Groups</h2>
-          <GroupList
-            groups={groups}
-            selectedGroup={selectedGroup}
-            onSelectGroup={handleSelectGroup}
-          />
-        </div>
+        {separateView ? (
+          <Tabs defaultValue="chats" className="w-full">
+            <TabsList className="w-full">
+              <TabsTrigger value="chats" className="w-full">
+                <MessageCircle className="w-4 h-4 mr-2" />
+                Chats
+              </TabsTrigger>
+              <TabsTrigger value="groups" className="w-full">
+                <Users2 className="w-4 h-4 mr-2" />
+                Groups
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="chats" className="mt-0">
+              <ChatList
+                chats={chats}
+                selectedChat={selectedChat}
+                onSelectChat={handleSelectChat}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+              />
+            </TabsContent>
+            <TabsContent value="groups" className="mt-0">
+              <GroupList
+                groups={groups}
+                selectedGroup={selectedGroup}
+                onSelectGroup={handleSelectGroup}
+              />
+            </TabsContent>
+          </Tabs>
+        ) : (
+          <div className="flex-1 overflow-hidden">
+            <ChatList
+              chats={chats}
+              selectedChat={selectedChat}
+              onSelectChat={handleSelectChat}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+            />
+            <div className="px-4 py-2 font-semibold text-sm text-muted-foreground mt-4">Groups</div>
+            <GroupList
+              groups={groups}
+              selectedGroup={selectedGroup}
+              onSelectGroup={handleSelectGroup}
+            />
+          </div>
+        )}
       </div>
 
       <div className={`${
