@@ -996,6 +996,16 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      create_test_user: {
+        Args: {
+          input_email: string
+          input_username: string
+          input_avatar_url: string
+          input_bio: string
+          input_location: string
+        }
+        Returns: string
+      }
       get_sample_user_id: {
         Args: Record<PropertyKey, never>
         Returns: string
