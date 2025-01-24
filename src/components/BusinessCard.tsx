@@ -109,9 +109,9 @@ export const BusinessCard = ({
       onClick={() => navigate(`/business/${id}`)}
     >
       <img src={image} alt={name} className="w-full h-48 object-cover" />
-      <div className="p-4">
+      <div className="p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-lg">{name}</h3>
+          <h3 className="font-semibold text-xl">{name}</h3>
           <div className="flex gap-2">
             {verified && <Badge variant="outline">Verified</Badge>}
             <Badge variant={isOpen ? "success" : "destructive"}>
@@ -119,40 +119,52 @@ export const BusinessCard = ({
             </Badge>
           </div>
         </div>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <span>{category}</span>
-          <span>•</span>
-          <div className="flex items-center">
-            <Star className="h-4 w-4 text-yellow-400 fill-current" />
-            <span className="ml-1">{rating}</span>
-            <span className="ml-1">({reviews})</span>
+
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span className="font-medium">{category}</span>
+            <span>•</span>
+            <div className="flex items-center">
+              <Star className="h-4 w-4 text-yellow-400 fill-current" />
+              <span className="ml-1">{rating}</span>
+              <span className="ml-1">({reviews})</span>
+            </div>
+          </div>
+          
+          <p className="text-sm text-muted-foreground leading-relaxed py-2">{description}</p>
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+            <MapPin className="h-4 w-4 shrink-0" />
+            <span>{location}</span>
+          </div>
+          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+            <Clock className="h-4 w-4 shrink-0" />
+            <span>{hours}</span>
           </div>
         </div>
-        <p className="text-sm text-muted-foreground">{description}</p>
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <MapPin className="h-4 w-4" />
-          {location}
-        </div>
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <Clock className="h-4 w-4" />
-          {hours}
-        </div>
         
-        <div className="flex flex-col gap-2 mt-4">
-          {appointment_price && (
-            <div className="text-sm">
-              <span className="font-semibold">Appointment:</span> ₹{appointment_price}
-            </div>
-          )}
-          {consultation_price && (
-            <div className="text-sm">
-              <span className="font-semibold">Consultation:</span> ₹{consultation_price}
-            </div>
-          )}
+        {(appointment_price || consultation_price) && (
+          <div className="space-y-2 pt-2">
+            {appointment_price && (
+              <div className="text-sm">
+                <span className="font-semibold">Appointment:</span> ₹{appointment_price}
+              </div>
+            )}
+            {consultation_price && (
+              <div className="text-sm">
+                <span className="font-semibold">Consultation:</span> ₹{consultation_price}
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="flex flex-col gap-2 pt-2">
           <div className="flex gap-2">
             <Button 
               onClick={handleWhatsApp} 
-              className="flex-1 flex items-center gap-1"
+              className="flex-1 flex items-center gap-2"
               variant="default"
             >
               <MessageSquare className="h-4 w-4" />
@@ -161,7 +173,7 @@ export const BusinessCard = ({
             <Button
               onClick={handleShare}
               variant="outline"
-              className="flex items-center gap-1"
+              className="flex items-center gap-2"
             >
               <Share2 className="h-4 w-4" />
               Share
@@ -173,7 +185,7 @@ export const BusinessCard = ({
               window.location.href = `tel:${contact}`;
             }} 
             variant="outline"
-            className="flex items-center gap-1"
+            className="flex items-center gap-2"
           >
             <Phone className="h-4 w-4" />
             Call
