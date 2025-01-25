@@ -84,18 +84,18 @@ const Marketplace = () => {
               selectedCategory={selectedCategory}
               onCategorySelect={setSelectedCategory}
               showDiscounted={showDiscounted}
-              onDiscountedChange={() => setShowDiscounted(!showDiscounted)}
+              onDiscountedChange={setShowDiscounted}
               showUsed={showUsed}
-              onUsedChange={() => setShowUsed(!showUsed)}
+              onUsedChange={setShowUsed}
               showBranded={showBranded}
-              onBrandedChange={() => setShowBranded(!showBranded)}
+              onBrandedChange={setShowBranded}
               sortOption={sortOption}
               onSortChange={setSortOption}
             />
           </div>
 
           <ShoppingSection 
-            searchQuery={searchQuery} 
+            searchQuery={searchQuery}
             selectedCategory={selectedCategory === "All" ? null : selectedCategory}
             showDiscounted={showDiscounted}
             showUsed={showUsed}
