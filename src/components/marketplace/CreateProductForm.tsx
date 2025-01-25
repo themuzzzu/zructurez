@@ -27,9 +27,9 @@ export const CreateProductForm = ({ businessId, onSuccess }: CreateProductFormPr
     is_discounted: false,
     discount_percentage: "",
     is_used: false,
+    condition: "",
     is_branded: false,
     brand_name: "",
-    condition: "",
     model: "",
   });
 
@@ -46,12 +46,14 @@ export const CreateProductForm = ({ businessId, onSuccess }: CreateProductFormPr
       return;
     }
 
+    if (formData.is_used && !formData.condition) {
+      toast.error("Please select product condition");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("No user found");
-
       let imageUrl = null;
       if (formData.image) {
         const base64Data = formData.image.split(',')[1];
@@ -85,7 +87,7 @@ export const CreateProductForm = ({ businessId, onSuccess }: CreateProductFormPr
       const { error } = await supabase
         .from('products')
         .insert([{
-          user_id: user.id,
+          user_id: businessId,
           title: formData.title,
           description: formData.description,
           price: discountedPrice,
@@ -97,9 +99,9 @@ export const CreateProductForm = ({ businessId, onSuccess }: CreateProductFormPr
           stock: parseInt(formData.stock),
           is_discounted: formData.is_discounted,
           is_used: formData.is_used,
+          condition: formData.condition,
           is_branded: formData.is_branded,
           brand_name: formData.brand_name || null,
-          condition: formData.condition || null,
           model: formData.model || null,
         }]);
 
@@ -129,17 +131,6 @@ export const CreateProductForm = ({ businessId, onSuccess }: CreateProductFormPr
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="description">Description *</Label>
-        <Textarea
-          id="description"
-          value={formData.description}
-          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-          placeholder="Describe your product"
-          required
-        />
-      </div>
-
-      <div className="space-y-2">
         <Label htmlFor="category">Category *</Label>
         <Select
           value={formData.category}
@@ -160,6 +151,17 @@ export const CreateProductForm = ({ businessId, onSuccess }: CreateProductFormPr
       </div>
 
       <div className="space-y-2">
+        <Label htmlFor="description">Description *</Label>
+        <Textarea
+          id="description"
+          value={formData.description}
+          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+          placeholder="Describe your product"
+          required
+        />
+      </div>
+
+      <div className="space-y-2">
         <Label htmlFor="price">Price *</Label>
         <Input
           id="price"
@@ -172,27 +174,37 @@ export const CreateProductForm = ({ businessId, onSuccess }: CreateProductFormPr
         />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="stock">Stock *</Label>
-        <Input
-          id="stock"
-          type="number"
-          value={formData.stock}
-          onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-          placeholder="Enter stock quantity"
-          required
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label>Product Image</Label>
-        <ImageUpload
-          selectedImage={formData.image}
-          onImageSelect={(image) => setFormData({ ...formData, image })}
-        />
-      </div>
-
       <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="is_used">Used Product</Label>
+          <Switch
+            id="is_used"
+            checked={formData.is_used}
+            onCheckedChange={(checked) => setFormData({ ...formData, is_used: checked })}
+          />
+        </div>
+
+        {formData.is_used && (
+          <div className="space-y-2">
+            <Label htmlFor="condition">Condition *</Label>
+            <Select
+              value={formData.condition}
+              onValueChange={(value) => setFormData({ ...formData, condition: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select condition" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="like_new">Like New</SelectItem>
+                <SelectItem value="very_good">Very Good</SelectItem>
+                <SelectItem value="good">Good</SelectItem>
+                <SelectItem value="fair">Fair</SelectItem>
+                <SelectItem value="refurbished">Refurbished</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
         <div className="flex items-center justify-between">
           <Label htmlFor="is_discounted">Discounted</Label>
           <Switch
@@ -216,33 +228,26 @@ export const CreateProductForm = ({ businessId, onSuccess }: CreateProductFormPr
               placeholder="Enter discount percentage"
               required
             />
-            {formData.price && formData.discount_percentage && (
-              <div className="text-sm text-muted-foreground">
-                Original Price: ₹{formData.price}
-                <br />
-                Discounted Price: ₹{(parseFloat(formData.price) - (parseFloat(formData.price) * (parseFloat(formData.discount_percentage) / 100))).toFixed(2)}
-              </div>
-            )}
           </div>
         )}
 
         <div className="space-y-2">
-          <Label htmlFor="brand_name">Brand Name</Label>
+          <Label htmlFor="stock">Stock *</Label>
           <Input
-            id="brand_name"
-            value={formData.brand_name}
-            onChange={(e) => setFormData({ ...formData, brand_name: e.target.value })}
-            placeholder="Enter brand name"
+            id="stock"
+            type="number"
+            value={formData.stock}
+            onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+            placeholder="Enter stock quantity"
+            required
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="model">Model/Version</Label>
-          <Input
-            id="model"
-            value={formData.model}
-            onChange={(e) => setFormData({ ...formData, model: e.target.value })}
-            placeholder="Enter model or version (optional)"
+          <Label>Product Image</Label>
+          <ImageUpload
+            selectedImage={formData.image}
+            onImageSelect={(image) => setFormData({ ...formData, image })}
           />
         </div>
       </div>
