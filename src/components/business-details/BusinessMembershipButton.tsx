@@ -16,6 +16,12 @@ interface MembershipPlan {
   features: string[];
 }
 
+interface MembershipDetails {
+  plan: string;
+  features: string[];
+  price: number;
+}
+
 export const BusinessMembershipButton = ({ businessId }: BusinessMembershipButtonProps) => {
   const [loading, setLoading] = useState(false);
   const [showPlans, setShowPlans] = useState(false);
@@ -116,11 +122,15 @@ export const BusinessMembershipButton = ({ businessId }: BusinessMembershipButto
   };
 
   const isActive = membership?.status === 'active';
-  const membershipPlans = (business?.membership_plans as MembershipPlan[] || []).map(plan => ({
-    name: String(plan.name || ''),
-    price: Number(plan.price || 0),
-    features: Array.isArray(plan.features) ? plan.features.map(String) : []
-  }));
+  const membershipPlans = Array.isArray(business?.membership_plans) 
+    ? (business.membership_plans as any[]).map(plan => ({
+        name: String(plan.name || ''),
+        price: Number(plan.price || 0),
+        features: Array.isArray(plan.features) ? plan.features.map(String) : []
+      }))
+    : [];
+
+  const membershipDetails = membership?.membership_details as MembershipDetails | undefined;
 
   return (
     <>
@@ -143,7 +153,7 @@ export const BusinessMembershipButton = ({ businessId }: BusinessMembershipButto
           <MembershipPlansCard
             plans={membershipPlans}
             onSelectPlan={handleMembership}
-            selectedPlan={membership?.membership_details?.plan as string}
+            selectedPlan={membershipDetails?.plan}
             loading={loading}
           />
         </DialogContent>
