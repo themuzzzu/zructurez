@@ -1,18 +1,17 @@
-import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
-import { MapPin, Clock, Phone, Mail, Building, Users, Globe, Menu, Calendar } from "lucide-react";
-import { BusinessOwnerCard } from "./profile/BusinessOwnerCard";
-import { BusinessStaffCard } from "./profile/BusinessStaffCard";
-import { ServiceMenuCard } from "./profile/ServiceMenuCard";
-import { BusinessAdvertisements } from "./BusinessAdvertisements";
-import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { BusinessImageSection } from "./profile/BusinessImageSection";
+import { BusinessActionButtons } from "./profile/BusinessActionButtons";
+import { BusinessAdvertisements } from "./BusinessAdvertisements";
+import { BusinessAboutSection } from "./profile/BusinessAboutSection";
+import { ServiceMenuCard } from "./profile/ServiceMenuCard";
+import { BusinessBioSection } from "./profile/BusinessBioSection";
+import { BusinessTeamSection } from "./profile/BusinessTeamSection";
 import { BookAppointmentDialog } from "@/components/BookAppointmentDialog";
-import { BusinessSubscribeButton } from "./BusinessSubscribeButton";
-import { BusinessMembershipButton } from "./BusinessMembershipButton";
+import type { Business } from "@/types/business";
 
 interface BusinessProfileProps {
   id: string;
+  name: string;
   description: string;
   location?: string;
   hours?: string;
@@ -21,29 +20,12 @@ interface BusinessProfileProps {
   image_url?: string;
   bio?: string;
   website?: string;
-  owners?: { 
-    name: string; 
-    role: string; 
-    position: string; 
-    experience?: string;
-    qualifications?: string;
-    image_url?: string | null;
-  }[];
-  staff_details?: { 
-    name: string; 
-    position: string; 
-    experience?: string;
-    image_url?: string | null;
-  }[];
+  owners?: Business['owners'];
+  staff_details?: Business['staff_details'];
   category?: string;
   appointment_price?: number;
   consultation_price?: number;
-  business_products?: Array<{
-    name: string;
-    price: number;
-    description: string;
-  }>;
-  name: string;
+  business_products?: Business['business_products'];
 }
 
 export const BusinessProfile = ({
@@ -65,101 +47,26 @@ export const BusinessProfile = ({
   business_products,
 }: BusinessProfileProps) => {
   const [showBooking, setShowBooking] = useState(false);
-  const hasValidStaff = staff_details && staff_details.length > 0 && staff_details.some(staff => staff.name);
 
   return (
     <div className="space-y-6">
-      {/* Business Image */}
-      {image_url && (
-        <div className="w-full rounded-lg overflow-hidden">
-          <div className="relative w-full max-h-[600px]">
-            <img
-              src={image_url}
-              alt="Business"
-              className="w-full h-auto object-contain rounded-lg"
-              style={{ maxHeight: '600px' }}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Subscription and Membership Buttons */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <BusinessSubscribeButton businessId={id} />
-        <BusinessMembershipButton businessId={id} />
-      </div>
-
-      {/* Advertisements Section */}
+      <BusinessImageSection image_url={image_url} />
+      
+      <BusinessActionButtons businessId={id} />
+      
       <BusinessAdvertisements businessId={id} />
+      
+      <BusinessAboutSection
+        description={description}
+        location={location}
+        hours={hours}
+        contact={contact}
+        website={website}
+        verified={verified}
+        appointment_price={appointment_price}
+        onBookAppointment={() => setShowBooking(true)}
+      />
 
-      {/* About Section */}
-      <Card className="p-6 space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-semibold">About</h2>
-          {verified && (
-            <Badge variant="outline" className="ml-2">
-              Verified
-            </Badge>
-          )}
-        </div>
-        
-        <p className="text-muted-foreground break-words">{description}</p>
-
-        <div className="grid gap-4">
-          {location && (
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <MapPin className="h-4 w-4 shrink-0" />
-              <span className="break-words">{location}</span>
-            </div>
-          )}
-          
-          {hours && (
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Clock className="h-4 w-4 shrink-0" />
-              <span>{hours}</span>
-            </div>
-          )}
-          
-          {contact && (
-            <div className="flex items-center gap-2 text-muted-foreground">
-              {contact.includes('@') ? (
-                <Mail className="h-4 w-4 shrink-0" />
-              ) : (
-                <Phone className="h-4 w-4 shrink-0" />
-              )}
-              <span>{contact}</span>
-            </div>
-          )}
-
-          {website && (
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Globe className="h-4 w-4 shrink-0" />
-              <a 
-                href={website} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="hover:text-primary transition-colors break-words"
-              >
-                {website}
-              </a>
-            </div>
-          )}
-        </div>
-
-        {appointment_price && (
-          <div className="pt-4">
-            <Button
-              onClick={() => setShowBooking(true)}
-              className="w-full sm:w-auto flex items-center justify-center gap-2"
-            >
-              <Calendar className="h-4 w-4" />
-              Book Appointment
-            </Button>
-          </div>
-        )}
-      </Card>
-
-      {/* Service Menu/Info Card */}
       {(category || appointment_price || consultation_price || (business_products && business_products.length > 0)) && (
         <ServiceMenuCard
           category={category}
@@ -169,43 +76,12 @@ export const BusinessProfile = ({
         />
       )}
 
-      {/* Bio Section */}
-      {bio && (
-        <Card className="p-6">
-          <h2 className="text-2xl font-semibold mb-4">Bio</h2>
-          <p className="text-muted-foreground break-words">{bio}</p>
-        </Card>
-      )}
+      {bio && <BusinessBioSection bio={bio} />}
 
-      {/* Owners Section */}
-      {owners && owners.length > 0 && (
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
-            <Building className="h-4 w-4" />
-            Owners
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {owners.map((owner, index) => (
-              <BusinessOwnerCard key={index} {...owner} />
-            ))}
-          </div>
-        </Card>
-      )}
-
-      {/* Staff Section */}
-      {hasValidStaff && (
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            Staff
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {staff_details.map((staff, index) => (
-              staff.name && <BusinessStaffCard key={index} {...staff} />
-            ))}
-          </div>
-        </Card>
-      )}
+      <BusinessTeamSection 
+        owners={owners} 
+        staff_details={staff_details}
+      />
 
       <BookAppointmentDialog
         businessId={id}
