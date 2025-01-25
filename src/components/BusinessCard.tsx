@@ -28,89 +28,6 @@ interface BusinessCardProps {
   is_open?: boolean;
 }
 
-const checkAvailability = (hours: string): boolean => {
-  if (!hours) return false;
-
-  try {
-    // First try parsing as JSON
-    const hoursData = JSON.parse(hours);
-    const now = new Date();
-    const dayOfWeek = now.toLocaleString('en-US', { weekday: 'short' }).toLowerCase();
-    const currentTime = now.getHours() * 100 + now.getMinutes();
-
-    if (!hoursData[dayOfWeek]?.isOpen) return false;
-
-    const { openTime, closeTime, openPeriod, closePeriod } = hoursData[dayOfWeek];
-    
-    const parseTime = (time: string, period: 'AM' | 'PM'): number => {
-      const [hours, minutes] = time.split(':').map(Number);
-      let adjustedHours = hours;
-      
-      if (period === 'PM' && hours !== 12) {
-        adjustedHours += 12;
-      } else if (period === 'AM' && hours === 12) {
-        adjustedHours = 0;
-      }
-      
-      return adjustedHours * 100 + minutes;
-    };
-
-    const openTimeNum = parseTime(openTime, openPeriod);
-    const closeTimeNum = parseTime(closeTime, closePeriod);
-
-    return currentTime >= openTimeNum && currentTime <= closeTimeNum;
-  } catch (error) {
-    // If JSON parsing fails, try parsing plain text format
-    const now = new Date();
-    const currentDay = now.toLocaleString('en-US', { weekday: 'short' }).toLowerCase();
-    const currentTime = now.getHours() * 100 + now.getMinutes();
-
-    // Handle "24 hrs" or "24/7" format
-    if (hours.toLowerCase().includes('24 hrs') || hours.toLowerCase().includes('24/7')) {
-      return true;
-    }
-
-    // Handle "Mon-Sat: 9 AM to 5 PM" format
-    const timeMatch = hours.match(/(\d{1,2})(?::\d{2})?\s*(AM|PM)\s*to\s*(\d{1,2})(?::\d{2})?\s*(AM|PM)/i);
-    if (timeMatch) {
-      const [_, openHour, openPeriod, closeHour, closePeriod] = timeMatch;
-      
-      let openTime = parseInt(openHour);
-      let closeTime = parseInt(closeHour);
-      
-      if (openPeriod.toUpperCase() === 'PM' && openTime !== 12) openTime += 12;
-      if (closePeriod.toUpperCase() === 'PM' && closeTime !== 12) closeTime += 12;
-      if (openPeriod.toUpperCase() === 'AM' && openTime === 12) openTime = 0;
-      if (closePeriod.toUpperCase() === 'AM' && closeTime === 12) closeTime = 0;
-      
-      openTime = openTime * 100;
-      closeTime = closeTime * 100;
-      
-      // Check if current day is within operating days
-      const daysMatch = hours.match(/([A-Za-z]{3})-([A-Za-z]{3})/);
-      if (daysMatch) {
-        const [_, startDay, endDay] = daysMatch;
-        const days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
-        const startIndex = days.indexOf(startDay.toLowerCase());
-        const endIndex = days.indexOf(endDay.toLowerCase());
-        const currentIndex = days.indexOf(currentDay);
-        
-        if (startIndex === -1 || endIndex === -1 || currentIndex === -1) return false;
-        
-        const isValidDay = startIndex <= endIndex 
-          ? currentIndex >= startIndex && currentIndex <= endIndex
-          : currentIndex >= startIndex || currentIndex <= endIndex;
-        
-        if (!isValidDay) return false;
-      }
-      
-      return currentTime >= openTime && currentTime <= closeTime;
-    }
-    
-    return false;
-  }
-};
-
 export const BusinessCard = ({
   id,
   name,
@@ -131,9 +48,6 @@ export const BusinessCard = ({
 }: BusinessCardProps) => {
   const navigate = useNavigate();
   const [showBooking, setShowBooking] = useState(false);
-
-  // Determine if the business is actually open based on both manual override and hours
-  const isActuallyOpen = is_open && checkAvailability(hours);
 
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -201,10 +115,10 @@ export const BusinessCard = ({
             <span className="text-sm text-gray-300">{category}</span>
             <div className="flex items-center gap-2">
               <Badge 
-                variant={isActuallyOpen ? "success" : "destructive"}
+                variant={is_open ? "success" : "destructive"}
                 className="text-xs px-2 py-0.5"
               >
-                {isActuallyOpen ? "Open" : "Closed"}
+                {is_open ? "Open" : "Closed"}
               </Badge>
               {verified && (
                 <Badge variant="outline" className="text-xs px-2 py-0.5">
@@ -212,7 +126,7 @@ export const BusinessCard = ({
                 </Badge>
               )}
             </div>
-            {!isActuallyOpen && wait_time && (
+            {!is_open && wait_time && (
               <div className="flex items-center gap-2 text-sm text-gray-300">
                 <Clock className="h-4 w-4" />
                 <span>Available in {wait_time}</span>
@@ -288,7 +202,7 @@ export const BusinessCard = ({
                 }}
                 className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700"
                 variant="default"
-                disabled={!isActuallyOpen}
+                disabled={!is_open}
               >
                 Book Now
               </Button>
