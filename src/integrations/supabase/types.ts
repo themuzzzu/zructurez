@@ -12,6 +12,7 @@ export type Database = {
       advertisements: {
         Row: {
           budget: number
+          business_id: string | null
           created_at: string
           description: string
           end_date: string
@@ -28,6 +29,7 @@ export type Database = {
         }
         Insert: {
           budget: number
+          business_id?: string | null
           created_at?: string
           description: string
           end_date: string
@@ -44,6 +46,7 @@ export type Database = {
         }
         Update: {
           budget?: number
+          business_id?: string | null
           created_at?: string
           description?: string
           end_date?: string
@@ -58,7 +61,15 @@ export type Database = {
           type?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "advertisements_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       appointments: {
         Row: {

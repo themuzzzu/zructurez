@@ -4,8 +4,10 @@ import { MapPin, Clock, Phone, Mail, Building, Users, Globe, Menu } from "lucide
 import { BusinessOwnerCard } from "./profile/BusinessOwnerCard";
 import { BusinessStaffCard } from "./profile/BusinessStaffCard";
 import { ServiceMenuCard } from "./profile/ServiceMenuCard";
+import { BusinessAdvertisements } from "./BusinessAdvertisements";
 
 interface BusinessProfileProps {
+  id: string;
   description: string;
   location?: string;
   hours?: string;
@@ -39,6 +41,7 @@ interface BusinessProfileProps {
 }
 
 export const BusinessProfile = ({
+  id,
   description,
   location,
   hours,
@@ -71,6 +74,9 @@ export const BusinessProfile = ({
           </div>
         </div>
       )}
+
+      {/* Advertisements Section */}
+      <BusinessAdvertisements businessId={id} />
 
       {/* About Section */}
       <Card className="p-6 space-y-4">
