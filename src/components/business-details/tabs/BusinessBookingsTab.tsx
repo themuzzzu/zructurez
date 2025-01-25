@@ -11,6 +11,10 @@ interface BusinessBookingsTabProps {
   businessId: string;
 }
 
+interface Profile {
+  username: string | null;
+}
+
 interface Appointment {
   id: string;
   user_id: string;
@@ -19,9 +23,7 @@ interface Appointment {
   cost: number;
   status: string;
   notes?: string | null;
-  profiles?: {
-    username: string | null;
-  } | null;
+  profiles?: Profile | null;
 }
 
 export const BusinessBookingsTab = ({ businessId }: BusinessBookingsTabProps) => {
@@ -34,9 +36,7 @@ export const BusinessBookingsTab = ({ businessId }: BusinessBookingsTabProps) =>
         .from('appointments')
         .select(`
           *,
-          profiles (
-            username
-          )
+          profiles:user_id(username)
         `)
         .eq('business_id', businessId)
         .order('appointment_date', { ascending: false });
