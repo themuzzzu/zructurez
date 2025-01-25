@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useState } from "react";
 import { BookAppointmentDialog } from "./BookAppointmentDialog";
+import { AspectRatio } from "./ui/aspect-ratio";
 
 interface BusinessCardProps {
   id: string;
@@ -99,7 +100,14 @@ export const BusinessCard = ({
         className="overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer w-full max-w-[360px] bg-black/95 text-white"
         onClick={() => navigate(`/business/${id}`)}
       >
-        <img src={image} alt={name} className="w-full h-40 object-cover" />
+        <AspectRatio ratio={16/9} className="bg-muted">
+          <img 
+            src={image} 
+            alt={name} 
+            className="w-full h-full object-cover"
+          />
+        </AspectRatio>
+        
         <div className="p-4 space-y-4">
           <div className="space-y-2">
             <div className="relative">

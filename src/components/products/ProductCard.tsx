@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useEffect } from "react";
 import { incrementViews } from "@/services/postService";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 interface Product {
   id: string;
@@ -108,13 +109,19 @@ export const ProductCard = ({ product }: ProductCardProps) => {
 
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 bg-[#0a0a0a] border-border">
-      {product.image_url && (
-        <img
-          src={product.image_url}
-          alt={product.title}
-          className="w-full h-48 object-cover"
-        />
-      )}
+      <AspectRatio ratio={16/9} className="bg-muted">
+        {product.image_url && (
+          <img
+            src={product.image_url}
+            alt={product.title}
+            className="w-full h-full object-cover"
+          />
+        )}
+        <div className="absolute top-4 right-4 bg-primary text-white px-3 py-1 rounded-full text-sm">
+          ${product.price}/hr
+        </div>
+      </AspectRatio>
+      
       <div className="p-4">
         <div className="flex justify-between items-start mb-2">
           <div>
