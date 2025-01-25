@@ -19,14 +19,14 @@ interface BusinessHeaderProps {
   onEdit?: () => void;
 }
 
-type ClosureReason = 'food_break' | 'sick' | 'holiday' | 'other';
+type ClosureReason = 'food_break' | 'sick' | 'holiday' | 'other' | 'next_day' | '';
 
 export const BusinessHeader = ({ id, name, category, isOwner, isOpen = true, onEdit }: BusinessHeaderProps) => {
   const [loading, setLoading] = useState(false);
   const [waitTime, setWaitTime] = useState("");
   const [open, setOpen] = useState(isOpen);
   const [temporarilyUnavailable, setTemporarilyUnavailable] = useState(false);
-  const [closureReason, setClosureReason] = useState<ClosureReason | ''>('');
+  const [closureReason, setClosureReason] = useState<ClosureReason>('');
 
   const handleStatusChange = async (checked: boolean) => {
     setLoading(true);
@@ -109,6 +109,8 @@ export const BusinessHeader = ({ id, name, category, isOwner, isOpen = true, onE
         return 'Sick Leave';
       case 'holiday':
         return 'Holiday';
+      case 'next_day':
+        return 'Available Next Day';
       case 'other':
         return 'Other';
       default:
@@ -166,7 +168,7 @@ export const BusinessHeader = ({ id, name, category, isOwner, isOpen = true, onE
             </div>
           )}
 
-          {(temporarilyUnavailable || !open) && (
+          {(!open || temporarilyUnavailable) && (
             <>
               <div className="flex flex-col gap-4 w-full">
                 <div className="flex items-center gap-2">
@@ -179,6 +181,7 @@ export const BusinessHeader = ({ id, name, category, isOwner, isOpen = true, onE
                     <option value="food_break">Food Break</option>
                     <option value="sick">Sick Leave</option>
                     <option value="holiday">Holiday</option>
+                    <option value="next_day">Available Next Day</option>
                     <option value="other">Other</option>
                   </Select>
                 </div>
