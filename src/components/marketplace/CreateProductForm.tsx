@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { ImageUpload } from "@/components/ImageUpload";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { BasicInfo } from "./product-form/BasicInfo";
+import { PricingInfo } from "./product-form/PricingInfo";
+import { ProductDetails } from "./product-form/ProductDetails";
+import { BrandInfo } from "./product-form/BrandInfo";
+import type { ProductFormData } from "./product-form/types";
 
 interface CreateProductFormProps {
   onSuccess?: () => void;
@@ -15,14 +16,14 @@ interface CreateProductFormProps {
 
 export const CreateProductForm = ({ onSuccess }: CreateProductFormProps) => {
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ProductFormData>({
     title: "",
     description: "",
     price: "",
     category: "",
     subcategory: "",
     stock: "1",
-    image: null as string | null,
+    image: null,
     is_discounted: false,
     discount_percentage: "",
     is_used: false,
@@ -32,6 +33,10 @@ export const CreateProductForm = ({ onSuccess }: CreateProductFormProps) => {
     model: "",
     size: "",
   });
+
+  const handleChange = (name: string, value: any) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -122,181 +127,18 @@ export const CreateProductForm = ({ onSuccess }: CreateProductFormProps) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <BasicInfo formData={formData} onChange={handleChange} />
+      <PricingInfo formData={formData} onChange={handleChange} />
+      <ProductDetails formData={formData} onChange={handleChange} />
+      <BrandInfo formData={formData} onChange={handleChange} />
+
       <div className="space-y-2">
-        <Label htmlFor="title">Product Title *</Label>
-        <Input
-          id="title"
-          value={formData.title}
-          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-          placeholder="Enter product title"
-          required
+        <Label>Product Image</Label>
+        <ImageUpload
+          selectedImage={formData.image}
+          onImageSelect={(image) => handleChange("image", image)}
         />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="category">Category *</Label>
-        <Select
-          value={formData.category}
-          onValueChange={(value) => setFormData({ ...formData, category: value })}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select a category" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="electronics">Electronics</SelectItem>
-            <SelectItem value="clothing">Clothing</SelectItem>
-            <SelectItem value="home">Home & Garden</SelectItem>
-            <SelectItem value="sports">Sports & Outdoors</SelectItem>
-            <SelectItem value="books">Books & Media</SelectItem>
-            <SelectItem value="other">Other</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="description">Description *</Label>
-        <Textarea
-          id="description"
-          value={formData.description}
-          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-          placeholder="Describe your product"
-          required
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="price">Price *</Label>
-        <Input
-          id="price"
-          type="number"
-          step="0.01"
-          value={formData.price}
-          onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-          placeholder="Enter price"
-          required
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="size">Size</Label>
-        <Input
-          id="size"
-          value={formData.size}
-          onChange={(e) => setFormData({ ...formData, size: e.target.value })}
-          placeholder="Enter size (optional)"
-        />
-      </div>
-
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="is_used">Used Product</Label>
-          <Switch
-            id="is_used"
-            checked={formData.is_used}
-            onCheckedChange={(checked) => setFormData({ ...formData, is_used: checked })}
-          />
-        </div>
-
-        {formData.is_used && (
-          <div className="space-y-2">
-            <Label htmlFor="condition">Condition *</Label>
-            <Select
-              value={formData.condition}
-              onValueChange={(value) => setFormData({ ...formData, condition: value })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select condition" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="like_new">Like New</SelectItem>
-                <SelectItem value="very_good">Very Good</SelectItem>
-                <SelectItem value="good">Good</SelectItem>
-                <SelectItem value="fair">Fair</SelectItem>
-                <SelectItem value="refurbished">Refurbished</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        )}
-
-        <div className="flex items-center justify-between">
-          <Label htmlFor="is_branded">Branded Product</Label>
-          <Switch
-            id="is_branded"
-            checked={formData.is_branded}
-            onCheckedChange={(checked) => setFormData({ ...formData, is_branded: checked })}
-          />
-        </div>
-
-        {formData.is_branded && (
-          <>
-            <div className="space-y-2">
-              <Label htmlFor="brand_name">Brand Name *</Label>
-              <Input
-                id="brand_name"
-                value={formData.brand_name}
-                onChange={(e) => setFormData({ ...formData, brand_name: e.target.value })}
-                placeholder="Enter brand name"
-                required={formData.is_branded}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="model">Model (Optional)</Label>
-              <Input
-                id="model"
-                value={formData.model}
-                onChange={(e) => setFormData({ ...formData, model: e.target.value })}
-                placeholder="Enter model"
-              />
-            </div>
-          </>
-        )}
-
-        <div className="flex items-center justify-between">
-          <Label htmlFor="is_discounted">Discounted</Label>
-          <Switch
-            id="is_discounted"
-            checked={formData.is_discounted}
-            onCheckedChange={(checked) => setFormData({ ...formData, is_discounted: checked })}
-          />
-        </div>
-
-        {formData.is_discounted && (
-          <div className="space-y-2">
-            <Label htmlFor="discount_percentage">Discount Percentage (%)</Label>
-            <Input
-              id="discount_percentage"
-              type="number"
-              min="0"
-              max="100"
-              step="0.01"
-              value={formData.discount_percentage}
-              onChange={(e) => setFormData({ ...formData, discount_percentage: e.target.value })}
-              placeholder="Enter discount percentage"
-              required
-            />
-          </div>
-        )}
-
-        <div className="space-y-2">
-          <Label htmlFor="stock">Stock *</Label>
-          <Input
-            id="stock"
-            type="number"
-            value={formData.stock}
-            onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-            placeholder="Enter stock quantity"
-            required
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label>Product Image</Label>
-          <ImageUpload
-            selectedImage={formData.image}
-            onImageSelect={(image) => setFormData({ ...formData, image })}
-          />
-        </div>
       </div>
 
       <Button type="submit" className="w-full" disabled={loading}>

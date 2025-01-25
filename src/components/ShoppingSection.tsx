@@ -146,10 +146,7 @@ export const ShoppingSection = ({
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent className="sm:max-w-[600px] h-[90vh]">
           <ScrollArea className="h-full pr-4">
-            <CreateProductForm 
-              businessId={userBusiness?.id} 
-              onSuccess={() => setIsCreateDialogOpen(false)} 
-            />
+            <CreateProductForm onSuccess={() => setIsCreateDialogOpen(false)} />
           </ScrollArea>
         </DialogContent>
       </Dialog>
