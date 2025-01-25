@@ -12,9 +12,10 @@ import type { ProductFormData } from "./product-form/types";
 
 interface CreateProductFormProps {
   onSuccess?: () => void;
+  businessId?: string;
 }
 
-export const CreateProductForm = ({ onSuccess }: CreateProductFormProps) => {
+export const CreateProductForm = ({ onSuccess, businessId }: CreateProductFormProps) => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<ProductFormData>({
     title: "",
@@ -112,6 +113,7 @@ export const CreateProductForm = ({ onSuccess }: CreateProductFormProps) => {
           brand_name: formData.brand_name || null,
           model: formData.model || null,
           size: formData.size || null,
+          business_id: businessId || null,
         }]);
 
       if (error) throw error;
