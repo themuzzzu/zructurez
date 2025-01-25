@@ -38,10 +38,16 @@ export const CartItem = ({ id, title, price, quantity, image_url }: CartItemProp
 
   const removeItemMutation = useMutation({
     mutationFn: async () => {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session?.session?.user) {
+        throw new Error('User must be logged in to remove items from cart');
+      }
+
       const { error } = await supabase
         .from('cart_items')
         .delete()
-        .eq('product_id', id);
+        .eq('product_id', id)
+        .eq('user_id', session.session.user.id);
 
       if (error) throw error;
     },
@@ -49,7 +55,8 @@ export const CartItem = ({ id, title, price, quantity, image_url }: CartItemProp
       queryClient.invalidateQueries({ queryKey: ['cart'] });
       toast.success("Item removed from cart");
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Error removing item:', error);
       toast.error("Failed to remove item from cart");
     },
   });
@@ -61,6 +68,10 @@ export const CartItem = ({ id, title, price, quantity, image_url }: CartItemProp
       currency: 'INR',
       maximumFractionDigits: 0,
     }).format(price);
+  };
+
+  const handleRemoveItem = () => {
+    removeItemMutation.mutate();
   };
 
   return (
@@ -97,7 +108,7 @@ export const CartItem = ({ id, title, price, quantity, image_url }: CartItemProp
         variant="ghost"
         size="icon"
         className="h-8 w-8"
-        onClick={() => removeItemMutation.mutate()}
+        onClick={handleRemoveItem}
         disabled={removeItemMutation.isPending}
       >
         <X className="h-4 w-4" />
