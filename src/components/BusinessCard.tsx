@@ -30,6 +30,7 @@ const checkAvailability = (hours: string): boolean => {
   if (!hours) return false;
 
   try {
+    // First try parsing as JSON
     const hoursData = JSON.parse(hours);
     const now = new Date();
     const dayOfWeek = now.toLocaleString('en-US', { weekday: 'short' }).toLowerCase();
@@ -57,7 +58,53 @@ const checkAvailability = (hours: string): boolean => {
 
     return currentTime >= openTimeNum && currentTime <= closeTimeNum;
   } catch (error) {
-    console.error('Error parsing business hours:', error);
+    // If JSON parsing fails, try parsing plain text format
+    const now = new Date();
+    const currentDay = now.toLocaleString('en-US', { weekday: 'short' }).toLowerCase();
+    const currentTime = now.getHours() * 100 + now.getMinutes();
+
+    // Handle "24 hrs" or "24/7" format
+    if (hours.toLowerCase().includes('24 hrs') || hours.toLowerCase().includes('24/7')) {
+      return true;
+    }
+
+    // Handle "Mon-Sat: 9 AM to 5 PM" format
+    const timeMatch = hours.match(/(\d{1,2})(?::\d{2})?\s*(AM|PM)\s*to\s*(\d{1,2})(?::\d{2})?\s*(AM|PM)/i);
+    if (timeMatch) {
+      const [_, openHour, openPeriod, closeHour, closePeriod] = timeMatch;
+      
+      let openTime = parseInt(openHour);
+      let closeTime = parseInt(closeHour);
+      
+      if (openPeriod.toUpperCase() === 'PM' && openTime !== 12) openTime += 12;
+      if (closePeriod.toUpperCase() === 'PM' && closeTime !== 12) closeTime += 12;
+      if (openPeriod.toUpperCase() === 'AM' && openTime === 12) openTime = 0;
+      if (closePeriod.toUpperCase() === 'AM' && closeTime === 12) closeTime = 0;
+      
+      openTime = openTime * 100;
+      closeTime = closeTime * 100;
+      
+      // Check if current day is within operating days
+      const daysMatch = hours.match(/([A-Za-z]{3})-([A-Za-z]{3})/);
+      if (daysMatch) {
+        const [_, startDay, endDay] = daysMatch;
+        const days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+        const startIndex = days.indexOf(startDay.toLowerCase());
+        const endIndex = days.indexOf(endDay.toLowerCase());
+        const currentIndex = days.indexOf(currentDay);
+        
+        if (startIndex === -1 || endIndex === -1 || currentIndex === -1) return false;
+        
+        const isValidDay = startIndex <= endIndex 
+          ? currentIndex >= startIndex && currentIndex <= endIndex
+          : currentIndex >= startIndex || currentIndex <= endIndex;
+        
+        if (!isValidDay) return false;
+      }
+      
+      return currentTime >= openTime && currentTime <= closeTime;
+    }
+    
     return false;
   }
 };
