@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import type { MembershipPlan, MembershipDetails } from "@/types/membership";
+import { membershipDetailsToJson, jsonToMembershipDetails } from "@/types/membership";
 
 export const useMembership = (businessId: string) => {
   const [loading, setLoading] = useState(false);
@@ -66,7 +67,7 @@ export const useMembership = (businessId: string) => {
             .update({ 
               status: 'active',
               membership_type: plan!.name.toLowerCase(),
-              membership_details: membershipDetails
+              membership_details: membershipDetails ? membershipDetailsToJson(membershipDetails) : null
             })
             .eq('id', membership.id);
 
@@ -82,7 +83,7 @@ export const useMembership = (businessId: string) => {
               user_id: user.id,
               membership_type: plan.name.toLowerCase(),
               status: 'active',
-              membership_details: membershipDetails
+              membership_details: membershipDetailsToJson(membershipDetails!)
             }
           ]);
 
@@ -108,7 +109,10 @@ export const useMembership = (businessId: string) => {
       }))
     : [];
 
-  const membershipDetails = membership?.membership_details as MembershipDetails | undefined;
+  const membershipDetails = membership?.membership_details 
+    ? jsonToMembershipDetails(membership.membership_details)
+    : undefined;
+    
   const isActive = membership?.status === 'active';
 
   return {
