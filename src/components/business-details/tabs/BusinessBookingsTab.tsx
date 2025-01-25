@@ -18,8 +18,8 @@ interface Appointment {
   service_name: string;
   cost: number;
   status: string;
-  notes?: string;
-  profiles?: {
+  notes?: string | null;
+  profiles: {
     username: string | null;
   } | null;
 }
@@ -34,7 +34,7 @@ export const BusinessBookingsTab = ({ businessId }: BusinessBookingsTabProps) =>
         .from('appointments')
         .select(`
           *,
-          profiles:user_id (
+          profiles:profiles!appointments_user_id_fkey (
             username
           )
         `)
