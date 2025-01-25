@@ -46,11 +46,11 @@ export const BusinessCategoryFilter = () => {
         <Button
           key={id}
           variant={id === selectedCategory ? "default" : "outline"}
-          className="whitespace-nowrap transition-all duration-300 hover:scale-105 hover:shadow-md min-w-fit px-4"
+          className="whitespace-nowrap min-w-[120px] justify-center transition-colors duration-300 hover:bg-accent/80"
           onClick={() => handleCategoryClick(id)}
         >
-          {Icon && <Icon className="h-4 w-4 mr-2" />}
-          {name}
+          {Icon && <Icon className="h-4 w-4 mr-2 shrink-0" />}
+          <span className="truncate">{name}</span>
         </Button>
       ))}
     </div>
