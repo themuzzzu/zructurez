@@ -5,7 +5,7 @@ import { useTheme } from "@/components/ThemeProvider";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 import { type Theme } from "@/components/ThemeProvider";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export const GeneralSettings = () => {
   const { theme, setTheme } = useTheme();

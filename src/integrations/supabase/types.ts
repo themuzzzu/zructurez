@@ -797,6 +797,7 @@ export type Database = {
           price: number
           reach: number | null
           service_product_id: string | null
+          size: string | null
           stock: number
           subcategory: string | null
           title: string
@@ -820,6 +821,7 @@ export type Database = {
           price: number
           reach?: number | null
           service_product_id?: string | null
+          size?: string | null
           stock?: number
           subcategory?: string | null
           title: string
@@ -843,6 +845,7 @@ export type Database = {
           price?: number
           reach?: number | null
           service_product_id?: string | null
+          size?: string | null
           stock?: number
           subcategory?: string | null
           title?: string

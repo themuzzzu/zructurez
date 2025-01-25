@@ -10,11 +10,10 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 interface CreateProductFormProps {
-  businessId: string;
   onSuccess?: () => void;
 }
 
-export const CreateProductForm = ({ businessId, onSuccess }: CreateProductFormProps) => {
+export const CreateProductForm = ({ onSuccess }: CreateProductFormProps) => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
@@ -55,6 +54,9 @@ export const CreateProductForm = ({ businessId, onSuccess }: CreateProductFormPr
     setLoading(true);
 
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
+
       let imageUrl = null;
       if (formData.image) {
         const base64Data = formData.image.split(',')[1];
@@ -88,7 +90,7 @@ export const CreateProductForm = ({ businessId, onSuccess }: CreateProductFormPr
       const { error } = await supabase
         .from('products')
         .insert([{
-          user_id: businessId,
+          user_id: user.id,
           title: formData.title,
           description: formData.description,
           price: discountedPrice,
@@ -109,11 +111,11 @@ export const CreateProductForm = ({ businessId, onSuccess }: CreateProductFormPr
 
       if (error) throw error;
 
-      toast.success("Product listed successfully!");
+      toast.success("Product created successfully!");
       onSuccess?.();
     } catch (error) {
       console.error('Error:', error);
-      toast.error("Failed to list product. Please try again.");
+      toast.error("Failed to create product. Please try again.");
     } finally {
       setLoading(false);
     }
