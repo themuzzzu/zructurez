@@ -35,10 +35,6 @@ const Marketplace = () => {
     },
   });
 
-  const handleDiscountedChange = (checked: boolean) => setShowDiscounted(checked);
-  const handleUsedChange = (checked: boolean) => setShowUsed(checked);
-  const handleBrandedChange = (checked: boolean) => setShowBranded(checked);
-
   return (
     <div className="min-h-screen bg-background pt-20 pb-16">
       <div className="container max-w-[1400px]">
@@ -88,11 +84,11 @@ const Marketplace = () => {
               selectedCategory={selectedCategory}
               onCategorySelect={setSelectedCategory}
               showDiscounted={showDiscounted}
-              onDiscountedChange={handleDiscountedChange}
+              onDiscountedChange={(checked) => setShowDiscounted(checked)}
               showUsed={showUsed}
-              onUsedChange={handleUsedChange}
+              onUsedChange={(checked) => setShowUsed(checked)}
               showBranded={showBranded}
-              onBrandedChange={handleBrandedChange}
+              onBrandedChange={(checked) => setShowBranded(checked)}
               sortOption={sortOption}
               onSortChange={setSortOption}
             />

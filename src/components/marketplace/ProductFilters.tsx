@@ -6,11 +6,11 @@ interface ProductFiltersProps {
   selectedCategory: string;
   onCategorySelect: (category: string) => void;
   showDiscounted: boolean;
-  onDiscountedChange: () => void;
+  onDiscountedChange: (checked: boolean) => void;
   showUsed: boolean;
-  onUsedChange: () => void;
+  onUsedChange: (checked: boolean) => void;
   showBranded: boolean;
-  onBrandedChange: () => void;
+  onBrandedChange: (checked: boolean) => void;
   sortOption: string;
   onSortChange: (value: string) => void;
 }
@@ -80,8 +80,8 @@ export const ProductFilters = ({
           <SelectContent>
             <SelectItem value="newest">Newest First</SelectItem>
             <SelectItem value="oldest">Oldest First</SelectItem>
-            <SelectItem value="price-asc">Price: Low to High</SelectItem>
-            <SelectItem value="price-desc">Price: High to Low</SelectItem>
+            <SelectItem value="price-low">Price: Low to High</SelectItem>
+            <SelectItem value="price-high">Price: High to Low</SelectItem>
           </SelectContent>
         </Select>
       </div>
