@@ -31,6 +31,7 @@ export const CreateProductForm = ({ businessId, onSuccess }: CreateProductFormPr
     is_branded: false,
     brand_name: "",
     model: "",
+    size: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -103,6 +104,7 @@ export const CreateProductForm = ({ businessId, onSuccess }: CreateProductFormPr
           is_branded: formData.is_branded,
           brand_name: formData.brand_name || null,
           model: formData.model || null,
+          size: formData.size || null,
         }]);
 
       if (error) throw error;
@@ -174,6 +176,16 @@ export const CreateProductForm = ({ businessId, onSuccess }: CreateProductFormPr
         />
       </div>
 
+      <div className="space-y-2">
+        <Label htmlFor="size">Size</Label>
+        <Input
+          id="size"
+          value={formData.size}
+          onChange={(e) => setFormData({ ...formData, size: e.target.value })}
+          placeholder="Enter size (optional)"
+        />
+      </div>
+
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <Label htmlFor="is_used">Used Product</Label>
@@ -203,6 +215,39 @@ export const CreateProductForm = ({ businessId, onSuccess }: CreateProductFormPr
               </SelectContent>
             </Select>
           </div>
+        )}
+
+        <div className="flex items-center justify-between">
+          <Label htmlFor="is_branded">Branded Product</Label>
+          <Switch
+            id="is_branded"
+            checked={formData.is_branded}
+            onCheckedChange={(checked) => setFormData({ ...formData, is_branded: checked })}
+          />
+        </div>
+
+        {formData.is_branded && (
+          <>
+            <div className="space-y-2">
+              <Label htmlFor="brand_name">Brand Name *</Label>
+              <Input
+                id="brand_name"
+                value={formData.brand_name}
+                onChange={(e) => setFormData({ ...formData, brand_name: e.target.value })}
+                placeholder="Enter brand name"
+                required={formData.is_branded}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="model">Model (Optional)</Label>
+              <Input
+                id="model"
+                value={formData.model}
+                onChange={(e) => setFormData({ ...formData, model: e.target.value })}
+                placeholder="Enter model"
+              />
+            </div>
+          </>
         )}
 
         <div className="flex items-center justify-between">
