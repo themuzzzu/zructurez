@@ -63,12 +63,6 @@ export const Cart = () => {
     }
 
     try {
-      // Here you would typically:
-      // 1. Process payment
-      // 2. Create order record
-      // 3. Clear cart
-      
-      // For now, we'll just clear the cart and show success message
       await clearCartMutation.mutateAsync();
     } catch (error) {
       toast.error("Checkout failed");
@@ -78,6 +72,15 @@ export const Cart = () => {
   const total = cartItems?.reduce((sum, item) => {
     return sum + (item.products?.price || 0) * item.quantity;
   }, 0) || 0;
+
+  // Format price in Indian Rupees
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0,
+    }).format(price);
+  };
 
   if (isLoading) {
     return <div className="p-4">Loading cart...</div>;
@@ -103,7 +106,7 @@ export const Cart = () => {
           <div className="mt-4 pt-4 border-t">
             <div className="flex justify-between items-center mb-4">
               <span className="font-semibold">Total:</span>
-              <span className="font-semibold">${total.toFixed(2)}</span>
+              <span className="font-semibold">{formatPrice(total)}</span>
             </div>
             <Button 
               className="w-full" 

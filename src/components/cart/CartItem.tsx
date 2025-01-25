@@ -54,6 +54,15 @@ export const CartItem = ({ id, title, price, quantity, image_url }: CartItemProp
     },
   });
 
+  // Format price in Indian Rupees
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0,
+    }).format(price);
+  };
+
   return (
     <div className="flex items-center gap-4 py-4 border-b">
       {image_url && (
@@ -61,7 +70,7 @@ export const CartItem = ({ id, title, price, quantity, image_url }: CartItemProp
       )}
       <div className="flex-1">
         <h3 className="font-medium">{title}</h3>
-        <p className="text-sm text-muted-foreground">${price}</p>
+        <p className="text-sm text-muted-foreground">{formatPrice(price)}</p>
       </div>
       <div className="flex items-center gap-2">
         <Button
