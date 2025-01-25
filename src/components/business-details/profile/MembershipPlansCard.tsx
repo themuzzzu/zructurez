@@ -29,7 +29,7 @@ export const MembershipPlansCard = ({
           <Card 
             key={plan.name}
             className={`p-6 flex flex-col ${
-              selectedPlan === plan.name 
+              selectedPlan === plan.name.toLowerCase() 
                 ? 'border-2 border-primary' 
                 : 'border border-border'
             }`}
@@ -50,11 +50,11 @@ export const MembershipPlansCard = ({
             </ul>
             <Button
               onClick={() => onSelectPlan(plan)}
-              variant={selectedPlan === plan.name ? "default" : "outline"}
+              variant={selectedPlan === plan.name.toLowerCase() ? "default" : "outline"}
               disabled={loading}
               className="w-full"
             >
-              {loading ? "Processing..." : (selectedPlan === plan.name ? "Selected" : "Choose Plan")}
+              {loading ? "Processing..." : (selectedPlan === plan.name.toLowerCase() ? "Selected" : "Choose Plan")}
             </Button>
           </Card>
         ))}

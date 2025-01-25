@@ -10,6 +10,12 @@ interface BusinessMembershipButtonProps {
   businessId: string;
 }
 
+interface MembershipPlan {
+  name: string;
+  price: number;
+  features: string[];
+}
+
 export const BusinessMembershipButton = ({ businessId }: BusinessMembershipButtonProps) => {
   const [loading, setLoading] = useState(false);
   const [showPlans, setShowPlans] = useState(false);
@@ -43,7 +49,7 @@ export const BusinessMembershipButton = ({ businessId }: BusinessMembershipButto
     }
   });
 
-  const handleMembership = async (plan: any) => {
+  const handleMembership = async (plan: MembershipPlan | null) => {
     try {
       setLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
@@ -66,11 +72,11 @@ export const BusinessMembershipButton = ({ businessId }: BusinessMembershipButto
             .from('business_memberships')
             .update({ 
               status: 'active',
-              membership_type: plan.name.toLowerCase(),
+              membership_type: plan!.name.toLowerCase(),
               membership_details: {
-                plan: plan.name.toLowerCase(),
-                features: plan.features,
-                price: plan.price
+                plan: plan!.name.toLowerCase(),
+                features: plan!.features,
+                price: plan!.price
               }
             })
             .eq('id', membership.id);
@@ -78,7 +84,7 @@ export const BusinessMembershipButton = ({ businessId }: BusinessMembershipButto
           if (error) throw error;
           toast.success("Membership reactivated with new plan");
         }
-      } else {
+      } else if (plan) {
         const { error } = await supabase
           .from('business_memberships')
           .insert([
@@ -110,6 +116,7 @@ export const BusinessMembershipButton = ({ businessId }: BusinessMembershipButto
   };
 
   const isActive = membership?.status === 'active';
+  const membershipPlans = business?.membership_plans as MembershipPlan[] || [];
 
   return (
     <>
@@ -130,7 +137,7 @@ export const BusinessMembershipButton = ({ businessId }: BusinessMembershipButto
         <DialogContent className="sm:max-w-[900px]">
           <DialogTitle>Choose a Membership Plan</DialogTitle>
           <MembershipPlansCard
-            plans={business?.membership_plans || []}
+            plans={membershipPlans}
             onSelectPlan={handleMembership}
             selectedPlan={membership?.membership_details?.plan}
             loading={loading}
