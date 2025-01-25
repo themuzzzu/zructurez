@@ -32,19 +32,35 @@ export const BusinessBookingsTab = ({ businessId }: BusinessBookingsTabProps) =>
   const { data: appointments, isLoading } = useQuery({
     queryKey: ['business-appointments', businessId],
     queryFn: async () => {
-      const { data: appointmentsData, error: appointmentsError } = await supabase
+      // First, get appointments directly made to the business
+      const { data: businessAppointments, error: businessAppointmentsError } = await supabase
         .from('appointments')
         .select('*')
         .eq('business_id', businessId)
         .order('appointment_date', { ascending: false });
 
-      if (appointmentsError) {
-        console.error('Error fetching appointments:', appointmentsError);
-        throw appointmentsError;
+      if (businessAppointmentsError) {
+        console.error('Error fetching business appointments:', businessAppointmentsError);
+        throw businessAppointmentsError;
       }
 
+      // Then, get appointments made to services owned by this business
+      const { data: serviceAppointments, error: serviceAppointmentsError } = await supabase
+        .from('appointments')
+        .select('*')
+        .eq('user_id', businessId) // Since service appointments use the business's user_id
+        .order('appointment_date', { ascending: false });
+
+      if (serviceAppointmentsError) {
+        console.error('Error fetching service appointments:', serviceAppointmentsError);
+        throw serviceAppointmentsError;
+      }
+
+      // Combine both types of appointments
+      const allAppointments = [...(businessAppointments || []), ...(serviceAppointments || [])];
+
       // Fetch profiles for all appointments
-      const userIds = appointmentsData.map(appointment => appointment.user_id);
+      const userIds = allAppointments.map(appointment => appointment.user_id);
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
         .select('id, username')
@@ -56,12 +72,15 @@ export const BusinessBookingsTab = ({ businessId }: BusinessBookingsTabProps) =>
       }
 
       // Map profiles to appointments
-      const appointmentsWithProfiles = appointmentsData.map(appointment => ({
+      const appointmentsWithProfiles = allAppointments.map(appointment => ({
         ...appointment,
         profile: profilesData.find(profile => profile.id === appointment.user_id) || null
       }));
 
-      return appointmentsWithProfiles as Appointment[];
+      // Sort all appointments by date
+      return appointmentsWithProfiles.sort((a, b) => 
+        new Date(b.appointment_date).getTime() - new Date(a.appointment_date).getTime()
+      );
     },
   });
 
