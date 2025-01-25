@@ -10,9 +10,12 @@ import { ServiceProducts } from "@/components/service-details/ServiceProducts";
 import { ErrorView } from "@/components/ErrorView";
 import { LoadingView } from "@/components/LoadingView";
 import { toast } from "sonner";
+import { BookAppointmentDialog } from "@/components/BookAppointmentDialog";
+import { useState } from "react";
 
 const ServiceDetails = () => {
   const { id } = useParams();
+  const [showBooking, setShowBooking] = useState(false);
 
   const { data: service, isLoading, error } = useQuery({
     queryKey: ['service', id],
@@ -198,10 +201,20 @@ const ServiceDetails = () => {
               providerName={service.profile?.username}
               providerAvatar={service.profile?.avatar_url}
               userId={service.user_id}
+              onBookAppointment={() => setShowBooking(true)}
             />
           </div>
         </div>
       </div>
+
+      <BookAppointmentDialog
+        businessId={service.user_id}
+        businessName={service.profile?.username || "Service Provider"}
+        serviceName={service.title}
+        cost={service.price}
+        isOpen={showBooking}
+        onClose={() => setShowBooking(false)}
+      />
     </div>
   );
 };

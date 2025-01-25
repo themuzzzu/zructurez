@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Phone, Mail } from "lucide-react";
+import { Phone, Mail, Calendar } from "lucide-react";
 import { toast } from "sonner";
 
 interface ServiceContactSidebarProps {
@@ -9,6 +9,7 @@ interface ServiceContactSidebarProps {
   providerName: string;
   providerAvatar: string;
   userId: string;
+  onBookAppointment: () => void;
 }
 
 export const ServiceContactSidebar = ({
@@ -17,6 +18,7 @@ export const ServiceContactSidebar = ({
   providerName,
   providerAvatar,
   userId,
+  onBookAppointment
 }: ServiceContactSidebarProps) => {
   const handleContact = () => {
     if (contactInfo) {
@@ -34,9 +36,19 @@ export const ServiceContactSidebar = ({
     <div className="space-y-6">
       <Card className="p-6 space-y-4">
         <div className="text-2xl font-bold">₹{price}</div>
-        <Button className="w-full" onClick={handleContact}>
-          Contact Service Provider
-        </Button>
+        <div className="space-y-2">
+          <Button className="w-full" onClick={handleContact}>
+            Contact Service Provider
+          </Button>
+          <Button 
+            className="w-full" 
+            variant="outline"
+            onClick={onBookAppointment}
+          >
+            <Calendar className="mr-2 h-4 w-4" />
+            Book Appointment
+          </Button>
+        </div>
         <div className="space-y-2">
           {contactInfo && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
