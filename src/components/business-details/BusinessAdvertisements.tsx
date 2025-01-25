@@ -8,9 +8,12 @@ interface BusinessAdvertisementsProps {
 }
 
 export const BusinessAdvertisements = ({ businessId }: BusinessAdvertisementsProps) => {
+  // Don't make the query if businessId is not provided
   const { data: advertisements } = useQuery({
     queryKey: ['business-advertisements', businessId],
     queryFn: async () => {
+      if (!businessId) return [];
+      
       const { data } = await supabase
         .from('advertisements')
         .select('*')
@@ -20,6 +23,8 @@ export const BusinessAdvertisements = ({ businessId }: BusinessAdvertisementsPro
         .order('created_at', { ascending: false });
       return data || [];
     },
+    // Only run the query if we have a valid businessId
+    enabled: !!businessId,
   });
 
   if (!advertisements?.length) return null;
