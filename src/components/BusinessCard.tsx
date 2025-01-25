@@ -4,6 +4,8 @@ import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useState } from "react";
+import { BookAppointmentDialog } from "./BookAppointmentDialog";
 
 interface BusinessCardProps {
   id: string;
@@ -128,6 +130,7 @@ export const BusinessCard = ({
   is_open = true
 }: BusinessCardProps) => {
   const navigate = useNavigate();
+  const [showBooking, setShowBooking] = useState(false);
 
   // Determine if the business is actually open based on both manual override and hours
   const isActuallyOpen = is_open && checkAvailability(hours);
@@ -177,12 +180,13 @@ export const BusinessCard = ({
   };
 
   return (
-    <Card 
-      className="overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer w-full max-w-[360px] bg-black/95 text-white"
-      onClick={() => navigate(`/business/${id}`)}
-    >
-      <img src={image} alt={name} className="w-full h-40 object-cover" />
-      <div className="p-4 space-y-4">
+    <>
+      <Card 
+        className="overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer w-full max-w-[360px] bg-black/95 text-white"
+        onClick={() => navigate(`/business/${id}`)}
+      >
+        <img src={image} alt={name} className="w-full h-40 object-cover" />
+        <div className="p-4 space-y-4">
         <div className="space-y-2">
           <div className="relative">
             <h3 className="font-semibold text-xl pr-8">{name}</h3>
@@ -275,36 +279,59 @@ export const BusinessCard = ({
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-2 pt-2">
-          <Button 
-            onClick={handleWhatsApp}
-            className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700"
-            variant="default"
-          >
-            <MessageSquare className="h-4 w-4" />
-            Message
-          </Button>
-          <Button
-            onClick={handleShare}
-            variant="outline"
-            className="w-full flex items-center justify-center gap-2 border-gray-700 hover:bg-gray-800"
-          >
-            <Share2 className="h-4 w-4" />
-            Share
-          </Button>
-          <Button 
-            onClick={(e) => {
-              e.stopPropagation();
-              window.location.href = `tel:${contact}`;
-            }} 
-            variant="outline"
-            className="w-full col-span-2 flex items-center justify-center gap-2 border-gray-700 hover:bg-gray-800"
-          >
-            <Phone className="h-4 w-4" />
-            Call
-          </Button>
+          <div className="grid grid-cols-2 gap-2 pt-2">
+            {appointment_price && (
+              <Button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowBooking(true);
+                }}
+                className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700"
+                variant="default"
+                disabled={!isActuallyOpen}
+              >
+                Book Now
+              </Button>
+            )}
+            <Button 
+              onClick={handleWhatsApp}
+              className={`w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 ${!appointment_price ? 'col-span-2' : ''}`}
+              variant="default"
+            >
+              <MessageSquare className="h-4 w-4" />
+              Message
+            </Button>
+            <Button
+              onClick={handleShare}
+              variant="outline"
+              className="w-full flex items-center justify-center gap-2 border-gray-700 hover:bg-gray-800"
+            >
+              <Share2 className="h-4 w-4" />
+              Share
+            </Button>
+            <Button 
+              onClick={(e) => {
+                e.stopPropagation();
+                window.location.href = `tel:${contact}`;
+              }} 
+              variant="outline"
+              className="w-full col-span-2 flex items-center justify-center gap-2 border-gray-700 hover:bg-gray-800"
+            >
+              <Phone className="h-4 w-4" />
+              Call
+            </Button>
+          </div>
         </div>
-      </div>
-    </Card>
+      </Card>
+
+      <BookAppointmentDialog
+        businessId={id}
+        businessName={name}
+        serviceName="General Appointment"
+        cost={appointment_price || 0}
+        isOpen={showBooking}
+        onClose={() => setShowBooking(false)}
+      />
+    </>
   );
 };
