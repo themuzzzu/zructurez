@@ -177,10 +177,10 @@ export const BusinessHeader = ({ id, name, category, isOwner, isOpen = true, onE
                     onValueChange={(value: ClosureReason) => setClosureReason(value)}
                     disabled={loading}
                   >
-                    <SelectTrigger className="w-[200px]">
+                    <SelectTrigger className="w-[200px] min-w-[200px]">
                       <SelectValue placeholder="Select a reason" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="min-w-[200px]">
                       <SelectItem value="food_break">Food Break</SelectItem>
                       <SelectItem value="sick">Sick Leave</SelectItem>
                       <SelectItem value="holiday">Holiday</SelectItem>
@@ -195,7 +195,7 @@ export const BusinessHeader = ({ id, name, category, isOwner, isOpen = true, onE
                     placeholder="Available in... (e.g., 30 mins)"
                     value={waitTime}
                     onChange={(e) => setWaitTime(e.target.value)}
-                    className="w-48"
+                    className="w-48 min-w-[12rem]"
                     disabled={loading}
                   />
                   <Button 
