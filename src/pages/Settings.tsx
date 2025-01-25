@@ -10,6 +10,7 @@ import { ProductsTab } from "@/components/settings/ProductsTab";
 import { BusinessSettings } from "@/components/settings/BusinessSettings";
 import { ServiceSettings } from "@/components/settings/ServiceSettings";
 import { AdvertisementsTab } from "@/components/settings/AdvertisementsTab";
+import { OrdersTab } from "@/components/settings/OrdersTab";
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState("profile");
@@ -22,6 +23,8 @@ const Settings = () => {
         return <NotificationSettings />;
       case "privacy":
         return <PrivacySettings />;
+      case "orders":
+        return <OrdersTab />;
       case "products":
         return <ProductsTab />;
       case "business":
