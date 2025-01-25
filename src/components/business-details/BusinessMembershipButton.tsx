@@ -116,7 +116,11 @@ export const BusinessMembershipButton = ({ businessId }: BusinessMembershipButto
   };
 
   const isActive = membership?.status === 'active';
-  const membershipPlans = business?.membership_plans as MembershipPlan[] || [];
+  const membershipPlans = (business?.membership_plans as MembershipPlan[] || []).map(plan => ({
+    name: String(plan.name || ''),
+    price: Number(plan.price || 0),
+    features: Array.isArray(plan.features) ? plan.features.map(String) : []
+  }));
 
   return (
     <>
@@ -139,7 +143,7 @@ export const BusinessMembershipButton = ({ businessId }: BusinessMembershipButto
           <MembershipPlansCard
             plans={membershipPlans}
             onSelectPlan={handleMembership}
-            selectedPlan={membership?.membership_details?.plan}
+            selectedPlan={membership?.membership_details?.plan as string}
             loading={loading}
           />
         </DialogContent>
