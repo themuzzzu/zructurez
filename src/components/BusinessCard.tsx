@@ -82,6 +82,9 @@ export const BusinessCard = ({
 }: BusinessCardProps) => {
   const navigate = useNavigate();
 
+  // Determine if the business is actually open based on both manual override and hours
+  const isActuallyOpen = is_open && checkAvailability(hours);
+
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
     const businessUrl = `${window.location.origin}/business/${id}`;
@@ -147,10 +150,10 @@ export const BusinessCard = ({
             <span className="text-sm text-gray-300">{category}</span>
             <div className="flex items-center gap-2">
               <Badge 
-                variant={is_open ? "success" : "destructive"}
+                variant={isActuallyOpen ? "success" : "destructive"}
                 className="text-xs px-2 py-0.5"
               >
-                {is_open ? "Open" : "Closed"}
+                {isActuallyOpen ? "Open" : "Closed"}
               </Badge>
               {verified && (
                 <Badge variant="outline" className="text-xs px-2 py-0.5">
@@ -158,7 +161,7 @@ export const BusinessCard = ({
                 </Badge>
               )}
             </div>
-            {!is_open && wait_time && (
+            {!isActuallyOpen && wait_time && (
               <div className="flex items-center gap-2 text-sm text-gray-300">
                 <Clock className="h-4 w-4" />
                 <span>Available in {wait_time}</span>
