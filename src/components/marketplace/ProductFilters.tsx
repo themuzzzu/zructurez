@@ -27,63 +27,83 @@ export const ProductFilters = ({
   sortOption,
   onSortChange,
 }: ProductFiltersProps) => {
+  const categories = [
+    { value: "All", label: "All Categories" },
+    { value: "Electronics", label: "Electronics" },
+    { value: "Clothing", label: "Clothing" },
+    { value: "Home", label: "Home & Garden" },
+    { value: "Sports", label: "Sports & Outdoors" },
+    { value: "Books", label: "Books & Media" },
+    { value: "Automotive", label: "Automotive" },
+    { value: "Beauty", label: "Beauty & Health" },
+    { value: "Toys", label: "Toys & Games" },
+    { value: "Jewelry", label: "Jewelry & Watches" },
+    { value: "Art", label: "Art & Collectibles" },
+    { value: "Food", label: "Food & Beverages" },
+    { value: "Music", label: "Musical Instruments" },
+    { value: "Pet", label: "Pet Supplies" },
+    { value: "Office", label: "Office Supplies" },
+  ];
+
   return (
-    <div className="flex flex-wrap gap-6 items-center justify-between p-4 border rounded-lg">
-      <div className="space-y-4">
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="discounted"
-              checked={showDiscounted}
-              onCheckedChange={onDiscountedChange}
-            />
-            <Label htmlFor="discounted">Discounted</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="used"
-              checked={showUsed}
-              onCheckedChange={onUsedChange}
-            />
-            <Label htmlFor="used">Used</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="branded"
-              checked={showBranded}
-              onCheckedChange={onBrandedChange}
-            />
-            <Label htmlFor="branded">Branded</Label>
+    <div className="flex flex-col gap-6 p-4 border rounded-lg bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="flex flex-wrap gap-6 items-center justify-between">
+        <div className="space-y-4">
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="discounted"
+                checked={showDiscounted}
+                onCheckedChange={onDiscountedChange}
+              />
+              <Label htmlFor="discounted">Discounted</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="used"
+                checked={showUsed}
+                onCheckedChange={onUsedChange}
+              />
+              <Label htmlFor="used">Used</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="branded"
+                checked={showBranded}
+                onCheckedChange={onBrandedChange}
+              />
+              <Label htmlFor="branded">Branded</Label>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="flex items-center space-x-4">
-        <Select value={selectedCategory} onValueChange={onCategorySelect}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Category" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="All">All Categories</SelectItem>
-            <SelectItem value="Electronics">Electronics</SelectItem>
-            <SelectItem value="Clothing">Clothing</SelectItem>
-            <SelectItem value="Home">Home & Garden</SelectItem>
-            <SelectItem value="Sports">Sports</SelectItem>
-            <SelectItem value="Books">Books</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex items-center space-x-4">
+          <Select value={selectedCategory} onValueChange={onCategorySelect}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Category" />
+            </SelectTrigger>
+            <SelectContent className="max-h-[300px]">
+              {categories.map((category) => (
+                <SelectItem key={category.value} value={category.value}>
+                  {category.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-        <Select value={sortOption} onValueChange={onSortChange}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Sort by" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="newest">Newest First</SelectItem>
-            <SelectItem value="oldest">Oldest First</SelectItem>
-            <SelectItem value="price-low">Price: Low to High</SelectItem>
-            <SelectItem value="price-high">Price: High to Low</SelectItem>
-          </SelectContent>
-        </Select>
+          <Select value={sortOption} onValueChange={onSortChange}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="newest">Newest First</SelectItem>
+              <SelectItem value="oldest">Oldest First</SelectItem>
+              <SelectItem value="price-low">Price: Low to High</SelectItem>
+              <SelectItem value="price-high">Price: High to Low</SelectItem>
+              <SelectItem value="most-viewed">Most Viewed</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
     </div>
   );

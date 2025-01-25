@@ -37,7 +37,7 @@ export const ShoppingSection = ({
         query = query.ilike('title', `%${searchQuery}%`);
       }
 
-      if (selectedCategory) {
+      if (selectedCategory && selectedCategory !== "All") {
         query = query.eq('category', selectedCategory);
       }
 
@@ -95,16 +95,18 @@ export const ShoppingSection = ({
               onSuccess={() => {
                 setIsDialogOpen(false);
                 refetch();
-              }} 
+              }}
             />
           </ScrollArea>
         </DialogContent>
       </Dialog>
 
       {products && products.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <div key={product.id} className="aspect-[3/4]">
+              <ProductCard product={product} />
+            </div>
           ))}
         </div>
       ) : (
