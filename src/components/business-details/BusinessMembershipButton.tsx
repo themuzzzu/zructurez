@@ -14,6 +14,7 @@ interface MembershipPlan {
   name: string;
   price: number;
   features: string[];
+  description?: string;
 }
 
 interface MembershipDetails {
@@ -126,7 +127,8 @@ export const BusinessMembershipButton = ({ businessId }: BusinessMembershipButto
     ? (business.membership_plans as any[]).map(plan => ({
         name: String(plan.name || ''),
         price: Number(plan.price || 0),
-        features: Array.isArray(plan.features) ? plan.features.map(String) : []
+        features: Array.isArray(plan.features) ? plan.features.map(String) : [],
+        description: String(plan.description || '')
       }))
     : [];
 
