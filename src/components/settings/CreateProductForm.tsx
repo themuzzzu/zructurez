@@ -1,18 +1,12 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { ImageUpload } from "@/components/ImageUpload";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { BasicInfo } from "../marketplace/product-form/BasicInfo";
+import { PricingInfo } from "../marketplace/product-form/PricingInfo";
+import { ProductDetails } from "../marketplace/product-form/ProductDetails";
+import { Label } from "../ui/label";
 
 interface CreateProductFormProps {
   onSuccess?: () => void;
@@ -27,8 +21,17 @@ export const CreateProductForm = ({ onSuccess }: CreateProductFormProps) => {
     category: "",
     subcategory: "",
     stock: "0",
+    size: "",
+    is_discounted: false,
+    discount_percentage: "",
+    is_used: false,
+    condition: "",
     image: null as string | null,
   });
+
+  const handleChange = (name: string, value: any) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,6 +82,11 @@ export const CreateProductForm = ({ onSuccess }: CreateProductFormProps) => {
           category: formData.category,
           subcategory: formData.subcategory || null,
           stock: parseInt(formData.stock),
+          size: formData.size || null,
+          is_discounted: formData.is_discounted,
+          discount_percentage: formData.discount_percentage ? parseFloat(formData.discount_percentage) : null,
+          is_used: formData.is_used,
+          condition: formData.condition || null,
           image_url: imageUrl,
         }])
         .select()
@@ -97,92 +105,19 @@ export const CreateProductForm = ({ onSuccess }: CreateProductFormProps) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="title">Product Title *</Label>
-        <Input
-          id="title"
-          value={formData.title}
-          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-          placeholder="Enter product title"
-          required
-        />
-      </div>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <BasicInfo formData={formData} onChange={handleChange} />
+      <PricingInfo formData={formData} onChange={handleChange} />
+      <ProductDetails formData={formData} onChange={handleChange} />
 
-      <div className="space-y-2">
-        <Label htmlFor="category">Category *</Label>
-        <Select
-          value={formData.category}
-          onValueChange={(value) => setFormData({ ...formData, category: value })}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select a category" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="electronics">Electronics</SelectItem>
-            <SelectItem value="clothing">Clothing</SelectItem>
-            <SelectItem value="books">Books</SelectItem>
-            <SelectItem value="home">Home & Garden</SelectItem>
-            <SelectItem value="sports">Sports & Outdoors</SelectItem>
-            <SelectItem value="beauty">Beauty & Personal Care</SelectItem>
-            <SelectItem value="toys">Toys & Games</SelectItem>
-            <SelectItem value="automotive">Automotive</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="subcategory">Subcategory</Label>
-        <Input
-          id="subcategory"
-          value={formData.subcategory}
-          onChange={(e) => setFormData({ ...formData, subcategory: e.target.value })}
-          placeholder="Enter subcategory (optional)"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="description">Description *</Label>
-        <Textarea
-          id="description"
-          value={formData.description}
-          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-          placeholder="Describe your product"
-          required
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="price">Price *</Label>
-        <Input
-          id="price"
-          type="number"
-          step="0.01"
-          value={formData.price}
-          onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-          placeholder="Enter price"
-          required
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="stock">Stock *</Label>
-        <Input
-          id="stock"
-          type="number"
-          value={formData.stock}
-          onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-          placeholder="Enter stock quantity"
-          required
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label>Product Image</Label>
-        <ImageUpload
-          selectedImage={formData.image}
-          onImageSelect={(image) => setFormData({ ...formData, image })}
-        />
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label>Product Image</Label>
+          <ImageUpload
+            selectedImage={formData.image}
+            onImageSelect={(image) => handleChange("image", image)}
+          />
+        </div>
       </div>
 
       <div className="flex gap-2 justify-end">
