@@ -117,8 +117,10 @@ export const ShoppingSection = ({
       {products && products.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {products.map((product) => (
-            <div key={product.id} className="aspect-[3/4]">
-              <ProductCard product={product} />
+            <div key={product.id} className="w-full">
+              <div className="aspect-[3/4] w-full">
+                <ProductCard product={product} />
+              </div>
             </div>
           ))}
         </div>

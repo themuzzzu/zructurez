@@ -42,7 +42,11 @@ export const BusinessesTab = () => {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {businesses?.map((business: any) => (
-          <BusinessCard key={business.id} {...business} />
+          <div key={business.id} className="w-full">
+            <div className="aspect-[3/4] w-full">
+              <BusinessCard {...business} />
+            </div>
+          </div>
         ))}
       </div>
       <Dialog open={isBusinessDialogOpen} onOpenChange={setIsBusinessDialogOpen}>
