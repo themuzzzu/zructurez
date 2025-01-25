@@ -42,13 +42,9 @@ export const BusinessBookingsTab = ({ businessId }: BusinessBookingsTabProps) =>
         .order('appointment_date', { ascending: false });
 
       if (error) throw error;
-      return data as Appointment[];
+      return (data || []) as Appointment[];
     },
   });
-
-  if (isLoading) {
-    return <div>Loading appointments...</div>;
-  }
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -78,6 +74,10 @@ export const BusinessBookingsTab = ({ businessId }: BusinessBookingsTabProps) =>
   const datesWithAppointments = appointments?.map(
     appointment => new Date(appointment.appointment_date)
   );
+
+  if (isLoading) {
+    return <div>Loading appointments...</div>;
+  }
 
   return (
     <div className="space-y-6">
