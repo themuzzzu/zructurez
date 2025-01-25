@@ -21,10 +21,16 @@ export const CartItem = ({ id, title, price, quantity, image_url }: CartItemProp
         throw new Error("Quantity cannot be less than 1");
       }
       
+      const { data: session } = await supabase.auth.getSession();
+      if (!session?.session?.user) {
+        throw new Error('User must be logged in to update cart');
+      }
+
       const { error } = await supabase
         .from('cart_items')
         .update({ quantity: newQuantity })
-        .eq('product_id', id);
+        .eq('product_id', id)
+        .eq('user_id', session.session.user.id);
 
       if (error) throw error;
     },
@@ -47,9 +53,13 @@ export const CartItem = ({ id, title, price, quantity, image_url }: CartItemProp
         .from('cart_items')
         .delete()
         .eq('product_id', id)
-        .eq('user_id', session.session.user.id);
+        .eq('user_id', session.session.user.id)
+        .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Delete error:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cart'] });
@@ -70,8 +80,12 @@ export const CartItem = ({ id, title, price, quantity, image_url }: CartItemProp
     }).format(price);
   };
 
-  const handleRemoveItem = () => {
-    removeItemMutation.mutate();
+  const handleRemoveItem = async () => {
+    try {
+      await removeItemMutation.mutateAsync();
+    } catch (error) {
+      console.error('Error in handleRemoveItem:', error);
+    }
   };
 
   return (
