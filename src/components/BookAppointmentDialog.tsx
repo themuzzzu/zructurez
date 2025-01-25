@@ -7,6 +7,7 @@ import { Textarea } from "./ui/textarea";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { ScrollArea } from "./ui/scroll-area";
+import QRCode from "qrcode";
 
 interface BookAppointmentDialogProps {
   businessId: string;
@@ -30,6 +31,27 @@ export const BookAppointmentDialog = ({
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const generateToken = () => {
+    return Math.random().toString(36).substr(2, 8).toUpperCase();
+  };
+
+  const generateQRCode = async (appointmentData: any) => {
+    try {
+      const qrData = JSON.stringify({
+        businessId,
+        appointmentId: appointmentData.id,
+        token: appointmentData.token,
+        date: appointmentData.appointment_date,
+        service: serviceName
+      });
+      
+      return await QRCode.toDataURL(qrData);
+    } catch (err) {
+      console.error("Error generating QR code:", err);
+      return null;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!date || !time) {
@@ -41,6 +63,7 @@ export const BookAppointmentDialog = ({
     const appointmentDate = new Date(date);
     const [hours, minutes] = time.split(":");
     appointmentDate.setHours(parseInt(hours), parseInt(minutes));
+    const token = generateToken();
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -50,16 +73,49 @@ export const BookAppointmentDialog = ({
         return;
       }
 
-      const { error } = await supabase.from("appointments").insert({
-        business_id: businessId,
-        user_id: user.id,
-        appointment_date: appointmentDate.toISOString(),
-        service_name: serviceName,
-        cost: cost,
-        notes: notes
-      });
+      // Create the appointment
+      const { data: appointmentData, error: appointmentError } = await supabase
+        .from("appointments")
+        .insert({
+          business_id: businessId,
+          user_id: user.id,
+          appointment_date: appointmentDate.toISOString(),
+          service_name: serviceName,
+          cost: cost,
+          notes: notes,
+          token: token
+        })
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (appointmentError) throw appointmentError;
+
+      // Generate QR code
+      const qrCodeUrl = await generateQRCode(appointmentData);
+
+      // Get the booking message template
+      const { data: messageTemplate } = await supabase
+        .from('business_booking_messages')
+        .select('message_template')
+        .eq('business_id', businessId)
+        .single();
+
+      // Create notification with the customized message
+      if (messageTemplate) {
+        const formattedDate = appointmentDate.toLocaleDateString();
+        const formattedTime = appointmentDate.toLocaleTimeString();
+        
+        let message = messageTemplate.message_template
+          .replace('{date}', formattedDate)
+          .replace('{time}', formattedTime)
+          .replace('{amount}', `$${cost}`)
+          .replace('{token}', token);
+
+        await supabase.from('notifications').insert({
+          user_id: user.id,
+          message: message,
+        });
+      }
 
       toast.success("Appointment booked successfully!");
       onClose();

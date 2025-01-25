@@ -107,6 +107,45 @@ export type Database = {
         }
         Relationships: []
       }
+      business_booking_messages: {
+        Row: {
+          business_id: string
+          created_at: string
+          id: string
+          message_template: string
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          id?: string
+          message_template?: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          id?: string
+          message_template?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_booking_messages_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_business"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_portfolio: {
         Row: {
           business_id: string
