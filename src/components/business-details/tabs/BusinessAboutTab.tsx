@@ -8,6 +8,7 @@ interface BusinessAboutTabProps {
 export const BusinessAboutTab = ({ business }: BusinessAboutTabProps) => {
   return (
     <BusinessProfile
+      id={business.id}
       description={business.description}
       location={business.location}
       hours={business.hours}
