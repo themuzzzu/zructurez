@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -174,15 +174,19 @@ export const BusinessHeader = ({ id, name, category, isOwner, isOpen = true, onE
                 <div className="flex items-center gap-2">
                   <Select
                     value={closureReason}
-                    onValueChange={(value) => setClosureReason(value as ClosureReason)}
+                    onValueChange={(value: ClosureReason) => setClosureReason(value)}
                     disabled={loading}
                   >
-                    <option value="">Select a reason</option>
-                    <option value="food_break">Food Break</option>
-                    <option value="sick">Sick Leave</option>
-                    <option value="holiday">Holiday</option>
-                    <option value="next_day">Available Next Day</option>
-                    <option value="other">Other</option>
+                    <SelectTrigger className="w-[200px]">
+                      <SelectValue placeholder="Select a reason" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="food_break">Food Break</SelectItem>
+                      <SelectItem value="sick">Sick Leave</SelectItem>
+                      <SelectItem value="holiday">Holiday</SelectItem>
+                      <SelectItem value="next_day">Available Next Day</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
                   </Select>
                 </div>
                 <div className="flex items-center gap-2">
