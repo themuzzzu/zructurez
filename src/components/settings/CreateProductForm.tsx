@@ -7,6 +7,7 @@ import { BasicInfo } from "../marketplace/product-form/BasicInfo";
 import { PricingInfo } from "../marketplace/product-form/PricingInfo";
 import { ProductDetails } from "../marketplace/product-form/ProductDetails";
 import { Label } from "../ui/label";
+import type { ProductFormData } from "../marketplace/product-form/types";
 
 interface CreateProductFormProps {
   onSuccess?: () => void;
@@ -14,7 +15,7 @@ interface CreateProductFormProps {
 
 export const CreateProductForm = ({ onSuccess }: CreateProductFormProps) => {
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ProductFormData>({
     title: "",
     description: "",
     price: "",
@@ -26,7 +27,10 @@ export const CreateProductForm = ({ onSuccess }: CreateProductFormProps) => {
     discount_percentage: "",
     is_used: false,
     condition: "",
-    image: null as string | null,
+    image: null,
+    is_branded: false,
+    brand_name: "",
+    model: "",
   });
 
   const handleChange = (name: string, value: any) => {
@@ -88,6 +92,9 @@ export const CreateProductForm = ({ onSuccess }: CreateProductFormProps) => {
           is_used: formData.is_used,
           condition: formData.condition || null,
           image_url: imageUrl,
+          is_branded: formData.is_branded,
+          brand_name: formData.brand_name || null,
+          model: formData.model || null,
         }])
         .select()
         .single();
