@@ -23,7 +23,7 @@ interface Appointment {
   cost: number;
   status: string;
   notes?: string | null;
-  profiles?: Profile | null;
+  profile?: Profile | null;
 }
 
 export const BusinessBookingsTab = ({ businessId }: BusinessBookingsTabProps) => {
@@ -32,20 +32,36 @@ export const BusinessBookingsTab = ({ businessId }: BusinessBookingsTabProps) =>
   const { data: appointments, isLoading } = useQuery({
     queryKey: ['business-appointments', businessId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data: appointmentsData, error: appointmentsError } = await supabase
         .from('appointments')
-        .select(`
-          *,
-          profiles:user_id(username)
-        `)
+        .select('*')
         .eq('business_id', businessId)
         .order('appointment_date', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching appointments:', error);
-        throw error;
+      if (appointmentsError) {
+        console.error('Error fetching appointments:', appointmentsError);
+        throw appointmentsError;
       }
-      return data as Appointment[];
+
+      // Fetch profiles for all appointments
+      const userIds = appointmentsData.map(appointment => appointment.user_id);
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, username')
+        .in('id', userIds);
+
+      if (profilesError) {
+        console.error('Error fetching profiles:', profilesError);
+        throw profilesError;
+      }
+
+      // Map profiles to appointments
+      const appointmentsWithProfiles = appointmentsData.map(appointment => ({
+        ...appointment,
+        profile: profilesData.find(profile => profile.id === appointment.user_id) || null
+      }));
+
+      return appointmentsWithProfiles as Appointment[];
     },
   });
 
@@ -125,7 +141,7 @@ export const BusinessBookingsTab = ({ businessId }: BusinessBookingsTabProps) =>
                     <div className="flex items-center gap-2">
                       <User className="h-4 w-4" />
                       <span>
-                        {appointment.profiles?.username || 'Anonymous User'}
+                        {appointment.profile?.username || 'Anonymous User'}
                       </span>
                     </div>
 
