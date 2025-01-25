@@ -34,7 +34,7 @@ export const BusinessBookingsTab = ({ businessId }: BusinessBookingsTabProps) =>
         .from('appointments')
         .select(`
           *,
-          profiles:profiles!appointments_user_id_fkey (
+          profiles:user_id (
             username
           )
         `)
