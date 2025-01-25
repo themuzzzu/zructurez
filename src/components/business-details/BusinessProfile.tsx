@@ -1,10 +1,13 @@
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { MapPin, Clock, Phone, Mail, Building, Users, Globe, Menu } from "lucide-react";
+import { MapPin, Clock, Phone, Mail, Building, Users, Globe, Menu, Calendar } from "lucide-react";
 import { BusinessOwnerCard } from "./profile/BusinessOwnerCard";
 import { BusinessStaffCard } from "./profile/BusinessStaffCard";
 import { ServiceMenuCard } from "./profile/ServiceMenuCard";
 import { BusinessAdvertisements } from "./BusinessAdvertisements";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { BookAppointmentDialog } from "@/components/BookAppointmentDialog";
 
 interface BusinessProfileProps {
   id: string;
@@ -38,10 +41,12 @@ interface BusinessProfileProps {
     price: number;
     description: string;
   }>;
+  name: string;
 }
 
 export const BusinessProfile = ({
   id,
+  name,
   description,
   location,
   hours,
@@ -57,6 +62,7 @@ export const BusinessProfile = ({
   consultation_price,
   business_products,
 }: BusinessProfileProps) => {
+  const [showBooking, setShowBooking] = useState(false);
   const hasValidStaff = staff_details && staff_details.length > 0 && staff_details.some(staff => staff.name);
 
   return (
@@ -131,6 +137,18 @@ export const BusinessProfile = ({
             </div>
           )}
         </div>
+
+        {appointment_price && (
+          <div className="pt-4">
+            <Button
+              onClick={() => setShowBooking(true)}
+              className="w-full sm:w-auto flex items-center justify-center gap-2"
+            >
+              <Calendar className="h-4 w-4" />
+              Book Appointment
+            </Button>
+          </div>
+        )}
       </Card>
 
       {/* Service Menu/Info Card */}
@@ -180,6 +198,15 @@ export const BusinessProfile = ({
           </div>
         </Card>
       )}
+
+      <BookAppointmentDialog
+        businessId={id}
+        businessName={name}
+        serviceName="General Appointment"
+        cost={appointment_price || 0}
+        isOpen={showBooking}
+        onClose={() => setShowBooking(false)}
+      />
     </div>
   );
 };
