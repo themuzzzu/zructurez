@@ -14,6 +14,7 @@ interface ShoppingSectionProps {
   showUsed?: boolean;
   showBranded?: boolean;
   sortOption?: string;
+  priceRange?: string;
 }
 
 export const ShoppingSection = ({
@@ -22,12 +23,13 @@ export const ShoppingSection = ({
   showDiscounted = false,
   showUsed = false,
   showBranded = false,
-  sortOption = "newest"
+  sortOption = "newest",
+  priceRange = "all"
 }: ShoppingSectionProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const { data: products, refetch } = useQuery({
-    queryKey: ['products', searchQuery, selectedCategory, showDiscounted, showUsed, showBranded, sortOption],
+    queryKey: ['products', searchQuery, selectedCategory, showDiscounted, showUsed, showBranded, sortOption, priceRange],
     queryFn: async () => {
       let query = supabase
         .from('products')
@@ -51,6 +53,17 @@ export const ShoppingSection = ({
 
       if (showBranded) {
         query = query.eq('is_branded', true);
+      }
+
+      // Add price range filtering
+      if (priceRange !== 'all') {
+        const [min, max] = priceRange.split('-').map(Number);
+        if (max) {
+          query = query.gte('price', min).lte('price', max);
+        } else {
+          // For "Above 25000" case
+          query = query.gte('price', min);
+        }
       }
 
       switch (sortOption) {

@@ -13,6 +13,8 @@ interface ProductFiltersProps {
   onBrandedChange: (checked: boolean) => void;
   sortOption: string;
   onSortChange: (value: string) => void;
+  priceRange: string;
+  onPriceRangeChange: (value: string) => void;
 }
 
 export const ProductFilters = ({
@@ -26,6 +28,8 @@ export const ProductFilters = ({
   onBrandedChange,
   sortOption,
   onSortChange,
+  priceRange,
+  onPriceRangeChange,
 }: ProductFiltersProps) => {
   const categories = [
     { value: "All", label: "All Categories" },
@@ -43,6 +47,16 @@ export const ProductFilters = ({
     { value: "Music", label: "Musical Instruments" },
     { value: "Pet", label: "Pet Supplies" },
     { value: "Office", label: "Office Supplies" },
+  ];
+
+  const priceRanges = [
+    { value: "all", label: "All Prices" },
+    { value: "0-500", label: "Under ₹500" },
+    { value: "500-1000", label: "₹500 - ₹1,000" },
+    { value: "1000-5000", label: "₹1,000 - ₹5,000" },
+    { value: "5000-10000", label: "₹5,000 - ₹10,000" },
+    { value: "10000-25000", label: "₹10,000 - ₹25,000" },
+    { value: "25000", label: "Above ₹25,000" },
   ];
 
   return (
@@ -86,6 +100,19 @@ export const ProductFilters = ({
               {categories.map((category) => (
                 <SelectItem key={category.value} value={category.value}>
                   {category.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={priceRange} onValueChange={onPriceRangeChange}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Price Range" />
+            </SelectTrigger>
+            <SelectContent>
+              {priceRanges.map((range) => (
+                <SelectItem key={range.value} value={range.value}>
+                  {range.label}
                 </SelectItem>
               ))}
             </SelectContent>
