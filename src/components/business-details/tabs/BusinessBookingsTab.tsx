@@ -41,7 +41,10 @@ export const BusinessBookingsTab = ({ businessId }: BusinessBookingsTabProps) =>
         .eq('business_id', businessId)
         .order('appointment_date', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching appointments:', error);
+        throw error;
+      }
       return data as Appointment[];
     },
   });
