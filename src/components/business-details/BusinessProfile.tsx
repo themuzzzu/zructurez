@@ -8,6 +8,8 @@ import { BusinessAdvertisements } from "./BusinessAdvertisements";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { BookAppointmentDialog } from "@/components/BookAppointmentDialog";
+import { BusinessSubscribeButton } from "./BusinessSubscribeButton";
+import { BusinessMembershipButton } from "./BusinessMembershipButton";
 
 interface BusinessProfileProps {
   id: string;
@@ -80,6 +82,12 @@ export const BusinessProfile = ({
           </div>
         </div>
       )}
+
+      {/* Subscription and Membership Buttons */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <BusinessSubscribeButton businessId={id} />
+        <BusinessMembershipButton businessId={id} />
+      </div>
 
       {/* Advertisements Section */}
       <BusinessAdvertisements businessId={id} />
