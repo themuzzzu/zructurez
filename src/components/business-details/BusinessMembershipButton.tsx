@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
+import { MembershipPlansCard } from "./profile/MembershipPlansCard";
 
 interface BusinessMembershipButtonProps {
   businessId: string;
@@ -10,6 +12,19 @@ interface BusinessMembershipButtonProps {
 
 export const BusinessMembershipButton = ({ businessId }: BusinessMembershipButtonProps) => {
   const [loading, setLoading] = useState(false);
+  const [showPlans, setShowPlans] = useState(false);
+
+  const { data: business } = useQuery({
+    queryKey: ['business-plans', businessId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('businesses')
+        .select('membership_plans')
+        .eq('id', businessId)
+        .single();
+      return data;
+    }
+  });
 
   const { data: membership, refetch } = useQuery({
     queryKey: ['business-membership', businessId],
@@ -28,7 +43,7 @@ export const BusinessMembershipButton = ({ businessId }: BusinessMembershipButto
     }
   });
 
-  const handleMembership = async () => {
+  const handleMembership = async (plan: any) => {
     try {
       setLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
@@ -38,13 +53,31 @@ export const BusinessMembershipButton = ({ businessId }: BusinessMembershipButto
       }
 
       if (membership) {
-        const { error } = await supabase
-          .from('business_memberships')
-          .update({ status: membership.status === 'active' ? 'cancelled' : 'active' })
-          .eq('id', membership.id);
+        if (membership.status === 'active') {
+          const { error } = await supabase
+            .from('business_memberships')
+            .update({ status: 'cancelled' })
+            .eq('id', membership.id);
 
-        if (error) throw error;
-        toast.success(membership.status === 'active' ? "Membership cancelled" : "Membership reactivated");
+          if (error) throw error;
+          toast.success("Membership cancelled");
+        } else {
+          const { error } = await supabase
+            .from('business_memberships')
+            .update({ 
+              status: 'active',
+              membership_type: plan.name.toLowerCase(),
+              membership_details: {
+                plan: plan.name.toLowerCase(),
+                features: plan.features,
+                price: plan.price
+              }
+            })
+            .eq('id', membership.id);
+
+          if (error) throw error;
+          toast.success("Membership reactivated with new plan");
+        }
       } else {
         const { error } = await supabase
           .from('business_memberships')
@@ -52,8 +85,13 @@ export const BusinessMembershipButton = ({ businessId }: BusinessMembershipButto
             { 
               business_id: businessId, 
               user_id: user.id,
-              membership_type: 'basic',
-              status: 'active'
+              membership_type: plan.name.toLowerCase(),
+              status: 'active',
+              membership_details: {
+                plan: plan.name.toLowerCase(),
+                features: plan.features,
+                price: plan.price
+              }
             }
           ]);
 
@@ -61,6 +99,7 @@ export const BusinessMembershipButton = ({ businessId }: BusinessMembershipButto
         toast.success("Joined membership successfully");
       }
       
+      setShowPlans(false);
       refetch();
     } catch (error) {
       console.error('Error:', error);
@@ -73,17 +112,31 @@ export const BusinessMembershipButton = ({ businessId }: BusinessMembershipButto
   const isActive = membership?.status === 'active';
 
   return (
-    <Button 
-      onClick={handleMembership}
-      variant={isActive ? "outline" : "default"}
-      disabled={loading}
-      className="w-full bg-red-600 hover:bg-red-700 text-white"
-    >
-      {loading ? "Loading..." : (
-        membership 
-          ? (isActive ? "Cancel Membership" : "Reactivate Membership")
-          : "Join Membership"
-      )}
-    </Button>
+    <>
+      <Button 
+        onClick={() => isActive ? handleMembership(null) : setShowPlans(true)}
+        variant={isActive ? "outline" : "default"}
+        disabled={loading}
+        className="w-full bg-red-600 hover:bg-red-700 text-white"
+      >
+        {loading ? "Loading..." : (
+          membership 
+            ? (isActive ? "Cancel Membership" : "Reactivate Membership")
+            : "Join Membership"
+        )}
+      </Button>
+
+      <Dialog open={showPlans} onOpenChange={setShowPlans}>
+        <DialogContent className="sm:max-w-[900px]">
+          <DialogTitle>Choose a Membership Plan</DialogTitle>
+          <MembershipPlansCard
+            plans={business?.membership_plans || []}
+            onSelectPlan={handleMembership}
+            selectedPlan={membership?.membership_details?.plan}
+            loading={loading}
+          />
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };

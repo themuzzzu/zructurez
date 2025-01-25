@@ -152,6 +152,7 @@ export type Database = {
           created_at: string
           end_date: string | null
           id: string
+          membership_details: Json | null
           membership_type: string
           start_date: string
           status: string
@@ -162,6 +163,7 @@ export type Database = {
           created_at?: string
           end_date?: string | null
           id?: string
+          membership_details?: Json | null
           membership_type?: string
           start_date?: string
           status?: string
@@ -172,6 +174,7 @@ export type Database = {
           created_at?: string
           end_date?: string | null
           id?: string
+          membership_details?: Json | null
           membership_type?: string
           start_date?: string
           status?: string
@@ -314,6 +317,7 @@ export type Database = {
           image_url: string | null
           is_open: boolean | null
           location: string | null
+          membership_plans: Json | null
           name: string
           owners: Json | null
           pan_number: string | null
@@ -346,6 +350,7 @@ export type Database = {
           image_url?: string | null
           is_open?: boolean | null
           location?: string | null
+          membership_plans?: Json | null
           name: string
           owners?: Json | null
           pan_number?: string | null
@@ -378,6 +383,7 @@ export type Database = {
           image_url?: string | null
           is_open?: boolean | null
           location?: string | null
+          membership_plans?: Json | null
           name?: string
           owners?: Json | null
           pan_number?: string | null
