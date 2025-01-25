@@ -84,7 +84,7 @@ export const BusinessMembershipButton = ({ businessId }: BusinessMembershipButto
                 plan: plan!.name.toLowerCase(),
                 features: plan!.features,
                 price: plan!.price
-              }
+              } as MembershipDetails
             })
             .eq('id', membership.id);
 
@@ -104,7 +104,7 @@ export const BusinessMembershipButton = ({ businessId }: BusinessMembershipButto
                 plan: plan.name.toLowerCase(),
                 features: plan.features,
                 price: plan.price
-              }
+              } as MembershipDetails
             }
           ]);
 
