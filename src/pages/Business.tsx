@@ -91,19 +91,15 @@ const Business = () => {
                   {filteredBusinesses.map((business) => (
                     <BusinessCard 
                       key={business.id}
-                      id={business.id}
-                      name={business.name}
-                      category={business.category}
-                      description={business.description}
+                      {...business}
                       image={business.image_url || '/placeholder.svg'}
                       rating={4.5} // This should come from a reviews system
                       reviews={0} // This should come from a reviews system
-                      location={business.location || 'Location not specified'}
-                      contact={business.contact || ''}
-                      hours={business.hours || 'Hours not specified'}
-                      verified={business.verified || false}
                       serviceName={business.category}
                       cost={business.business_products?.[0]?.price || 0}
+                      is_open={business.is_open}
+                      wait_time={business.wait_time}
+                      closure_reason={business.closure_reason}
                     />
                   ))}
                 </div>

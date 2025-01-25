@@ -21,6 +21,9 @@ interface BusinessCardProps {
   cost: number;
   appointment_price?: number;
   consultation_price?: number;
+  wait_time?: string;
+  closure_reason?: string;
+  is_open?: boolean;
 }
 
 const checkAvailability = (hours: string): boolean => {
@@ -72,10 +75,12 @@ export const BusinessCard = ({
   hours,
   verified,
   appointment_price,
-  consultation_price
+  consultation_price,
+  wait_time,
+  closure_reason,
+  is_open = true
 }: BusinessCardProps) => {
   const navigate = useNavigate();
-  const isOpen = checkAvailability(hours);
 
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -103,6 +108,24 @@ export const BusinessCard = ({
     window.open(whatsappUrl, '_blank');
   };
 
+  const getReasonLabel = (reason?: string) => {
+    if (!reason) return '';
+    switch (reason) {
+      case 'food_break':
+        return 'Food Break';
+      case 'sick':
+        return 'Sick Leave';
+      case 'holiday':
+        return 'Holiday';
+      case 'next_day':
+        return 'Available Next Day';
+      case 'other':
+        return 'Other';
+      default:
+        return '';
+    }
+  };
+
   return (
     <Card 
       className="overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer w-full max-w-[360px] bg-black/95 text-white"
@@ -124,10 +147,10 @@ export const BusinessCard = ({
             <span className="text-sm text-gray-300">{category}</span>
             <div className="flex items-center gap-2">
               <Badge 
-                variant={isOpen ? "success" : "destructive"}
+                variant={is_open ? "success" : "destructive"}
                 className="text-xs px-2 py-0.5"
               >
-                {isOpen ? "Open" : "Closed"}
+                {is_open ? "Open" : "Closed"}
               </Badge>
               {verified && (
                 <Badge variant="outline" className="text-xs px-2 py-0.5">
@@ -135,6 +158,15 @@ export const BusinessCard = ({
                 </Badge>
               )}
             </div>
+            {!is_open && wait_time && (
+              <div className="flex items-center gap-2 text-sm text-gray-300">
+                <Clock className="h-4 w-4" />
+                <span>Available in {wait_time}</span>
+                {closure_reason && (
+                  <span className="text-gray-400">({getReasonLabel(closure_reason)})</span>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
