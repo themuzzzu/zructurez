@@ -19,7 +19,7 @@ interface Appointment {
   cost: number;
   status: string;
   notes?: string | null;
-  profiles: {
+  profiles?: {
     username: string | null;
   } | null;
 }
@@ -42,7 +42,7 @@ export const BusinessBookingsTab = ({ businessId }: BusinessBookingsTabProps) =>
         .order('appointment_date', { ascending: false });
 
       if (error) throw error;
-      return data as unknown as Appointment[];
+      return data as Appointment[];
     },
   });
 
