@@ -26,7 +26,10 @@ export const ProfileView = () => {
   const fetchProfile = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) {
+        navigate('/auth');
+        return;
+      }
 
       const { data, error } = await supabase
         .from('profiles')
@@ -35,7 +38,7 @@ export const ProfileView = () => {
         .single();
 
       if (error) throw error;
-      if (data) setProfile({ ...data });
+      if (data) setProfile(data);
     } catch (error) {
       console.error('Error fetching profile:', error);
       toast.error('Failed to load profile');
@@ -46,23 +49,31 @@ export const ProfileView = () => {
     try {
       setLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('No user found');
+      if (!user) {
+        toast.error('No user found');
+        navigate('/auth');
+        return;
+      }
+
+      const updates = {
+        username: profile.username,
+        name: profile.name,
+        avatar_url: profile.avatar_url,
+        bio: profile.bio,
+        location: profile.location,
+        updated_at: new Date().toISOString(),
+      };
 
       const { error } = await supabase
         .from('profiles')
-        .update({
-          id: user.id,
-          username: profile.username,
-          name: profile.name,
-          avatar_url: profile.avatar_url,
-          bio: profile.bio,
-          location: profile.location,
-        })
+        .update(updates)
         .eq('id', user.id);
 
       if (error) throw error;
+      
       toast.success('Profile updated successfully');
       setIsEditing(false);
+      await fetchProfile(); // Refresh profile data
     } catch (error) {
       console.error('Error updating profile:', error);
       toast.error('Failed to update profile');
