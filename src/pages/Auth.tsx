@@ -11,14 +11,13 @@ const Auth = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Clear any existing session data on mount
-    localStorage.removeItem('supabase.auth.token');
-    
-    // Check current session on mount
     const checkSession = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error('Session check error:', error);
+          toast.error('Error checking authentication status');
+        } else if (session) {
           navigate('/');
         }
       } catch (error) {
@@ -29,16 +28,14 @@ const Auth = () => {
       }
     };
 
-    checkSession();
-
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
       if (event === 'SIGNED_IN' && session) {
         navigate('/');
-      } else if (event === 'SIGNED_OUT') {
-        navigate('/auth');
       }
     });
+
+    checkSession();
 
     return () => {
       subscription.unsubscribe();

@@ -28,8 +28,8 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
           if (mounted) {
             setIsAuthenticated(false);
             setIsLoading(false);
-            navigate('/auth');
           }
+          navigate('/auth');
           return;
         }
 
@@ -47,8 +47,6 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
       }
     };
 
-    checkSession();
-
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_OUT') {
         setIsAuthenticated(false);
@@ -60,6 +58,8 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         setIsAuthenticated(true);
       }
     });
+
+    checkSession();
 
     return () => {
       mounted = false;
