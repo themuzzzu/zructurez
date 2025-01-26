@@ -1,16 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Cart } from "./cart/Cart";
-import { LocationSelector } from "./LocationSelector";
+import { ProfileHeader } from "./profile/ProfileHeader";
+import { ProfileAvatar } from "./profile/ProfileAvatar";
+import { ProfileForm } from "./profile/ProfileForm";
 
 export const ProfileView = () => {
   const navigate = useNavigate();
@@ -115,119 +112,29 @@ export const ProfileView = () => {
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle className="text-2xl font-bold">Profile</CardTitle>
-            <Button 
-              variant={isEditing ? "ghost" : "outline"} 
-              onClick={() => setIsEditing(!isEditing)}
-            >
-              {isEditing ? "Cancel" : "Edit Profile"}
-            </Button>
-          </div>
-        </CardHeader>
+        <ProfileHeader 
+          isEditing={isEditing} 
+          onEditClick={() => setIsEditing(!isEditing)} 
+        />
         <CardContent className="space-y-6">
-          <div className="flex flex-col items-center gap-4">
-            <Avatar className="h-24 w-24">
-              <AvatarImage src={profile.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"} />
-              <AvatarFallback>User</AvatarFallback>
-            </Avatar>
-            {isEditing && (
-              <div className="w-full">
-                <Label htmlFor="avatar_url">Avatar URL</Label>
-                <Input
-                  id="avatar_url"
-                  value={profile.avatar_url || ""}
-                  onChange={(e) => setProfile({ ...profile, avatar_url: e.target.value })}
-                  placeholder="Enter avatar URL"
-                />
-              </div>
-            )}
-          </div>
-
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="name">Name</Label>
-              <Input
-                id="name"
-                value={profile.name || ""}
-                onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                disabled={!isEditing}
-                placeholder="Enter your name"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="username">Username</Label>
-              <Input
-                id="username"
-                value={profile.username || ""}
-                onChange={(e) => setProfile({ ...profile, username: e.target.value })}
-                disabled={!isEditing}
-                placeholder="Enter username"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="bio">Bio</Label>
-              <Textarea
-                id="bio"
-                value={profile.bio || ""}
-                onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
-                disabled={!isEditing}
-                placeholder="Tell us about yourself"
-                className="h-32"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="location">Location</Label>
-              {isEditing ? (
-                <LocationSelector
-                  value={profile.location || ""}
-                  onChange={(value) => setProfile({ ...profile, location: value })}
-                />
-              ) : (
-                <Input
-                  id="location"
-                  value={profile.location || ""}
-                  disabled
-                  placeholder="No location set"
-                />
-              )}
-            </div>
-
-            <div className="flex items-center justify-between space-x-2">
-              <Label htmlFor="disappearing-messages" className="text-sm font-medium">
-                Disappearing messages
-              </Label>
-              <Switch
-                id="disappearing-messages"
-                checked={disappearingMessages}
-                onCheckedChange={handleDisappearingMessages}
-              />
-            </div>
-            {disappearingMessages && (
-              <p className="text-sm text-muted-foreground">
-                Messages will disappear after 24 hours
-              </p>
-            )}
-
-            {isEditing && (
-              <div className="flex justify-end gap-4">
-                <Button onClick={updateProfile} disabled={loading}>
-                  {loading ? "Saving..." : "Save Changes"}
-                </Button>
-              </div>
-            )}
-          </div>
+          <ProfileAvatar
+            avatarUrl={profile.avatar_url}
+            isEditing={isEditing}
+            onAvatarChange={(url) => setProfile({ ...profile, avatar_url: url })}
+          />
+          <ProfileForm
+            profile={profile}
+            isEditing={isEditing}
+            loading={loading}
+            disappearingMessages={disappearingMessages}
+            onProfileChange={(field, value) => setProfile({ ...profile, [field]: value })}
+            onDisappearingMessagesChange={handleDisappearingMessages}
+            onSave={updateProfile}
+          />
         </CardContent>
       </Card>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Shopping Cart</CardTitle>
-        </CardHeader>
         <CardContent>
           <Cart />
         </CardContent>
