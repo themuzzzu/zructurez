@@ -93,12 +93,35 @@ export const BookAppointmentDialog = ({
       // Generate QR code
       const qrCodeUrl = await generateQRCode(appointmentData);
 
-      // Get the booking message template
+      // First check if a message template exists
+      const { data: existingTemplate, error: templateError } = await supabase
+        .from('business_booking_messages')
+        .select('message_template')
+        .eq('business_id', businessId)
+        .maybeSingle();
+
+      if (templateError) throw templateError;
+
+      // If no template exists, create one with default message
+      if (!existingTemplate) {
+        const defaultTemplate = 'Thank you for booking with us! Your appointment is scheduled for {date} at {time}. Payment amount: ${amount}. Token number: {token}';
+        
+        const { error: createError } = await supabase
+          .from('business_booking_messages')
+          .insert({
+            business_id: businessId,
+            message_template: defaultTemplate
+          });
+
+        if (createError) throw createError;
+      }
+
+      // Get the template (either existing or newly created)
       const { data: messageTemplate } = await supabase
         .from('business_booking_messages')
         .select('message_template')
         .eq('business_id', businessId)
-        .single();
+        .maybeSingle();
 
       // Create notification with the customized message
       if (messageTemplate) {
