@@ -1,7 +1,5 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
-import { Pencil } from "lucide-react";
 
 interface ProfileCardProps {
   profile: {
@@ -27,20 +25,16 @@ export const ProfileCard = ({ profile, onEditClick }: ProfileCardProps) => {
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <h1 className="text-2xl font-bold">{profile.name || "Anonymous"}</h1>
-                <Button 
-                  variant="ghost" 
-                  size="icon"
-                  onClick={onEditClick}
-                  className="h-8 w-8"
-                >
-                  <Pencil className="h-4 w-4" />
-                </Button>
               </div>
               <p className="text-muted-foreground">@{profile.username || "username"}</p>
               <p className="text-muted-foreground">{profile.bio || "No bio yet"}</p>
             </div>
           </div>
-          <Button variant="outline" onClick={onEditClick}>
+          <Button 
+            variant="outline" 
+            onClick={onEditClick}
+            className="h-9"
+          >
             Edit Profile
           </Button>
         </div>
