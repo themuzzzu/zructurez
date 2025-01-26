@@ -31,7 +31,7 @@ const Auth = () => {
       }
     };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null, error?: Error) => {
       if (event === 'SIGNED_IN' && session) {
         toast.success('Successfully signed in!');
         navigate('/');
@@ -43,7 +43,7 @@ const Auth = () => {
         toast.info('Please check your email for password reset instructions');
       }
 
-      // Handle email confirmation separately through error messages
+      // Handle email confirmation error
       if (error?.message?.includes('email_not_confirmed')) {
         toast.info('Please check your email to confirm your account');
       }
