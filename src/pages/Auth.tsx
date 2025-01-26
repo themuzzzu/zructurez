@@ -87,9 +87,9 @@ const Auth = () => {
                 input: {
                   borderRadius: '6px',
                   color: 'white',
-                  '::placeholder': {
+                  '&[placeholder]': {
                     color: 'rgba(255, 255, 255, 0.6)',
-                  },
+                  }
                 },
                 anchor: {
                   color: '#e31837',
