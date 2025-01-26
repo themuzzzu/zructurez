@@ -16,11 +16,7 @@ const Auth = () => {
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error) {
           console.error('Session check error:', error);
-          if (error.message.includes('invalid_credentials')) {
-            toast.error('Invalid email or password');
-          } else {
-            toast.error('Error checking authentication status');
-          }
+          toast.error('Error checking authentication status');
         } else if (session) {
           navigate('/');
         }
@@ -84,6 +80,26 @@ const Auth = () => {
                 anchor: {
                   color: '#e31837',
                 },
+              }
+            }}
+            localization={{
+              variables: {
+                sign_in: {
+                  email_input_placeholder: 'Your email address',
+                  password_input_placeholder: 'Your password',
+                  email_label: 'Email',
+                  password_label: 'Password',
+                  button_label: 'Sign in',
+                  loading_button_label: 'Signing in...',
+                },
+                sign_up: {
+                  email_input_placeholder: 'Your email address',
+                  password_input_placeholder: 'Create a password',
+                  email_label: 'Email',
+                  password_label: 'Password',
+                  button_label: 'Sign up',
+                  loading_button_label: 'Signing up...',
+                }
               }
             }}
             providers={[]}
