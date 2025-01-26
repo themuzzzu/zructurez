@@ -1,13 +1,11 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "./ui/dialog";
-import { Button } from "./ui/button";
-import { Calendar } from "./ui/calendar";
-import { Input } from "./ui/input";
-import { Textarea } from "./ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { ScrollArea } from "./ui/scroll-area";
-import QRCode from "qrcode";
+import { AppointmentForm } from "./appointments/AppointmentForm";
+import { generateQRCode } from "./appointments/QRCodeGenerator";
+import { getOrCreateBookingMessage, formatBookingMessage } from "./appointments/BookingMessageService";
 
 interface BookAppointmentDialogProps {
   businessId: string;
@@ -26,39 +24,13 @@ export const BookAppointmentDialog = ({
   isOpen,
   onClose
 }: BookAppointmentDialogProps) => {
-  const [date, setDate] = useState<Date | undefined>(undefined);
-  const [time, setTime] = useState("");
-  const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
 
   const generateToken = () => {
     return Math.random().toString(36).substr(2, 8).toUpperCase();
   };
 
-  const generateQRCode = async (appointmentData: any) => {
-    try {
-      const qrData = JSON.stringify({
-        businessId,
-        appointmentId: appointmentData.id,
-        token: appointmentData.token,
-        date: appointmentData.appointment_date,
-        service: serviceName
-      });
-      
-      return await QRCode.toDataURL(qrData);
-    } catch (err) {
-      console.error("Error generating QR code:", err);
-      return null;
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!date || !time) {
-      toast.error("Please select both date and time");
-      return;
-    }
-
+  const handleSubmit = async (date: Date, time: string, notes: string) => {
     setLoading(true);
     const appointmentDate = new Date(date);
     const [hours, minutes] = time.split(":");
@@ -91,48 +63,29 @@ export const BookAppointmentDialog = ({
       if (appointmentError) throw appointmentError;
 
       // Generate QR code
-      const qrCodeUrl = await generateQRCode(appointmentData);
+      await generateQRCode({
+        businessId,
+        appointmentId: appointmentData.id,
+        token: appointmentData.token,
+        date: appointmentData.appointment_date,
+        service: serviceName
+      });
 
-      // First check if a message template exists
-      const { data: existingTemplate, error: templateError } = await supabase
-        .from('business_booking_messages')
-        .select('message_template')
-        .eq('business_id', businessId)
-        .maybeSingle();
-
-      if (templateError) throw templateError;
-
-      // If no template exists, create one with default message
-      if (!existingTemplate) {
-        const defaultTemplate = 'Thank you for booking with us! Your appointment is scheduled for {date} at {time}. Payment amount: ${amount}. Token number: {token}';
-        
-        const { error: createError } = await supabase
-          .from('business_booking_messages')
-          .insert({
-            business_id: businessId,
-            message_template: defaultTemplate
-          });
-
-        if (createError) throw createError;
-      }
-
-      // Get the template (either existing or newly created)
-      const { data: messageTemplate } = await supabase
-        .from('business_booking_messages')
-        .select('message_template')
-        .eq('business_id', businessId)
-        .maybeSingle();
+      // Get or create booking message template
+      const messageTemplate = await getOrCreateBookingMessage(businessId);
 
       // Create notification with the customized message
       if (messageTemplate) {
         const formattedDate = appointmentDate.toLocaleDateString();
         const formattedTime = appointmentDate.toLocaleTimeString();
         
-        let message = messageTemplate.message_template
-          .replace('{date}', formattedDate)
-          .replace('{time}', formattedTime)
-          .replace('{amount}', `$${cost}`)
-          .replace('{token}', token);
+        const message = formatBookingMessage(
+          messageTemplate,
+          formattedDate,
+          formattedTime,
+          cost,
+          token
+        );
 
         await supabase.from('notifications').insert({
           user_id: user.id,
@@ -160,43 +113,11 @@ export const BookAppointmentDialog = ({
           </DialogDescription>
         </DialogHeader>
         <ScrollArea className="h-full max-h-[calc(90vh-8rem)] pr-4">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Select Date</label>
-              <Calendar
-                mode="single"
-                selected={date}
-                onSelect={setDate}
-                disabled={(date) => date < new Date()}
-                className="rounded-md border"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Select Time</label>
-              <Input
-                type="time"
-                value={time}
-                onChange={(e) => setTime(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Notes (optional)</label>
-              <Textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Any special requests or notes..."
-              />
-            </div>
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={onClose}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={loading}>
-                {loading ? "Booking..." : "Book Appointment"}
-              </Button>
-            </DialogFooter>
-          </form>
+          <AppointmentForm
+            onSubmit={handleSubmit}
+            onCancel={onClose}
+            loading={loading}
+          />
         </ScrollArea>
       </DialogContent>
     </Dialog>
