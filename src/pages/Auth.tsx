@@ -14,12 +14,13 @@ const Auth = () => {
     const checkSession = async () => {
       try {
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
         if (sessionError) {
           console.error('Session check error:', sessionError);
-          if (sessionError.message.includes('email_not_confirmed')) {
-            toast.error('Please check your email and confirm your account before signing in.');
-          } else if (sessionError.message.includes('invalid_credentials')) {
+          if (sessionError.message.includes('invalid_credentials')) {
             toast.error('Invalid email or password. Please try again.');
+          } else if (sessionError.message.includes('email_not_confirmed')) {
+            toast.error('Please check your email and confirm your account before signing in.');
           } else {
             toast.error('Error checking authentication status');
           }
@@ -35,13 +36,11 @@ const Auth = () => {
     };
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
-      console.log('Auth state changed:', event, session);
-      
       if (event === 'SIGNED_IN' && session) {
         toast.success('Successfully signed in!');
         navigate('/');
       } else if (event === 'SIGNED_OUT') {
-        toast.error('You have been signed out');
+        toast.info('You have been signed out');
       } else if (event === 'USER_UPDATED') {
         toast.success('Your profile has been updated');
       } else if (event === 'PASSWORD_RECOVERY') {
