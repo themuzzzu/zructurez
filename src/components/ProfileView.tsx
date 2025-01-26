@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 import { Cart } from "./cart/Cart";
 import { ProfileHeader } from "./profile/ProfileHeader";
 import { ProfileAvatar } from "./profile/ProfileAvatar";
