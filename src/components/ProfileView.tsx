@@ -10,7 +10,6 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Cart } from "./cart/Cart";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LocationSelector } from "./LocationSelector";
 
 export const ProfileView = () => {
@@ -20,6 +19,7 @@ export const ProfileView = () => {
   const [profile, setProfile] = useState({
     id: "",
     username: "",
+    name: "",
     avatar_url: "",
     bio: "",
     location: "",
@@ -56,6 +56,7 @@ export const ProfileView = () => {
         .update({
           id: user.id,
           username: profile.username,
+          name: profile.name,
           avatar_url: profile.avatar_url,
           bio: profile.bio,
           location: profile.location,
@@ -137,6 +138,17 @@ export const ProfileView = () => {
           </div>
 
           <div className="space-y-4">
+            <div>
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                value={profile.name || ""}
+                onChange={(e) => setProfile({ ...profile, name: e.target.value })}
+                disabled={!isEditing}
+                placeholder="Enter your name"
+              />
+            </div>
+
             <div>
               <Label htmlFor="username">Username</Label>
               <Input
