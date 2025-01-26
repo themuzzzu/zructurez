@@ -1,8 +1,10 @@
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MapPin, Clock, Phone, Mail, Globe, Calendar } from "lucide-react";
+import { MapPin, Clock, Phone, Mail, Globe, Calendar, Star } from "lucide-react";
 import { BusinessCommentSection } from "../comments/BusinessCommentSection";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface BusinessAboutSectionProps {
   businessId: string;
@@ -27,14 +29,59 @@ export const BusinessAboutSection = ({
   appointment_price,
   onBookAppointment,
 }: BusinessAboutSectionProps) => {
+  // Fetch average rating
+  const { data: ratingData } = useQuery({
+    queryKey: ['business-rating', businessId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('business_comments')
+        .select('rating')
+        .eq('business_id', businessId)
+        .not('rating', 'is', null);
+
+      if (error) throw error;
+      
+      if (!data || data.length === 0) return { average: 0, count: 0 };
+      
+      const ratings = data.map(r => r.rating).filter(Boolean);
+      const average = ratings.reduce((a, b) => a + b, 0) / ratings.length;
+      
+      return {
+        average: Number(average.toFixed(1)),
+        count: ratings.length
+      };
+    }
+  });
+
   return (
     <Card className="p-6 space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold">About</h2>
-        {verified && (
-          <Badge variant="outline" className="ml-2">
-            Verified
-          </Badge>
+        <div className="flex items-center gap-4">
+          <h2 className="text-2xl font-semibold">About</h2>
+          {verified && (
+            <Badge variant="outline">
+              Verified
+            </Badge>
+          )}
+        </div>
+        {ratingData && ratingData.count > 0 && (
+          <div className="flex items-center gap-1">
+            <div className="flex">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star
+                  key={star}
+                  className={`h-4 w-4 ${
+                    star <= Math.round(ratingData.average)
+                      ? "fill-yellow-400 text-yellow-400"
+                      : "text-gray-300"
+                  }`}
+                />
+              ))}
+            </div>
+            <span className="text-sm text-muted-foreground">
+              ({ratingData.average} • {ratingData.count} reviews)
+            </span>
+          </div>
         )}
       </div>
       
@@ -92,11 +139,6 @@ export const BusinessAboutSection = ({
           </Button>
         </div>
       )}
-
-      <div className="border-t pt-6 mt-6">
-        <h3 className="text-lg font-semibold mb-4">Comments & Reviews</h3>
-        <BusinessCommentSection businessId={businessId} />
-      </div>
     </Card>
   );
 };

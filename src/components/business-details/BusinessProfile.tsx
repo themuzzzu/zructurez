@@ -6,7 +6,9 @@ import { BusinessAboutSection } from "./profile/BusinessAboutSection";
 import { ServiceMenuCard } from "./profile/ServiceMenuCard";
 import { BusinessBioSection } from "./profile/BusinessBioSection";
 import { BusinessTeamSection } from "./profile/BusinessTeamSection";
+import { BusinessCommentSection } from "./comments/BusinessCommentSection";
 import { BookAppointmentDialog } from "@/components/BookAppointmentDialog";
+import { Card } from "@/components/ui/card";
 import type { Business } from "@/types/business";
 
 interface BusinessProfileProps {
@@ -83,6 +85,8 @@ export const BusinessProfile = ({
         owners={owners} 
         staff_details={staff_details}
       />
+
+      <BusinessCommentSection businessId={id} />
 
       <BookAppointmentDialog
         businessId={id}
