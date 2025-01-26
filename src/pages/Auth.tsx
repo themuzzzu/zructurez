@@ -16,7 +16,11 @@ const Auth = () => {
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error) {
           console.error('Session check error:', error);
-          toast.error('Error checking authentication status');
+          if (error.message.includes('invalid_credentials')) {
+            toast.error('Invalid email or password. Please try again.');
+          } else {
+            toast.error('Error checking authentication status');
+          }
         } else if (session) {
           navigate('/');
         }
@@ -28,6 +32,8 @@ const Auth = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
       if (event === 'SIGNED_IN' && session) {
         navigate('/');
+      } else if (event === 'SIGNED_OUT') {
+        toast.error('You have been signed out');
       }
     });
 
