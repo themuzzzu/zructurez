@@ -46,8 +46,6 @@ const Auth = () => {
         toast.success('Your profile has been updated');
       } else if (event === 'PASSWORD_RECOVERY') {
         toast.info('Please check your email for password reset instructions');
-      } else if (event === 'USER_DELETED') {
-        toast.error('Your account has been deleted');
       }
     });
 
