@@ -1,16 +1,19 @@
 import { useEffect, useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Sidebar } from "@/components/Sidebar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { PostsTab } from "@/components/profile/PostsTab";
 import { ServicesTab } from "@/components/profile/ServicesTab";
 import { BusinessesTab } from "@/components/profile/BusinessesTab";
 import { SubscribedBusinessesTab } from "@/components/profile/SubscribedBusinessesTab";
+import { Button } from "@/components/ui/button";
+import { Pencil } from "lucide-react";
 
 const Profile = () => {
   const [profile, setProfile] = useState<any>(null);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -39,17 +42,33 @@ const Profile = () => {
           <Sidebar className="w-64 hidden lg:block sticky top-24 h-[calc(100vh-6rem)]" />
           <main className="flex-1">
             <Card className="mb-6">
-              <CardHeader>
-                <div className="flex items-center gap-4">
-                  <img
-                    src={profile.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"}
-                    alt="Profile"
-                    className="w-20 h-20 rounded-full"
-                  />
-                  <div>
-                    <CardTitle className="text-2xl">{profile.username || "Anonymous"}</CardTitle>
-                    <p className="text-muted-foreground mt-2">{profile.bio || "No bio yet"}</p>
+              <CardHeader className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <img
+                      src={profile.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"}
+                      alt="Profile"
+                      className="w-20 h-20 rounded-full"
+                    />
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <h1 className="text-2xl font-bold">{profile.name || "Anonymous"}</h1>
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => setIsEditing(!isEditing)}
+                          className="h-8 w-8"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <p className="text-muted-foreground">@{profile.username || "username"}</p>
+                      <p className="text-muted-foreground">{profile.bio || "No bio yet"}</p>
+                    </div>
                   </div>
+                  <Button variant="outline" onClick={() => setIsEditing(!isEditing)}>
+                    Edit Profile
+                  </Button>
                 </div>
               </CardHeader>
             </Card>
@@ -63,6 +82,9 @@ const Profile = () => {
               </TabsList>
 
               <TabsContent value="posts">
+                <div className="flex justify-end mb-4">
+                  <Button variant="default">Create Post</Button>
+                </div>
                 <PostsTab />
               </TabsContent>
 
