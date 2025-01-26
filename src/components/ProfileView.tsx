@@ -161,6 +161,18 @@ export const ProfileView = () => {
             </div>
 
             <div>
+              <Label htmlFor="bio">Bio</Label>
+              <Textarea
+                id="bio"
+                value={profile.bio || ""}
+                onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
+                disabled={!isEditing}
+                placeholder="Tell us about yourself"
+                className="h-32"
+              />
+            </div>
+
+            <div>
               <Label htmlFor="location">Location</Label>
               {isEditing ? (
                 <LocationSelector
@@ -175,18 +187,6 @@ export const ProfileView = () => {
                   placeholder="No location set"
                 />
               )}
-            </div>
-
-            <div>
-              <Label htmlFor="bio">Bio</Label>
-              <Textarea
-                id="bio"
-                value={profile.bio || ""}
-                onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
-                disabled={!isEditing}
-                placeholder="Tell us about yourself"
-                className="h-32"
-              />
             </div>
 
             <div className="flex items-center justify-between space-x-2">
