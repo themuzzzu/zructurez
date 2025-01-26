@@ -1,16 +1,11 @@
+import { useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Sidebar } from "@/components/Sidebar";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Calendar, MapPin, Clock, Users2, ArrowLeft } from "lucide-react";
-import { toast } from "sonner";
+import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ImageUpload } from "@/components/ImageUpload";
+import { EventCard } from "@/components/events/EventCard";
+import { CreateEventDialog } from "@/components/events/CreateEventDialog";
 
 const SAMPLE_EVENTS = [
   {
@@ -47,71 +42,6 @@ const SAMPLE_EVENTS = [
 
 const Events = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    date: "",
-    time: "",
-    location: "",
-    image: null as string | null,
-  });
-
-  const handleAttend = (eventId: number) => {
-    toast.success("You're now attending this event!");
-  };
-
-  const handleCreateEvent = async () => {
-    if (!formData.title || !formData.description || !formData.date || !formData.time || !formData.location) {
-      toast.error("Please fill in all required fields");
-      return;
-    }
-
-    setIsCreating(true);
-    try {
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      
-      if (userError || !user) {
-        throw new Error("User not authenticated");
-      }
-
-      // Generate a UUID for the event
-      const eventId = crypto.randomUUID();
-
-      const { data: event, error } = await supabase
-        .from("events")
-        .insert({
-          id: eventId, // Include the generated UUID
-          title: formData.title,
-          description: formData.description,
-          date: new Date(formData.date).toISOString(),
-          time: formData.time,
-          location: formData.location,
-          image_url: formData.image,
-          user_id: user.id,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      toast.success("Event created successfully!");
-      setIsCreateDialogOpen(false);
-      setFormData({
-        title: "",
-        description: "",
-        date: "",
-        time: "",
-        location: "",
-        image: null,
-      });
-    } catch (error) {
-      console.error("Error creating event:", error);
-      toast.error("Failed to create event. Please try again.");
-    } finally {
-      setIsCreating(false);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -137,41 +67,7 @@ const Events = () => {
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {SAMPLE_EVENTS.map((event) => (
-                  <Card key={event.id} className="overflow-hidden hover:shadow-lg transition-all duration-300">
-                    <img
-                      src={event.image}
-                      alt={event.title}
-                      className="w-full h-48 object-cover"
-                    />
-                    <div className="p-4">
-                      <h3 className="text-xl font-semibold mb-4">{event.title}</h3>
-                      <div className="space-y-2 mb-4">
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <Calendar className="h-4 w-4 mr-2" />
-                          {event.date}
-                        </div>
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <Clock className="h-4 w-4 mr-2" />
-                          {event.time}
-                        </div>
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <MapPin className="h-4 w-4 mr-2" />
-                          {event.location}
-                        </div>
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <Users2 className="h-4 w-4 mr-2" />
-                          {event.attendees} attending
-                        </div>
-                      </div>
-                      <p className="text-muted-foreground mb-4">{event.description}</p>
-                      <Button 
-                        className="w-full"
-                        onClick={() => handleAttend(event.id)}
-                      >
-                        Attend Event
-                      </Button>
-                    </div>
-                  </Card>
+                  <EventCard key={event.id} {...event} />
                 ))}
               </div>
             </div>
@@ -179,60 +75,10 @@ const Events = () => {
         </div>
       </div>
 
-      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Create New Event</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Input
-                placeholder="Event Title"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Textarea
-                placeholder="Event Description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                type="date"
-                value={formData.date}
-                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-              />
-              <Input
-                type="time"
-                value={formData.time}
-                onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Input
-                placeholder="Location"
-                value={formData.location}
-                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-              />
-            </div>
-            <ImageUpload
-              selectedImage={formData.image}
-              onImageSelect={(image) => setFormData({ ...formData, image })}
-            />
-            <div className="flex justify-end gap-4 pt-4">
-              <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleCreateEvent} disabled={isCreating}>
-                {isCreating ? "Creating..." : "Create Event"}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <CreateEventDialog 
+        isOpen={isCreateDialogOpen}
+        onClose={() => setIsCreateDialogOpen(false)}
+      />
     </div>
   );
 };
