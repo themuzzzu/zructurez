@@ -4,6 +4,7 @@ import { BusinessBasicInfo } from "./business-form/BusinessBasicInfo";
 import { BusinessPricing } from "./business-form/BusinessPricing";
 import { BusinessContactInfo } from "./business-form/BusinessContactInfo";
 import { BusinessProfileInfo } from "./business-form/BusinessProfileInfo";
+import { BusinessMembershipPlans } from "./business-form/BusinessMembershipPlans";
 import { Label } from "./ui/label";
 import { useBusinessForm } from "./business-form/useBusinessForm";
 import type { FormProps } from "./business-form/types/form";
@@ -114,6 +115,10 @@ export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: FormPro
           <BusinessProfileInfo formData={formData} onChange={handleChange} />
           <BusinessPricing formData={formData} onChange={handleChange} />
           <BusinessContactInfo formData={formData} onChange={handleChange} />
+          <BusinessMembershipPlans
+            plans={formData.membership_plans || []}
+            onChange={(plans) => handleChange("membership_plans", plans)}
+          />
         </div>
 
         <div className="space-y-4 border-t pt-6">

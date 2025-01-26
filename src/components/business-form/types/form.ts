@@ -1,4 +1,5 @@
 import type { StaffMember, BusinessOwner } from "../../../types/business";
+import type { MembershipPlan } from "@/types/membership";
 
 interface BusinessProduct {
   name: string;
@@ -22,6 +23,7 @@ export interface BusinessFormData {
   owners: BusinessOwner[];
   staff_details: StaffMember[];
   business_products: BusinessProduct[];
+  membership_plans: MembershipPlan[];
 }
 
 export interface FormProps {
