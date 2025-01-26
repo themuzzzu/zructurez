@@ -82,9 +82,6 @@ const Profile = () => {
               </TabsList>
 
               <TabsContent value="posts">
-                <div className="flex justify-end mb-4">
-                  <Button variant="default">Create Post</Button>
-                </div>
                 <PostsTab />
               </TabsContent>
 
