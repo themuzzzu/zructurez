@@ -7,7 +7,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { PostsTab } from "@/components/profile/PostsTab";
 import { ServicesTab } from "@/components/profile/ServicesTab";
 import { BusinessesTab } from "@/components/profile/BusinessesTab";
-import { LikedBusinessesTab } from "@/components/profile/LikedBusinessesTab";
 import { SubscribedBusinessesTab } from "@/components/profile/SubscribedBusinessesTab";
 
 const Profile = () => {
@@ -60,7 +59,6 @@ const Profile = () => {
                 <TabsTrigger value="posts">Posts</TabsTrigger>
                 <TabsTrigger value="services">Services</TabsTrigger>
                 <TabsTrigger value="businesses">Businesses</TabsTrigger>
-                <TabsTrigger value="liked">Liked Businesses</TabsTrigger>
                 <TabsTrigger value="subscribed">Subscribed Businesses</TabsTrigger>
               </TabsList>
 
@@ -74,10 +72,6 @@ const Profile = () => {
 
               <TabsContent value="businesses">
                 <BusinessesTab />
-              </TabsContent>
-
-              <TabsContent value="liked">
-                <LikedBusinessesTab />
               </TabsContent>
 
               <TabsContent value="subscribed">
