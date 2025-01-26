@@ -35,17 +35,25 @@ export const PostCard = ({
   }, [id]);
 
   return (
-    <div className="flex flex-col p-4 border rounded-lg">
-      {image && <img src={image} alt={content} className="w-full h-48 object-cover rounded-md" />}
-      <div className="flex items-center mt-2">
+    <div className="flex flex-col space-y-4 p-4 border rounded-lg">
+      {image && (
+        <div className="w-full aspect-[16/9] overflow-hidden rounded-lg">
+          <img 
+            src={image} 
+            alt={content} 
+            className="w-full h-full object-cover"
+          />
+        </div>
+      )}
+      <div className="flex items-center">
         <img src={avatar} alt={author} className="w-10 h-10 rounded-full" />
         <div className="ml-2">
           <h3 className="font-semibold">{author}</h3>
           <p className="text-sm text-muted-foreground">{time}</p>
         </div>
       </div>
-      <p className="mt-2">{content}</p>
-      <div className="flex items-center gap-4 mt-2 text-muted-foreground">
+      <p className="text-sm">{content}</p>
+      <div className="flex items-center gap-4 text-sm text-muted-foreground">
         <div className="flex items-center gap-1">
           <Eye className="h-4 w-4" />
           {views}
