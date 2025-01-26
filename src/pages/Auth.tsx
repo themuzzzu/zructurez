@@ -11,6 +11,9 @@ const Auth = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Clear any existing session data on mount
+    localStorage.removeItem('supabase.auth.token');
+    
     // Check current session on mount
     const checkSession = async () => {
       try {
