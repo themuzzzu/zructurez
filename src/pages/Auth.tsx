@@ -34,7 +34,7 @@ const Auth = () => {
       }
     };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
       console.log('Auth state changed:', event, session);
       
       if (event === 'SIGNED_IN' && session) {
@@ -49,23 +49,10 @@ const Auth = () => {
       }
     });
 
-    // Handle auth errors through the error listener
-    const { data: { subscription: errorSubscription } } = supabase.auth.onError((error) => {
-      console.error('Auth error:', error);
-      if (error.message.includes('email_not_confirmed')) {
-        toast.error('Please check your email to confirm your account');
-      } else if (error.message.includes('Email not confirmed')) {
-        toast.error('Please confirm your email before signing in');
-      } else {
-        toast.error(error.message);
-      }
-    });
-
     checkSession();
 
     return () => {
       subscription.unsubscribe();
-      errorSubscription.unsubscribe();
     };
   }, [navigate]);
 
