@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Cart } from "./cart/Cart";
 import { ProfileHeader } from "./profile/ProfileHeader";
 import { ProfileAvatar } from "./profile/ProfileAvatar";
@@ -13,6 +13,7 @@ import { useProfile } from "@/hooks/useProfile";
 
 export const ProfileView = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const { profile, loading, setProfile, fetchProfile, updateProfile } = useProfile();
 
@@ -26,7 +27,11 @@ export const ProfileView = () => {
   const handleSignOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
-      toast.error('Error signing out');
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Error signing out"
+      });
     } else {
       navigate('/auth');
     }
