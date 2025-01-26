@@ -73,41 +73,41 @@ export type Database = {
       }
       appointments: {
         Row: {
-          id: string;
-          business_id: string;
-          user_id: string;
-          appointment_date: string;
-          status: string;
-          service_name: string;
-          cost: number;
-          notes: string | null;
-          created_at: string;
-          token: string | null;
-        };
+          appointment_date: string
+          business_id: string
+          cost: number
+          created_at: string
+          id: string
+          notes: string | null
+          service_name: string
+          status: string
+          token: string | null
+          user_id: string
+        }
         Insert: {
-          id?: string;
-          business_id: string;
-          user_id: string;
-          appointment_date: string;
-          status?: string;
-          service_name: string;
-          cost: number;
-          notes?: string | null;
-          created_at?: string;
-          token?: string | null;
-        };
+          appointment_date: string
+          business_id: string
+          cost: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          service_name: string
+          status?: string
+          token?: string | null
+          user_id: string
+        }
         Update: {
-          id?: string;
-          business_id?: string;
-          user_id?: string;
-          appointment_date?: string;
-          status?: string;
-          service_name?: string;
-          cost?: number;
-          notes?: string | null;
-          created_at?: string;
-          token?: string | null;
-        };
+          appointment_date?: string
+          business_id?: string
+          cost?: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          service_name?: string
+          status?: string
+          token?: string | null
+          user_id?: string
+        }
         Relationships: []
       }
       business_booking_messages: {
@@ -522,7 +522,7 @@ export type Database = {
           created_at?: string
           date: string
           description: string
-          id: string
+          id?: string
           image_url?: string | null
           location: string
           time: string
@@ -627,7 +627,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           name?: string
-          user_id: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -885,7 +885,7 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string
-          product_id: string
+          product_id?: string
         }
         Relationships: [
           {
@@ -940,7 +940,7 @@ export type Database = {
           reach?: number | null
           service_product_id?: string | null
           size?: string | null
-          stock: number
+          stock?: number
           subcategory?: string | null
           title: string
           user_id?: string | null
@@ -1001,7 +1001,7 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
-          id: string
+          id?: string
           location?: string | null
           username?: string | null
         }
@@ -1033,7 +1033,7 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
-          service_id: string
+          service_id?: string
           title?: string
           video_url?: string | null
           views?: number | null
@@ -1065,7 +1065,7 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string
-          service_product_id: string
+          service_product_id?: string
         }
         Relationships: [
           {
@@ -1105,7 +1105,7 @@ export type Database = {
           image_url?: string | null
           name?: string
           price?: number
-          service_id: string
+          service_id?: string
           stock?: number | null
         }
         Relationships: [
@@ -1157,9 +1157,9 @@ export type Database = {
           image_url?: string | null
           is_open?: boolean | null
           location?: string | null
-          price: number
+          price?: number
           title?: string
-          user_id: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -1265,7 +1265,7 @@ export type Tables<
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
         Database[PublicTableNameOrOptions["schema"]]["Views"])
-    : never,
+    : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
       Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
@@ -1277,10 +1277,10 @@ export type Tables<
         PublicSchema["Views"])
     ? (PublicSchema["Tables"] &
         PublicSchema["Views"])[PublicTableNameOrOptions] extends {
-      Row: infer R
-    }
-    ? R
-    : never
+        Row: infer R
+      }
+      ? R
+      : never
     : never
 
 export type TablesInsert<
@@ -1298,10 +1298,10 @@ export type TablesInsert<
     : never
   : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
     ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
-      Insert: infer I
-    }
-    ? I
-    : never
+        Insert: infer I
+      }
+      ? I
+      : never
     : never
 
 export type TablesUpdate<
@@ -1319,10 +1319,10 @@ export type TablesUpdate<
     : never
   : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
     ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
-      Update: infer U
-    }
-    ? U
-    : never
+        Update: infer U
+      }
+      ? U
+      : never
     : never
 
 export type Enums<

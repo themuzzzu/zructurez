@@ -69,23 +69,26 @@ const Events = () => {
 
     setIsCreating(true);
     try {
-      // Get the current user
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       
       if (userError || !user) {
         throw new Error("User not authenticated");
       }
 
+      // Generate a UUID for the event
+      const eventId = crypto.randomUUID();
+
       const { data: event, error } = await supabase
         .from("events")
         .insert({
+          id: eventId, // Include the generated UUID
           title: formData.title,
           description: formData.description,
           date: new Date(formData.date).toISOString(),
           time: formData.time,
           location: formData.location,
           image_url: formData.image,
-          user_id: user.id, // Add the user_id here
+          user_id: user.id,
         })
         .select()
         .single();
