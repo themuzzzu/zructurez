@@ -1,14 +1,16 @@
-import { Star, MapPin, Clock, Phone, Share2, MessageSquare, ChevronDown, Heart } from "lucide-react";
-import { Button } from "./ui/button";
-import { Card } from "./ui/card";
-import { Badge } from "./ui/badge";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { useState } from "react";
-import { BookAppointmentDialog } from "./BookAppointmentDialog";
-import { AspectRatio } from "./ui/aspect-ratio";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Card } from "./ui/card";
+import { AspectRatio } from "./ui/aspect-ratio";
+import { BookAppointmentDialog } from "./BookAppointmentDialog";
+import { BusinessCardHeader } from "./business/BusinessCardHeader";
+import { BusinessCardRating } from "./business/BusinessCardRating";
+import { BusinessCardDescription } from "./business/BusinessCardDescription";
+import { BusinessCardInfo } from "./business/BusinessCardInfo";
+import { BusinessCardActions } from "./business/BusinessCardActions";
 
 interface BusinessCardProps {
   id: string;
@@ -53,7 +55,6 @@ export const BusinessCard = ({
   const [showBooking, setShowBooking] = useState(false);
   const queryClient = useQueryClient();
 
-  // Query to check if the user has liked this business
   const { data: isLiked } = useQuery({
     queryKey: ['business-like', id],
     queryFn: async () => {
@@ -71,7 +72,6 @@ export const BusinessCard = ({
     }
   });
 
-  // Query to get the total number of likes
   const { data: likesCount = 0 } = useQuery({
     queryKey: ['business-likes-count', id],
     queryFn: async () => {
@@ -84,7 +84,6 @@ export const BusinessCard = ({
     }
   });
 
-  // Mutation to handle liking/unliking
   const { mutate: toggleLike } = useMutation({
     mutationFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -147,24 +146,6 @@ export const BusinessCard = ({
     window.open(whatsappUrl, '_blank');
   };
 
-  const getReasonLabel = (reason?: string) => {
-    if (!reason) return '';
-    switch (reason) {
-      case 'food_break':
-        return 'Food Break';
-      case 'sick':
-        return 'Sick Leave';
-      case 'holiday':
-        return 'Holiday';
-      case 'next_day':
-        return 'Available Next Day';
-      case 'other':
-        return 'Other';
-      default:
-        return '';
-    }
-  };
-
   return (
     <>
       <Card 
@@ -180,156 +161,49 @@ export const BusinessCard = ({
         </AspectRatio>
         
         <div className="p-4 space-y-4">
-          <div className="space-y-2">
-            <div className="relative">
-              <h3 className="font-semibold text-xl pr-8">{name}</h3>
-              {name.length > 25 && (
-                <div className="absolute top-1/2 right-0 -translate-y-1/2 bg-gradient-to-l from-black/95 to-transparent px-2">
-                  <ChevronDown className="h-4 w-4 text-gray-400" />
-                </div>
-              )}
-            </div>
-            
-            <div className="flex flex-col gap-1">
-              <span className="text-sm text-gray-300">{category}</span>
-              <div className="flex items-center gap-2">
-                {typeof is_open === 'boolean' && (
-                  <Badge 
-                    variant={is_open ? "success" : "destructive"}
-                    className="text-xs px-2 py-0.5"
-                  >
-                    {is_open ? "Open" : "Closed"}
-                  </Badge>
-                )}
-                {verified && (
-                  <Badge variant="outline" className="text-xs px-2 py-0.5">
-                    Verified
-                  </Badge>
-                )}
-              </div>
-              {!is_open && wait_time && (
-                <div className="flex items-center gap-2 text-sm text-gray-300">
-                  <Clock className="h-4 w-4" />
-                  <span>Available in {wait_time}</span>
-                  {closure_reason && (
-                    <span className="text-gray-400">({getReasonLabel(closure_reason)})</span>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
+          <BusinessCardHeader
+            name={name}
+            category={category}
+            is_open={is_open}
+            verified={verified}
+            wait_time={wait_time}
+            closure_reason={closure_reason}
+          />
+          
+          <BusinessCardRating
+            rating={rating}
+            reviews={reviews}
+            isLiked={isLiked || false}
+            likesCount={likesCount}
+            onLikeClick={(e) => {
+              e.stopPropagation();
+              toggleLike();
+            }}
+          />
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1 text-sm text-yellow-400">
-              <Star className="h-4 w-4 fill-current" />
-              <span>{rating}</span>
-              <span className="text-gray-400">({reviews} reviews)</span>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className={`p-0 hover:bg-transparent ${isLiked ? 'text-red-500' : 'text-gray-400'}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleLike();
-              }}
-            >
-              <Heart className={`h-5 w-5 ${isLiked ? 'fill-current' : ''}`} />
-              <span className="ml-1 text-sm">{likesCount}</span>
-            </Button>
-          </div>
+          <BusinessCardDescription description={description} />
 
-          <div className="relative">
-            <p className="text-sm text-gray-300 line-clamp-3 mb-2">{description}</p>
-            {description.length > 150 && (
-              <div className="absolute bottom-0 right-0 bg-gradient-to-l from-black/95 to-transparent px-2">
-                <ChevronDown className="h-4 w-4 text-gray-400" />
-              </div>
-            )}
-          </div>
+          <BusinessCardInfo
+            location={location}
+            hours={hours}
+            appointment_price={appointment_price}
+            consultation_price={consultation_price}
+          />
 
-          <div className="space-y-2">
-            <div className="flex items-start gap-2 text-sm text-gray-300">
-              <MapPin className="h-4 w-4 shrink-0 mt-1" />
-              <div className="flex-1 relative">
-                <span className="inline-block pr-6">{location}</span>
-                {location.length > 35 && (
-                  <div className="absolute top-0 right-0 bg-gradient-to-l from-black/95 to-transparent px-2">
-                    <ChevronDown className="h-4 w-4 text-gray-400" />
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="flex items-start gap-2 text-sm text-gray-300">
-              <Clock className="h-4 w-4 shrink-0 mt-1" />
-              <div className="flex-1 relative">
-                <span className="inline-block pr-6">{hours}</span>
-                {hours.length > 35 && (
-                  <div className="absolute top-0 right-0 bg-gradient-to-l from-black/95 to-transparent px-2">
-                    <ChevronDown className="h-4 w-4 text-gray-400" />
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {(appointment_price || consultation_price) && (
-            <div className="space-y-1 text-sm text-gray-300">
-              {appointment_price && (
-                <div>
-                  <span className="font-medium">Appointment:</span> ₹{appointment_price}
-                </div>
-              )}
-              {consultation_price && (
-                <div>
-                  <span className="font-medium">Consultation:</span> ₹{consultation_price}
-                </div>
-              )}
-            </div>
-          )}
-
-          <div className="grid grid-cols-2 gap-2 pt-2">
-            {appointment_price && (
-              <Button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowBooking(true);
-                }}
-                className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700"
-                variant="default"
-                disabled={!is_open}
-              >
-                Book Now
-              </Button>
-            )}
-            <Button 
-              onClick={handleWhatsApp}
-              className={`w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 ${!appointment_price ? 'col-span-2' : ''}`}
-              variant="default"
-            >
-              <MessageSquare className="h-4 w-4" />
-              Message
-            </Button>
-            <Button
-              onClick={handleShare}
-              variant="outline"
-              className="w-full flex items-center justify-center gap-2 border-gray-700 hover:bg-gray-800"
-            >
-              <Share2 className="h-4 w-4" />
-              Share
-            </Button>
-            <Button 
-              onClick={(e) => {
-                e.stopPropagation();
-                window.location.href = `tel:${contact}`;
-              }} 
-              variant="outline"
-              className="w-full col-span-2 flex items-center justify-center gap-2 border-gray-700 hover:bg-gray-800"
-            >
-              <Phone className="h-4 w-4" />
-              Call
-            </Button>
-          </div>
+          <BusinessCardActions
+            appointment_price={appointment_price}
+            onBookClick={(e) => {
+              e.stopPropagation();
+              setShowBooking(true);
+            }}
+            onWhatsAppClick={handleWhatsApp}
+            onShareClick={handleShare}
+            onCallClick={(e) => {
+              e.stopPropagation();
+              window.location.href = `tel:${contact}`;
+            }}
+            is_open={is_open}
+          />
         </div>
       </Card>
 
