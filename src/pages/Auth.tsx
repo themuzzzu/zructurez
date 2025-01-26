@@ -16,7 +16,9 @@ const Auth = () => {
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error) {
           console.error('Session check error:', error);
-          if (error.message.includes('invalid_credentials')) {
+          if (error.message.includes('email_not_confirmed')) {
+            toast.error('Please check your email and confirm your account before signing in.');
+          } else if (error.message.includes('invalid_credentials')) {
             toast.error('Invalid email or password. Please try again.');
           } else {
             toast.error('Error checking authentication status');
@@ -39,6 +41,8 @@ const Auth = () => {
         toast.success('Your profile has been updated');
       } else if (event === 'PASSWORD_RECOVERY') {
         toast.info('Please check your email for password reset instructions');
+      } else if (event === 'EMAIL_CONFIRMATION_REQUIRED') {
+        toast.info('Please check your email to confirm your account');
       }
     });
 
