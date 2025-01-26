@@ -13,12 +13,12 @@ const Auth = () => {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (error) {
-          console.error('Session check error:', error);
-          if (error.message.includes('email_not_confirmed')) {
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) {
+          console.error('Session check error:', sessionError);
+          if (sessionError.message.includes('email_not_confirmed')) {
             toast.error('Please check your email and confirm your account before signing in.');
-          } else if (error.message.includes('invalid_credentials')) {
+          } else if (sessionError.message.includes('invalid_credentials')) {
             toast.error('Invalid email or password. Please try again.');
           } else {
             toast.error('Error checking authentication status');
@@ -49,10 +49,22 @@ const Auth = () => {
       }
     });
 
+    // Handle auth errors through the error listener
+    const { data: { subscription: errorSubscription } } = supabase.auth.onError((error) => {
+      console.error('Auth error:', error);
+      const errorMessage = error.message;
+      if (errorMessage.includes('email_not_confirmed') || errorMessage.includes('Email not confirmed')) {
+        toast.error('Please check your email to confirm your account before signing in');
+      } else {
+        toast.error(errorMessage || 'An authentication error occurred');
+      }
+    });
+
     checkSession();
 
     return () => {
       subscription.unsubscribe();
+      errorSubscription.unsubscribe();
     };
   }, [navigate]);
 
