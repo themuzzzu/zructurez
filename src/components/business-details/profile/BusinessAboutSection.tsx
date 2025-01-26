@@ -5,6 +5,7 @@ import { MapPin, Clock, Phone, Mail, Globe, Calendar } from "lucide-react";
 import { CommentSection } from "@/components/CommentSection";
 
 interface BusinessAboutSectionProps {
+  businessId: string;
   description: string;
   location?: string;
   hours?: string;
@@ -16,6 +17,7 @@ interface BusinessAboutSectionProps {
 }
 
 export const BusinessAboutSection = ({
+  businessId,
   description,
   location,
   hours,
@@ -93,7 +95,7 @@ export const BusinessAboutSection = ({
 
       <div className="border-t pt-6 mt-6">
         <h3 className="text-lg font-semibold mb-4">Comments & Reviews</h3>
-        <CommentSection postId="business-about" />
+        <CommentSection postId={businessId} />
       </div>
     </Card>
   );

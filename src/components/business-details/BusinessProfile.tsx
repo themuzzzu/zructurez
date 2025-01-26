@@ -57,6 +57,7 @@ export const BusinessProfile = ({
       <BusinessAdvertisements businessId={id} />
       
       <BusinessAboutSection
+        businessId={id}
         description={description}
         location={location}
         hours={hours}
