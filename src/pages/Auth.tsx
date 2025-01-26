@@ -26,12 +26,17 @@ const Auth = () => {
         } else if (session) {
           navigate('/');
         }
+      } catch (error) {
+        console.error('Error:', error);
+        toast.error('An unexpected error occurred');
       } finally {
         setLoading(false);
       }
     };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null, error?: Error) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
+      console.log('Auth state changed:', event, session);
+      
       if (event === 'SIGNED_IN' && session) {
         toast.success('Successfully signed in!');
         navigate('/');
@@ -42,10 +47,17 @@ const Auth = () => {
       } else if (event === 'PASSWORD_RECOVERY') {
         toast.info('Please check your email for password reset instructions');
       }
+    });
 
-      // Handle email confirmation error
-      if (error?.message?.includes('email_not_confirmed')) {
-        toast.info('Please check your email to confirm your account');
+    // Handle auth errors through the error listener
+    const { data: { subscription: errorSubscription } } = supabase.auth.onError((error) => {
+      console.error('Auth error:', error);
+      if (error.message.includes('email_not_confirmed')) {
+        toast.error('Please check your email to confirm your account');
+      } else if (error.message.includes('Email not confirmed')) {
+        toast.error('Please confirm your email before signing in');
+      } else {
+        toast.error(error.message);
       }
     });
 
@@ -53,6 +65,7 @@ const Auth = () => {
 
     return () => {
       subscription.unsubscribe();
+      errorSubscription.unsubscribe();
     };
   }, [navigate]);
 
