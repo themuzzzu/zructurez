@@ -88,14 +88,6 @@ const Auth = () => {
             }}
             providers={[]}
             redirectTo={`${window.location.origin}/auth/callback`}
-            onError={(error) => {
-              console.error('Auth error:', error);
-              if (error.message.includes('invalid_credentials')) {
-                toast.error('Invalid email or password');
-              } else {
-                toast.error('Authentication error occurred');
-              }
-            }}
           />
         </div>
       </div>
