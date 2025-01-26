@@ -157,6 +157,7 @@ export type Database = {
           id: string
           profile_id: string
           rating: number | null
+          reply_to: string | null
           user_id: string
         }
         Insert: {
@@ -166,6 +167,7 @@ export type Database = {
           id?: string
           profile_id: string
           rating?: number | null
+          reply_to?: string | null
           user_id: string
         }
         Update: {
@@ -175,6 +177,7 @@ export type Database = {
           id?: string
           profile_id?: string
           rating?: number | null
+          reply_to?: string | null
           user_id?: string
         }
         Relationships: [
@@ -190,6 +193,13 @@ export type Database = {
             columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_comments_reply_to_fkey"
+            columns: ["reply_to"]
+            isOneToOne: false
+            referencedRelation: "business_comments"
             referencedColumns: ["id"]
           },
         ]
