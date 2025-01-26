@@ -24,7 +24,11 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         
         if (error) {
           console.error('Session error:', error);
-          toast.error('Authentication error. Please sign in again.');
+          if (error.message.includes('invalid_credentials')) {
+            toast.error('Invalid login credentials. Please sign in again.');
+          } else {
+            toast.error('Authentication error. Please sign in again.');
+          }
           if (mounted) {
             setIsAuthenticated(false);
             setIsLoading(false);
