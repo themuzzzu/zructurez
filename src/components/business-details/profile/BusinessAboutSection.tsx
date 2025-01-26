@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MapPin, Clock, Phone, Mail, Globe, Calendar } from "lucide-react";
-import { CommentSection } from "@/components/CommentSection";
+import { BusinessCommentSection } from "../comments/BusinessCommentSection";
 
 interface BusinessAboutSectionProps {
   businessId: string;
@@ -95,7 +95,7 @@ export const BusinessAboutSection = ({
 
       <div className="border-t pt-6 mt-6">
         <h3 className="text-lg font-semibold mb-4">Comments & Reviews</h3>
-        <CommentSection postId={businessId} />
+        <BusinessCommentSection businessId={businessId} />
       </div>
     </Card>
   );

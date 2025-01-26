@@ -6,6 +6,9 @@ import { ScrollArea } from "./ui/scroll-area";
 import { AppointmentForm } from "./appointments/AppointmentForm";
 import { generateQRCode } from "./appointments/QRCodeGenerator";
 import { getOrCreateBookingMessage, formatBookingMessage } from "./appointments/BookingMessageService";
+import { Star } from "lucide-react";
+import { Button } from "./ui/button";
+import { Textarea } from "./ui/textarea";
 
 interface BookAppointmentDialogProps {
   businessId: string;
@@ -25,6 +28,9 @@ export const BookAppointmentDialog = ({
   onClose
 }: BookAppointmentDialogProps) => {
   const [loading, setLoading] = useState(false);
+  const [showRating, setShowRating] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [review, setReview] = useState("");
 
   const generateToken = () => {
     return Math.random().toString(36).substr(2, 8).toUpperCase();
@@ -94,7 +100,7 @@ export const BookAppointmentDialog = ({
       }
 
       toast.success("Appointment booked successfully!");
-      onClose();
+      setShowRating(true);
     } catch (error) {
       console.error("Error booking appointment:", error);
       toast.error("Failed to book appointment. Please try again.");
@@ -103,22 +109,94 @@ export const BookAppointmentDialog = ({
     }
   };
 
+  const handleRatingSubmit = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', user.id)
+        .single();
+
+      if (!profile) return;
+
+      await supabase
+        .from('business_comments')
+        .insert({
+          business_id: businessId,
+          user_id: user.id,
+          profile_id: profile.id,
+          content: review,
+          rating: rating
+        });
+
+      toast.success("Thank you for your review!");
+      setShowRating(false);
+      onClose();
+    } catch (error) {
+      console.error("Error submitting review:", error);
+      toast.error("Failed to submit review");
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px] h-[90vh]">
-        <DialogHeader>
-          <DialogTitle>Book Appointment</DialogTitle>
-          <DialogDescription>
-            Book an appointment with {businessName} for {serviceName}
-          </DialogDescription>
-        </DialogHeader>
-        <ScrollArea className="h-full max-h-[calc(90vh-8rem)] pr-4">
-          <AppointmentForm
-            onSubmit={handleSubmit}
-            onCancel={onClose}
-            loading={loading}
-          />
-        </ScrollArea>
+        {!showRating ? (
+          <>
+            <DialogHeader>
+              <DialogTitle>Book Appointment</DialogTitle>
+              <DialogDescription>
+                Book an appointment with {businessName} for {serviceName}
+              </DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="h-full max-h-[calc(90vh-8rem)] pr-4">
+              <AppointmentForm
+                onSubmit={handleSubmit}
+                onCancel={onClose}
+                loading={loading}
+              />
+            </ScrollArea>
+          </>
+        ) : (
+          <>
+            <DialogHeader>
+              <DialogTitle>Rate Your Experience</DialogTitle>
+              <DialogDescription>
+                How would you rate your experience with {businessName}?
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star
+                    key={star}
+                    className={`h-6 w-6 cursor-pointer ${
+                      star <= rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+                    }`}
+                    onClick={() => setRating(star)}
+                  />
+                ))}
+              </div>
+              <Textarea
+                value={review}
+                onChange={(e) => setReview(e.target.value)}
+                placeholder="Write a review (optional)"
+                className="min-h-[100px]"
+              />
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={onClose}>
+                  Skip
+                </Button>
+                <Button onClick={handleRatingSubmit} disabled={!rating}>
+                  Submit Review
+                </Button>
+              </div>
+            </div>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );

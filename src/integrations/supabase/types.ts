@@ -149,6 +149,51 @@ export type Database = {
           },
         ]
       }
+      business_comments: {
+        Row: {
+          business_id: string
+          content: string
+          created_at: string
+          id: string
+          profile_id: string
+          rating: number | null
+          user_id: string
+        }
+        Insert: {
+          business_id: string
+          content: string
+          created_at?: string
+          id?: string
+          profile_id: string
+          rating?: number | null
+          user_id: string
+        }
+        Update: {
+          business_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          profile_id?: string
+          rating?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_comments_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_comments_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_likes: {
         Row: {
           business_id: string
