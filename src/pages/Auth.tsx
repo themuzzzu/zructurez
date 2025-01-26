@@ -69,6 +69,10 @@ const Auth = () => {
                   colors: {
                     brand: '#e31837',
                     brandAccent: '#b31528',
+                    inputText: 'white',
+                    inputPlaceholder: 'rgba(255, 255, 255, 0.6)',
+                    inputBackground: 'rgb(23, 23, 23)',
+                    inputBorder: 'rgb(55, 55, 55)',
                   }
                 }
               },
@@ -82,10 +86,17 @@ const Auth = () => {
                 },
                 input: {
                   borderRadius: '6px',
+                  color: 'white',
+                  '&::placeholder': {
+                    color: 'rgba(255, 255, 255, 0.6)',
+                  },
                 },
                 anchor: {
                   color: '#e31837',
                 },
+                label: {
+                  color: 'white',
+                }
               }
             }}
             localization={{
