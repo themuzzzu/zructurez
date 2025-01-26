@@ -41,7 +41,10 @@ const Auth = () => {
         toast.success('Your profile has been updated');
       } else if (event === 'PASSWORD_RECOVERY') {
         toast.info('Please check your email for password reset instructions');
-      } else if (event === 'EMAIL_CONFIRMATION_REQUIRED') {
+      }
+
+      // Handle email confirmation separately through error messages
+      if (error?.message?.includes('email_not_confirmed')) {
         toast.info('Please check your email to confirm your account');
       }
     });
