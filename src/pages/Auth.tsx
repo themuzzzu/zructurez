@@ -31,9 +31,14 @@ const Auth = () => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
       if (event === 'SIGNED_IN' && session) {
+        toast.success('Successfully signed in!');
         navigate('/');
       } else if (event === 'SIGNED_OUT') {
         toast.error('You have been signed out');
+      } else if (event === 'USER_UPDATED') {
+        toast.success('Your profile has been updated');
+      } else if (event === 'PASSWORD_RECOVERY') {
+        toast.info('Please check your email for password reset instructions');
       }
     });
 
