@@ -20,15 +20,11 @@ const Auth = () => {
         } else if (session) {
           navigate('/');
         }
-      } catch (error) {
-        console.error('Session check error:', error);
-        toast.error('Error checking authentication status');
       } finally {
         setLoading(false);
       }
     };
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
       if (event === 'SIGNED_IN' && session) {
         navigate('/');

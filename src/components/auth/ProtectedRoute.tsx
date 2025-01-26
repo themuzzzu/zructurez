@@ -42,8 +42,9 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         if (mounted) {
           setIsAuthenticated(false);
           setIsLoading(false);
-          toast.error('Error checking authentication status');
         }
+        toast.error('Error checking authentication status');
+        navigate('/auth');
       }
     };
 
