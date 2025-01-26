@@ -22,13 +22,30 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 import { Cart } from "./cart/Cart";
 import { NotificationList } from "./notifications/NotificationList";
-import { useQuery } from "@tanstack/react-query";
 import { SearchBox } from "./search/SearchBox";
+import { useQuery } from "@tanstack/react-query";
 
 export const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const isHomePage = location.pathname === "/";
+
+  const { data: profile } = useQuery({
+    queryKey: ['profile'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const { data: cartItemCount = 0 } = useQuery({
     queryKey: ['cartCount'],
@@ -94,7 +111,9 @@ export const Navbar = () => {
               <Sidebar className="w-full" />
             </SheetContent>
           </Sheet>
-          <h1 className="text-xl font-bold text-primary">Zructures</h1>
+          <h1 className="text-xl font-bold text-primary">
+            {profile?.name || 'Welcome'}
+          </h1>
         </div>
 
         {isHomePage && (
@@ -154,11 +173,11 @@ export const Navbar = () => {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="flex gap-2 transition-all duration-300 hover:bg-accent/80">
                 <img 
-                  src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" 
+                  src={profile?.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"} 
                   alt="avatar" 
                   className="h-6 w-6 rounded-full transition-transform duration-300 hover:scale-110" 
                 />
-                <span className="text-sm hidden sm:inline">Felix</span>
+                <span className="text-sm hidden sm:inline">{profile?.username || 'User'}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
