@@ -2,7 +2,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
 import { LocationSelector } from "../LocationSelector";
 
 interface ProfileFormProps {
@@ -14,9 +13,7 @@ interface ProfileFormProps {
   };
   isEditing: boolean;
   loading: boolean;
-  disappearingMessages: boolean;
   onProfileChange: (field: string, value: string) => void;
-  onDisappearingMessagesChange: (enabled: boolean) => void;
   onSave: () => void;
 }
 
@@ -24,9 +21,7 @@ export const ProfileForm = ({
   profile,
   isEditing,
   loading,
-  disappearingMessages,
   onProfileChange,
-  onDisappearingMessagesChange,
   onSave,
 }: ProfileFormProps) => {
   return (
@@ -81,22 +76,6 @@ export const ProfileForm = ({
           />
         )}
       </div>
-
-      <div className="flex items-center justify-between space-x-2">
-        <Label htmlFor="disappearing-messages" className="text-sm font-medium">
-          Disappearing messages
-        </Label>
-        <Switch
-          id="disappearing-messages"
-          checked={disappearingMessages}
-          onCheckedChange={onDisappearingMessagesChange}
-        />
-      </div>
-      {disappearingMessages && (
-        <p className="text-sm text-muted-foreground">
-          Messages will disappear after 24 hours
-        </p>
-      )}
 
       {isEditing && (
         <div className="flex justify-end gap-4">
