@@ -116,7 +116,15 @@ export const ProfileView = () => {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">Profile</CardTitle>
+          <div className="flex justify-between items-center">
+            <CardTitle className="text-2xl font-bold">Profile</CardTitle>
+            <Button 
+              variant={isEditing ? "ghost" : "outline"} 
+              onClick={() => setIsEditing(!isEditing)}
+            >
+              {isEditing ? "Cancel" : "Edit Profile"}
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex flex-col items-center gap-4">
@@ -205,26 +213,13 @@ export const ProfileView = () => {
               </p>
             )}
 
-            <div className="flex justify-end gap-4">
-              {isEditing ? (
-                <>
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setIsEditing(false);
-                      fetchProfile();
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                  <Button onClick={updateProfile} disabled={loading}>
-                    {loading ? "Saving..." : "Save Changes"}
-                  </Button>
-                </>
-              ) : (
-                <Button onClick={() => setIsEditing(true)}>Edit Profile</Button>
-              )}
-            </div>
+            {isEditing && (
+              <div className="flex justify-end gap-4">
+                <Button onClick={updateProfile} disabled={loading}>
+                  {loading ? "Saving..." : "Save Changes"}
+                </Button>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
