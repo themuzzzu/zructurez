@@ -2,24 +2,53 @@ import { Auth as SupabaseAuth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { AuthChangeEvent, Session } from "@supabase/supabase-js";
+import { toast } from "sonner";
 
 const Auth = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
-      switch (event) {
-        case 'SIGNED_IN':
-          if (session) navigate('/');
-          break;
-        case 'SIGNED_OUT':
-          navigate('/auth');
-          break;
+    // Check current session on mount
+    const checkSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          navigate('/');
+        }
+      } catch (error) {
+        console.error('Session check error:', error);
+        toast.error('Error checking authentication status');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkSession();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
+      if (event === 'SIGNED_IN' && session) {
+        navigate('/');
+      } else if (event === 'SIGNED_OUT') {
+        navigate('/auth');
       }
     });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
