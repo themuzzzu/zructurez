@@ -46,17 +46,8 @@ const Auth = () => {
         toast.success('Your profile has been updated');
       } else if (event === 'PASSWORD_RECOVERY') {
         toast.info('Please check your email for password reset instructions');
-      }
-    });
-
-    // Handle auth errors through the error listener
-    const { data: { subscription: errorSubscription } } = supabase.auth.onError((error) => {
-      console.error('Auth error:', error);
-      const errorMessage = error.message;
-      if (errorMessage.includes('email_not_confirmed') || errorMessage.includes('Email not confirmed')) {
-        toast.error('Please check your email to confirm your account before signing in');
-      } else {
-        toast.error(errorMessage || 'An authentication error occurred');
+      } else if (event === 'USER_DELETED') {
+        toast.error('Your account has been deleted');
       }
     });
 
@@ -64,7 +55,6 @@ const Auth = () => {
 
     return () => {
       subscription.unsubscribe();
-      errorSubscription.unsubscribe();
     };
   }, [navigate]);
 
