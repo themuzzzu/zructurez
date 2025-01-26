@@ -1,4 +1,4 @@
-import { Star, MapPin, Clock, Phone, Share2, MessageSquare, ChevronDown } from "lucide-react";
+import { Star, MapPin, Clock, Phone, Share2, MessageSquare, ChevronDown, Heart } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
@@ -7,6 +7,8 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { BookAppointmentDialog } from "./BookAppointmentDialog";
 import { AspectRatio } from "./ui/aspect-ratio";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface BusinessCardProps {
   id: string;
@@ -49,6 +51,75 @@ export const BusinessCard = ({
 }: BusinessCardProps) => {
   const navigate = useNavigate();
   const [showBooking, setShowBooking] = useState(false);
+  const queryClient = useQueryClient();
+
+  // Query to check if the user has liked this business
+  const { data: isLiked } = useQuery({
+    queryKey: ['business-like', id],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return false;
+
+      const { data } = await supabase
+        .from('business_likes')
+        .select('id')
+        .eq('business_id', id)
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      return !!data;
+    }
+  });
+
+  // Query to get the total number of likes
+  const { data: likesCount = 0 } = useQuery({
+    queryKey: ['business-likes-count', id],
+    queryFn: async () => {
+      const { count } = await supabase
+        .from('business_likes')
+        .select('*', { count: 'exact', head: true })
+        .eq('business_id', id);
+      
+      return count || 0;
+    }
+  });
+
+  // Mutation to handle liking/unliking
+  const { mutate: toggleLike } = useMutation({
+    mutationFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('Must be logged in to like businesses');
+      }
+
+      if (isLiked) {
+        const { error } = await supabase
+          .from('business_likes')
+          .delete()
+          .eq('business_id', id)
+          .eq('user_id', user.id);
+
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('business_likes')
+          .insert([
+            { business_id: id, user_id: user.id }
+          ]);
+
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['business-like', id] });
+      queryClient.invalidateQueries({ queryKey: ['business-likes-count', id] });
+      toast.success(isLiked ? 'Business unliked' : 'Business liked');
+    },
+    onError: (error) => {
+      console.error('Error:', error);
+      toast.error('Failed to update like status');
+    }
+  });
 
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -148,60 +219,74 @@ export const BusinessCard = ({
             </div>
           </div>
 
-        <div className="flex items-center gap-1 text-sm text-yellow-400">
-          <Star className="h-4 w-4 fill-current" />
-          <span>{rating}</span>
-          <span className="text-gray-400">({reviews} reviews)</span>
-        </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1 text-sm text-yellow-400">
+              <Star className="h-4 w-4 fill-current" />
+              <span>{rating}</span>
+              <span className="text-gray-400">({reviews} reviews)</span>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className={`p-0 hover:bg-transparent ${isLiked ? 'text-red-500' : 'text-gray-400'}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleLike();
+              }}
+            >
+              <Heart className={`h-5 w-5 ${isLiked ? 'fill-current' : ''}`} />
+              <span className="ml-1 text-sm">{likesCount}</span>
+            </Button>
+          </div>
 
-        <div className="relative">
-          <p className="text-sm text-gray-300 line-clamp-3 mb-2">{description}</p>
-          {description.length > 150 && (
-            <div className="absolute bottom-0 right-0 bg-gradient-to-l from-black/95 to-transparent px-2">
-              <ChevronDown className="h-4 w-4 text-gray-400" />
+          <div className="relative">
+            <p className="text-sm text-gray-300 line-clamp-3 mb-2">{description}</p>
+            {description.length > 150 && (
+              <div className="absolute bottom-0 right-0 bg-gradient-to-l from-black/95 to-transparent px-2">
+                <ChevronDown className="h-4 w-4 text-gray-400" />
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-start gap-2 text-sm text-gray-300">
+              <MapPin className="h-4 w-4 shrink-0 mt-1" />
+              <div className="flex-1 relative">
+                <span className="inline-block pr-6">{location}</span>
+                {location.length > 35 && (
+                  <div className="absolute top-0 right-0 bg-gradient-to-l from-black/95 to-transparent px-2">
+                    <ChevronDown className="h-4 w-4 text-gray-400" />
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="flex items-start gap-2 text-sm text-gray-300">
+              <Clock className="h-4 w-4 shrink-0 mt-1" />
+              <div className="flex-1 relative">
+                <span className="inline-block pr-6">{hours}</span>
+                {hours.length > 35 && (
+                  <div className="absolute top-0 right-0 bg-gradient-to-l from-black/95 to-transparent px-2">
+                    <ChevronDown className="h-4 w-4 text-gray-400" />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {(appointment_price || consultation_price) && (
+            <div className="space-y-1 text-sm text-gray-300">
+              {appointment_price && (
+                <div>
+                  <span className="font-medium">Appointment:</span> ₹{appointment_price}
+                </div>
+              )}
+              {consultation_price && (
+                <div>
+                  <span className="font-medium">Consultation:</span> ₹{consultation_price}
+                </div>
+              )}
             </div>
           )}
-        </div>
-
-        <div className="space-y-2">
-          <div className="flex items-start gap-2 text-sm text-gray-300">
-            <MapPin className="h-4 w-4 shrink-0 mt-1" />
-            <div className="flex-1 relative">
-              <span className="inline-block pr-6">{location}</span>
-              {location.length > 35 && (
-                <div className="absolute top-0 right-0 bg-gradient-to-l from-black/95 to-transparent px-2">
-                  <ChevronDown className="h-4 w-4 text-gray-400" />
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="flex items-start gap-2 text-sm text-gray-300">
-            <Clock className="h-4 w-4 shrink-0 mt-1" />
-            <div className="flex-1 relative">
-              <span className="inline-block pr-6">{hours}</span>
-              {hours.length > 35 && (
-                <div className="absolute top-0 right-0 bg-gradient-to-l from-black/95 to-transparent px-2">
-                  <ChevronDown className="h-4 w-4 text-gray-400" />
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {(appointment_price || consultation_price) && (
-          <div className="space-y-1 text-sm text-gray-300">
-            {appointment_price && (
-              <div>
-                <span className="font-medium">Appointment:</span> ₹{appointment_price}
-              </div>
-            )}
-            {consultation_price && (
-              <div>
-                <span className="font-medium">Consultation:</span> ₹{consultation_price}
-              </div>
-            )}
-          </div>
-        )}
 
           <div className="grid grid-cols-2 gap-2 pt-2">
             {appointment_price && (
