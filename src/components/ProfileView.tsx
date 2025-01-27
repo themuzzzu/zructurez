@@ -21,6 +21,10 @@ export const ProfileView = () => {
     const success = await updateProfile();
     if (success) {
       setIsEditing(false);
+      toast({
+        title: "Success",
+        description: "Profile updated successfully",
+      });
     }
   };
 
