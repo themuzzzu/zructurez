@@ -53,7 +53,7 @@ export const useProfile = () => {
       if (!user) {
         toast.error('No user found');
         navigate('/auth');
-        return;
+        return false;
       }
 
       const updates = {
@@ -73,7 +73,6 @@ export const useProfile = () => {
       if (error) throw error;
       
       toast.success('Profile updated successfully');
-      await fetchProfile();
       return true;
     } catch (error) {
       console.error('Error updating profile:', error);
