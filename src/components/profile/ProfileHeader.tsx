@@ -13,6 +13,7 @@ export const ProfileHeader = ({ isEditing, onEditClick }: ProfileHeaderProps) =>
       <Button 
         variant="outline"
         onClick={onEditClick}
+        className="bg-gray-800 text-white hover:bg-gray-700"
       >
         {isEditing ? "Cancel" : "Edit Profile"}
       </Button>
