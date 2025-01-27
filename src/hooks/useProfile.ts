@@ -26,7 +26,9 @@ export const useProfile = () => {
 
   const fetchProfile = async () => {
     try {
+      setLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
+      
       if (!user) {
         navigate('/auth');
         return;
@@ -36,13 +38,15 @@ export const useProfile = () => {
         .from('profiles')
         .select('*')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       if (data) setProfile(data);
     } catch (error) {
       console.error('Error fetching profile:', error);
       toast.error('Failed to load profile');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -50,6 +54,7 @@ export const useProfile = () => {
     try {
       setLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
+      
       if (!user) {
         toast.error('No user found');
         navigate('/auth');
@@ -71,8 +76,6 @@ export const useProfile = () => {
         .eq('id', user.id);
 
       if (error) throw error;
-      
-      toast.success('Profile updated successfully');
       return true;
     } catch (error) {
       console.error('Error updating profile:', error);
