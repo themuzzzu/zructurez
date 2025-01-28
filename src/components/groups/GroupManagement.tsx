@@ -2,64 +2,96 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { UserPlus, UserMinus, Trash2, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+
+interface Group {
+  id: string;
+  name: string;
+  description: string | null;
+  image_url: string | null;
+  created_at: string;
+}
 
 export const GroupManagement = () => {
+  const [isLoading, setIsLoading] = useState(false);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
 
-  const { data: groups, isLoading } = useQuery({
+  // Query to fetch groups
+  const { data: groups, isError: isGroupsError } = useQuery({
     queryKey: ['groups'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
-
       const { data, error } = await supabase
         .from('groups')
-        .select(`
-          *,
-          group_members!inner (
-            user_id
-          )
-        `);
+        .select('*')
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data || [];
+      return data as Group[];
     },
   });
 
+  // Query to fetch user's group memberships
+  const { data: memberships } = useQuery({
+    queryKey: ['group_memberships', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      
+      const { data, error } = await supabase
+        .from('group_members')
+        .select('group_id')
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+      return data.map(m => m.group_id);
+    },
+    enabled: !!user,
+  });
+
+  // Mutation to join a group
   const joinGroupMutation = useMutation({
     mutationFn: async (groupId: string) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      if (!user) {
+        toast.error("Please sign in to join groups");
+        navigate("/auth");
+        return;
+      }
 
-      const { error } = await supabase
-        .from('group_members')
-        .insert({ group_id: groupId, user_id: user.id });
+      try {
+        const { error } = await supabase
+          .from('group_members')
+          .insert([
+            { group_id: groupId, user_id: user.id }
+          ]);
 
-      if (error) {
-        if (error.code === '23505') {
-          throw new Error('You are already a member of this group');
+        if (error) {
+          if (error.code === '23505') {
+            toast.error("You're already a member of this group");
+            return;
+          }
+          throw error;
         }
+
+        toast.success("Successfully joined the group!");
+      } catch (error) {
+        console.error('Error joining group:', error);
         throw error;
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['groups'] });
-      toast.success('Successfully joined the group!');
+      queryClient.invalidateQueries({ queryKey: ['group_memberships'] });
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to join group');
-    },
+      toast.error(error.message);
+    }
   });
 
+  // Mutation to leave a group
   const leaveGroupMutation = useMutation({
     mutationFn: async (groupId: string) => {
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
       const { error } = await supabase
@@ -71,129 +103,61 @@ export const GroupManagement = () => {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['groups'] });
-      toast.success('Successfully left the group');
+      queryClient.invalidateQueries({ queryKey: ['group_memberships'] });
+      toast.success("Successfully left the group");
     },
-    onError: () => {
-      toast.error('Failed to leave group');
-    },
-  });
-
-  const deleteGroupMutation = useMutation({
-    mutationFn: async (groupId: string) => {
-      const { error } = await supabase
-        .from('groups')
-        .delete()
-        .eq('id', groupId);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['groups'] });
-      toast.success('Group deleted successfully');
-    },
-    onError: () => {
-      toast.error('Failed to delete group');
-    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    }
   });
 
   const handleJoinGroup = async (groupId: string) => {
-    setLoading(true);
+    setIsLoading(true);
     try {
       await joinGroupMutation.mutateAsync(groupId);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   const handleLeaveGroup = async (groupId: string) => {
-    setLoading(true);
+    setIsLoading(true);
     try {
       await leaveGroupMutation.mutateAsync(groupId);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  const handleDeleteGroup = async (groupId: string) => {
-    setLoading(true);
-    try {
-      await deleteGroupMutation.mutateAsync(groupId);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleOpenChat = (groupId: string) => {
-    navigate(`/messages?group=${groupId}`);
-  };
-
-  const getCurrentUserId = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    return user?.id;
-  };
-
-  if (isLoading) {
-    return <div>Loading groups...</div>;
+  if (isGroupsError) {
+    return <div className="p-4 text-red-500">Error loading groups</div>;
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {groups?.map((group: any) => (
-        <Card key={group.id} className="w-full">
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>{group.name}</span>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => handleOpenChat(group.id)}
-              >
-                <MessageSquare className="h-4 w-4" />
-              </Button>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              {group.description || 'No description available'}
-            </p>
-            <div className="flex justify-end gap-2">
-              {group.user_id === getCurrentUserId() ? (
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => handleDeleteGroup(group.id)}
-                  disabled={loading}
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete Group
-                </Button>
-              ) : group.group_members.some((member: any) => 
-                  member.user_id === getCurrentUserId()
-                ) ? (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleLeaveGroup(group.id)}
-                  disabled={loading}
-                >
-                  <UserMinus className="h-4 w-4 mr-2" />
-                  Leave Group
-                </Button>
-              ) : (
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={() => handleJoinGroup(group.id)}
-                  disabled={loading}
-                >
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Join Group
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+    <div className="space-y-4 p-4">
+      {groups?.map((group) => (
+        <div
+          key={group.id}
+          className="flex items-center justify-between p-4 border rounded-lg shadow-sm"
+        >
+          <div>
+            <h3 className="font-semibold">{group.name}</h3>
+            {group.description && (
+              <p className="text-sm text-muted-foreground">{group.description}</p>
+            )}
+          </div>
+          <Button
+            onClick={() => 
+              memberships?.includes(group.id)
+                ? handleLeaveGroup(group.id)
+                : handleJoinGroup(group.id)
+            }
+            disabled={isLoading}
+            variant={memberships?.includes(group.id) ? "destructive" : "default"}
+          >
+            {memberships?.includes(group.id) ? "Leave" : "Join"}
+          </Button>
+        </div>
       ))}
     </div>
   );
