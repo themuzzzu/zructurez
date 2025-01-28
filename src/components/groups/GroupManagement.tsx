@@ -43,17 +43,22 @@ export const GroupManagement = () => {
         .select('*')
         .eq('group_id', groupId)
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (existingMembership) {
-        throw new Error('Already a member of this group');
+        throw new Error('You are already a member of this group');
       }
 
       const { error } = await supabase
         .from('group_members')
         .insert({ group_id: groupId, user_id: user.id });
 
-      if (error) throw error;
+      if (error) {
+        if (error.code === '23505') {
+          throw new Error('You are already a member of this group');
+        }
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['groups'] });
