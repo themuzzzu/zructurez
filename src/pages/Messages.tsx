@@ -11,7 +11,6 @@ import type { Chat } from "@/types/chat";
 import type { Group } from "@/types/group";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAuth } from "@/hooks/useAuth";
 
 const Messages = () => {
   const [chats, setChats] = useState<Chat[]>([]);
@@ -20,31 +19,29 @@ const Messages = () => {
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [separateView] = useState(() => {
     const saved = localStorage.getItem("separateGroupsAndChats");
     return saved ? JSON.parse(saved) : false;
   });
-  
   const navigate = useNavigate();
-  const { user } = useAuth();
 
   useEffect(() => {
-    if (!user) {
-      navigate('/auth');
-      return;
-    }
     loadChats();
     loadGroups();
-  }, [user, navigate]);
+  }, []);
 
   const loadChats = async () => {
     try {
-      setError(null);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("Please log in to view messages");
+        return;
+      }
+
       const { data: messages, error: messagesError } = await supabase
         .from('messages')
         .select('*')
-        .or(`sender_id.eq.${user?.id},receiver_id.eq.${user?.id}`)
+        .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
         .order('created_at', { ascending: false });
 
       if (messagesError) throw messagesError;
@@ -52,13 +49,8 @@ const Messages = () => {
       // Get unique user IDs from messages
       const userIds = new Set<string>();
       messages?.forEach(msg => {
-        userIds.add(msg.sender_id === user?.id ? msg.receiver_id : msg.sender_id);
+        userIds.add(msg.sender_id === user.id ? msg.receiver_id : msg.sender_id);
       });
-
-      if (userIds.size === 0) {
-        setChats([]);
-        return;
-      }
 
       // Fetch profiles for all users
       const { data: profiles, error: profilesError } = await supabase
@@ -71,7 +63,7 @@ const Messages = () => {
       // Create chat objects
       const chatMap = new Map<string, Chat>();
       messages?.forEach(msg => {
-        const otherUserId = msg.sender_id === user?.id ? msg.receiver_id : msg.sender_id;
+        const otherUserId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id;
         const profile = profiles?.find(p => p.id === otherUserId);
         
         if (!profile) return;
@@ -83,7 +75,7 @@ const Messages = () => {
             avatar: profile.avatar_url || '/placeholder.svg',
             lastMessage: msg.content,
             time: new Date(msg.created_at).toLocaleTimeString(),
-            unread: msg.receiver_id === user?.id && !msg.read ? 1 : 0,
+            unread: msg.receiver_id === user.id && !msg.read ? 1 : 0,
             userId: otherUserId,
             messages: [],
             type: 'chat'
@@ -94,7 +86,6 @@ const Messages = () => {
       setChats(Array.from(chatMap.values()));
     } catch (error) {
       console.error('Error loading chats:', error);
-      setError('Failed to load chats');
       toast.error("Failed to load chats");
     } finally {
       setLoading(false);
@@ -103,7 +94,12 @@ const Messages = () => {
 
   const loadGroups = async () => {
     try {
-      setError(null);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("Please log in to view groups");
+        return;
+      }
+
       const { data: userGroups, error: groupsError } = await supabase
         .from('group_members')
         .select(`
@@ -120,24 +116,21 @@ const Messages = () => {
             )
           )
         `)
-        .eq('user_id', user?.id);
+        .eq('user_id', user.id);
 
       if (groupsError) throw groupsError;
 
-      const formattedGroups = userGroups
-        .filter(membership => membership.groups) // Filter out null groups
-        .map(membership => ({
-          ...membership.groups,
-          group_members: {
-            count: membership.groups.group_members.length,
-            members: membership.groups.group_members.map((m: any) => m.user_id)
-          }
-        }));
+      const formattedGroups = userGroups.map(membership => ({
+        ...membership.groups,
+        group_members: {
+          count: membership.groups.group_members.length,
+          members: membership.groups.group_members.map((m: any) => m.user_id)
+        }
+      }));
 
       setGroups(formattedGroups);
     } catch (error) {
       console.error('Error loading groups:', error);
-      setError('Failed to load groups');
       toast.error("Failed to load groups");
     }
   };
@@ -161,32 +154,8 @@ const Messages = () => {
     loadChats();
   };
 
-  if (!user) {
-    return null; // Will redirect in useEffect
-  }
-
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading messages...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <p className="text-destructive mb-4">{error}</p>
-          <Button onClick={() => { setLoading(true); loadChats(); loadGroups(); }}>
-            Try Again
-          </Button>
-        </div>
-      </div>
-    );
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
 
   return (
@@ -212,71 +181,45 @@ const Messages = () => {
             <TabsList className="w-full">
               <TabsTrigger value="chats" className="w-full">
                 <MessageCircle className="w-4 h-4 mr-2" />
-                Chats {chats.length > 0 && `(${chats.length})`}
+                Chats
               </TabsTrigger>
               <TabsTrigger value="groups" className="w-full">
                 <Users2 className="w-4 h-4 mr-2" />
-                Groups {groups.length > 0 && `(${groups.length})`}
+                Groups
               </TabsTrigger>
             </TabsList>
             <TabsContent value="chats" className="mt-0">
-              {chats.length === 0 ? (
-                <div className="p-4 text-center text-muted-foreground">
-                  <MessageCircle className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                  <p>No chats yet</p>
-                  <p className="text-sm">Start a conversation with someone!</p>
-                </div>
-              ) : (
-                <ChatList
-                  chats={chats}
-                  selectedChat={selectedChat}
-                  onSelectChat={handleSelectChat}
-                  searchQuery={searchQuery}
-                  onSearchChange={setSearchQuery}
-                />
-              )}
+              <ChatList
+                chats={chats}
+                selectedChat={selectedChat}
+                onSelectChat={handleSelectChat}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+              />
             </TabsContent>
             <TabsContent value="groups" className="mt-0">
-              {groups.length === 0 ? (
-                <div className="p-4 text-center text-muted-foreground">
-                  <Users2 className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                  <p>No groups yet</p>
-                  <p className="text-sm">Join or create a group to get started!</p>
-                </div>
-              ) : (
-                <GroupList
-                  groups={groups}
-                  selectedGroup={selectedGroup}
-                  onSelectGroup={handleSelectGroup}
-                />
-              )}
+              <GroupList
+                groups={groups}
+                selectedGroup={selectedGroup}
+                onSelectGroup={handleSelectGroup}
+              />
             </TabsContent>
           </Tabs>
         ) : (
           <div className="flex-1 overflow-hidden">
-            {chats.length === 0 && groups.length === 0 ? (
-              <div className="p-4 text-center text-muted-foreground">
-                <MessageCircle className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                <p>No messages or groups yet</p>
-                <p className="text-sm">Start a conversation or join a group!</p>
-              </div>
-            ) : (
-              <>
-                <ChatList
-                  chats={chats}
-                  selectedChat={selectedChat}
-                  onSelectChat={handleSelectChat}
-                  searchQuery={searchQuery}
-                  onSearchChange={setSearchQuery}
-                />
-                <div className="px-4 py-2 font-semibold text-sm text-muted-foreground mt-4">Groups</div>
-                <GroupList
-                  groups={groups}
-                  selectedGroup={selectedGroup}
-                  onSelectGroup={handleSelectGroup}
-                />
-              </>
-            )}
+            <ChatList
+              chats={chats}
+              selectedChat={selectedChat}
+              onSelectChat={handleSelectChat}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+            />
+            <div className="px-4 py-2 font-semibold text-sm text-muted-foreground mt-4">Groups</div>
+            <GroupList
+              groups={groups}
+              selectedGroup={selectedGroup}
+              onSelectGroup={handleSelectGroup}
+            />
           </div>
         )}
       </div>
