@@ -1104,6 +1104,7 @@ export type Database = {
           id: string
           location: string | null
           name: string | null
+          updated_at: string | null
           username: string | null
         }
         Insert: {
@@ -1113,6 +1114,7 @@ export type Database = {
           id: string
           location?: string | null
           name?: string | null
+          updated_at?: string | null
           username?: string | null
         }
         Update: {
@@ -1122,6 +1124,7 @@ export type Database = {
           id?: string
           location?: string | null
           name?: string | null
+          updated_at?: string | null
           username?: string | null
         }
         Relationships: []
