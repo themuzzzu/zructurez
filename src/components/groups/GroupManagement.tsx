@@ -37,18 +37,6 @@ export const GroupManagement = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      // First check if the user is already a member
-      const { data: existingMembership } = await supabase
-        .from('group_members')
-        .select('*')
-        .eq('group_id', groupId)
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      if (existingMembership) {
-        throw new Error('You are already a member of this group');
-      }
-
       const { error } = await supabase
         .from('group_members')
         .insert({ group_id: groupId, user_id: user.id });
