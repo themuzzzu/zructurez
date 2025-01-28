@@ -1,6 +1,11 @@
 import { useEffect } from "react";
-import { Eye } from "lucide-react";
+import { Eye, Heart, MessageCircle } from "lucide-react";
 import { incrementViews } from "@/services/postService";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { Button } from "./ui/button";
+import { CommentSection } from "./CommentSection";
 
 interface PostCardProps {
   id: string;
@@ -29,10 +34,63 @@ export const PostCard = ({
   views = 0,
   isLiked = false
 }: PostCardProps) => {
+  const queryClient = useQueryClient();
+
   useEffect(() => {
-    // Increment view count when post is rendered
     incrementViews('posts', id);
   }, [id]);
+
+  const { data: currentLikeStatus } = useQuery({
+    queryKey: ['post-like', id],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return false;
+
+      const { data } = await supabase
+        .from('likes')
+        .select('id')
+        .eq('post_id', id)
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      return !!data;
+    },
+    initialData: isLiked,
+  });
+
+  const { mutate: toggleLike } = useMutation({
+    mutationFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Must be logged in to like posts');
+
+      if (currentLikeStatus) {
+        const { error } = await supabase
+          .from('likes')
+          .delete()
+          .eq('post_id', id)
+          .eq('user_id', user.id);
+
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('likes')
+          .insert([
+            { post_id: id, user_id: user.id }
+          ]);
+
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['post-like', id] });
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      toast.success(currentLikeStatus ? 'Post unliked' : 'Post liked');
+    },
+    onError: (error) => {
+      console.error('Error toggling like:', error);
+      toast.error('Failed to update like status');
+    },
+  });
 
   return (
     <div className="flex flex-col space-y-4 p-4 border rounded-lg">
@@ -58,13 +116,21 @@ export const PostCard = ({
           <Eye className="h-4 w-4" />
           {views}
         </div>
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="flex items-center gap-1"
+          onClick={() => toggleLike()}
+        >
+          <Heart className={`h-4 w-4 ${currentLikeStatus ? 'fill-current text-red-500' : ''}`} />
+          <span className="font-medium">{likes}</span>
+        </Button>
         <div className="flex items-center gap-1">
-          <span className="font-medium">{likes}</span> Likes
-        </div>
-        <div className="flex items-center gap-1">
-          <span className="font-medium">{comments}</span> Comments
+          <MessageCircle className="h-4 w-4" />
+          <span className="font-medium">{comments}</span>
         </div>
       </div>
+      <CommentSection postId={id} />
     </div>
   );
 };
