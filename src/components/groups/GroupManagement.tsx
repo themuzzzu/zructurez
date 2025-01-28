@@ -37,6 +37,18 @@ export const GroupManagement = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
+      // First check if the user is already a member
+      const { data: existingMembership } = await supabase
+        .from('group_members')
+        .select('*')
+        .eq('group_id', groupId)
+        .eq('user_id', user.id)
+        .single();
+
+      if (existingMembership) {
+        throw new Error('Already a member of this group');
+      }
+
       const { error } = await supabase
         .from('group_members')
         .insert({ group_id: groupId, user_id: user.id });
@@ -47,8 +59,8 @@ export const GroupManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['groups'] });
       toast.success('Successfully joined the group!');
     },
-    onError: () => {
-      toast.error('Failed to join group');
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to join group');
     },
   });
 
