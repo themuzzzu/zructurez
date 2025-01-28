@@ -123,6 +123,11 @@ export const GroupManagement = () => {
     navigate(`/messages?group=${groupId}`);
   };
 
+  const getCurrentUserId = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    return user?.id;
+  };
+
   if (isLoading) {
     return <div>Loading groups...</div>;
   }
@@ -148,7 +153,7 @@ export const GroupManagement = () => {
               {group.description || 'No description available'}
             </p>
             <div className="flex justify-end gap-2">
-              {group.user_id === (supabase.auth.user()?.id || '') ? (
+              {group.user_id === getCurrentUserId() ? (
                 <Button
                   variant="destructive"
                   size="sm"
@@ -159,7 +164,7 @@ export const GroupManagement = () => {
                   Delete Group
                 </Button>
               ) : group.group_members.some((member: any) => 
-                  member.user_id === (supabase.auth.user()?.id || '')
+                  member.user_id === getCurrentUserId()
                 ) ? (
                 <Button
                   variant="outline"
