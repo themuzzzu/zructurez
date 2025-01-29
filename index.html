@@ -4,11 +4,10 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Local Services</title>
+    <title>Zructures</title>
     <script>
       window.initMap = function() {
         console.log('Google Maps API loaded successfully');
-        // Dispatch a custom event that our React components can listen for
         window.dispatchEvent(new Event('google-maps-loaded'));
       }
     </script>

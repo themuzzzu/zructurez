@@ -112,7 +112,7 @@ export const Navbar = () => {
             </SheetContent>
           </Sheet>
           <h1 className="text-xl font-bold text-primary">
-            {profile?.name || 'Welcome'}
+            Zructures
           </h1>
         </div>
 
