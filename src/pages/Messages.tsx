@@ -34,27 +34,42 @@ const Messages = () => {
         return;
       }
 
+      // First, get all messages
       const { data: messages, error: messagesError } = await supabase
         .from('messages')
-        .select(`
-          *,
-          sender:profiles!messages_sender_id_fkey(username, avatar_url),
-          receiver:profiles!messages_receiver_id_fkey(username, avatar_url)
-        `)
+        .select('*')
         .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
         .order('created_at', { ascending: false });
 
       if (messagesError) throw messagesError;
+
+      // Get all unique user IDs from messages
+      const userIds = new Set<string>();
+      messages?.forEach(msg => {
+        userIds.add(msg.sender_id);
+        userIds.add(msg.receiver_id);
+      });
+
+      // Fetch profiles for all users
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, username, avatar_url')
+        .in('id', Array.from(userIds));
+
+      if (profilesError) throw profilesError;
+
+      // Create a map of user profiles
+      const profileMap = new Map(profiles?.map(profile => [profile.id, profile]));
 
       // Create chat objects from messages
       const chatMap = new Map<string, Chat>();
       
       messages?.forEach(msg => {
         const isUserSender = msg.sender_id === user.id;
-        const otherUser = isUserSender ? msg.receiver : msg.sender;
         const otherUserId = isUserSender ? msg.receiver_id : msg.sender_id;
+        const otherUser = profileMap.get(otherUserId);
 
-        if (!chatMap.has(otherUserId)) {
+        if (!chatMap.has(otherUserId) && otherUser) {
           chatMap.set(otherUserId, {
             id: otherUserId,
             name: otherUser.username || 'Unknown User',
