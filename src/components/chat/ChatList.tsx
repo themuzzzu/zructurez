@@ -3,7 +3,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Chat } from "@/types/chat";
 import { ChatListItem } from "./ChatListItem";
-import { CreateGroupDialog } from "../groups/CreateGroupDialog";
 import { useState } from "react";
 
 interface ChatListProps {
@@ -21,8 +20,6 @@ export const ChatList = ({
   searchQuery,
   onSearchChange,
 }: ChatListProps) => {
-  const [showCreateGroup, setShowCreateGroup] = useState(false);
-
   return (
     <div className="flex flex-col h-full">
       <div className="p-4 space-y-4 border-b border-border/10">
@@ -35,14 +32,6 @@ export const ChatList = ({
             onChange={(e) => onSearchChange(e.target.value)}
           />
         </div>
-        <Button 
-          variant="outline" 
-          className="w-full justify-start"
-          onClick={() => setShowCreateGroup(true)}
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Create New Group
-        </Button>
       </div>
       <div className="overflow-y-auto flex-1">
         {chats.length > 0 ? (
@@ -60,10 +49,6 @@ export const ChatList = ({
           </div>
         )}
       </div>
-      <CreateGroupDialog 
-        open={showCreateGroup} 
-        onClose={() => setShowCreateGroup(false)} 
-      />
     </div>
   );
 };
