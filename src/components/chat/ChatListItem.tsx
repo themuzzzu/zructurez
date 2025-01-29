@@ -1,4 +1,5 @@
 import { Chat } from "@/types/chat";
+import { formatDistanceToNow } from "date-fns";
 
 interface ChatListItemProps {
   chat: Chat;
@@ -9,11 +10,8 @@ interface ChatListItemProps {
 export const ChatListItem = ({ chat, isSelected, onClick }: ChatListItemProps) => {
   return (
     <button
-      className={`w-full p-4 flex items-start gap-3 transition-colors
-        ${isSelected 
-          ? 'bg-[#1a1a1a]' // Darker background when selected
-          : 'hover:bg-[#1a1a1a]/70' // Slightly transparent dark on hover
-        }`}
+      className={`w-full p-4 flex items-start gap-3 transition-colors hover:bg-[#1a1a1a]/70
+        ${isSelected ? 'bg-[#1a1a1a]' : ''}`}
       onClick={onClick}
     >
       <img
@@ -22,15 +20,15 @@ export const ChatListItem = ({ chat, isSelected, onClick }: ChatListItemProps) =
         className="w-12 h-12 rounded-full flex-shrink-0 object-cover"
       />
       <div className="flex-1 text-left min-w-0">
-        <div className="flex justify-between items-start gap-2">
-          <span className="font-semibold truncate text-foreground">
+        <div className="flex justify-between items-start mb-1">
+          <span className="font-semibold text-base text-foreground truncate">
             {chat.name}
           </span>
-          <span className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
-            {chat.time}
+          <span className="text-xs text-muted-foreground whitespace-nowrap">
+            {formatDistanceToNow(new Date(chat.time), { addSuffix: true })}
           </span>
         </div>
-        <p className="text-sm text-muted-foreground truncate pr-2">
+        <p className="text-sm text-muted-foreground truncate">
           {chat.lastMessage}
         </p>
         {chat.unread > 0 && (

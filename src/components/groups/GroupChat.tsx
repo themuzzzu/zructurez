@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Message } from "./types";
 import { MessageBubble } from "../MessageBubble";
 import { Input } from "../ui/input";
@@ -7,6 +7,7 @@ import { Send } from "lucide-react";
 import { ScrollArea } from "../ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { format } from "date-fns";
 
 interface GroupChatProps {
   groupId: string;
@@ -18,6 +19,7 @@ export const GroupChat = ({ groupId }: GroupChatProps) => {
   const [loading, setLoading] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isMember, setIsMember] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const initializeChat = async () => {
@@ -29,6 +31,8 @@ export const GroupChat = ({ groupId }: GroupChatProps) => {
       } catch (error) {
         console.error("Error initializing chat:", error);
         toast.error("Failed to initialize chat");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -40,52 +44,58 @@ export const GroupChat = ({ groupId }: GroupChatProps) => {
     };
   }, [groupId]);
 
-  const fetchCurrentUser = async () => {
-    try {
-      const { data: { user }, error } = await supabase.auth.getUser();
-      if (error) throw error;
-      setCurrentUserId(user?.id || null);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      toast.error("Failed to fetch user information");
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
+  }, [messages]);
+
+  const fetchCurrentUser = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    setCurrentUserId(user?.id || null);
   };
 
   const checkGroupMembership = async () => {
     if (!currentUserId) return;
     
-    try {
-      const { data: membership, error } = await supabase
-        .from("group_members")
-        .select("*")
-        .eq("group_id", groupId)
-        .eq("user_id", currentUserId)
-        .maybeSingle();
+    const { data: membership, error } = await supabase
+      .from("group_members")
+      .select("*")
+      .eq("group_id", groupId)
+      .eq("user_id", currentUserId)
+      .maybeSingle();
 
-      if (error) throw error;
-      setIsMember(!!membership);
-    } catch (error) {
+    if (error) {
       console.error("Error checking group membership:", error);
-      toast.error("Failed to verify group membership");
+      return;
     }
+
+    setIsMember(!!membership);
   };
 
   const fetchMessages = async () => {
-    try {
-      const { data: messages, error } = await supabase
-        .from("group_messages")
-        .select("*")
-        .eq("group_id", groupId)
-        .order("created_at", { ascending: true });
+    const { data: messages, error } = await supabase
+      .from("group_messages")
+      .select(`
+        *,
+        sender:sender_id (
+          id,
+          email,
+          profiles:profiles (
+            username,
+            avatar_url
+          )
+        )
+      `)
+      .eq("group_id", groupId)
+      .order("created_at", { ascending: true });
 
-      if (error) throw error;
-      setMessages(messages || []);
-    } catch (error) {
+    if (error) {
       console.error("Error fetching messages:", error);
-      toast.error("Failed to load messages");
-    } finally {
-      setLoading(false);
+      return;
     }
+
+    setMessages(messages || []);
   };
 
   const subscribeToMessages = () => {
@@ -99,7 +109,7 @@ export const GroupChat = ({ groupId }: GroupChatProps) => {
           table: "group_messages",
           filter: `group_id=eq.${groupId}`,
         },
-        async (payload) => {
+        (payload) => {
           if (payload.eventType === "INSERT") {
             const newMessage = payload.new as Message;
             setMessages((current) => [...current, newMessage]);
@@ -136,30 +146,25 @@ export const GroupChat = ({ groupId }: GroupChatProps) => {
     }
   };
 
-  const handleForwardMessage = (content: string) => {
-    setNewMessage(content);
-  };
-
   if (loading) {
-    return <div className="p-4">Loading messages...</div>;
+    return <div className="p-4 text-center">Loading messages...</div>;
   }
 
   if (!isMember) {
-    return <div className="p-4">You are not a member of this group.</div>;
+    return <div className="p-4 text-center">You are not a member of this group.</div>;
   }
 
   return (
     <div className="flex flex-col h-[calc(100vh-200px)]">
-      <ScrollArea className="flex-1 p-4">
+      <ScrollArea ref={scrollRef} className="flex-1 p-4">
         <div className="space-y-4">
           {messages.map((message) => (
             <MessageBubble
               key={message.id}
               messageId={message.id}
               content={message.content}
-              timestamp={new Date(message.created_at).toLocaleString()}
+              timestamp={format(new Date(message.created_at), 'p')}
               isOwn={message.sender_id === currentUserId}
-              onForward={handleForwardMessage}
             />
           ))}
         </div>
