@@ -36,7 +36,6 @@ export const ChatMessages = ({ messages, currentUserId, isGroup, onForwardMessag
           table: 'messages',
         },
         (payload) => {
-          // Handle new message
           console.log('New message received:', payload.new);
         }
       )

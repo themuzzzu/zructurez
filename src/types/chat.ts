@@ -1,3 +1,10 @@
+export interface Message {
+  id: string;
+  content: string;
+  timestamp: string;
+  senderId: string;
+}
+
 export interface Chat {
   id: string;
   name: string;
@@ -6,11 +13,6 @@ export interface Chat {
   time: string;
   unread: number;
   userId: string;
-  messages: Array<{
-    id: string;
-    content: string;
-    senderId: string;
-    timestamp: string;
-  }>;
-  type: 'chat';
+  messages: Message[];
+  type: 'chat' | 'group';
 }

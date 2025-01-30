@@ -54,14 +54,7 @@ export const useMessageHandling = (
           .eq('id', selectedChat.userId)
           .maybeSingle();
 
-        if (profileError) {
-          console.error("Error checking receiver profile:", profileError);
-          toast.error("Error verifying recipient");
-          return;
-        }
-
-        if (!receiverProfile) {
-          console.error("Receiver profile not found:", selectedChat.userId);
+        if (profileError || !receiverProfile) {
           toast.error("Cannot send message - recipient not found");
           return;
         }
