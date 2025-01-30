@@ -35,7 +35,6 @@ const Communities = () => {
     
     checkAuth();
 
-    // Subscribe to auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_OUT' || !session) {
         navigate('/auth');
@@ -48,49 +47,50 @@ const Communities = () => {
   }, [navigate]);
 
   const { data: currentUser } = useCurrentUser();
-  const { data: groups, isLoading } = useGroups(!!currentUser);
+  const { data: groups = [], isLoading } = useGroups(!!currentUser);
 
-  const handleAddMember = async () => {
-    if (!selectedGroup || !newMemberEmail) return;
-
-    try {
-      // First get the user ID from the email
+  const addMemberMutation = useMutation({
+    mutationFn: async ({ groupId, email }: { groupId: string; email: string }) => {
       const { data: profiles, error: profileError } = await supabase
         .from('profiles')
         .select('id')
-        .eq('email', newMemberEmail)
+        .eq('email', email)
         .maybeSingle();
 
       if (profileError) throw profileError;
-      if (!profiles) {
-        toast.error("User not found");
-        return;
-      }
+      if (!profiles) throw new Error("User not found");
 
-      // Add user to group
       const { error: memberError } = await supabase
         .from('group_members')
         .insert({
-          group_id: selectedGroup.id,
+          group_id: groupId,
           user_id: profiles.id
         });
 
       if (memberError) {
         if (memberError.code === '23505') {
-          toast.error("User is already a member of this group");
-        } else {
-          throw memberError;
+          throw new Error("User is already a member of this group");
         }
-      } else {
-        toast.success("Member added successfully");
-        queryClient.invalidateQueries({ queryKey: ['groups'] });
-        setNewMemberEmail("");
-        setShowAddMembers(false);
+        throw memberError;
       }
-    } catch (error) {
-      console.error('Error adding member:', error);
-      toast.error("Failed to add member");
+    },
+    onSuccess: () => {
+      toast.success("Member added successfully");
+      queryClient.invalidateQueries({ queryKey: ['groups'] });
+      setNewMemberEmail("");
+      setShowAddMembers(false);
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
     }
+  });
+
+  const handleAddMember = () => {
+    if (!selectedGroup || !newMemberEmail) return;
+    addMemberMutation.mutate({ 
+      groupId: selectedGroup.id, 
+      email: newMemberEmail 
+    });
   };
 
   if (isLoading) {
@@ -119,7 +119,7 @@ const Communities = () => {
               </Button>
             </div>
             <GroupList 
-              groups={groups || []}
+              groups={groups}
               selectedGroup={selectedGroup}
               onSelectGroup={setSelectedGroup}
               onAddMembers={() => setShowAddMembers(true)}

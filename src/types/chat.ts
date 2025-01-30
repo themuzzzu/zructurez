@@ -25,15 +25,6 @@ export interface Message {
   expires_at?: string;
 }
 
-export interface Group {
-  id: string;
-  name: string;
-  description?: string;
-  image_url?: string;
-  created_at: string;
-  user_id: string;
-}
-
 export interface ChatHeaderProps {
   chat: Chat;
   isMuted: boolean;
