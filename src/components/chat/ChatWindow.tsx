@@ -85,7 +85,7 @@ export const ChatWindow = ({
 
       <div className="flex-1 overflow-y-auto">
         <ChatMessages 
-          messages={selectedChat.messages}
+          messages={selectedChat.messages || []}
           currentUserId={user?.id || ''}
           isGroup={selectedChat.type === 'group'}
           onForwardMessage={handleForwardMessage}

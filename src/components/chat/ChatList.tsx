@@ -1,9 +1,7 @@
-import { Search, Plus } from "lucide-react";
+import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Chat } from "@/types/chat";
 import { ChatListItem } from "./ChatListItem";
-import { useState } from "react";
 
 interface ChatListProps {
   chats: Chat[];
