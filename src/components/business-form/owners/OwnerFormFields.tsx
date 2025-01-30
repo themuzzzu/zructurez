@@ -27,39 +27,41 @@ export const OwnerFormFields = ({
   onUpdate,
 }: OwnerFormFieldsProps) => {
   const handleImageSelect = async (image: string | null) => {
-    console.log('Selected image:', image);
     if (image) {
       onUpdate("image_url", image);
-      toast.success("Image uploaded successfully");
+      toast.success("Photo uploaded successfully");
     }
   };
 
   return (
     <div className="grid gap-4 flex-1">
       <div className="space-y-2">
-        <Label>Owner Name</Label>
+        <Label>Owner Name <span className="text-red-500">*</span></Label>
         <Input
           placeholder="Owner Name"
           value={name}
           onChange={(e) => onUpdate("name", e.target.value)}
+          required
         />
       </div>
 
       <div className="space-y-2">
-        <Label>Role</Label>
+        <Label>Role <span className="text-red-500">*</span></Label>
         <Input
           placeholder="Role (e.g., Primary Owner, Co-Owner)"
           value={role}
           onChange={(e) => onUpdate("role", e.target.value)}
+          required
         />
       </div>
 
       <div className="space-y-2">
-        <Label>Position</Label>
+        <Label>Position <span className="text-red-500">*</span></Label>
         <Input
           placeholder="Position (e.g., CEO, Medical Director)"
           value={position}
           onChange={(e) => onUpdate("position", e.target.value)}
+          required
         />
       </div>
 
