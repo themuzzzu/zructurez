@@ -13,12 +13,14 @@ interface ChatWindowProps {
   selectedChat: Chat | null;
   onBack?: () => void;
   onMessageSent?: () => void;
+  onClose: () => void;
 }
 
 export const ChatWindow = ({
   selectedChat,
   onBack,
   onMessageSent,
+  onClose,
 }: ChatWindowProps) => {
   const [showContactInfo, setShowContactInfo] = useState(false);
   const [isSelectMode, setIsSelectMode] = useState(false);

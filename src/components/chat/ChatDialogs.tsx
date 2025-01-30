@@ -1,188 +1,122 @@
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { ImageUpload } from "@/components/ImageUpload";
-import { VideoUpload } from "./VideoUpload";
-import { DocumentUpload } from "./DocumentUpload";
-import { PollDialog } from "./PollDialog";
-import { ContactDialog } from "./ContactDialog";
-import { ContactInfoDialog } from "./ContactInfoDialog";
-import { Chat } from "@/types/chat";
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { Group } from "@/types/chat";
 
 interface ChatDialogsProps {
-  selectedChat: Chat;
-  showContactInfo: boolean;
-  setShowContactInfo: (show: boolean) => void;
-  showImageUpload: boolean;
-  setShowImageUpload: (show: boolean) => void;
-  showVideoUpload: boolean;
-  setShowVideoUpload: (show: boolean) => void;
-  showDocumentUpload: boolean;
-  setShowDocumentUpload: (show: boolean) => void;
-  showPollDialog: boolean;
-  setShowPollDialog: (show: boolean) => void;
-  showContactDialog: boolean;
-  setShowContactDialog: (show: boolean) => void;
-  selectedImage: string | null;
-  setSelectedImage: (image: string | null) => void;
-  selectedVideo: string | null;
-  setSelectedVideo: (video: string | null) => void;
+  selectedChat: Chat | null;
+  showNewChat: boolean;
+  showNewGroup: boolean;
+  showAddMembers: boolean;
+  newMemberEmail: string;
+  onNewChat: (userId: string) => Promise<void>;
+  onNewGroup: (name: string, description?: string) => Promise<void>;
+  onAddMembers: (emails: any) => Promise<void>;
+  onCloseNewChat: () => void;
+  onCloseNewGroup: () => void;
+  onCloseAddMembers: () => void;
 }
 
 export const ChatDialogs = ({
   selectedChat,
-  showContactInfo,
-  setShowContactInfo,
-  showImageUpload,
-  setShowImageUpload,
-  showVideoUpload,
-  setShowVideoUpload,
-  showDocumentUpload,
-  setShowDocumentUpload,
-  showPollDialog,
-  setShowPollDialog,
-  showContactDialog,
-  setShowContactDialog,
-  selectedImage,
-  setSelectedImage,
-  selectedVideo,
-  setSelectedVideo,
+  showNewChat,
+  showNewGroup,
+  showAddMembers,
+  newMemberEmail,
+  onNewChat,
+  onNewGroup,
+  onAddMembers,
+  onCloseNewChat,
+  onCloseNewGroup,
+  onCloseAddMembers,
 }: ChatDialogsProps) => {
   return (
     <>
-      <ContactInfoDialog
-        open={showContactInfo}
-        onOpenChange={setShowContactInfo}
-        chat={selectedChat}
-      />
-
-      <Dialog open={showImageUpload} onOpenChange={setShowImageUpload}>
+      <Dialog open={showNewChat} onOpenChange={onCloseNewChat}>
         <DialogContent>
-          <ImageUpload
-            selectedImage={selectedImage}
-            onImageSelect={setSelectedImage}
-          />
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={showVideoUpload} onOpenChange={setShowVideoUpload}>
-        <DialogContent>
-          <VideoUpload
-            selectedVideo={selectedVideo}
-            onVideoSelect={setSelectedVideo}
-          />
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={showDocumentUpload} onOpenChange={setShowDocumentUpload}>
-        <DialogContent>
-          <DocumentUpload
-            onDocumentUpload={async (file) => {
-              try {
-                // Get the current user
-                const { data: { user }, error: userError } = await supabase.auth.getUser();
-                
-                if (userError || !user) {
-                  toast.error("You must be logged in to upload documents");
-                  return;
+          <div className="p-4">
+            <h2 className="text-lg font-semibold mb-4">New Chat</h2>
+            <input
+              type="text"
+              placeholder="Enter user ID..."
+              className="w-full p-2 border rounded"
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  onNewChat((e.target as HTMLInputElement).value);
                 }
-
-                const fileName = `${Date.now()}_${file.name}`;
-                const filePath = `chat-documents/${fileName}`;
-
-                const { error: uploadError } = await supabase.storage
-                  .from("chat-documents")
-                  .upload(filePath, file);
-
-                if (uploadError) throw uploadError;
-
-                const { data: { publicUrl } } = supabase.storage
-                  .from("chat-documents")
-                  .getPublicUrl(filePath);
-
-                const { error: docError } = await supabase
-                  .from("documents")
-                  .insert({
-                    title: file.name,
-                    file_url: publicUrl,
-                    file_type: file.type,
-                    user_id: user.id, // Use the actual user ID
-                  });
-
-                if (docError) throw docError;
-
-                setShowDocumentUpload(false);
-                toast.success("Document uploaded successfully!");
-              } catch (error) {
-                console.error("Error uploading document:", error);
-                toast.error("Failed to upload document");
-              }
-            }}
-          />
+              }}
+            />
+          </div>
         </DialogContent>
       </Dialog>
 
-      <PollDialog
-        open={showPollDialog}
-        onOpenChange={setShowPollDialog}
-        onCreatePoll={async (question, options) => {
-          try {
-            const { data: { user }, error: userError } = await supabase.auth.getUser();
-            
-            if (userError || !user) {
-              toast.error("You must be logged in to create polls");
-              return;
-            }
+      <Dialog open={showNewGroup} onOpenChange={onCloseNewGroup}>
+        <DialogContent>
+          <div className="p-4">
+            <h2 className="text-lg font-semibold mb-4">Create New Group</h2>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target as HTMLFormElement);
+                onNewGroup(
+                  formData.get('name') as string,
+                  formData.get('description') as string
+                );
+              }}
+            >
+              <div className="space-y-4">
+                <input
+                  name="name"
+                  type="text"
+                  placeholder="Group name"
+                  className="w-full p-2 border rounded"
+                  required
+                />
+                <textarea
+                  name="description"
+                  placeholder="Group description (optional)"
+                  className="w-full p-2 border rounded"
+                />
+                <button
+                  type="submit"
+                  className="w-full p-2 bg-primary text-primary-foreground rounded"
+                >
+                  Create Group
+                </button>
+              </div>
+            </form>
+          </div>
+        </DialogContent>
+      </Dialog>
 
-            const { error } = await supabase
-              .from("polls")
-              .insert({
-                question,
-                options,
-                user_id: user.id,
-              });
-
-            if (error) throw error;
-
-            setShowPollDialog(false);
-            toast.success("Poll created successfully!");
-          } catch (error) {
-            console.error("Error creating poll:", error);
-            toast.error("Failed to create poll");
-          }
-        }}
-      />
-
-      <ContactDialog
-        open={showContactDialog}
-        onOpenChange={setShowContactDialog}
-        onShareContact={async (contactData) => {
-          try {
-            const { data: { user }, error: userError } = await supabase.auth.getUser();
-            
-            if (userError || !user) {
-              toast.error("You must be logged in to share contacts");
-              return;
-            }
-
-            const { error } = await supabase
-              .from("shared_contacts")
-              .insert({
-                contact_data: contactData,
-                user_id: user.id,
-                shared_with_id: selectedChat.userId,
-              });
-
-            if (error) throw error;
-
-            setShowContactDialog(false);
-            toast.success("Contact shared successfully!");
-          } catch (error) {
-            console.error("Error sharing contact:", error);
-            toast.error("Failed to share contact");
-          }
-        }}
-      />
+      <Dialog open={showAddMembers} onOpenChange={onCloseAddMembers}>
+        <DialogContent>
+          <div className="p-4">
+            <h2 className="text-lg font-semibold mb-4">Add Members</h2>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target as HTMLFormElement);
+                const emails = formData.get('emails') as string;
+                onAddMembers(emails.split(',').map(email => email.trim()));
+              }}
+            >
+              <div className="space-y-4">
+                <textarea
+                  name="emails"
+                  placeholder="Enter email addresses (comma-separated)"
+                  className="w-full p-2 border rounded"
+                  required
+                />
+                <button
+                  type="submit"
+                  className="w-full p-2 bg-primary text-primary-foreground rounded"
+                >
+                  Add Members
+                </button>
+              </div>
+            </form>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

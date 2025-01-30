@@ -1,22 +1,34 @@
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Chat } from "@/types/chat";
+import { Chat, Group } from "@/types/chat";
 import { ChatListItem } from "./ChatListItem";
 
 interface ChatListProps {
   chats: Chat[];
+  groups: Group[];
   selectedChat: Chat | null;
+  selectedGroup: Group | null;
   onSelectChat: (chat: Chat) => void;
+  onSelectGroup: (group: Group) => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
+  onNewChat: () => void;
+  onNewGroup: () => void;
+  onAddMembers: () => void;
 }
 
 export const ChatList = ({
   chats,
+  groups,
   selectedChat,
+  selectedGroup,
   onSelectChat,
+  onSelectGroup,
   searchQuery,
   onSearchChange,
+  onNewChat,
+  onNewGroup,
+  onAddMembers,
 }: ChatListProps) => {
   return (
     <div className="flex flex-col h-full">
