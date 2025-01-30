@@ -189,7 +189,6 @@ const Messages = () => {
     if (!selectedGroup || !newMemberEmail) return;
 
     try {
-      // First get the user ID from the email
       const { data: profiles, error: profileError } = await supabase
         .from('profiles')
         .select('id')
@@ -202,7 +201,6 @@ const Messages = () => {
         return;
       }
 
-      // Add user to group
       const { error: memberError } = await supabase
         .from('group_members')
         .insert({
