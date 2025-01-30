@@ -1,5 +1,5 @@
 import { Chat } from "@/types/chat";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, parseISO } from "date-fns";
 
 interface ChatListItemProps {
   chat: Chat;
@@ -8,6 +8,17 @@ interface ChatListItemProps {
 }
 
 export const ChatListItem = ({ chat, isSelected, onClick }: ChatListItemProps) => {
+  const formatTimestamp = (timestamp: string) => {
+    try {
+      // First parse the ISO string to a Date object
+      const date = parseISO(timestamp);
+      return formatDistanceToNow(date, { addSuffix: true });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'recently'; // Fallback text if date is invalid
+    }
+  };
+
   return (
     <button
       className={`w-full p-4 flex items-start gap-3 transition-colors hover:bg-[#1a1a1a]/70
@@ -25,7 +36,7 @@ export const ChatListItem = ({ chat, isSelected, onClick }: ChatListItemProps) =
             {chat.name}
           </span>
           <span className="text-xs text-muted-foreground whitespace-nowrap">
-            {formatDistanceToNow(new Date(chat.time), { addSuffix: true })}
+            {formatTimestamp(chat.time)}
           </span>
         </div>
         <p className="text-sm text-muted-foreground truncate">
