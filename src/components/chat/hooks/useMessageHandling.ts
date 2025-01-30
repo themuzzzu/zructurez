@@ -24,14 +24,14 @@ export const useMessageHandling = (
 
       if (selectedChat.type === 'group') {
         // Handle group message
-        const { error: membershipError } = await supabase
+        const { data: membershipData, error: membershipError } = await supabase
           .from('group_members')
           .select('*')
           .eq('group_id', selectedChat.userId)
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle();
 
-        if (membershipError) {
+        if (membershipError || !membershipData) {
           console.error("Error checking group membership:", membershipError);
           toast.error("You must be a member of this group to send messages");
           return;
