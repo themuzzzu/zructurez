@@ -18,6 +18,11 @@ export interface Message {
   timestamp: string;
   type?: 'text' | 'image' | 'video' | 'document';
   fileUrl?: string;
+  created_at: string;
+  sender_id: string;
+  receiver_id: string;
+  read: boolean;
+  expires_at?: string;
 }
 
 export interface Group {

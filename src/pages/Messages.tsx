@@ -17,6 +17,7 @@ const Messages = () => {
   const [newMemberEmail, setNewMemberEmail] = useState("");
   const [chats, setChats] = useState<Chat[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const fetchChats = async () => {
@@ -152,6 +153,8 @@ const Messages = () => {
               onNewChat={() => setShowNewChat(true)}
               onNewGroup={() => setShowNewGroup(true)}
               onAddMembers={() => setShowAddMembers(true)}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
             />
           </div>
           <div className="col-span-8">
@@ -167,6 +170,7 @@ const Messages = () => {
       </div>
 
       <ChatDialogs
+        selectedChat={selectedChat}
         showNewChat={showNewChat}
         showNewGroup={showNewGroup}
         showAddMembers={showAddMembers}

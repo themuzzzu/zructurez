@@ -1,11 +1,27 @@
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Group } from "@/types/chat";
+import { Chat, Group } from "@/types/chat";
 
 interface ChatDialogsProps {
   selectedChat: Chat | null;
   showNewChat: boolean;
   showNewGroup: boolean;
   showAddMembers: boolean;
+  showContactInfo?: boolean;
+  setShowContactInfo?: (show: boolean) => void;
+  showImageUpload?: boolean;
+  setShowImageUpload?: (show: boolean) => void;
+  showVideoUpload?: boolean;
+  setShowVideoUpload?: (show: boolean) => void;
+  showDocumentUpload?: boolean;
+  setShowDocumentUpload?: (show: boolean) => void;
+  showPollDialog?: boolean;
+  setShowPollDialog?: (show: boolean) => void;
+  showContactDialog?: boolean;
+  setShowContactDialog?: (show: boolean) => void;
+  selectedImage?: string | null;
+  setSelectedImage?: (image: string | null) => void;
+  selectedVideo?: string | null;
+  setSelectedVideo?: (video: string | null) => void;
   newMemberEmail: string;
   onNewChat: (userId: string) => Promise<void>;
   onNewGroup: (name: string, description?: string) => Promise<void>;
@@ -20,6 +36,22 @@ export const ChatDialogs = ({
   showNewChat,
   showNewGroup,
   showAddMembers,
+  showContactInfo,
+  setShowContactInfo,
+  showImageUpload,
+  setShowImageUpload,
+  showVideoUpload,
+  setShowVideoUpload,
+  showDocumentUpload,
+  setShowDocumentUpload,
+  showPollDialog,
+  setShowPollDialog,
+  showContactDialog,
+  setShowContactDialog,
+  selectedImage,
+  setSelectedImage,
+  selectedVideo,
+  setSelectedVideo,
   newMemberEmail,
   onNewChat,
   onNewGroup,
