@@ -16,7 +16,10 @@ export interface Business {
   bio?: string;
   website?: string;
   image_scale?: number;
-  image_position?: { x: number; y: number };
+  image_position?: {
+    x: number;
+    y: number;
+  };
   staff_details?: StaffMember[];
   owners?: BusinessOwner[];
   show_in_services?: boolean;
@@ -30,17 +33,12 @@ export interface Business {
   verification_submitted_at?: string;
   verification_documents: any[];
   membership_plans?: any[];
-  business_products?: BusinessProduct[];
-  business_portfolio?: BusinessPortfolioItem[];
-  posts?: BusinessPost[];
 }
 
 export interface StaffMember {
   name: string | null;
   position: string | null;
   experience: string | null;
-  bio?: string;
-  image_url?: string | null;
 }
 
 export interface BusinessOwner {
@@ -48,36 +46,4 @@ export interface BusinessOwner {
   role: string;
   position: string | null;
   experience: string | null;
-  bio?: string;
-  image_url?: string | null;
-}
-
-export interface BusinessProduct {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  image_url?: string;
-  stock?: number;
-  created_at: string;
-}
-
-export interface BusinessPortfolioItem {
-  id: string;
-  title: string;
-  description?: string;
-  image_url?: string;
-  created_at: string;
-  views?: number;
-}
-
-export interface BusinessPost {
-  id: string;
-  content: string;
-  image_url?: string;
-  location?: string;
-  category?: string;
-  created_at: string;
-  business_id: string | null;
-  views: number | null;
 }
