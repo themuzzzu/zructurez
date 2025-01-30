@@ -14,16 +14,26 @@ export const BusinessesTab = () => {
   const { data: businesses, refetch: refetchBusinesses } = useQuery({
     queryKey: ['user-businesses'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return [];
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return [];
 
-      const { data } = await supabase
-        .from('businesses')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+        const { data, error } = await supabase
+          .from('businesses')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
 
-      return data || [];
+        if (error) {
+          console.error('Error fetching businesses:', error);
+          return [];
+        }
+
+        return data || [];
+      } catch (error) {
+        console.error('Error in business query:', error);
+        return [];
+      }
     },
   });
 
