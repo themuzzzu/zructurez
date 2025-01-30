@@ -50,6 +50,12 @@ const Messages = () => {
         userIds.add(msg.receiver_id);
       });
 
+      if (userIds.size === 0) {
+        setChats([]);
+        setLoading(false);
+        return;
+      }
+
       // Fetch profiles for all users
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
