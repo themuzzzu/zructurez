@@ -45,9 +45,14 @@ const Messages = () => {
           acc.push({
             id: chatUserId,
             userId: chatUserId,
-            type: 'chat',
+            type: 'direct',
+            name: 'User',
+            avatar: '/placeholder.svg',
+            time: message.created_at,
             lastMessage: message.content,
-            unreadCount: message.read ? 0 : 1
+            unread: message.read ? 0 : 1,
+            participants: [user.id, chatUserId],
+            messages: [message]
           });
         }
         return acc;
@@ -85,7 +90,12 @@ const Messages = () => {
     const chat: Chat = {
       id: userId,
       userId,
-      type: 'chat'
+      type: 'direct',
+      name: 'New Chat',
+      avatar: '/placeholder.svg',
+      time: new Date().toISOString(),
+      participants: [userId],
+      messages: []
     };
     setSelectedChat(chat);
     setShowNewChat(false);
@@ -125,37 +135,6 @@ const Messages = () => {
     }
   };
 
-  const handleAddMember = async () => {
-    if (!selectedGroup || !newMemberEmail) return;
-
-    try {
-      const { data: profiles, error: profileError } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('email', newMemberEmail)
-        .maybeSingle();
-
-      if (profileError || !profiles) {
-        console.error('Error finding user:', profileError);
-        return;
-      }
-
-      const { error: memberError } = await supabase
-        .from('group_members')
-        .insert({
-          group_id: selectedGroup.id,
-          user_id: profiles.id
-        });
-
-      if (memberError) throw memberError;
-
-      setNewMemberEmail("");
-      setShowAddMembers(false);
-    } catch (error) {
-      console.error('Error adding member:', error);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -176,6 +155,7 @@ const Messages = () => {
           </div>
           <div className="col-span-8">
             <ChatWindow
+              selectedChat={selectedChat}
               chat={selectedChat}
               group={selectedGroup}
               onClose={() => {
@@ -194,8 +174,10 @@ const Messages = () => {
         newMemberEmail={newMemberEmail}
         onNewChat={handleNewChat}
         onNewGroup={handleNewGroup}
-        onAddMember={handleAddMember}
-        onNewMemberEmailChange={setNewMemberEmail}
+        onAddMembers={async (emails) => {
+          // Handle adding members
+          setShowAddMembers(false);
+        }}
         onCloseNewChat={() => setShowNewChat(false)}
         onCloseNewGroup={() => setShowNewGroup(false)}
         onCloseAddMembers={() => setShowAddMembers(false)}

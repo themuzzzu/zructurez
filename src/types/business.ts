@@ -63,9 +63,9 @@ export interface Business {
   bio?: string;
   website?: string;
   image_scale?: number;
-  image_position?: { x: number; y: number };
-  staff_details?: StaffMember[];
-  owners?: BusinessOwner[];
+  image_position: { x: number; y: number };
+  staff_details: StaffMember[];
+  owners: BusinessOwner[];
   show_in_services?: boolean;
   is_open?: boolean;
   wait_time?: string;
@@ -75,8 +75,8 @@ export interface Business {
   gst_number?: string;
   verification_status?: string;
   verification_submitted_at?: string;
-  verification_documents?: any[];
-  membership_plans?: any[];
+  verification_documents: any[];
+  membership_plans: any[];
   business_portfolio?: BusinessPortfolioItem[];
   business_products?: BusinessProduct[];
   posts?: BusinessPost[];
