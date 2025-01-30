@@ -12,10 +12,14 @@ import { useNavigate } from "react-router-dom";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useGroups } from "@/hooks/useGroups";
 import { GroupList } from "@/components/groups/GroupList";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 const Communities = () => {
   const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
+  const [showAddMembers, setShowAddMembers] = useState(false);
+  const [newMemberEmail, setNewMemberEmail] = useState("");
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -46,28 +50,48 @@ const Communities = () => {
   const { data: currentUser } = useCurrentUser();
   const { data: groups, isLoading } = useGroups(!!currentUser);
 
-  const joinGroupMutation = useMutation({
-    mutationFn: async (groupId: string) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
+  const handleAddMember = async () => {
+    if (!selectedGroup || !newMemberEmail) return;
 
-      const { error } = await supabase
+    try {
+      // First get the user ID from the email
+      const { data: profiles, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', newMemberEmail)
+        .maybeSingle();
+
+      if (profileError) throw profileError;
+      if (!profiles) {
+        toast.error("User not found");
+        return;
+      }
+
+      // Add user to group
+      const { error: memberError } = await supabase
         .from('group_members')
-        .insert({ 
-          group_id: groupId,
-          user_id: user.id
+        .insert({
+          group_id: selectedGroup.id,
+          user_id: profiles.id
         });
 
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['groups'] });
-      toast.success("Successfully joined the group!");
-    },
-    onError: () => {
-      toast.error("Failed to join group");
-    },
-  });
+      if (memberError) {
+        if (memberError.code === '23505') {
+          toast.error("User is already a member of this group");
+        } else {
+          throw memberError;
+        }
+      } else {
+        toast.success("Member added successfully");
+        queryClient.invalidateQueries({ queryKey: ['groups'] });
+        setNewMemberEmail("");
+        setShowAddMembers(false);
+      }
+    } catch (error) {
+      console.error('Error adding member:', error);
+      toast.error("Failed to add member");
+    }
+  };
 
   if (isLoading) {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
@@ -98,6 +122,7 @@ const Communities = () => {
               groups={groups || []}
               selectedGroup={selectedGroup}
               onSelectGroup={setSelectedGroup}
+              onAddMembers={() => setShowAddMembers(true)}
             />
           </div>
 
@@ -118,6 +143,24 @@ const Communities = () => {
         onClose={() => setIsCreateGroupOpen(false)}
         onSuccess={() => queryClient.invalidateQueries({ queryKey: ['groups'] })}
       />
+
+      <Dialog open={showAddMembers} onOpenChange={setShowAddMembers}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Members</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Input
+              placeholder="Enter member email"
+              value={newMemberEmail}
+              onChange={(e) => setNewMemberEmail(e.target.value)}
+            />
+            <Button onClick={handleAddMember} className="w-full">
+              Add Member
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
