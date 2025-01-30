@@ -43,6 +43,7 @@ export interface BusinessPost {
   user_id: string;
   location: string | null;
   views: number | null;
+  business_id: string | null;
 }
 
 export interface Business {
@@ -51,33 +52,33 @@ export interface Business {
   name: string;
   category: string;
   description: string;
-  location?: string;
-  contact?: string;
-  hours?: string;
-  image_url?: string;
-  video_url?: string;
-  verified?: boolean;
+  location?: string | null;
+  contact?: string | null;
+  hours?: string | null;
+  image_url?: string | null;
+  video_url?: string | null;
+  verified?: boolean | null;
   created_at: string;
-  appointment_price?: number;
-  consultation_price?: number;
-  bio?: string;
-  website?: string;
-  image_scale?: number;
+  appointment_price?: number | null;
+  consultation_price?: number | null;
+  bio?: string | null;
+  website?: string | null;
+  image_scale?: number | null;
   image_position: { x: number; y: number };
   staff_details: StaffMember[];
   owners: BusinessOwner[];
-  show_in_services?: boolean;
-  is_open?: boolean;
-  wait_time?: string;
-  closure_reason?: string;
-  aadhar_number?: string;
-  pan_number?: string;
-  gst_number?: string;
-  verification_status?: string;
-  verification_submitted_at?: string;
+  show_in_services?: boolean | null;
+  is_open?: boolean | null;
+  wait_time?: string | null;
+  closure_reason?: string | null;
+  aadhar_number?: string | null;
+  pan_number?: string | null;
+  gst_number?: string | null;
+  verification_status?: string | null;
+  verification_submitted_at?: string | null;
   verification_documents: any[];
   membership_plans: any[];
-  business_portfolio?: BusinessPortfolioItem[];
-  business_products?: BusinessProduct[];
-  posts?: BusinessPost[];
+  business_portfolio: BusinessPortfolioItem[];
+  business_products: BusinessProduct[];
+  posts: BusinessPost[];
 }
