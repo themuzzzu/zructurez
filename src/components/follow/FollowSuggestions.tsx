@@ -1,8 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, MessageSquare } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface FollowSuggestion {
   id: string;
@@ -37,8 +39,30 @@ const suggestions: FollowSuggestion[] = [
 ];
 
 export const FollowSuggestions = () => {
+  const navigate = useNavigate();
+
+  const handleFollow = async (userId: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("Please sign in to follow users");
+        return;
+      }
+
+      // Here you would implement the follow logic with your backend
+      toast.success("Successfully followed user!");
+    } catch (error) {
+      console.error("Error following user:", error);
+      toast.error("Failed to follow user");
+    }
+  };
+
+  const handleMessage = (userId: string) => {
+    navigate(`/messages?userId=${userId}`);
+  };
+
   return (
-    <Card className="bg-card border-none shadow-none">
+    <Card className="bg-card border-none shadow-none mb-6">
       <CardHeader>
         <CardTitle className="text-xl">Who to follow</CardTitle>
       </CardHeader>
@@ -60,9 +84,24 @@ export const FollowSuggestions = () => {
                 <span className="text-sm text-muted-foreground">{suggestion.username}</span>
               </div>
             </div>
-            <Button variant="outline" size="sm" className="rounded-full">
-              Follow
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="rounded-full"
+                onClick={() => handleFollow(suggestion.id)}
+              >
+                Follow
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="rounded-full"
+                onClick={() => handleMessage(suggestion.id)}
+              >
+                <MessageSquare className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
         ))}
         <Button variant="link" className="text-sm text-blue-500 hover:text-blue-600 p-0">
