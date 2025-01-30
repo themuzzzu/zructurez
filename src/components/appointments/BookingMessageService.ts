@@ -1,32 +1,38 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export const getOrCreateBookingMessage = async (businessId: string) => {
-  // First check if a message template exists
-  const { data: existingTemplate, error: templateError } = await supabase
-    .from('business_booking_messages')
-    .select('message_template')
-    .eq('business_id', businessId)
-    .maybeSingle();
-
-  if (templateError) throw templateError;
-
-  // If no template exists, create one with default message
-  if (!existingTemplate) {
-    const defaultTemplate = 'Thank you for booking with us! Your appointment is scheduled for {date} at {time}. Payment amount: ${amount}. Token number: {token}';
-    
-    const { error: createError } = await supabase
+  try {
+    // First check if a message template exists
+    const { data: existingTemplate, error: templateError } = await supabase
       .from('business_booking_messages')
-      .insert({
-        business_id: businessId,
-        message_template: defaultTemplate
-      });
+      .select('message_template')
+      .eq('business_id', businessId)
+      .maybeSingle();
 
-    if (createError) throw createError;
+    if (templateError) throw templateError;
 
-    return defaultTemplate;
+    // If no template exists, create one with default message
+    if (!existingTemplate) {
+      const defaultTemplate = 'Thank you for booking with us! Your appointment is scheduled for {date} at {time}. Payment amount: ${amount}. Token number: {token}';
+      
+      const { error: createError } = await supabase
+        .from('business_booking_messages')
+        .insert({
+          business_id: businessId,
+          message_template: defaultTemplate
+        });
+
+      if (createError) throw createError;
+
+      return defaultTemplate;
+    }
+
+    return existingTemplate.message_template;
+  } catch (error) {
+    console.error('Error getting/creating booking message:', error);
+    // Return default template as fallback
+    return 'Thank you for booking with us! Your appointment is scheduled for {date} at {time}. Payment amount: ${amount}. Token number: {token}';
   }
-
-  return existingTemplate.message_template;
 };
 
 export const formatBookingMessage = (

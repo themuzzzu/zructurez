@@ -1,153 +1,61 @@
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { ChatList } from "@/components/chat/ChatList";
-import { ChatWindow } from "@/components/chat/ChatWindow";
-import { GroupList } from "@/components/groups/GroupList";
-import { GroupChat } from "@/components/groups/GroupChat";
-import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Home, ArrowLeft, Users2, MessageCircle } from "lucide-react";
-import type { Chat } from "@/types/chat";
-import type { Group } from "@/types/group";
-import { toast } from "sonner";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+import { supabase } from "@/integrations/supabase/client";
+import { ChatWindow } from "@/components/chat/ChatWindow";
+import { ChatList } from "@/components/chat/ChatList";
+import { ChatDialogs } from "@/components/chat/ChatDialogs";
+import { Navbar } from "@/components/Navbar";
+import type { Chat, Group } from "@/types/chat";
 
 const Messages = () => {
-  const [chats, setChats] = useState<Chat[]>([]);
-  const [groups, setGroups] = useState<Group[]>([]);
+  const navigate = useNavigate();
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [showNewChat, setShowNewChat] = useState(false);
+  const [showNewGroup, setShowNewGroup] = useState(false);
   const [showAddMembers, setShowAddMembers] = useState(false);
   const [newMemberEmail, setNewMemberEmail] = useState("");
-  const navigate = useNavigate();
+  const [chats, setChats] = useState<Chat[]>([]);
+  const [groups, setGroups] = useState<Group[]>([]);
 
   useEffect(() => {
-    loadChats();
-    loadGroups();
-    subscribeToMessages();
-    subscribeToGroupMessages();
-  }, []);
-
-  const subscribeToMessages = () => {
-    const channel = supabase
-      .channel('messages-channel')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages'
-        },
-        (payload) => {
-          console.log('New message received:', payload);
-          loadChats(); // Reload chats when new message arrives
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  };
-
-  const subscribeToGroupMessages = () => {
-    const channel = supabase
-      .channel('group-messages-channel')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'group_messages'
-        },
-        (payload) => {
-          console.log('New group message received:', payload);
-          loadGroups(); // Reload groups when new message arrives
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  };
-
-  const loadChats = async () => {
-    try {
+    const fetchChats = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        toast.error("Please log in to view messages");
+        navigate('/auth');
         return;
       }
 
+      // Fetch direct messages
       const { data: messages, error: messagesError } = await supabase
         .from('messages')
         .select('*')
         .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
         .order('created_at', { ascending: false });
 
-      if (messagesError) throw messagesError;
-
-      const userIds = new Set<string>();
-      messages?.forEach(msg => {
-        userIds.add(msg.sender_id);
-        userIds.add(msg.receiver_id);
-      });
-
-      if (userIds.size === 0) {
-        setChats([]);
-        setLoading(false);
+      if (messagesError) {
+        console.error('Error fetching messages:', messagesError);
         return;
       }
 
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('id, username, avatar_url')
-        .in('id', Array.from(userIds));
-
-      if (profilesError) throw profilesError;
-
-      const profileMap = new Map(profiles?.map(profile => [profile.id, profile]));
-      const chatMap = new Map<string, Chat>();
-      
-      messages?.forEach(msg => {
-        const isUserSender = msg.sender_id === user.id;
-        const otherUserId = isUserSender ? msg.receiver_id : msg.sender_id;
-        const otherUser = profileMap.get(otherUserId);
-
-        if (!chatMap.has(otherUserId) && otherUser) {
-          chatMap.set(otherUserId, {
-            id: otherUserId,
-            name: otherUser.username || 'Unknown User',
-            avatar: otherUser.avatar_url || '/placeholder.svg',
-            lastMessage: msg.content,
-            time: new Date(msg.created_at).toLocaleTimeString(),
-            unread: msg.receiver_id === user.id && !msg.read ? 1 : 0,
-            userId: otherUserId,
-            messages: [],
-            type: 'chat'
+      // Create unique chats from messages
+      const uniqueChats = messages.reduce((acc: Chat[], message) => {
+        const chatUserId = message.sender_id === user.id ? message.receiver_id : message.sender_id;
+        if (!acc.find(chat => chat.userId === chatUserId)) {
+          acc.push({
+            id: chatUserId,
+            userId: chatUserId,
+            type: 'chat',
+            lastMessage: message.content,
+            unreadCount: message.read ? 0 : 1
           });
         }
-      });
+        return acc;
+      }, []);
 
-      setChats(Array.from(chatMap.values()));
-    } catch (error) {
-      console.error('Error loading chats:', error);
-      toast.error("Failed to load chats");
-    } finally {
-      setLoading(false);
-    }
-  };
+      setChats(uniqueChats);
 
-  const loadGroups = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
+      // Fetch groups
       const { data: userGroups, error: groupsError } = await supabase
         .from('group_members')
         .select(`
@@ -157,31 +65,63 @@ const Messages = () => {
             description,
             image_url,
             created_at,
-            user_id,
-            group_members (
-              user_id
-            )
+            user_id
           )
         `)
         .eq('user_id', user.id);
 
-      if (groupsError) throw groupsError;
+      if (groupsError) {
+        console.error('Error fetching groups:', groupsError);
+        return;
+      }
 
-      const formattedGroups = userGroups
-        .map(membership => membership.group)
-        .filter(group => group)
-        .map(group => ({
-          ...group,
-          group_members: {
-            count: group.group_members.length,
-            members: group.group_members.map((m: any) => m.user_id)
-          }
-        }));
+      setGroups(userGroups.map(ug => ug.group));
+    };
 
-      setGroups(formattedGroups);
+    fetchChats();
+  }, [navigate]);
+
+  const handleNewChat = async (userId: string) => {
+    const chat: Chat = {
+      id: userId,
+      userId,
+      type: 'chat'
+    };
+    setSelectedChat(chat);
+    setShowNewChat(false);
+  };
+
+  const handleNewGroup = async (name: string, description?: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: group, error: groupError } = await supabase
+        .from('groups')
+        .insert({
+          name,
+          description,
+          user_id: user.id
+        })
+        .select()
+        .single();
+
+      if (groupError) throw groupError;
+
+      const { error: memberError } = await supabase
+        .from('group_members')
+        .insert({
+          group_id: group.id,
+          user_id: user.id
+        });
+
+      if (memberError) throw memberError;
+
+      setGroups(prev => [...prev, group]);
+      setSelectedGroup(group);
+      setShowNewGroup(false);
     } catch (error) {
-      console.error('Error loading groups:', error);
-      toast.error("Failed to load groups");
+      console.error('Error creating group:', error);
     }
   };
 
@@ -195,9 +135,8 @@ const Messages = () => {
         .eq('email', newMemberEmail)
         .maybeSingle();
 
-      if (profileError) throw profileError;
-      if (!profiles) {
-        toast.error("User not found");
+      if (profileError || !profiles) {
+        console.error('Error finding user:', profileError);
         return;
       }
 
@@ -208,149 +147,59 @@ const Messages = () => {
           user_id: profiles.id
         });
 
-      if (memberError) {
-        if (memberError.code === '23505') {
-          toast.error("User is already a member of this group");
-        } else {
-          throw memberError;
-        }
-      } else {
-        toast.success("Member added successfully");
-        loadGroups();
-        setNewMemberEmail("");
-        setShowAddMembers(false);
-      }
+      if (memberError) throw memberError;
+
+      setNewMemberEmail("");
+      setShowAddMembers(false);
     } catch (error) {
       console.error('Error adding member:', error);
-      toast.error("Failed to add member");
     }
   };
 
-  if (loading) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
-  }
-
   return (
-    <div className="flex h-screen bg-background">
-      <div className={`${
-        (selectedChat || selectedGroup) ? 'hidden md:flex' : 'flex'
-      } w-full md:w-80 border-r flex-col`}>
-        <div className="p-4 border-b flex items-center justify-between">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate('/')}
-            className="hover:bg-accent/50"
-          >
-            <Home className="h-5 w-5" />
-          </Button>
-          <h1 className="text-xl font-semibold">Messages</h1>
-          <div className="w-10" />
-        </div>
-        
-        <Tabs defaultValue="chats" className="w-full">
-          <TabsList className="w-full">
-            <TabsTrigger value="chats" className="w-full">
-              <MessageCircle className="w-4 h-4 mr-2" />
-              Chats
-            </TabsTrigger>
-            <TabsTrigger value="groups" className="w-full">
-              <Users2 className="w-4 h-4 mr-2" />
-              Groups
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="chats" className="mt-0">
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      <div className="container max-w-7xl mx-auto pt-20 pb-16">
+        <div className="grid grid-cols-12 gap-6">
+          <div className="col-span-4 space-y-4">
             <ChatList
               chats={chats}
-              selectedChat={selectedChat}
-              onSelectChat={setSelectedChat}
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-            />
-          </TabsContent>
-          <TabsContent value="groups" className="mt-0">
-            <GroupList
               groups={groups}
+              selectedChat={selectedChat}
               selectedGroup={selectedGroup}
-              onSelectGroup={(group) => {
-                setSelectedGroup(group);
-                setSelectedChat(null);
-              }}
+              onSelectChat={setSelectedChat}
+              onSelectGroup={setSelectedGroup}
+              onNewChat={() => setShowNewChat(true)}
+              onNewGroup={() => setShowNewGroup(true)}
               onAddMembers={() => setShowAddMembers(true)}
             />
-          </TabsContent>
-        </Tabs>
-      </div>
-
-      <div className={`${
-        (selectedChat || selectedGroup) ? 'flex' : 'hidden md:flex'
-      } flex-1 flex-col`}>
-        {(selectedChat || selectedGroup) && (
-          <div className="p-4 border-b flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => {
+          </div>
+          <div className="col-span-8">
+            <ChatWindow
+              chat={selectedChat}
+              group={selectedGroup}
+              onClose={() => {
                 setSelectedChat(null);
                 setSelectedGroup(null);
               }}
-              className="md:hidden hover:bg-accent/50"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <span className="font-semibold">
-              {selectedChat?.name || selectedGroup?.name}
-            </span>
-            {selectedGroup && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="ml-auto"
-                onClick={() => setShowAddMembers(true)}
-              >
-                <Users2 className="h-4 w-4 mr-2" />
-                Add Members
-              </Button>
-            )}
+            />
           </div>
-        )}
-        
-        {selectedChat && (
-          <ChatWindow
-            selectedChat={selectedChat}
-            onBack={() => setSelectedChat(null)}
-            onMessageSent={loadChats}
-          />
-        )}
-        
-        {selectedGroup && (
-          <GroupChat groupId={selectedGroup.id} />
-        )}
-        
-        {!selectedChat && !selectedGroup && (
-          <div className="flex items-center justify-center h-full text-muted-foreground">
-            Select a chat or group to start messaging
-          </div>
-        )}
+        </div>
       </div>
 
-      <Dialog open={showAddMembers} onOpenChange={setShowAddMembers}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add Members</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <Input
-              placeholder="Enter member email"
-              value={newMemberEmail}
-              onChange={(e) => setNewMemberEmail(e.target.value)}
-            />
-            <Button onClick={handleAddMember} className="w-full">
-              Add Member
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ChatDialogs
+        showNewChat={showNewChat}
+        showNewGroup={showNewGroup}
+        showAddMembers={showAddMembers}
+        newMemberEmail={newMemberEmail}
+        onNewChat={handleNewChat}
+        onNewGroup={handleNewGroup}
+        onAddMember={handleAddMember}
+        onNewMemberEmailChange={setNewMemberEmail}
+        onCloseNewChat={() => setShowNewChat(false)}
+        onCloseNewGroup={() => setShowNewGroup(false)}
+        onCloseAddMembers={() => setShowAddMembers(false)}
+      />
     </div>
   );
 };
