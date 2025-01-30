@@ -25,6 +25,15 @@ export interface Message {
   expires_at?: string;
 }
 
+export interface Group {
+  id: string;
+  name: string;
+  description?: string;
+  image_url?: string;
+  created_at: string;
+  user_id: string;
+}
+
 export interface ChatHeaderProps {
   chat: Chat;
   isMuted: boolean;
@@ -55,22 +64,22 @@ export interface ChatDialogsProps {
   showNewChat: boolean;
   showNewGroup: boolean;
   showAddMembers: boolean;
-  showContactInfo: boolean;
-  setShowContactInfo: (show: boolean) => void;
-  showImageUpload: boolean;
-  setShowImageUpload: (show: boolean) => void;
-  showVideoUpload: boolean;
-  setShowVideoUpload: (show: boolean) => void;
-  showDocumentUpload: boolean;
-  setShowDocumentUpload: (show: boolean) => void;
-  showPollDialog: boolean;
-  setShowPollDialog: (show: boolean) => void;
-  showContactDialog: boolean;
-  setShowContactDialog: (show: boolean) => void;
-  selectedImage: string | null;
-  setSelectedImage: (image: string | null) => void;
-  selectedVideo: string | null;
-  setSelectedVideo: (video: string | null) => void;
+  showContactInfo?: boolean;
+  setShowContactInfo?: (show: boolean) => void;
+  showImageUpload?: boolean;
+  setShowImageUpload?: (show: boolean) => void;
+  showVideoUpload?: boolean;
+  setShowVideoUpload?: (show: boolean) => void;
+  showDocumentUpload?: boolean;
+  setShowDocumentUpload?: (show: boolean) => void;
+  showPollDialog?: boolean;
+  setShowPollDialog?: (show: boolean) => void;
+  showContactDialog?: boolean;
+  setShowContactDialog?: (show: boolean) => void;
+  selectedImage?: string | null;
+  setSelectedImage?: (image: string | null) => void;
+  selectedVideo?: string | null;
+  setSelectedVideo?: (video: string | null) => void;
   newMemberEmail: string;
   onNewChat: (userId: string) => Promise<void>;
   onNewGroup: (name: string, description?: string) => Promise<void>;

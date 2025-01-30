@@ -28,7 +28,7 @@ export interface Business {
   gst_number?: string;
   verification_status?: string;
   verification_submitted_at?: string;
-  verification_documents?: any[];
+  verification_documents: any[];
   membership_plans?: any[];
   business_products?: BusinessProduct[];
   business_portfolio?: BusinessPortfolioItem[];
@@ -48,7 +48,6 @@ export interface BusinessOwner {
   role: string;
   position: string | null;
   experience: string | null;
-  qualifications?: string;
   bio?: string;
   image_url?: string | null;
 }
