@@ -2,47 +2,48 @@ export interface Message {
   id: string;
   content: string;
   sender_id: string;
-  receiver_id: string;
   created_at: string;
   read?: boolean;
-}
-
-export interface GroupMessage {
-  id: string;
-  content: string;
-  sender_id: string;
-  group_id: string;
-  created_at: string;
-}
-
-export type ChatType = 'chat' | 'group';
-
-export interface ChatUser {
-  id: string;
-  name?: string;
-  avatar_url?: string;
-  last_seen?: string;
+  expires_at?: string | null;
 }
 
 export interface Chat {
   id: string;
-  userId: string;
-  type: ChatType;
-  name?: string;
-  avatar?: string;
-  lastMessage?: string;
-  unread?: number;
-  time?: string;
+  type: 'direct' | 'group';
+  participants: string[];
   messages?: Message[];
-  user?: ChatUser;
+  lastMessage?: Message;
+  unreadCount?: number;
 }
 
-export interface Group {
-  id: string;
-  name: string;
-  description?: string;
-  image_url?: string;
-  created_at: string;
-  user_id: string;
-  messages?: GroupMessage[];
+export interface ChatListProps {
+  chats: Chat[];
+  selectedChat: Chat | null;
+  onSelectChat: (chat: Chat) => void;
+  onNewChat?: () => void;
+  groups?: any[];
+  selectedGroup?: any;
+  onSelectGroup?: (group: any) => void;
+  onNewGroup?: () => void;
+  onAddMembers?: () => void;
+}
+
+export interface ChatWindowProps {
+  selectedChat?: Chat;
+  onClose: () => void;
+  chat?: Chat;
+  group?: any;
+}
+
+export interface ChatDialogsProps {
+  showNewChat?: boolean;
+  showNewGroup?: boolean;
+  showAddMembers?: boolean;
+  newMemberEmail?: string;
+  onNewChat?: (userId: string) => Promise<void>;
+  onNewGroup?: (name: string, description?: string) => Promise<void>;
+  onAddMembers?: (emails: string[]) => Promise<void>;
+  onCloseNewChat?: () => void;
+  onCloseNewGroup?: () => void;
+  onCloseAddMembers?: () => void;
 }

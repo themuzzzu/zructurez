@@ -1,3 +1,50 @@
+export interface BusinessOwner {
+  name: string | null;
+  role: string;
+  position: string | null;
+  experience: string | null;
+  bio?: string | null;
+  qualifications?: string | null;
+  image_url?: string | null;
+}
+
+export interface StaffMember {
+  name: string | null;
+  position: string | null;
+  experience: string | null;
+  bio?: string | null;
+  image_url?: string | null;
+}
+
+export interface BusinessPortfolioItem {
+  id: string;
+  title: string;
+  description: string | null;
+  image_url: string | null;
+  views: number | null;
+}
+
+export interface BusinessProduct {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  image_url: string | null;
+  stock: number | null;
+}
+
+export interface BusinessPost {
+  id: string;
+  content: string;
+  image_url: string | null;
+  category: string | null;
+  created_at: string;
+  profile_id: string;
+  user_id: string;
+  location: string | null;
+  views: number | null;
+}
+
 export interface Business {
   id: string;
   user_id: string;
@@ -17,17 +64,8 @@ export interface Business {
   website?: string;
   image_scale?: number;
   image_position?: { x: number; y: number };
-  staff_details?: Array<{
-    name: string | null;
-    position: string | null;
-    experience: string | null;
-  }>;
-  owners?: Array<{
-    name: string | null;
-    role: string;
-    position: string | null;
-    experience: string | null;
-  }>;
+  staff_details?: StaffMember[];
+  owners?: BusinessOwner[];
   show_in_services?: boolean;
   is_open?: boolean;
   wait_time?: string;
@@ -39,4 +77,7 @@ export interface Business {
   verification_submitted_at?: string;
   verification_documents?: any[];
   membership_plans?: any[];
+  business_portfolio?: BusinessPortfolioItem[];
+  business_products?: BusinessProduct[];
+  posts?: BusinessPost[];
 }

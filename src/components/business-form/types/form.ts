@@ -1,5 +1,5 @@
-import type { StaffMember, BusinessOwner } from "../../../types/business";
 import type { MembershipPlan } from "@/types/membership";
+import type { BusinessOwner, StaffMember } from "@/types/business";
 
 interface BusinessProduct {
   name: string;
