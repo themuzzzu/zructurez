@@ -11,6 +11,8 @@ import type { Chat } from "@/types/chat";
 import type { Group } from "@/types/group";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 const Messages = () => {
   const [chats, setChats] = useState<Chat[]>([]);
@@ -19,12 +21,60 @@ const Messages = () => {
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
+  const [showAddMembers, setShowAddMembers] = useState(false);
+  const [newMemberEmail, setNewMemberEmail] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
     loadChats();
     loadGroups();
+    subscribeToMessages();
+    subscribeToGroupMessages();
   }, []);
+
+  const subscribeToMessages = () => {
+    const channel = supabase
+      .channel('messages-channel')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages'
+        },
+        (payload) => {
+          console.log('New message received:', payload);
+          loadChats(); // Reload chats when new message arrives
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  };
+
+  const subscribeToGroupMessages = () => {
+    const channel = supabase
+      .channel('group-messages-channel')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'group_messages'
+        },
+        (payload) => {
+          console.log('New group message received:', payload);
+          loadGroups(); // Reload groups when new message arrives
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  };
 
   const loadChats = async () => {
     try {
@@ -34,7 +84,6 @@ const Messages = () => {
         return;
       }
 
-      // First, get all messages
       const { data: messages, error: messagesError } = await supabase
         .from('messages')
         .select('*')
@@ -43,7 +92,6 @@ const Messages = () => {
 
       if (messagesError) throw messagesError;
 
-      // Get all unique user IDs from messages
       const userIds = new Set<string>();
       messages?.forEach(msg => {
         userIds.add(msg.sender_id);
@@ -56,7 +104,6 @@ const Messages = () => {
         return;
       }
 
-      // Fetch profiles for all users
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('id, username, avatar_url')
@@ -64,10 +111,7 @@ const Messages = () => {
 
       if (profilesError) throw profilesError;
 
-      // Create a map of user profiles
       const profileMap = new Map(profiles?.map(profile => [profile.id, profile]));
-
-      // Create chat objects from messages
       const chatMap = new Map<string, Chat>();
       
       messages?.forEach(msg => {
@@ -102,10 +146,7 @@ const Messages = () => {
   const loadGroups = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast.error("Please log in to view groups");
-        return;
-      }
+      if (!user) return;
 
       const { data: userGroups, error: groupsError } = await supabase
         .from('group_members')
@@ -128,7 +169,7 @@ const Messages = () => {
 
       const formattedGroups = userGroups
         .map(membership => membership.group)
-        .filter(group => group) // Filter out any null values
+        .filter(group => group)
         .map(group => ({
           ...group,
           group_members: {
@@ -144,23 +185,47 @@ const Messages = () => {
     }
   };
 
-  const handleSelectChat = (chat: Chat) => {
-    setSelectedChat(chat);
-    setSelectedGroup(null);
-  };
+  const handleAddMember = async () => {
+    if (!selectedGroup || !newMemberEmail) return;
 
-  const handleSelectGroup = (group: Group) => {
-    setSelectedGroup(group);
-    setSelectedChat(null);
-  };
+    try {
+      // First get the user ID from the email
+      const { data: profiles, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', newMemberEmail)
+        .maybeSingle();
 
-  const handleBack = () => {
-    setSelectedChat(null);
-    setSelectedGroup(null);
-  };
+      if (profileError) throw profileError;
+      if (!profiles) {
+        toast.error("User not found");
+        return;
+      }
 
-  const handleSendMessage = () => {
-    loadChats();
+      // Add user to group
+      const { error: memberError } = await supabase
+        .from('group_members')
+        .insert({
+          group_id: selectedGroup.id,
+          user_id: profiles.id
+        });
+
+      if (memberError) {
+        if (memberError.code === '23505') {
+          toast.error("User is already a member of this group");
+        } else {
+          throw memberError;
+        }
+      } else {
+        toast.success("Member added successfully");
+        loadGroups();
+        setNewMemberEmail("");
+        setShowAddMembers(false);
+      }
+    } catch (error) {
+      console.error('Error adding member:', error);
+      toast.error("Failed to add member");
+    }
   };
 
   if (loading) {
@@ -209,7 +274,11 @@ const Messages = () => {
             <GroupList
               groups={groups}
               selectedGroup={selectedGroup}
-              onSelectGroup={setSelectedGroup}
+              onSelectGroup={(group) => {
+                setSelectedGroup(group);
+                setSelectedChat(null);
+              }}
+              onAddMembers={() => setShowAddMembers(true)}
             />
           </TabsContent>
         </Tabs>
@@ -223,7 +292,10 @@ const Messages = () => {
             <Button
               variant="ghost"
               size="icon"
-              onClick={handleBack}
+              onClick={() => {
+                setSelectedChat(null);
+                setSelectedGroup(null);
+              }}
               className="md:hidden hover:bg-accent/50"
             >
               <ArrowLeft className="h-5 w-5" />
@@ -231,13 +303,24 @@ const Messages = () => {
             <span className="font-semibold">
               {selectedChat?.name || selectedGroup?.name}
             </span>
+            {selectedGroup && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="ml-auto"
+                onClick={() => setShowAddMembers(true)}
+              >
+                <Users2 className="h-4 w-4 mr-2" />
+                Add Members
+              </Button>
+            )}
           </div>
         )}
         
         {selectedChat && (
           <ChatWindow
             selectedChat={selectedChat}
-            onBack={handleBack}
+            onBack={() => setSelectedChat(null)}
             onMessageSent={loadChats}
           />
         )}
@@ -252,6 +335,24 @@ const Messages = () => {
           </div>
         )}
       </div>
+
+      <Dialog open={showAddMembers} onOpenChange={setShowAddMembers}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Members</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Input
+              placeholder="Enter member email"
+              value={newMemberEmail}
+              onChange={(e) => setNewMemberEmail(e.target.value)}
+            />
+            <Button onClick={handleAddMember} className="w-full">
+              Add Member
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

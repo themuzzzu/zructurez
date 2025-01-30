@@ -8,9 +8,10 @@ interface GroupListProps {
   groups: Group[];
   selectedGroup: Group | null;
   onSelectGroup: (group: Group) => void;
+  onAddMembers: () => void;
 }
 
-export const GroupList = ({ groups, selectedGroup, onSelectGroup }: GroupListProps) => {
+export const GroupList = ({ groups, selectedGroup, onSelectGroup, onAddMembers }: GroupListProps) => {
   const [showCreateGroup, setShowCreateGroup] = useState(false);
 
   return (

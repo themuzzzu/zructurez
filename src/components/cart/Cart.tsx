@@ -63,8 +63,27 @@ export const Cart = () => {
     }
 
     try {
+      // Process the order
       await clearCartMutation.mutateAsync();
+      
+      // Create a notification for the order
+      const { data: session } = await supabase.auth.getSession();
+      if (session?.session?.user) {
+        const { error: notificationError } = await supabase
+          .from('notifications')
+          .insert({
+            user_id: session.session.user.id,
+            message: `Your order has been placed successfully! Total amount: ${formatPrice(total)}`,
+          });
+
+        if (notificationError) {
+          console.error('Error creating notification:', notificationError);
+        }
+      }
+
+      toast.success("Order placed successfully!");
     } catch (error) {
+      console.error('Error during checkout:', error);
       toast.error("Checkout failed");
     }
   };
