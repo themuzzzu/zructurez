@@ -9,12 +9,16 @@ export interface Message {
 }
 
 export interface Chat {
+  id: string;
   userId: string;
   name: string;
   avatar: string;
   time: string;
   unread: number;
-  lastMessage?: Message;
+  lastMessage?: string;
+  type: 'direct' | 'group';
+  messages: Message[];
+  participants: string[];
 }
 
 export interface Group {
@@ -36,13 +40,17 @@ export interface ChatListProps {
   onNewChat: () => void;
   onNewGroup: () => void;
   onAddMembers: () => void;
+  searchQuery?: string;
+  onSearchChange?: (query: string) => void;
 }
 
 export interface ChatWindowProps {
   selectedChat: Chat | null;
-  chat: Chat;
+  chat: Chat | null;
   group: Group | null;
   onClose: () => void;
+  onMessageSent?: () => void;
+  onBack?: () => void;
 }
 
 export interface ChatDialogsProps {

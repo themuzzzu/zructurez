@@ -1,53 +1,46 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { Business } from "@/types/business";
+import type { Business, StaffMember, BusinessOwner } from "@/types/business";
 
-export const useBusinesses = (userId?: string) => {
+export const useBusinesses = () => {
+  const fetchBusinesses = async () => {
+    const { data, error } = await supabase
+      .from("businesses")
+      .select("*");
+
+    if (error) throw error;
+
+    return data.map((business: any) => ({
+      ...business,
+      staff_details: Array.isArray(business.staff_details) 
+        ? business.staff_details.map((staff: any) => ({
+            name: staff.name || null,
+            position: staff.position || null,
+            experience: staff.experience || null,
+          }))
+        : [],
+      owners: Array.isArray(business.owners)
+        ? business.owners.map((owner: any) => ({
+            name: owner.name || null,
+            role: owner.role || "Primary Owner",
+            position: owner.position || null,
+            experience: owner.experience || null,
+          }))
+        : [],
+      image_position: typeof business.image_position === 'object'
+        ? {
+            x: business.image_position.x || 50,
+            y: business.image_position.y || 50,
+          }
+        : { x: 50, y: 50 },
+      verification_documents: Array.isArray(business.verification_documents)
+        ? business.verification_documents
+        : []
+    })) as Business[];
+  };
+
   return useQuery({
-    queryKey: ['businesses', userId],
-    queryFn: async () => {
-      if (!userId) return [];
-
-      const { data, error } = await supabase
-        .from('businesses')
-        .select(`
-          *,
-          business_portfolio (*),
-          business_products (*),
-          posts (*)
-        `)
-        .eq('user_id', userId);
-
-      if (error) {
-        console.error('Error fetching businesses:', error);
-        return [];
-      }
-
-      return data.map((business): Business => ({
-        ...business,
-        staff_details: Array.isArray(business.staff_details) 
-          ? business.staff_details 
-          : [],
-        owners: Array.isArray(business.owners)
-          ? business.owners
-          : [],
-        image_position: typeof business.image_position === 'object' 
-          ? {
-              x: Number(business.image_position.x) || 50,
-              y: Number(business.image_position.y) || 50
-            }
-          : { x: 50, y: 50 },
-        verification_documents: Array.isArray(business.verification_documents)
-          ? business.verification_documents
-          : [],
-        membership_plans: Array.isArray(business.membership_plans)
-          ? business.membership_plans
-          : [],
-        business_portfolio: business.business_portfolio || [],
-        business_products: business.business_products || [],
-        posts: business.posts || []
-      }));
-    },
-    enabled: !!userId,
+    queryKey: ["businesses"],
+    queryFn: fetchBusinesses,
   });
 };
