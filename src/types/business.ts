@@ -39,6 +39,7 @@ export interface StaffMember {
   name: string | null;
   position: string | null;
   experience: string | null;
+  image_url?: string | null;
 }
 
 export interface BusinessOwner {
@@ -46,6 +47,9 @@ export interface BusinessOwner {
   role: string;
   position: string | null;
   experience: string | null;
+  qualifications?: string | null;
+  bio?: string | null;
+  image_url?: string | null;
 }
 
 export interface BusinessProduct {

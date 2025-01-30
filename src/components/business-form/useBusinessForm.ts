@@ -34,7 +34,7 @@ export const useBusinessForm = (initialData?: any, onSuccess?: () => void) => {
     }],
     staff_details: [],
     business_products: [],
-    membership_plans: [] // Add default empty array for membership plans
+    membership_plans: []
   });
 
   useEffect(() => {
@@ -62,7 +62,7 @@ export const useBusinessForm = (initialData?: any, onSuccess?: () => void) => {
         }],
         staff_details: initialData.staff_details || [],
         business_products: initialData.business_products || [],
-        membership_plans: initialData.membership_plans || [] // Add membership plans from initialData
+        membership_plans: initialData.membership_plans || []
       });
       setPendingImage(initialData.image_url || null);
       if (initialData.image_scale) setImageScale(initialData.image_scale);

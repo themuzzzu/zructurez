@@ -94,6 +94,7 @@ const Messages = () => {
       name: 'New Chat',
       avatar: '/placeholder.svg',
       time: new Date().toISOString(),
+      unread: 0,
       participants: [userId],
       messages: []
     };
@@ -156,8 +157,6 @@ const Messages = () => {
           <div className="col-span-8">
             <ChatWindow
               selectedChat={selectedChat}
-              chat={selectedChat}
-              group={selectedGroup}
               onClose={() => {
                 setSelectedChat(null);
                 setSelectedGroup(null);
@@ -175,7 +174,6 @@ const Messages = () => {
         onNewChat={handleNewChat}
         onNewGroup={handleNewGroup}
         onAddMembers={async (emails) => {
-          // Handle adding members
           setShowAddMembers(false);
         }}
         onCloseNewChat={() => setShowNewChat(false)}

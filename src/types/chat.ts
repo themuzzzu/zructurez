@@ -46,8 +46,6 @@ export interface ChatListProps {
 
 export interface ChatWindowProps {
   selectedChat: Chat | null;
-  chat: Chat | null;
-  group: Group | null;
   onClose: () => void;
   onMessageSent?: () => void;
   onBack?: () => void;
