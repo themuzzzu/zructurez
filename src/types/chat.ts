@@ -17,13 +17,24 @@ export interface GroupMessage {
 
 export type ChatType = 'chat' | 'group';
 
+export interface ChatUser {
+  id: string;
+  name?: string;
+  avatar_url?: string;
+  last_seen?: string;
+}
+
 export interface Chat {
   id: string;
   userId: string;
   type: ChatType;
+  name?: string;
+  avatar?: string;
   lastMessage?: string;
-  unreadCount?: number;
+  unread?: number;
+  time?: string;
   messages?: Message[];
+  user?: ChatUser;
 }
 
 export interface Group {

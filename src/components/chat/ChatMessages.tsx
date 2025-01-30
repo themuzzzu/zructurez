@@ -53,8 +53,8 @@ export const ChatMessages = ({ messages, currentUserId, isGroup, onForwardMessag
           <MessageBubble
             key={message.id}
             content={message.content}
-            timestamp={format(new Date(message.timestamp), 'p')}
-            isOwn={message.senderId === currentUserId}
+            timestamp={format(new Date(message.created_at), 'p')}
+            isOwn={message.sender_id === currentUserId}
             messageId={message.id}
             onForward={onForwardMessage}
           />
