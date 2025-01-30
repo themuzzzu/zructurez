@@ -1,108 +1,36 @@
 import { useState } from "react";
-import { Chat } from "@/types/chat";
-import { useMessageHandling } from "./hooks/useMessageHandling";
-import { useMessageForwarding } from "./hooks/useMessageForwarding";
-import { useAttachments } from "./hooks/useAttachments";
 import { ChatHeader } from "./ChatHeader";
 import { ChatMessages } from "./ChatMessages";
 import { ChatInput } from "./ChatInput";
 import { ChatDialogs } from "./ChatDialogs";
-import { useAuth } from "../../hooks/useAuth";
+import type { Chat } from "@/types/chat";
 
 interface ChatWindowProps {
-  selectedChat: Chat | null;
-  onBack?: () => void;
-  onMessageSent?: () => void;
+  selectedChat: Chat;
   onClose: () => void;
 }
 
-export const ChatWindow = ({
-  selectedChat,
-  onBack,
-  onMessageSent,
-  onClose,
-}: ChatWindowProps) => {
+export const ChatWindow = ({ selectedChat, onClose }: ChatWindowProps) => {
   const [showContactInfo, setShowContactInfo] = useState(false);
-  const [isSelectMode, setIsSelectMode] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-  const [message, setMessage] = useState("");
-  const { user } = useAuth();
-
-  const {
-    showImageUpload,
-    setShowImageUpload,
-    showVideoUpload,
-    setShowVideoUpload,
-    showDocumentUpload,
-    setShowDocumentUpload,
-    showPollDialog,
-    setShowPollDialog,
-    showContactDialog,
-    setShowContactDialog,
-    handleAttachment,
-  } = useAttachments();
-
-  const {
-    selectedImage,
-    setSelectedImage,
-    selectedVideo,
-    setSelectedVideo,
-    handleSendMessage,
-    handleSendImage,
-    handleSendVideo,
-  } = useMessageHandling(selectedChat, message, setMessage, onMessageSent);
-
-  const { handleForwardMessage } = useMessageForwarding();
-
-  if (!selectedChat) {
-    return (
-      <div className="flex-1 flex items-center justify-center text-muted-foreground">
-        Select a chat to start messaging
-      </div>
-    );
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (selectedImage) {
-      await handleSendImage();
-    } else if (selectedVideo) {
-      await handleSendVideo();
-    } else {
-      await handleSendMessage();
-    }
-  };
+  const [showImageUpload, setShowImageUpload] = useState(false);
+  const [showVideoUpload, setShowVideoUpload] = useState(false);
+  const [showDocumentUpload, setShowDocumentUpload] = useState(false);
+  const [showPollDialog, setShowPollDialog] = useState(false);
+  const [showContactDialog, setShowContactDialog] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
 
   return (
     <div className="flex flex-col h-full">
-      <ChatHeader
-        chat={selectedChat}
-        isMuted={isMuted}
-        setIsMuted={setIsMuted}
-        setShowContactInfo={setShowContactInfo}
-        setIsSelectMode={setIsSelectMode}
-        isSelectMode={isSelectMode}
-        onBack={onBack}
-      />
-
-      <div className="flex-1 overflow-y-auto">
-        <ChatMessages 
-          messages={selectedChat.messages || []}
-          currentUserId={user?.id || ''}
-          isGroup={selectedChat.type === 'group'}
-          onForwardMessage={handleForwardMessage}
-        />
-      </div>
-
-      <ChatInput
-        message={message}
-        onMessageChange={setMessage}
-        onSubmit={handleSubmit}
-        onAttachment={handleAttachment}
-      />
-
+      <ChatHeader chat={selectedChat} onClose={onClose} />
+      <ChatMessages chat={selectedChat} />
+      <ChatInput chat={selectedChat} />
+      
       <ChatDialogs
         selectedChat={selectedChat}
+        showNewChat={false}
+        showNewGroup={false}
+        showAddMembers={false}
         showContactInfo={showContactInfo}
         setShowContactInfo={setShowContactInfo}
         showImageUpload={showImageUpload}
@@ -119,6 +47,13 @@ export const ChatWindow = ({
         setSelectedImage={setSelectedImage}
         selectedVideo={selectedVideo}
         setSelectedVideo={setSelectedVideo}
+        newMemberEmail=""
+        onNewChat={async () => {}}
+        onNewGroup={async () => {}}
+        onAddMembers={async () => {}}
+        onCloseNewChat={() => {}}
+        onCloseNewGroup={() => {}}
+        onCloseAddMembers={() => {}}
       />
     </div>
   );
