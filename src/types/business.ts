@@ -28,8 +28,8 @@ export interface Business {
   gst_number?: string;
   verification_status?: string;
   verification_submitted_at?: string;
-  verification_documents: any[];
-  membership_plans?: any;
+  verification_documents?: any[];
+  membership_plans?: any[];
   business_products?: BusinessProduct[];
   business_portfolio?: BusinessPortfolioItem[];
   posts?: BusinessPost[];
@@ -39,7 +39,6 @@ export interface StaffMember {
   name: string | null;
   position: string | null;
   experience: string | null;
-  image_url?: string | null;
 }
 
 export interface BusinessOwner {
@@ -47,9 +46,6 @@ export interface BusinessOwner {
   role: string;
   position: string | null;
   experience: string | null;
-  qualifications?: string | null;
-  bio?: string | null;
-  image_url?: string | null;
 }
 
 export interface BusinessProduct {
@@ -78,6 +74,6 @@ export interface BusinessPost {
   location?: string;
   category?: string;
   created_at: string;
-  views?: number;
-  business_id?: string;
+  business_id: string | null;
+  views: number | null;
 }

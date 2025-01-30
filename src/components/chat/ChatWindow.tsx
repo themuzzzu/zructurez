@@ -19,12 +19,56 @@ export const ChatWindow = ({ selectedChat, onClose }: ChatWindowProps) => {
   const [showContactDialog, setShowContactDialog] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isSelectMode, setIsSelectMode] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Handle message submission
+  };
+
+  const handleAttachment = (type: string) => {
+    switch (type) {
+      case "image":
+        setShowImageUpload(true);
+        break;
+      case "video":
+        setShowVideoUpload(true);
+        break;
+      case "document":
+        setShowDocumentUpload(true);
+        break;
+      case "poll":
+        setShowPollDialog(true);
+        break;
+      case "contact":
+        setShowContactDialog(true);
+        break;
+    }
+  };
 
   return (
     <div className="flex flex-col h-full">
-      <ChatHeader chat={selectedChat} onClose={onClose} />
-      <ChatMessages chat={selectedChat} />
-      <ChatInput chat={selectedChat} />
+      <ChatHeader
+        chat={selectedChat}
+        isMuted={isMuted}
+        setIsMuted={setIsMuted}
+        setShowContactInfo={setShowContactInfo}
+        setIsSelectMode={setIsSelectMode}
+        isSelectMode={isSelectMode}
+        onClose={onClose}
+      />
+      <ChatMessages
+        messages={selectedChat.messages}
+        currentUserId={selectedChat.userId}
+      />
+      <ChatInput
+        message={message}
+        onMessageChange={setMessage}
+        onSubmit={handleSubmit}
+        onAttachment={handleAttachment}
+      />
       
       <ChatDialogs
         selectedChat={selectedChat}
