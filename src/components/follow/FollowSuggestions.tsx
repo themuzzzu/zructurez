@@ -1,113 +1,128 @@
+import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { CheckCircle, MessageSquare } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Card } from "@/components/ui/card";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-
-interface FollowSuggestion {
-  id: string;
-  name: string;
-  username: string;
-  avatar_url: string;
-  isVerified?: boolean;
-}
-
-const suggestions: FollowSuggestion[] = [
-  {
-    id: "1",
-    name: "Manobala Vijayabalan",
-    username: "@ManobalaV",
-    avatar_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Manobala",
-    isVerified: true
-  },
-  {
-    id: "2",
-    name: "Tadas Viskanta",
-    username: "@abnormalreturns",
-    avatar_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Tadas",
-    isVerified: true
-  },
-  {
-    id: "3",
-    name: "Harry Stebbings",
-    username: "@HarryStebbings",
-    avatar_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Harry",
-    isVerified: true
-  }
-];
+import { MessageCircle, UserPlus } from "lucide-react";
 
 export const FollowSuggestions = () => {
   const navigate = useNavigate();
 
-  const handleFollow = async (userId: string) => {
+  const { data: profiles = [], isLoading } = useQuery({
+    queryKey: ['suggested-profiles'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .neq('id', user.id)
+        .limit(3);
+
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const handleFollow = async (profileId: string) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        toast.error("Please sign in to follow users");
+        toast.error('You must be logged in to follow users');
         return;
       }
 
-      // Here you would implement the follow logic with your backend
-      toast.success("Successfully followed user!");
+      // Add follow logic here when implementing follow feature
+      toast.success('User followed successfully');
     } catch (error) {
-      console.error("Error following user:", error);
-      toast.error("Failed to follow user");
+      console.error('Error following user:', error);
+      toast.error('Failed to follow user');
     }
   };
 
-  const handleMessage = (userId: string) => {
-    navigate(`/messages?userId=${userId}`);
+  const handleMessage = async (profileId: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error('You must be logged in to send messages');
+        return;
+      }
+
+      // Create or get existing chat
+      const { data: existingMessages, error: fetchError } = await supabase
+        .from('messages')
+        .select('*')
+        .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+        .or(`sender_id.eq.${profileId},receiver_id.eq.${profileId}`)
+        .limit(1);
+
+      if (fetchError) throw fetchError;
+
+      // If no existing chat, create first message
+      if (!existingMessages || existingMessages.length === 0) {
+        const { error: sendError } = await supabase
+          .from('messages')
+          .insert({
+            sender_id: user.id,
+            receiver_id: profileId,
+            content: 'Hey! 👋'
+          });
+
+        if (sendError) throw sendError;
+      }
+
+      // Navigate to messages page
+      navigate('/messages');
+      toast.success('Chat started!');
+    } catch (error) {
+      console.error('Error starting chat:', error);
+      toast.error('Failed to start chat');
+    }
   };
 
+  if (isLoading) {
+    return <div>Loading suggestions...</div>;
+  }
+
   return (
-    <Card className="bg-card border-none shadow-none mb-6">
-      <CardHeader>
-        <CardTitle className="text-xl">Who to follow</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {suggestions.map((suggestion) => (
-          <div key={suggestion.id} className="flex items-center justify-between">
+    <Card className="p-4 my-4">
+      <h3 className="font-semibold text-lg mb-4">Who to Follow</h3>
+      <div className="space-y-4">
+        {profiles.map((profile) => (
+          <div key={profile.id} className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Avatar>
-                <AvatarImage src={suggestion.avatar_url} alt={suggestion.name} />
-                <AvatarFallback>{suggestion.name[0]}</AvatarFallback>
-              </Avatar>
+              <img
+                src={profile.avatar_url || '/placeholder.svg'}
+                alt={profile.username}
+                className="w-10 h-10 rounded-full object-cover"
+              />
               <div>
-                <div className="flex items-center gap-1">
-                  <span className="font-semibold text-sm">{suggestion.name}</span>
-                  {suggestion.isVerified && (
-                    <CheckCircle className="w-4 h-4 text-blue-500 fill-current" />
-                  )}
-                </div>
-                <span className="text-sm text-muted-foreground">{suggestion.username}</span>
+                <p className="font-medium">{profile.username || 'Anonymous'}</p>
+                <p className="text-sm text-muted-foreground">{profile.bio || 'No bio'}</p>
               </div>
             </div>
             <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="rounded-full"
-                onClick={() => handleFollow(suggestion.id)}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleMessage(profile.id)}
               >
-                Follow
+                <MessageCircle className="h-4 w-4 mr-1" />
+                Message
               </Button>
               <Button
-                variant="ghost"
                 size="sm"
-                className="rounded-full"
-                onClick={() => handleMessage(suggestion.id)}
+                onClick={() => handleFollow(profile.id)}
               >
-                <MessageSquare className="w-4 h-4" />
+                <UserPlus className="h-4 w-4 mr-1" />
+                Follow
               </Button>
             </div>
           </div>
         ))}
-        <Button variant="link" className="text-sm text-blue-500 hover:text-blue-600 p-0">
-          Show more
-        </Button>
-      </CardContent>
+      </div>
     </Card>
   );
 };
