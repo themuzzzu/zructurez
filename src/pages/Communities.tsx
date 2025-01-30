@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { CreateGroupForm } from "@/components/groups/CreateGroupForm";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Group } from "@/types/group";
+import { Group } from "@/types/chat";
 import { GroupChat } from "@/components/groups/GroupChat";
 import { useNavigate } from "react-router-dom";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
