@@ -10,12 +10,11 @@ interface ChatListItemProps {
 export const ChatListItem = ({ chat, isSelected, onClick }: ChatListItemProps) => {
   const formatTimestamp = (timestamp: string) => {
     try {
-      // First parse the ISO string to a Date object
       const date = parseISO(timestamp);
       return formatDistanceToNow(date, { addSuffix: true });
     } catch (error) {
       console.error('Error formatting date:', error);
-      return 'recently'; // Fallback text if date is invalid
+      return 'recently';
     }
   };
 
@@ -40,7 +39,7 @@ export const ChatListItem = ({ chat, isSelected, onClick }: ChatListItemProps) =
           </span>
         </div>
         <p className="text-sm text-muted-foreground truncate">
-          {chat.lastMessage}
+          {chat.lastMessage?.content}
         </p>
         {chat.unread > 0 && (
           <span className="inline-flex items-center justify-center bg-primary text-primary-foreground text-xs font-medium h-5 min-w-5 rounded-full px-1.5 mt-1">

@@ -81,9 +81,9 @@ export interface ChatDialogsProps {
   selectedVideo: string | null;
   setSelectedVideo: (video: string | null) => void;
   newMemberEmail: string;
-  onNewChat: () => Promise<void>;
-  onNewGroup: () => Promise<void>;
-  onAddMembers: () => Promise<void>;
+  onNewChat: (userId: string) => Promise<void>;
+  onNewGroup: (name: string, description?: string) => Promise<void>;
+  onAddMembers: (emails: any) => Promise<void>;
   onCloseNewChat: () => void;
   onCloseNewGroup: () => void;
   onCloseAddMembers: () => void;

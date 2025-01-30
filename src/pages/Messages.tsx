@@ -32,25 +32,36 @@ const Messages = () => {
     }
 
     const chatMap = new Map<string, Message[]>();
-    messages.forEach((message: Message) => {
+    messages.forEach((message: any) => {
       const otherUserId = message.sender_id === user.id ? message.receiver_id : message.sender_id;
       if (!chatMap.has(otherUserId)) {
         chatMap.set(otherUserId, []);
       }
-      chatMap.get(otherUserId)?.push({
-        senderId: message.sender_id,
-        content: message.content,
-        timestamp: new Date(message.created_at).toISOString(),
+      const formattedMessage: Message = {
         id: message.id,
-      });
+        content: message.content,
+        senderId: message.sender_id,
+        timestamp: new Date(message.created_at).toISOString(),
+        created_at: message.created_at,
+        sender_id: message.sender_id,
+        receiver_id: message.receiver_id,
+        read: message.read || false,
+        expires_at: message.expires_at
+      };
+      chatMap.get(otherUserId)?.push(formattedMessage);
     });
 
-    const chatArray = Array.from(chatMap.entries()).map(([userId, messages]) => ({
+    const chatArray: Chat[] = Array.from(chatMap.entries()).map(([userId, messages]) => ({
       id: userId,
       userId: userId,
-      messages: messages,
-      lastMessage: messages[0],
-      unreadCount: messages.filter(m => !m.read && m.sender_id !== user.id).length,
+      type: 'direct',
+      name: 'User',  // You might want to fetch user names from profiles
+      avatar: '/placeholder.svg',  // You might want to fetch user avatars
+      time: messages[0]?.created_at || new Date().toISOString(),
+      lastMessage: messages[0] || null,
+      unread: messages.filter(m => !m.read && m.sender_id !== user.id).length,
+      participants: [user.id, userId],
+      messages: messages
     }));
 
     setChats(chatArray);
@@ -73,11 +84,11 @@ const Messages = () => {
             selectedGroup={selectedGroup}
             onSelectChat={setSelectedChat}
             onSelectGroup={setSelectedGroup}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
             onNewChat={() => setShowNewChat(true)}
             onNewGroup={() => setShowNewGroup(true)}
             onAddMembers={() => setShowAddMembers(true)}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
           />
         </div>
         <div className="col-span-8">
@@ -95,14 +106,35 @@ const Messages = () => {
         showNewChat={showNewChat}
         showNewGroup={showNewGroup}
         showAddMembers={showAddMembers}
+        showContactInfo={false}
+        setShowContactInfo={() => {}}
+        showImageUpload={false}
+        setShowImageUpload={() => {}}
+        showVideoUpload={false}
+        setShowVideoUpload={() => {}}
+        showDocumentUpload={false}
+        setShowDocumentUpload={() => {}}
+        showPollDialog={false}
+        setShowPollDialog={() => {}}
+        showContactDialog={false}
+        setShowContactDialog={() => {}}
+        selectedImage={null}
+        setSelectedImage={() => {}}
+        selectedVideo={null}
+        setSelectedVideo={() => {}}
         newMemberEmail={newMemberEmail}
         onNewChat={async (userId: string) => {
           const newChat: Chat = {
             id: userId,
             userId: userId,
-            messages: [],
+            type: 'direct',
+            name: 'New Chat',
+            avatar: '/placeholder.svg',
+            time: new Date().toISOString(),
             lastMessage: null,
-            unreadCount: 0,
+            unread: 0,
+            participants: [],
+            messages: []
           };
           setChats([...chats, newChat]);
           setSelectedChat(newChat);
@@ -133,7 +165,6 @@ const Messages = () => {
           setShowNewGroup(false);
         }}
         onAddMembers={async (emails: string[]) => {
-          // Add members to the selected group
           if (!selectedGroup) return;
 
           const { error } = await supabase
@@ -141,7 +172,7 @@ const Messages = () => {
             .insert(
               emails.map(email => ({
                 group_id: selectedGroup.id,
-                user_id: email, // Assuming email is actually the user ID
+                user_id: email,
               }))
             );
 
