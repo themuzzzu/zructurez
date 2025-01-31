@@ -7,7 +7,6 @@ export interface Chat {
   unreadCount?: number;
   isGroup?: boolean;
   groupInfo?: Group;
-  // Adding back needed properties
   userId: string;
   type: 'direct' | 'group';
   name: string;
@@ -48,7 +47,8 @@ export interface ChatHeaderProps {
   setShowContactInfo: (show: boolean) => void;
   setIsSelectMode: (mode: boolean) => void;
   isSelectMode: boolean;
-  onClose?: () => void;
+  onBack?: () => void;
+  onClose?: () => void; // Added this line
 }
 
 export interface ChatDialogsProps {
