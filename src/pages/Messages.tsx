@@ -6,6 +6,7 @@ import { ChatDialogs } from "@/components/chat/ChatDialogs";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MessageSquare, Users } from "lucide-react";
 import { useGroups } from "@/hooks/useGroups";
+import { toast } from "sonner";
 import type { Chat, Group } from "@/types/chat";
 
 const Messages = () => {
@@ -19,7 +20,28 @@ const Messages = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("chats");
   
-  const { data: groups = [] } = useGroups(true);
+  const { data: groupsData = [] } = useGroups(true);
+
+  // Map the groups data to match the Group interface
+  const groups: Group[] = groupsData.map(group => ({
+    id: group.id,
+    userId: group.user_id,
+    type: 'group',
+    name: group.name,
+    description: group.description,
+    image_url: group.image_url,
+    created_at: group.created_at,
+    user_id: group.user_id,
+    avatar: group.image_url || '/placeholder.svg',
+    time: group.created_at,
+    lastMessage: null,
+    unread: 0,
+    participants: [],
+    messages: [],
+    unreadCount: 0,
+    isGroup: true,
+    group_members: group.group_members
+  }));
 
   const fetchChats = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -68,6 +90,100 @@ const Messages = () => {
     const interval = setInterval(fetchChats, 5000);
     return () => clearInterval(interval);
   }, []);
+
+  const handleCreateGroup = async (name: string, description?: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("You must be logged in to create a group");
+        return;
+      }
+
+      const { data: group, error } = await supabase
+        .from('groups')
+        .insert([
+          {
+            name,
+            description,
+            user_id: user.id,
+          }
+        ])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Auto-join the created group
+      const { error: memberError } = await supabase
+        .from('group_members')
+        .insert({
+          group_id: group.id,
+          user_id: user.id
+        });
+
+      if (memberError) throw memberError;
+
+      toast.success("Group created successfully!");
+      setShowNewGroup(false);
+    } catch (error) {
+      console.error('Error creating group:', error);
+      toast.error("Failed to create group");
+    }
+  };
+
+  const handleJoinGroup = async (groupId: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("You must be logged in to join a group");
+        return;
+      }
+
+      const { error } = await supabase
+        .from('group_members')
+        .insert({
+          group_id: groupId,
+          user_id: user.id
+        });
+
+      if (error) {
+        if (error.code === '23505') {
+          toast.error("You're already a member of this group");
+          return;
+        }
+        throw error;
+      }
+
+      toast.success("Successfully joined the group!");
+    } catch (error) {
+      console.error('Error joining group:', error);
+      toast.error("Failed to join group");
+    }
+  };
+
+  const handleLeaveGroup = async (groupId: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("You must be logged in to leave a group");
+        return;
+      }
+
+      const { error } = await supabase
+        .from('group_members')
+        .delete()
+        .eq('group_id', groupId)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      toast.success("Successfully left the group");
+      setSelectedGroup(null);
+    } catch (error) {
+      console.error('Error leaving group:', error);
+      toast.error("Failed to leave group");
+    }
+  };
 
   return (
     <div className="container max-w-[1400px] pt-20 pb-16">
@@ -126,6 +242,16 @@ const Messages = () => {
               onClose={() => setSelectedChat(null)}
             />
           )}
+          {selectedGroup && (
+            <ChatWindow
+              selectedChat={{
+                ...selectedGroup,
+                type: 'group',
+                isGroup: true
+              }}
+              onClose={() => setSelectedGroup(null)}
+            />
+          )}
           {!selectedChat && !selectedGroup && (
             <div className="h-full flex items-center justify-center text-muted-foreground">
               Select a chat or group to start messaging
@@ -159,47 +285,26 @@ const Messages = () => {
           setSelectedChat(newChat);
           setShowNewChat(false);
         }}
-        onNewGroup={async (name: string, description?: string) => {
-          const { data: { user } } = await supabase.auth.getUser();
-          if (!user) return;
-
-          const { data: group, error } = await supabase
-            .from('groups')
-            .insert([
-              {
-                name,
-                description,
-                user_id: user.id,
-              }
-            ])
-            .select()
-            .single();
-
-          if (error) {
-            console.error('Error creating group:', error);
-            return;
-          }
-
-          setShowNewGroup(false);
-        }}
+        onNewGroup={handleCreateGroup}
         onAddMembers={async (emails: string[]) => {
           if (!selectedGroup) return;
+          try {
+            const { error } = await supabase
+              .from('group_members')
+              .insert(
+                emails.map(email => ({
+                  group_id: selectedGroup.id,
+                  user_id: email,
+                }))
+              );
 
-          const { error } = await supabase
-            .from('group_members')
-            .insert(
-              emails.map(email => ({
-                group_id: selectedGroup.id,
-                user_id: email,
-              }))
-            );
-
-          if (error) {
+            if (error) throw error;
+            toast.success("Members added successfully");
+            setShowAddMembers(false);
+          } catch (error) {
             console.error('Error adding members:', error);
-            return;
+            toast.error("Failed to add members");
           }
-
-          setShowAddMembers(false);
         }}
         onCloseNewChat={() => setShowNewChat(false)}
         onCloseNewGroup={() => setShowNewGroup(false)}

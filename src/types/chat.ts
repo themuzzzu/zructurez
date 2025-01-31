@@ -13,11 +13,23 @@ export interface Chat {
   isGroup: boolean;
 }
 
-export interface Group extends Chat {
+export interface Group {
+  id: string;
+  userId: string;
+  type: 'group';
+  name: string;
   description: string | null;
   image_url: string | null;
   created_at: string;
   user_id: string;
+  avatar: string;
+  time: string;
+  lastMessage: Message | null;
+  unread: number;
+  participants: any[];
+  messages: Message[];
+  unreadCount: number;
+  isGroup: boolean;
   group_members: {
     count: number;
     members: string[];
@@ -41,4 +53,5 @@ export interface ChatHeaderProps {
   setIsSelectMode: (select: boolean) => void;
   isSelectMode: boolean;
   onClose?: () => void;
+  onBack?: () => void;
 }

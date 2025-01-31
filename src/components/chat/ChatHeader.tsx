@@ -1,9 +1,10 @@
 import { Chat } from "@/types/chat";
 import { ChatMenu } from "./ChatMenu";
 import { formatDistanceToNow } from "date-fns";
-import { Phone, Video, ArrowLeft } from "lucide-react";
+import { Phone, Video, ArrowLeft, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 interface ChatHeaderProps {
   chat: Chat;
@@ -12,6 +13,7 @@ interface ChatHeaderProps {
   setShowContactInfo: (show: boolean) => void;
   setIsSelectMode: (select: boolean) => void;
   isSelectMode: boolean;
+  onClose?: () => void;
   onBack?: () => void;
 }
 
@@ -22,8 +24,11 @@ export const ChatHeader = ({
   setShowContactInfo,
   setIsSelectMode,
   isSelectMode,
+  onClose,
   onBack,
 }: ChatHeaderProps) => {
+  const navigate = useNavigate();
+  
   const getLastSeen = () => {
     try {
       if (chat.time.includes('ago')) {
@@ -47,6 +52,10 @@ export const ChatHeader = ({
     toast.info("Video call feature coming soon!");
   };
 
+  const handleHomeClick = () => {
+    navigate('/');
+  };
+
   return (
     <div className="p-4 border-b">
       <div className="flex items-center justify-between">
@@ -61,6 +70,14 @@ export const ChatHeader = ({
               <ArrowLeft className="h-5 w-5" />
             </Button>
           )}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleHomeClick}
+            className="hover:bg-accent/50"
+          >
+            <Home className="h-5 w-5" />
+          </Button>
           <div 
             className="flex flex-col cursor-pointer hover:opacity-80 transition-opacity"
             onClick={handleProfileClick}
