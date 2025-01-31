@@ -26,12 +26,14 @@ export interface Group {
   };
   type: "group";
   avatar: string;
+  time: string;
   lastMessage: Message | null;
   unread: number;
   participants: Participant[];
   messages: Message[];
   unreadCount: number;
   isGroup: boolean;
+  userId: string;
 }
 
 export interface Message {

@@ -19,8 +19,8 @@ interface ChatListProps {
   onAddMembers: () => void;
 }
 
-export const ChatList = ({ 
-  chats, 
+export const ChatList = ({
+  chats,
   groups,
   selectedChat,
   selectedGroup,
@@ -30,35 +30,37 @@ export const ChatList = ({
   onSearchChange,
   onNewChat,
   onNewGroup,
-  onAddMembers 
+  onAddMembers,
 }: ChatListProps) => {
   const [separateGroupsAndChats] = useState(() => {
     const saved = localStorage.getItem("separateGroupsAndChats");
     return saved ? JSON.parse(saved) : false;
   });
 
-  const filteredChats = chats.filter(chat => 
+  const filteredChats = chats.filter((chat) =>
     chat.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const filteredGroups = groups.filter(group =>
+  const filteredGroups = groups.filter((group) =>
     group.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const mappedGroups = filteredGroups.map(group => ({
+  const mappedGroups = filteredGroups.map((group) => ({
     ...group,
     type: "group" as const,
     avatar: group.image_url || '/placeholder.svg',
+    time: group.created_at,
     lastMessage: null,
     unread: 0,
     participants: [],
     messages: [],
     unreadCount: 0,
-    isGroup: true
+    isGroup: true,
+    userId: group.user_id
   }));
 
-  const allChats = separateGroupsAndChats 
-    ? filteredChats 
+  const allChats = separateGroupsAndChats
+    ? filteredChats
     : [...filteredChats, ...mappedGroups];
 
   return (
@@ -106,7 +108,7 @@ export const ChatList = ({
               {mappedGroups.map((group) => (
                 <ChatListItem
                   key={group.id}
-                  chat={group}
+                  chat={group as Chat}
                   isSelected={selectedGroup?.id === group.id}
                   onClick={() => onSelectGroup(group)}
                 />
@@ -118,7 +120,7 @@ export const ChatList = ({
             {allChats.map((chat) => (
               <ChatListItem
                 key={chat.id}
-                chat={chat}
+                chat={chat as Chat}
                 isSelected={
                   chat.type === "direct"
                     ? selectedChat?.id === chat.id
@@ -127,7 +129,7 @@ export const ChatList = ({
                 onClick={() =>
                   chat.type === "direct"
                     ? onSelectChat(chat as Chat)
-                    : onSelectGroup(chat as unknown as Group)
+                    : onSelectGroup(chat as Group)
                 }
               />
             ))}
