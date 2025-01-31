@@ -1,30 +1,16 @@
-import { Profile } from "./profile";
-
 export interface Chat {
   id: string;
-  participants: Profile[];
-  lastMessage?: Message;
-  unreadCount?: number;
-  isGroup?: boolean;
-  groupInfo?: Group;
   userId: string;
-  type: 'direct' | 'group';
+  type: "direct" | "group";
   name: string;
   avatar: string;
   time: string;
+  lastMessage: Message | null;
   unread: number;
+  participants: Participant[];
   messages: Message[];
-}
-
-export interface Message {
-  id: string;
-  sender_id: string;
-  content: string;
-  created_at: string;
-  read?: boolean;
-  expires_at?: string;
-  type?: 'text' | 'image' | 'video' | 'document';
-  fileUrl?: string;
+  unreadCount: number;
+  isGroup: boolean;
 }
 
 export interface Group {
@@ -40,6 +26,23 @@ export interface Group {
   };
 }
 
+export interface Message {
+  id: string;
+  content: string;
+  sender_id: string;
+  created_at: string;
+  read?: boolean;
+  expires_at?: string | null;
+}
+
+export interface Participant {
+  id: string;
+  username: string | null;
+  avatar_url: string | null;
+  created_at: string;
+  bio: string | null;
+}
+
 export interface ChatHeaderProps {
   chat: Chat;
   isMuted: boolean;
@@ -47,38 +50,5 @@ export interface ChatHeaderProps {
   setShowContactInfo: (show: boolean) => void;
   setIsSelectMode: (mode: boolean) => void;
   isSelectMode: boolean;
-  onBack?: () => void;
-  onClose?: () => void; // Added this line
-}
-
-export interface ChatDialogsProps {
-  isOpen?: boolean;
-  onClose?: () => void;
-  selectedChat?: Chat;
-  showNewChat: boolean;
-  showNewGroup: boolean;
-  showAddMembers: boolean;
-  showContactInfo?: boolean;
-  setShowContactInfo?: (show: boolean) => void;
-  showImageUpload?: boolean;
-  setShowImageUpload?: (show: boolean) => void;
-  showVideoUpload?: boolean;
-  setShowVideoUpload?: (show: boolean) => void;
-  showDocumentUpload?: boolean;
-  setShowDocumentUpload?: (show: boolean) => void;
-  showPollDialog?: boolean;
-  setShowPollDialog?: (show: boolean) => void;
-  showContactDialog?: boolean;
-  setShowContactDialog?: (show: boolean) => void;
-  selectedImage?: string | null;
-  setSelectedImage?: (image: string | null) => void;
-  selectedVideo?: string | null;
-  setSelectedVideo?: (video: string | null) => void;
-  newMemberEmail: string;
-  onNewChat: (userId: string) => Promise<void>;
-  onNewGroup: (name: string, description?: string) => Promise<void>;
-  onAddMembers: (emails: any) => Promise<void>;
-  onCloseNewChat: () => void;
-  onCloseNewGroup: () => void;
-  onCloseAddMembers: () => void;
+  onClose: () => void;
 }

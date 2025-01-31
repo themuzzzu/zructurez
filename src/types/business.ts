@@ -28,8 +28,45 @@ export interface Business {
   gst_number: string | null;
   verification_status: string | null;
   verification_submitted_at: string | null;
-  verification_documents: any[]; // Changed from Json to any[]
+  verification_documents: any[];
   membership_plans: any[];
+  business_products: BusinessProduct[];
+  business_portfolio: BusinessPortfolio[];
+  posts: BusinessPost[];
+}
+
+export interface BusinessProduct {
+  id: string;
+  business_id: string;
+  name: string;
+  description: string;
+  price: number;
+  image_url: string | null;
+  stock: number | null;
+  created_at: string;
+}
+
+export interface BusinessPortfolio {
+  id: string;
+  business_id: string;
+  title: string;
+  description: string | null;
+  image_url: string | null;
+  created_at: string;
+  views: number | null;
+}
+
+export interface BusinessPost {
+  id: string;
+  user_id: string;
+  content: string;
+  image_url: string | null;
+  location: string | null;
+  category: string | null;
+  created_at: string;
+  profile_id: string;
+  business_id: string | null;
+  views: number | null;
 }
 
 export interface StaffMember {

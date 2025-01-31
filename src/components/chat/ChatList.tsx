@@ -1,7 +1,8 @@
-import { Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Chat, Group } from "@/types/chat";
-import { ChatListItem } from "./ChatListItem";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { SearchInput } from "@/components/ui/search-input";
+import { ChatListItem } from "@/components/chat/ChatListItem";
+import type { Chat, Group } from "@/types/chat";
 
 interface ChatListProps {
   chats: Chat[];
@@ -17,8 +18,8 @@ interface ChatListProps {
   onAddMembers: () => void;
 }
 
-export const ChatList = ({
-  chats,
+export const ChatList = ({ 
+  chats, 
   groups,
   selectedChat,
   selectedGroup,
@@ -28,95 +29,111 @@ export const ChatList = ({
   onSearchChange,
   onNewChat,
   onNewGroup,
-  onAddMembers,
+  onAddMembers 
 }: ChatListProps) => {
-  const separateGroupsAndChats = localStorage.getItem("separateGroupsAndChats") === "true";
+  const [separateGroupsAndChats] = useState(() => {
+    const saved = localStorage.getItem("separateGroupsAndChats");
+    return saved ? JSON.parse(saved) : false;
+  });
+
+  const filteredChats = chats.filter(chat => 
+    chat.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredGroups = groups.filter(group =>
+    group.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const mappedGroups = filteredGroups.map(group => ({
+    id: group.id,
+    userId: group.user_id,
+    type: "group" as const,
+    name: group.name,
+    avatar: group.image_url || '/placeholder.svg',
+    time: group.created_at,
+    lastMessage: null,
+    unread: 0,
+    participants: [],
+    messages: [],
+    unreadCount: 0,
+    isGroup: true
+  }));
+
+  const allChats = separateGroupsAndChats 
+    ? filteredChats 
+    : [...filteredChats, ...mappedGroups];
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="p-4 space-y-4 border-b border-border/10">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search messages..."
-            className="pl-10 bg-[#1a1a1a]/50 border-[#2a2a2a]"
+    <div className="border rounded-lg overflow-hidden">
+      <div className="p-4 space-y-4">
+        <div className="flex items-center gap-2">
+          <SearchInput
             value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
+            onChange={onSearchChange}
+            placeholder="Search messages..."
           />
+          <Button variant="outline" size="icon" onClick={onNewChat}>
+            <Plus className="h-4 w-4" />
+          </Button>
         </div>
-      </div>
-      <div className="overflow-y-auto flex-1">
+
         {separateGroupsAndChats ? (
           <>
-            <div className="py-2 px-4 text-sm font-medium text-muted-foreground">
-              Chats
-            </div>
-            {chats.length > 0 ? (
-              chats.map((chat) => (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold">Chats</h3>
+              </div>
+              {filteredChats.map((chat) => (
                 <ChatListItem
                   key={chat.id}
                   chat={chat}
                   isSelected={selectedChat?.id === chat.id}
                   onClick={() => onSelectChat(chat)}
                 />
-              ))
-            ) : (
-              <div className="p-4 text-center text-muted-foreground">
-                No messages yet
-              </div>
-            )}
-            
-            <div className="py-2 px-4 text-sm font-medium text-muted-foreground mt-4">
-              Groups
+              ))}
             </div>
-            {groups.length > 0 ? (
-              groups.map((group) => (
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold">Groups</h3>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="icon" onClick={onNewGroup}>
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="icon" onClick={onAddMembers}>
+                    <UserPlus className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              {mappedGroups.map((group) => (
                 <ChatListItem
                   key={group.id}
-                  chat={{
-                    id: group.id,
-                    name: group.name,
-                    avatar: group.image_url || '/placeholder.svg',
-                    time: group.created_at,
-                    lastMessage: null,
-                    unread: 0,
-                    type: 'group',
-                    participants: [],
-                    messages: [],
-                    userId: group.user_id
-                  }}
+                  chat={group}
                   isSelected={selectedGroup?.id === group.id}
                   onClick={() => onSelectGroup(group)}
                 />
-              ))
-            ) : (
-              <div className="p-4 text-center text-muted-foreground">
-                No groups yet
-              </div>
-            )}
+              ))}
+            </div>
           </>
         ) : (
-          <>
-            {[...chats, ...groups.map(group => ({
-              id: group.id,
-              name: group.name,
-              avatar: group.image_url || '/placeholder.svg',
-              time: group.created_at,
-              lastMessage: null,
-              unread: 0,
-              type: 'group',
-              participants: [],
-              messages: [],
-              userId: group.user_id
-            }))].map((item) => (
+          <div className="space-y-2">
+            {allChats.map((chat) => (
               <ChatListItem
-                key={item.id}
-                chat={item}
-                isSelected={item.type === 'group' ? selectedGroup?.id === item.id : selectedChat?.id === item.id}
-                onClick={() => item.type === 'group' ? onSelectGroup(groups.find(g => g.id === item.id)!) : onSelectChat(item as Chat)}
+                key={chat.id}
+                chat={chat}
+                isSelected={
+                  chat.type === "direct"
+                    ? selectedChat?.id === chat.id
+                    : selectedGroup?.id === chat.id
+                }
+                onClick={() =>
+                  chat.type === "direct"
+                    ? onSelectChat(chat)
+                    : onSelectGroup(chat)
+                }
               />
             ))}
-          </>
+          </div>
         )}
       </div>
     </div>
