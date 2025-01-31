@@ -3,14 +3,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { ChatList } from "@/components/chat/ChatList";
 import { ChatWindow } from "@/components/chat/ChatWindow";
 import { ChatDialogs } from "@/components/chat/ChatDialogs";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MessageSquare, Users } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useGroups } from "@/hooks/useGroups";
 import type { Chat, Group } from "@/types/chat";
 
 const Messages = () => {
-  const navigate = useNavigate();
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [showNewChat, setShowNewChat] = useState(false);
@@ -18,9 +16,10 @@ const Messages = () => {
   const [showAddMembers, setShowAddMembers] = useState(false);
   const [newMemberEmail, setNewMemberEmail] = useState("");
   const [chats, setChats] = useState<Chat[]>([]);
-  const [groups, setGroups] = useState<Group[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("chats");
+  
+  const { data: groups = [] } = useGroups(true);
 
   const fetchChats = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -64,49 +63,8 @@ const Messages = () => {
     setChats(chatArray);
   };
 
-  const fetchGroups = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data: groupsData, error } = await supabase
-      .from('groups')
-      .select('*, group_members!inner(user_id)')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching groups:', error);
-      return;
-    }
-
-    const mappedGroups: Group[] = groupsData.map((group) => ({
-      id: group.id,
-      userId: group.user_id,
-      type: 'group',
-      name: group.name,
-      avatar: group.image_url || '/placeholder.svg',
-      time: group.created_at,
-      lastMessage: null,
-      unread: 0,
-      participants: [],
-      messages: [],
-      unreadCount: 0,
-      isGroup: true,
-      description: group.description,
-      image_url: group.image_url,
-      created_at: group.created_at,
-      user_id: group.user_id,
-      group_members: {
-        count: group.group_members?.length || 0,
-        members: group.group_members?.map((m: any) => m.user_id) || []
-      }
-    }));
-
-    setGroups(mappedGroups);
-  };
-
   useEffect(() => {
     fetchChats();
-    fetchGroups();
     const interval = setInterval(fetchChats, 5000);
     return () => clearInterval(interval);
   }, []);
@@ -222,15 +180,6 @@ const Messages = () => {
             return;
           }
 
-          const newGroup: Group = {
-            ...group,
-            group_members: {
-              count: 1,
-              members: [user.id]
-            }
-          };
-
-          setGroups([...groups, newGroup]);
           setShowNewGroup(false);
         }}
         onAddMembers={async (emails: string[]) => {
