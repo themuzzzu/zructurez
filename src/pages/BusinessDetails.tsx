@@ -46,7 +46,8 @@ const BusinessDetails = () => {
           ? data.staff_details.map((staff: any): StaffMember => ({
               name: staff.name || null,
               position: staff.position || null,
-              experience: staff.experience || null
+              experience: staff.experience || null,
+              image_url: staff.image_url || null
             }))
           : [],
         owners: Array.isArray(data.owners)
@@ -54,7 +55,8 @@ const BusinessDetails = () => {
               name: owner.name || null,
               role: owner.role || 'Primary Owner',
               position: owner.position || null,
-              experience: owner.experience || null
+              experience: owner.experience || null,
+              image_url: owner.image_url || null
             }))
           : [],
         image_position: typeof data.image_position === 'object' && data.image_position !== null && !Array.isArray(data.image_position)
@@ -65,6 +67,9 @@ const BusinessDetails = () => {
           : { x: 50, y: 50 },
         verification_documents: Array.isArray(data.verification_documents) 
           ? data.verification_documents 
+          : [],
+        membership_plans: Array.isArray(data.membership_plans)
+          ? data.membership_plans
           : [],
         posts: data.posts || [],
         business_portfolio: data.business_portfolio || [],

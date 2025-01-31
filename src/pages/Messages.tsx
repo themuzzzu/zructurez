@@ -22,7 +22,7 @@ const Messages = () => {
   
   const { data: groupsData = [] } = useGroups(true);
 
-  // Map the groups data to match the Group interface
+  // Map the groups data to match the Group interface from chat.ts
   const groups: Group[] = groupsData.map(group => ({
     id: group.id,
     userId: group.user_id,
@@ -40,7 +40,7 @@ const Messages = () => {
     messages: [],
     unreadCount: 0,
     isGroup: true,
-    group_members: group.group_members
+    group_members: group.group_members || { count: 0, members: [] }
   }));
 
   const fetchChats = async () => {
