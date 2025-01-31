@@ -58,7 +58,8 @@ export interface ChatHeaderProps {
   isMuted: boolean;
   setIsMuted: (muted: boolean) => void;
   setShowContactInfo: (show: boolean) => void;
-  setIsSelectMode: (mode: boolean) => void;
+  setIsSelectMode: (select: boolean) => void;
   isSelectMode: boolean;
-  onClose: () => void;
+  onBack?: () => void;
+  onClose?: () => void;
 }

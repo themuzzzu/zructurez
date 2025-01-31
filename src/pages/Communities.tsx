@@ -23,7 +23,16 @@ const Communities = () => {
       }
 
       const mappedGroups: Group[] = data.map((group) => ({
-        ...group,
+        id: group.id,
+        name: group.name,
+        description: group.description,
+        image_url: group.image_url,
+        created_at: group.created_at,
+        user_id: group.user_id,
+        group_members: {
+          count: group.group_members?.length || 0,
+          members: group.group_members?.map((m: any) => m.members) || []
+        },
         type: "group",
         avatar: group.image_url || '/placeholder.svg',
         time: group.created_at,
