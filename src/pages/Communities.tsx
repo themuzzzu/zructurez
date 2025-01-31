@@ -22,7 +22,21 @@ const Communities = () => {
         return;
       }
 
-      setGroups(data as Group[]);
+      const mappedGroups: Group[] = data.map((group) => ({
+        ...group,
+        type: "group",
+        avatar: group.image_url || '/placeholder.svg',
+        time: group.created_at,
+        lastMessage: null,
+        unread: 0,
+        participants: [],
+        messages: [],
+        unreadCount: 0,
+        isGroup: true,
+        userId: group.user_id
+      }));
+
+      setGroups(mappedGroups);
     };
 
     fetchGroups();

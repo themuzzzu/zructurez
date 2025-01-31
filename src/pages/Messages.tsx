@@ -69,8 +69,42 @@ const Messages = () => {
     setChats(chatArray);
   };
 
+  const fetchGroups = async () => {
+    const { data: groupsData, error: groupsError } = await supabase
+      .from('groups')
+      .select(`
+        *,
+        group_members (
+          count,
+          members:user_id
+        )
+      `);
+
+    if (groupsError) {
+      console.error('Error fetching groups:', groupsError);
+      return;
+    }
+
+    const mappedGroups: Group[] = groupsData.map((group) => ({
+      ...group,
+      type: "group",
+      avatar: group.image_url || '/placeholder.svg',
+      time: group.created_at,
+      lastMessage: null,
+      unread: 0,
+      participants: [],
+      messages: [],
+      unreadCount: 0,
+      isGroup: true,
+      userId: group.user_id
+    }));
+
+    setGroups(mappedGroups);
+  };
+
   useEffect(() => {
     fetchChats();
+    fetchGroups();
     const interval = setInterval(fetchChats, 5000);
     return () => clearInterval(interval);
   }, []);

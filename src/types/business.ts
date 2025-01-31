@@ -64,7 +64,7 @@ export interface Business {
   aadhar_number: string | null;
   pan_number: string | null;
   gst_number: string | null;
-  verification_status: string;
+  verification_status: string | null;
   verification_submitted_at: string | null;
   verification_documents: any[];
   membership_plans: any[];
