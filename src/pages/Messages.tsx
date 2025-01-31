@@ -37,31 +37,29 @@ const Messages = () => {
       if (!chatMap.has(otherUserId)) {
         chatMap.set(otherUserId, []);
       }
-      const formattedMessage: Message = {
+      chatMap.get(otherUserId)?.push({
         id: message.id,
         content: message.content,
-        senderId: message.sender_id,
-        timestamp: new Date(message.created_at).toISOString(),
-        created_at: message.created_at,
         sender_id: message.sender_id,
-        receiver_id: message.receiver_id,
+        created_at: message.created_at,
         read: message.read || false,
         expires_at: message.expires_at
-      };
-      chatMap.get(otherUserId)?.push(formattedMessage);
+      });
     });
 
     const chatArray: Chat[] = Array.from(chatMap.entries()).map(([userId, messages]) => ({
       id: userId,
       userId: userId,
       type: 'direct',
-      name: 'User',  // You might want to fetch user names from profiles
-      avatar: '/placeholder.svg',  // You might want to fetch user avatars
+      name: 'User',
+      avatar: '/placeholder.svg',
       time: messages[0]?.created_at || new Date().toISOString(),
       lastMessage: messages[0] || null,
       unread: messages.filter(m => !m.read && m.sender_id !== user.id).length,
-      participants: [user.id, userId],
-      messages: messages
+      participants: [{ id: user.id, username: null, avatar_url: null, created_at: '', bio: null }],
+      messages: messages,
+      unreadCount: 0,
+      isGroup: false
     }));
 
     setChats(chatArray);
@@ -106,22 +104,6 @@ const Messages = () => {
         showNewChat={showNewChat}
         showNewGroup={showNewGroup}
         showAddMembers={showAddMembers}
-        showContactInfo={false}
-        setShowContactInfo={() => {}}
-        showImageUpload={false}
-        setShowImageUpload={() => {}}
-        showVideoUpload={false}
-        setShowVideoUpload={() => {}}
-        showDocumentUpload={false}
-        setShowDocumentUpload={() => {}}
-        showPollDialog={false}
-        setShowPollDialog={() => {}}
-        showContactDialog={false}
-        setShowContactDialog={() => {}}
-        selectedImage={null}
-        setSelectedImage={() => {}}
-        selectedVideo={null}
-        setSelectedVideo={() => {}}
         newMemberEmail={newMemberEmail}
         onNewChat={async (userId: string) => {
           const newChat: Chat = {
@@ -134,7 +116,9 @@ const Messages = () => {
             lastMessage: null,
             unread: 0,
             participants: [],
-            messages: []
+            messages: [],
+            unreadCount: 0,
+            isGroup: false
           };
           setChats([...chats, newChat]);
           setSelectedChat(newChat);
@@ -161,7 +145,15 @@ const Messages = () => {
             return;
           }
 
-          setGroups([...groups, group]);
+          const newGroup: Group = {
+            ...group,
+            group_members: {
+              count: 1,
+              members: [user.id]
+            }
+          };
+
+          setGroups([...groups, newGroup]);
           setShowNewGroup(false);
         }}
         onAddMembers={async (emails: string[]) => {

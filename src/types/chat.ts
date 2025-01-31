@@ -7,6 +7,14 @@ export interface Chat {
   unreadCount?: number;
   isGroup?: boolean;
   groupInfo?: Group;
+  // Adding back needed properties
+  userId: string;
+  type: 'direct' | 'group';
+  name: string;
+  avatar: string;
+  time: string;
+  unread: number;
+  messages: Message[];
 }
 
 export interface Message {
@@ -16,6 +24,8 @@ export interface Message {
   created_at: string;
   read?: boolean;
   expires_at?: string;
+  type?: 'text' | 'image' | 'video' | 'document';
+  fileUrl?: string;
 }
 
 export interface Group {
@@ -45,4 +55,30 @@ export interface ChatDialogsProps {
   isOpen?: boolean;
   onClose?: () => void;
   selectedChat?: Chat;
+  showNewChat: boolean;
+  showNewGroup: boolean;
+  showAddMembers: boolean;
+  showContactInfo?: boolean;
+  setShowContactInfo?: (show: boolean) => void;
+  showImageUpload?: boolean;
+  setShowImageUpload?: (show: boolean) => void;
+  showVideoUpload?: boolean;
+  setShowVideoUpload?: (show: boolean) => void;
+  showDocumentUpload?: boolean;
+  setShowDocumentUpload?: (show: boolean) => void;
+  showPollDialog?: boolean;
+  setShowPollDialog?: (show: boolean) => void;
+  showContactDialog?: boolean;
+  setShowContactDialog?: (show: boolean) => void;
+  selectedImage?: string | null;
+  setSelectedImage?: (image: string | null) => void;
+  selectedVideo?: string | null;
+  setSelectedVideo?: (video: string | null) => void;
+  newMemberEmail: string;
+  onNewChat: (userId: string) => Promise<void>;
+  onNewGroup: (name: string, description?: string) => Promise<void>;
+  onAddMembers: (emails: any) => Promise<void>;
+  onCloseNewChat: () => void;
+  onCloseNewGroup: () => void;
+  onCloseAddMembers: () => void;
 }
