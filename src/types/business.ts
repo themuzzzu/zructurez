@@ -36,6 +36,13 @@ export interface BusinessPortfolio {
   views: number | null;
 }
 
+export interface MembershipPlan {
+  name: string;
+  price: number;
+  features: string[];
+  description?: string;
+}
+
 export interface Business {
   id: string;
   user_id: string;
@@ -67,7 +74,7 @@ export interface Business {
   verification_status: string | null;
   verification_submitted_at: string | null;
   verification_documents: any[];
-  membership_plans: any[];
+  membership_plans: MembershipPlan[];
   business_products: BusinessProduct[];
   business_portfolio: BusinessPortfolio[];
   posts: any[];

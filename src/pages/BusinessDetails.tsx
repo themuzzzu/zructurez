@@ -10,7 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { CreateBusinessForm } from "@/components/CreateBusinessForm";
 import { useState } from "react";
 import { BusinessTabs } from "@/components/business-details/BusinessTabs";
-import type { Business, StaffMember, BusinessOwner } from "@/types/business";
+import type { Business, StaffMember, BusinessOwner, MembershipPlan } from "@/types/business";
 
 const BusinessDetails = () => {
   const { id } = useParams();
@@ -69,7 +69,12 @@ const BusinessDetails = () => {
           ? data.verification_documents 
           : [],
         membership_plans: Array.isArray(data.membership_plans)
-          ? data.membership_plans
+          ? data.membership_plans.map((plan: any): MembershipPlan => ({
+              name: plan.name || '',
+              price: Number(plan.price) || 0,
+              features: Array.isArray(plan.features) ? plan.features : [],
+              description: plan.description || undefined
+            }))
           : [],
         posts: data.posts || [],
         business_portfolio: data.business_portfolio || [],
