@@ -3,9 +3,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { ChatList } from "@/components/chat/ChatList";
 import { ChatWindow } from "@/components/chat/ChatWindow";
 import { ChatDialogs } from "@/components/chat/ChatDialogs";
+import { Button } from "@/components/ui/button";
+import { Home, Users } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import type { Chat, Group, Message } from "@/types/chat";
 
 const Messages = () => {
+  const navigate = useNavigate();
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [showNewChat, setShowNewChat] = useState(false);
@@ -73,6 +77,26 @@ const Messages = () => {
 
   return (
     <div className="container max-w-[1400px] pt-20 pb-16">
+      <div className="flex items-center gap-4 mb-6">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="flex items-center gap-2"
+          onClick={() => navigate('/')}
+        >
+          <Home className="h-4 w-4" />
+          <span>Home</span>
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="flex items-center gap-2"
+          onClick={() => navigate('/communities')}
+        >
+          <Users className="h-4 w-4" />
+          <span>Groups</span>
+        </Button>
+      </div>
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-4">
           <ChatList
