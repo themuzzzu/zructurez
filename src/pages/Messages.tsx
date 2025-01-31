@@ -70,33 +70,24 @@ const Messages = () => {
   };
 
   const fetchGroups = async () => {
-    const { data: groupsData, error: groupsError } = await supabase
-      .from('groups')
-      .select(`
-        *,
-        group_members (
-          count,
-          members:user_id
-        )
-      `);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
 
-    if (groupsError) {
-      console.error('Error fetching groups:', groupsError);
+    const { data: groupsData, error } = await supabase
+      .from('groups')
+      .select('*, group_members:group_members(count:count(*), members:user_id)')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching groups:', error);
       return;
     }
 
     const mappedGroups: Group[] = groupsData.map((group) => ({
       id: group.id,
+      userId: group.user_id,
+      type: 'group',
       name: group.name,
-      description: group.description,
-      image_url: group.image_url,
-      created_at: group.created_at,
-      user_id: group.user_id,
-      group_members: {
-        count: group.group_members?.length || 0,
-        members: group.group_members?.map((m: any) => m.members) || []
-      },
-      type: "group",
       avatar: group.image_url || '/placeholder.svg',
       time: group.created_at,
       lastMessage: null,
@@ -105,7 +96,14 @@ const Messages = () => {
       messages: [],
       unreadCount: 0,
       isGroup: true,
-      userId: group.user_id
+      description: group.description,
+      image_url: group.image_url,
+      created_at: group.created_at,
+      user_id: group.user_id,
+      group_members: {
+        count: group.group_members?.[0]?.count || 0,
+        members: group.group_members?.[0]?.members || []
+      }
     }));
 
     setGroups(mappedGroups);

@@ -1,21 +1,19 @@
 export interface Chat {
   id: string;
   userId: string;
-  type: "direct" | "group";
+  type: 'direct' | 'group';
   name: string;
   avatar: string;
   time: string;
   lastMessage: Message | null;
   unread: number;
-  participants: Participant[];
+  participants: any[];
   messages: Message[];
   unreadCount: number;
   isGroup: boolean;
 }
 
-export interface Group {
-  id: string;
-  name: string;
+export interface Group extends Chat {
   description: string | null;
   image_url: string | null;
   created_at: string;
@@ -24,16 +22,6 @@ export interface Group {
     count: number;
     members: string[];
   };
-  type: "group";
-  avatar: string;
-  time: string;
-  lastMessage: Message | null;
-  unread: number;
-  participants: Participant[];
-  messages: Message[];
-  unreadCount: number;
-  isGroup: boolean;
-  userId: string;
 }
 
 export interface Message {
@@ -43,14 +31,6 @@ export interface Message {
   created_at: string;
   read?: boolean;
   expires_at?: string | null;
-}
-
-export interface Participant {
-  id: string;
-  username: string | null;
-  avatar_url: string | null;
-  created_at: string;
-  bio: string | null;
 }
 
 export interface ChatHeaderProps {

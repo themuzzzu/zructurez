@@ -1440,6 +1440,15 @@ export type Database = {
         }
         Returns: string
       }
+      get_group_members: {
+        Args: {
+          group_id: string
+        }
+        Returns: {
+          count: number
+          members: string[]
+        }[]
+      }
       get_sample_user_id: {
         Args: Record<PropertyKey, never>
         Returns: string
