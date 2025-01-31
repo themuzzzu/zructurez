@@ -40,6 +40,5 @@ export interface ChatHeaderProps {
   setShowContactInfo: (show: boolean) => void;
   setIsSelectMode: (select: boolean) => void;
   isSelectMode: boolean;
-  onBack?: () => void;
   onClose?: () => void;
 }

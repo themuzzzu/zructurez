@@ -4,9 +4,10 @@ import { ChatList } from "@/components/chat/ChatList";
 import { ChatWindow } from "@/components/chat/ChatWindow";
 import { ChatDialogs } from "@/components/chat/ChatDialogs";
 import { Button } from "@/components/ui/button";
-import { Home, Users } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MessageSquare, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import type { Chat, Group, Message } from "@/types/chat";
+import type { Chat, Group } from "@/types/chat";
 
 const Messages = () => {
   const navigate = useNavigate();
@@ -19,6 +20,7 @@ const Messages = () => {
   const [chats, setChats] = useState<Chat[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState("chats");
 
   const fetchChats = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -35,20 +37,13 @@ const Messages = () => {
       return;
     }
 
-    const chatMap = new Map<string, Message[]>();
+    const chatMap = new Map<string, any[]>();
     messages.forEach((message: any) => {
       const otherUserId = message.sender_id === user.id ? message.receiver_id : message.sender_id;
       if (!chatMap.has(otherUserId)) {
         chatMap.set(otherUserId, []);
       }
-      chatMap.get(otherUserId)?.push({
-        id: message.id,
-        content: message.content,
-        sender_id: message.sender_id,
-        created_at: message.created_at,
-        read: message.read || false,
-        expires_at: message.expires_at
-      });
+      chatMap.get(otherUserId)?.push(message);
     });
 
     const chatArray: Chat[] = Array.from(chatMap.entries()).map(([userId, messages]) => ({
@@ -60,7 +55,7 @@ const Messages = () => {
       time: messages[0]?.created_at || new Date().toISOString(),
       lastMessage: messages[0] || null,
       unread: messages.filter(m => !m.read && m.sender_id !== user.id).length,
-      participants: [{ id: user.id, username: null, avatar_url: null, created_at: '', bio: null }],
+      participants: [],
       messages: messages,
       unreadCount: 0,
       isGroup: false
@@ -75,7 +70,7 @@ const Messages = () => {
 
     const { data: groupsData, error } = await supabase
       .from('groups')
-      .select('*, group_members:group_members(count:count(*), members:user_id)')
+      .select('*, group_members!inner(user_id)')
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -101,8 +96,8 @@ const Messages = () => {
       created_at: group.created_at,
       user_id: group.user_id,
       group_members: {
-        count: group.group_members?.[0]?.count || 0,
-        members: group.group_members?.[0]?.members || []
+        count: group.group_members?.length || 0,
+        members: group.group_members?.map((m: any) => m.user_id) || []
       }
     }));
 
@@ -118,48 +113,65 @@ const Messages = () => {
 
   return (
     <div className="container max-w-[1400px] pt-20 pb-16">
-      <div className="flex items-center gap-4 mb-6">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="flex items-center gap-2"
-          onClick={() => navigate('/')}
-        >
-          <Home className="h-4 w-4" />
-          <span>Home</span>
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="flex items-center gap-2"
-          onClick={() => navigate('/communities')}
-        >
-          <Users className="h-4 w-4" />
-          <span>Groups</span>
-        </Button>
-      </div>
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-4">
-          <ChatList
-            chats={chats}
-            groups={groups}
-            selectedChat={selectedChat}
-            selectedGroup={selectedGroup}
-            onSelectChat={setSelectedChat}
-            onSelectGroup={setSelectedGroup}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            onNewChat={() => setShowNewChat(true)}
-            onNewGroup={() => setShowNewGroup(true)}
-            onAddMembers={() => setShowAddMembers(true)}
-          />
+          <Tabs defaultValue="chats" className="w-full" onValueChange={setActiveTab}>
+            <TabsList className="w-full mb-4">
+              <TabsTrigger value="chats" className="flex-1">
+                <MessageSquare className="w-4 h-4 mr-2" />
+                Chats
+              </TabsTrigger>
+              <TabsTrigger value="groups" className="flex-1">
+                <Users className="w-4 h-4 mr-2" />
+                Groups
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="chats">
+              <ChatList
+                chats={chats}
+                groups={[]}
+                selectedChat={selectedChat}
+                selectedGroup={null}
+                onSelectChat={setSelectedChat}
+                onSelectGroup={() => {}}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                onNewChat={() => setShowNewChat(true)}
+                onNewGroup={() => {}}
+                onAddMembers={() => {}}
+              />
+            </TabsContent>
+
+            <TabsContent value="groups">
+              <ChatList
+                chats={[]}
+                groups={groups}
+                selectedChat={null}
+                selectedGroup={selectedGroup}
+                onSelectChat={() => {}}
+                onSelectGroup={setSelectedGroup}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                onNewChat={() => {}}
+                onNewGroup={() => setShowNewGroup(true)}
+                onAddMembers={() => setShowAddMembers(true)}
+              />
+            </TabsContent>
+          </Tabs>
         </div>
+
         <div className="col-span-8">
           {selectedChat && (
             <ChatWindow
               selectedChat={selectedChat}
               onClose={() => setSelectedChat(null)}
             />
+          )}
+          {!selectedChat && !selectedGroup && (
+            <div className="h-full flex items-center justify-center text-muted-foreground">
+              Select a chat or group to start messaging
+            </div>
           )}
         </div>
       </div>
