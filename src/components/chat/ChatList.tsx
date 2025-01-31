@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { SearchInput } from "@/components/ui/search-input";
+import { SearchInput } from "@/components/SearchInput";
 import { ChatListItem } from "@/components/chat/ChatListItem";
+import { Plus, UserPlus } from "lucide-react";
 import type { Chat, Group } from "@/types/chat";
 
 interface ChatListProps {
@@ -45,12 +46,9 @@ export const ChatList = ({
   );
 
   const mappedGroups = filteredGroups.map(group => ({
-    id: group.id,
-    userId: group.user_id,
+    ...group,
     type: "group" as const,
-    name: group.name,
     avatar: group.image_url || '/placeholder.svg',
-    time: group.created_at,
     lastMessage: null,
     unread: 0,
     participants: [],
@@ -128,8 +126,8 @@ export const ChatList = ({
                 }
                 onClick={() =>
                   chat.type === "direct"
-                    ? onSelectChat(chat)
-                    : onSelectGroup(chat)
+                    ? onSelectChat(chat as Chat)
+                    : onSelectGroup(chat as unknown as Group)
                 }
               />
             ))}

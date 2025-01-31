@@ -24,6 +24,14 @@ export interface Group {
     count: number;
     members: string[];
   };
+  type: "group";
+  avatar: string;
+  lastMessage: Message | null;
+  unread: number;
+  participants: Participant[];
+  messages: Message[];
+  unreadCount: number;
+  isGroup: boolean;
 }
 
 export interface Message {
