@@ -63,6 +63,9 @@ const BusinessDetails = () => {
               y: Number(data.image_position.y) || 50
             }
           : { x: 50, y: 50 },
+        verification_documents: Array.isArray(data.verification_documents) 
+          ? data.verification_documents 
+          : [],
         posts: data.posts || [],
         business_portfolio: data.business_portfolio || [],
         business_products: data.business_products || []
