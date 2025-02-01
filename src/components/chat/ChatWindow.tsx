@@ -29,7 +29,6 @@ export const ChatWindow = ({ selectedChat, onClose }: ChatWindowProps) => {
     handleSendImage,
     handleSendVideo,
   } = useMessageHandling(selectedChat, message, setMessage, () => {
-    // Callback after message is sent successfully
     setMessage("");
   });
 
@@ -84,8 +83,6 @@ export const ChatWindow = ({ selectedChat, onClose }: ChatWindowProps) => {
       <ChatDialogs
         selectedChat={selectedChat}
         showNewChat={false}
-        showNewGroup={false}
-        showAddMembers={false}
         showContactInfo={showContactInfo}
         setShowContactInfo={setShowContactInfo}
         showImageUpload={showImageUpload}
@@ -102,13 +99,8 @@ export const ChatWindow = ({ selectedChat, onClose }: ChatWindowProps) => {
         setSelectedImage={setSelectedImage}
         selectedVideo={selectedVideo}
         setSelectedVideo={setSelectedVideo}
-        newMemberEmail=""
         onNewChat={async () => {}}
-        onNewGroup={async () => {}}
-        onAddMembers={async () => {}}
         onCloseNewChat={() => {}}
-        onCloseNewGroup={() => {}}
-        onCloseAddMembers={() => {}}
       />
     </div>
   );
