@@ -1,33 +1,61 @@
 import { Group } from "@/types/group";
-import { Users2, Plus } from "lucide-react";
+import { Users2, Plus, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { CreateGroupDialog } from "./CreateGroupDialog";
+import { SearchInput } from "@/components/SearchInput";
 
 interface GroupListProps {
   groups: Group[];
   selectedGroup: Group | null;
   onSelectGroup: (group: Group) => void;
   onAddMembers: () => void;
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
 }
 
-export const GroupList = ({ groups, selectedGroup, onSelectGroup, onAddMembers }: GroupListProps) => {
+export const GroupList = ({ 
+  groups, 
+  selectedGroup, 
+  onSelectGroup, 
+  onAddMembers,
+  searchQuery,
+  onSearchChange
+}: GroupListProps) => {
   const [showCreateGroup, setShowCreateGroup] = useState(false);
+
+  const filteredGroups = groups.filter((group) =>
+    group.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="flex flex-col h-full">
-      <div className="p-4 border-b">
-        <Button 
-          variant="outline" 
-          className="w-full justify-start"
-          onClick={() => setShowCreateGroup(true)}
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Create New Group
-        </Button>
+      <div className="p-4 space-y-4">
+        <div className="flex items-center gap-2">
+          <SearchInput
+            value={searchQuery}
+            onChange={onSearchChange}
+            placeholder="Search groups..."
+          />
+          <Button 
+            variant="outline" 
+            size="icon"
+            onClick={() => setShowCreateGroup(true)}
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant="outline" 
+            size="icon"
+            onClick={onAddMembers}
+          >
+            <UserPlus className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
+
       <div className="overflow-y-auto flex-1">
-        {groups?.map((group) => (
+        {filteredGroups.map((group) => (
           <div
             key={group.id}
             className={`p-4 border-b cursor-pointer hover:bg-accent/50 transition-colors ${
@@ -54,18 +82,19 @@ export const GroupList = ({ groups, selectedGroup, onSelectGroup, onAddMembers }
                 </p>
                 <div className="flex items-center text-xs text-muted-foreground mt-1">
                   <Users2 className="h-3 w-3 mr-1" />
-                  {group.group_members.count} members
+                  {group.group_members?.count || 0} members
                 </div>
               </div>
             </div>
           </div>
         ))}
-        {groups.length === 0 && (
+        {filteredGroups.length === 0 && (
           <div className="p-4 text-center text-muted-foreground">
-            No groups yet
+            No groups found
           </div>
         )}
       </div>
+
       <CreateGroupDialog 
         open={showCreateGroup} 
         onClose={() => setShowCreateGroup(false)} 
