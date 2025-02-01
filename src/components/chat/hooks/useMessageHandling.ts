@@ -89,18 +89,6 @@ export const useMessageHandling = (
         return;
       }
 
-      // Check if receiver exists
-      const { data: receiverProfile, error: profileError } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('id', selectedChat.userId)
-        .maybeSingle();
-
-      if (profileError || !receiverProfile) {
-        toast.error("Cannot send image - recipient not found");
-        return;
-      }
-
       const file = await fetch(selectedImage).then((r) => r.blob());
       const fileExt = "jpg";
       const fileName = `${Date.now()}.${fileExt}`;
@@ -143,18 +131,6 @@ export const useMessageHandling = (
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         toast.error("You must be logged in to send videos");
-        return;
-      }
-
-      // Check if receiver exists
-      const { data: receiverProfile, error: profileError } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('id', selectedChat.userId)
-        .maybeSingle();
-
-      if (profileError || !receiverProfile) {
-        toast.error("Cannot send video - recipient not found");
         return;
       }
 

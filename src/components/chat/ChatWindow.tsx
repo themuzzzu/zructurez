@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChatHeader } from "./ChatHeader";
 import { ChatMessages } from "./ChatMessages";
 import { ChatInput } from "./ChatInput";
 import { ChatDialogs } from "./ChatDialogs";
+import { useMessageHandling } from "./hooks/useMessageHandling";
 import type { Chat } from "@/types/chat";
 
 interface ChatWindowProps {
@@ -23,14 +24,24 @@ export const ChatWindow = ({ selectedChat, onClose }: ChatWindowProps) => {
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [message, setMessage] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const {
+    handleSendMessage,
+    handleSendImage,
+    handleSendVideo,
+  } = useMessageHandling(selectedChat, message, setMessage, () => {
+    // Callback after message is sent successfully
+    setMessage("");
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle message submission
+    if (!message.trim()) return;
+    await handleSendMessage();
   };
 
   const handleAttachment = (type: string) => {
     switch (type) {
-      case "image":
+      case "photo":
         setShowImageUpload(true);
         break;
       case "video":

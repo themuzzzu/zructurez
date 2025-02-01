@@ -4,6 +4,7 @@ import { ScrollArea } from "../ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import type { Message } from "@/types/chat";
+import { toast } from "sonner";
 
 interface ChatMessagesProps {
   messages: Message[];
@@ -37,9 +38,17 @@ export const ChatMessages = ({ messages, currentUserId, isGroup, onForwardMessag
         },
         (payload) => {
           console.log('New message received:', payload.new);
+          // The messages will be updated through the parent component's state
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          console.log('Subscribed to new messages');
+        }
+        if (status === 'CHANNEL_ERROR') {
+          toast.error('Error connecting to chat');
+        }
+      });
 
     return () => {
       supabase.removeChannel(channel);
