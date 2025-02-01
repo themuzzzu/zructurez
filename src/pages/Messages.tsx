@@ -5,12 +5,15 @@ import { ChatWindow } from "@/components/chat/ChatWindow";
 import { ChatDialogs } from "@/components/chat/ChatDialogs";
 import { GroupList } from "@/components/groups/GroupList";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MessageSquare, Users } from "lucide-react";
+import { MessageSquare, Users, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 import type { Chat } from "@/types/chat";
 import type { Group } from "@/types/group";
 
 const Messages = () => {
+  const navigate = useNavigate();
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [showNewChat, setShowNewChat] = useState(false);
@@ -65,40 +68,55 @@ const Messages = () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    const { data: userGroups, error } = await supabase
+    // First get the groups the user is a member of
+    const { data: userGroups, error: memberError } = await supabase
       .from('group_members')
-      .select(`
-        group:groups (
-          id,
-          name,
-          description,
-          image_url,
-          created_at,
-          user_id,
-          group_members (count)
-        )
-      `)
+      .select('group_id')
       .eq('user_id', user.id);
 
-    if (error) {
-      console.error('Error fetching groups:', error);
+    if (memberError) {
+      console.error('Error fetching group memberships:', memberError);
       return;
     }
 
-    const groups = userGroups.map((ug: any) => ({
-      ...ug.group,
+    if (!userGroups?.length) {
+      setGroups([]);
+      return;
+    }
+
+    const groupIds = userGroups.map(ug => ug.group_id);
+
+    // Then fetch the actual group details
+    const { data: groupsData, error: groupsError } = await supabase
+      .from('groups')
+      .select(`
+        *,
+        group_members (
+          user_id
+        )
+      `)
+      .in('id', groupIds)
+      .order('created_at', { ascending: false });
+
+    if (groupsError) {
+      console.error('Error fetching groups:', groupsError);
+      return;
+    }
+
+    const formattedGroups = groupsData.map(group => ({
+      ...group,
       type: 'group' as const,
-      avatar: ug.group.image_url || '/placeholder.svg',
-      time: ug.group.created_at,
+      avatar: group.image_url || '/placeholder.svg',
+      time: group.created_at,
       lastMessage: null,
       unread: 0,
-      participants: [],
+      participants: group.group_members?.map((member: any) => member.user_id) || [],
       messages: [],
       unreadCount: 0,
       isGroup: true
     }));
 
-    setGroups(groups);
+    setGroups(formattedGroups);
   };
 
   useEffect(() => {
@@ -108,46 +126,20 @@ const Messages = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const handleCreateGroup = async (name: string, description?: string) => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast.error("You must be logged in to create a group");
-        return;
-      }
-
-      const { data: group, error: groupError } = await supabase
-        .from('groups')
-        .insert({
-          name,
-          description,
-          user_id: user.id
-        })
-        .select()
-        .single();
-
-      if (groupError) throw groupError;
-
-      // Add creator as first member
-      const { error: memberError } = await supabase
-        .from('group_members')
-        .insert({
-          group_id: group.id,
-          user_id: user.id
-        });
-
-      if (memberError) throw memberError;
-
-      toast.success("Group created successfully!");
-      fetchGroups();
-    } catch (error) {
-      console.error('Error creating group:', error);
-      toast.error("Failed to create group");
-    }
-  };
-
   return (
     <div className="container max-w-[1400px] pt-20 pb-16">
+      <div className="flex items-center mb-4">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => navigate('/')}
+          className="mr-2"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <h1 className="text-2xl font-bold">Messages</h1>
+      </div>
+
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-4">
           <Tabs defaultValue="chats" className="w-full" onValueChange={setActiveTab}>
