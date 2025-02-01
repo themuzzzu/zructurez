@@ -102,8 +102,8 @@ export const MessageBubble = ({ content, timestamp, isOwn, messageId, onForward 
           <div
             className={`max-w-[70%] rounded-lg p-3 ${
               isOwn
-                ? 'bg-primary text-primary-foreground ml-auto'
-                : 'bg-accent/50 text-foreground'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-muted text-foreground'
             }`}
           >
             <p className="text-sm break-words">{content}</p>

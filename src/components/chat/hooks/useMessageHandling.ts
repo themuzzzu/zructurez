@@ -169,6 +169,50 @@ export const useMessageHandling = (
     }
   };
 
+  const handleCreateGroup = async (name: string, description?: string, members: string[]) => {
+    if (members.length <= 1) {
+      toast.error("Groups require more than one member");
+      return;
+    }
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("You must be logged in to create a group");
+        return;
+      }
+
+      const { data: group, error: groupError } = await supabase
+        .from('groups')
+        .insert({
+          name,
+          description,
+          user_id: user.id
+        })
+        .select()
+        .single();
+
+      if (groupError) throw groupError;
+
+      // Add all members including the creator
+      const memberPromises = [user.id, ...members].map(memberId =>
+        supabase
+          .from('group_members')
+          .insert({
+            group_id: group.id,
+            user_id: memberId
+          })
+      );
+
+      await Promise.all(memberPromises);
+
+      toast.success("Group created successfully!");
+    } catch (error) {
+      console.error('Error creating group:', error);
+      toast.error("Failed to create group");
+    }
+  };
+
   return {
     selectedImage,
     setSelectedImage,
@@ -177,5 +221,6 @@ export const useMessageHandling = (
     handleSendMessage,
     handleSendImage,
     handleSendVideo,
+    handleCreateGroup,
   };
 };
