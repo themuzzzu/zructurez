@@ -38,7 +38,6 @@ export const ChatMessages = ({ messages, currentUserId, isGroup, onForwardMessag
         },
         (payload) => {
           console.log('New message received:', payload.new);
-          // The messages will be updated through the parent component's state
         }
       )
       .subscribe((status) => {

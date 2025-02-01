@@ -3,15 +3,19 @@ import { supabase } from "@/integrations/supabase/client";
 import { ChatList } from "@/components/chat/ChatList";
 import { ChatWindow } from "@/components/chat/ChatWindow";
 import { ChatDialogs } from "@/components/chat/ChatDialogs";
+import { GroupList } from "@/components/groups/GroupList";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, Users } from "lucide-react";
 import { toast } from "sonner";
 import type { Chat } from "@/types/chat";
+import type { Group } from "@/types/group";
 
 const Messages = () => {
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
+  const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [showNewChat, setShowNewChat] = useState(false);
   const [chats, setChats] = useState<Chat[]>([]);
+  const [groups, setGroups] = useState<Group[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("chats");
 
@@ -57,11 +61,90 @@ const Messages = () => {
     setChats(chatArray);
   };
 
+  const fetchGroups = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data: userGroups, error } = await supabase
+      .from('group_members')
+      .select(`
+        group:groups (
+          id,
+          name,
+          description,
+          image_url,
+          created_at,
+          user_id,
+          group_members (count)
+        )
+      `)
+      .eq('user_id', user.id);
+
+    if (error) {
+      console.error('Error fetching groups:', error);
+      return;
+    }
+
+    const groups = userGroups.map((ug: any) => ({
+      ...ug.group,
+      type: 'group' as const,
+      avatar: ug.group.image_url || '/placeholder.svg',
+      time: ug.group.created_at,
+      lastMessage: null,
+      unread: 0,
+      participants: [],
+      messages: [],
+      unreadCount: 0,
+      isGroup: true
+    }));
+
+    setGroups(groups);
+  };
+
   useEffect(() => {
     fetchChats();
+    fetchGroups();
     const interval = setInterval(fetchChats, 5000);
     return () => clearInterval(interval);
   }, []);
+
+  const handleCreateGroup = async (name: string, description?: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("You must be logged in to create a group");
+        return;
+      }
+
+      const { data: group, error: groupError } = await supabase
+        .from('groups')
+        .insert({
+          name,
+          description,
+          user_id: user.id
+        })
+        .select()
+        .single();
+
+      if (groupError) throw groupError;
+
+      // Add creator as first member
+      const { error: memberError } = await supabase
+        .from('group_members')
+        .insert({
+          group_id: group.id,
+          user_id: user.id
+        });
+
+      if (memberError) throw memberError;
+
+      toast.success("Group created successfully!");
+      fetchGroups();
+    } catch (error) {
+      console.error('Error creating group:', error);
+      toast.error("Failed to create group");
+    }
+  };
 
   return (
     <div className="container max-w-[1400px] pt-20 pb-16">
@@ -72,6 +155,10 @@ const Messages = () => {
               <TabsTrigger value="chats" className="flex-1">
                 <MessageSquare className="w-4 h-4 mr-2" />
                 Chats
+              </TabsTrigger>
+              <TabsTrigger value="groups" className="flex-1">
+                <Users className="w-4 h-4 mr-2" />
+                Groups
               </TabsTrigger>
             </TabsList>
 
@@ -85,6 +172,17 @@ const Messages = () => {
                 onNewChat={() => setShowNewChat(true)}
               />
             </TabsContent>
+
+            <TabsContent value="groups">
+              <GroupList
+                groups={groups}
+                selectedGroup={selectedGroup}
+                onSelectGroup={setSelectedGroup}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                onAddMembers={() => {}}
+              />
+            </TabsContent>
           </Tabs>
         </div>
 
@@ -95,9 +193,9 @@ const Messages = () => {
               onClose={() => setSelectedChat(null)}
             />
           )}
-          {!selectedChat && (
+          {!selectedChat && !selectedGroup && (
             <div className="h-full flex items-center justify-center text-muted-foreground">
-              Select a chat to start messaging
+              Select a chat or group to start messaging
             </div>
           )}
         </div>
