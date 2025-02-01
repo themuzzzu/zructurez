@@ -169,7 +169,7 @@ export const useMessageHandling = (
     }
   };
 
-  const handleCreateGroup = async (name: string, description?: string, members: string[]) => {
+  const handleCreateGroup = async (name: string, members: string[], description?: string) => {
     if (members.length <= 1) {
       toast.error("Groups require more than one member");
       return;
