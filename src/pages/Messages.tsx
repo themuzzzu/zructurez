@@ -91,7 +91,7 @@ const Messages = () => {
       .from('groups')
       .select(`
         *,
-        group_members (
+        group_members!inner (
           user_id
         )
       `)
@@ -103,17 +103,17 @@ const Messages = () => {
       return;
     }
 
-    const formattedGroups = groupsData.map(group => ({
-      ...group,
-      type: 'group' as const,
-      avatar: group.image_url || '/placeholder.svg',
-      time: group.created_at,
-      lastMessage: null,
-      unread: 0,
-      participants: group.group_members?.map((member: any) => member.user_id) || [],
-      messages: [],
-      unreadCount: 0,
-      isGroup: true
+    const formattedGroups: Group[] = groupsData.map(group => ({
+      id: group.id,
+      name: group.name,
+      description: group.description,
+      image_url: group.image_url,
+      created_at: group.created_at,
+      user_id: group.user_id,
+      group_members: {
+        count: group.group_members?.length || 0,
+        members: group.group_members?.map((member: any) => member.user_id) || []
+      }
     }));
 
     setGroups(formattedGroups);
