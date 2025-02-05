@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Database } from "@/integrations/supabase/types";
 
 type Appointment = Database['public']['Tables']['appointments']['Row'] & {
-  businesses: Pick<Database['public']['Tables']['businesses']['Row'], 'name' | 'image_url'> | null;
+  businesses: Pick<Database['public']['Tables']['businesses']['Row'], 'name' | 'image_url'>;
 };
 
 export const AppointmentsTab = () => {
@@ -19,7 +19,13 @@ export const AppointmentsTab = () => {
 
       const { data, error } = await supabase
         .from('appointments')
-        .select('*, businesses:businesses!appointments_business_id_fkey(name, image_url)')
+        .select(`
+          *,
+          businesses (
+            name,
+            image_url
+          )
+        `)
         .eq('user_id', user.id)
         .order('appointment_date', { ascending: false });
 
