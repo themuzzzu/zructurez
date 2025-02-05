@@ -30,23 +30,23 @@ export const FollowersTab = () => {
     const { data, error } = await supabase
       .from('followers')
       .select(`
-        follower:profiles!followers_follower_id_fkey(
+        is_business,
+        profiles!followers_follower_id_fkey (
           id,
-          username,
           name,
+          username,
           avatar_url
-        ),
-        is_business
+        )
       `)
       .eq('following_id', profile.id);
 
     if (!error && data) {
       const formattedData = data.map(item => ({
-        id: item.follower.id,
-        name: item.follower.name,
-        username: item.follower.username,
-        avatar_url: item.follower.avatar_url,
-        is_business: item.is_business
+        id: item.profiles.id,
+        name: item.profiles.name,
+        username: item.profiles.username,
+        avatar_url: item.profiles.avatar_url,
+        is_business: item.is_business || false
       }));
       setFollowers(formattedData);
     }
@@ -56,23 +56,23 @@ export const FollowersTab = () => {
     const { data, error } = await supabase
       .from('followers')
       .select(`
-        following:profiles!followers_following_id_fkey(
+        is_business,
+        profiles!followers_following_id_fkey (
           id,
-          username,
           name,
+          username,
           avatar_url
-        ),
-        is_business
+        )
       `)
       .eq('follower_id', profile.id);
 
     if (!error && data) {
       const formattedData = data.map(item => ({
-        id: item.following.id,
-        name: item.following.name,
-        username: item.following.username,
-        avatar_url: item.following.avatar_url,
-        is_business: item.is_business
+        id: item.profiles.id,
+        name: item.profiles.name,
+        username: item.profiles.username,
+        avatar_url: item.profiles.avatar_url,
+        is_business: item.is_business || false
       }));
       setFollowing(formattedData);
     }
