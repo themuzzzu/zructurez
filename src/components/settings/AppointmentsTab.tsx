@@ -4,6 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
+import { Database } from "@/integrations/supabase/types";
+
+type Appointment = Database['public']['Tables']['appointments']['Row'] & {
+  businesses: Database['public']['Tables']['businesses']['Row'] | null;
+};
 
 export const AppointmentsTab = () => {
   const { data: appointments, isLoading } = useQuery({
@@ -12,11 +17,11 @@ export const AppointmentsTab = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return [];
 
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('appointments')
         .select(`
           *,
-          businesses (
+          businesses:business_id (
             name,
             image_url
           )
@@ -24,7 +29,12 @@ export const AppointmentsTab = () => {
         .eq('user_id', user.id)
         .order('appointment_date', { ascending: false });
 
-      return data || [];
+      if (error) {
+        console.error('Error fetching appointments:', error);
+        return [];
+      }
+
+      return (data || []) as Appointment[];
     },
   });
 
