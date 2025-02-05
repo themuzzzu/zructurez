@@ -21,7 +21,7 @@ export const AppointmentsTab = () => {
         .from('appointments')
         .select(`
           *,
-          businesses (
+          businesses!appointments_business_id_fkey (
             name,
             image_url
           )
