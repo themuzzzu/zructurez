@@ -19,13 +19,7 @@ export const AppointmentsTab = () => {
 
       const { data, error } = await supabase
         .from('appointments')
-        .select(`
-          *,
-          businesses:business_id(
-            name,
-            image_url
-          )
-        `)
+        .select('*, businesses:businesses!appointments_business_id_fkey(name, image_url)')
         .eq('user_id', user.id)
         .order('appointment_date', { ascending: false });
 
