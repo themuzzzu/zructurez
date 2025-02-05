@@ -698,6 +698,30 @@ export type Database = {
         }
         Relationships: []
       }
+      followers: {
+        Row: {
+          created_at: string
+          follower_id: string
+          following_id: string
+          id: string
+          is_business: boolean | null
+        }
+        Insert: {
+          created_at?: string
+          follower_id: string
+          following_id: string
+          id?: string
+          is_business?: boolean | null
+        }
+        Update: {
+          created_at?: string
+          follower_id?: string
+          following_id?: string
+          id?: string
+          is_business?: boolean | null
+        }
+        Relationships: []
+      }
       group_members: {
         Row: {
           group_id: string
