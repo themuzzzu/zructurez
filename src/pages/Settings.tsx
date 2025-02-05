@@ -1,3 +1,4 @@
+
 import { Navbar } from "@/components/Navbar";
 import { Sidebar } from "@/components/Sidebar";
 import { ProfileView } from "@/components/ProfileView";
@@ -12,6 +13,7 @@ import { ServiceSettings } from "@/components/settings/ServiceSettings";
 import { AdvertisementsTab } from "@/components/settings/AdvertisementsTab";
 import { OrdersTab } from "@/components/settings/OrdersTab";
 import { LikedBusinessesTab } from "@/components/profile/LikedBusinessesTab";
+import { AppointmentsTab } from "@/components/settings/AppointmentsTab";
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState("profile");
@@ -26,6 +28,8 @@ const Settings = () => {
         return <PrivacySettings />;
       case "orders":
         return <OrdersTab />;
+      case "appointments":
+        return <AppointmentsTab />;
       case "products":
         return <ProductsTab />;
       case "business":
