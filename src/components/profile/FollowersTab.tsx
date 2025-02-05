@@ -30,8 +30,7 @@ export const FollowersTab = () => {
     const { data, error } = await supabase
       .from('followers')
       .select(`
-        id,
-        follower:follower_id(
+        follower:profiles!followers_follower_id_fkey(
           id,
           username,
           name,
@@ -57,8 +56,7 @@ export const FollowersTab = () => {
     const { data, error } = await supabase
       .from('followers')
       .select(`
-        id,
-        following:following_id(
+        following:profiles!followers_following_id_fkey(
           id,
           username,
           name,
