@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Database } from "@/integrations/supabase/types";
 
 type Appointment = Database['public']['Tables']['appointments']['Row'] & {
-  businesses: Database['public']['Tables']['businesses']['Row'] | null;
+  businesses: Pick<Database['public']['Tables']['businesses']['Row'], 'name' | 'image_url'> | null;
 };
 
 export const AppointmentsTab = () => {
@@ -21,7 +21,7 @@ export const AppointmentsTab = () => {
         .from('appointments')
         .select(`
           *,
-          businesses:business_id (
+          businesses:business_id(
             name,
             image_url
           )
@@ -34,7 +34,7 @@ export const AppointmentsTab = () => {
         return [];
       }
 
-      return (data || []) as Appointment[];
+      return data as Appointment[];
     },
   });
 
