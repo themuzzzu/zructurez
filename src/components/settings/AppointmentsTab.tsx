@@ -6,8 +6,11 @@ import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Database } from "@/integrations/supabase/types";
 
-type Appointment = Database['public']['Tables']['appointments']['Row'] & {
-  businesses: Pick<Database['public']['Tables']['businesses']['Row'], 'name' | 'image_url'>;
+type AppointmentRow = Database['public']['Tables']['appointments']['Row'];
+type BusinessRow = Database['public']['Tables']['businesses']['Row'];
+
+type Appointment = AppointmentRow & {
+  businesses: Pick<BusinessRow, 'name' | 'image_url'> | null;
 };
 
 export const AppointmentsTab = () => {
@@ -21,7 +24,7 @@ export const AppointmentsTab = () => {
         .from('appointments')
         .select(`
           *,
-          businesses!appointments_business_id_fkey (
+          businesses (
             name,
             image_url
           )
