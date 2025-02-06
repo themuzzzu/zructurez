@@ -60,77 +60,84 @@ export const ProductFilters = ({
   ];
 
   return (
-    <div className="flex flex-col gap-6 p-4 border rounded-lg bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex flex-wrap gap-6 items-center justify-between">
-        <div className="space-y-4">
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="discounted"
-                checked={showDiscounted}
-                onCheckedChange={onDiscountedChange}
-              />
-              <Label htmlFor="discounted">Discounted</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="used"
-                checked={showUsed}
-                onCheckedChange={onUsedChange}
-              />
-              <Label htmlFor="used">Used</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="branded"
-                checked={showBranded}
-                onCheckedChange={onBrandedChange}
-              />
-              <Label htmlFor="branded">Branded</Label>
-            </div>
-          </div>
+    <div className="flex flex-col gap-4 p-4 border rounded-lg bg-[#111111] border-zinc-800">
+      <div className="flex flex-wrap gap-4">
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="discounted"
+            checked={showDiscounted}
+            onCheckedChange={onDiscountedChange}
+            className="data-[state=checked]:bg-primary"
+          />
+          <Label htmlFor="discounted" className="text-white">Discounted</Label>
         </div>
-
-        <div className="flex items-center space-x-4">
-          <Select value={selectedCategory} onValueChange={onCategorySelect}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Category" />
-            </SelectTrigger>
-            <SelectContent className="max-h-[300px]">
-              {categories.map((category) => (
-                <SelectItem key={category.value} value={category.value}>
-                  {category.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select value={priceRange} onValueChange={onPriceRangeChange}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Price Range" />
-            </SelectTrigger>
-            <SelectContent>
-              {priceRanges.map((range) => (
-                <SelectItem key={range.value} value={range.value}>
-                  {range.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select value={sortOption} onValueChange={onSortChange}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="newest">Newest First</SelectItem>
-              <SelectItem value="oldest">Oldest First</SelectItem>
-              <SelectItem value="price-low">Price: Low to High</SelectItem>
-              <SelectItem value="price-high">Price: High to Low</SelectItem>
-              <SelectItem value="most-viewed">Most Viewed</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="used"
+            checked={showUsed}
+            onCheckedChange={onUsedChange}
+            className="data-[state=checked]:bg-primary"
+          />
+          <Label htmlFor="used" className="text-white">Used</Label>
         </div>
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="branded"
+            checked={showBranded}
+            onCheckedChange={onBrandedChange}
+            className="data-[state=checked]:bg-primary"
+          />
+          <Label htmlFor="branded" className="text-white">Branded</Label>
+        </div>
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-4">
+        <Select value={selectedCategory} onValueChange={onCategorySelect}>
+          <SelectTrigger className="w-full sm:w-[200px] bg-[#111111] border-zinc-800 text-white">
+            <SelectValue placeholder="Category" />
+          </SelectTrigger>
+          <SelectContent className="max-h-[300px] bg-[#111111] border-zinc-800">
+            {categories.map((category) => (
+              <SelectItem 
+                key={category.value} 
+                value={category.value}
+                className="text-white hover:bg-zinc-800"
+              >
+                {category.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={priceRange} onValueChange={onPriceRangeChange}>
+          <SelectTrigger className="w-full sm:w-[200px] bg-[#111111] border-zinc-800 text-white">
+            <SelectValue placeholder="Price Range" />
+          </SelectTrigger>
+          <SelectContent className="bg-[#111111] border-zinc-800">
+            {priceRanges.map((range) => (
+              <SelectItem 
+                key={range.value} 
+                value={range.value}
+                className="text-white hover:bg-zinc-800"
+              >
+                {range.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={sortOption} onValueChange={onSortChange}>
+          <SelectTrigger className="w-full sm:w-[180px] bg-[#111111] border-zinc-800 text-white">
+            <SelectValue placeholder="Sort by" />
+          </SelectTrigger>
+          <SelectContent className="bg-[#111111] border-zinc-800">
+            <SelectItem value="newest" className="text-white hover:bg-zinc-800">Newest First</SelectItem>
+            <SelectItem value="oldest" className="text-white hover:bg-zinc-800">Oldest First</SelectItem>
+            <SelectItem value="price-low" className="text-white hover:bg-zinc-800">Price: Low to High</SelectItem>
+            <SelectItem value="price-high" className="text-white hover:bg-zinc-800">Price: High to Low</SelectItem>
+            <SelectItem value="most-viewed" className="text-white hover:bg-zinc-800">Most Viewed</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
     </div>
   );

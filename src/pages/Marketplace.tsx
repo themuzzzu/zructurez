@@ -37,35 +37,35 @@ const Marketplace = () => {
   });
 
   return (
-    <div className="min-h-screen bg-background pt-20 pb-16">
-      <div className="container max-w-[1400px]">
-        <div className="flex flex-col gap-6">
+    <div className="min-h-screen bg-[#0a0a0a] pt-4 pb-16 px-4 md:pt-20 md:px-6">
+      <div className="max-w-[1400px] mx-auto">
+        <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link to="/">
-                <Button variant="ghost" size="icon">
+            <div className="flex items-center gap-2">
+              <Link to="/" className="md:hidden">
+                <Button variant="ghost" size="icon" className="text-white">
                   <ArrowLeft className="h-5 w-5" />
                 </Button>
               </Link>
-              <h1 className="text-3xl font-bold">Marketplace</h1>
+              <h1 className="text-2xl md:text-3xl font-bold text-white">Marketplace</h1>
             </div>
             
             <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
               <SheetTrigger asChild>
                 <div className="relative">
-                  <Button variant="outline" size="icon">
+                  <Button variant="ghost" size="icon" className="text-white">
                     <ShoppingCart className="h-5 w-5" />
+                    {cartItemCount > 0 && (
+                      <span className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-primary text-white text-xs flex items-center justify-center animate-fade-in">
+                        {cartItemCount}
+                      </span>
+                    )}
                   </Button>
-                  {cartItemCount > 0 && (
-                    <span className="absolute -top-3 -right-3 h-6 w-6 rounded-full bg-red-500 text-white text-xs flex items-center justify-center shadow-sm animate-fade-in">
-                      {cartItemCount}
-                    </span>
-                  )}
                 </div>
               </SheetTrigger>
-              <SheetContent className="w-[400px] sm:w-[540px]">
+              <SheetContent className="w-full sm:w-[540px] bg-[#0a0a0a] border-zinc-800">
                 <SheetHeader>
-                  <SheetTitle>Shopping Cart</SheetTitle>
+                  <SheetTitle className="text-white">Shopping Cart</SheetTitle>
                 </SheetHeader>
                 <div className="mt-4">
                   <Cart />
@@ -79,7 +79,7 @@ const Marketplace = () => {
               placeholder="Search products..."
               value={searchQuery}
               onChange={setSearchQuery}
-              className="max-w-xl mx-auto"
+              className="w-full"
             />
             <ProductFilters 
               selectedCategory={selectedCategory}
