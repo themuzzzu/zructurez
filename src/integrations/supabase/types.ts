@@ -157,6 +157,38 @@ export type Database = {
           },
         ]
       }
+      business_analytics: {
+        Row: {
+          business_id: string
+          created_at: string | null
+          id: string
+          last_updated: string | null
+          page_views: number | null
+        }
+        Insert: {
+          business_id: string
+          created_at?: string | null
+          id?: string
+          last_updated?: string | null
+          page_views?: number | null
+        }
+        Update: {
+          business_id?: string
+          created_at?: string | null
+          id?: string
+          last_updated?: string | null
+          page_views?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_analytics_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_booking_messages: {
         Row: {
           business_id: string
@@ -1499,6 +1531,12 @@ export type Database = {
       get_sample_user_id: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      increment_business_views: {
+        Args: {
+          business_id_param: string
+        }
+        Returns: undefined
       }
       increment_views: {
         Args: {

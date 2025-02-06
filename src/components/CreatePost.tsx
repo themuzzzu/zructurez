@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Image as ImageIcon, Tag, MapPin, ListChecks } from "lucide-react";
@@ -13,6 +13,8 @@ import {
 import { Textarea } from "./ui/textarea";
 import { ImageUpload, ACCEPTED_IMAGE_TYPES } from "./ImageUpload";
 import { createPost } from "../services/postService";
+import { supabase } from "@/integrations/supabase/client";
+import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
 
 interface CreatePostProps {
   onSuccess?: () => void;
@@ -23,6 +25,26 @@ export const CreatePost = ({ onSuccess }: CreatePostProps) => {
   const [selectedLocation, setSelectedLocation] = useState<string>("");
   const [content, setContent] = useState("");
   const [isPosting, setIsPosting] = useState(false);
+  const [userAvatar, setUserAvatar] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('avatar_url')
+          .eq('id', user.id)
+          .single();
+        
+        if (profile) {
+          setUserAvatar(profile.avatar_url);
+        }
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
 
   const handleCreatePost = async () => {
     if (!content.trim()) {
@@ -57,11 +79,13 @@ export const CreatePost = ({ onSuccess }: CreatePostProps) => {
   return (
     <Card className="p-4 bg-black/90 border-zinc-800 shadow-lg">
       <div className="flex items-start gap-4">
-        <img
-          src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"
-          alt="avatar"
-          className="h-10 w-10 rounded-full"
-        />
+        <Avatar className="h-10 w-10">
+          <AvatarImage 
+            src={userAvatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"} 
+            alt="User avatar" 
+          />
+          <AvatarFallback>User</AvatarFallback>
+        </Avatar>
         <div className="flex-1">
           <Textarea
             placeholder="Share something with your neighborhood..."
