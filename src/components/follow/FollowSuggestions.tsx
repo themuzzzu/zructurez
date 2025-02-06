@@ -36,6 +36,19 @@ export const FollowSuggestions = () => {
         return;
       }
 
+      // First check if already following
+      const { data: existingFollow } = await supabase
+        .from('followers')
+        .select('*')
+        .eq('follower_id', user.id)
+        .eq('following_id', profileId)
+        .single();
+
+      if (existingFollow) {
+        toast.error('You are already following this user');
+        return;
+      }
+
       const { error } = await supabase
         .from('followers')
         .insert({
