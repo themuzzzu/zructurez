@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
+import { toast } from "sonner";
 
 interface FollowData {
   id: string;
@@ -23,6 +24,7 @@ export const FollowersTab = () => {
     if (profile.id) {
       fetchFollowers();
       fetchFollowing();
+      subscribeToFollowers();
     }
   }, [profile.id]);
 
@@ -76,6 +78,29 @@ export const FollowersTab = () => {
       }));
       setFollowing(formattedData);
     }
+  };
+
+  const subscribeToFollowers = () => {
+    const channel = supabase
+      .channel('followers-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'followers',
+          filter: `following_id=eq.${profile.id}`
+        },
+        () => {
+          fetchFollowers();
+          toast.success("Followers list updated");
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   };
 
   const renderFollowList = (data: FollowData[], type: "followers" | "following") => {

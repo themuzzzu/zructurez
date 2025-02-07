@@ -113,6 +113,9 @@ export const GroupChat = ({ groupId }: GroupChatProps) => {
           if (payload.eventType === "INSERT") {
             const newMessage = payload.new as Message;
             setMessages((current) => [...current, newMessage]);
+            if (scrollRef.current) {
+              scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+            }
           }
         }
       )
