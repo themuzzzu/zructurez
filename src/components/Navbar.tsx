@@ -1,4 +1,4 @@
-import { Bell, Search, Menu, ShoppingCart } from "lucide-react";
+import { Bell, Search, Menu, ShoppingCart, Home, Store, Wrench, Briefcase, MessageSquare, MoreVertical, Building } from "lucide-react";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
 import {
@@ -97,109 +97,165 @@ export const Navbar = () => {
     }
   };
 
+  const mobileNavItems = [
+    { icon: Home, label: "Home", path: "/" },
+    { icon: Store, label: "Marketplace", path: "/marketplace" },
+    { icon: Wrench, label: "Services", path: "/services" },
+    { icon: Building, label: "Business", path: "/business" },
+    { icon: MessageSquare, label: "Messages", path: "/messages" },
+  ];
+
   return (
-    <nav className="border-b bg-background py-3 fixed top-0 w-full z-50">
-      <div className="container max-w-[1400px] flex items-center justify-between animate-fade-down">
-        <div className="flex items-center gap-4">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="lg:hidden">
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="p-0 w-64">
-              <Sidebar className="w-full" />
-            </SheetContent>
-          </Sheet>
-          <h1 className="text-xl font-bold text-primary">
-            Zructures
-          </h1>
-        </div>
+    <>
+      <nav className="border-b bg-background py-3 fixed top-0 w-full z-50">
+        <div className="container max-w-[1400px] flex items-center justify-between animate-fade-down">
+          <div className="flex items-center gap-4">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="lg:hidden">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="p-0 w-64">
+                <Sidebar className="w-full" />
+              </SheetContent>
+            </Sheet>
+            <h1 className="text-xl font-bold text-primary">
+              Zructures
+            </h1>
+          </div>
 
-        {isHomePage && (
-          <SearchBox className="flex-1 max-w-xl mx-4 hidden md:block" />
-        )}
+          {isHomePage && (
+            <SearchBox className="flex-1 max-w-xl mx-4 hidden md:block" />
+          )}
 
-        <div className="flex items-center gap-2">
-          <Sheet>
-            <SheetTrigger asChild>
-              <div className="relative">
-                <Button variant="ghost" size="icon" className="relative transition-transform duration-300 hover:scale-110">
-                  <Bell className="h-5 w-5" />
-                  {unreadCount > 0 && (
+          <div className="flex items-center gap-2">
+            <Sheet>
+              <SheetTrigger asChild>
+                <div className="relative">
+                  <Button variant="ghost" size="icon" className="relative transition-transform duration-300 hover:scale-110">
+                    <Bell className="h-5 w-5" />
+                    {unreadCount > 0 && (
+                      <span className="absolute -top-2 -right-2 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center shadow-sm animate-fade-in">
+                        {unreadCount}
+                      </span>
+                    )}
+                  </Button>
+                </div>
+              </SheetTrigger>
+              <SheetContent>
+                <SheetHeader>
+                  <SheetTitle>Notifications</SheetTitle>
+                </SheetHeader>
+                <div className="mt-4">
+                  <NotificationList />
+                </div>
+              </SheetContent>
+            </Sheet>
+
+            <Sheet>
+              <SheetTrigger asChild>
+                <div className="relative">
+                  <Button variant="ghost" size="icon" className="transition-transform duration-300 hover:scale-110">
+                    <ShoppingCart className="h-5 w-5" />
+                  </Button>
+                  {cartItemCount > 0 && (
                     <span className="absolute -top-2 -right-2 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center shadow-sm animate-fade-in">
-                      {unreadCount}
+                      {cartItemCount}
                     </span>
                   )}
-                </Button>
-              </div>
-            </SheetTrigger>
-            <SheetContent>
-              <SheetHeader>
-                <SheetTitle>Notifications</SheetTitle>
-              </SheetHeader>
-              <div className="mt-4">
-                <NotificationList />
-              </div>
-            </SheetContent>
-          </Sheet>
+                </div>
+              </SheetTrigger>
+              <SheetContent className="w-[400px] sm:w-[540px]">
+                <SheetHeader>
+                  <SheetTitle>Shopping Cart</SheetTitle>
+                </SheetHeader>
+                <div className="mt-4">
+                  <Cart />
+                </div>
+              </SheetContent>
+            </Sheet>
 
-          <Sheet>
-            <SheetTrigger asChild>
-              <div className="relative">
-                <Button variant="ghost" size="icon" className="transition-transform duration-300 hover:scale-110">
-                  <ShoppingCart className="h-5 w-5" />
+            <Separator orientation="vertical" className="h-6 hidden sm:block" />
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex gap-2 transition-all duration-300 hover:bg-accent/80">
+                  <img 
+                    src={profile?.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"} 
+                    alt="avatar" 
+                    className="h-6 w-6 rounded-full transition-transform duration-300 hover:scale-110" 
+                  />
+                  <span className="text-sm hidden sm:inline">{profile?.username || 'User'}</span>
                 </Button>
-                {cartItemCount > 0 && (
-                  <span className="absolute -top-2 -right-2 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center shadow-sm animate-fade-in">
-                    {cartItemCount}
-                  </span>
-                )}
-              </div>
-            </SheetTrigger>
-            <SheetContent className="w-[400px] sm:w-[540px]">
-              <SheetHeader>
-                <SheetTitle>Shopping Cart</SheetTitle>
-              </SheetHeader>
-              <div className="mt-4">
-                <Cart />
-              </div>
-            </SheetContent>
-          </Sheet>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => handleProfileAction("Profile")}>
+                  Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleProfileAction("Settings")}>
+                  Settings
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleProfileAction("Help")}>
+                  Help
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => handleProfileAction("Sign out")}>
+                  Sign out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+      </nav>
 
-          <Separator orientation="vertical" className="h-6 hidden sm:block" />
-          
+      {/* Mobile Bottom Navigation */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-background border-t py-2 px-4 z-50">
+        <div className="flex justify-between items-center max-w-md mx-auto">
+          {mobileNavItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = location.pathname === item.path;
+            return (
+              <Button
+                key={item.path}
+                variant="ghost"
+                size="sm"
+                className={`flex flex-col items-center gap-1 h-auto py-1 ${
+                  isActive ? 'text-primary' : 'text-muted-foreground'
+                }`}
+                onClick={() => navigate(item.path)}
+              >
+                <Icon className="h-5 w-5" />
+                <span className="text-xs">{item.label}</span>
+              </Button>
+            );
+          })}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex gap-2 transition-all duration-300 hover:bg-accent/80">
-                <img 
-                  src={profile?.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"} 
-                  alt="avatar" 
-                  className="h-6 w-6 rounded-full transition-transform duration-300 hover:scale-110" 
-                />
-                <span className="text-sm hidden sm:inline">{profile?.username || 'User'}</span>
+              <Button variant="ghost" size="sm" className="flex flex-col items-center gap-1 h-auto py-1">
+                <MoreVertical className="h-5 w-5" />
+                <span className="text-xs">More</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => handleProfileAction("Profile")}>
-                Profile
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => navigate('/jobs')}>
+                Jobs
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleProfileAction("Settings")}>
-                Settings
+              <DropdownMenuItem onClick={() => navigate('/communities')}>
+                Communities
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleProfileAction("Help")}>
-                Help
+              <DropdownMenuItem onClick={() => navigate('/events')}>
+                Events
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => handleProfileAction("Sign out")}>
-                Sign out
+              <DropdownMenuItem onClick={() => navigate('/maps')}>
+                Maps
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </div>
-    </nav>
+    </>
   );
 };
