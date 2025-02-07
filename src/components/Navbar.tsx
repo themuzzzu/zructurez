@@ -1,32 +1,23 @@
-import { Bell, Search, Menu, ShoppingCart, Home, Store, Wrench, Briefcase, MessageSquare, MoreVertical, Building } from "lucide-react";
+
+import { Menu } from "lucide-react";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   Sheet,
   SheetContent,
-  SheetHeader,
-  SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
-import { Cart } from "./cart/Cart";
-import { NotificationList } from "./notifications/NotificationList";
+import { NotificationButton } from "./navbar/NotificationButton";
+import { CartButton } from "./navbar/CartButton";
+import { UserMenu } from "./navbar/UserMenu";
+import { MobileNav } from "./navbar/MobileNav";
 import { SearchBox } from "./search/SearchBox";
 import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Navbar = () => {
-  const navigate = useNavigate();
   const location = useLocation();
   const isHomePage = location.pathname === "/";
 
@@ -46,64 +37,6 @@ export const Navbar = () => {
       return data;
     },
   });
-
-  const { data: cartItemCount = 0 } = useQuery({
-    queryKey: ['cartCount'],
-    queryFn: async () => {
-      const { data: session } = await supabase.auth.getSession();
-      if (!session?.session?.user) return 0;
-
-      const { count, error } = await supabase
-        .from('cart_items')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', session.session.user.id);
-
-      if (error) throw error;
-      return count || 0;
-    },
-  });
-
-  const { data: unreadCount = 0 } = useQuery({
-    queryKey: ['unreadCount'],
-    queryFn: async () => {
-      const { data: session } = await supabase.auth.getSession();
-      if (!session?.session?.user) return 0;
-
-      const { count, error } = await supabase
-        .from('notifications')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', session.session.user.id)
-        .eq('read', false);
-
-      if (error) throw error;
-      return count || 0;
-    },
-  });
-
-  const handleProfileAction = async (action: string) => {
-    if (action === "Sign out") {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        toast.error("Error signing out");
-      } else {
-        navigate("/auth");
-      }
-    } else if (action === "Profile") {
-      navigate("/profile");
-    } else if (action === "Settings") {
-      navigate("/settings");
-    } else {
-      toast.info(`${action} clicked - Feature coming soon!`);
-    }
-  };
-
-  const mobileNavItems = [
-    { icon: Home, label: "Home", path: "/" },
-    { icon: Store, label: "Marketplace", path: "/marketplace" },
-    { icon: Wrench, label: "Services", path: "/services" },
-    { icon: Building, label: "Business", path: "/business" },
-    { icon: MessageSquare, label: "Messages", path: "/messages" },
-  ];
 
   return (
     <>
@@ -130,132 +63,15 @@ export const Navbar = () => {
           )}
 
           <div className="flex items-center gap-2">
-            <Sheet>
-              <SheetTrigger asChild>
-                <div className="relative">
-                  <Button variant="ghost" size="icon" className="relative transition-transform duration-300 hover:scale-110">
-                    <Bell className="h-5 w-5" />
-                    {unreadCount > 0 && (
-                      <span className="absolute -top-2 -right-2 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center shadow-sm animate-fade-in">
-                        {unreadCount}
-                      </span>
-                    )}
-                  </Button>
-                </div>
-              </SheetTrigger>
-              <SheetContent>
-                <SheetHeader>
-                  <SheetTitle>Notifications</SheetTitle>
-                </SheetHeader>
-                <div className="mt-4">
-                  <NotificationList />
-                </div>
-              </SheetContent>
-            </Sheet>
-
-            <Sheet>
-              <SheetTrigger asChild>
-                <div className="relative">
-                  <Button variant="ghost" size="icon" className="transition-transform duration-300 hover:scale-110">
-                    <ShoppingCart className="h-5 w-5" />
-                  </Button>
-                  {cartItemCount > 0 && (
-                    <span className="absolute -top-2 -right-2 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center shadow-sm animate-fade-in">
-                      {cartItemCount}
-                    </span>
-                  )}
-                </div>
-              </SheetTrigger>
-              <SheetContent className="w-[400px] sm:w-[540px]">
-                <SheetHeader>
-                  <SheetTitle>Shopping Cart</SheetTitle>
-                </SheetHeader>
-                <div className="mt-4">
-                  <Cart />
-                </div>
-              </SheetContent>
-            </Sheet>
-
+            <NotificationButton />
+            <CartButton />
             <Separator orientation="vertical" className="h-6 hidden sm:block" />
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex gap-2 transition-all duration-300 hover:bg-accent/80">
-                  <img 
-                    src={profile?.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"} 
-                    alt="avatar" 
-                    className="h-6 w-6 rounded-full transition-transform duration-300 hover:scale-110" 
-                  />
-                  <span className="text-sm hidden sm:inline">{profile?.username || 'User'}</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => handleProfileAction("Profile")}>
-                  Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleProfileAction("Settings")}>
-                  Settings
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleProfileAction("Help")}>
-                  Help
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => handleProfileAction("Sign out")}>
-                  Sign out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <UserMenu profile={profile} />
           </div>
         </div>
       </nav>
 
-      {/* Mobile Bottom Navigation */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-background border-t py-2 px-4 z-50">
-        <div className="flex justify-between items-center max-w-md mx-auto">
-          {mobileNavItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = location.pathname === item.path;
-            return (
-              <Button
-                key={item.path}
-                variant="ghost"
-                size="sm"
-                className={`flex flex-col items-center gap-1 h-auto py-1 ${
-                  isActive ? 'text-primary' : 'text-muted-foreground'
-                }`}
-                onClick={() => navigate(item.path)}
-              >
-                <Icon className="h-5 w-5" />
-                <span className="text-xs">{item.label}</span>
-              </Button>
-            );
-          })}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="flex flex-col items-center gap-1 h-auto py-1">
-                <MoreVertical className="h-5 w-5" />
-                <span className="text-xs">More</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => navigate('/jobs')}>
-                Jobs
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/communities')}>
-                Communities
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/events')}>
-                Events
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/maps')}>
-                Maps
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
+      <MobileNav />
     </>
   );
 };

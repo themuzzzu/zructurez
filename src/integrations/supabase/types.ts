@@ -1117,6 +1117,84 @@ export type Database = {
           },
         ]
       }
+      pricing_plans: {
+        Row: {
+          analytics_level: string | null
+          billing_period: string
+          created_at: string
+          description: string | null
+          features: Json
+          id: string
+          is_active: boolean | null
+          max_listings: number | null
+          message_quota: number | null
+          name: string
+          price: number
+          support_level: string | null
+        }
+        Insert: {
+          analytics_level?: string | null
+          billing_period?: string
+          created_at?: string
+          description?: string | null
+          features?: Json
+          id?: string
+          is_active?: boolean | null
+          max_listings?: number | null
+          message_quota?: number | null
+          name: string
+          price: number
+          support_level?: string | null
+        }
+        Update: {
+          analytics_level?: string | null
+          billing_period?: string
+          created_at?: string
+          description?: string | null
+          features?: Json
+          id?: string
+          is_active?: boolean | null
+          max_listings?: number | null
+          message_quota?: number | null
+          name?: string
+          price?: number
+          support_level?: string | null
+        }
+        Relationships: []
+      }
+      privacy_settings: {
+        Row: {
+          allow_direct_messages: boolean | null
+          anonymize_number: boolean | null
+          created_at: string
+          id: string
+          show_contact_info: boolean | null
+          show_location: boolean | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          allow_direct_messages?: boolean | null
+          anonymize_number?: boolean | null
+          created_at?: string
+          id?: string
+          show_contact_info?: boolean | null
+          show_location?: boolean | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          allow_direct_messages?: boolean | null
+          anonymize_number?: boolean | null
+          created_at?: string
+          id?: string
+          show_contact_info?: boolean | null
+          show_location?: boolean | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       product_images: {
         Row: {
           created_at: string
