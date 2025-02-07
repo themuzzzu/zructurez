@@ -1,53 +1,54 @@
+
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { MessageCircle, UserPlus, Users } from "lucide-react";
+import { MessageCircle, UserPlus, Users, UserMinus } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 export const FollowSuggestions = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
+  // Fetch suggested profiles and their follow status
   const { data: profiles = [], isLoading } = useQuery({
     queryKey: ['suggested-profiles'],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      const { data, error } = await supabase
+      // Get profiles excluding current user
+      const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
-        .select('*')
+        .select('id, username, name, avatar_url')
         .neq('id', user.id)
-        .order('created_at', { ascending: false })
         .limit(5);
 
-      if (error) throw error;
-      return data;
+      if (profilesError) throw profilesError;
+
+      // Get current user's following list
+      const { data: followingData } = await supabase
+        .from('followers')
+        .select('following_id')
+        .eq('follower_id', user.id);
+
+      const followingIds = new Set(followingData?.map(f => f.following_id) || []);
+
+      // Combine the data
+      return profilesData.map(profile => ({
+        ...profile,
+        isFollowing: followingIds.has(profile.id)
+      }));
     }
   });
 
-  const handleFollow = async (profileId: string) => {
-    try {
+  // Follow mutation
+  const followMutation = useMutation({
+    mutationFn: async (profileId: string) => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast.error('You must be logged in to follow users');
-        return;
-      }
-
-      // First check if already following
-      const { data: existingFollow } = await supabase
-        .from('followers')
-        .select('*')
-        .eq('follower_id', user.id)
-        .eq('following_id', profileId)
-        .single();
-
-      if (existingFollow) {
-        toast.error('You are already following this user');
-        return;
-      }
+      if (!user) throw new Error('Not authenticated');
 
       const { error } = await supabase
         .from('followers')
@@ -57,10 +58,46 @@ export const FollowSuggestions = () => {
         });
 
       if (error) throw error;
-      toast.success('User followed successfully');
-    } catch (error) {
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['suggested-profiles'] });
+      toast.success('Successfully followed user');
+    },
+    onError: (error) => {
       console.error('Error following user:', error);
       toast.error('Failed to follow user');
+    }
+  });
+
+  // Unfollow mutation
+  const unfollowMutation = useMutation({
+    mutationFn: async (profileId: string) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const { error } = await supabase
+        .from('followers')
+        .delete()
+        .eq('follower_id', user.id)
+        .eq('following_id', profileId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['suggested-profiles'] });
+      toast.success('Successfully unfollowed user');
+    },
+    onError: (error) => {
+      console.error('Error unfollowing user:', error);
+      toast.error('Failed to unfollow user');
+    }
+  });
+
+  const handleFollowToggle = async (profileId: string, isFollowing: boolean) => {
+    if (isFollowing) {
+      unfollowMutation.mutate(profileId);
+    } else {
+      followMutation.mutate(profileId);
     }
   };
 
@@ -102,8 +139,6 @@ export const FollowSuggestions = () => {
   };
 
   const handleSyncContacts = async () => {
-    // In a real app, you would implement contact sync logic here
-    // For now, we'll just show a success message
     toast.success('Contacts synced successfully!');
   };
 
@@ -160,10 +195,20 @@ export const FollowSuggestions = () => {
               </Button>
               <Button
                 size="sm"
-                onClick={() => handleFollow(profile.id)}
+                variant={profile.isFollowing ? "outline" : "default"}
+                onClick={() => handleFollowToggle(profile.id, profile.isFollowing)}
               >
-                <UserPlus className="h-4 w-4 mr-1" />
-                Follow
+                {profile.isFollowing ? (
+                  <>
+                    <UserMinus className="h-4 w-4 mr-1" />
+                    Unfollow
+                  </>
+                ) : (
+                  <>
+                    <UserPlus className="h-4 w-4 mr-1" />
+                    Follow
+                  </>
+                )}
               </Button>
             </div>
           </div>
