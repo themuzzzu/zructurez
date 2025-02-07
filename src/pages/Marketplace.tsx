@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ShoppingSection } from "@/components/ShoppingSection";
 import { ArrowLeft, ShoppingCart } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Cart } from "@/components/cart/Cart";
 import { useState } from "react";
@@ -11,6 +11,7 @@ import { SearchInput } from "@/components/SearchInput";
 import { ProductFilters } from "@/components/marketplace/ProductFilters";
 
 const Marketplace = () => {
+  const navigate = useNavigate();
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -42,11 +43,14 @@ const Marketplace = () => {
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Link to="/" className="md:hidden">
-                <Button variant="ghost" size="icon" className="text-white">
-                  <ArrowLeft className="h-5 w-5" />
-                </Button>
-              </Link>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-white hover:bg-white/10"
+                onClick={() => navigate('/')}
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
               <h1 className="text-2xl md:text-3xl font-bold text-white">Marketplace</h1>
             </div>
             
