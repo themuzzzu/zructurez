@@ -7,6 +7,7 @@ interface PerformanceMetric {
   success: boolean;
   error_message?: string;
   metadata?: Record<string, any>;
+  user_id: string;
 }
 
 export const trackPerformance = async (metric: PerformanceMetric) => {
@@ -28,6 +29,8 @@ export const measureApiCall = async <T>(
   apiCall: () => Promise<T>,
   metadata?: Record<string, any>
 ): Promise<T> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  
   const startTime = performance.now();
   try {
     const result = await apiCall();
@@ -37,7 +40,8 @@ export const measureApiCall = async <T>(
       endpoint,
       response_time: endTime - startTime,
       success: true,
-      metadata
+      metadata,
+      user_id: user?.id as string
     });
 
     return result;
@@ -49,7 +53,8 @@ export const measureApiCall = async <T>(
       response_time: endTime - startTime,
       success: false,
       error_message: error instanceof Error ? error.message : 'Unknown error',
-      metadata
+      metadata,
+      user_id: user?.id as string
     });
 
     throw error;
