@@ -1,9 +1,11 @@
+
 import { Navbar } from "@/components/Navbar";
 import { Sidebar } from "@/components/Sidebar";
 import { CreatePost } from "@/components/CreatePost";
 import { GroupManagement } from "@/components/groups/GroupManagement";
 import { FollowSuggestions } from "@/components/follow/FollowSuggestions";
 import { PostCard } from "@/components/PostCard";
+import { PerformanceDashboard } from "@/components/performance/PerformanceDashboard";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
@@ -75,6 +77,10 @@ const Index = () => {
           <Sidebar className="hidden lg:block w-64 fixed h-[calc(100vh-4rem)]" />
           <main className="flex-1 lg:ml-64">
             <div className="container max-w-[800px] p-4 space-y-4">
+              <div className="mb-8">
+                <h2 className="text-2xl font-bold mb-4">Performance Metrics</h2>
+                <PerformanceDashboard />
+              </div>
               <CreatePost />
               <div className="space-y-4">
                 {isLoading ? (
