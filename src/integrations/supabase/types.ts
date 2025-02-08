@@ -283,6 +283,47 @@ export type Database = {
           },
         ]
       }
+      business_commission_settings: {
+        Row: {
+          business_id: string
+          commission_rate: number
+          created_at: string
+          custom_platform_fee_percentage: number | null
+          custom_transaction_fee_flat: number | null
+          id: string
+          is_custom_fee_enabled: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          commission_rate?: number
+          created_at?: string
+          custom_platform_fee_percentage?: number | null
+          custom_transaction_fee_flat?: number | null
+          id?: string
+          is_custom_fee_enabled?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          commission_rate?: number
+          created_at?: string
+          custom_platform_fee_percentage?: number | null
+          custom_transaction_fee_flat?: number | null
+          id?: string
+          is_custom_fee_enabled?: boolean | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_commission_settings_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: true
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_likes: {
         Row: {
           business_id: string
@@ -668,6 +709,97 @@ export type Database = {
             columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commission_settings: {
+        Row: {
+          created_at: string
+          id: string
+          platform_fee_percentage: number
+          transaction_fee_flat: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          platform_fee_percentage?: number
+          transaction_fee_flat?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          platform_fee_percentage?: number
+          transaction_fee_flat?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      commission_transactions: {
+        Row: {
+          appointment_id: string | null
+          business_id: string
+          commission_amount: number
+          created_at: string
+          id: string
+          net_amount: number
+          order_id: string | null
+          original_amount: number
+          platform_fee_amount: number
+          processed_at: string | null
+          status: string
+          transaction_fee_amount: number
+        }
+        Insert: {
+          appointment_id?: string | null
+          business_id: string
+          commission_amount: number
+          created_at?: string
+          id?: string
+          net_amount: number
+          order_id?: string | null
+          original_amount: number
+          platform_fee_amount: number
+          processed_at?: string | null
+          status?: string
+          transaction_fee_amount: number
+        }
+        Update: {
+          appointment_id?: string | null
+          business_id?: string
+          commission_amount?: number
+          created_at?: string
+          id?: string
+          net_amount?: number
+          order_id?: string | null
+          original_amount?: number
+          platform_fee_amount?: number
+          processed_at?: string | null
+          status?: string
+          transaction_fee_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commission_transactions_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commission_transactions_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commission_transactions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
             referencedColumns: ["id"]
           },
         ]
