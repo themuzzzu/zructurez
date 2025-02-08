@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from "@/integrations/supabase/client";
@@ -42,28 +43,32 @@ export const PerformanceDashboard = () => {
   });
 
   useEffect(() => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    const setupRealtimeSubscription = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
-    const channel = supabase
-      .channel('schema-db-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'performance_metrics',
-          filter: `user_id=eq.${user.id}`
-        },
-        (payload) => {
-          setRealtimeData(current => [payload.new, ...current].slice(0, 100));
-        }
-      )
-      .subscribe();
+      const channel = supabase
+        .channel('schema-db-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'performance_metrics',
+            filter: `user_id=eq.${user.id}`
+          },
+          (payload) => {
+            setRealtimeData(current => [payload.new, ...current].slice(0, 100));
+          }
+        )
+        .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
+      return () => {
+        supabase.removeChannel(channel);
+      };
     };
+
+    setupRealtimeSubscription();
   }, []);
 
   const combinedData = [...(realtimeData || []), ...(metrics || [])].slice(0, 100);
