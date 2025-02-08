@@ -1136,6 +1136,39 @@ export type Database = {
           },
         ]
       }
+      performance_metrics: {
+        Row: {
+          created_at: string
+          endpoint: string
+          error_message: string | null
+          id: string
+          metadata: Json | null
+          response_time: number
+          success: boolean
+          timestamp: string
+        }
+        Insert: {
+          created_at?: string
+          endpoint: string
+          error_message?: string | null
+          id?: string
+          metadata?: Json | null
+          response_time: number
+          success: boolean
+          timestamp?: string
+        }
+        Update: {
+          created_at?: string
+          endpoint?: string
+          error_message?: string | null
+          id?: string
+          metadata?: Json | null
+          response_time?: number
+          success?: boolean
+          timestamp?: string
+        }
+        Relationships: []
+      }
       poll_votes: {
         Row: {
           created_at: string
