@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { usePerformanceMetrics } from './hooks/usePerformanceMetrics';
-import { simulateLoad } from "@/utils/performanceTracking";
+import { simulateLoad } from '../../utils/performanceTracking';
 import { calculateAverageResponseTime, calculateSuccessRate } from './utils/metricCalculations';
 import { MetricCard } from './components/MetricCard';
 import { ResponseTimeChart } from './components/ResponseTimeChart';
