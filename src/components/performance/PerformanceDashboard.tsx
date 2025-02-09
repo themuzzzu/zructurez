@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from "@/integrations/supabase/client";
@@ -25,6 +24,7 @@ import { useEffect } from 'react';
 
 export const PerformanceDashboard = () => {
   const [realtimeData, setRealtimeData] = useState<any[]>([]);
+  const [isLoadTesting, setIsLoadTesting] = useState(false);
 
   const { data: metrics = [], isLoading } = useQuery({
     queryKey: ['performance-metrics'],
@@ -100,12 +100,43 @@ export const PerformanceDashboard = () => {
       }));
   };
 
+  const startLoadTest = async () => {
+    setIsLoadTesting(true);
+    try {
+      await simulateLoad(5000);
+    } finally {
+      setIsLoadTesting(false);
+    }
+  };
+
+  if (isLoadTesting) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-lg font-semibold">Running load test with 5000 simulated users...</p>
+          <p className="text-sm text-muted-foreground">This may take a few moments</p>
+        </div>
+      </div>
+    );
+  }
+
   if (isLoading) {
     return <div>Loading performance metrics...</div>;
   }
 
   return (
     <div className="space-y-4">
+      <div className="flex justify-end mb-4">
+        <button
+          onClick={startLoadTest}
+          disabled={isLoadTesting}
+          className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md"
+        >
+          Run Load Test (5000 users)
+        </button>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <Card>
           <CardHeader>

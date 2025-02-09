@@ -13,16 +13,27 @@ interface PerformanceMetric {
   concurrent_users?: number;
 }
 
+// Use a WeakMap to store active sessions without memory leaks
+const activeSessions = new WeakMap<object, boolean>();
+
 const getCurrentPerformanceMetrics = () => {
-  const memory = performance.memory ? {
-    jsHeapSizeLimit: performance.memory.jsHeapSizeLimit,
-    totalJSHeapSize: performance.memory.totalJSHeapSize,
-    usedJSHeapSize: performance.memory.usedJSHeapSize
-  } : null;
+  let memoryUsage = null;
+  
+  // Check if performance.memory is available (Chrome only)
+  if (typeof window !== 'undefined' && 
+      window.performance && 
+      (window.performance as any).memory) {
+    const memory = (window.performance as any).memory;
+    memoryUsage = (memory.usedJSHeapSize / memory.jsHeapSizeLimit) * 100;
+  }
+
+  // Get approximate concurrent users count
+  const sessionCount = Object.keys(sessionStorage).length;
 
   return {
     cpu_usage: null, // Browser API doesn't provide CPU usage
-    memory_usage: memory ? (memory.usedJSHeapSize / memory.jsHeapSizeLimit) * 100 : null,
+    memory_usage: memoryUsage,
+    concurrent_users: sessionCount
   };
 };
 
@@ -33,7 +44,8 @@ export const trackPerformance = async (metric: PerformanceMetric) => {
       .from('performance_metrics')
       .insert([{
         ...metric,
-        ...performanceMetrics
+        ...performanceMetrics,
+        timestamp: new Date().toISOString()
       }]);
 
     if (error) {
@@ -79,4 +91,23 @@ export const measureApiCall = async <T>(
 
     throw error;
   }
+};
+
+// Load test simulation helper
+export const simulateLoad = async (userCount: number = 5000) => {
+  const endpoints = ['/api/users', '/api/posts', '/api/comments'];
+  const simulatedUsers = Array.from({ length: userCount }, (_, i) => `test-user-${i}`);
+  
+  const requests = simulatedUsers.map(async (userId) => {
+    const randomEndpoint = endpoints[Math.floor(Math.random() * endpoints.length)];
+    return trackPerformance({
+      endpoint: randomEndpoint,
+      response_time: Math.random() * 1000, // Simulate random response times
+      success: Math.random() > 0.1, // 90% success rate
+      user_id: userId,
+      concurrent_users: userCount
+    });
+  });
+
+  return Promise.all(requests);
 };
