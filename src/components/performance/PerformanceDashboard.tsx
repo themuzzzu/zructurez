@@ -10,7 +10,9 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  ResponsiveContainer
+  ResponsiveContainer,
+  BarChart,
+  Bar
 } from 'recharts';
 import {
   Card,
@@ -77,12 +79,71 @@ export const PerformanceDashboard = () => {
     return new Date(timestamp).toLocaleTimeString();
   };
 
+  const calculateAverageResponseTime = () => {
+    if (combinedData.length === 0) return 0;
+    const sum = combinedData.reduce((acc, curr) => acc + curr.response_time, 0);
+    return Math.round(sum / combinedData.length);
+  };
+
+  const calculateSuccessRate = () => {
+    if (combinedData.length === 0) return 0;
+    const successCount = combinedData.filter(m => m.success).length;
+    return Math.round((successCount / combinedData.length) * 100);
+  };
+
+  const getMemoryUsageTrend = () => {
+    return combinedData
+      .filter(m => m.memory_usage != null)
+      .map(m => ({
+        timestamp: m.timestamp,
+        memory_usage: Math.round(m.memory_usage * 100) / 100
+      }));
+  };
+
   if (isLoading) {
     return <div>Loading performance metrics...</div>;
   }
 
   return (
     <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Avg Response Time</CardTitle>
+            <CardDescription>Average API response time</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-primary">
+              {calculateAverageResponseTime()}ms
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Success Rate</CardTitle>
+            <CardDescription>API call success rate</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-primary">
+              {calculateSuccessRate()}%
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Active Users</CardTitle>
+            <CardDescription>Currently active users</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-primary">
+              {combinedData[0]?.concurrent_users || 'N/A'}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       <Card>
         <CardHeader>
           <CardTitle>Response Times</CardTitle>
@@ -114,38 +175,54 @@ export const PerformanceDashboard = () => {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
-          <CardHeader>
-            <CardTitle>Success Rate</CardTitle>
-            <CardDescription>Endpoint success vs failure ratio</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-primary">
-              {Math.round((combinedData.filter(m => m.success).length / combinedData.length) * 100)}%
-            </div>
-          </CardContent>
-        </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Memory Usage</CardTitle>
+          <CardDescription>Memory usage over time</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={getMemoryUsageTrend()}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis 
+                  dataKey="timestamp" 
+                  tickFormatter={formatTimestamp}
+                />
+                <YAxis />
+                <Tooltip 
+                  labelFormatter={(value) => formatTimestamp(value as string)}
+                />
+                <Legend />
+                <Bar
+                  dataKey="memory_usage"
+                  fill="#8884d8"
+                  name="Memory Usage (%)"
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Latest Errors</CardTitle>
-            <CardDescription>Most recent error messages</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {combinedData
-                .filter(m => !m.success && m.error_message)
-                .slice(0, 5)
-                .map((error, i) => (
-                  <div key={i} className="text-sm text-destructive">
-                    {error.error_message}
-                  </div>
-                ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Latest Errors</CardTitle>
+          <CardDescription>Most recent error messages</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {combinedData
+              .filter(m => !m.success && m.error_message)
+              .slice(0, 5)
+              .map((error, i) => (
+                <div key={i} className="text-sm text-destructive">
+                  {error.error_message}
+                </div>
+              ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

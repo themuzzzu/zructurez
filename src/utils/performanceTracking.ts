@@ -8,13 +8,33 @@ interface PerformanceMetric {
   error_message?: string;
   metadata?: Record<string, any>;
   user_id: string;
+  cpu_usage?: number;
+  memory_usage?: number;
+  concurrent_users?: number;
 }
+
+const getCurrentPerformanceMetrics = () => {
+  const memory = performance.memory ? {
+    jsHeapSizeLimit: performance.memory.jsHeapSizeLimit,
+    totalJSHeapSize: performance.memory.totalJSHeapSize,
+    usedJSHeapSize: performance.memory.usedJSHeapSize
+  } : null;
+
+  return {
+    cpu_usage: null, // Browser API doesn't provide CPU usage
+    memory_usage: memory ? (memory.usedJSHeapSize / memory.jsHeapSizeLimit) * 100 : null,
+  };
+};
 
 export const trackPerformance = async (metric: PerformanceMetric) => {
   try {
+    const performanceMetrics = getCurrentPerformanceMetrics();
     const { error } = await supabase
       .from('performance_metrics')
-      .insert([metric]);
+      .insert([{
+        ...metric,
+        ...performanceMetrics
+      }]);
 
     if (error) {
       console.error('Error tracking performance:', error);
