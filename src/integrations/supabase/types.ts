@@ -1163,7 +1163,7 @@ export type Database = {
           response_time: number
           success: boolean
           timestamp?: string
-          user_id?: string
+          user_id: string
         }
         Update: {
           concurrent_users?: number | null
