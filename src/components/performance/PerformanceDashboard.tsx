@@ -7,19 +7,39 @@ import { MetricCard } from './components/MetricCard';
 import { ResponseTimeChart } from './components/ResponseTimeChart';
 import { MemoryUsageChart } from './components/MemoryUsageChart';
 import { ErrorList } from './components/ErrorList';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 
 export const PerformanceDashboard = () => {
   const [isLoadTesting, setIsLoadTesting] = useState(false);
   const { combinedData, isLoading } = usePerformanceMetrics();
+  const { user } = useAuth();
 
   const startLoadTest = async () => {
+    if (!user) {
+      toast.error('Please login to run load tests');
+      return;
+    }
+    
     setIsLoadTesting(true);
     try {
       await simulateLoad(5000);
+      toast.success('Load test completed successfully');
+    } catch (error) {
+      console.error('Load test failed:', error);
+      toast.error('Load test failed. Please try again.');
     } finally {
       setIsLoadTesting(false);
     }
   };
+
+  if (!user) {
+    return (
+      <div className="p-4 text-center">
+        <p className="text-lg text-muted-foreground">Please login to view performance metrics</p>
+      </div>
+    );
+  }
 
   if (isLoadTesting) {
     return (

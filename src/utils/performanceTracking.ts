@@ -39,13 +39,20 @@ const getCurrentPerformanceMetrics = () => {
 
 export const trackPerformance = async (metric: PerformanceMetric) => {
   try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      console.error('No authenticated user found for performance tracking');
+      return;
+    }
+
     const performanceMetrics = getCurrentPerformanceMetrics();
     const { error } = await supabase
       .from('performance_metrics')
       .insert([{
         ...metric,
         ...performanceMetrics,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        user_id: user.id // Ensure we always use the authenticated user's ID
       }]);
 
     if (error) {
@@ -62,6 +69,9 @@ export const measureApiCall = async <T>(
   metadata?: Record<string, any>
 ): Promise<T> => {
   const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    throw new Error('No authenticated user found');
+  }
   
   const startTime = performance.now();
   try {
@@ -73,7 +83,7 @@ export const measureApiCall = async <T>(
       response_time: endTime - startTime,
       success: true,
       metadata,
-      user_id: user?.id as string
+      user_id: user.id
     });
 
     return result;
@@ -86,7 +96,7 @@ export const measureApiCall = async <T>(
       success: false,
       error_message: error instanceof Error ? error.message : 'Unknown error',
       metadata,
-      user_id: user?.id as string
+      user_id: user.id
     });
 
     throw error;
@@ -97,8 +107,7 @@ export const measureApiCall = async <T>(
 export const simulateLoad = async (userCount: number = 5000) => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
-    console.error('No authenticated user found for load test');
-    return;
+    throw new Error('No authenticated user found for load test');
   }
 
   const endpoints = ['/api/users', '/api/posts', '/api/comments'];
@@ -108,7 +117,7 @@ export const simulateLoad = async (userCount: number = 5000) => {
       endpoint: randomEndpoint,
       response_time: Math.random() * 1000, // Simulate random response times
       success: Math.random() > 0.1, // 90% success rate
-      user_id: user.id, // Use the actual authenticated user's ID
+      user_id: user.id,
       concurrent_users: userCount
     });
   });
