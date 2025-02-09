@@ -95,16 +95,20 @@ export const measureApiCall = async <T>(
 
 // Load test simulation helper
 export const simulateLoad = async (userCount: number = 5000) => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    console.error('No authenticated user found for load test');
+    return;
+  }
+
   const endpoints = ['/api/users', '/api/posts', '/api/comments'];
-  const simulatedUsers = Array.from({ length: userCount }, (_, i) => `test-user-${i}`);
-  
-  const requests = simulatedUsers.map(async (userId) => {
+  const requests = Array.from({ length: userCount }, async () => {
     const randomEndpoint = endpoints[Math.floor(Math.random() * endpoints.length)];
     return trackPerformance({
       endpoint: randomEndpoint,
       response_time: Math.random() * 1000, // Simulate random response times
       success: Math.random() > 0.1, // 90% success rate
-      user_id: userId,
+      user_id: user.id, // Use the actual authenticated user's ID
       concurrent_users: userCount
     });
   });
