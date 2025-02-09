@@ -1138,10 +1138,13 @@ export type Database = {
       }
       performance_metrics: {
         Row: {
+          concurrent_users: number | null
+          cpu_usage: number | null
           created_at: string
           endpoint: string
           error_message: string | null
           id: string
+          memory_usage: number | null
           metadata: Json | null
           response_time: number
           success: boolean
@@ -1149,10 +1152,13 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          concurrent_users?: number | null
+          cpu_usage?: number | null
           created_at?: string
           endpoint: string
           error_message?: string | null
           id?: string
+          memory_usage?: number | null
           metadata?: Json | null
           response_time: number
           success: boolean
@@ -1160,10 +1166,13 @@ export type Database = {
           user_id?: string
         }
         Update: {
+          concurrent_users?: number | null
+          cpu_usage?: number | null
           created_at?: string
           endpoint?: string
           error_message?: string | null
           id?: string
+          memory_usage?: number | null
           metadata?: Json | null
           response_time?: number
           success?: boolean
