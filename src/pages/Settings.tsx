@@ -14,6 +14,7 @@ import { AdvertisementsTab } from "@/components/settings/AdvertisementsTab";
 import { OrdersTab } from "@/components/settings/OrdersTab";
 import { LikedBusinessesTab } from "@/components/profile/LikedBusinessesTab";
 import { AppointmentsTab } from "@/components/settings/AppointmentsTab";
+import { AnalyticsTab } from "@/components/settings/AnalyticsTab";
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState("profile");
@@ -40,6 +41,8 @@ const Settings = () => {
         return <AdvertisementsTab />;
       case "liked":
         return <LikedBusinessesTab />;
+      case "analytics":
+        return <AnalyticsTab />;
       default:
         return <ProfileView />;
     }
