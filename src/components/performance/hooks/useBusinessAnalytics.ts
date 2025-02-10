@@ -18,7 +18,7 @@ export const useBusinessAnalytics = (businessId: string | undefined) => {
     queryFn: async () => {
       if (!businessId) throw new Error("Business ID is required");
 
-      // Fetch page views
+      // First, get analytics data
       const { data: analyticsData, error: analyticsError } = await supabase
         .from('business_analytics')
         .select('*')
@@ -30,7 +30,7 @@ export const useBusinessAnalytics = (businessId: string | undefined) => {
         throw analyticsError;
       }
 
-      // Fetch orders/products sold
+      // Get orders linked to this business
       const { data: ordersData, error: ordersError } = await supabase
         .from('orders')
         .select('*')
@@ -41,7 +41,7 @@ export const useBusinessAnalytics = (businessId: string | undefined) => {
         throw ordersError;
       }
 
-      // Fetch appointments/bookings
+      // Get appointments
       const { data: appointmentsData, error: appointmentsError } = await supabase
         .from('appointments')
         .select('*')
@@ -52,7 +52,7 @@ export const useBusinessAnalytics = (businessId: string | undefined) => {
         throw appointmentsError;
       }
 
-      // Fetch subscriptions
+      // Get subscriptions
       const { data: subscriptionsData, error: subscriptionsError } = await supabase
         .from('business_memberships')
         .select('*')
@@ -63,21 +63,34 @@ export const useBusinessAnalytics = (businessId: string | undefined) => {
         throw subscriptionsError;
       }
 
-      // Process and return the combined data
+      // Create data points for the last 30 days
       const last30Days = Array.from({ length: 30 }, (_, i) => {
         const date = new Date();
         date.setDate(date.getDate() - i);
         return date.toISOString().split('T')[0];
       }).reverse();
 
-      return last30Days.map(date => ({
-        date,
-        views: analyticsData?.page_views || 0,
-        products_sold: ordersData?.length || 0,
-        bookings: appointmentsData?.length || 0,
-        subscriptions: subscriptionsData?.length || 0,
-        revenue: (ordersData || []).reduce((sum, order) => sum + (order.total_price || 0), 0)
-      }));
+      return last30Days.map(date => {
+        // Filter data for this specific date
+        const dateOrders = (ordersData || []).filter(order => 
+          order.created_at.split('T')[0] === date
+        );
+        const dateAppointments = (appointmentsData || []).filter(appointment => 
+          appointment.created_at.split('T')[0] === date
+        );
+        const dateSubscriptions = (subscriptionsData || []).filter(subscription => 
+          subscription.created_at.split('T')[0] === date
+        );
+
+        return {
+          date,
+          views: analyticsData?.page_views || 0,
+          products_sold: dateOrders.length,
+          bookings: dateAppointments.length,
+          subscriptions: dateSubscriptions.length,
+          revenue: dateOrders.reduce((sum, order) => sum + (order.total_price || 0), 0)
+        };
+      });
     }
   });
 };

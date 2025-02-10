@@ -183,7 +183,7 @@ export type Database = {
           {
             foreignKeyName: "business_analytics_business_id_fkey"
             columns: ["business_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "businesses"
             referencedColumns: ["id"]
           },
@@ -1100,6 +1100,7 @@ export type Database = {
       }
       orders: {
         Row: {
+          business_id: string | null
           created_at: string
           id: string
           product_id: string
@@ -1109,6 +1110,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          business_id?: string | null
           created_at?: string
           id?: string
           product_id: string
@@ -1118,6 +1120,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          business_id?: string | null
           created_at?: string
           id?: string
           product_id?: string
@@ -1127,6 +1130,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "orders_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "orders_product_id_fkey"
             columns: ["product_id"]
