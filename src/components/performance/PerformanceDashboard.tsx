@@ -1,12 +1,14 @@
 
 import { useState } from 'react';
 import { usePerformanceMetrics } from './hooks/usePerformanceMetrics';
+import { useBusinessAnalytics } from './hooks/useBusinessAnalytics';
 import { simulateLoad } from '../../utils/performanceTracking';
 import { calculateAverageResponseTime, calculateSuccessRate } from './utils/metricCalculations';
 import { MetricCard } from './components/MetricCard';
 import { ResponseTimeChart } from './components/ResponseTimeChart';
 import { MemoryUsageChart } from './components/MemoryUsageChart';
 import { ErrorList } from './components/ErrorList';
+import { BusinessAnalyticsCharts } from './components/BusinessAnalyticsCharts';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
@@ -14,6 +16,11 @@ export const PerformanceDashboard = () => {
   const [isLoadTesting, setIsLoadTesting] = useState(false);
   const { combinedData, isLoading } = usePerformanceMetrics();
   const { user } = useAuth();
+  
+  // Assuming the business ID is stored in the user metadata or can be fetched
+  // You'll need to modify this based on your actual business ID retrieval logic
+  const businessId = user?.id; // This should be replaced with actual business ID
+  const { data: businessAnalytics, isLoading: isLoadingAnalytics } = useBusinessAnalytics(businessId || '');
 
   const startLoadTest = async () => {
     if (!user) {
@@ -53,12 +60,12 @@ export const PerformanceDashboard = () => {
     );
   }
 
-  if (isLoading) {
-    return <div>Loading performance metrics...</div>;
+  if (isLoading || isLoadingAnalytics) {
+    return <div>Loading metrics...</div>;
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex justify-end mb-4">
         <button
           onClick={startLoadTest}
@@ -86,6 +93,8 @@ export const PerformanceDashboard = () => {
           value={combinedData[0]?.concurrent_users || 'N/A'}
         />
       </div>
+
+      {businessAnalytics && <BusinessAnalyticsCharts data={businessAnalytics} />}
 
       <ResponseTimeChart data={combinedData} />
       <MemoryUsageChart data={combinedData} />
