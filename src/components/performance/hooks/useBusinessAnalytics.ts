@@ -2,16 +2,19 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-export const useBusinessAnalytics = (businessId: string) => {
+export const useBusinessAnalytics = (businessId: string | undefined) => {
   return useQuery({
     queryKey: ['business-analytics', businessId],
+    enabled: !!businessId, // Only run query if businessId exists
     queryFn: async () => {
+      if (!businessId) throw new Error("Business ID is required");
+
       // Fetch page views
       const { data: analyticsData, error: analyticsError } = await supabase
         .from('business_analytics')
         .select('*')
         .eq('business_id', businessId)
-        .single();
+        .maybeSingle(); // Use maybeSingle instead of single
 
       if (analyticsError) {
         console.error('Error fetching analytics:', analyticsError);

@@ -17,10 +17,9 @@ export const PerformanceDashboard = () => {
   const { combinedData, isLoading } = usePerformanceMetrics();
   const { user } = useAuth();
   
-  // Assuming the business ID is stored in the user metadata or can be fetched
-  // You'll need to modify this based on your actual business ID retrieval logic
-  const businessId = user?.id; // This should be replaced with actual business ID
-  const { data: businessAnalytics, isLoading: isLoadingAnalytics } = useBusinessAnalytics(businessId || '');
+  // Get the business ID from user metadata or another source
+  const businessId = user?.id; // Make sure this is the correct way to get business ID in your app
+  const { data: businessAnalytics, isLoading: isLoadingAnalytics } = useBusinessAnalytics(businessId);
 
   const startLoadTest = async () => {
     if (!user) {
