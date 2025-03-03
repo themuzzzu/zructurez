@@ -1,11 +1,18 @@
 
 import { Card } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Badge } from "@/components/ui/badge";
-import { Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Clock, ShoppingCart } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 export const DealsSection = () => {
   const { data: deals = [] } = useQuery({
@@ -59,43 +66,79 @@ export const DealsSection = () => {
           discount_percentage: 31,
           ends_in: "9h 20m",
         },
+        {
+          id: 6,
+          title: "Wireless Charger",
+          image_url: "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?q=80&w=1972&auto=format&fit=crop",
+          original_price: 49.99,
+          discounted_price: 29.99,
+          discount_percentage: 40,
+          ends_in: "7h 10m",
+        },
+        {
+          id: 7,
+          title: "Fitness Tracker",
+          image_url: "https://images.unsplash.com/photo-1575311373937-040b8e1fd6f0?q=80&w=1974&auto=format&fit=crop",
+          original_price: 79.99,
+          discounted_price: 49.99,
+          discount_percentage: 38,
+          ends_in: "10h 20m",
+        },
       ];
     }
   });
 
   return (
-    <ScrollArea className="w-full">
-      <div className="flex space-x-4 pb-4">
-        {deals.map((deal) => (
-          <Card key={deal.id} className="flex-shrink-0 w-[200px] hover:shadow-lg transition-shadow duration-300 overflow-hidden">
-            <div className="p-2">
-              <AspectRatio ratio={1}>
-                <img 
-                  src={deal.image_url} 
-                  alt={deal.title} 
-                  className="rounded-md object-cover w-full h-full"
-                />
-              </AspectRatio>
-              <div className="p-2">
-                <h3 className="font-medium text-sm line-clamp-1">{deal.title}</h3>
-                <div className="flex items-baseline mt-1">
-                  <span className="text-lg font-bold">${deal.discounted_price}</span>
-                  <span className="text-xs line-through text-muted-foreground ml-1">
-                    ${deal.original_price}
-                  </span>
-                  <Badge variant="outline" className="bg-green-50 text-green-600 ml-2 text-xs">
-                    {deal.discount_percentage}% off
-                  </Badge>
+    <div className="w-full">
+      <Carousel
+        opts={{
+          align: "start",
+          loop: false,
+        }}
+        className="w-full"
+      >
+        <CarouselContent className="-ml-2 md:-ml-4">
+          {deals.map((deal) => (
+            <CarouselItem key={deal.id} className="pl-2 md:pl-4 sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5">
+              <Card className="overflow-hidden hover:shadow-lg transition-all duration-300">
+                <div className="p-2">
+                  <AspectRatio ratio={1}>
+                    <img 
+                      src={deal.image_url} 
+                      alt={deal.title} 
+                      className="rounded-md object-cover w-full h-full transition-transform hover:scale-105 duration-500"
+                    />
+                  </AspectRatio>
+                  <div className="p-2">
+                    <h3 className="font-medium text-sm line-clamp-1">{deal.title}</h3>
+                    <div className="flex items-baseline mt-1">
+                      <span className="text-lg font-bold">${deal.discounted_price}</span>
+                      <span className="text-xs line-through text-muted-foreground ml-1">
+                        ${deal.original_price}
+                      </span>
+                      <Badge variant="outline" className="bg-green-50 text-green-600 ml-2 text-xs">
+                        {deal.discount_percentage}% off
+                      </Badge>
+                    </div>
+                    <div className="flex items-center mt-2 text-xs text-muted-foreground">
+                      <Clock className="h-3 w-3 mr-1" />
+                      <span>Ends in {deal.ends_in}</span>
+                    </div>
+                    <Button className="w-full mt-2" size="sm" variant="secondary">
+                      <ShoppingCart className="h-3 w-3 mr-1" />
+                      Add to Cart
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex items-center mt-2 text-xs text-muted-foreground">
-                  <Clock className="h-3 w-3 mr-1" />
-                  <span>Ends in {deal.ends_in}</span>
-                </div>
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
-    </ScrollArea>
+              </Card>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <div className="flex items-center justify-end gap-2 mt-4">
+          <CarouselPrevious className="static translate-y-0 rounded-full" />
+          <CarouselNext className="static translate-y-0 rounded-full" />
+        </div>
+      </Carousel>
+    </div>
   );
 };

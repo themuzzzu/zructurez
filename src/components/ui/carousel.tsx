@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
@@ -204,10 +205,11 @@ const CarouselPrevious = React.forwardRef<
       variant={variant}
       size={size}
       className={cn(
-        "absolute  h-8 w-8 rounded-full",
+        "absolute rounded-full h-8 w-8 shadow-md",
         orientation === "horizontal"
-          ? "-left-12 top-1/2 -translate-y-1/2"
-          : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
+          ? "-left-4 top-1/2 -translate-y-1/2"
+          : "-top-4 left-1/2 -translate-x-1/2 rotate-90",
+        !canScrollPrev && "opacity-50 cursor-not-allowed",
         className
       )}
       disabled={!canScrollPrev}
@@ -233,10 +235,11 @@ const CarouselNext = React.forwardRef<
       variant={variant}
       size={size}
       className={cn(
-        "absolute h-8 w-8 rounded-full",
+        "absolute rounded-full h-8 w-8 shadow-md",
         orientation === "horizontal"
-          ? "-right-12 top-1/2 -translate-y-1/2"
-          : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",
+          ? "-right-4 top-1/2 -translate-y-1/2"
+          : "-bottom-4 left-1/2 -translate-x-1/2 rotate-90",
+        !canScrollNext && "opacity-50 cursor-not-allowed",
         className
       )}
       disabled={!canScrollNext}
