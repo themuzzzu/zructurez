@@ -100,7 +100,7 @@ export const SponsoredProducts = () => {
         <CarouselContent className="-ml-2 md:-ml-4">
           {sponsoredProducts.map((product) => (
             <CarouselItem key={product.id} className="pl-2 md:pl-4 sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5">
-              <Card className="overflow-hidden hover:shadow-lg transition-all duration-300">
+              <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 dark:bg-card dark:border-border">
                 <div className="relative">
                   <AspectRatio ratio={4/3}>
                     <img 
@@ -139,8 +139,8 @@ export const SponsoredProducts = () => {
           ))}
         </CarouselContent>
         <div className="flex items-center justify-end gap-2 mt-4">
-          <CarouselPrevious className="static translate-y-0 rounded-full bg-background text-foreground hover:bg-muted" />
-          <CarouselNext className="static translate-y-0 rounded-full bg-background text-foreground hover:bg-muted" />
+          <CarouselPrevious className="static translate-y-0 rounded-full bg-background dark:bg-background/20 text-foreground hover:bg-muted" />
+          <CarouselNext className="static translate-y-0 rounded-full bg-background dark:bg-background/20 text-foreground hover:bg-muted" />
         </div>
       </Carousel>
     </div>

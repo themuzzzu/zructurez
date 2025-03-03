@@ -109,7 +109,7 @@ export const TrendingProducts = () => {
         <CarouselContent className="-ml-2 md:-ml-4">
           {trendingProducts.map((product) => (
             <CarouselItem key={product.id} className="pl-2 md:pl-4 sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5">
-              <Card className="overflow-hidden hover:shadow-lg transition-all duration-300">
+              <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 dark:bg-card dark:border-border">
                 <div className="relative">
                   <AspectRatio ratio={4/3}>
                     <img 
@@ -118,7 +118,7 @@ export const TrendingProducts = () => {
                       className="object-cover w-full h-full transition-transform hover:scale-105 duration-500"
                     />
                   </AspectRatio>
-                  <Badge className="absolute top-2 right-2 bg-orange-500">
+                  <Badge className="absolute top-2 right-2 bg-orange-500 dark:bg-orange-600">
                     <TrendingUp className="h-3 w-3 mr-1" />
                     Trending
                   </Badge>
@@ -126,7 +126,7 @@ export const TrendingProducts = () => {
                 <div className="p-3">
                   <div className="text-xs text-muted-foreground mb-1">{product.category}</div>
                   <h3 className="font-medium text-sm line-clamp-2 min-h-[2.5rem]">{product.title}</h3>
-                  <div className="flex items-center mt-1 text-amber-500">
+                  <div className="flex items-center mt-1 text-amber-500 dark:text-amber-400">
                     {[...Array(5)].map((_, i) => (
                       <Star 
                         key={i} 
@@ -155,8 +155,8 @@ export const TrendingProducts = () => {
           ))}
         </CarouselContent>
         <div className="flex items-center justify-end gap-2 mt-4">
-          <CarouselPrevious className="static translate-y-0 rounded-full bg-background text-foreground hover:bg-muted" />
-          <CarouselNext className="static translate-y-0 rounded-full bg-background text-foreground hover:bg-muted" />
+          <CarouselPrevious className="static translate-y-0 rounded-full bg-background dark:bg-background/20 text-foreground hover:bg-muted" />
+          <CarouselNext className="static translate-y-0 rounded-full bg-background dark:bg-background/20 text-foreground hover:bg-muted" />
         </div>
       </Carousel>
     </div>

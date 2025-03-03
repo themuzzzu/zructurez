@@ -109,7 +109,7 @@ export const DealsSection = () => {
         <CarouselContent className="-ml-2 md:-ml-4">
           {deals.map((deal) => (
             <CarouselItem key={deal.id} className="pl-2 md:pl-4 sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5">
-              <Card className="overflow-hidden hover:shadow-lg transition-all duration-300">
+              <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 dark:bg-card dark:border-border">
                 <div className="p-2">
                   <AspectRatio ratio={1}>
                     <img 
@@ -128,7 +128,7 @@ export const DealsSection = () => {
                       <span className="text-xs line-through text-muted-foreground ml-1">
                         ₹{formatPrice(deal.original_price).replace('₹', '')}
                       </span>
-                      <Badge variant="outline" className="bg-green-100/10 text-green-500 ml-2 text-xs">
+                      <Badge variant="outline" className="bg-green-100/10 text-green-500 dark:text-green-400 ml-2 text-xs">
                         {deal.discount_percentage}% off
                       </Badge>
                     </div>
@@ -147,8 +147,8 @@ export const DealsSection = () => {
           ))}
         </CarouselContent>
         <div className="flex items-center justify-end gap-2 mt-4">
-          <CarouselPrevious className="static translate-y-0 rounded-full bg-background text-foreground hover:bg-muted" />
-          <CarouselNext className="static translate-y-0 rounded-full bg-background text-foreground hover:bg-muted" />
+          <CarouselPrevious className="static translate-y-0 rounded-full bg-background dark:bg-background/20 text-foreground hover:bg-muted" />
+          <CarouselNext className="static translate-y-0 rounded-full bg-background dark:bg-background/20 text-foreground hover:bg-muted" />
         </div>
       </Carousel>
     </div>
