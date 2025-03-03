@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, TrendingUp, Star } from "lucide-react";
+import { ShoppingCart, TrendingUp, Star, IndianRupee } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -25,7 +25,7 @@ export const TrendingProducts = () => {
           id: 1,
           title: "Noise Cancelling Headphones",
           image_url: "https://images.unsplash.com/photo-1546435770-a3e426bf472b?q=80&w=2065&auto=format&fit=crop",
-          price: 149.99,
+          price: 14999,
           rating: 4.6,
           views: 8520,
           category: "Electronics"
@@ -34,7 +34,7 @@ export const TrendingProducts = () => {
           id: 2,
           title: "Fitness Tracker with Heart Rate Monitor",
           image_url: "https://images.unsplash.com/photo-1575311373937-040b8e1fd6f0?q=80&w=2088&auto=format&fit=crop",
-          price: 89.99,
+          price: 8999,
           rating: 4.4,
           views: 7350,
           category: "Wearables"
@@ -43,7 +43,7 @@ export const TrendingProducts = () => {
           id: 3,
           title: "Portable Bluetooth Speaker Waterproof",
           image_url: "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?q=80&w=2062&auto=format&fit=crop",
-          price: 69.99,
+          price: 6999,
           rating: 4.2,
           views: 6890,
           category: "Audio"
@@ -52,7 +52,7 @@ export const TrendingProducts = () => {
           id: 4,
           title: "Wireless Charging Pad 15W Fast Charge",
           image_url: "https://images.unsplash.com/photo-1623126464548-c858d1a77517?q=80&w=1932&auto=format&fit=crop",
-          price: 29.99,
+          price: 2999,
           rating: 4.5,
           views: 5960,
           category: "Accessories"
@@ -61,7 +61,7 @@ export const TrendingProducts = () => {
           id: 5,
           title: "Smartphone Gimbal Stabilizer",
           image_url: "https://images.unsplash.com/photo-1569420067112-b57b4f024595?q=80&w=1887&auto=format&fit=crop",
-          price: 119.99,
+          price: 11999,
           rating: 4.8,
           views: 4870,
           category: "Photography"
@@ -70,7 +70,7 @@ export const TrendingProducts = () => {
           id: 6,
           title: "Wireless Gaming Controller",
           image_url: "https://images.unsplash.com/photo-1592840496694-26d035b52b48?q=80&w=2070&auto=format&fit=crop",
-          price: 59.99,
+          price: 5999,
           rating: 4.7,
           views: 5430,
           category: "Gaming"
@@ -79,7 +79,7 @@ export const TrendingProducts = () => {
           id: 7,
           title: "Smart Home Security Camera",
           image_url: "https://images.unsplash.com/photo-1557333310-5103d169ebda?q=80&w=1965&auto=format&fit=crop",
-          price: 79.99,
+          price: 7999,
           rating: 4.3,
           views: 4560,
           category: "Smart Home"
@@ -87,6 +87,15 @@ export const TrendingProducts = () => {
       ];
     }
   });
+
+  // Format price in Indian Rupees
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0,
+    }).format(price);
+  };
 
   return (
     <div className="w-full">
@@ -127,7 +136,10 @@ export const TrendingProducts = () => {
                     <span className="text-xs text-muted-foreground ml-1">({product.rating})</span>
                   </div>
                   <div className="mt-2">
-                    <span className="text-lg font-bold">${product.price}</span>
+                    <span className="text-lg font-bold flex items-center">
+                      <IndianRupee className="h-4 w-4 mr-1" />
+                      {formatPrice(product.price).replace('₹', '')}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between mt-2">
                     <span className="text-xs text-muted-foreground">
@@ -143,8 +155,8 @@ export const TrendingProducts = () => {
           ))}
         </CarouselContent>
         <div className="flex items-center justify-end gap-2 mt-4">
-          <CarouselPrevious className="static translate-y-0 rounded-full" />
-          <CarouselNext className="static translate-y-0 rounded-full" />
+          <CarouselPrevious className="static translate-y-0 rounded-full bg-background text-foreground hover:bg-muted" />
+          <CarouselNext className="static translate-y-0 rounded-full bg-background text-foreground hover:bg-muted" />
         </div>
       </Carousel>
     </div>

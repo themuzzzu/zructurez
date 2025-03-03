@@ -72,8 +72,8 @@ export const MarketplaceBanner = () => {
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious className="left-2 bg-white/80 hover:bg-white" />
-        <CarouselNext className="right-2 bg-white/80 hover:bg-white" />
+        <CarouselPrevious className="left-2 bg-background/80 hover:bg-background text-foreground" />
+        <CarouselNext className="right-2 bg-background/80 hover:bg-background text-foreground" />
         
         {/* Dots indicator */}
         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">

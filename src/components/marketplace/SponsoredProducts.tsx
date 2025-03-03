@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Star } from "lucide-react";
+import { ShoppingCart, Star, IndianRupee } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -25,7 +25,7 @@ export const SponsoredProducts = () => {
           id: 1,
           title: "Premium Bluetooth Headphones",
           image_url: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=2070&auto=format&fit=crop",
-          price: 199.99,
+          price: 9999,
           rating: 4.5,
           sponsored: true,
           category: "Audio"
@@ -34,7 +34,7 @@ export const SponsoredProducts = () => {
           id: 2,
           title: "4K Smart TV 55-inch",
           image_url: "https://images.unsplash.com/photo-1593305841991-05c297ba4575?q=80&w=2057&auto=format&fit=crop",
-          price: 599.99,
+          price: 49999,
           rating: 4.7,
           sponsored: true,
           category: "Television"
@@ -43,7 +43,7 @@ export const SponsoredProducts = () => {
           id: 3,
           title: "Professional Camera Kit",
           image_url: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=1964&auto=format&fit=crop",
-          price: 1299.99,
+          price: 89999,
           rating: 4.9,
           sponsored: true,
           category: "Photography"
@@ -52,7 +52,7 @@ export const SponsoredProducts = () => {
           id: 4,
           title: "Ergonomic Office Chair",
           image_url: "https://images.unsplash.com/photo-1505843490701-5c4b83fe0a6e?q=80&w=1976&auto=format&fit=crop",
-          price: 249.99,
+          price: 12499,
           rating: 4.3,
           sponsored: true,
           category: "Furniture"
@@ -61,7 +61,7 @@ export const SponsoredProducts = () => {
           id: 5,
           title: "Gaming Laptop Pro",
           image_url: "https://images.unsplash.com/photo-1603302576837-37561b2e2302?q=80&w=2068&auto=format&fit=crop",
-          price: 1499.99,
+          price: 99999,
           rating: 4.8,
           sponsored: true,
           category: "Computers"
@@ -70,7 +70,7 @@ export const SponsoredProducts = () => {
           id: 6,
           title: "Wireless Home Security System",
           image_url: "https://images.unsplash.com/photo-1558002038-1055907df827?q=80&w=2070&auto=format&fit=crop",
-          price: 349.99,
+          price: 19999,
           rating: 4.6,
           sponsored: true,
           category: "Smart Home"
@@ -78,6 +78,15 @@ export const SponsoredProducts = () => {
       ];
     }
   });
+
+  // Format price in Indian Rupees
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0,
+    }).format(price);
+  };
 
   return (
     <div className="w-full">
@@ -115,7 +124,10 @@ export const SponsoredProducts = () => {
                     <span className="text-xs text-muted-foreground ml-1">({product.rating})</span>
                   </div>
                   <div className="mt-2">
-                    <span className="text-lg font-bold">${product.price}</span>
+                    <span className="text-lg font-bold flex items-center">
+                      <IndianRupee className="h-4 w-4 mr-1" />
+                      {formatPrice(product.price).replace('₹', '')}
+                    </span>
                   </div>
                   <Button className="w-full mt-2" size="sm">
                     <ShoppingCart className="h-4 w-4 mr-2" />
@@ -127,8 +139,8 @@ export const SponsoredProducts = () => {
           ))}
         </CarouselContent>
         <div className="flex items-center justify-end gap-2 mt-4">
-          <CarouselPrevious className="static translate-y-0 rounded-full" />
-          <CarouselNext className="static translate-y-0 rounded-full" />
+          <CarouselPrevious className="static translate-y-0 rounded-full bg-background text-foreground hover:bg-muted" />
+          <CarouselNext className="static translate-y-0 rounded-full bg-background text-foreground hover:bg-muted" />
         </div>
       </Carousel>
     </div>

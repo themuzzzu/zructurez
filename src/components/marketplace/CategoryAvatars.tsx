@@ -31,18 +31,18 @@ export const CategoryAvatars = ({ onCategorySelect }: CategoryAvatarsProps) => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   
   const categories = [
-    { id: "electronics", name: "Electronics", icon: <Smartphone className="h-8 w-8" />, color: "bg-blue-100" },
-    { id: "mobiles", name: "Mobiles", icon: <Smartphone className="h-8 w-8" />, color: "bg-green-100" },
-    { id: "tvs", name: "TVs & Appliances", icon: <Tv className="h-8 w-8" />, color: "bg-purple-100" },
-    { id: "fashion", name: "Fashion", icon: <Shirt className="h-8 w-8" />, color: "bg-pink-100" },
-    { id: "computers", name: "Computers", icon: <Laptop className="h-8 w-8" />, color: "bg-yellow-100" },
-    { id: "baby", name: "Baby & Kids", icon: <Baby className="h-8 w-8" />, color: "bg-red-100" },
-    { id: "home", name: "Home & Furniture", icon: <Home className="h-8 w-8" />, color: "bg-indigo-100" },
-    { id: "books", name: "Books & Education", icon: <BookOpen className="h-8 w-8" />, color: "bg-orange-100" },
-    { id: "sports", name: "Sports & Fitness", icon: <Dumbbell className="h-8 w-8" />, color: "bg-teal-100" },
-    { id: "grocery", name: "Grocery", icon: <Utensils className="h-8 w-8" />, color: "bg-lime-100" },
-    { id: "auto", name: "Auto Accessories", icon: <Car className="h-8 w-8" />, color: "bg-cyan-100" },
-    { id: "gifts", name: "Gifts & Toys", icon: <Gift className="h-8 w-8" />, color: "bg-rose-100" },
+    { id: "electronics", name: "Electronics", icon: <Smartphone className="h-8 w-8" />, color: "bg-blue-100/10 text-blue-400" },
+    { id: "mobiles", name: "Mobiles", icon: <Smartphone className="h-8 w-8" />, color: "bg-green-100/10 text-green-400" },
+    { id: "tvs", name: "TVs & Appliances", icon: <Tv className="h-8 w-8" />, color: "bg-purple-100/10 text-purple-400" },
+    { id: "fashion", name: "Fashion", icon: <Shirt className="h-8 w-8" />, color: "bg-pink-100/10 text-pink-400" },
+    { id: "computers", name: "Computers", icon: <Laptop className="h-8 w-8" />, color: "bg-yellow-100/10 text-yellow-400" },
+    { id: "baby", name: "Baby & Kids", icon: <Baby className="h-8 w-8" />, color: "bg-red-100/10 text-red-400" },
+    { id: "home", name: "Home & Furniture", icon: <Home className="h-8 w-8" />, color: "bg-indigo-100/10 text-indigo-400" },
+    { id: "books", name: "Books & Education", icon: <BookOpen className="h-8 w-8" />, color: "bg-orange-100/10 text-orange-400" },
+    { id: "sports", name: "Sports & Fitness", icon: <Dumbbell className="h-8 w-8" />, color: "bg-teal-100/10 text-teal-400" },
+    { id: "grocery", name: "Grocery", icon: <Utensils className="h-8 w-8" />, color: "bg-lime-100/10 text-lime-400" },
+    { id: "auto", name: "Auto Accessories", icon: <Car className="h-8 w-8" />, color: "bg-cyan-100/10 text-cyan-400" },
+    { id: "gifts", name: "Gifts & Toys", icon: <Gift className="h-8 w-8" />, color: "bg-rose-100/10 text-rose-400" },
   ];
   
   const handleCategoryClick = (categoryId: string) => {
@@ -51,7 +51,7 @@ export const CategoryAvatars = ({ onCategorySelect }: CategoryAvatarsProps) => {
   };
   
   return (
-    <div className="w-full bg-white rounded-lg p-4 shadow-sm">
+    <div className="w-full bg-card rounded-lg p-4 shadow-sm">
       <Carousel
         opts={{
           align: "start",
@@ -68,11 +68,11 @@ export const CategoryAvatars = ({ onCategorySelect }: CategoryAvatarsProps) => {
               >
                 <Avatar className={`w-16 h-16 ${category.color} p-2 group-hover:scale-110 transition-transform duration-200 ${selectedCategory === category.id ? 'ring-2 ring-primary shadow-md' : ''}`}>
                   <AvatarImage src="" alt={category.name} />
-                  <AvatarFallback className={`${category.color} text-primary`}>
+                  <AvatarFallback className={category.color}>
                     {category.icon}
                   </AvatarFallback>
                 </Avatar>
-                <span className="mt-2 text-xs text-center font-medium max-w-[80px] line-clamp-2">
+                <span className="mt-2 text-xs text-center font-medium max-w-[80px] line-clamp-2 text-foreground">
                   {category.name}
                 </span>
               </div>
@@ -80,10 +80,10 @@ export const CategoryAvatars = ({ onCategorySelect }: CategoryAvatarsProps) => {
           ))}
         </CarouselContent>
         <div className="absolute -right-4 top-1/2 transform -translate-y-1/2">
-          <CarouselNext className="bg-white shadow-md" />
+          <CarouselNext className="bg-background shadow-md" />
         </div>
         <div className="absolute -left-4 top-1/2 transform -translate-y-1/2">
-          <CarouselPrevious className="bg-white shadow-md" />
+          <CarouselPrevious className="bg-background shadow-md" />
         </div>
       </Carousel>
     </div>

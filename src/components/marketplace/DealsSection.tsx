@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Clock, ShoppingCart } from "lucide-react";
+import { Clock, ShoppingCart, IndianRupee } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -25,8 +25,8 @@ export const DealsSection = () => {
           id: 1,
           title: "Wireless Earbuds",
           image_url: "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?q=80&w=1978&auto=format&fit=crop",
-          original_price: 99.99,
-          discounted_price: 49.99,
+          original_price: 4999,
+          discounted_price: 2499,
           discount_percentage: 50,
           ends_in: "8h 15m",
         },
@@ -34,8 +34,8 @@ export const DealsSection = () => {
           id: 2,
           title: "Smart Watch Series 5",
           image_url: "https://images.unsplash.com/photo-1579586337278-3befd40fd17a?q=80&w=1972&auto=format&fit=crop",
-          original_price: 299.99,
-          discounted_price: 199.99,
+          original_price: 19999,
+          discounted_price: 13299,
           discount_percentage: 33,
           ends_in: "6h 30m",
         },
@@ -43,8 +43,8 @@ export const DealsSection = () => {
           id: 3,
           title: "Bluetooth Speaker",
           image_url: "https://images.unsplash.com/photo-1589003077984-894e762f8865?q=80&w=1964&auto=format&fit=crop",
-          original_price: 129.99,
-          discounted_price: 79.99,
+          original_price: 6499,
+          discounted_price: 3999,
           discount_percentage: 38,
           ends_in: "12h 45m",
         },
@@ -52,8 +52,8 @@ export const DealsSection = () => {
           id: 4,
           title: "Gaming Mouse",
           image_url: "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?q=80&w=2065&auto=format&fit=crop",
-          original_price: 59.99,
-          discounted_price: 29.99,
+          original_price: 2999,
+          discounted_price: 1499,
           discount_percentage: 50,
           ends_in: "5h 50m",
         },
@@ -61,8 +61,8 @@ export const DealsSection = () => {
           id: 5,
           title: "Mechanical Keyboard",
           image_url: "https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?q=80&w=2080&auto=format&fit=crop",
-          original_price: 129.99,
-          discounted_price: 89.99,
+          original_price: 6499,
+          discounted_price: 4499,
           discount_percentage: 31,
           ends_in: "9h 20m",
         },
@@ -70,8 +70,8 @@ export const DealsSection = () => {
           id: 6,
           title: "Wireless Charger",
           image_url: "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?q=80&w=1972&auto=format&fit=crop",
-          original_price: 49.99,
-          discounted_price: 29.99,
+          original_price: 2499,
+          discounted_price: 1499,
           discount_percentage: 40,
           ends_in: "7h 10m",
         },
@@ -79,14 +79,23 @@ export const DealsSection = () => {
           id: 7,
           title: "Fitness Tracker",
           image_url: "https://images.unsplash.com/photo-1575311373937-040b8e1fd6f0?q=80&w=1974&auto=format&fit=crop",
-          original_price: 79.99,
-          discounted_price: 49.99,
+          original_price: 3999,
+          discounted_price: 2499,
           discount_percentage: 38,
           ends_in: "10h 20m",
         },
       ];
     }
   });
+
+  // Format price in Indian Rupees
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0,
+    }).format(price);
+  };
 
   return (
     <div className="w-full">
@@ -112,11 +121,14 @@ export const DealsSection = () => {
                   <div className="p-2">
                     <h3 className="font-medium text-sm line-clamp-1">{deal.title}</h3>
                     <div className="flex items-baseline mt-1">
-                      <span className="text-lg font-bold">${deal.discounted_price}</span>
-                      <span className="text-xs line-through text-muted-foreground ml-1">
-                        ${deal.original_price}
+                      <span className="text-lg font-bold flex items-center">
+                        <IndianRupee className="h-4 w-4" />
+                        {formatPrice(deal.discounted_price).replace('₹', '')}
                       </span>
-                      <Badge variant="outline" className="bg-green-50 text-green-600 ml-2 text-xs">
+                      <span className="text-xs line-through text-muted-foreground ml-1">
+                        ₹{formatPrice(deal.original_price).replace('₹', '')}
+                      </span>
+                      <Badge variant="outline" className="bg-green-100/10 text-green-500 ml-2 text-xs">
                         {deal.discount_percentage}% off
                       </Badge>
                     </div>
@@ -135,8 +147,8 @@ export const DealsSection = () => {
           ))}
         </CarouselContent>
         <div className="flex items-center justify-end gap-2 mt-4">
-          <CarouselPrevious className="static translate-y-0 rounded-full" />
-          <CarouselNext className="static translate-y-0 rounded-full" />
+          <CarouselPrevious className="static translate-y-0 rounded-full bg-background text-foreground hover:bg-muted" />
+          <CarouselNext className="static translate-y-0 rounded-full bg-background text-foreground hover:bg-muted" />
         </div>
       </Carousel>
     </div>

@@ -1,3 +1,4 @@
+
 import { Card } from "../ui/card";
 import { Button } from "../ui/button";
 import { ShoppingBag, IndianRupee, Share2, Eye } from "lucide-react";
@@ -108,7 +109,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
   }, [product.id]);
 
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 bg-[#0a0a0a] border-border">
+    <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 bg-card border-border">
       <AspectRatio ratio={16/9} className="bg-muted">
         {product.image_url && (
           <img
@@ -118,7 +119,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
           />
         )}
         <div className="absolute top-4 right-4 bg-primary text-white px-3 py-1 rounded-full text-sm">
-          ${product.price}/hr
+          ₹{formatPrice(product.price).replace('₹', '')}/hr
         </div>
       </AspectRatio>
       
