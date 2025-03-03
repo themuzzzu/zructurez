@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogTitle } from "./ui/dialog";
@@ -6,6 +7,7 @@ import { CreateProductForm } from "./marketplace/CreateProductForm";
 import { ProductCard } from "./products/ProductCard";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Plus } from "lucide-react";
 
 interface ShoppingSectionProps {
   searchQuery?: string;
@@ -94,8 +96,9 @@ export const ShoppingSection = ({
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-semibold">Products</h2>
+        <h2 className="text-2xl font-semibold">All Products</h2>
         <Button onClick={() => setIsDialogOpen(true)}>
+          <Plus className="h-4 w-4 mr-2" />
           Add Product
         </Button>
       </div>
@@ -115,18 +118,18 @@ export const ShoppingSection = ({
       </Dialog>
 
       {products && products.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {products.map((product) => (
-            <div key={product.id} className="w-full">
-              <div className="aspect-[3/4] w-full">
-                <ProductCard product={product} />
-              </div>
-            </div>
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
       ) : (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">No products found. Add your first product!</p>
+        <div className="text-center py-12 bg-white rounded-lg shadow-sm">
+          <p className="text-muted-foreground">No products found matching your filters.</p>
+          <Button variant="outline" className="mt-4" onClick={() => setIsDialogOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Your First Product
+          </Button>
         </div>
       )}
     </div>

@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { ShoppingSection } from "@/components/ShoppingSection";
 import { ArrowLeft, ShoppingCart } from "lucide-react";
@@ -9,6 +10,12 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { SearchInput } from "@/components/SearchInput";
 import { ProductFilters } from "@/components/marketplace/ProductFilters";
+import { MarketplaceBanner } from "@/components/marketplace/MarketplaceBanner";
+import { CategoryAvatars } from "@/components/marketplace/CategoryAvatars";
+import { DealsSection } from "@/components/marketplace/DealsSection";
+import { SponsoredProducts } from "@/components/marketplace/SponsoredProducts";
+import { TrendingProducts } from "@/components/marketplace/TrendingProducts";
+import { Separator } from "@/components/ui/separator";
 
 const Marketplace = () => {
   const navigate = useNavigate();
@@ -38,9 +45,10 @@ const Marketplace = () => {
   });
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] pt-4 pb-16 px-4 md:pt-20 md:px-6">
-      <div className="max-w-[1400px] mx-auto">
-        <div className="flex flex-col gap-4">
+    <div className="min-h-screen bg-[#f1f3f6] pt-4 md:pt-6 pb-16">
+      {/* Header */}
+      <div className="bg-primary px-4 py-3 mb-4 shadow-md sticky top-0 z-10">
+        <div className="max-w-[1400px] mx-auto">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Button 
@@ -54,22 +62,31 @@ const Marketplace = () => {
               <h1 className="text-2xl md:text-3xl font-bold text-white">Marketplace</h1>
             </div>
             
+            <div className="hidden md:flex items-center flex-1 max-w-2xl mx-4">
+              <SearchInput 
+                placeholder="Search products..."
+                value={searchQuery}
+                onChange={setSearchQuery}
+                className="w-full bg-white rounded-l-md"
+              />
+            </div>
+            
             <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
               <SheetTrigger asChild>
                 <div className="relative">
                   <Button variant="ghost" size="icon" className="text-white">
                     <ShoppingCart className="h-5 w-5" />
                     {cartItemCount > 0 && (
-                      <span className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-primary text-white text-xs flex items-center justify-center animate-fade-in">
+                      <span className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-accent text-white text-xs flex items-center justify-center animate-fade-in">
                         {cartItemCount}
                       </span>
                     )}
                   </Button>
                 </div>
               </SheetTrigger>
-              <SheetContent className="w-full sm:w-[540px] bg-[#0a0a0a] border-zinc-800">
+              <SheetContent className="w-full sm:w-[540px] bg-white border-zinc-800">
                 <SheetHeader>
-                  <SheetTitle className="text-white">Shopping Cart</SheetTitle>
+                  <SheetTitle>Shopping Cart</SheetTitle>
                 </SheetHeader>
                 <div className="mt-4">
                   <Cart />
@@ -77,30 +94,77 @@ const Marketplace = () => {
               </SheetContent>
             </Sheet>
           </div>
-
-          <div className="space-y-4">
+          
+          {/* Mobile Search */}
+          <div className="mt-3 md:hidden">
             <SearchInput 
               placeholder="Search products..."
               value={searchQuery}
               onChange={setSearchQuery}
-              className="w-full"
-            />
-            <ProductFilters 
-              selectedCategory={selectedCategory}
-              onCategorySelect={setSelectedCategory}
-              showDiscounted={showDiscounted}
-              onDiscountedChange={setShowDiscounted}
-              showUsed={showUsed}
-              onUsedChange={setShowUsed}
-              showBranded={showBranded}
-              onBrandedChange={setShowBranded}
-              sortOption={sortOption}
-              onSortChange={setSortOption}
-              priceRange={priceRange}
-              onPriceRangeChange={setPriceRange}
+              className="w-full bg-white"
             />
           </div>
+        </div>
+      </div>
 
+      <div className="max-w-[1400px] mx-auto px-4">
+        {/* Banner Section */}
+        <div className="mb-6">
+          <MarketplaceBanner />
+        </div>
+
+        {/* Categories */}
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold mb-3">Shop by Category</h2>
+          <CategoryAvatars onCategorySelect={setSelectedCategory} />
+        </div>
+        
+        {/* Deals Section */}
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold mb-3">Deals of the Day</h2>
+          <DealsSection />
+        </div>
+
+        <Separator className="my-6" />
+
+        {/* Sponsored Products */}
+        <div className="mb-6">
+          <div className="flex justify-between items-center mb-3">
+            <h2 className="text-xl font-semibold">Sponsored Products</h2>
+            <Button variant="link">View All</Button>
+          </div>
+          <SponsoredProducts />
+        </div>
+
+        <Separator className="my-6" />
+
+        {/* Trending Products */}
+        <div className="mb-6">
+          <div className="flex justify-between items-center mb-3">
+            <h2 className="text-xl font-semibold">Trending Products</h2>
+            <Button variant="link">View All</Button>
+          </div>
+          <TrendingProducts />
+        </div>
+
+        <Separator className="my-6" />
+        
+        {/* Filters and Products */}
+        <div className="pt-2">
+          <ProductFilters 
+            selectedCategory={selectedCategory}
+            onCategorySelect={setSelectedCategory}
+            showDiscounted={showDiscounted}
+            onDiscountedChange={setShowDiscounted}
+            showUsed={showUsed}
+            onUsedChange={setShowUsed}
+            showBranded={showBranded}
+            onBrandedChange={setShowBranded}
+            sortOption={sortOption}
+            onSortChange={setSortOption}
+            priceRange={priceRange}
+            onPriceRangeChange={setPriceRange}
+          />
           <ShoppingSection 
             searchQuery={searchQuery}
             selectedCategory={selectedCategory === "All" ? null : selectedCategory}
