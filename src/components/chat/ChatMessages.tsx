@@ -1,3 +1,4 @@
+
 import { useEffect, useRef } from "react";
 import { MessageBubble } from "../MessageBubble";
 import { ScrollArea } from "../ui/scroll-area";
@@ -10,7 +11,7 @@ interface ChatMessagesProps {
   messages: Message[];
   currentUserId: string;
   isGroup?: boolean;
-  onForwardMessage?: (messageId: string) => void;
+  onForwardMessage?: (content: string) => void;
 }
 
 export const ChatMessages = ({ messages, currentUserId, isGroup, onForwardMessage }: ChatMessagesProps) => {
@@ -55,19 +56,52 @@ export const ChatMessages = ({ messages, currentUserId, isGroup, onForwardMessag
     };
   }, []);
 
+  const handleForwardMessage = (content: string) => {
+    if (onForwardMessage) {
+      onForwardMessage(content);
+    }
+  };
+
+  // Group messages by date for better organization
+  const groupedMessages: { [key: string]: Message[] } = {};
+  messages.forEach(message => {
+    const date = new Date(message.created_at).toLocaleDateString();
+    if (!groupedMessages[date]) {
+      groupedMessages[date] = [];
+    }
+    groupedMessages[date].push(message);
+  });
+
   return (
     <ScrollArea ref={scrollRef} className="h-[calc(100vh-15rem)] px-4">
-      <div className="space-y-4">
-        {messages.map((message) => (
-          <MessageBubble
-            key={message.id}
-            content={message.content}
-            timestamp={format(new Date(message.created_at), 'p')}
-            isOwn={message.sender_id === currentUserId}
-            messageId={message.id}
-            onForward={onForwardMessage}
-          />
+      <div className="py-4 space-y-6">
+        {Object.entries(groupedMessages).map(([date, dateMessages]) => (
+          <div key={date} className="space-y-4">
+            <div className="flex justify-center">
+              <span className="text-xs bg-muted text-muted-foreground px-2 py-1 rounded-full">
+                {new Date(date).toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}
+              </span>
+            </div>
+            
+            {dateMessages.map((message) => (
+              <MessageBubble
+                key={message.id}
+                content={message.content}
+                timestamp={format(new Date(message.created_at), 'p')}
+                isOwn={message.sender_id === currentUserId}
+                messageId={message.id}
+                onForward={handleForwardMessage}
+              />
+            ))}
+          </div>
         ))}
+        
+        {messages.length === 0 && (
+          <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground pt-20">
+            <p className="text-sm mb-2">No messages yet</p>
+            <p className="text-xs">Start the conversation by sending a message</p>
+          </div>
+        )}
       </div>
     </ScrollArea>
   );

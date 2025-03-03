@@ -1,11 +1,13 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ChatList } from "@/components/chat/ChatList";
 import { ChatWindow } from "@/components/chat/ChatWindow";
 import { ChatDialogs } from "@/components/chat/ChatDialogs";
 import { GroupList } from "@/components/groups/GroupList";
+import { FoldersSection } from "@/components/chat/FoldersSection";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MessageSquare, Users, ArrowLeft } from "lucide-react";
+import { MessageSquare, Users, ArrowLeft, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -21,6 +23,22 @@ const Messages = () => {
   const [groups, setGroups] = useState<Group[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("chats");
+  const [selectedFolder, setSelectedFolder] = useState("all");
+  const [isPremiumUser, setIsPremiumUser] = useState(false);
+  
+  // Checking if user is premium (in a real app, this would check subscription status)
+  useEffect(() => {
+    const checkPremiumStatus = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        // This is where you'd check if user has premium status
+        // For demo, let's set it to true 50% of the time
+        setIsPremiumUser(Math.random() > 0.5);
+      }
+    };
+    
+    checkPremiumStatus();
+  }, []);
 
   const fetchChats = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -118,6 +136,15 @@ const Messages = () => {
 
     setGroups(formattedGroups);
   };
+  
+  const handleFolderSelect = (folderId: string) => {
+    setSelectedFolder(folderId);
+    // In a real app, you would filter chats based on folder here
+  };
+  
+  const handleNewChat = () => {
+    setShowNewChat(true);
+  };
 
   useEffect(() => {
     fetchChats();
@@ -140,10 +167,15 @@ const Messages = () => {
         <h1 className="text-2xl font-bold">Messages</h1>
       </div>
 
-      <div className="grid grid-cols-12 gap-4">
-        <div className="col-span-4">
+      <div className="grid grid-cols-12 gap-4 h-[calc(100vh-160px)]">
+        <div className="col-span-4 border rounded-lg overflow-hidden bg-background shadow-sm">
+          <FoldersSection 
+            onSelectFolder={handleFolderSelect} 
+            isPremiumUser={isPremiumUser}
+          />
+          
           <Tabs defaultValue="chats" className="w-full" onValueChange={setActiveTab}>
-            <TabsList className="w-full mb-4">
+            <TabsList className="w-full px-4 py-2">
               <TabsTrigger value="chats" className="flex-1">
                 <MessageSquare className="w-4 h-4 mr-2" />
                 Chats
@@ -154,18 +186,30 @@ const Messages = () => {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="chats">
+            <div className="p-4 flex justify-end border-b">
+              <Button 
+                size="sm" 
+                variant="outline" 
+                className="gap-1" 
+                onClick={activeTab === "chats" ? handleNewChat : () => {}}
+              >
+                <Plus className="h-4 w-4" />
+                {activeTab === "chats" ? "New Chat" : "New Group"}
+              </Button>
+            </div>
+
+            <TabsContent value="chats" className="m-0">
               <ChatList
                 chats={chats}
                 selectedChat={selectedChat}
                 onSelectChat={setSelectedChat}
                 searchQuery={searchQuery}
                 onSearchChange={setSearchQuery}
-                onNewChat={() => setShowNewChat(true)}
+                onNewChat={handleNewChat}
               />
             </TabsContent>
 
-            <TabsContent value="groups">
+            <TabsContent value="groups" className="m-0">
               <GroupList
                 groups={groups}
                 selectedGroup={selectedGroup}
@@ -178,7 +222,7 @@ const Messages = () => {
           </Tabs>
         </div>
 
-        <div className="col-span-8">
+        <div className="col-span-8 h-full">
           {selectedChat && (
             <ChatWindow
               selectedChat={selectedChat}
@@ -186,8 +230,19 @@ const Messages = () => {
             />
           )}
           {!selectedChat && !selectedGroup && (
-            <div className="h-full flex items-center justify-center text-muted-foreground">
-              Select a chat or group to start messaging
+            <div className="h-full flex flex-col items-center justify-center text-muted-foreground border rounded-lg bg-background p-8 shadow-sm">
+              <MessageSquare className="h-16 w-16 mb-4 opacity-20" />
+              <h3 className="text-xl font-medium mb-2">No conversation selected</h3>
+              <p className="text-center max-w-md">
+                Select a chat or group to start messaging, or create a new conversation to connect with others.
+              </p>
+              <Button 
+                className="mt-6"
+                onClick={handleNewChat}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Start New Conversation
+              </Button>
             </div>
           )}
         </div>
