@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogTitle } from "./ui/dialog";
@@ -41,8 +40,8 @@ export const ShoppingSection = ({
         query = query.ilike('title', `%${searchQuery}%`);
       }
 
-      if (selectedCategory && selectedCategory !== "All") {
-        query = query.eq('category', selectedCategory);
+      if (selectedCategory && selectedCategory !== "all") {
+        query = query.eq('category', selectedCategory.toLowerCase());
       }
 
       if (showDiscounted) {
@@ -57,13 +56,11 @@ export const ShoppingSection = ({
         query = query.eq('is_branded', true);
       }
 
-      // Add price range filtering
       if (priceRange !== 'all') {
         const [min, max] = priceRange.split('-').map(Number);
         if (max) {
           query = query.gte('price', min).lte('price', max);
         } else {
-          // For "Above 25000" case
           query = query.gte('price', min);
         }
       }

@@ -1,4 +1,3 @@
-
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -33,21 +32,19 @@ export const ProductFilters = ({
   onPriceRangeChange,
 }: ProductFiltersProps) => {
   const categories = [
-    { value: "All", label: "All Categories" },
-    { value: "Electronics", label: "Electronics" },
-    { value: "Clothing", label: "Clothing" },
-    { value: "Home", label: "Home & Garden" },
-    { value: "Sports", label: "Sports & Outdoors" },
-    { value: "Books", label: "Books & Media" },
-    { value: "Automotive", label: "Automotive" },
-    { value: "Beauty", label: "Beauty & Health" },
-    { value: "Toys", label: "Toys & Games" },
-    { value: "Jewelry", label: "Jewelry & Watches" },
-    { value: "Art", label: "Art & Collectibles" },
-    { value: "Food", label: "Food & Beverages" },
-    { value: "Music", label: "Musical Instruments" },
-    { value: "Pet", label: "Pet Supplies" },
-    { value: "Office", label: "Office Supplies" },
+    { value: "all", label: "All Categories" },
+    { value: "electronics", label: "Electronics" },
+    { value: "mobiles", label: "Mobiles" },
+    { value: "tvs", label: "TVs & Appliances" },
+    { value: "fashion", label: "Fashion" },
+    { value: "computers", label: "Computers" },
+    { value: "baby", label: "Baby & Kids" },
+    { value: "home", label: "Home & Furniture" },
+    { value: "books", label: "Books & Education" },
+    { value: "sports", label: "Sports & Fitness" },
+    { value: "grocery", label: "Grocery" },
+    { value: "auto", label: "Auto Accessories" },
+    { value: "gifts", label: "Gifts & Toys" },
   ];
 
   const priceRanges = [

@@ -46,8 +46,10 @@ export const CategoryAvatars = ({ onCategorySelect }: CategoryAvatarsProps) => {
   ];
   
   const handleCategoryClick = (categoryId: string) => {
-    setSelectedCategory(categoryId);
-    onCategorySelect(categoryId);
+    // Deselect if clicking the same category
+    const newCategory = selectedCategory === categoryId ? null : categoryId;
+    setSelectedCategory(newCategory);
+    onCategorySelect(newCategory || 'all'); // Pass 'all' when deselecting
   };
   
   return (
