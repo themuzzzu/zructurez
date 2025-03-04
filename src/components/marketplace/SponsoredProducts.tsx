@@ -100,7 +100,7 @@ export const SponsoredProducts = () => {
         <CarouselContent className="-ml-2 md:-ml-4">
           {sponsoredProducts.map((product) => (
             <CarouselItem key={product.id} className="pl-2 md:pl-4 sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5">
-              <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 dark:bg-card dark:border-border">
+              <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 dark:bg-card border-border">
                 <div className="relative">
                   <AspectRatio ratio={4/3}>
                     <img 
@@ -109,11 +109,11 @@ export const SponsoredProducts = () => {
                       className="object-cover w-full h-full transition-transform hover:scale-105 duration-500"
                     />
                   </AspectRatio>
-                  <Badge className="absolute top-2 right-2 bg-primary/80">Sponsored</Badge>
+                  <Badge className="absolute top-2 right-2 bg-primary/90">Sponsored</Badge>
                 </div>
                 <div className="p-3">
                   <div className="text-xs text-muted-foreground mb-1">{product.category}</div>
-                  <h3 className="font-medium text-sm line-clamp-2 min-h-[2.5rem]">{product.title}</h3>
+                  <h3 className="font-medium text-sm line-clamp-2 min-h-[2.5rem] text-foreground">{product.title}</h3>
                   <div className="flex items-center mt-1 text-amber-500">
                     {[...Array(5)].map((_, i) => (
                       <Star 
@@ -124,7 +124,7 @@ export const SponsoredProducts = () => {
                     <span className="text-xs text-muted-foreground ml-1">({product.rating})</span>
                   </div>
                   <div className="mt-2">
-                    <span className="text-lg font-bold flex items-center">
+                    <span className="text-lg font-bold flex items-center text-foreground">
                       <IndianRupee className="h-4 w-4 mr-1" />
                       {formatPrice(product.price).replace('₹', '')}
                     </span>
@@ -139,8 +139,8 @@ export const SponsoredProducts = () => {
           ))}
         </CarouselContent>
         <div className="flex items-center justify-end gap-2 mt-4">
-          <CarouselPrevious className="static translate-y-0 rounded-full bg-background dark:bg-background/20 text-foreground hover:bg-muted" />
-          <CarouselNext className="static translate-y-0 rounded-full bg-background dark:bg-background/20 text-foreground hover:bg-muted" />
+          <CarouselPrevious className="static translate-y-0 rounded-full bg-background dark:bg-card text-foreground hover:bg-muted" />
+          <CarouselNext className="static translate-y-0 rounded-full bg-background dark:bg-card text-foreground hover:bg-muted" />
         </div>
       </Carousel>
     </div>

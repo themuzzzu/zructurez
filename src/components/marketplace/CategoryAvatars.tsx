@@ -51,7 +51,7 @@ export const CategoryAvatars = ({ onCategorySelect }: CategoryAvatarsProps) => {
   };
   
   return (
-    <div className="w-full bg-card rounded-lg p-4 shadow-sm dark:bg-card/40 dark:border dark:border-border">
+    <div className="w-full bg-card rounded-lg p-4 shadow-sm border border-border">
       <Carousel
         opts={{
           align: "start",
@@ -72,7 +72,7 @@ export const CategoryAvatars = ({ onCategorySelect }: CategoryAvatarsProps) => {
                     {category.icon}
                   </AvatarFallback>
                 </Avatar>
-                <span className="mt-2 text-xs text-center font-medium max-w-[80px] line-clamp-2 text-foreground">
+                <span className="mt-2 text-xs text-center font-medium max-w-[80px] line-clamp-2 text-foreground dark:text-white">
                   {category.name}
                 </span>
               </div>
@@ -80,10 +80,10 @@ export const CategoryAvatars = ({ onCategorySelect }: CategoryAvatarsProps) => {
           ))}
         </CarouselContent>
         <div className="absolute -right-4 top-1/2 transform -translate-y-1/2">
-          <CarouselNext className="bg-background shadow-md dark:bg-card/80" />
+          <CarouselNext className="bg-background shadow-md dark:bg-card" />
         </div>
         <div className="absolute -left-4 top-1/2 transform -translate-y-1/2">
-          <CarouselPrevious className="bg-background shadow-md dark:bg-card/80" />
+          <CarouselPrevious className="bg-background shadow-md dark:bg-card" />
         </div>
       </Carousel>
     </div>

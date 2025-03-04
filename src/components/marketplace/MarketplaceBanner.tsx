@@ -54,15 +54,15 @@ export const MarketplaceBanner = () => {
         <CarouselContent>
           {banners.map((banner) => (
             <CarouselItem key={banner.id}>
-              <div className="relative h-[200px] md:h-[300px] w-full overflow-hidden rounded-lg">
+              <div className="relative h-[200px] md:h-[300px] w-full overflow-hidden rounded-lg border border-border">
                 <img 
                   src={banner.image_url} 
                   alt={banner.title} 
                   className="w-full h-full object-cover transition-transform hover:scale-105 duration-700"
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent dark:from-black/80 flex flex-col justify-center p-8">
+                <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent flex flex-col justify-center p-8">
                   <h2 className="text-2xl md:text-4xl font-bold text-white mb-2">{banner.title}</h2>
-                  <p className="text-lg text-white/90 mb-4 max-w-md">{banner.subtitle}</p>
+                  <p className="text-lg text-white mb-4 max-w-md">{banner.subtitle}</p>
                   <Button className="w-fit" size="lg">
                     <ShoppingBag className="mr-2 h-4 w-4" />
                     {banner.button_text}
@@ -72,15 +72,15 @@ export const MarketplaceBanner = () => {
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious className="left-2 bg-background/80 hover:bg-background text-foreground dark:bg-background/50 dark:hover:bg-background/70" />
-        <CarouselNext className="right-2 bg-background/80 hover:bg-background text-foreground dark:bg-background/50 dark:hover:bg-background/70" />
+        <CarouselPrevious className="left-2 bg-background/90 hover:bg-background text-foreground dark:bg-background/60 dark:hover:bg-background/80" />
+        <CarouselNext className="right-2 bg-background/90 hover:bg-background text-foreground dark:bg-background/60 dark:hover:bg-background/80" />
         
         {/* Dots indicator */}
         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
           {banners.map((_, index) => (
             <button
               key={index}
-              className="w-2.5 h-2.5 rounded-full bg-white/50 dark:bg-white/30 transition-all duration-300"
+              className="w-2.5 h-2.5 rounded-full bg-white/70 dark:bg-white/50 transition-all duration-300"
               onClick={() => {
                 // Dot navigation would be implemented with API from useCarousel
               }}

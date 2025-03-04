@@ -1,3 +1,4 @@
+
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -60,7 +61,7 @@ export const ProductFilters = ({
   ];
 
   return (
-    <div className="flex flex-col gap-4 p-4 border rounded-lg bg-[#111111] border-zinc-800">
+    <div className="flex flex-col gap-4 p-4 border rounded-lg bg-card border-border">
       <div className="flex flex-wrap gap-4">
         <div className="flex items-center space-x-2">
           <Switch
@@ -69,7 +70,7 @@ export const ProductFilters = ({
             onCheckedChange={onDiscountedChange}
             className="data-[state=checked]:bg-primary"
           />
-          <Label htmlFor="discounted" className="text-white">Discounted</Label>
+          <Label htmlFor="discounted" className="text-foreground">Discounted</Label>
         </div>
         <div className="flex items-center space-x-2">
           <Switch
@@ -78,7 +79,7 @@ export const ProductFilters = ({
             onCheckedChange={onUsedChange}
             className="data-[state=checked]:bg-primary"
           />
-          <Label htmlFor="used" className="text-white">Used</Label>
+          <Label htmlFor="used" className="text-foreground">Used</Label>
         </div>
         <div className="flex items-center space-x-2">
           <Switch
@@ -87,21 +88,20 @@ export const ProductFilters = ({
             onCheckedChange={onBrandedChange}
             className="data-[state=checked]:bg-primary"
           />
-          <Label htmlFor="branded" className="text-white">Branded</Label>
+          <Label htmlFor="branded" className="text-foreground">Branded</Label>
         </div>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4">
         <Select value={selectedCategory} onValueChange={onCategorySelect}>
-          <SelectTrigger className="w-full sm:w-[200px] bg-[#111111] border-zinc-800 text-white">
+          <SelectTrigger className="w-full sm:w-[200px] border-border text-foreground">
             <SelectValue placeholder="Category" />
           </SelectTrigger>
-          <SelectContent className="max-h-[300px] bg-[#111111] border-zinc-800">
+          <SelectContent className="max-h-[300px]">
             {categories.map((category) => (
               <SelectItem 
                 key={category.value} 
                 value={category.value}
-                className="text-white hover:bg-zinc-800"
               >
                 {category.label}
               </SelectItem>
@@ -110,15 +110,14 @@ export const ProductFilters = ({
         </Select>
 
         <Select value={priceRange} onValueChange={onPriceRangeChange}>
-          <SelectTrigger className="w-full sm:w-[200px] bg-[#111111] border-zinc-800 text-white">
+          <SelectTrigger className="w-full sm:w-[200px] border-border text-foreground">
             <SelectValue placeholder="Price Range" />
           </SelectTrigger>
-          <SelectContent className="bg-[#111111] border-zinc-800">
+          <SelectContent>
             {priceRanges.map((range) => (
               <SelectItem 
                 key={range.value} 
                 value={range.value}
-                className="text-white hover:bg-zinc-800"
               >
                 {range.label}
               </SelectItem>
@@ -127,15 +126,15 @@ export const ProductFilters = ({
         </Select>
 
         <Select value={sortOption} onValueChange={onSortChange}>
-          <SelectTrigger className="w-full sm:w-[180px] bg-[#111111] border-zinc-800 text-white">
+          <SelectTrigger className="w-full sm:w-[180px] border-border text-foreground">
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
-          <SelectContent className="bg-[#111111] border-zinc-800">
-            <SelectItem value="newest" className="text-white hover:bg-zinc-800">Newest First</SelectItem>
-            <SelectItem value="oldest" className="text-white hover:bg-zinc-800">Oldest First</SelectItem>
-            <SelectItem value="price-low" className="text-white hover:bg-zinc-800">Price: Low to High</SelectItem>
-            <SelectItem value="price-high" className="text-white hover:bg-zinc-800">Price: High to Low</SelectItem>
-            <SelectItem value="most-viewed" className="text-white hover:bg-zinc-800">Most Viewed</SelectItem>
+          <SelectContent>
+            <SelectItem value="newest">Newest First</SelectItem>
+            <SelectItem value="oldest">Oldest First</SelectItem>
+            <SelectItem value="price-low">Price: Low to High</SelectItem>
+            <SelectItem value="price-high">Price: High to Low</SelectItem>
+            <SelectItem value="most-viewed">Most Viewed</SelectItem>
           </SelectContent>
         </Select>
       </div>

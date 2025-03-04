@@ -45,7 +45,7 @@ const Marketplace = () => {
   });
 
   return (
-    <div className="min-h-screen bg-[#f1f3f6] pt-4 md:pt-6 pb-16">
+    <div className="min-h-screen bg-background pt-4 md:pt-6 pb-16">
       {/* Header */}
       <div className="bg-primary px-4 py-3 mb-4 shadow-md sticky top-0 z-10">
         <div className="max-w-[1400px] mx-auto">
@@ -84,7 +84,7 @@ const Marketplace = () => {
                   </Button>
                 </div>
               </SheetTrigger>
-              <SheetContent className="w-full sm:w-[540px] bg-white border-zinc-800">
+              <SheetContent className="w-full sm:w-[540px]">
                 <SheetHeader>
                   <SheetTitle>Shopping Cart</SheetTitle>
                 </SheetHeader>
@@ -115,13 +115,13 @@ const Marketplace = () => {
 
         {/* Categories */}
         <div className="mb-6">
-          <h2 className="text-xl font-semibold mb-3">Shop by Category</h2>
+          <h2 className="text-xl font-semibold mb-3 text-foreground">Shop by Category</h2>
           <CategoryAvatars onCategorySelect={setSelectedCategory} />
         </div>
         
         {/* Deals Section */}
         <div className="mb-6">
-          <h2 className="text-xl font-semibold mb-3">Deals of the Day</h2>
+          <h2 className="text-xl font-semibold mb-3 text-foreground">Deals of the Day</h2>
           <DealsSection />
         </div>
 
@@ -130,7 +130,7 @@ const Marketplace = () => {
         {/* Sponsored Products */}
         <div className="mb-6">
           <div className="flex justify-between items-center mb-3">
-            <h2 className="text-xl font-semibold">Sponsored Products</h2>
+            <h2 className="text-xl font-semibold text-foreground">Sponsored Products</h2>
             <Button variant="link">View All</Button>
           </div>
           <SponsoredProducts />
@@ -141,7 +141,7 @@ const Marketplace = () => {
         {/* Trending Products */}
         <div className="mb-6">
           <div className="flex justify-between items-center mb-3">
-            <h2 className="text-xl font-semibold">Trending Products</h2>
+            <h2 className="text-xl font-semibold text-foreground">Trending Products</h2>
             <Button variant="link">View All</Button>
           </div>
           <TrendingProducts />
