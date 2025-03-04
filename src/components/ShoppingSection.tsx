@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogTitle } from "./ui/dialog";
@@ -40,8 +41,9 @@ export const ShoppingSection = ({
         query = query.ilike('title', `%${searchQuery}%`);
       }
 
+      // Process selectedCategory properly
       if (selectedCategory && selectedCategory !== "all") {
-        query = query.eq('category', selectedCategory.toLowerCase());
+        query = query.eq('category', selectedCategory);
       }
 
       if (showDiscounted) {
@@ -84,8 +86,12 @@ export const ShoppingSection = ({
       }
 
       const { data, error } = await query;
-
-      if (error) throw error;
+      
+      if (error) {
+        console.error('Error fetching products:', error);
+        throw error;
+      }
+      
       return data || [];
     }
   });
@@ -93,7 +99,11 @@ export const ShoppingSection = ({
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-semibold">All Products</h2>
+        <h2 className="text-2xl font-semibold">
+          {selectedCategory && selectedCategory !== 'all' 
+            ? `${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} Products` 
+            : 'All Products'}
+        </h2>
         <Button onClick={() => setIsDialogOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Add Product

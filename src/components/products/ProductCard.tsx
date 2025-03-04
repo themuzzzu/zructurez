@@ -1,3 +1,4 @@
+
 import { Card } from "../ui/card";
 import { Button } from "../ui/button";
 import { ShoppingBag, IndianRupee, Share2, Eye } from "lucide-react";
@@ -75,7 +76,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
   });
 
   const handleShare = async (platform: 'copy' | 'whatsapp' | 'facebook' | 'twitter') => {
-    const productUrl = `${window.location.origin}/marketplace?product=${product.id}`;
+    const productUrl = `${window.location.origin}/product/${product.id}`;
     
     switch (platform) {
       case 'copy':
@@ -156,7 +157,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
             </div>
           </div>
           
-          <p className="text-muted-foreground text-sm mb-4">{product.description}</p>
+          <p className="text-muted-foreground text-sm mb-4 line-clamp-2">{product.description}</p>
         </div>
       </div>
       
@@ -170,7 +171,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
               size="sm"
               className="gap-2"
               onClick={(e) => {
-                e.stopPropagation();
+                e.stopPropagation(); // Prevent navigation when clicking the button
                 addToCartMutation.mutate({ productId: product.id, quantity: 1 });
               }}
               disabled={addToCartMutation.isPending}
@@ -183,32 +184,32 @@ export const ProductCard = ({ product }: ProductCardProps) => {
                 <Button
                   size="sm"
                   variant="ghost"
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={(e) => e.stopPropagation()} // Prevent navigation when clicking the share button
                 >
                   <Share2 className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem onClick={(e) => {
-                  e.stopPropagation();
+                  e.stopPropagation(); // Prevent navigation when clicking menu items
                   handleShare('copy');
                 }}>
                   Copy Link
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={(e) => {
-                  e.stopPropagation();
+                  e.stopPropagation(); // Prevent navigation when clicking menu items
                   handleShare('whatsapp');
                 }}>
                   Share on WhatsApp
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={(e) => {
-                  e.stopPropagation();
+                  e.stopPropagation(); // Prevent navigation when clicking menu items
                   handleShare('facebook');
                 }}>
                   Share on Facebook
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={(e) => {
-                  e.stopPropagation();
+                  e.stopPropagation(); // Prevent navigation when clicking menu items
                   handleShare('twitter');
                 }}>
                   Share on Twitter

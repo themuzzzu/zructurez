@@ -1,3 +1,4 @@
+
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { 
   ShoppingBag, 
@@ -30,7 +31,7 @@ export const CategoryAvatars = ({ onCategorySelect }: CategoryAvatarsProps) => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   
   const categories = [
-    { id: "all", name: "All", icon: null },
+    { id: "all", name: "All", icon: <ShoppingBag className="h-8 w-8" /> },
     { id: "electronics", name: "Electronics", icon: <Smartphone className="h-8 w-8" /> },
     { id: "mobiles", name: "Mobiles", icon: <Smartphone className="h-8 w-8" /> },
     { id: "tvs", name: "TVs & Appliances", icon: <Tv className="h-8 w-8" /> },
@@ -46,10 +47,14 @@ export const CategoryAvatars = ({ onCategorySelect }: CategoryAvatarsProps) => {
   ];
   
   const handleCategoryClick = (categoryId: string) => {
-    // Deselect if clicking the same category
-    const newCategory = selectedCategory === categoryId ? "all" : categoryId;
-    setSelectedCategory(newCategory);
-    onCategorySelect(newCategory);
+    // If clicking the currently selected category, deselect it and show all products
+    if (selectedCategory === categoryId) {
+      setSelectedCategory(null);
+      onCategorySelect("all");
+    } else {
+      setSelectedCategory(categoryId);
+      onCategorySelect(categoryId);
+    }
   };
   
   return (

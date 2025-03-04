@@ -21,7 +21,7 @@ const Marketplace = () => {
   const navigate = useNavigate();
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [showDiscounted, setShowDiscounted] = useState(false);
   const [showUsed, setShowUsed] = useState(false);
   const [showBranded, setShowBranded] = useState(false);
@@ -43,6 +43,11 @@ const Marketplace = () => {
       return count || 0;
     },
   });
+
+  const handleCategorySelect = (category: string) => {
+    console.log("Selected category:", category);
+    setSelectedCategory(category);
+  };
 
   return (
     <div className="min-h-screen bg-background pt-4 md:pt-6 pb-16">
@@ -116,7 +121,7 @@ const Marketplace = () => {
         {/* Categories */}
         <div className="mb-6">
           <h2 className="text-xl font-semibold mb-3 text-foreground">Shop by Category</h2>
-          <CategoryAvatars onCategorySelect={setSelectedCategory} />
+          <CategoryAvatars onCategorySelect={handleCategorySelect} />
         </div>
         
         {/* Deals Section */}
@@ -167,7 +172,7 @@ const Marketplace = () => {
           />
           <ShoppingSection 
             searchQuery={searchQuery}
-            selectedCategory={selectedCategory === "All" ? null : selectedCategory}
+            selectedCategory={selectedCategory}
             showDiscounted={showDiscounted}
             showUsed={showUsed}
             showBranded={showBranded}
