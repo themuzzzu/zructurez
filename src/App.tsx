@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,6 +11,7 @@ import { NotFound } from "@/components/NotFound";
 // Page imports
 import Index from "./pages/Index";
 import Marketplace from "./pages/Marketplace";
+import ProductDetails from "./pages/ProductDetails";
 import Services from "./pages/Services";
 import Messages from "./pages/Messages";
 import Events from "./pages/Events";
@@ -43,6 +45,7 @@ const App = () => (
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/marketplace" element={<ProtectedRoute><Marketplace /></ProtectedRoute>} />
+            <Route path="/product/:productId" element={<ProtectedRoute><ProductDetails /></ProtectedRoute>} />
             <Route path="/services" element={<ProtectedRoute><Services /></ProtectedRoute>} />
             <Route path="/jobs" element={<ProtectedRoute><Jobs /></ProtectedRoute>} />
             <Route path="/services/:id" element={<ProtectedRoute><ServiceDetails /></ProtectedRoute>} />

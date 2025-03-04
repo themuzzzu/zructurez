@@ -1,4 +1,3 @@
-
 import { Card } from "../ui/card";
 import { Button } from "../ui/button";
 import { ShoppingBag, IndianRupee, Share2, Eye } from "lucide-react";
@@ -14,6 +13,7 @@ import {
 import { useEffect } from "react";
 import { incrementViews } from "@/services/postService";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { useNavigate } from "react-router-dom";
 
 interface Product {
   id: string;
@@ -28,6 +28,9 @@ interface Product {
   stock: number;
   views?: number;
   reach?: number;
+  is_branded?: boolean;
+  is_used?: boolean;
+  is_discounted?: boolean;
 }
 
 interface ProductCardProps {
@@ -36,6 +39,7 @@ interface ProductCardProps {
 
 export const ProductCard = ({ product }: ProductCardProps) => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const addToCartMutation = useMutation({
     mutationFn: async ({ productId, quantity = 1 }: { productId: string; quantity: number }) => {
@@ -94,7 +98,6 @@ export const ProductCard = ({ product }: ProductCardProps) => {
     }
   };
 
-  // Format price in Indian Rupees
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
@@ -104,53 +107,60 @@ export const ProductCard = ({ product }: ProductCardProps) => {
   };
 
   useEffect(() => {
-    // Increment view count when product is rendered
     incrementViews('products', product.id);
   }, [product.id]);
 
+  const handleProductClick = () => {
+    navigate(`/product/${product.id}`);
+  };
+
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 bg-card border-border">
-      <AspectRatio ratio={16/9} className="bg-muted">
-        {product.image_url && (
-          <img
-            src={product.image_url}
-            alt={product.title}
-            className="w-full h-full object-cover"
-          />
-        )}
-        <div className="absolute top-4 right-4 bg-primary text-white px-3 py-1 rounded-full text-sm">
-          ₹{formatPrice(product.price).replace('₹', '')}/hr
-        </div>
-      </AspectRatio>
-      
-      <div className="p-4">
-        <div className="flex justify-between items-start mb-2">
-          <div>
-            <h3 className="text-lg font-semibold text-foreground">{product.title}</h3>
-            <div className="text-sm text-muted-foreground">
-              {product.category} {product.subcategory && `• ${product.subcategory}`}
+      <div className="cursor-pointer" onClick={handleProductClick}>
+        <AspectRatio ratio={16/9} className="bg-muted">
+          {product.image_url && (
+            <img
+              src={product.image_url}
+              alt={product.title}
+              className="w-full h-full object-cover"
+            />
+          )}
+          <div className="absolute top-4 right-4 bg-primary text-white px-3 py-1 rounded-full text-sm">
+            ₹{formatPrice(product.price).replace('₹', '')}
+          </div>
+        </AspectRatio>
+        
+        <div className="p-4">
+          <div className="flex justify-between items-start mb-2">
+            <div>
+              <h3 className="text-lg font-semibold text-foreground">{product.title}</h3>
+              <div className="text-sm text-muted-foreground">
+                {product.category} {product.subcategory && `• ${product.subcategory}`}
+              </div>
+            </div>
+            <div className="text-right">
+              <span className="text-lg font-bold text-primary flex items-center gap-1">
+                <IndianRupee className="h-4 w-4" />
+                {formatPrice(product.price).replace('₹', '')}
+              </span>
+              {product.original_price && (
+                <div className="flex flex-col items-end">
+                  <span className="text-sm text-muted-foreground line-through">
+                    ₹{formatPrice(product.original_price).replace('₹', '')}
+                  </span>
+                  <span className="text-xs text-green-500">
+                    {product.discount_percentage}% off
+                  </span>
+                </div>
+              )}
             </div>
           </div>
-          <div className="text-right">
-            <span className="text-lg font-bold text-primary flex items-center gap-1">
-              <IndianRupee className="h-4 w-4" />
-              {formatPrice(product.price).replace('₹', '')}
-            </span>
-            {product.original_price && (
-              <div className="flex flex-col items-end">
-                <span className="text-sm text-muted-foreground line-through">
-                  ₹{formatPrice(product.original_price).replace('₹', '')}
-                </span>
-                <span className="text-xs text-green-500">
-                  {product.discount_percentage}% off
-                </span>
-              </div>
-            )}
-          </div>
+          
+          <p className="text-muted-foreground text-sm mb-4">{product.description}</p>
         </div>
-        
-        <p className="text-muted-foreground text-sm mb-4">{product.description}</p>
-        
+      </div>
+      
+      <div className="px-4 pb-4">
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">
             {product.stock} in stock
@@ -159,7 +169,10 @@ export const ProductCard = ({ product }: ProductCardProps) => {
             <Button
               size="sm"
               className="gap-2"
-              onClick={() => addToCartMutation.mutate({ productId: product.id, quantity: 1 })}
+              onClick={(e) => {
+                e.stopPropagation();
+                addToCartMutation.mutate({ productId: product.id, quantity: 1 });
+              }}
               disabled={addToCartMutation.isPending}
             >
               <ShoppingBag className="h-4 w-4" />
@@ -170,21 +183,34 @@ export const ProductCard = ({ product }: ProductCardProps) => {
                 <Button
                   size="sm"
                   variant="ghost"
+                  onClick={(e) => e.stopPropagation()}
                 >
                   <Share2 className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem onClick={() => handleShare('copy')}>
+                <DropdownMenuItem onClick={(e) => {
+                  e.stopPropagation();
+                  handleShare('copy');
+                }}>
                   Copy Link
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleShare('whatsapp')}>
+                <DropdownMenuItem onClick={(e) => {
+                  e.stopPropagation();
+                  handleShare('whatsapp');
+                }}>
                   Share on WhatsApp
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleShare('facebook')}>
+                <DropdownMenuItem onClick={(e) => {
+                  e.stopPropagation();
+                  handleShare('facebook');
+                }}>
                   Share on Facebook
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleShare('twitter')}>
+                <DropdownMenuItem onClick={(e) => {
+                  e.stopPropagation();
+                  handleShare('twitter');
+                }}>
                   Share on Twitter
                 </DropdownMenuItem>
               </DropdownMenuContent>
