@@ -50,11 +50,11 @@ export const ProductsList = () => {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
       {products.map((product) => (
-        <Card key={product.id} className="p-4 overflow-hidden">
+        <Card key={product.id} className="p-2 sm:p-3 overflow-hidden">
           {product.image_url && (
-            <div className="aspect-square overflow-hidden rounded-md mb-3">
+            <div className="aspect-square overflow-hidden rounded-md mb-2">
               <img
                 src={product.image_url}
                 alt={product.title}
@@ -62,19 +62,19 @@ export const ProductsList = () => {
               />
             </div>
           )}
-          <h3 className="font-semibold text-sm line-clamp-1">{product.title}</h3>
-          <p className="text-xs text-muted-foreground mb-2 line-clamp-2">{product.description}</p>
+          <h3 className="font-semibold text-xs sm:text-sm line-clamp-1">{product.title}</h3>
+          <p className="text-xs text-muted-foreground mb-2 line-clamp-1 sm:line-clamp-2">{product.description}</p>
           <div className="flex justify-between items-center">
-            <span className="font-medium text-sm">₹{product.price}</span>
+            <span className="font-medium text-xs sm:text-sm">₹{product.price}</span>
             <div className="flex gap-1">
-              <Button variant="outline" size="icon" className="h-7 w-7">
+              <Button variant="outline" size="icon" className="h-6 w-6 sm:h-7 sm:w-7">
                 <Pencil className="h-3 w-3" />
               </Button>
               <Button
                 variant="destructive"
                 size="icon"
                 onClick={() => handleDelete(product.id)}
-                className="h-7 w-7"
+                className="h-6 w-6 sm:h-7 sm:w-7"
               >
                 <Trash2 className="h-3 w-3" />
               </Button>
