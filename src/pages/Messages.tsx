@@ -168,7 +168,7 @@ const Messages = () => {
       </div>
 
       <div className="grid grid-cols-12 gap-4 h-[calc(100vh-160px)]">
-        <div className="col-span-4 border rounded-lg overflow-hidden bg-background shadow-sm">
+        <div className="col-span-12 md:col-span-4 border rounded-lg overflow-hidden bg-background shadow-sm">
           <FoldersSection 
             onSelectFolder={handleFolderSelect} 
             isPremiumUser={isPremiumUser}
@@ -222,29 +222,32 @@ const Messages = () => {
           </Tabs>
         </div>
 
-        <div className="col-span-8 h-full">
+        <div className="col-span-12 md:col-span-8 h-full md:block" 
+             style={{ display: selectedChat ? 'block' : 'none' }}>
           {selectedChat && (
             <ChatWindow
               selectedChat={selectedChat}
               onClose={() => setSelectedChat(null)}
             />
           )}
-          {!selectedChat && !selectedGroup && (
-            <div className="h-full flex flex-col items-center justify-center text-muted-foreground border rounded-lg bg-background p-8 shadow-sm">
-              <MessageSquare className="h-16 w-16 mb-4 opacity-20" />
-              <h3 className="text-xl font-medium mb-2">No conversation selected</h3>
-              <p className="text-center max-w-md">
-                Select a chat or group to start messaging, or create a new conversation to connect with others.
-              </p>
-              <Button 
-                className="mt-6"
-                onClick={handleNewChat}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Start New Conversation
-              </Button>
-            </div>
-          )}
+        </div>
+
+        <div className="col-span-12 md:col-span-8 h-full" 
+             style={{ display: !selectedChat && !selectedGroup ? 'block' : 'none' }}>
+          <div className="h-full flex flex-col items-center justify-center text-muted-foreground border rounded-lg bg-background p-8 shadow-sm">
+            <MessageSquare className="h-16 w-16 mb-4 opacity-20" />
+            <h3 className="text-xl font-medium mb-2">No conversation selected</h3>
+            <p className="text-center max-w-md">
+              Select a chat or group to start messaging, or create a new conversation to connect with others.
+            </p>
+            <Button 
+              className="mt-6"
+              onClick={handleNewChat}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Start New Conversation
+            </Button>
+          </div>
         </div>
       </div>
 

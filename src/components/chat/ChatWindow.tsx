@@ -7,6 +7,7 @@ import { ChatDialogs } from "./ChatDialogs";
 import { useMessageHandling } from "./hooks/useMessageHandling";
 import type { Chat } from "@/types/chat";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ChatWindowProps {
   selectedChat: Chat;
@@ -34,6 +35,37 @@ export const ChatWindow = ({ selectedChat, onClose }: ChatWindowProps) => {
   } = useMessageHandling(selectedChat, message, setMessage, () => {
     setMessage("");
   });
+
+  // Subscribe to real-time updates for this chat
+  useEffect(() => {
+    // Create a channel to listen for new messages
+    const channel = supabase
+      .channel('chat-messages')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+        },
+        (payload) => {
+          console.log('New message received:', payload.new);
+          // The Messages component will handle the state update
+        }
+      )
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          console.log('Subscribed to new messages');
+        }
+        if (status === 'CHANNEL_ERROR') {
+          toast.error('Error connecting to chat');
+        }
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
