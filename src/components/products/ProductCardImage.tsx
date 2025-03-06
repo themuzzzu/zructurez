@@ -11,16 +11,20 @@ interface ProductCardImageProps {
 
 export const ProductCardImage = ({ imageUrl, title, price, onClick }: ProductCardImageProps) => {
   return (
-    <div className="cursor-pointer" onClick={onClick}>
-      <AspectRatio ratio={16/9} className="bg-muted">
-        {imageUrl && (
+    <div className="cursor-pointer group relative overflow-hidden" onClick={onClick}>
+      <AspectRatio ratio={1} className="bg-muted transition-all duration-300">
+        {imageUrl ? (
           <img
             src={imageUrl}
             alt={title}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-muted">
+            <span className="text-muted-foreground">No image</span>
+          </div>
         )}
-        <div className="absolute top-4 right-4 bg-primary text-white px-3 py-1 rounded-full text-sm">
+        <div className="absolute top-3 right-3 bg-primary text-white px-2 py-1 rounded-full text-xs font-medium">
           ₹{formatPrice(price).replace('₹', '')}
         </div>
       </AspectRatio>

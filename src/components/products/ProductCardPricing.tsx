@@ -14,20 +14,22 @@ export const ProductCardPricing = ({
   discountPercentage 
 }: ProductCardPricingProps) => {
   return (
-    <div className="text-right">
-      <span className="text-lg font-bold text-primary flex items-center gap-1">
-        <IndianRupee className="h-4 w-4" />
+    <div className="text-right flex flex-col items-end">
+      <span className="text-sm font-bold text-primary flex items-center gap-0.5">
+        <IndianRupee className="h-3 w-3" />
         {formatPrice(price).replace('₹', '')}
       </span>
       {originalPrice && (
-        <div className="flex flex-col items-end">
-          <span className="text-sm text-muted-foreground line-through">
+        <>
+          <span className="text-xs text-muted-foreground line-through">
             ₹{formatPrice(originalPrice).replace('₹', '')}
           </span>
-          <span className="text-xs text-green-500">
-            {discountPercentage}% off
-          </span>
-        </div>
+          {discountPercentage && (
+            <span className="text-xs text-green-500">
+              {discountPercentage}% off
+            </span>
+          )}
+        </>
       )}
     </div>
   );

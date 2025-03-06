@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -49,30 +50,33 @@ export const ProductsList = () => {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {products.map((product) => (
-        <Card key={product.id} className="p-4">
+        <Card key={product.id} className="p-4 overflow-hidden">
           {product.image_url && (
-            <img
-              src={product.image_url}
-              alt={product.title}
-              className="w-full h-48 object-cover rounded-lg mb-4"
-            />
+            <div className="aspect-square overflow-hidden rounded-md mb-3">
+              <img
+                src={product.image_url}
+                alt={product.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
           )}
-          <h3 className="font-semibold">{product.title}</h3>
-          <p className="text-sm text-muted-foreground mb-2">{product.description}</p>
+          <h3 className="font-semibold text-sm line-clamp-1">{product.title}</h3>
+          <p className="text-xs text-muted-foreground mb-2 line-clamp-2">{product.description}</p>
           <div className="flex justify-between items-center">
-            <span className="font-medium">${product.price}</span>
-            <div className="flex gap-2">
-              <Button variant="outline" size="icon">
-                <Pencil className="h-4 w-4" />
+            <span className="font-medium text-sm">₹{product.price}</span>
+            <div className="flex gap-1">
+              <Button variant="outline" size="icon" className="h-7 w-7">
+                <Pencil className="h-3 w-3" />
               </Button>
               <Button
                 variant="destructive"
                 size="icon"
                 onClick={() => handleDelete(product.id)}
+                className="h-7 w-7"
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-3 w-3" />
               </Button>
             </div>
           </div>
