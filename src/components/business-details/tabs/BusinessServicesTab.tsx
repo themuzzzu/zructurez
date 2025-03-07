@@ -34,7 +34,6 @@ export const BusinessServicesTab = ({
     cost: number;
   } | null>(null);
 
-  // Fetch the current settings when component mounts
   useEffect(() => {
     const fetchBusinessSettings = async () => {
       const { data: businessData, error: businessError } = await supabase
@@ -50,7 +49,6 @@ export const BusinessServicesTab = ({
 
       setShowInServices(businessData?.show_in_services || false);
 
-      // Fetch booking message template
       const { data: messageData, error: messageError } = await supabase
         .from('business_booking_messages')
         .select('message_template')
@@ -60,7 +58,6 @@ export const BusinessServicesTab = ({
       if (!messageError && messageData) {
         setBookingMessage(messageData.message_template);
       } else {
-        // If no template exists, create default one
         const { error: insertError } = await supabase
           .from('business_booking_messages')
           .insert([{ business_id: businessId }]);
@@ -74,7 +71,6 @@ export const BusinessServicesTab = ({
     fetchBusinessSettings();
   }, [businessId]);
 
-  // Handle toggle change
   const handleShowInServicesChange = async () => {
     const newValue = !showInServices;
     

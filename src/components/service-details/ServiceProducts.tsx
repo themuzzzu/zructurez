@@ -1,3 +1,4 @@
+
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
@@ -38,7 +39,7 @@ export const ServiceProducts = ({
       )}
 
       {(serviceProducts?.length > 0 || marketplaceProducts?.length > 0) && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
           {serviceProducts?.map((product) => (
             <ServiceProductCard
               key={product.id}

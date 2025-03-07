@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { BusinessCard } from "@/components/BusinessCard";
 import { Button } from "@/components/ui/button";
@@ -50,10 +51,10 @@ export const BusinessesTab = () => {
           Create Business
         </Button>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {businesses?.map((business: any) => (
           <div key={business.id} className="w-full">
-            <div className="aspect-[3/4] w-full">
+            <div className="w-full">
               <BusinessCard {...business} />
             </div>
           </div>
