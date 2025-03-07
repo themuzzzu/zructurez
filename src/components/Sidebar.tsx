@@ -1,7 +1,8 @@
+
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Home,
   Store,
@@ -15,14 +16,22 @@ import {
   Building,
   PanelLeftClose,
   PanelLeft,
+  SunMoon,
 } from "lucide-react";
+import { useTheme } from "@/components/ThemeProvider";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export const Sidebar = ({ className }: SidebarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(localStorage.getItem("sidebarCollapsed") === "true");
+  const { theme, setTheme } = useTheme();
+
+  // Save collapse state to localStorage
+  useEffect(() => {
+    localStorage.setItem("sidebarCollapsed", String(isCollapsed));
+  }, [isCollapsed]);
 
   const routes = [
     { name: "Home", path: "/", icon: Home },
@@ -37,9 +46,13 @@ export const Sidebar = ({ className }: SidebarProps) => {
     { name: "Settings", path: "/settings", icon: Settings },
   ];
 
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark");
+  };
+
   return (
     <div className={cn(
-      "h-screen border-r bg-background overflow-y-auto transition-all duration-300",
+      "h-screen border-r bg-background overflow-y-auto transition-all duration-300 fixed left-0 top-0 z-30",
       isCollapsed ? "w-16" : "w-64",
       className
     )}>
@@ -49,6 +62,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
           size="icon"
           onClick={() => setIsCollapsed(!isCollapsed)}
           className="hover:bg-accent/50"
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {isCollapsed ? (
             <PanelLeft className="h-4 w-4" />
@@ -57,6 +71,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
           )}
         </Button>
       </div>
+      
       <div className="space-y-1 p-3">
         {routes.map((route) => {
           const Icon = route.icon;
@@ -79,6 +94,21 @@ export const Sidebar = ({ className }: SidebarProps) => {
             </Button>
           );
         })}
+        
+        {/* Theme toggle */}
+        <Button
+          variant="ghost"
+          className={cn(
+            "w-full justify-start h-10 px-3 gap-3 hover:bg-accent/50 mt-4",
+            isCollapsed && "justify-center px-0"
+          )}
+          onClick={toggleTheme}
+        >
+          <SunMoon className="h-4 w-4 shrink-0" />
+          {!isCollapsed && (
+            <span className="text-sm font-medium">Toggle Theme</span>
+          )}
+        </Button>
       </div>
     </div>
   );

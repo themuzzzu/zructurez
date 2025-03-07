@@ -13,6 +13,19 @@ import { useEffect, useState } from "react";
 const Index = () => {
   const [followSectionPosition, setFollowSectionPosition] = useState<number>(0);
   const [sponsoredPosition, setSponsoredPosition] = useState<number>(2);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(
+    localStorage.getItem("sidebarCollapsed") === "true"
+  );
+
+  // Listen for sidebar collapse state changes
+  useEffect(() => {
+    const checkSidebarState = () => {
+      setSidebarCollapsed(localStorage.getItem("sidebarCollapsed") === "true");
+    };
+    
+    window.addEventListener('storage', checkSidebarState);
+    return () => window.removeEventListener('storage', checkSidebarState);
+  }, []);
 
   const { data: posts = [], isLoading } = useQuery({
     queryKey: ['posts'],
@@ -92,8 +105,8 @@ const Index = () => {
       <Navbar />
       <div className="pt-16">
         <div className="flex">
-          <Sidebar className="hidden lg:block w-64 fixed h-[calc(100vh-4rem)]" />
-          <main className="flex-1 lg:ml-64">
+          <Sidebar className="hidden lg:block fixed h-[calc(100vh-4rem)]" />
+          <main className={`flex-1 transition-all duration-300 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'}`}>
             <div className="container max-w-[800px] p-4 space-y-4">
               <CreatePost />
               <div className="space-y-4">

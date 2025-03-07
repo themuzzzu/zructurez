@@ -16,10 +16,12 @@ import { MobileNav } from "./navbar/MobileNav";
 import { SearchBox } from "./search/SearchBox";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useTheme } from "./ThemeProvider";
 
 export const Navbar = () => {
   const location = useLocation();
   const isHomePage = location.pathname === "/";
+  const { theme } = useTheme();
 
   const { data: profile } = useQuery({
     queryKey: ['profile'],
