@@ -1,7 +1,10 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useEffect } from "react";
+import { incrementAdView } from "@/services/adService";
 
 interface BusinessAdvertisementsProps {
   businessId: string;
@@ -17,7 +20,7 @@ export const BusinessAdvertisements = ({ businessId }: BusinessAdvertisementsPro
       const { data } = await supabase
         .from('advertisements')
         .select('*')
-        .eq('business_id', businessId)
+        .eq('reference_id', businessId)
         .eq('status', 'active')
         .gte('end_date', new Date().toISOString())
         .order('created_at', { ascending: false });
@@ -26,6 +29,15 @@ export const BusinessAdvertisements = ({ businessId }: BusinessAdvertisementsPro
     // Only run the query if we have a valid businessId
     enabled: !!businessId,
   });
+
+  // Record views for the ads
+  useEffect(() => {
+    if (advertisements?.length) {
+      advertisements.forEach(ad => {
+        incrementAdView(ad.id);
+      });
+    }
+  }, [advertisements]);
 
   if (!advertisements?.length) return null;
 

@@ -5,12 +5,14 @@ import { CreatePost } from "@/components/CreatePost";
 import { GroupManagement } from "@/components/groups/GroupManagement";
 import { FollowSuggestions } from "@/components/follow/FollowSuggestions";
 import { PostCard } from "@/components/PostCard";
+import { SponsoredPosts } from "@/components/SponsoredPosts";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 
 const Index = () => {
   const [followSectionPosition, setFollowSectionPosition] = useState<number>(0);
+  const [sponsoredPosition, setSponsoredPosition] = useState<number>(2);
 
   const { data: posts = [], isLoading } = useQuery({
     queryKey: ['posts'],
@@ -33,6 +35,14 @@ const Index = () => {
     if (posts.length > 0) {
       const randomPosition = Math.floor(Math.random() * (posts.length + 1));
       setFollowSectionPosition(randomPosition);
+      
+      // Position sponsored posts at a different position
+      let sponsoredPos = Math.floor(Math.random() * (posts.length + 1));
+      // Make sure sponsored and follow sections are not at the same position
+      while (sponsoredPos === randomPosition) {
+        sponsoredPos = Math.floor(Math.random() * (posts.length + 1));
+      }
+      setSponsoredPosition(sponsoredPos);
     }
   }, [posts]);
 
@@ -43,6 +53,11 @@ const Index = () => {
       if (index === followSectionPosition) {
         content.push(<FollowSuggestions key="follow-suggestions" />);
       }
+      
+      if (index === sponsoredPosition) {
+        content.push(<SponsoredPosts key="sponsored-posts" />);
+      }
+      
       content.push(
         <PostCard
           key={post.id}
@@ -60,9 +75,13 @@ const Index = () => {
       );
     });
 
-    // If the random position is at the end, append the follow suggestions
+    // If the random positions are at the end, append them
     if (followSectionPosition === posts.length) {
       content.push(<FollowSuggestions key="follow-suggestions" />);
+    }
+    
+    if (sponsoredPosition === posts.length) {
+      content.push(<SponsoredPosts key="sponsored-posts" />);
     }
 
     return content;
