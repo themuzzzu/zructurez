@@ -1,6 +1,4 @@
 
-import { Navbar } from "@/components/Navbar";
-import { Sidebar } from "@/components/Sidebar";
 import { CreatePost } from "@/components/CreatePost";
 import { GroupManagement } from "@/components/groups/GroupManagement";
 import { FollowSuggestions } from "@/components/follow/FollowSuggestions";
@@ -9,23 +7,11 @@ import { SponsoredPosts } from "@/components/SponsoredPosts";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
+import { Layout } from "@/components/layout/Layout";
 
 const Index = () => {
   const [followSectionPosition, setFollowSectionPosition] = useState<number>(0);
   const [sponsoredPosition, setSponsoredPosition] = useState<number>(2);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(
-    localStorage.getItem("sidebarCollapsed") === "true"
-  );
-
-  // Listen for sidebar collapse state changes
-  useEffect(() => {
-    const checkSidebarState = () => {
-      setSidebarCollapsed(localStorage.getItem("sidebarCollapsed") === "true");
-    };
-    
-    window.addEventListener('storage', checkSidebarState);
-    return () => window.removeEventListener('storage', checkSidebarState);
-  }, []);
 
   const { data: posts = [], isLoading } = useQuery({
     queryKey: ['posts'],
@@ -101,30 +87,22 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <div className="pt-16">
-        <div className="flex">
-          <Sidebar className="hidden lg:block fixed h-[calc(100vh-4rem)]" />
-          <main className={`flex-1 transition-all duration-300 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'}`}>
-            <div className="container max-w-[800px] p-4 space-y-4">
-              <CreatePost />
-              <div className="space-y-4">
-                {isLoading ? (
-                  <div>Loading posts...</div>
-                ) : (
-                  renderContent()
-                )}
-              </div>
-              <div className="my-8">
-                <h2 className="text-2xl font-bold mb-4">Groups</h2>
-                <GroupManagement />
-              </div>
-            </div>
-          </main>
+    <Layout>
+      <div className="container max-w-[800px] p-4 space-y-4">
+        <CreatePost />
+        <div className="space-y-4">
+          {isLoading ? (
+            <div>Loading posts...</div>
+          ) : (
+            renderContent()
+          )}
+        </div>
+        <div className="my-8">
+          <h2 className="text-2xl font-bold mb-4">Groups</h2>
+          <GroupManagement />
         </div>
       </div>
-    </div>
+    </Layout>
   );
 };
 

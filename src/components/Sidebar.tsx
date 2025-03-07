@@ -28,9 +28,12 @@ export const Sidebar = ({ className }: SidebarProps) => {
   const [isCollapsed, setIsCollapsed] = useState(localStorage.getItem("sidebarCollapsed") === "true");
   const { theme, setTheme } = useTheme();
 
-  // Save collapse state to localStorage
+  // Save collapse state to localStorage and dispatch custom event
   useEffect(() => {
     localStorage.setItem("sidebarCollapsed", String(isCollapsed));
+    
+    // Dispatch custom event to notify other components
+    window.dispatchEvent(new Event('sidebarStateChanged'));
   }, [isCollapsed]);
 
   const routes = [
@@ -61,7 +64,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
           variant="ghost"
           size="icon"
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="hover:bg-accent/50"
+          className="hover:bg-accent/50 transition-all duration-200 hover:rotate-180"
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {isCollapsed ? (
@@ -82,14 +85,18 @@ export const Sidebar = ({ className }: SidebarProps) => {
               key={route.path}
               variant={isActive ? "secondary" : "ghost"}
               className={cn(
-                "w-full justify-start h-10 px-3 gap-3 hover:bg-accent/50",
-                isCollapsed && "justify-center px-0"
+                "w-full justify-start h-10 px-3 gap-3 hover:bg-accent/50 transition-all duration-200",
+                isCollapsed && "justify-center px-0",
+                isActive && "relative before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-primary"
               )}
               onClick={() => navigate(route.path)}
             >
-              <Icon className="h-4 w-4 shrink-0" />
+              <Icon className={cn(
+                "h-4 w-4 shrink-0",
+                isActive && "text-primary"
+              )} />
               {!isCollapsed && (
-                <span className="text-sm font-medium">{route.name}</span>
+                <span className="text-sm font-medium transition-opacity duration-200">{route.name}</span>
               )}
             </Button>
           );
@@ -99,7 +106,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
         <Button
           variant="ghost"
           className={cn(
-            "w-full justify-start h-10 px-3 gap-3 hover:bg-accent/50 mt-4",
+            "w-full justify-start h-10 px-3 gap-3 hover:bg-accent/50 mt-4 transition-all duration-200",
             isCollapsed && "justify-center px-0"
           )}
           onClick={toggleTheme}
