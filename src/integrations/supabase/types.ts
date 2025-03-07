@@ -1797,6 +1797,18 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      increment_ad_clicks: {
+        Args: {
+          ad_id: string
+        }
+        Returns: undefined
+      }
+      increment_ad_views: {
+        Args: {
+          ad_id: string
+        }
+        Returns: undefined
+      }
       increment_business_views: {
         Args: {
           business_id_param: string
