@@ -79,24 +79,30 @@ export const Sidebar = ({ className }: SidebarProps) => {
         {routes.map((route) => {
           const Icon = route.icon;
           const isActive = location.pathname === route.path;
+          const isHome = route.name === "Home";
 
           return (
             <Button
               key={route.path}
               variant={isActive ? "secondary" : "ghost"}
               className={cn(
-                "w-full justify-start h-10 px-3 gap-3 hover:bg-accent/50 transition-all duration-200",
+                "w-full justify-start h-10 px-3 gap-3 hover:bg-accent/50 transition-all duration-200 group",
                 isCollapsed && "justify-center px-0",
-                isActive && "relative before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-primary"
+                isActive && "relative before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-primary",
+                isHome && "hover:text-white"
               )}
               onClick={() => navigate(route.path)}
             >
               <Icon className={cn(
                 "h-4 w-4 shrink-0",
-                isActive && "text-primary"
+                isActive && "text-primary",
+                isHome && "group-hover:text-white"
               )} />
               {!isCollapsed && (
-                <span className="text-sm font-medium transition-opacity duration-200">{route.name}</span>
+                <span className={cn(
+                  "text-sm font-medium transition-opacity duration-200",
+                  isHome && "group-hover:text-white"
+                )}>{route.name}</span>
               )}
             </Button>
           );

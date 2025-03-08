@@ -40,10 +40,10 @@ export const MobileNav = () => {
               size="sm"
               className={`flex flex-col items-center gap-1 h-auto py-1 transition-all duration-200 ${
                 isActive ? 'text-primary scale-110' : 'text-muted-foreground'
-              }`}
+              } ${item.label === "Home" ? 'hover:text-white' : ''}`}
               onClick={() => navigate(item.path)}
             >
-              <Icon className="h-5 w-5" />
+              <Icon className={`h-5 w-5 ${item.label === "Home" ? 'group-hover:text-white' : ''}`} />
               <span className="text-xs">{item.label}</span>
             </Button>
           );
