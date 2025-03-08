@@ -1,7 +1,23 @@
 
 import { Button } from "@/components/ui/button";
 import { ShoppingSection } from "@/components/ShoppingSection";
-import { ArrowLeft, ShoppingCart, Filter, Search as SearchIcon, LayoutGrid, Tag } from "lucide-react";
+import { 
+  ArrowLeft, 
+  ShoppingCart, 
+  Filter, 
+  Search as SearchIcon, 
+  LayoutGrid, 
+  Tag,
+  Smartphone,
+  Tv,
+  Shirt,
+  Laptop,
+  Baby,
+  Home,
+  BookOpen,
+  Dumbbell,
+  Utensils
+} from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Cart } from "@/components/cart/Cart";
