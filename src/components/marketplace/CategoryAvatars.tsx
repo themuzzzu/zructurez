@@ -14,7 +14,7 @@ import {
   Car, 
   Gift
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Carousel,
   CarouselContent,
@@ -22,6 +22,9 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 interface CategoryAvatarsProps {
   onCategorySelect: (category: string) => void;
@@ -29,6 +32,7 @@ interface CategoryAvatarsProps {
 
 export const CategoryAvatars = ({ onCategorySelect }: CategoryAvatarsProps) => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const navigate = useNavigate();
   
   const categories = [
     { id: "all", name: "All", icon: <ShoppingBag className="h-8 w-8" /> },
@@ -47,18 +51,32 @@ export const CategoryAvatars = ({ onCategorySelect }: CategoryAvatarsProps) => {
   ];
   
   const handleCategoryClick = (categoryId: string) => {
-    // If clicking the currently selected category, deselect it and show all products
-    if (selectedCategory === categoryId) {
-      setSelectedCategory(null);
+    setSelectedCategory(categoryId);
+    onCategorySelect(categoryId);
+    toast.success(`Browsing ${categories.find(c => c.id === categoryId)?.name} products`);
+  };
+  
+  // Initialize with "all" category on first render
+  useEffect(() => {
+    if (!selectedCategory) {
+      setSelectedCategory("all");
       onCategorySelect("all");
-    } else {
-      setSelectedCategory(categoryId);
-      onCategorySelect(categoryId);
     }
+  }, []);
+  
+  const viewAllCategories = () => {
+    navigate('/marketplace/categories');
   };
   
   return (
     <div className="w-full bg-card rounded-lg p-4 shadow-sm border border-border">
+      <div className="flex justify-between items-center mb-3">
+        <h3 className="text-lg font-medium text-foreground">Shop by Category</h3>
+        <Button variant="ghost" size="sm" className="text-primary" onClick={viewAllCategories}>
+          View All
+        </Button>
+      </div>
+      
       <Carousel
         opts={{
           align: "start",
