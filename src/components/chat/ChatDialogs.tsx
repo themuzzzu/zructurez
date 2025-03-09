@@ -1,5 +1,7 @@
+
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Chat } from "@/types/chat";
+import { Input } from "@/components/ui/input";
 
 interface ChatDialogsProps {
   selectedChat: Chat | null;
@@ -48,13 +50,13 @@ export const ChatDialogs = ({
 }: ChatDialogsProps) => {
   return (
     <Dialog open={showNewChat} onOpenChange={onCloseNewChat}>
-      <DialogContent>
+      <DialogContent className="dark:bg-[#111111] dark:border-zinc-800">
         <div className="p-4">
           <h2 className="text-lg font-semibold mb-4">New Chat</h2>
-          <input
+          <Input
             type="text"
             placeholder="Enter user ID..."
-            className="w-full p-2 border rounded"
+            className="w-full p-2 rounded"
             onKeyPress={(e) => {
               if (e.key === 'Enter') {
                 onNewChat((e.target as HTMLInputElement).value);

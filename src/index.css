@@ -43,8 +43,8 @@
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
+    --border: 0 0% 30%;
+    --input: 0 0% 30%;
     --ring: 217 91% 60%;
   }
 
@@ -64,8 +64,12 @@
     @apply bg-background text-foreground;
   }
   
-  .dark .text-input {
-    @apply text-gray-200;
+  .dark input {
+    @apply bg-[#111111] text-white border-zinc-700;
+  }
+  
+  .dark input::placeholder {
+    @apply text-zinc-400;
   }
 }
 

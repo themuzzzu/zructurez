@@ -1,3 +1,4 @@
+
 import { Search } from "lucide-react";
 import { Input } from "./ui/input";
 
@@ -22,7 +23,7 @@ export const SearchInput = ({
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="pl-10 w-full bg-[#111111] border-zinc-800 text-white placeholder:text-zinc-400 focus:ring-primary"
+        className="pl-10 w-full"
       />
     </div>
   );
