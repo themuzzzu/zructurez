@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -89,6 +90,28 @@
   
   .animate-pulse-soft {
     animation: pulseSoft 2s infinite;
+  }
+
+  /* Responsive visibility utilities */
+  .xs\:block {
+    @media (min-width: 320px) {
+      display: block;
+    }
+  }
+  
+  .xs\:hidden {
+    @media (min-width: 320px) {
+      display: none;
+    }
+  }
+  
+  /* Responsive text utilities */
+  .text-responsive {
+    font-size: clamp(0.75rem, 2vw, 1rem);
+  }
+  
+  .heading-responsive {
+    font-size: clamp(1.25rem, 4vw, 2rem);
   }
 }
 

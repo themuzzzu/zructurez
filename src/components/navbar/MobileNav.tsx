@@ -28,7 +28,7 @@ export const MobileNav = () => {
   };
 
   return (
-    <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-background border-t py-2 px-4 z-50 animate-slide-up backdrop-blur-sm bg-background/80">
+    <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-background border-t py-2 px-2 z-50 animate-slide-up backdrop-blur-sm bg-background/80">
       <div className="flex justify-between items-center max-w-md mx-auto">
         {mobileNavItems.map((item) => {
           const Icon = item.icon;
@@ -40,24 +40,24 @@ export const MobileNav = () => {
               key={item.path}
               variant={isHome ? "home-nav" : "ghost"}
               size="sm"
-              className={`flex flex-col items-center gap-1 h-auto py-1 transition-all duration-200 ${
-                isActive ? 'text-primary scale-110' : isHome ? '' : 'text-muted-foreground'
+              className={`flex flex-col items-center gap-0.5 h-auto py-1 transition-all duration-200 ${
+                isActive ? 'text-primary scale-110' : isHome ? 'text-white' : 'text-muted-foreground'
               }`}
               onClick={() => navigate(item.path)}
             >
-              <Icon className="h-5 w-5" />
-              <span className="text-xs">{item.label}</span>
+              <Icon className={`h-4 w-4 sm:h-5 sm:w-5 ${isHome ? 'text-white' : ''}`} />
+              <span className="text-[10px] sm:text-xs">{item.label}</span>
             </Button>
           );
         })}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="flex flex-col items-center gap-1 h-auto py-1">
-              <MoreVertical className="h-5 w-5" />
-              <span className="text-xs">More</span>
+            <Button variant="ghost" size="sm" className="flex flex-col items-center gap-0.5 h-auto py-1">
+              <MoreVertical className="h-4 w-4 sm:h-5 sm:w-5" />
+              <span className="text-[10px] sm:text-xs">More</span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align="end" className="w-40">
             <DropdownMenuItem onClick={() => navigate('/jobs')}>
               Jobs
             </DropdownMenuItem>

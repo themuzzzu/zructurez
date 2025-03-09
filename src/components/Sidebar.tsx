@@ -75,7 +75,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
         </Button>
       </div>
       
-      <div className="space-y-1 p-3">
+      <div className="space-y-1 p-2">
         {routes.map((route) => {
           const Icon = route.icon;
           const isActive = location.pathname === route.path;
@@ -94,10 +94,15 @@ export const Sidebar = ({ className }: SidebarProps) => {
             >
               <Icon className={cn(
                 "h-4 w-4 shrink-0",
-                isActive && !isHome && "text-primary"
+                isHome ? "text-white" : (isActive && !isHome ? "text-primary" : "")
               )} />
               {!isCollapsed && (
-                <span className="text-sm font-medium transition-opacity duration-200">{route.name}</span>
+                <span className={cn(
+                  "text-xs sm:text-sm font-medium transition-opacity duration-200",
+                  isHome && "text-white"
+                )}>
+                  {route.name}
+                </span>
               )}
             </Button>
           );
@@ -114,7 +119,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
         >
           <SunMoon className="h-4 w-4 shrink-0" />
           {!isCollapsed && (
-            <span className="text-sm font-medium">Toggle Theme</span>
+            <span className="text-xs sm:text-sm font-medium">Toggle Theme</span>
           )}
         </Button>
       </div>

@@ -40,7 +40,7 @@ export const Layout = ({ children }: LayoutProps) => {
         <div className="flex">
           <Sidebar className="hidden lg:block h-[calc(100vh-4rem)]" />
           <main 
-            className={`flex-1 transition-all duration-300 ${
+            className={`flex-1 transition-all duration-300 w-full pb-16 lg:pb-0 ${
               sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'
             }`}
           >
