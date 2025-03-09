@@ -177,8 +177,8 @@ export const Messages = () => {
   };
 
   return (
-    <div className="container max-w-[1400px] pt-20 pb-16">
-      <div className="flex items-center mb-4">
+    <div className="w-full h-[100vh] md:h-auto md:container max-w-full md:max-w-[1400px] pt-16 md:pt-20 pb-0 px-0 md:pb-16 md:px-4">
+      <div className="hidden md:flex items-center mb-4">
         <Button
           variant="ghost"
           size="icon"

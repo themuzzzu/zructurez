@@ -24,8 +24,8 @@ export const ChatList = ({
   );
 
   return (
-    <div className="overflow-hidden">
-      <div className="px-4 py-2">
+    <div className="flex flex-col h-full">
+      <div className="px-3 py-2 border-b">
         <SearchInput
           value={searchQuery}
           onChange={onSearchChange}
@@ -33,7 +33,7 @@ export const ChatList = ({
         />
       </div>
 
-      <div className="overflow-y-auto h-[calc(100vh-400px)]">
+      <div className="overflow-y-auto flex-1">
         {filteredChats.length > 0 ? (
           filteredChats.map((chat) => (
             <ChatListItem

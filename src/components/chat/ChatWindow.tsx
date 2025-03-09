@@ -107,7 +107,7 @@ export const ChatWindow = ({ selectedChat, onClose }: ChatWindowProps) => {
   };
 
   return (
-    <div className="flex flex-col h-full border rounded-lg overflow-hidden shadow-sm bg-background">
+    <div className="flex flex-col h-full md:col-span-8 lg:col-span-9 border rounded-none md:rounded-r-lg overflow-hidden shadow-sm bg-background">
       <ChatHeader
         chat={selectedChat}
         isMuted={isMuted}

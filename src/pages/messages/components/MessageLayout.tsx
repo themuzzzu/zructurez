@@ -7,7 +7,7 @@ interface MessageLayoutProps {
 
 export const MessageLayout = ({ children }: MessageLayoutProps) => {
   return (
-    <div className="grid grid-cols-12 gap-4 h-[calc(100vh-160px)]">
+    <div className="flex flex-col md:flex-row md:grid md:grid-cols-12 gap-0 h-[calc(100vh-140px)] overflow-hidden">
       {children}
     </div>
   );

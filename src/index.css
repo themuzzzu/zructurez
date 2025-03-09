@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -109,6 +110,21 @@
   .xs\:hidden {
     @media (min-width: 320px) {
       display: none;
+    }
+  }
+  
+  /* Message app specific utilities */
+  .message-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    height: 100%;
+  }
+  
+  @media (min-width: 768px) {
+    .message-grid {
+      grid-template-columns: 350px 1fr;
+      gap: 1rem;
     }
   }
   

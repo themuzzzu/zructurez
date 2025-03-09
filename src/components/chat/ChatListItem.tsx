@@ -22,15 +22,15 @@ export const ChatListItem = ({ chat, isSelected, onClick }: ChatListItemProps) =
 
   return (
     <button
-      className={`w-full p-4 flex items-start gap-3 transition-colors hover:bg-accent/30
-        ${isSelected ? 'bg-accent' : ''}`}
+      className={`w-full px-3 py-3 flex items-start gap-3 transition-colors border-b last:border-b-0 border-border/30 hover:bg-accent/30
+        ${isSelected ? 'bg-accent/50' : ''}`}
       onClick={onClick}
     >
       <div className="relative">
         <img
           src={chat.avatar}
           alt={chat.name}
-          className="w-12 h-12 rounded-full flex-shrink-0 object-cover"
+          className="w-10 h-10 rounded-full flex-shrink-0 object-cover"
         />
         {/* Online indicator - would be dynamic in a real app */}
         {Math.random() > 0.5 && (
@@ -39,16 +39,16 @@ export const ChatListItem = ({ chat, isSelected, onClick }: ChatListItemProps) =
       </div>
       
       <div className="flex-1 text-left min-w-0">
-        <div className="flex justify-between items-start mb-1">
+        <div className="flex justify-between items-start">
           <span className="font-semibold text-base text-foreground truncate">
             {chat.name}
           </span>
-          <span className="text-xs text-muted-foreground whitespace-nowrap">
+          <span className="text-xs text-muted-foreground whitespace-nowrap ml-1">
             {formatTimestamp(chat.time)}
           </span>
         </div>
-        <div className="flex justify-between">
-          <p className="text-sm text-muted-foreground truncate pr-2 w-[70%]">
+        <div className="flex justify-between items-center">
+          <p className="text-sm text-muted-foreground truncate pr-2 max-w-[70%]">
             {chat.lastMessage ? (
               <>
                 {chat.lastMessage.sender_id === chat.userId ? '' : 'You: '}

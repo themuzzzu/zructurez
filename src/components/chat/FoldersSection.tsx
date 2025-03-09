@@ -130,7 +130,7 @@ export const FoldersSection = ({
       </div>
       
       <Dialog open={showAddFolderDialog} onOpenChange={setShowAddFolderDialog}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md dark:bg-[#111111] dark:border-zinc-800">
           <DialogHeader>
             <DialogTitle>Create New Folder</DialogTitle>
           </DialogHeader>
