@@ -33,17 +33,19 @@ export const MobileNav = () => {
         {mobileNavItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
+          const isHome = item.label === "Home";
+          
           return (
             <Button
               key={item.path}
-              variant="ghost"
+              variant={isHome ? "home-nav" : "ghost"}
               size="sm"
               className={`flex flex-col items-center gap-1 h-auto py-1 transition-all duration-200 ${
-                isActive ? 'text-primary scale-110' : 'text-muted-foreground'
-              } ${item.label === "Home" ? 'hover:text-white' : ''}`}
+                isActive ? 'text-primary scale-110' : isHome ? '' : 'text-muted-foreground'
+              }`}
               onClick={() => navigate(item.path)}
             >
-              <Icon className={`h-5 w-5 ${item.label === "Home" ? 'group-hover:text-white' : ''}`} />
+              <Icon className="h-5 w-5" />
               <span className="text-xs">{item.label}</span>
             </Button>
           );

@@ -84,25 +84,20 @@ export const Sidebar = ({ className }: SidebarProps) => {
           return (
             <Button
               key={route.path}
-              variant={isActive ? "secondary" : "ghost"}
+              variant={isHome ? "home-nav" : isActive ? "secondary" : "ghost"}
               className={cn(
-                "w-full justify-start h-10 px-3 gap-3 hover:bg-accent/50 transition-all duration-200 group",
+                "w-full justify-start h-10 px-3 gap-3 transition-all duration-200",
                 isCollapsed && "justify-center px-0",
-                isActive && "relative before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-primary",
-                isHome && "hover:text-white"
+                isActive && !isHome && "relative before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-primary"
               )}
               onClick={() => navigate(route.path)}
             >
               <Icon className={cn(
                 "h-4 w-4 shrink-0",
-                isActive && "text-primary",
-                isHome && "group-hover:text-white"
+                isActive && !isHome && "text-primary"
               )} />
               {!isCollapsed && (
-                <span className={cn(
-                  "text-sm font-medium transition-opacity duration-200",
-                  isHome && "group-hover:text-white"
-                )}>{route.name}</span>
+                <span className="text-sm font-medium transition-opacity duration-200">{route.name}</span>
               )}
             </Button>
           );
