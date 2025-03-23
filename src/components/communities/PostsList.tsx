@@ -48,8 +48,8 @@ interface PostsListProps {
   refreshTrigger: number;
 }
 
-// Use a simpler type for raw database objects to avoid recursive references
-interface BasicPostData {
+// Define simple types to avoid recursive references
+interface DatabasePostData {
   id: string;
   user_id: string;
   content: string;
@@ -63,15 +63,9 @@ interface BasicPostData {
   category?: string;
   location?: string;
   views?: number;
-}
-
-interface BasicProfileData {
-  username: string;
-  avatar_url: string;
-}
-
-interface BasicGroupData {
-  name: string;
+  profiles?: { username: string; avatar_url: string; } | null;
+  group?: { name?: string; } | null;
+  poll?: any;
 }
 
 export const PostsList = ({ selectedGroup, refreshTrigger }: PostsListProps) => {
@@ -117,12 +111,8 @@ export const PostsList = ({ selectedGroup, refreshTrigger }: PostsListProps) => 
       const transformedPosts: Post[] = [];
       
       for (const rawData of data) {
-        // Cast to a basic post data object to avoid type issues
-        const rawPost = rawData as (BasicPostData & {
-          profiles?: BasicProfileData | null;
-          group?: BasicGroupData | null;
-          poll?: any | null;
-        });
+        // Safely cast the raw data
+        const rawPost = rawData as DatabasePostData;
 
         // Create the post object with mandatory fields
         const post: Post = {
@@ -160,12 +150,12 @@ export const PostsList = ({ selectedGroup, refreshTrigger }: PostsListProps) => 
         if (rawPost.poll) {
           const pollData = rawPost.poll;
           
-          if (pollData && pollData.id && pollData.question) {
+          if (pollData && typeof pollData === 'object' && 'id' in pollData && 'question' in pollData) {
             const pollOptions: PollOption[] = [];
             const pollVotes: PollVote[] = [];
             
             // Process options
-            if (pollData.options && Array.isArray(pollData.options)) {
+            if ('options' in pollData && Array.isArray(pollData.options)) {
               pollData.options.forEach((opt: any) => {
                 if (typeof opt === 'string') {
                   pollOptions.push({ 
@@ -182,7 +172,7 @@ export const PostsList = ({ selectedGroup, refreshTrigger }: PostsListProps) => 
             }
             
             // Process votes
-            if (pollData.votes && Array.isArray(pollData.votes)) {
+            if ('votes' in pollData && Array.isArray(pollData.votes)) {
               pollData.votes.forEach((vote: any) => {
                 if (vote && typeof vote === 'object' && 
                     'id' in vote && 'poll_id' in vote && 
