@@ -1,32 +1,42 @@
+
 import { useEffect, useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Sidebar } from "@/components/Sidebar";
 import { supabase } from "@/integrations/supabase/client";
-import { ProfileCard } from "@/components/profile/ProfileCard";
-import { ProfileTabs } from "@/components/profile/ProfileTabs";
+import { ProfileView } from "@/components/ProfileView";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 const Profile = () => {
-  const [profile, setProfile] = useState<any>(null);
-  const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-
-      setProfile(data);
+    const checkSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Session check error:', error);
+          toast.error('Authentication error. Please sign in again.');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        toast.error('An unexpected error occurred');
+      } finally {
+        setLoading(false);
+      }
     };
 
-    fetchProfile();
+    checkSession();
   }, []);
 
-  if (!profile) return <div>Loading...</div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -35,11 +45,7 @@ const Profile = () => {
         <div className="flex gap-6">
           <Sidebar className="w-64 hidden lg:block sticky top-24 h-[calc(100vh-6rem)]" />
           <main className="flex-1">
-            <ProfileCard 
-              profile={profile} 
-              onEditClick={() => setIsEditing(!isEditing)} 
-            />
-            <ProfileTabs />
+            <ProfileView />
           </main>
         </div>
       </div>

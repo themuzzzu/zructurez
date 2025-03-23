@@ -1,26 +1,40 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
+import { useProfile } from "@/hooks/useProfile";
+import { ProfileEditForm } from "@/components/profile/ProfileEditForm";
+import { ProfileDisplay } from "@/components/profile/ProfileDisplay";
+import { ProfileTabs } from "@/components/profile/ProfileTabs";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Cart } from "./cart/Cart";
-import { ProfileHeader } from "./profile/ProfileHeader";
-import { ProfileAvatar } from "./profile/ProfileAvatar";
-import { ProfileForm } from "./profile/ProfileForm";
-import { MessageSettings } from "./profile/MessageSettings";
-import { useProfile } from "@/hooks/useProfile";
+import { Loader2 } from "lucide-react";
+import type { Profile } from "@/types/profile";
 
 export const ProfileView = () => {
   const navigate = useNavigate();
-  const [isEditing, setIsEditing] = useState(false);
-  const { profile, loading, setProfile, fetchProfile, updateProfile } = useProfile();
+  const { 
+    profile, 
+    loading, 
+    isEditing, 
+    setIsEditing, 
+    updateProfile, 
+    uploadAvatar 
+  } = useProfile();
 
-  const handleSave = async () => {
-    const success = await updateProfile();
+  const handleSave = async (updatedProfile: Partial<Profile>) => {
+    const success = await updateProfile(updatedProfile);
     if (success) {
       setIsEditing(false);
       toast.success("Profile updated successfully");
+    }
+  };
+
+  const handleAvatarChange = async (file: File) => {
+    const url = await uploadAvatar(file);
+    if (url) {
+      toast.success("Profile picture updated");
     }
   };
 
@@ -33,73 +47,39 @@ export const ProfileView = () => {
     }
   };
 
-  const handleAvatarChange = async (file: File) => {
-    try {
-      const fileExt = file.name.split('.').pop();
-      const filePath = `${profile.id}-${Math.random()}.${fileExt}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file);
-
-      if (uploadError) {
-        throw uploadError;
-      }
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
-
-      setProfile({ ...profile, avatar_url: publicUrl });
-      
-      if (!isEditing) {
-        const success = await updateProfile();
-        if (success) {
-          toast.success("Profile picture updated successfully");
-        }
-      }
-    } catch (error) {
-      toast.error("Error uploading profile picture");
-      console.error("Error uploading avatar:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchProfile();
-  }, []);
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <Card>
-        <ProfileHeader 
-          isEditing={isEditing} 
-          onEditClick={() => setIsEditing(!isEditing)} 
-        />
-        <CardContent className="space-y-6">
-          <ProfileAvatar
-            avatarUrl={profile.avatar_url}
-            isEditing={isEditing}
-            onAvatarChange={handleAvatarChange}
-          />
-          <ProfileForm
-            profile={profile}
-            isEditing={isEditing}
-            loading={loading}
-            onProfileChange={(field, value) => setProfile({ ...profile, [field]: value })}
-            onSave={handleSave}
-          />
-          <MessageSettings />
+        <CardContent className="pt-6">
+          {isEditing ? (
+            <ProfileEditForm
+              profile={profile}
+              loading={loading}
+              onSave={handleSave}
+              onCancel={() => setIsEditing(false)}
+              onAvatarChange={handleAvatarChange}
+            />
+          ) : (
+            <ProfileDisplay 
+              profile={profile} 
+              onEdit={() => setIsEditing(true)} 
+            />
+          )}
         </CardContent>
       </Card>
 
-      <Card>
-        <CardContent>
-          <Cart />
-        </CardContent>
-      </Card>
+      <ProfileTabs />
 
       <Card>
-        <CardContent>
+        <CardContent className="pt-6">
           <Button variant="destructive" onClick={handleSignOut}>
             Sign Out
           </Button>

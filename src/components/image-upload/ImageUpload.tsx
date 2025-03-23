@@ -1,3 +1,5 @@
+
+import { useCallback } from "react";
 import { useImageUploadState } from "./hooks/useImageUploadState";
 import { useImageUploadHandlers } from "./hooks/useImageUploadHandlers";
 import { ImagePreview } from "./ImagePreview";
@@ -49,39 +51,35 @@ export const ImageUpload = ({
     skipAutoSave,
   });
 
-  const handleMouseDown = (e: React.MouseEvent) => {
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
     setIsDragging(true);
     setDragStart({
       x: e.clientX - position.x,
       y: e.clientY - position.y,
     });
-  };
+  }, [position, setDragStart, setIsDragging]);
 
-  const handleMouseMove = (e: React.MouseEvent) => {
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!isDragging) return;
     
     const newX = Math.max(0, Math.min(100, e.clientX - dragStart.x));
     const newY = Math.max(0, Math.min(100, e.clientY - dragStart.y));
     
-    const newPosition = { x: newX, y: newY };
-    setPosition(newPosition);
-    if (!skipAutoSave) {
-      onPositionChange?.(newPosition);
-    }
-  };
+    setPosition({ x: newX, y: newY });
+  }, [isDragging, dragStart, setPosition]);
 
-  const handleMouseUp = () => {
+  const handleMouseUp = useCallback(() => {
     setIsDragging(false);
-  };
+  }, [setIsDragging]);
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     if (pendingImage) {
       setPreviewImage(selectedImage);
       setScale(initialScale);
       setPosition(initialPosition);
       setPendingImage(null);
     }
-  };
+  }, [pendingImage, selectedImage, initialScale, initialPosition, setPendingImage, setPreviewImage, setScale, setPosition]);
 
   return (
     <div className="space-y-4">
