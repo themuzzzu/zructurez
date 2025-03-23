@@ -1,7 +1,8 @@
+
 import { Chat } from "@/types/chat";
 import { ChatMenu } from "./ChatMenu";
 import { formatDistanceToNow } from "date-fns";
-import { Phone, Video, ArrowLeft, Home } from "lucide-react";
+import { Phone, Video, ArrowLeft, Home, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -15,6 +16,7 @@ interface ChatHeaderProps {
   isSelectMode: boolean;
   onClose?: () => void;
   onBack?: () => void;
+  userPresence?: Record<string, string>;
 }
 
 export const ChatHeader = ({
@@ -26,10 +28,35 @@ export const ChatHeader = ({
   isSelectMode,
   onClose,
   onBack,
+  userPresence = {},
 }: ChatHeaderProps) => {
   const navigate = useNavigate();
   
   const getLastSeen = () => {
+    // Check if user is currently online
+    if (userPresence[chat.userId] === 'online') {
+      return 'online';
+    }
+    
+    // Check if we have a last seen timestamp for this user
+    const lastSeenTime = userPresence[chat.userId];
+    if (lastSeenTime && lastSeenTime !== 'online') {
+      try {
+        return `last seen ${formatDistanceToNow(new Date(lastSeenTime), { addSuffix: true })}`;
+      } catch (error) {
+        // Fall back to time from chat if presence data is invalid
+        try {
+          if (chat.time.includes('ago')) {
+            return chat.time;
+          }
+          return formatDistanceToNow(new Date(chat.time), { addSuffix: true });
+        } catch (error) {
+          return 'recently';
+        }
+      }
+    }
+    
+    // If no presence data, use chat time
     try {
       if (chat.time.includes('ago')) {
         return chat.time;
@@ -83,14 +110,22 @@ export const ChatHeader = ({
             onClick={handleProfileClick}
           >
             <div className="flex items-center gap-3">
-              <img
-                src={chat.avatar}
-                alt={chat.name}
-                className="w-10 h-10 rounded-full"
-              />
+              <div className="relative">
+                <img
+                  src={chat.avatar}
+                  alt={chat.name}
+                  className="w-10 h-10 rounded-full"
+                />
+                {userPresence[chat.userId] === 'online' && (
+                  <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
+                )}
+              </div>
               <div>
                 <span className="font-semibold">{chat.name}</span>
-                <p className="text-xs text-muted-foreground">last seen {getLastSeen()}</p>
+                <div className="text-xs text-muted-foreground flex items-center gap-1">
+                  {userPresence[chat.userId] === 'online' ? null : <Clock className="h-3 w-3" />}
+                  <p>{getLastSeen()}</p>
+                </div>
               </div>
             </div>
           </div>

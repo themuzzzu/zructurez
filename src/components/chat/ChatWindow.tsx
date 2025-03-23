@@ -12,9 +12,18 @@ import { supabase } from "@/integrations/supabase/client";
 interface ChatWindowProps {
   selectedChat: Chat;
   onClose: () => void;
+  onTyping?: (isTyping: boolean) => void;
+  typingUsers?: Record<string, boolean>;
+  userPresence?: Record<string, string>;
 }
 
-export const ChatWindow = ({ selectedChat, onClose }: ChatWindowProps) => {
+export const ChatWindow = ({ 
+  selectedChat, 
+  onClose, 
+  onTyping,
+  typingUsers = {},
+  userPresence = {}
+}: ChatWindowProps) => {
   const [showContactInfo, setShowContactInfo] = useState(false);
   const [showImageUpload, setShowImageUpload] = useState(false);
   const [showVideoUpload, setShowVideoUpload] = useState(false);
@@ -27,6 +36,8 @@ export const ChatWindow = ({ selectedChat, onClose }: ChatWindowProps) => {
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [message, setMessage] = useState("");
   const [forwardMessage, setForwardMessage] = useState<string | null>(null);
+  const [isTyping, setIsTyping] = useState(false);
+  const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
 
   const {
     handleSendMessage,
@@ -67,6 +78,46 @@ export const ChatWindow = ({ selectedChat, onClose }: ChatWindowProps) => {
     };
   }, []);
 
+  // Handle typing indicator
+  useEffect(() => {
+    // Clean up typing indicator when component unmounts
+    return () => {
+      if (onTyping) {
+        onTyping(false);
+      }
+      if (typingTimeout) {
+        clearTimeout(typingTimeout);
+      }
+    };
+  }, [onTyping, typingTimeout]);
+
+  const handleTyping = () => {
+    if (!isTyping && onTyping) {
+      setIsTyping(true);
+      onTyping(true);
+    }
+    
+    // Clear existing timeout
+    if (typingTimeout) {
+      clearTimeout(typingTimeout);
+    }
+    
+    // Set a new timeout to stop the typing indicator after 2 seconds
+    const timeout = setTimeout(() => {
+      setIsTyping(false);
+      if (onTyping) {
+        onTyping(false);
+      }
+    }, 2000);
+    
+    setTypingTimeout(timeout);
+  };
+
+  const handleMessageChange = (value: string) => {
+    setMessage(value);
+    handleTyping();
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim() && !forwardMessage) return;
@@ -76,6 +127,12 @@ export const ChatWindow = ({ selectedChat, onClose }: ChatWindowProps) => {
       const tempMessage = forwardMessage;
       setForwardMessage(null);
       setMessage(tempMessage);
+    }
+    
+    // Clear typing indicator
+    setIsTyping(false);
+    if (onTyping) {
+      onTyping(false);
     }
     
     await handleSendMessage();
@@ -116,11 +173,14 @@ export const ChatWindow = ({ selectedChat, onClose }: ChatWindowProps) => {
         setIsSelectMode={setIsSelectMode}
         isSelectMode={isSelectMode}
         onClose={onClose}
+        userPresence={userPresence}
       />
       <ChatMessages
         messages={selectedChat.messages}
         currentUserId={selectedChat.userId}
         onForwardMessage={handleForwardMessage}
+        typingUsers={typingUsers}
+        otherUserId={selectedChat.userId}
       />
       {forwardMessage && (
         <div className="px-3 py-2 bg-muted flex items-center justify-between text-xs sm:text-sm">
@@ -135,7 +195,7 @@ export const ChatWindow = ({ selectedChat, onClose }: ChatWindowProps) => {
       )}
       <ChatInput
         message={message}
-        onMessageChange={setMessage}
+        onMessageChange={handleMessageChange}
         onSubmit={handleSubmit}
         onAttachment={handleAttachment}
       />

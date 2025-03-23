@@ -16,11 +16,14 @@ import {
   MessageCircle,
   Trash2,
   Forward,
-  Copy
+  Copy,
+  ThumbsUp,
+  SmilePlus
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useState } from "react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface MessageBubbleProps {
   content: string;
@@ -32,6 +35,7 @@ interface MessageBubbleProps {
 
 export const MessageBubble = ({ content, timestamp, isOwn, messageId, onForward }: MessageBubbleProps) => {
   const [showActions, setShowActions] = useState(false);
+  const [reactions, setReactions] = useState<string[]>([]);
   
   const handleMarkUnread = () => {
     // Implementation for marking as unread
@@ -112,15 +116,24 @@ export const MessageBubble = ({ content, timestamp, isOwn, messageId, onForward 
     }
   };
 
+  const handleAddReaction = (emoji: string) => {
+    if (!reactions.includes(emoji)) {
+      setReactions([...reactions, emoji]);
+      toast.success(`Added reaction: ${emoji}`);
+    }
+  };
+
+  const quickReactions = ["👍", "❤️", "😂", "😮", "😢", "👏"];
+  
   return (
-    <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-4 group`}>
+    <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-4 group relative`}>
       <ContextMenu>
         <ContextMenuTrigger>
           <div
-            className={`max-w-[70%] rounded-2xl p-3 shadow-sm ${
+            className={`max-w-[70%] p-3 shadow-sm ${
               isOwn
-                ? 'bg-primary text-primary-foreground rounded-tr-sm'
-                : 'bg-muted text-foreground rounded-tl-sm'
+                ? 'bg-primary text-primary-foreground rounded-2xl rounded-tr-sm'
+                : 'bg-muted text-foreground rounded-2xl rounded-tl-sm'
             }`}
             onMouseEnter={() => setShowActions(true)}
             onMouseLeave={() => setShowActions(false)}
@@ -139,6 +152,29 @@ export const MessageBubble = ({ content, timestamp, isOwn, messageId, onForward 
             
             {showActions && (
               <div className={`absolute ${isOwn ? 'left-0 -translate-x-full' : 'right-0 translate-x-full'} top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-1`}>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button 
+                      className="rounded-full bg-muted p-1.5 hover:bg-accent text-muted-foreground"
+                    >
+                      <SmilePlus className="h-3.5 w-3.5" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-2 flex gap-1">
+                    {quickReactions.map(emoji => (
+                      <button
+                        key={emoji}
+                        className="hover:bg-accent p-1 rounded-full"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAddReaction(emoji);
+                        }}
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </PopoverContent>
+                </Popover>
                 <button 
                   className="rounded-full bg-muted p-1.5 hover:bg-accent text-muted-foreground"
                   onClick={(e) => {
@@ -208,6 +244,14 @@ export const MessageBubble = ({ content, timestamp, isOwn, messageId, onForward 
           </ContextMenuItem>
         </ContextMenuContent>
       </ContextMenu>
+      
+      {reactions.length > 0 && (
+        <div className={`absolute ${isOwn ? 'right-0 -bottom-3' : 'left-0 -bottom-3'} bg-background border rounded-full px-1 py-0.5 shadow-sm flex gap-0.5`}>
+          {reactions.map((emoji, index) => (
+            <span key={index} className="text-xs">{emoji}</span>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

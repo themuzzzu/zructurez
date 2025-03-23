@@ -12,9 +12,18 @@ interface ChatMessagesProps {
   currentUserId: string;
   isGroup?: boolean;
   onForwardMessage?: (content: string) => void;
+  typingUsers?: Record<string, boolean>;
+  otherUserId?: string;
 }
 
-export const ChatMessages = ({ messages, currentUserId, isGroup, onForwardMessage }: ChatMessagesProps) => {
+export const ChatMessages = ({ 
+  messages, 
+  currentUserId, 
+  isGroup, 
+  onForwardMessage,
+  typingUsers = {},
+  otherUserId
+}: ChatMessagesProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -25,7 +34,7 @@ export const ChatMessages = ({ messages, currentUserId, isGroup, onForwardMessag
     };
 
     scrollToBottom();
-  }, [messages]);
+  }, [messages, typingUsers]);
 
   useEffect(() => {
     const channel = supabase
@@ -72,6 +81,9 @@ export const ChatMessages = ({ messages, currentUserId, isGroup, onForwardMessag
     groupedMessages[date].push(message);
   });
 
+  // Check if other user is typing
+  const isOtherUserTyping = otherUserId && typingUsers[otherUserId];
+
   return (
     <ScrollArea ref={scrollRef} className="h-[calc(100vh-15rem)] px-4">
       <div className="py-4 space-y-6">
@@ -96,10 +108,20 @@ export const ChatMessages = ({ messages, currentUserId, isGroup, onForwardMessag
           </div>
         ))}
         
-        {messages.length === 0 && (
+        {messages.length === 0 && !isOtherUserTyping && (
           <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground pt-20">
             <p className="text-sm mb-2">No messages yet</p>
             <p className="text-xs">Start the conversation by sending a message</p>
+          </div>
+        )}
+        
+        {isOtherUserTyping && (
+          <div className="flex justify-start mb-4">
+            <div className="bg-muted rounded-2xl rounded-tl-sm p-3 flex items-center gap-1 text-muted-foreground">
+              <span className="typing-dot animate-pulse">•</span>
+              <span className="typing-dot animate-pulse delay-150">•</span>
+              <span className="typing-dot animate-pulse delay-300">•</span>
+            </div>
           </div>
         )}
       </div>

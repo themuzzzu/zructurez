@@ -24,6 +24,8 @@ export const Messages = () => {
   const [activeTab, setActiveTab] = useState("chats");
   const [selectedFolder, setSelectedFolder] = useState("all");
   const [isPremiumUser, setIsPremiumUser] = useState(false);
+  const [userPresence, setUserPresence] = useState<Record<string, string>>({});
+  const [typingUsers, setTypingUsers] = useState<Record<string, boolean>>({});
   
   // Check premium status
   useEffect(() => {
@@ -36,6 +38,78 @@ export const Messages = () => {
     };
     
     checkPremiumStatus();
+  }, []);
+
+  // Update user's last seen status
+  useEffect(() => {
+    const updateUserPresence = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { error } = await supabase
+        .from('profiles')
+        .update({ last_seen_at: new Date().toISOString() })
+        .eq('id', user.id);
+
+      if (error) {
+        console.error('Error updating user presence:', error);
+      }
+    };
+
+    // Update presence immediately and every minute
+    updateUserPresence();
+    const interval = setInterval(updateUserPresence, 60000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Subscribe to user presence and typing indicators
+  useEffect(() => {
+    const channel = supabase.channel('user_presence')
+      .on('presence', { event: 'sync' }, () => {
+        const state = channel.presenceState();
+        const newUserPresence: Record<string, string> = {};
+        
+        Object.entries(state).forEach(([userId, userStates]) => {
+          if (Array.isArray(userStates) && userStates.length > 0) {
+            const userState = userStates[0] as any;
+            newUserPresence[userId] = userState.last_seen_at || 'online';
+            
+            if (userState.typing_in) {
+              setTypingUsers(prev => ({
+                ...prev,
+                [userId]: true
+              }));
+            } else {
+              setTypingUsers(prev => {
+                const newState = { ...prev };
+                delete newState[userId];
+                return newState;
+              });
+            }
+          }
+        });
+        
+        setUserPresence(newUserPresence);
+      })
+      .subscribe();
+
+    // Update our presence status
+    const setupPresence = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await channel.track({
+          user_id: user.id,
+          last_seen_at: new Date().toISOString()
+        });
+      }
+    };
+    
+    setupPresence();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchChats = async () => {
@@ -155,6 +229,29 @@ export const Messages = () => {
     setShowNewChat(true);
   };
 
+  // Handle typing indicator
+  const setUserTyping = async (isTyping: boolean) => {
+    if (!selectedChat) return;
+    
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    
+    const channel = supabase.channel('user_presence');
+    
+    if (isTyping) {
+      await channel.track({
+        user_id: user.id,
+        last_seen_at: new Date().toISOString(),
+        typing_in: selectedChat.userId
+      });
+    } else {
+      await channel.track({
+        user_id: user.id,
+        last_seen_at: new Date().toISOString()
+      });
+    }
+  };
+
   // Handle successfully created chat
   const handleChatCreated = async (userId: string) => {
     const newChat: Chat = {
@@ -206,12 +303,16 @@ export const Messages = () => {
           onFolderSelect={handleFolderSelect}
           onSearchChange={setSearchQuery}
           onNewChat={handleNewChat}
+          userPresence={userPresence}
         />
         
         {selectedChat ? (
           <ChatWindow
             selectedChat={selectedChat}
             onClose={() => setSelectedChat(null)}
+            onTyping={setUserTyping}
+            typingUsers={typingUsers}
+            userPresence={userPresence}
           />
         ) : (
           <EmptyState onNewChat={handleNewChat} />
