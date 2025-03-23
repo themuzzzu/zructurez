@@ -86,15 +86,26 @@ export const PostsList = ({ selectedGroup, refreshTrigger }: PostsListProps) => 
     const transformedPosts: Post[] = (data || []).map(post => ({
       id: post.id,
       user_id: post.user_id,
-      group_id: post.group_id,
+      group_id: post.group_id || post.business_id, // Handle either field name
       content: post.content,
       created_at: post.created_at,
       image_url: post.image_url,
       poll_id: post.poll_id,
       gif_url: post.gif_url,
       profile: post.profiles,
-      group: post.group,
-      poll: post.poll
+      // Ensure group has the required structure
+      group: post.group && typeof post.group === 'object' && 'name' in post.group 
+        ? post.group 
+        : { name: 'Unknown Group' },
+      // Ensure poll has the required structure if it exists
+      poll: post.poll && typeof post.poll === 'object'
+        ? {
+            id: post.poll.id,
+            question: post.poll.question,
+            options: Array.isArray(post.poll.options) ? post.poll.options : [],
+            votes: Array.isArray(post.poll.votes) ? post.poll.votes : []
+          }
+        : undefined
     }));
 
     setPosts(transformedPosts);
