@@ -86,7 +86,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
               variant="ghost"
               className={cn(
                 "w-10 h-10 p-0 justify-center rounded-full",
-                isActive ? "bg-zinc-800" : "bg-transparent"
+                isActive ? "bg-zinc-800" : "bg-transparent hover:bg-zinc-800/70"
               )}
               onClick={() => navigate(route.path)}
             >
@@ -108,7 +108,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
         {isCollapsed ? (
           <Button
             variant="ghost"
-            className="w-10 h-10 p-0 justify-center rounded-full mt-4 bg-transparent"
+            className="w-10 h-10 p-0 justify-center rounded-full mt-4 bg-transparent hover:bg-zinc-800/70"
             onClick={toggleTheme}
           >
             <SunMoon className="h-5 w-5 text-muted-foreground" />

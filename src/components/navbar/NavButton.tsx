@@ -20,12 +20,17 @@ export const NavButton = ({
 }: NavButtonProps) => {
   return (
     <Button
-      variant={isActive ? "dark-nav-active" : "dark-nav"}
+      variant="dark-nav"
       onClick={onClick}
-      className={cn("justify-start text-base", className)}
+      className={cn("justify-start text-base group", className)}
     >
-      <Icon className={cn("h-5 w-5", isActive ? "text-white" : "text-muted-foreground")} />
-      <span className={cn(isActive ? "text-white" : "text-muted-foreground")}>{label}</span>
+      <div className={cn(
+        "flex items-center justify-center w-10 h-10 rounded-full transition-colors",
+        isActive ? "bg-zinc-800" : "group-hover:bg-zinc-800/70"
+      )}>
+        <Icon className={cn("h-5 w-5", isActive ? "text-white" : "text-muted-foreground group-hover:text-gray-300")} />
+      </div>
+      <span className={cn("ml-3", isActive ? "text-white" : "text-muted-foreground group-hover:text-gray-300")}>{label}</span>
     </Button>
   );
 };
