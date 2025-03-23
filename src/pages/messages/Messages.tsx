@@ -9,6 +9,7 @@ import { ChatSidebar } from "./components/ChatSidebar";
 import { EmptyState } from "./components/EmptyState";
 import { ChatWindow } from "@/components/chat/ChatWindow";
 import { ChatDialogs } from "@/components/chat/ChatDialogs";
+import { updateUserPresence } from "@/integrations/supabase/userPresence";
 import type { Chat } from "@/types/chat";
 import type { Group } from "@/types/group";
 
@@ -26,12 +27,10 @@ export const Messages = () => {
   const [userPresence, setUserPresence] = useState<Record<string, string>>({});
   const [typingUsers, setTypingUsers] = useState<Record<string, boolean>>({});
   
-  // Check premium status
   useEffect(() => {
     const checkPremiumStatus = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        // For demo, set premium status randomly
         setIsPremiumUser(Math.random() > 0.5);
       }
     };
@@ -39,31 +38,20 @@ export const Messages = () => {
     checkPremiumStatus();
   }, []);
 
-  // Update user's last seen status
   useEffect(() => {
-    const updateUserPresence = async () => {
+    const updatePresence = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Create and update the user's presence
-      const { error } = await supabase.rpc('update_user_presence', {
-        user_id: user.id,
-        last_seen_time: new Date().toISOString()
-      });
-
-      if (error) {
-        console.error('Error updating user presence:', error);
-      }
+      await updateUserPresence(user.id);
     };
 
-    // Update presence immediately and every minute
-    updateUserPresence();
-    const interval = setInterval(updateUserPresence, 60000);
+    updatePresence();
+    const interval = setInterval(updatePresence, 60000);
 
     return () => clearInterval(interval);
   }, []);
 
-  // Subscribe to user presence and typing indicators
   useEffect(() => {
     const channel = supabase.channel('user_presence')
       .on('presence', { event: 'sync' }, () => {
@@ -94,7 +82,6 @@ export const Messages = () => {
       })
       .subscribe();
 
-    // Update our presence status
     const setupPresence = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
@@ -127,7 +114,6 @@ export const Messages = () => {
       return;
     }
 
-    // Process messages into chat objects
     const chatMap = new Map<string, any[]>();
     messages.forEach((message: any) => {
       const otherUserId = message.sender_id === user.id ? message.receiver_id : message.sender_id;
@@ -159,7 +145,6 @@ export const Messages = () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    // Get user's group memberships
     const { data: userGroups, error: memberError } = await supabase
       .from('group_members')
       .select('group_id')
@@ -177,7 +162,6 @@ export const Messages = () => {
 
     const groupIds = userGroups.map(ug => ug.group_id);
 
-    // Fetch group details
     const { data: groupsData, error: groupsError } = await supabase
       .from('groups')
       .select(`
@@ -209,27 +193,22 @@ export const Messages = () => {
 
     setGroups(formattedGroups);
   };
-  
-  // Fetch data periodically
+
   useEffect(() => {
     fetchChats();
     fetchGroups();
     const interval = setInterval(fetchChats, 5000);
     return () => clearInterval(interval);
   }, []);
-  
-  // Handle folder selection
+
   const handleFolderSelect = (folderId: string) => {
     setSelectedFolder(folderId);
-    // Filter chats based on folder in a real app
   };
-  
-  // Handle new chat creation
+
   const handleNewChat = () => {
     setShowNewChat(true);
   };
 
-  // Handle typing indicator
   const setUserTyping = async (isTyping: boolean) => {
     if (!selectedChat) return;
     
@@ -252,7 +231,6 @@ export const Messages = () => {
     }
   };
 
-  // Handle successfully created chat
   const handleChatCreated = async (userId: string) => {
     const newChat: Chat = {
       id: userId,

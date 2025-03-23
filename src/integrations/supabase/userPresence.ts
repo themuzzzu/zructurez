@@ -4,7 +4,7 @@ import { supabase } from './client';
 // Function to update a user's presence
 export const updateUserPresence = async (userId: string) => {
   try {
-    const { error } = await supabase.rpc('update_user_presence', {
+    const { data, error } = await supabase.rpc('update_user_presence', {
       user_id: userId,
       last_seen_time: new Date().toISOString()
     });

@@ -1768,6 +1768,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_presence: {
+        Row: {
+          is_online: boolean | null
+          last_seen_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          is_online?: boolean | null
+          last_seen_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          is_online?: boolean | null
+          last_seen_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       wishlists: {
         Row: {
           created_at: string
@@ -1829,6 +1850,12 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_user_presence: {
+        Args: {
+          user_id: string
+        }
+        Returns: Json
+      }
       increment_ad_clicks: {
         Args: {
           ad_id: string
@@ -1859,6 +1886,13 @@ export type Database = {
           record_id: string
         }
         Returns: undefined
+      }
+      update_user_presence: {
+        Args: {
+          user_id: string
+          last_seen_time: string
+        }
+        Returns: boolean
       }
     }
     Enums: {
