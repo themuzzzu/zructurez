@@ -137,7 +137,6 @@ const Auth = () => {
                   color: 'white',
                 }
               },
-              // Using the className approach instead of the invalid button_disabled style property
               className: {
                 button: authLoading ? 'opacity-50' : ''
               }
@@ -165,10 +164,6 @@ const Auth = () => {
             providers={[]}
             redirectTo={`${window.location.origin}/auth/callback`}
             onlyThirdPartyProviders={false}
-            onAuthError={(error) => {
-              setAuthLoading(false);
-              handleAuthError(error);
-            }}
           />
         </div>
       </div>
