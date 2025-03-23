@@ -13,6 +13,7 @@ export const useProfile = () => {
     avatar_url: null,
     created_at: "",
     bio: null,
+    location: null,
   });
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
