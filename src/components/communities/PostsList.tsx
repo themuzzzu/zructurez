@@ -92,9 +92,11 @@ export const PostsList = ({ selectedGroup, refreshTrigger }: PostsListProps) => 
       const transformedPosts: Post[] = [];
       
       for (const rawPost of data) {
+        // Use type assertion to handle the any type from Supabase
         const post: Post = {
           id: rawPost.id,
           user_id: rawPost.user_id,
+          // Use the appropriate ID field (either group_id or business_id)
           group_id: rawPost.group_id || rawPost.business_id || '',
           content: rawPost.content,
           created_at: rawPost.created_at,
@@ -108,16 +110,16 @@ export const PostsList = ({ selectedGroup, refreshTrigger }: PostsListProps) => 
           group: { name: 'Unknown Group' }
         };
 
-        // Handle group data
+        // Handle group data with null checks
         if (rawPost.group && typeof rawPost.group === 'object' && 'name' in rawPost.group) {
           post.group = { name: String(rawPost.group.name) };
         }
 
-        // Handle poll data
+        // Handle poll data with null checks
         if (rawPost.poll && typeof rawPost.poll === 'object') {
           const pollOptions: PollOption[] = [];
           
-          if (Array.isArray(rawPost.poll.options)) {
+          if (rawPost.poll.options && Array.isArray(rawPost.poll.options)) {
             for (const opt of rawPost.poll.options) {
               if (typeof opt === 'string') {
                 pollOptions.push({ id: crypto.randomUUID(), text: opt });
@@ -127,24 +129,29 @@ export const PostsList = ({ selectedGroup, refreshTrigger }: PostsListProps) => 
                   text: String(opt.text)
                 });
               } else {
-                pollOptions.push({ id: crypto.randomUUID(), text: String(opt || '') });
+                // Handle potential null or undefined options
+                const optText = opt ? String(opt) : '';
+                pollOptions.push({ id: crypto.randomUUID(), text: optText });
               }
             }
           }
 
-          post.poll = {
-            id: String(rawPost.poll.id),
-            question: String(rawPost.poll.question),
-            options: pollOptions,
-            votes: Array.isArray(rawPost.poll.votes) 
-              ? rawPost.poll.votes.map(vote => ({
-                  id: String(vote.id),
-                  poll_id: String(vote.poll_id),
-                  user_id: String(vote.user_id),
-                  option_index: Number(vote.option_index)
-                }))
-              : []
-          };
+          // Only add poll if we have a valid poll structure
+          if (rawPost.poll.id && rawPost.poll.question) {
+            post.poll = {
+              id: String(rawPost.poll.id),
+              question: String(rawPost.poll.question),
+              options: pollOptions,
+              votes: Array.isArray(rawPost.poll.votes) 
+                ? rawPost.poll.votes.map(vote => ({
+                    id: String(vote.id),
+                    poll_id: String(vote.poll_id),
+                    user_id: String(vote.user_id),
+                    option_index: Number(vote.option_index)
+                  }))
+                : []
+            };
+          }
         }
 
         transformedPosts.push(post);
