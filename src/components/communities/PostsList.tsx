@@ -43,8 +43,7 @@ export interface Post {
   poll?: Poll;
 }
 
-// Define a type for the raw post data we get from Supabase
-// Using a more generic type to avoid strict type checking on the response
+// Define a simplified type for the raw post data from Supabase
 interface RawPostData {
   id: string;
   user_id: string;
@@ -59,7 +58,7 @@ interface RawPostData {
     username: string;
     avatar_url: string;
   } | null;
-  group?: any; // Use a more flexible type for now
+  group?: Record<string, any>; // Using a more flexible type
   poll?: {
     id: string;
     question: string;
@@ -107,12 +106,12 @@ export const PostsList = ({ selectedGroup, refreshTrigger }: PostsListProps) => 
       return;
     }
 
-    // Transform the data to match our Post interface
-    // First cast to unknown to bypass type checking, then to our array type
-    const rawData = data as unknown as RawPostData[];
+    // Safely type cast the data - first to unknown, then to our expected type
+    const rawPosts = (data || []) as unknown as RawPostData[];
     
-    const transformedPosts: Post[] = (rawData || []).map(post => {
-      // Create a properly typed Post object
+    // Transform the data to match our Post interface
+    const transformedPosts: Post[] = rawPosts.map(post => {
+      // Create a base post object with required fields
       const transformedPost: Post = {
         id: post.id,
         user_id: post.user_id,
@@ -123,34 +122,37 @@ export const PostsList = ({ selectedGroup, refreshTrigger }: PostsListProps) => 
         poll_id: post.poll_id,
         gif_url: post.gif_url,
         profile: post.profiles || undefined,
+        group: { name: 'Unknown Group' } // Default fallback
       };
 
-      // Handle group data, ensuring it has the expected structure
+      // Handle group data if it exists
       if (post.group && typeof post.group === 'object') {
-        // If it's an object with a name property, use it
-        if ('name' in post.group) {
+        if ('name' in post.group && typeof post.group.name === 'string') {
           transformedPost.group = { name: post.group.name };
-        } else {
-          // Default fallback
-          transformedPost.group = { name: 'Unknown Group' };
         }
-      } else {
-        transformedPost.group = { name: 'Unknown Group' };
       }
 
-      // Handle poll data, ensuring it has the expected structure
+      // Handle poll data if it exists
       if (post.poll && typeof post.poll === 'object') {
+        const pollOptions = Array.isArray(post.poll.options) 
+          ? post.poll.options.map((opt: any) => {
+              if (typeof opt === 'string') {
+                return { id: crypto.randomUUID(), text: opt };
+              } else if (opt && typeof opt === 'object' && 'text' in opt) {
+                return { 
+                  id: ('id' in opt && opt.id) ? opt.id : crypto.randomUUID(), 
+                  text: opt.text 
+                };
+              } else {
+                return { id: crypto.randomUUID(), text: String(opt || '') };
+              }
+            })
+          : [];
+
         transformedPost.poll = {
           id: post.poll.id,
           question: post.poll.question,
-          options: Array.isArray(post.poll.options) 
-            ? post.poll.options.map((opt: any) => {
-                // Convert each option to the expected structure
-                return typeof opt === 'string' 
-                  ? { id: crypto.randomUUID(), text: opt }
-                  : (opt.text ? { id: opt.id || crypto.randomUUID(), text: opt.text } : { id: crypto.randomUUID(), text: String(opt) });
-              })
-            : [],
+          options: pollOptions,
           votes: Array.isArray(post.poll.votes) ? post.poll.votes : []
         };
       }
