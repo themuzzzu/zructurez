@@ -19,6 +19,7 @@ import {
   SunMoon,
 } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
+import { NavButton } from "./navbar/NavButton";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -75,53 +76,48 @@ export const Sidebar = ({ className }: SidebarProps) => {
         </Button>
       </div>
       
-      <div className="space-y-1 p-2">
+      <div className="space-y-2 p-2">
         {routes.map((route) => {
-          const Icon = route.icon;
           const isActive = location.pathname === route.path;
-          const isHome = route.name === "Home";
 
-          return (
+          return isCollapsed ? (
             <Button
               key={route.path}
-              variant={isHome ? "home-nav" : isActive ? "secondary" : "ghost"}
-              className={cn(
-                "w-full justify-start h-10 px-3 gap-3 transition-all duration-200",
-                isCollapsed && "justify-center px-0",
-                isActive && !isHome && "relative before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-primary"
-              )}
+              variant={isActive ? "dark-nav-active" : "dark-nav"}
+              className="w-10 h-10 p-0 justify-center rounded-full"
               onClick={() => navigate(route.path)}
             >
-              <Icon className={cn(
-                "h-4 w-4 shrink-0",
-                isHome ? "text-white" : (isActive && !isHome ? "text-primary" : "")
-              )} />
-              {!isCollapsed && (
-                <span className={cn(
-                  "text-xs sm:text-sm font-medium transition-opacity duration-200",
-                  isHome && "text-white"
-                )}>
-                  {route.name}
-                </span>
-              )}
+              <route.icon className="h-5 w-5" />
             </Button>
+          ) : (
+            <NavButton
+              key={route.path}
+              icon={route.icon}
+              label={route.name}
+              isActive={isActive}
+              onClick={() => navigate(route.path)}
+              className="w-full"
+            />
           );
         })}
         
         {/* Theme toggle */}
-        <Button
-          variant="ghost"
-          className={cn(
-            "w-full justify-start h-10 px-3 gap-3 hover:bg-accent/50 mt-4 transition-all duration-200",
-            isCollapsed && "justify-center px-0"
-          )}
-          onClick={toggleTheme}
-        >
-          <SunMoon className="h-4 w-4 shrink-0" />
-          {!isCollapsed && (
-            <span className="text-xs sm:text-sm font-medium">Toggle Theme</span>
-          )}
-        </Button>
+        {isCollapsed ? (
+          <Button
+            variant="dark-nav"
+            className="w-10 h-10 p-0 justify-center rounded-full mt-4"
+            onClick={toggleTheme}
+          >
+            <SunMoon className="h-5 w-5" />
+          </Button>
+        ) : (
+          <NavButton
+            icon={SunMoon}
+            label="Toggle Theme"
+            onClick={toggleTheme}
+            className="mt-4"
+          />
+        )}
       </div>
     </div>
   );

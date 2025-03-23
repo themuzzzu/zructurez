@@ -17,7 +17,7 @@ export const EmptyState = ({ onNewChat }: EmptyStateProps) => {
         <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">
           Select a conversation or start a new chat to begin messaging
         </p>
-        <Button onClick={onNewChat} className="gap-2">
+        <Button onClick={onNewChat} variant="dark-nav" className="gap-2 mx-auto">
           <Plus className="h-4 w-4" />
           New Chat
         </Button>

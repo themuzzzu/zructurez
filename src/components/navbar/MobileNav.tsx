@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useTheme } from "../ThemeProvider";
+import { NavButton } from "./NavButton";
 
 export const MobileNav = () => {
   const location = useLocation();
@@ -33,44 +34,47 @@ export const MobileNav = () => {
         {mobileNavItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
-          const isHome = item.label === "Home";
           
           return (
             <Button
               key={item.path}
-              variant={isHome ? "home-nav" : "ghost"}
+              variant={isActive ? "dark-nav-active" : "dark-nav"}
               size="sm"
-              className={`flex flex-col items-center gap-0.5 h-auto py-1 transition-all duration-200 ${
-                isActive ? 'text-primary scale-105' : isHome ? 'text-white' : 'text-muted-foreground'
+              className={`flex flex-col items-center gap-0.5 h-auto py-1 px-2 transition-all duration-200 rounded-lg ${
+                isActive ? 'text-white scale-105' : 'text-muted-foreground'
               }`}
               onClick={() => navigate(item.path)}
             >
-              <Icon className={`h-4 w-4 ${isHome ? 'text-white' : ''}`} />
+              <Icon className="h-4 w-4" />
               <span className="text-[10px]">{item.label}</span>
             </Button>
           );
         })}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="flex flex-col items-center gap-0.5 h-auto py-1">
+            <Button 
+              variant="dark-nav" 
+              size="sm" 
+              className="flex flex-col items-center gap-0.5 h-auto py-1 px-2 rounded-lg"
+            >
               <MoreVertical className="h-4 w-4" />
               <span className="text-[10px]">More</span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-40">
-            <DropdownMenuItem onClick={() => navigate('/jobs')}>
+          <DropdownMenuContent align="end" className="w-40 bg-zinc-900 text-white border-zinc-700">
+            <DropdownMenuItem onClick={() => navigate('/jobs')} className="hover:bg-zinc-800">
               Jobs
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate('/communities')}>
+            <DropdownMenuItem onClick={() => navigate('/communities')} className="hover:bg-zinc-800">
               Communities
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate('/events')}>
+            <DropdownMenuItem onClick={() => navigate('/events')} className="hover:bg-zinc-800">
               Events
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate('/maps')}>
+            <DropdownMenuItem onClick={() => navigate('/maps')} className="hover:bg-zinc-800">
               Maps
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={toggleTheme}>
+            <DropdownMenuItem onClick={toggleTheme} className="hover:bg-zinc-800">
               <SunMoon className="mr-2 h-4 w-4" />
               Toggle Theme
             </DropdownMenuItem>
