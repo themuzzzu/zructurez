@@ -92,64 +92,92 @@ export const PostsList = ({ selectedGroup, refreshTrigger }: PostsListProps) => 
       const transformedPosts: Post[] = [];
       
       for (const rawPost of data) {
-        // Use type assertion to handle the any type from Supabase
+        // Create the post object with type safety
         const post: Post = {
           id: rawPost.id,
           user_id: rawPost.user_id,
-          // Use the appropriate ID field (either group_id or business_id)
-          group_id: rawPost.group_id || rawPost.business_id || '',
+          // Handle various ID fields with explicit type checking
+          group_id: typeof rawPost.group_id === 'string' ? rawPost.group_id :
+                  typeof rawPost.business_id === 'string' ? rawPost.business_id : '',
           content: rawPost.content,
           created_at: rawPost.created_at,
-          image_url: rawPost.image_url || null,
-          poll_id: rawPost.poll_id || null,
-          gif_url: rawPost.gif_url || null,
-          profile: rawPost.profiles ? {
-            username: rawPost.profiles.username,
-            avatar_url: rawPost.profiles.avatar_url
+          // Handle optional fields
+          image_url: typeof rawPost.image_url === 'string' ? rawPost.image_url : null,
+          poll_id: typeof rawPost.poll_id === 'string' ? rawPost.poll_id : null,
+          gif_url: typeof rawPost.gif_url === 'string' ? rawPost.gif_url : null,
+          // Set default profile if it doesn't exist
+          profile: rawPost.profiles && typeof rawPost.profiles === 'object' ? {
+            username: String(rawPost.profiles.username || ''),
+            avatar_url: String(rawPost.profiles.avatar_url || '')
           } : undefined,
+          // Set default group
           group: { name: 'Unknown Group' }
         };
 
-        // Handle group data with null checks
-        if (rawPost.group && typeof rawPost.group === 'object' && 'name' in rawPost.group) {
+        // Handle group data with null checks and type guarding
+        if (rawPost.group && 
+            typeof rawPost.group === 'object' && 
+            rawPost.group !== null && 
+            'name' in rawPost.group && 
+            rawPost.group.name) {
           post.group = { name: String(rawPost.group.name) };
         }
 
-        // Handle poll data with null checks
-        if (rawPost.poll && typeof rawPost.poll === 'object') {
-          const pollOptions: PollOption[] = [];
+        // Handle poll data with comprehensive null checks and type guarding
+        if (rawPost.poll && 
+            typeof rawPost.poll === 'object' && 
+            rawPost.poll !== null) {
+          // Only process poll if it has valid structure
+          const pollObj = rawPost.poll;
           
-          if (rawPost.poll.options && Array.isArray(rawPost.poll.options)) {
-            for (const opt of rawPost.poll.options) {
-              if (typeof opt === 'string') {
-                pollOptions.push({ id: crypto.randomUUID(), text: opt });
-              } else if (opt && typeof opt === 'object' && 'text' in opt) {
-                pollOptions.push({ 
-                  id: ('id' in opt && opt.id) ? String(opt.id) : crypto.randomUUID(), 
-                  text: String(opt.text)
-                });
-              } else {
-                // Handle potential null or undefined options
-                const optText = opt ? String(opt) : '';
-                pollOptions.push({ id: crypto.randomUUID(), text: optText });
+          if (pollObj.id && pollObj.question) {
+            const pollOptions: PollOption[] = [];
+            
+            // Process options safely if they exist and are an array
+            if (pollObj.options && Array.isArray(pollObj.options)) {
+              for (const opt of pollObj.options) {
+                if (typeof opt === 'string') {
+                  // Handle string options
+                  pollOptions.push({ id: crypto.randomUUID(), text: opt });
+                } else if (opt && typeof opt === 'object' && 'text' in opt) {
+                  // Handle object options with text property
+                  pollOptions.push({ 
+                    id: ('id' in opt && opt.id) ? String(opt.id) : crypto.randomUUID(), 
+                    text: String(opt.text)
+                  });
+                } else if (opt) {
+                  // Handle any other non-null value by converting to string
+                  pollOptions.push({ id: crypto.randomUUID(), text: String(opt) });
+                } else {
+                  // Handle null or undefined
+                  pollOptions.push({ id: crypto.randomUUID(), text: '' });
+                }
               }
             }
-          }
 
-          // Only add poll if we have a valid poll structure
-          if (rawPost.poll.id && rawPost.poll.question) {
-            post.poll = {
-              id: String(rawPost.poll.id),
-              question: String(rawPost.poll.question),
-              options: pollOptions,
-              votes: Array.isArray(rawPost.poll.votes) 
-                ? rawPost.poll.votes.map(vote => ({
+            // Process votes if they exist and are an array
+            const pollVotes: PollVote[] = [];
+            if (pollObj.votes && Array.isArray(pollObj.votes)) {
+              for (const vote of pollObj.votes) {
+                if (vote && typeof vote === 'object' && 
+                    'id' in vote && 'poll_id' in vote && 
+                    'user_id' in vote && 'option_index' in vote) {
+                  pollVotes.push({
                     id: String(vote.id),
                     poll_id: String(vote.poll_id),
                     user_id: String(vote.user_id),
                     option_index: Number(vote.option_index)
-                  }))
-                : []
+                  });
+                }
+              }
+            }
+
+            // Create the poll object
+            post.poll = {
+              id: String(pollObj.id),
+              question: String(pollObj.question),
+              options: pollOptions,
+              votes: pollVotes
             };
           }
         }
