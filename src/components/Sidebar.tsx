@@ -56,7 +56,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
 
   return (
     <div className={cn(
-      "h-screen border-r bg-background overflow-y-auto transition-all duration-300 fixed left-0 top-0 z-30",
+      "h-screen border-r border-zinc-800 bg-black overflow-y-auto transition-all duration-300 fixed left-0 top-0 z-30",
       isCollapsed ? "w-16" : "w-64",
       className
     )}>
@@ -65,13 +65,13 @@ export const Sidebar = ({ className }: SidebarProps) => {
           variant="ghost"
           size="icon"
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="hover:bg-accent/50 transition-all duration-200 hover:rotate-180"
+          className="hover:bg-zinc-800 transition-all duration-200"
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {isCollapsed ? (
-            <PanelLeft className="h-4 w-4" />
+            <PanelLeft className="h-4 w-4 text-muted-foreground" />
           ) : (
-            <PanelLeftClose className="h-4 w-4" />
+            <PanelLeftClose className="h-4 w-4 text-muted-foreground" />
           )}
         </Button>
       </div>
@@ -83,11 +83,14 @@ export const Sidebar = ({ className }: SidebarProps) => {
           return isCollapsed ? (
             <Button
               key={route.path}
-              variant={isActive ? "dark-nav-active" : "dark-nav"}
-              className="w-10 h-10 p-0 justify-center rounded-full"
+              variant="ghost"
+              className={cn(
+                "w-10 h-10 p-0 justify-center rounded-full",
+                isActive ? "bg-zinc-800" : "bg-transparent"
+              )}
               onClick={() => navigate(route.path)}
             >
-              <route.icon className="h-5 w-5" />
+              <route.icon className={cn("h-5 w-5", isActive ? "text-white" : "text-muted-foreground")} />
             </Button>
           ) : (
             <NavButton
@@ -104,11 +107,11 @@ export const Sidebar = ({ className }: SidebarProps) => {
         {/* Theme toggle */}
         {isCollapsed ? (
           <Button
-            variant="dark-nav"
-            className="w-10 h-10 p-0 justify-center rounded-full mt-4"
+            variant="ghost"
+            className="w-10 h-10 p-0 justify-center rounded-full mt-4 bg-transparent"
             onClick={toggleTheme}
           >
-            <SunMoon className="h-5 w-5" />
+            <SunMoon className="h-5 w-5 text-muted-foreground" />
           </Button>
         ) : (
           <NavButton

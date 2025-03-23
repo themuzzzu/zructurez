@@ -24,8 +24,8 @@ export const NavButton = ({
       onClick={onClick}
       className={cn("justify-start text-base", className)}
     >
-      <Icon className="h-5 w-5" />
-      <span>{label}</span>
+      <Icon className={cn("h-5 w-5", isActive ? "text-white" : "text-muted-foreground")} />
+      <span className={cn(isActive ? "text-white" : "text-muted-foreground")}>{label}</span>
     </Button>
   );
 };

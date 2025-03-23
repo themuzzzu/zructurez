@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useTheme } from "../ThemeProvider";
-import { NavButton } from "./NavButton";
+import { cn } from "@/lib/utils";
 
 export const MobileNav = () => {
   const location = useLocation();
@@ -29,7 +29,7 @@ export const MobileNav = () => {
   };
 
   return (
-    <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-background/90 border-t py-1.5 sm:py-2 px-1 sm:px-2 z-50 animate-slide-up backdrop-blur-sm">
+    <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-black/95 border-t border-zinc-800 py-3 px-1 sm:px-2 z-50 animate-slide-up backdrop-blur-sm">
       <div className="flex justify-between items-center max-w-md mx-auto">
         {mobileNavItems.map((item) => {
           const Icon = item.icon;
@@ -38,27 +38,28 @@ export const MobileNav = () => {
           return (
             <Button
               key={item.path}
-              variant={isActive ? "dark-nav-active" : "dark-nav"}
-              size="sm"
-              className={`flex flex-col items-center gap-0.5 h-auto py-1 px-2 transition-all duration-200 rounded-lg ${
-                isActive ? 'text-white scale-105' : 'text-muted-foreground'
-              }`}
+              variant="ghost"
+              size="icon"
+              className={cn(
+                "flex flex-col items-center justify-center h-10 w-10 rounded-full transition-all duration-200",
+                isActive ? "bg-zinc-800" : "bg-transparent"
+              )}
               onClick={() => navigate(item.path)}
+              aria-label={item.label}
             >
-              <Icon className="h-4 w-4" />
-              <span className="text-[10px]">{item.label}</span>
+              <Icon className={cn("h-5 w-5", isActive ? "text-white" : "text-muted-foreground")} />
             </Button>
           );
         })}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button 
-              variant="dark-nav" 
-              size="sm" 
-              className="flex flex-col items-center gap-0.5 h-auto py-1 px-2 rounded-lg"
+              variant="ghost" 
+              size="icon"
+              className="flex items-center justify-center h-10 w-10 rounded-full bg-transparent"
+              aria-label="More options"
             >
-              <MoreVertical className="h-4 w-4" />
-              <span className="text-[10px]">More</span>
+              <MoreVertical className="h-5 w-5 text-muted-foreground" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-40 bg-zinc-900 text-white border-zinc-700">

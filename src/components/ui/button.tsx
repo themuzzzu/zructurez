@@ -17,8 +17,8 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline relative after:absolute after:bottom-0 after:left-0 after:h-[1px] after:w-0 after:bg-primary after:transition-all hover:after:w-full",
         glow: "bg-primary text-primary-foreground animate-button-glow hover:animate-button-pulse hover:scale-105 active:scale-95",
         "home-nav": "bg-primary text-white hover:bg-primary/90 hover:text-white transition-colors duration-200",
-        "dark-nav": "bg-black hover:bg-zinc-800 text-white rounded-full py-2 px-4 flex gap-3 items-center justify-start transition-colors w-full",
-        "dark-nav-active": "bg-zinc-800 text-white rounded-full py-2 px-4 flex gap-3 items-center justify-start transition-colors w-full",
+        "dark-nav": "bg-black hover:bg-zinc-800 text-muted-foreground rounded-md py-2 px-4 flex gap-3 items-center justify-start transition-colors w-full",
+        "dark-nav-active": "bg-zinc-900 text-white rounded-md py-2 px-4 flex gap-3 items-center justify-start transition-colors w-full",
       },
       size: {
         default: "h-10 px-4 py-2",
