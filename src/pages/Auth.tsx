@@ -1,3 +1,4 @@
+
 import { Auth as SupabaseAuth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
@@ -134,10 +135,11 @@ const Auth = () => {
                 },
                 label: {
                   color: 'white',
-                },
-                button_disabled: {
-                  backgroundColor: 'rgba(227, 24, 55, 0.5)',
                 }
+              },
+              // Using the className approach instead of the invalid button_disabled style property
+              className: {
+                button: authLoading ? 'opacity-50' : ''
               }
             }}
             localization={{
