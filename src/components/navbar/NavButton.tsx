@@ -22,19 +22,24 @@ export const NavButton = ({
     <Button
       variant="dark-nav"
       onClick={onClick}
-      className={cn("justify-start text-base group", className)}
+      className={cn(
+        "justify-start text-base group", 
+        isActive && "bg-zinc-800", 
+        className
+      )}
     >
-      <div className={cn(
-        "flex items-center justify-center w-10 h-10",
-      )}>
-        <div className={cn(
-          "p-2 rounded-full transition-colors", 
-          isActive ? "bg-zinc-800" : "group-hover:bg-zinc-800/70"
-        )}>
-          <Icon className={cn("h-5 w-5", isActive ? "text-white" : "text-muted-foreground group-hover:text-gray-300")} />
-        </div>
+      <div className="flex items-center justify-center w-10 h-10">
+        <Icon className={cn(
+          "h-5 w-5", 
+          isActive ? "text-white" : "text-muted-foreground group-hover:text-gray-300"
+        )} />
       </div>
-      <span className={cn("ml-3", isActive ? "text-white" : "text-muted-foreground group-hover:text-gray-300")}>{label}</span>
+      <span className={cn(
+        "ml-3", 
+        isActive ? "text-white font-medium" : "text-muted-foreground group-hover:text-gray-300"
+      )}>
+        {label}
+      </span>
     </Button>
   );
 };

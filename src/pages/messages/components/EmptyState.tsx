@@ -21,16 +21,12 @@ export const EmptyState = ({ onNewChat }: EmptyStateProps) => {
           Select a conversation or start a new chat to begin messaging
         </p>
         <div className="flex gap-2 justify-center">
-          <Button onClick={() => navigate('/')} variant="ghost" className="gap-2 rounded-full bg-zinc-800 hover:bg-zinc-700">
-            <div className="p-1 rounded-full">
-              <Home className="h-4 w-4 text-white" />
-            </div>
+          <Button onClick={() => navigate('/')} variant="ghost" className="gap-2 bg-zinc-800 hover:bg-zinc-700">
+            <Home className="h-4 w-4 text-white" />
             <span className="text-white">Back to Home</span>
           </Button>
-          <Button onClick={onNewChat} variant="ghost" className="gap-2 rounded-full bg-zinc-800 hover:bg-zinc-700">
-            <div className="p-1 rounded-full">
-              <Plus className="h-4 w-4 text-white" />
-            </div>
+          <Button onClick={onNewChat} variant="ghost" className="gap-2 bg-zinc-800 hover:bg-zinc-700">
+            <Plus className="h-4 w-4 text-white" />
             <span className="text-white">New Chat</span>
           </Button>
         </div>

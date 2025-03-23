@@ -84,17 +84,16 @@ export const Sidebar = ({ className }: SidebarProps) => {
             <Button
               key={route.path}
               variant="ghost"
-              className="w-full p-0 justify-center"
+              className={cn(
+                "w-full p-0 justify-center",
+                isActive && "bg-zinc-800"
+              )}
               onClick={() => navigate(route.path)}
             >
-              <div className="flex items-center justify-center w-10 h-10">
-                <div className={cn(
-                  "p-2 rounded-full transition-colors",
-                  isActive ? "bg-zinc-800" : "hover:bg-zinc-800/70"
-                )}>
-                  <route.icon className={cn("h-5 w-5", isActive ? "text-white" : "text-muted-foreground")} />
-                </div>
-              </div>
+              <route.icon className={cn(
+                "h-5 w-5", 
+                isActive ? "text-white" : "text-muted-foreground"
+              )} />
             </Button>
           ) : (
             <NavButton
@@ -115,11 +114,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
             className="w-full p-0 justify-center mt-4"
             onClick={toggleTheme}
           >
-            <div className="flex items-center justify-center w-10 h-10">
-              <div className="p-2 rounded-full transition-colors hover:bg-zinc-800/70">
-                <SunMoon className="h-5 w-5 text-muted-foreground" />
-              </div>
-            </div>
+            <SunMoon className="h-5 w-5 text-muted-foreground" />
           </Button>
         ) : (
           <NavButton
