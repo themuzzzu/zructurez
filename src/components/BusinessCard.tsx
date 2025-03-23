@@ -1,9 +1,5 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { Card } from "./ui/card";
 import { AspectRatio } from "./ui/aspect-ratio";
 import { BookAppointmentDialog } from "./BookAppointmentDialog";
@@ -13,6 +9,7 @@ import { BusinessCardDescription } from "./business/BusinessCardDescription";
 import { BusinessCardInfo } from "./business/BusinessCardInfo";
 import { BusinessCardActions } from "./business/BusinessCardActions";
 import { useBusinessLikes } from "./business/hooks/useBusinessLikes";
+import { shareBusinessProfile, openWhatsAppChat } from "@/utils/businessCardUtils";
 
 interface BusinessCardProps {
   id: string;
@@ -26,8 +23,6 @@ interface BusinessCardProps {
   contact: string;
   hours: string;
   verified: boolean;
-  serviceName: string;
-  cost: number;
   appointment_price?: number;
   consultation_price?: number;
   wait_time?: string;
@@ -57,32 +52,6 @@ export const BusinessCard = ({
   const [showBooking, setShowBooking] = useState(false);
   
   const { isLiked, likesCount, toggleLike } = useBusinessLikes(id);
-
-  const handleShare = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const businessUrl = `${window.location.origin}/business/${id}`;
-    
-    if (navigator.share) {
-      navigator.share({
-        title: name,
-        text: `Check out ${name} - ${description}`,
-        url: businessUrl
-      }).catch(() => {
-        navigator.clipboard.writeText(businessUrl);
-        toast.success("Link copied to clipboard!");
-      });
-    } else {
-      navigator.clipboard.writeText(businessUrl);
-      toast.success("Link copied to clipboard!");
-    }
-  };
-
-  const handleWhatsApp = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const greeting = `Hi! I found your business profile for ${name}. I'm interested in learning more about your services.`;
-    const whatsappUrl = `https://wa.me/${contact.replace(/\D/g, '')}?text=${encodeURIComponent(greeting)}`;
-    window.open(whatsappUrl, '_blank');
-  };
 
   return (
     <>
@@ -134,8 +103,8 @@ export const BusinessCard = ({
               e.stopPropagation();
               setShowBooking(true);
             }}
-            onWhatsAppClick={handleWhatsApp}
-            onShareClick={handleShare}
+            onWhatsAppClick={(e) => openWhatsAppChat(e, name, contact)}
+            onShareClick={(e) => shareBusinessProfile(e, name, description, id)}
             onCallClick={(e) => {
               e.stopPropagation();
               window.location.href = `tel:${contact}`;
