@@ -1,4 +1,3 @@
-
 import { Auth as SupabaseAuth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
@@ -64,7 +63,6 @@ const Auth = () => {
 
     const message = error.message.toLowerCase();
     
-    // Handle specific error types with precise messaging
     if (message.includes('invalid_credentials') || message.includes('invalid login credentials')) {
       toast.error('Incorrect email or password');
     } else if (message.includes('email_not_confirmed')) {
@@ -122,9 +120,7 @@ const Auth = () => {
                 button: {
                   borderRadius: '6px',
                   transition: 'all 0.2s ease',
-                  '&:disabled': {
-                    backgroundColor: 'rgba(227, 24, 55, 0.5)',
-                  }
+                  opacity: '1',
                 },
                 container: {
                   borderRadius: '8px',
@@ -138,6 +134,9 @@ const Auth = () => {
                 },
                 label: {
                   color: 'white',
+                },
+                button_disabled: {
+                  backgroundColor: 'rgba(227, 24, 55, 0.5)',
                 }
               }
             }}
@@ -169,7 +168,6 @@ const Auth = () => {
               return Promise.resolve();
             }}
             afterAuthentication={() => {
-              // This gets called regardless of success/failure
               return Promise.resolve();
             }}
             afterVerification={() => {
