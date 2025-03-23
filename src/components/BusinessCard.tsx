@@ -1,7 +1,6 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card } from "./ui/card";
-import { AspectRatio } from "./ui/aspect-ratio";
 import { BookAppointmentDialog } from "./BookAppointmentDialog";
 import { BusinessCardHeader } from "./business/BusinessCardHeader";
 import { BusinessCardRating } from "./business/BusinessCardRating";
@@ -10,6 +9,7 @@ import { BusinessCardInfo } from "./business/BusinessCardInfo";
 import { BusinessCardActions } from "./business/BusinessCardActions";
 import { useBusinessLikes } from "./business/hooks/useBusinessLikes";
 import { shareBusinessProfile, openWhatsAppChat } from "@/utils/businessCardUtils";
+import { BusinessCard as BusinessCardUI, BusinessCardImage, BusinessCardContent } from "./ui/business-card";
 
 interface BusinessCardProps {
   id: string;
@@ -55,19 +55,15 @@ export const BusinessCard = ({
 
   return (
     <>
-      <Card 
-        className="overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer w-full max-w-[360px] bg-black/95 text-white"
+      <BusinessCardUI 
         onClick={() => navigate(`/business/${id}`)}
       >
-        <AspectRatio ratio={16/9} className="bg-muted">
-          <img 
-            src={image} 
-            alt={name} 
-            className="w-full h-full object-cover"
-          />
-        </AspectRatio>
+        <BusinessCardImage 
+          src={image} 
+          alt={name} 
+        />
         
-        <div className="p-4 space-y-4">
+        <BusinessCardContent>
           <BusinessCardHeader
             name={name}
             category={category}
@@ -111,8 +107,8 @@ export const BusinessCard = ({
             }}
             is_open={is_open}
           />
-        </div>
-      </Card>
+        </BusinessCardContent>
+      </BusinessCardUI>
 
       <BookAppointmentDialog
         businessId={id}

@@ -1,4 +1,3 @@
-
 import { Navbar } from "@/components/Navbar";
 import { BusinessCard } from "@/components/BusinessCard";
 import { BusinessCategoryFilter } from "@/components/BusinessCategoryFilter";
@@ -35,7 +34,6 @@ const Business = () => {
 
       if (error) throw error;
       
-      // Calculate average rating for each business
       const businessesWithRating = data?.map(business => {
         const ratings = business.business_ratings || [];
         const totalRating = ratings.reduce((sum: number, rating: any) => sum + rating.rating, 0);
@@ -54,7 +52,6 @@ const Business = () => {
   if (isLoading) return <LoadingView />;
   if (error) return <ErrorView />;
 
-  // Filter businesses by category and search query
   const filteredBusinesses = businesses?.filter(business => 
     (selectedCategory === "all" || business.category === selectedCategory) &&
     (
@@ -65,7 +62,6 @@ const Business = () => {
     )
   ) || [];
 
-  // Sort businesses according to selected option
   const sortedBusinesses = [...filteredBusinesses].sort((a, b) => {
     switch (sortBy) {
       case "newest":
@@ -168,8 +164,6 @@ const Business = () => {
                         image={business.image_url || '/placeholder.svg'}
                         rating={business.average_rating || 0}
                         reviews={business.business_ratings?.length || 0}
-                        serviceName={business.category}
-                        cost={business.business_products?.[0]?.price || 0}
                         is_open={business.is_open}
                         wait_time={business.wait_time}
                         closure_reason={business.closure_reason}
