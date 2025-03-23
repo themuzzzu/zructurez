@@ -5,44 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-
-interface PollOption {
-  id: string;
-  text: string;
-}
-
-interface PollVote {
-  id: string;
-  poll_id: string;
-  user_id: string;
-  option_index: number;
-}
-
-interface Poll {
-  id: string;
-  question: string;
-  options: PollOption[];
-  votes: PollVote[];
-}
-
-interface Post {
-  id: string;
-  user_id: string;
-  group_id: string;
-  content: string;
-  created_at: string;
-  image_url?: string | null;
-  poll_id?: string | null;
-  gif_url?: string | null;
-  profile?: {
-    username: string;
-    avatar_url: string;
-  };
-  group?: {
-    name: string;
-  };
-  poll?: Poll;
-}
+import { Post, Poll, PollVote } from "./PostsList";
 
 interface PostItemProps {
   post: Post;

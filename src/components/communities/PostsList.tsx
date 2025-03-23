@@ -5,26 +5,26 @@ import { PostItem } from "./PostItem";
 import { Card } from "@/components/ui/card";
 import { Info } from "lucide-react";
 
-interface PollOption {
+export interface PollOption {
   id: string;
   text: string;
 }
 
-interface PollVote {
+export interface PollVote {
   id: string;
   poll_id: string;
   user_id: string;
   option_index: number;
 }
 
-interface Poll {
+export interface Poll {
   id: string;
   question: string;
   options: PollOption[];
   votes: PollVote[];
 }
 
-interface Post {
+export interface Post {
   id: string;
   user_id: string;
   group_id: string;
@@ -82,7 +82,22 @@ export const PostsList = ({ selectedGroup, refreshTrigger }: PostsListProps) => 
       return;
     }
 
-    setPosts(data as Post[] || []);
+    // Transform the data to match our Post interface
+    const transformedPosts: Post[] = (data || []).map(post => ({
+      id: post.id,
+      user_id: post.user_id,
+      group_id: post.group_id,
+      content: post.content,
+      created_at: post.created_at,
+      image_url: post.image_url,
+      poll_id: post.poll_id,
+      gif_url: post.gif_url,
+      profile: post.profiles,
+      group: post.group,
+      poll: post.poll
+    }));
+
+    setPosts(transformedPosts);
   };
 
   if (posts.length === 0) {

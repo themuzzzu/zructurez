@@ -16,6 +16,16 @@ interface PostCreatorProps {
   onPostCreated: () => void;
 }
 
+// Define the post data interface
+interface PostData {
+  content: string;
+  group_id: string;
+  user_id: string;
+  profile_id: string;
+  image_url?: string;
+  gif_url?: string;
+}
+
 export const PostCreator = ({ selectedGroup, onPostCreated }: PostCreatorProps) => {
   const [postContent, setPostContent] = useState("");
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -61,7 +71,7 @@ export const PostCreator = ({ selectedGroup, onPostCreated }: PostCreatorProps) 
         return;
       }
 
-      const postData = {
+      const postData: PostData = {
         content: postContent,
         group_id: selectedGroup,
         user_id: user.id,
