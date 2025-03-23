@@ -1411,6 +1411,38 @@ export type Database = {
           },
         ]
       }
+      product_purchases: {
+        Row: {
+          id: string
+          product_id: string | null
+          purchase_date: string | null
+          quantity: number
+          user_id: string | null
+        }
+        Insert: {
+          id?: string
+          product_id?: string | null
+          purchase_date?: string | null
+          quantity?: number
+          user_id?: string | null
+        }
+        Update: {
+          id?: string
+          product_id?: string | null
+          purchase_date?: string | null
+          quantity?: number
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_purchases_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: true
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           brand_name: string | null
@@ -1812,6 +1844,12 @@ export type Database = {
       increment_business_views: {
         Args: {
           business_id_param: string
+        }
+        Returns: undefined
+      }
+      increment_product_views: {
+        Args: {
+          product_id_param: string
         }
         Returns: undefined
       }

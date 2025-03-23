@@ -35,7 +35,7 @@ export const ShoppingSection = ({
     queryFn: async () => {
       let query = supabase
         .from('products')
-        .select('*, product_purchases(count)');
+        .select('*, product_purchases(id)');
 
       if (searchQuery) {
         query = query.ilike('title', `%${searchQuery}%`);
@@ -75,7 +75,8 @@ export const ShoppingSection = ({
       
       // Calculate sales count and trending score
       const productsWithRanking = data?.map(product => {
-        const salesCount = product.product_purchases?.[0]?.count || 0;
+        // Check if product_purchases exists and has items (indicating sales)
+        const salesCount = product.product_purchases ? product.product_purchases.length : 0;
         const viewsWeight = 0.3;
         const salesWeight = 0.7;
         
