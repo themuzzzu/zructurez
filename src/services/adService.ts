@@ -146,34 +146,19 @@ export const recordAdConversion = async (adId: string, conversionType: string) =
 
 export const fetchAdAnalytics = async (adId: string): Promise<AdAnalytics> => {
   try {
-    // First, check if the ad_analytics table exists and has an entry for this ad
-    let { data, error } = await supabase
-      .from('ad_analytics')
-      .select('impressions, clicks, conversions')
-      .eq('ad_id', adId)
+    // First, check if the advertisements table has the necessary columns
+    const { data: adData, error: adError } = await supabase
+      .from('advertisements')
+      .select('reach, clicks')
+      .eq('id', adId)
       .single();
     
-    // If there's no entry in ad_analytics or table doesn't exist yet,
-    // calculate analytics from the advertisements table
-    if (error || !data) {
-      const { data: adData, error: adError } = await supabase
-        .from('advertisements')
-        .select('views, clicks, conversions')
-        .eq('id', adId)
-        .single();
-      
-      if (adError) throw adError;
-      
-      data = {
-        impressions: adData?.views || 0,
-        clicks: adData?.clicks || 0,
-        conversions: adData?.conversions || 0
-      };
-    }
+    if (adError) throw adError;
     
-    const impressions = data?.impressions || 0;
-    const clicks = data?.clicks || 0;
-    const conversions = data?.conversions || 0;
+    // Use the data from advertisements table
+    const impressions = adData?.reach || 0;
+    const clicks = adData?.clicks || 0;
+    const conversions = 0; // Default value if not available
     const ctr = impressions > 0 ? (clicks / impressions) * 100 : 0;
     
     return {
