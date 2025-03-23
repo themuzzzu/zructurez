@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export type AdType = "business" | "service" | "product";
@@ -24,6 +23,7 @@ export const fetchActiveAds = async (
   targeting?: TargetingOptions
 ) => {
   try {
+    // Use type assertion to avoid excessive type instantiation
     let query = supabase
       .from('advertisements')
       .select('*')
