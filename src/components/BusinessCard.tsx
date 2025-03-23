@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -11,6 +12,7 @@ import { BusinessCardRating } from "./business/BusinessCardRating";
 import { BusinessCardDescription } from "./business/BusinessCardDescription";
 import { BusinessCardInfo } from "./business/BusinessCardInfo";
 import { BusinessCardActions } from "./business/BusinessCardActions";
+import { useBusinessLikes } from "./business/hooks/useBusinessLikes";
 
 interface BusinessCardProps {
   id: string;
@@ -53,72 +55,8 @@ export const BusinessCard = ({
 }: BusinessCardProps) => {
   const navigate = useNavigate();
   const [showBooking, setShowBooking] = useState(false);
-  const queryClient = useQueryClient();
-
-  const { data: isLiked } = useQuery({
-    queryKey: ['business-like', id],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return false;
-
-      const { data } = await supabase
-        .from('business_likes')
-        .select('id')
-        .eq('business_id', id)
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      return !!data;
-    }
-  });
-
-  const { data: likesCount = 0 } = useQuery({
-    queryKey: ['business-likes-count', id],
-    queryFn: async () => {
-      const { count } = await supabase
-        .from('business_likes')
-        .select('*', { count: 'exact', head: true })
-        .eq('business_id', id);
-      
-      return count || 0;
-    }
-  });
-
-  const { mutate: toggleLike } = useMutation({
-    mutationFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        throw new Error('Must be logged in to like businesses');
-      }
-
-      if (isLiked) {
-        const { error } = await supabase
-          .from('business_likes')
-          .delete()
-          .eq('business_id', id)
-          .eq('user_id', user.id);
-
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from('business_likes')
-          .insert([
-            { business_id: id, user_id: user.id }
-          ]);
-
-        if (error) throw error;
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['business-like', id] });
-      queryClient.invalidateQueries({ queryKey: ['business-likes-count', id] });
-      toast.success(isLiked ? 'Business unliked' : 'Business liked');
-    },
-    onError: (error) => {
-      console.error('Error:', error);
-      toast.error('Failed to update like status');
-    }
-  });
+  
+  const { isLiked, likesCount, toggleLike } = useBusinessLikes(id);
 
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
