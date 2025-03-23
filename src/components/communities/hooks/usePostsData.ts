@@ -48,9 +48,8 @@ export const usePostsData = (selectedGroup: string | null, refreshTrigger: numbe
         return;
       }
 
-      // Fix for excessive type instantiation by using explicit typing
-      const rawData: any[] = data as any[];
-      const transformedPosts = transformPosts(rawData);
+      // Fix for excessive type instantiation by using an explicit type cast
+      const transformedPosts = transformPosts(data as any[]);
       setPosts(transformedPosts);
     } catch (error) {
       console.error('Error fetching posts:', error);

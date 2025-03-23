@@ -6,33 +6,25 @@ import { useEffect } from "react";
 import { incrementAdView } from "@/services/adService";
 
 export const MarketplaceBanner = () => {
-  const { data: bannerAds = [] } = useQuery({
-    queryKey: ['marketplace-banner-ads'],
-    queryFn: () => fetchActiveAds(undefined, 1),
+  const { data: ads = [] } = useQuery({
+    queryKey: ['marketplace-banner'],
+    queryFn: () => fetchActiveAds(undefined, "banner", 1),
   });
 
   // Record views for the ads
   useEffect(() => {
-    if (bannerAds?.length) {
-      bannerAds.forEach(ad => {
+    if (ads?.length) {
+      ads.forEach(ad => {
         incrementAdView(ad.id);
       });
     }
-  }, [bannerAds]);
+  }, [ads]);
 
-  if (!bannerAds.length) {
-    // Default banner if no ads
-    return (
-      <div className="w-full rounded-lg overflow-hidden aspect-[8/2] sm:aspect-[8/1.5] md:aspect-[8/1.5] bg-gradient-to-r from-primary to-primary-foreground/20">
-        <div className="h-full w-full flex flex-col justify-center p-6 md:p-8">
-          <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">Welcome to Marketplace</h2>
-          <p className="max-w-xl text-white/90 text-sm md:text-base">
-            Discover great products and services from your local community
-          </p>
-        </div>
-      </div>
-    );
-  }
+  if (!ads.length) return null;
 
-  return <BannerAd ad={bannerAds[0]} />;
+  return (
+    <div className="w-full mb-6">
+      <BannerAd ad={ads[0]} />
+    </div>
+  );
 };

@@ -16,7 +16,8 @@ export const ImageUpload = ({
   onScaleChange,
   onPositionChange,
   skipAutoSave = false,
-}: ImageUploadProps) => {
+  buttonText,
+}: ImageUploadProps & { buttonText?: string }) => {
   const {
     scale,
     setScale,
@@ -86,6 +87,7 @@ export const ImageUpload = ({
       <UploadButtons 
         onCameraCapture={handleCameraCapture}
         onFileSelect={handleFileUpload}
+        buttonText={buttonText}
       />
 
       {previewImage && (

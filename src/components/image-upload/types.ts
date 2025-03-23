@@ -1,3 +1,4 @@
+
 export interface ImagePosition {
   x: number;
   y: number;
@@ -11,6 +12,7 @@ export interface ImageUploadProps {
   onScaleChange?: (scale: number) => void;
   onPositionChange?: (position: ImagePosition) => void;
   skipAutoSave?: boolean;
+  buttonText?: string;
 }
 
 export interface ImagePreviewProps {
@@ -35,4 +37,5 @@ export interface ImageControlsProps {
 export interface UploadButtonsProps {
   onCameraCapture: () => void;
   onFileSelect: (file: File) => void;
+  buttonText?: string;
 }

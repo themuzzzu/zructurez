@@ -1,12 +1,18 @@
+
 import { Camera, Upload } from "lucide-react";
 import { Button } from "../ui/button";
 
 interface UploadButtonsProps {
   onCameraCapture: () => void;
   onFileSelect: (file: File) => void;
+  buttonText?: string;
 }
 
-export const UploadButtons = ({ onCameraCapture, onFileSelect }: UploadButtonsProps) => {
+export const UploadButtons = ({ 
+  onCameraCapture, 
+  onFileSelect,
+  buttonText = "Upload" 
+}: UploadButtonsProps) => {
   return (
     <div className="flex gap-2">
       <Button
@@ -25,7 +31,7 @@ export const UploadButtons = ({ onCameraCapture, onFileSelect }: UploadButtonsPr
         }}
       >
         <Upload className="mr-2 h-4 w-4" />
-        Upload
+        {buttonText}
       </Button>
       <Button
         type="button"

@@ -8,7 +8,7 @@ import { incrementAdView } from "@/services/adService";
 export const SponsoredPosts = () => {
   const { data: ads = [] } = useQuery({
     queryKey: ['sponsored-posts'],
-    queryFn: () => fetchActiveAds(undefined, 3),
+    queryFn: () => fetchActiveAds(undefined, undefined, 3),
   });
 
   // Record views for the ads
