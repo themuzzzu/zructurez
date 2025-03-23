@@ -1,5 +1,6 @@
+
 import { Button } from "./ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { 
   Hospital, 
@@ -32,13 +33,27 @@ const categories = [
   { id: "wellness", name: "Wellness", icon: Heart },
 ];
 
-export const BusinessCategoryFilter = () => {
+interface BusinessCategoryFilterProps {
+  onCategoryChange?: (category: string) => void;
+}
+
+export const BusinessCategoryFilter = ({ onCategoryChange }: BusinessCategoryFilterProps = {}) => {
   const [selectedCategory, setSelectedCategory] = useState("all");
 
   const handleCategoryClick = (categoryId: string) => {
     setSelectedCategory(categoryId);
+    if (onCategoryChange) {
+      onCategoryChange(categoryId);
+    }
     toast.success(`Filtered by ${categories.find(c => c.id === categoryId)?.name}`);
   };
+
+  useEffect(() => {
+    // Initialize with "all" category if there's a change handler
+    if (onCategoryChange) {
+      onCategoryChange(selectedCategory);
+    }
+  }, []);
 
   return (
     <div className="flex gap-3 overflow-x-auto pb-4 px-2 scrollbar-hide animate-fade-up">
