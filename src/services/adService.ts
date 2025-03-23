@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 export type AdType = "business" | "service" | "product";
@@ -23,14 +24,14 @@ export const fetchActiveAds = async (
   targeting?: TargetingOptions
 ) => {
   try {
-    // Use type assertion to avoid excessive type instantiation
+    // Explicitly cast to any to avoid excessive type instantiation
     let query = supabase
       .from('advertisements')
       .select('*')
       .eq('status', 'active')
       .lte('start_date', new Date().toISOString())
       .gte('end_date', new Date().toISOString())
-      .order('budget', { ascending: false });
+      .order('budget', { ascending: false }) as any;
     
     if (type) {
       query = query.eq('type', type);
@@ -146,18 +147,18 @@ export const recordAdConversion = async (adId: string, conversionType: string) =
 
 export const fetchAdAnalytics = async (adId: string): Promise<AdAnalytics> => {
   try {
-    // First, check if the advertisements table has the necessary columns
-    const { data: adData, error: adError } = await supabase
+    // Fetch the ad data with explicit type casting to avoid type errors
+    const { data, error } = await (supabase
       .from('advertisements')
-      .select('reach, clicks')
+      .select('*')
       .eq('id', adId)
-      .single();
+      .single() as any);
     
-    if (adError) throw adError;
+    if (error) throw error;
     
-    // Use the data from advertisements table
-    const impressions = adData?.reach || 0;
-    const clicks = adData?.clicks || 0;
+    // Extract the data we need and provide fallbacks
+    const impressions = data?.reach || 0;
+    const clicks = data?.clicks || 0;
     const conversions = 0; // Default value if not available
     const ctr = impressions > 0 ? (clicks / impressions) * 100 : 0;
     
