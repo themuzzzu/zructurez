@@ -44,11 +44,13 @@ export const MobileNav = () => {
               onClick={() => navigate(item.path)}
               aria-label={item.label}
             >
-              <div className={cn(
-                "flex items-center justify-center w-10 h-10 rounded-full transition-colors",
-                isActive ? "bg-zinc-800" : "hover:bg-zinc-800/70"
-              )}>
-                <Icon className={cn("h-5 w-5", isActive ? "text-white" : "text-muted-foreground")} />
+              <div className="flex items-center justify-center w-10 h-10">
+                <div className={cn(
+                  "p-2 rounded-full transition-colors",
+                  isActive ? "bg-zinc-800" : "hover:bg-zinc-800/70"
+                )}>
+                  <Icon className={cn("h-5 w-5", isActive ? "text-white" : "text-muted-foreground")} />
+                </div>
               </div>
             </Button>
           );
@@ -61,8 +63,10 @@ export const MobileNav = () => {
               className="flex items-center justify-center h-10 w-10 p-0"
               aria-label="More options"
             >
-              <div className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-zinc-800/70">
-                <MoreVertical className="h-5 w-5 text-muted-foreground" />
+              <div className="flex items-center justify-center w-10 h-10">
+                <div className="p-2 rounded-full hover:bg-zinc-800/70">
+                  <MoreVertical className="h-5 w-5 text-muted-foreground" />
+                </div>
               </div>
             </Button>
           </DropdownMenuTrigger>
