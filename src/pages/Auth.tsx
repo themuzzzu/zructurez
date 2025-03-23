@@ -165,17 +165,6 @@ const Auth = () => {
             providers={[]}
             redirectTo={`${window.location.origin}/auth/callback`}
             onlyThirdPartyProviders={false}
-            beforeAuthentication={() => {
-              setAuthLoading(true);
-              return Promise.resolve();
-            }}
-            afterAuthentication={() => {
-              return Promise.resolve();
-            }}
-            afterVerification={() => {
-              toast.success('Email verified successfully');
-              return Promise.resolve();
-            }}
             onAuthError={(error) => {
               setAuthLoading(false);
               handleAuthError(error);
