@@ -43,30 +43,6 @@ export interface Post {
   poll?: Poll;
 }
 
-// Define a simplified type for the raw post data from Supabase
-interface RawPostData {
-  id: string;
-  user_id: string;
-  content: string;
-  created_at: string;
-  image_url?: string | null;
-  gif_url?: string | null;
-  poll_id?: string | null;
-  business_id?: string | null;
-  group_id?: string | null;
-  profiles?: {
-    username: string;
-    avatar_url: string;
-  } | null;
-  group?: Record<string, any>; // Using a more flexible type
-  poll?: {
-    id: string;
-    question: string;
-    options: any[];
-    votes: any[];
-  } | null;
-}
-
 interface PostsListProps {
   selectedGroup: string | null;
   refreshTrigger: number;
@@ -106,61 +82,79 @@ export const PostsList = ({ selectedGroup, refreshTrigger }: PostsListProps) => 
       return;
     }
 
-    // Safely type cast the data - first to unknown, then to our expected type
-    const rawPosts = (data || []) as unknown as RawPostData[];
-    
-    // Transform the data to match our Post interface
-    const transformedPosts: Post[] = rawPosts.map(post => {
-      // Create a base post object with required fields
-      const transformedPost: Post = {
-        id: post.id,
-        user_id: post.user_id,
-        group_id: post.group_id || post.business_id || '', // Handle either field name
-        content: post.content,
-        created_at: post.created_at,
-        image_url: post.image_url,
-        poll_id: post.poll_id,
-        gif_url: post.gif_url,
-        profile: post.profiles || undefined,
-        group: { name: 'Unknown Group' } // Default fallback
-      };
+    if (!data || data.length === 0) {
+      setPosts([]);
+      return;
+    }
 
-      // Handle group data if it exists
-      if (post.group && typeof post.group === 'object') {
-        if ('name' in post.group && typeof post.group.name === 'string') {
-          transformedPost.group = { name: post.group.name };
-        }
-      }
-
-      // Handle poll data if it exists
-      if (post.poll && typeof post.poll === 'object') {
-        const pollOptions = Array.isArray(post.poll.options) 
-          ? post.poll.options.map((opt: any) => {
-              if (typeof opt === 'string') {
-                return { id: crypto.randomUUID(), text: opt };
-              } else if (opt && typeof opt === 'object' && 'text' in opt) {
-                return { 
-                  id: ('id' in opt && opt.id) ? opt.id : crypto.randomUUID(), 
-                  text: opt.text 
-                };
-              } else {
-                return { id: crypto.randomUUID(), text: String(opt || '') };
-              }
-            })
-          : [];
-
-        transformedPost.poll = {
-          id: post.poll.id,
-          question: post.poll.question,
-          options: pollOptions,
-          votes: Array.isArray(post.poll.votes) ? post.poll.votes : []
+    // Transform the raw data to match our Post interface
+    try {
+      const transformedPosts: Post[] = [];
+      
+      for (const rawPost of data) {
+        const post: Post = {
+          id: rawPost.id,
+          user_id: rawPost.user_id,
+          group_id: rawPost.group_id || rawPost.business_id || '',
+          content: rawPost.content,
+          created_at: rawPost.created_at,
+          image_url: rawPost.image_url || null,
+          poll_id: rawPost.poll_id || null,
+          gif_url: rawPost.gif_url || null,
+          profile: rawPost.profiles ? {
+            username: rawPost.profiles.username,
+            avatar_url: rawPost.profiles.avatar_url
+          } : undefined,
+          group: { name: 'Unknown Group' }
         };
+
+        // Handle group data
+        if (rawPost.group && typeof rawPost.group === 'object' && 'name' in rawPost.group) {
+          post.group = { name: String(rawPost.group.name) };
+        }
+
+        // Handle poll data
+        if (rawPost.poll && typeof rawPost.poll === 'object') {
+          const pollOptions: PollOption[] = [];
+          
+          if (Array.isArray(rawPost.poll.options)) {
+            for (const opt of rawPost.poll.options) {
+              if (typeof opt === 'string') {
+                pollOptions.push({ id: crypto.randomUUID(), text: opt });
+              } else if (opt && typeof opt === 'object' && 'text' in opt) {
+                pollOptions.push({ 
+                  id: ('id' in opt && opt.id) ? String(opt.id) : crypto.randomUUID(), 
+                  text: String(opt.text)
+                });
+              } else {
+                pollOptions.push({ id: crypto.randomUUID(), text: String(opt || '') });
+              }
+            }
+          }
+
+          post.poll = {
+            id: String(rawPost.poll.id),
+            question: String(rawPost.poll.question),
+            options: pollOptions,
+            votes: Array.isArray(rawPost.poll.votes) 
+              ? rawPost.poll.votes.map(vote => ({
+                  id: String(vote.id),
+                  poll_id: String(vote.poll_id),
+                  user_id: String(vote.user_id),
+                  option_index: Number(vote.option_index)
+                }))
+              : []
+          };
+        }
+
+        transformedPosts.push(post);
       }
 
-      return transformedPost;
-    });
-
-    setPosts(transformedPosts);
+      setPosts(transformedPosts);
+    } catch (transformError) {
+      console.error('Error transforming posts data:', transformError);
+      setPosts([]);
+    }
   };
 
   if (posts.length === 0) {
