@@ -1,56 +1,67 @@
 
-import { SearchInput } from "@/components/SearchInput";
-import { ChatListItem } from "@/components/chat/ChatListItem";
-import type { Chat } from "@/types/chat";
+import React, { useState } from 'react';
+import { ChatListItem } from './ChatListItem';
+import { Input } from '@/components/ui/input';
+import { Search } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import type { Chat } from '@/types/chat';
 
-interface ChatListProps {
+export interface ChatListProps {
   chats: Chat[];
   selectedChat: Chat | null;
   onSelectChat: (chat: Chat) => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
   onNewChat: () => void;
+  userPresence?: Record<string, string>;
 }
 
-export const ChatList = ({
+export const ChatList: React.FC<ChatListProps> = ({
   chats,
   selectedChat,
   onSelectChat,
   searchQuery,
   onSearchChange,
-}: ChatListProps) => {
-  const filteredChats = chats.filter((chat) =>
+  userPresence = {},
+}) => {
+  // Maintain the existing implementation, just add the userPresence prop
+  const filteredChats = chats.filter(chat => 
     chat.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="px-2 sm:px-3 py-2 border-b">
-        <SearchInput
-          value={searchQuery}
-          onChange={onSearchChange}
-          placeholder="Search messages..."
-          className="w-full"
-        />
+    <div className="h-full flex flex-col">
+      <div className="p-3 border-b">
+        <div className="relative">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Search chats..."
+            className="pl-8"
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+          />
+        </div>
       </div>
-
-      <div className="overflow-y-auto flex-1 pb-safe">
-        {filteredChats.length > 0 ? (
-          filteredChats.map((chat) => (
-            <ChatListItem
-              key={chat.id}
-              chat={chat}
-              isSelected={selectedChat?.id === chat.id}
-              onClick={() => onSelectChat(chat)}
-            />
-          ))
-        ) : (
-          <div className="flex flex-col items-center justify-center h-40 text-center text-muted-foreground py-6 px-2 sm:py-8 sm:px-4">
-            <p className="text-xs sm:text-sm mb-1 sm:mb-2">No conversations found</p>
-            <p className="text-xs">Try searching for something else or start a new chat</p>
-          </div>
-        )}
-      </div>
+      <ScrollArea className="flex-1">
+        <div className="p-3">
+          {filteredChats.length > 0 ? (
+            filteredChats.map((chat) => (
+              <ChatListItem
+                key={chat.id}
+                chat={chat}
+                isSelected={selectedChat?.id === chat.id}
+                onSelect={() => onSelectChat(chat)}
+                presenceStatus={userPresence[chat.userId]}
+              />
+            ))
+          ) : (
+            <div className="text-center py-6 text-muted-foreground">
+              No chats found
+            </div>
+          )}
+        </div>
+      </ScrollArea>
     </div>
   );
 };

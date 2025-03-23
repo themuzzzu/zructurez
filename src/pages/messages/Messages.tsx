@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -46,13 +45,11 @@ export const Messages = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Using a custom table column for last_seen_at instead of default profile properties
-      const { error } = await supabase
-        .from('user_presence')
-        .upsert({ 
-          user_id: user.id,
-          last_seen_at: new Date().toISOString() 
-        });
+      // Create and update the user's presence
+      const { error } = await supabase.rpc('update_user_presence', {
+        user_id: user.id,
+        last_seen_time: new Date().toISOString()
+      });
 
       if (error) {
         console.error('Error updating user presence:', error);

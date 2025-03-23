@@ -1,81 +1,67 @@
 
-import { Chat } from "@/types/chat";
-import { formatDistanceToNow, parseISO } from "date-fns";
-import { Check, CheckCheck } from "lucide-react";
+import { useState } from 'react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { formatDistanceToNow } from 'date-fns';
+import type { Chat } from '@/types/chat';
 
 interface ChatListItemProps {
   chat: Chat;
   isSelected: boolean;
-  onClick: () => void;
+  onSelect: () => void;
+  presenceStatus?: string;
 }
 
-export const ChatListItem = ({ chat, isSelected, onClick }: ChatListItemProps) => {
-  const formatTimestamp = (timestamp: string) => {
-    try {
-      const date = parseISO(timestamp);
-      return formatDistanceToNow(date, { addSuffix: true });
-    } catch (error) {
-      console.error('Error formatting date:', error);
-      return 'recently';
+export const ChatListItem = ({
+  chat,
+  isSelected,
+  onSelect,
+  presenceStatus,
+}: ChatListItemProps) => {
+  const formattedTime = chat.time 
+    ? formatDistanceToNow(new Date(chat.time), { addSuffix: true })
+    : '';
+
+  const getStatusIndicator = () => {
+    if (!presenceStatus) return null;
+    
+    if (presenceStatus === 'online') {
+      return <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-background" />;
     }
+    
+    // If it's a timestamp, show gray for offline
+    return <div className="absolute bottom-0 right-0 w-3 h-3 bg-gray-400 rounded-full border-2 border-background" />;
   };
 
   return (
-    <button
-      className={`w-full px-3 py-3 flex items-start gap-3 transition-colors border-b last:border-b-0 border-border/30 hover:bg-accent/30
-        ${isSelected ? 'bg-accent/50' : ''}`}
-      onClick={onClick}
+    <div
+      className={`flex items-center gap-3 rounded-lg p-2 cursor-pointer mb-1 transition-colors ${
+        isSelected ? 'bg-accent' : 'hover:bg-muted'
+      }`}
+      onClick={onSelect}
     >
       <div className="relative">
-        <img
-          src={chat.avatar}
-          alt={chat.name}
-          className="w-10 h-10 rounded-full flex-shrink-0 object-cover"
-        />
-        {/* Online indicator - would be dynamic in a real app */}
-        {Math.random() > 0.5 && (
-          <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-background"></span>
-        )}
+        <Avatar className="h-10 w-10">
+          <AvatarImage src={chat.avatar} alt={chat.name} />
+          <AvatarFallback>{chat.name[0]}</AvatarFallback>
+        </Avatar>
+        {getStatusIndicator()}
       </div>
-      
-      <div className="flex-1 text-left min-w-0">
-        <div className="flex justify-between items-start">
-          <span className="font-semibold text-base text-foreground truncate">
-            {chat.name}
-          </span>
-          <span className="text-xs text-muted-foreground whitespace-nowrap ml-1">
-            {formatTimestamp(chat.time)}
-          </span>
-        </div>
+      <div className="flex-1 min-w-0">
         <div className="flex justify-between items-center">
-          <p className="text-sm text-muted-foreground truncate pr-2 max-w-[70%]">
-            {chat.lastMessage ? (
-              <>
-                {chat.lastMessage.sender_id === chat.userId ? '' : 'You: '}
-                {chat.lastMessage.content}
-              </>
-            ) : (
-              <span className="text-muted-foreground/70 italic">No messages yet</span>
-            )}
-          </p>
-          <div className="flex items-center">
-            {chat.lastMessage && chat.lastMessage.sender_id !== chat.userId && (
-              <span className="text-xs mr-1">
-                {chat.lastMessage.read ? (
-                  <CheckCheck className="h-4 w-4 text-blue-500" />
-                ) : (
-                  <Check className="h-4 w-4 text-muted-foreground" />
-                )}
-              </span>
-            )}
-            {chat.unread > 0 && (
-              <span className="inline-flex items-center justify-center bg-primary text-primary-foreground text-xs font-medium h-5 min-w-5 rounded-full px-1.5">
-                {chat.unread}
-              </span>
-            )}
-          </div>
+          <p className="text-sm font-medium truncate">{chat.name}</p>
+          <span className="text-xs text-muted-foreground">{formattedTime}</span>
         </div>
+        <p className="text-xs truncate text-muted-foreground">
+          {chat.lastMessage ? chat.lastMessage.content : 'No messages yet'}
+        </p>
       </div>
-    </button>
+      {chat.unread > 0 && (
+        <div className="rounded-full bg-primary w-5 h-5 flex items-center justify-center">
+          <span className="text-[10px] font-medium text-primary-foreground">
+            {chat.unread}
+          </span>
+        </div>
+      )}
+    </div>
   );
 };
