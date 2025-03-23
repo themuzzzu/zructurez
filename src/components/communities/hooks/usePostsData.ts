@@ -48,8 +48,9 @@ export const usePostsData = (selectedGroup: string | null, refreshTrigger: numbe
         return;
       }
 
-      // Use type assertion to avoid excessive type instantiation
-      const transformedPosts = transformPosts(data as any[]);
+      // Fix for excessive type instantiation by using explicit typing
+      const rawData: any[] = data as any[];
+      const transformedPosts = transformPosts(rawData);
       setPosts(transformedPosts);
     } catch (error) {
       console.error('Error fetching posts:', error);

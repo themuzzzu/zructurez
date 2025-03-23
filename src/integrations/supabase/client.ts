@@ -9,11 +9,13 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 type CustomSupabaseClient = ReturnType<typeof createClient<Database>> & {
   rpc: ReturnType<typeof createClient<Database>>["rpc"] & {
     (
-      fn: "increment_ad_views" | "increment_ad_clicks" | "update_user_presence" | "get_user_presence",
+      fn: "increment_ad_views" | "increment_ad_clicks" | "update_user_presence" | "get_user_presence" | "record_ad_conversion" | "record_ad_impression",
       params: { 
         ad_id?: string; 
         user_id?: string; 
         last_seen_time?: string;
+        conversion_type?: string;
+        location?: string;
       }
     ): Promise<{ data: any; error: any }>;
   };
