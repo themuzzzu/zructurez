@@ -43,6 +43,32 @@ export interface Post {
   poll?: Poll;
 }
 
+// Define a type for the raw post data we get from Supabase
+interface RawPostData {
+  id: string;
+  user_id: string;
+  content: string;
+  created_at: string;
+  image_url?: string | null;
+  gif_url?: string | null;
+  poll_id?: string | null;
+  business_id?: string | null;
+  group_id?: string | null;
+  profiles?: {
+    username: string;
+    avatar_url: string;
+  } | null;
+  group?: {
+    name: string;
+  } | null;
+  poll?: {
+    id: string;
+    question: string;
+    options: any[];
+    votes: any[];
+  } | null;
+}
+
 interface PostsListProps {
   selectedGroup: string | null;
   refreshTrigger: number;
@@ -83,20 +109,18 @@ export const PostsList = ({ selectedGroup, refreshTrigger }: PostsListProps) => 
     }
 
     // Transform the data to match our Post interface
-    const transformedPosts: Post[] = (data || []).map(post => ({
+    const transformedPosts: Post[] = (data as RawPostData[] || []).map(post => ({
       id: post.id,
       user_id: post.user_id,
-      group_id: post.group_id || post.business_id, // Handle either field name
+      group_id: post.group_id || post.business_id || '', // Handle either field name
       content: post.content,
       created_at: post.created_at,
       image_url: post.image_url,
       poll_id: post.poll_id,
       gif_url: post.gif_url,
-      profile: post.profiles,
+      profile: post.profiles || undefined,
       // Ensure group has the required structure
-      group: post.group && typeof post.group === 'object' && 'name' in post.group 
-        ? post.group 
-        : { name: 'Unknown Group' },
+      group: post.group && typeof post.group === 'object' ? post.group : { name: 'Unknown Group' },
       // Ensure poll has the required structure if it exists
       poll: post.poll && typeof post.poll === 'object'
         ? {

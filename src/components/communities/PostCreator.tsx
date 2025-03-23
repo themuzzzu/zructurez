@@ -15,7 +15,7 @@ interface PostCreatorProps {
   onPostCreated: () => void;
 }
 
-// Define the post data interface
+// Define the post data interface with optional image_url and gif_url
 interface PostData {
   content: string;
   group_id: string;
