@@ -23,6 +23,14 @@ import { NavButton } from "./navbar/NavButton";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
+// Create a filled icon component
+const FilledIcon = ({ Icon }: { Icon: React.ElementType }) => (
+  <div className="relative">
+    <Icon size={20} fill="white" stroke="black" strokeWidth={1.5} />
+    <div className="absolute -top-2 -right-1 w-2 h-2 bg-blue-500 rounded-full"></div>
+  </div>
+);
+
 export const Sidebar = ({ className }: SidebarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -90,20 +98,33 @@ export const Sidebar = ({ className }: SidebarProps) => {
               )}
               onClick={() => navigate(route.path)}
             >
-              <route.icon className={cn(
-                "h-5 w-5", 
-                isActive ? "text-white" : "text-muted-foreground"
-              )} />
+              {isActive ? (
+                <FilledIcon Icon={route.icon} />
+              ) : (
+                <route.icon className="h-5 w-5 text-muted-foreground" />
+              )}
             </Button>
           ) : (
-            <NavButton
+            <Button
               key={route.path}
-              icon={route.icon}
-              label={route.name}
-              isActive={isActive}
+              variant="ghost"
+              className={cn(
+                "w-full justify-start gap-4 rounded-full px-4",
+                isActive ? "bg-gray-800" : "hover:bg-gray-800"
+              )}
               onClick={() => navigate(route.path)}
-              className="w-full"
-            />
+            >
+              <div className="flex items-center justify-center">
+                {isActive ? (
+                  <FilledIcon Icon={route.icon} />
+                ) : (
+                  <route.icon size={20} className="text-muted-foreground" />
+                )}
+              </div>
+              <span className="text-lg font-medium">
+                {route.name}
+              </span>
+            </Button>
           );
         })}
         
@@ -117,12 +138,18 @@ export const Sidebar = ({ className }: SidebarProps) => {
             <SunMoon className="h-5 w-5 text-muted-foreground" />
           </Button>
         ) : (
-          <NavButton
-            icon={SunMoon}
-            label="Toggle Theme"
+          <Button
+            variant="ghost"
+            className="w-full justify-start gap-4 rounded-full px-4 mt-4"
             onClick={toggleTheme}
-            className="mt-4"
-          />
+          >
+            <div className="flex items-center justify-center">
+              <SunMoon size={20} className="text-muted-foreground" />
+            </div>
+            <span className="text-lg font-medium">
+              Toggle Theme
+            </span>
+          </Button>
         )}
       </div>
     </div>
