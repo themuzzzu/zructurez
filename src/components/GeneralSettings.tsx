@@ -1,22 +1,33 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { useTheme } from "@/components/ThemeProvider";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
+import { useState, useEffect } from "react";
+import { useProfile } from "@/hooks/useProfile";
+import { useTheme } from "@/components/ThemeProvider";
 import { type Theme } from "@/components/ThemeProvider";
-import { useState } from "react";
+import { Loader2 } from "lucide-react";
 
 export const GeneralSettings = () => {
   const { theme, setTheme } = useTheme();
+  const { profile, loading, updateThemePreference } = useProfile();
   const [separateGroupsAndChats, setSeparateGroupsAndChats] = useState(() => {
     const saved = localStorage.getItem("separateGroupsAndChats");
     return saved ? JSON.parse(saved) : false;
   });
 
-  const handleThemeChange = (value: Theme) => {
+  // Sync theme with profile preference on component mount
+  useEffect(() => {
+    if (profile.theme_preference) {
+      setTheme(profile.theme_preference as Theme);
+    }
+  }, [profile.theme_preference, setTheme]);
+
+  const handleThemeChange = async (value: Theme) => {
     setTheme(value);
-    toast.success(`Theme changed to ${value} mode`);
+    await updateThemePreference(value);
   };
 
   const handleSeparateGroupsChange = (checked: boolean) => {
@@ -24,6 +35,16 @@ export const GeneralSettings = () => {
     localStorage.setItem("separateGroupsAndChats", JSON.stringify(checked));
     toast.success(`Messages view ${checked ? 'separated' : 'combined'}`);
   };
+
+  if (loading) {
+    return (
+      <Card className="w-full">
+        <CardContent className="flex items-center justify-center p-6">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="w-full">
