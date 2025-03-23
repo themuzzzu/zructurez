@@ -123,10 +123,10 @@ export const ChatWindow = ({ selectedChat, onClose }: ChatWindowProps) => {
         onForwardMessage={handleForwardMessage}
       />
       {forwardMessage && (
-        <div className="px-4 py-2 bg-muted flex items-center justify-between">
-          <div className="text-sm">Forwarding: {forwardMessage.substring(0, 30)}...</div>
+        <div className="px-3 py-2 bg-muted flex items-center justify-between text-xs sm:text-sm">
+          <div className="truncate">Forwarding: {forwardMessage.substring(0, 25)}...</div>
           <button 
-            className="text-xs text-destructive"
+            className="text-xs text-destructive ml-2"
             onClick={() => setForwardMessage(null)}
           >
             Cancel

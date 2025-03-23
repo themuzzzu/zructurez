@@ -28,19 +28,19 @@ export const MarketplaceHeader = ({
   const navigate = useNavigate();
 
   return (
-    <div className="bg-primary px-4 py-3 mb-4 shadow-md sticky top-0 z-10">
+    <div className="bg-primary px-2 sm:px-4 py-2 sm:py-3 mb-4 shadow-md sticky top-0 z-10">
       <div className="max-w-[1400px] mx-auto">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <Button 
               variant="ghost" 
               size="icon" 
-              className="text-white hover:bg-white/10"
+              className="text-white hover:bg-white/10 h-8 w-8"
               onClick={() => navigate('/')}
             >
-              <ArrowLeft className="h-5 w-5" />
+              <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
-            <h1 className="text-2xl md:text-3xl font-bold text-white">Marketplace</h1>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white truncate">Marketplace</h1>
           </div>
           
           <div className="hidden md:flex items-center flex-1 max-w-2xl mx-4">
@@ -52,30 +52,30 @@ export const MarketplaceHeader = ({
             />
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <Button 
               variant="ghost" 
               size="icon" 
-              className="text-white hover:bg-white/10 md:hidden"
+              className="text-white hover:bg-white/10 h-8 w-8 md:hidden"
               onClick={() => setIsFilterOpen(true)}
             >
-              <Filter className="h-5 w-5" />
+              <Filter className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
             
             <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
               <SheetTrigger asChild>
                 <div className="relative">
-                  <Button variant="ghost" size="icon" className="text-white">
-                    <ShoppingCart className="h-5 w-5" />
+                  <Button variant="ghost" size="icon" className="text-white h-8 w-8">
+                    <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" />
                     {cartItemCount > 0 && (
-                      <span className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-accent text-white text-xs flex items-center justify-center animate-fade-in">
+                      <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-accent text-white text-[10px] flex items-center justify-center animate-fade-in">
                         {cartItemCount}
                       </span>
                     )}
                   </Button>
                 </div>
               </SheetTrigger>
-              <SheetContent className="w-full sm:w-[540px]">
+              <SheetContent className="w-full sm:max-w-md">
                 <SheetHeader>
                   <SheetTitle>Shopping Cart</SheetTitle>
                 </SheetHeader>
@@ -88,7 +88,7 @@ export const MarketplaceHeader = ({
         </div>
         
         {/* Mobile Search */}
-        <div className="mt-3 md:hidden">
+        <div className="mt-2 md:hidden">
           <SearchInput 
             placeholder="Search products..."
             value={searchQuery}

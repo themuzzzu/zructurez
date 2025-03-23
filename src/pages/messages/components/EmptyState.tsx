@@ -8,13 +8,13 @@ interface EmptyStateProps {
 
 export const EmptyState = ({ onNewChat }: EmptyStateProps) => {
   return (
-    <div className="flex flex-col items-center justify-center h-full w-full md:col-span-8 lg:col-span-9 border rounded-r-lg bg-background/50 p-4">
-      <div className="max-w-md text-center">
-        <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
-          <MessageSquare className="h-10 w-10 text-primary" />
+    <div className="flex flex-col items-center justify-center h-full w-full md:col-span-8 lg:col-span-9 border rounded-none sm:rounded-r-lg bg-background/50 p-4">
+      <div className="max-w-md text-center px-2">
+        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+          <MessageSquare className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
         </div>
-        <h3 className="text-xl font-semibold mb-2">No chat selected</h3>
-        <p className="text-muted-foreground mb-6">
+        <h3 className="text-lg sm:text-xl font-semibold mb-2">No chat selected</h3>
+        <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">
           Select a conversation or start a new chat to begin messaging
         </p>
         <Button onClick={onNewChat} className="gap-2">

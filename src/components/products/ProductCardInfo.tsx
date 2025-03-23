@@ -23,11 +23,11 @@ export const ProductCardInfo = ({
   onClick
 }: ProductCardInfoProps) => {
   return (
-    <div className="p-1.5 sm:p-3 cursor-pointer" onClick={onClick}>
-      <div className="flex justify-between items-start mb-0.5 sm:mb-1">
-        <div className="flex-1 pr-1 sm:pr-2">
-          <h3 className="text-xs font-semibold text-foreground line-clamp-1 sm:text-sm">{title}</h3>
-          <div className="text-[10px] text-muted-foreground line-clamp-1 sm:text-xs">
+    <div className="p-1.5 cursor-pointer touch-manipulation" onClick={onClick}>
+      <div className="flex justify-between items-start mb-0.5">
+        <div className="flex-1 pr-1">
+          <h3 className="text-xs font-semibold text-foreground line-clamp-1">{title}</h3>
+          <div className="text-[10px] text-muted-foreground line-clamp-1">
             {category} {subcategory && `• ${subcategory}`}
           </div>
         </div>
@@ -38,7 +38,7 @@ export const ProductCardInfo = ({
         />
       </div>
       
-      <p className="text-muted-foreground text-[10px] sm:text-xs mb-1 sm:mb-2 line-clamp-1 sm:line-clamp-2">{description}</p>
+      <p className="text-muted-foreground text-[10px] mb-1 line-clamp-2">{description}</p>
     </div>
   );
 };

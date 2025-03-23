@@ -100,6 +100,20 @@
     animation: pulseSoft 2s infinite;
   }
 
+  /* Touch-friendly improvements */
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+  
+  /* Fix for iOS Safari bottom bar */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  
+  .mb-safe {
+    margin-bottom: env(safe-area-inset-bottom, 0);
+  }
+
   /* Responsive visibility utilities */
   .xs\:block {
     @media (min-width: 320px) {
@@ -135,6 +149,15 @@
   
   .heading-responsive {
     font-size: clamp(1.25rem, 4vw, 2rem);
+  }
+
+  /* Additional responsive utilities */
+  .min-w-responsive {
+    min-width: min(100%, 480px);
+  }
+
+  .max-w-responsive {
+    max-width: min(100%, 480px);
   }
 }
 
