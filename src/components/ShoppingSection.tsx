@@ -76,7 +76,7 @@ export const ShoppingSection = ({
       // Calculate sales count and trending score
       const productsWithRanking = data?.map(product => {
         // Check if product_purchases exists and has items (indicating sales)
-        const salesCount = product.product_purchases ? product.product_purchases.length : 0;
+        const salesCount = product.product_purchases ? product.product_purchases.length || 0 : 0;
         const viewsWeight = 0.3;
         const salesWeight = 0.7;
         
