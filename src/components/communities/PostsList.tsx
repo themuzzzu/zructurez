@@ -48,28 +48,32 @@ interface PostsListProps {
   refreshTrigger: number;
 }
 
-// Define a simplified type for raw data from Supabase to avoid circular references
-interface RawPostData {
+// Explicit type definition for Supabase response to avoid deep recursion
+type RawPost = {
   id: string;
   user_id: string;
   content: string;
   created_at: string;
-  image_url?: string | null;
-  poll_id?: string | null;
-  gif_url?: string | null;
   business_id?: string | null;
-  group_id?: string | null;
+  category?: string;
+  location?: string;
+  profile_id?: string;
+  views?: number;
+  image_url?: string | null;
   profiles?: {
     username: string;
     avatar_url: string;
   } | null;
   group?: {
-    name: string;
+    name?: string;
   } | null;
+  group_id?: string | null;
+  poll_id?: string | null;
+  gif_url?: string | null;
   poll?: {
-    id: string;
-    question: string;
-    options: string[] | PollOption[];
+    id?: string;
+    question?: string;
+    options?: Array<string | PollOption>;
     votes?: PollVote[] | null;
   } | null;
 }
@@ -117,22 +121,23 @@ export const PostsList = ({ selectedGroup, refreshTrigger }: PostsListProps) => 
     try {
       const transformedPosts: Post[] = [];
       
-      for (const rawPost of data) {
+      for (const rawPost of data as RawPost[]) {
         // Create the post object with type safety
         const post: Post = {
           id: rawPost.id,
           user_id: rawPost.user_id,
-          // Handle various ID fields
-          group_id: typeof rawPost.group_id === 'string' ? rawPost.group_id :
-                   typeof rawPost.business_id === 'string' ? rawPost.business_id : '',
+          // Handle group_id or business_id as fallback
+          group_id: (rawPost.group_id && typeof rawPost.group_id === 'string') 
+                   ? rawPost.group_id 
+                   : (rawPost.business_id && typeof rawPost.business_id === 'string') 
+                   ? rawPost.business_id 
+                   : '',
           content: rawPost.content,
           created_at: rawPost.created_at,
           // Handle optional fields
-          image_url: typeof rawPost.image_url === 'string' ? rawPost.image_url : null,
-          poll_id: typeof rawPost.poll_id === 'string' ? rawPost.poll_id : null,
-          gif_url: typeof rawPost.gif_url === 'string' ? rawPost.gif_url : null,
-          // Set default profile
-          profile: undefined,
+          image_url: (rawPost.image_url && typeof rawPost.image_url === 'string') ? rawPost.image_url : null,
+          poll_id: (rawPost.poll_id && typeof rawPost.poll_id === 'string') ? rawPost.poll_id : null,
+          gif_url: (rawPost.gif_url && typeof rawPost.gif_url === 'string') ? rawPost.gif_url : null,
           // Set default group
           group: { name: 'Unknown Group' }
         };
@@ -150,10 +155,10 @@ export const PostsList = ({ selectedGroup, refreshTrigger }: PostsListProps) => 
         // Handle group data safely
         if (rawPost.group && 
             typeof rawPost.group === 'object' && 
-            rawPost.group !== null && 
-            'name' in rawPost.group && 
-            rawPost.group.name) {
-          post.group = { name: String(rawPost.group.name) };
+            rawPost.group !== null) {
+          post.group = { 
+            name: rawPost.group.name ? String(rawPost.group.name) : 'Unknown Group' 
+          };
         }
 
         // Handle poll data with comprehensive null checks
@@ -163,14 +168,14 @@ export const PostsList = ({ selectedGroup, refreshTrigger }: PostsListProps) => 
           
           const pollObj = rawPost.poll;
           
-          if ('id' in pollObj && pollObj.id && 
+          if (pollObj && 'id' in pollObj && pollObj.id && 
               'question' in pollObj && pollObj.question) {
             
             const pollOptions: PollOption[] = [];
             
             // Process options safely
-            if ('options' in pollObj && pollObj.options && Array.isArray(pollObj.options)) {
-              for (const opt of pollObj.options) {
+            if (pollObj && 'options' in pollObj && pollObj.options && Array.isArray(pollObj.options)) {
+              pollObj.options.forEach(opt => {
                 if (typeof opt === 'string') {
                   // Handle string options
                   pollOptions.push({ id: crypto.randomUUID(), text: opt });
@@ -187,13 +192,13 @@ export const PostsList = ({ selectedGroup, refreshTrigger }: PostsListProps) => 
                   // Handle null or undefined
                   pollOptions.push({ id: crypto.randomUUID(), text: '' });
                 }
-              }
+              });
             }
 
             // Process votes if they exist
             const pollVotes: PollVote[] = [];
-            if ('votes' in pollObj && pollObj.votes && Array.isArray(pollObj.votes)) {
-              for (const vote of pollObj.votes) {
+            if (pollObj && 'votes' in pollObj && pollObj.votes && Array.isArray(pollObj.votes)) {
+              pollObj.votes.forEach(vote => {
                 if (vote && typeof vote === 'object' && 
                     'id' in vote && 'poll_id' in vote && 
                     'user_id' in vote && 'option_index' in vote) {
@@ -204,7 +209,7 @@ export const PostsList = ({ selectedGroup, refreshTrigger }: PostsListProps) => 
                     option_index: Number(vote.option_index)
                   });
                 }
-              }
+              });
             }
 
             // Create the poll object with safe typed values
