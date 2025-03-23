@@ -13,6 +13,25 @@ import { PollDialog } from "@/components/chat/PollDialog";
 import { toast } from "sonner";
 import { Image, ListChecks, Film, Send, Info } from "lucide-react";
 
+interface PollOption {
+  id: string;
+  text: string;
+}
+
+interface PollVote {
+  id: string;
+  poll_id: string;
+  user_id: string;
+  option_index: number;
+}
+
+interface Poll {
+  id: string;
+  question: string;
+  options: PollOption[];
+  votes: PollVote[];
+}
+
 interface Post {
   id: string;
   user_id: string;
@@ -29,23 +48,7 @@ interface Post {
   group?: {
     name: string;
   };
-  poll?: {
-    question: string;
-    options: PollOption[];
-    votes: PollVote[];
-  };
-}
-
-interface PollOption {
-  id: string;
-  poll_id: string;
-  text: string;
-}
-
-interface PollVote {
-  id: string;
-  poll_option_id: string;
-  user_id: string;
+  poll?: Poll;
 }
 
 interface CreatePostData {
@@ -54,6 +57,8 @@ interface CreatePostData {
   image_url?: string | null;
   poll_id?: string | null;
   gif_url?: string | null;
+  user_id: string;
+  profile_id: string;
 }
 
 const Communities = () => {
@@ -129,8 +134,8 @@ const Communities = () => {
         poll:poll_id (
           id,
           question,
-          poll_options (id, text),
-          poll_votes (id, poll_option_id, user_id)
+          options:text,
+          votes:poll_votes (id, poll_id, user_id, option_index)
         )
       `)
       .order('created_at', { ascending: false });
@@ -146,7 +151,8 @@ const Communities = () => {
       return;
     }
 
-    setPosts(data || []);
+    const fetchedPosts = data as unknown as Post[];
+    setPosts(fetchedPosts || []);
   };
 
   const createPost = async () => {
@@ -169,9 +175,23 @@ const Communities = () => {
         return;
       }
 
+      // Get user profile
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', user.id)
+        .single();
+
+      if (!profileData) {
+        toast.error("Profile not found");
+        return;
+      }
+
       const postData: CreatePostData = {
         content: postContent,
         group_id: selectedGroup,
+        user_id: user.id,
+        profile_id: profileData.id
       };
 
       if (selectedImage) {
@@ -212,12 +232,13 @@ const Communities = () => {
         return;
       }
 
-      // Insert poll
+      // Insert poll with options as JSON
       const { data: pollData, error: pollError } = await supabase
         .from('polls')
         .insert({
           question,
-          user_id: user.id
+          user_id: user.id,
+          options: options // Store options directly as JSON
         })
         .select();
 
@@ -227,19 +248,12 @@ const Communities = () => {
 
       const pollId = pollData[0].id;
 
-      // Insert poll options
-      const optionsToInsert = options.map(option => ({
-        poll_id: pollId,
-        text: option
-      }));
-
-      const { error: optionsError } = await supabase
-        .from('poll_options')
-        .insert(optionsToInsert);
-
-      if (optionsError) {
-        throw optionsError;
-      }
+      // Get user profile
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', user.id)
+        .single();
 
       // Create a post with the poll
       if (selectedGroup) {
@@ -249,7 +263,8 @@ const Communities = () => {
             content: question,
             group_id: selectedGroup,
             poll_id: pollId,
-            user_id: user.id
+            user_id: user.id,
+            profile_id: profileData?.id
           });
 
         if (postError) {
@@ -266,7 +281,7 @@ const Communities = () => {
     }
   };
 
-  const handleVote = async (pollId: string, optionId: string) => {
+  const handleVote = async (pollId: string, optionIndex: number) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -286,7 +301,7 @@ const Communities = () => {
         // Update existing vote
         const { error } = await supabase
           .from('poll_votes')
-          .update({ poll_option_id: optionId })
+          .update({ option_index: optionIndex })
           .eq('id', existingVote.id);
 
         if (error) throw error;
@@ -296,7 +311,7 @@ const Communities = () => {
           .from('poll_votes')
           .insert({
             poll_id: pollId,
-            poll_option_id: optionId,
+            option_index: optionIndex,
             user_id: user.id
           });
 
@@ -332,12 +347,12 @@ const Communities = () => {
 
   const getUserVote = (post: Post, userId: string) => {
     if (!post.poll?.votes) return null;
-    return post.poll.votes.find(vote => vote.user_id === userId)?.poll_option_id;
+    return post.poll.votes.find(vote => vote.user_id === userId)?.option_index;
   };
 
-  const getVoteCount = (post: Post, optionId: string) => {
+  const getVoteCount = (post: Post, optionIndex: number) => {
     if (!post.poll?.votes) return 0;
-    return post.poll.votes.filter(vote => vote.poll_option_id === optionId).length;
+    return post.poll.votes.filter(vote => vote.option_index === optionIndex).length;
   };
 
   const getTotalVotes = (post: Post) => {
@@ -587,28 +602,31 @@ const Communities = () => {
                         <div className="mt-4 border rounded-md p-4">
                           <p className="font-medium mb-2">{post.poll.question}</p>
                           <div className="space-y-2">
-                            {post.poll.options?.map((option: PollOption) => {
-                              const voteCount = getVoteCount(post, option.id);
-                              const totalVotes = getTotalVotes(post);
-                              const percentage = totalVotes > 0 ? Math.round((voteCount / totalVotes) * 100) : 0;
-                              
-                              return (
-                                <div key={option.id} className="relative">
-                                  <Button
-                                    variant="outline"
-                                    className="w-full justify-between hover:bg-muted"
-                                    onClick={() => handleVote(post.poll!.id, option.id)}
-                                  >
-                                    <span>{option.text}</span>
-                                    <span>{voteCount} votes ({percentage}%)</span>
-                                  </Button>
-                                  <div 
-                                    className="absolute top-0 left-0 h-full bg-primary/10 rounded-l-sm"
-                                    style={{ width: `${percentage}%`, zIndex: -1 }}
-                                  />
-                                </div>
-                              );
-                            })}
+                            {Array.isArray(post.poll.options) ? 
+                              post.poll.options.map((option, index) => {
+                                const voteCount = getVoteCount(post, index);
+                                const totalVotes = getTotalVotes(post);
+                                const percentage = totalVotes > 0 ? Math.round((voteCount / totalVotes) * 100) : 0;
+                                
+                                return (
+                                  <div key={index} className="relative">
+                                    <Button
+                                      variant="outline"
+                                      className="w-full justify-between hover:bg-muted"
+                                      onClick={() => handleVote(post.poll!.id, index)}
+                                    >
+                                      <span>{typeof option === 'string' ? option : option.text}</span>
+                                      <span>{voteCount} votes ({percentage}%)</span>
+                                    </Button>
+                                    <div 
+                                      className="absolute top-0 left-0 h-full bg-primary/10 rounded-l-sm"
+                                      style={{ width: `${percentage}%`, zIndex: -1 }}
+                                    />
+                                  </div>
+                                );
+                              })
+                              : null
+                            }
                           </div>
                           <p className="text-sm text-muted-foreground mt-2">
                             {getTotalVotes(post)} votes total
