@@ -1,3 +1,4 @@
+
 import { Navbar } from "@/components/Navbar";
 import { BusinessCard } from "@/components/BusinessCard";
 import { BusinessCategoryFilter } from "@/components/BusinessCategoryFilter";
@@ -145,31 +146,59 @@ const Business = () => {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {sortedBusinesses.map((business) => (
-                    <div key={business.id} className="relative">
-                      {business.average_rating >= 4.5 && (
-                        <Badge variant="success" className="absolute top-2 right-2 z-10 px-2 py-1">
-                          Top Rated
-                        </Badge>
-                      )}
-                      {business.location && (
-                        <div className="absolute bottom-2 left-2 z-10 bg-black/70 text-white text-xs rounded px-2 py-1 flex items-center">
-                          <MapPin className="h-3 w-3 mr-1" />
-                          {business.location}
-                        </div>
-                      )}
-                      <BusinessCard 
-                        key={business.id}
-                        {...business}
-                        image={business.image_url || '/placeholder.svg'}
-                        rating={business.average_rating || 0}
-                        reviews={business.business_ratings?.length || 0}
-                        is_open={business.is_open}
-                        wait_time={business.wait_time}
-                        closure_reason={business.closure_reason}
-                      />
-                    </div>
-                  ))}
+                  {sortedBusinesses.map((business) => {
+                    // Extract only the props that match BusinessCardProps
+                    const {
+                      id,
+                      name,
+                      category,
+                      description,
+                      image_url,
+                      location,
+                      contact,
+                      hours,
+                      verified,
+                      appointment_price,
+                      consultation_price,
+                      is_open,
+                      wait_time,
+                      closure_reason
+                    } = business;
+                    
+                    return (
+                      <div key={id} className="relative">
+                        {business.average_rating >= 4.5 && (
+                          <Badge variant="success" className="absolute top-2 right-2 z-10 px-2 py-1">
+                            Top Rated
+                          </Badge>
+                        )}
+                        {location && (
+                          <div className="absolute bottom-2 left-2 z-10 bg-black/70 text-white text-xs rounded px-2 py-1 flex items-center">
+                            <MapPin className="h-3 w-3 mr-1" />
+                            {location}
+                          </div>
+                        )}
+                        <BusinessCard 
+                          id={id}
+                          name={name}
+                          category={category}
+                          description={description}
+                          image={image_url || '/placeholder.svg'}
+                          rating={business.average_rating || 0}
+                          reviews={business.business_ratings?.length || 0}
+                          location={location || ''}
+                          contact={contact || ''}
+                          hours={hours || ''}
+                          verified={verified || false}
+                          appointment_price={appointment_price}
+                          consultation_price={consultation_price}
+                          is_open={is_open}
+                          wait_time={wait_time}
+                          closure_reason={closure_reason}
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </>
