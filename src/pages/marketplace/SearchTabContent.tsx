@@ -5,6 +5,7 @@ import { ProductFilters } from "@/components/marketplace/ProductFilters";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Filter } from "lucide-react";
 import { useState } from "react";
+import { TrendingSearches } from "@/components/marketplace/TrendingSearches";
 
 interface SearchTabContentProps {
   searchQuery: string;
@@ -41,6 +42,11 @@ export const SearchTabContent = ({
 
   return (
     <div className="animate-fade-up">
+      {/* Trending Searches */}
+      {!searchQuery && (
+        <TrendingSearches onSearchSelect={(search) => window.location.href = `/marketplace?search=${encodeURIComponent(search)}`} />
+      )}
+      
       {/* Filters and Products */}
       <div className="pt-2">
         <div className="flex justify-between items-center mb-4">

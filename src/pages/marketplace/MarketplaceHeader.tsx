@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ShoppingCart, Filter } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { SearchInput } from "@/components/SearchInput";
+import { AutocompleteSearch } from "@/components/marketplace/AutocompleteSearch";
 import { Cart } from "@/components/cart/Cart";
 import { useNavigate } from "react-router-dom";
 
@@ -44,11 +44,12 @@ export const MarketplaceHeader = ({
           </div>
           
           <div className="hidden md:flex items-center flex-1 max-w-2xl mx-4">
-            <SearchInput 
+            <AutocompleteSearch 
               placeholder="Search products..."
               value={searchQuery}
               onChange={setSearchQuery}
               className="w-full bg-white rounded-l-md"
+              onSearchSelect={setSearchQuery}
             />
           </div>
           
@@ -89,11 +90,12 @@ export const MarketplaceHeader = ({
         
         {/* Mobile Search */}
         <div className="mt-2 md:hidden">
-          <SearchInput 
+          <AutocompleteSearch 
             placeholder="Search products..."
             value={searchQuery}
             onChange={setSearchQuery}
             className="w-full bg-white"
+            onSearchSelect={setSearchQuery}
           />
         </div>
       </div>

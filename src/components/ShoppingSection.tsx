@@ -35,7 +35,7 @@ export const ShoppingSection = ({
     queryFn: async () => {
       let query = supabase
         .from('products')
-        .select('*');
+        .select('*, product_purchases(count)');
 
       if (searchQuery) {
         query = query.ilike('title', `%${searchQuery}%`);
@@ -66,24 +66,6 @@ export const ShoppingSection = ({
         }
       }
 
-      switch (sortOption) {
-        case 'newest':
-          query = query.order('created_at', { ascending: false });
-          break;
-        case 'oldest':
-          query = query.order('created_at', { ascending: true });
-          break;
-        case 'price-low':
-          query = query.order('price', { ascending: true });
-          break;
-        case 'price-high':
-          query = query.order('price', { ascending: false });
-          break;
-        case 'most-viewed':
-          query = query.order('views', { ascending: false });
-          break;
-      }
-
       const { data, error } = await query;
       
       if (error) {
@@ -91,7 +73,45 @@ export const ShoppingSection = ({
         throw error;
       }
       
-      return data || [];
+      // Calculate sales count and trending score
+      const productsWithRanking = data?.map(product => {
+        const salesCount = product.product_purchases?.[0]?.count || 0;
+        const viewsWeight = 0.3;
+        const salesWeight = 0.7;
+        
+        // Calculate trending score based on views and sales
+        const trendingScore = (product.views * viewsWeight) + (salesCount * salesWeight);
+        
+        return {
+          ...product,
+          sales_count: salesCount,
+          trending_score: trendingScore
+        };
+      }) || [];
+      
+      // Sort based on selected option
+      switch (sortOption) {
+        case 'newest':
+          return productsWithRanking.sort((a, b) => 
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          );
+        case 'oldest':
+          return productsWithRanking.sort((a, b) => 
+            new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+          );
+        case 'price-low':
+          return productsWithRanking.sort((a, b) => a.price - b.price);
+        case 'price-high':
+          return productsWithRanking.sort((a, b) => b.price - a.price);
+        case 'most-viewed':
+          return productsWithRanking.sort((a, b) => b.views - a.views);
+        case 'best-selling':
+          return productsWithRanking.sort((a, b) => b.sales_count - a.sales_count);
+        case 'trending':
+          return productsWithRanking.sort((a, b) => b.trending_score - a.trending_score);
+        default:
+          return productsWithRanking;
+      }
     }
   });
 
