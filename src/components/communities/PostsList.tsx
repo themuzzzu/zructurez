@@ -48,35 +48,30 @@ interface PostsListProps {
   refreshTrigger: number;
 }
 
-// Define a simpler type for raw posts from the database
-// This avoids recursive type definitions
-interface RawPostData {
+// Use a simpler type for raw database objects to avoid recursive references
+interface BasicPostData {
   id: string;
   user_id: string;
   content: string;
   created_at: string;
-  business_id?: string | null;
-  category?: string;
-  location?: string;
-  profile_id?: string;
-  views?: number;
-  image_url?: string | null;
   group_id?: string | null;
+  business_id?: string | null; 
+  profile_id?: string;
+  image_url?: string | null;
   poll_id?: string | null;
   gif_url?: string | null;
-  profiles?: {
-    username: string;
-    avatar_url: string;
-  } | null;
-  group?: {
-    name?: string;
-  } | null;
-  poll?: {
-    id?: string;
-    question?: string;
-    options?: any;
-    votes?: any;
-  } | null;
+  category?: string;
+  location?: string;
+  views?: number;
+}
+
+interface BasicProfileData {
+  username: string;
+  avatar_url: string;
+}
+
+interface BasicGroupData {
+  name: string;
 }
 
 export const PostsList = ({ selectedGroup, refreshTrigger }: PostsListProps) => {
@@ -118,78 +113,77 @@ export const PostsList = ({ selectedGroup, refreshTrigger }: PostsListProps) => 
       return;
     }
 
-    // Transform the raw data to match our Post interface
     try {
       const transformedPosts: Post[] = [];
       
-      for (const rawPost of data as RawPostData[]) {
-        // Create the post object with type safety
+      for (const rawData of data) {
+        // Cast to a basic post data object to avoid type issues
+        const rawPost = rawData as (BasicPostData & {
+          profiles?: BasicProfileData | null;
+          group?: BasicGroupData | null;
+          poll?: any | null;
+        });
+
+        // Create the post object with mandatory fields
         const post: Post = {
           id: rawPost.id,
           user_id: rawPost.user_id,
-          // Handle group_id or business_id as fallback
+          // Use group_id if present, otherwise try business_id, or fallback to empty string
           group_id: rawPost.group_id || rawPost.business_id || '',
           content: rawPost.content,
           created_at: rawPost.created_at,
-          // Handle optional fields
-          image_url: rawPost.image_url,
-          poll_id: rawPost.poll_id,
-          gif_url: rawPost.gif_url,
-          // Set default group
+          // Default group name
           group: { name: 'Unknown Group' }
         };
 
-        // Handle profile data safely
+        // Add optional fields if they exist
+        if (rawPost.image_url) post.image_url = rawPost.image_url;
+        if (rawPost.poll_id) post.poll_id = rawPost.poll_id;
+        if (rawPost.gif_url) post.gif_url = rawPost.gif_url;
+
+        // Handle profile data 
         if (rawPost.profiles) {
           post.profile = {
-            username: String(rawPost.profiles.username || ''),
-            avatar_url: String(rawPost.profiles.avatar_url || '')
+            username: rawPost.profiles.username || '',
+            avatar_url: rawPost.profiles.avatar_url || ''
           };
         }
 
-        // Handle group data safely
-        if (rawPost.group) {
-          post.group = { 
-            name: rawPost.group.name ? String(rawPost.group.name) : 'Unknown Group' 
+        // Handle group data
+        if (rawPost.group && rawPost.group.name) {
+          post.group = {
+            name: rawPost.group.name
           };
         }
 
-        // Handle poll data with comprehensive null checks
+        // Handle poll data
         if (rawPost.poll) {
-          const pollObj = rawPost.poll;
+          const pollData = rawPost.poll;
           
-          if (pollObj && pollObj.id && pollObj.question) {
+          if (pollData && pollData.id && pollData.question) {
             const pollOptions: PollOption[] = [];
+            const pollVotes: PollVote[] = [];
             
-            // Process options safely
-            if (pollObj.options && Array.isArray(pollObj.options)) {
-              // Type the options array correctly
-              const optionsArray = pollObj.options as any[];
-              
-              optionsArray.forEach(opt => {
+            // Process options
+            if (pollData.options && Array.isArray(pollData.options)) {
+              pollData.options.forEach((opt: any) => {
                 if (typeof opt === 'string') {
-                  // Handle string options
-                  pollOptions.push({ id: crypto.randomUUID(), text: opt });
+                  pollOptions.push({ 
+                    id: crypto.randomUUID(), 
+                    text: opt 
+                  });
                 } else if (opt && typeof opt === 'object' && 'text' in opt) {
-                  // Handle object options with text property
                   pollOptions.push({ 
                     id: ('id' in opt && opt.id) ? String(opt.id) : crypto.randomUUID(), 
-                    text: String(opt.text)
+                    text: String(opt.text) 
                   });
-                } else if (opt) {
-                  // Handle any other non-null value by converting to string
-                  pollOptions.push({ id: crypto.randomUUID(), text: String(opt) });
                 }
               });
             }
-
-            // Process votes if they exist
-            const pollVotes: PollVote[] = [];
-            if (pollObj.votes && Array.isArray(pollObj.votes)) {
-              // Type the votes array correctly
-              const votesArray = pollObj.votes as any[];
-              
-              votesArray.forEach(vote => {
+            
+            // Process votes
+            if (pollData.votes && Array.isArray(pollData.votes)) {
+              pollData.votes.forEach((vote: any) => {
                 if (vote && typeof vote === 'object' && 
                     'id' in vote && 'poll_id' in vote && 
                     'user_id' in vote && 'option_index' in vote) {
@@ -203,10 +197,9 @@ export const PostsList = ({ selectedGroup, refreshTrigger }: PostsListProps) => 
               });
             }
 
-            // Create the poll object with safe typed values
             post.poll = {
-              id: String(pollObj.id),
-              question: String(pollObj.question),
+              id: String(pollData.id),
+              question: String(pollData.question),
               options: pollOptions,
               votes: pollVotes
             };
