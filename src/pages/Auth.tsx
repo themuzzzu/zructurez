@@ -1,3 +1,4 @@
+
 import { Auth as SupabaseAuth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
@@ -5,10 +6,12 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { AuthChangeEvent, Session } from "@supabase/supabase-js";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 const Auth = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(false);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -17,13 +20,7 @@ const Auth = () => {
         
         if (sessionError) {
           console.error('Session check error:', sessionError);
-          if (sessionError.message.includes('invalid_credentials')) {
-            toast.error('Invalid email or password. Please try again.');
-          } else if (sessionError.message.includes('email_not_confirmed')) {
-            toast.error('Please check your email and confirm your account before signing in.');
-          } else {
-            toast.error('Error checking authentication status');
-          }
+          handleAuthError(sessionError);
         } else if (session) {
           navigate('/');
         }
@@ -35,7 +32,9 @@ const Auth = () => {
       }
     };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
+    const handleAuthEvent = (event: AuthChangeEvent, session: Session | null) => {
+      setAuthLoading(false);
+      
       if (event === 'SIGNED_IN' && session) {
         toast.success('Successfully signed in!');
         navigate('/');
@@ -46,7 +45,9 @@ const Auth = () => {
       } else if (event === 'PASSWORD_RECOVERY') {
         toast.info('Please check your email for password reset instructions');
       }
-    });
+    };
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(handleAuthEvent);
 
     checkSession();
 
@@ -54,6 +55,36 @@ const Auth = () => {
       subscription.unsubscribe();
     };
   }, [navigate]);
+
+  const handleAuthError = (error: any) => {
+    if (!error || !error.message) {
+      toast.error('An unknown error occurred');
+      return;
+    }
+
+    const message = error.message.toLowerCase();
+    
+    // Handle specific error types with precise messaging
+    if (message.includes('invalid_credentials') || message.includes('invalid login credentials')) {
+      toast.error('Incorrect email or password');
+    } else if (message.includes('email_not_confirmed')) {
+      toast.error('Please verify your email before signing in');
+    } else if (message.includes('rate_limited')) {
+      toast.error('Too many attempts. Please try again later');
+    } else if (message.includes('user_banned') || message.includes('banned')) {
+      toast.error('This account has been suspended. Please contact support');
+    } else if (message.includes('token_expired') || message.includes('jwt expired')) {
+      toast.error('Your session has expired. Please sign in again');
+    } else if (message.includes('user_not_found')) {
+      toast.error('No account found with this email');
+    } else if (message.includes('already_registered')) {
+      toast.error('An account with this email already exists');
+    } else if (message.includes('weak_password')) {
+      toast.error('Please use a stronger password');
+    } else {
+      toast.error(`Authentication error: ${error.message}`);
+    }
+  };
 
   if (loading) {
     return (
@@ -91,6 +122,9 @@ const Auth = () => {
                 button: {
                   borderRadius: '6px',
                   transition: 'all 0.2s ease',
+                  '&:disabled': {
+                    backgroundColor: 'rgba(227, 24, 55, 0.5)',
+                  }
                 },
                 container: {
                   borderRadius: '8px',
@@ -129,6 +163,23 @@ const Auth = () => {
             }}
             providers={[]}
             redirectTo={`${window.location.origin}/auth/callback`}
+            onlyThirdPartyProviders={false}
+            beforeAuthentication={() => {
+              setAuthLoading(true);
+              return Promise.resolve();
+            }}
+            afterAuthentication={() => {
+              // This gets called regardless of success/failure
+              return Promise.resolve();
+            }}
+            afterVerification={() => {
+              toast.success('Email verified successfully');
+              return Promise.resolve();
+            }}
+            onAuthError={(error) => {
+              setAuthLoading(false);
+              handleAuthError(error);
+            }}
           />
         </div>
       </div>
