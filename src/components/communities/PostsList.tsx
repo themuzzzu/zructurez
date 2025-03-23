@@ -48,8 +48,9 @@ interface PostsListProps {
   refreshTrigger: number;
 }
 
-// Explicit type definition for Supabase response to avoid deep recursion
-type RawPost = {
+// Define a simpler type for raw posts from the database
+// This avoids recursive type definitions
+interface RawPostData {
   id: string;
   user_id: string;
   content: string;
@@ -60,6 +61,9 @@ type RawPost = {
   profile_id?: string;
   views?: number;
   image_url?: string | null;
+  group_id?: string | null;
+  poll_id?: string | null;
+  gif_url?: string | null;
   profiles?: {
     username: string;
     avatar_url: string;
@@ -67,14 +71,11 @@ type RawPost = {
   group?: {
     name?: string;
   } | null;
-  group_id?: string | null;
-  poll_id?: string | null;
-  gif_url?: string | null;
   poll?: {
     id?: string;
     question?: string;
-    options?: Array<string | PollOption>;
-    votes?: PollVote[] | null;
+    options?: any;
+    votes?: any;
   } | null;
 }
 
@@ -121,31 +122,25 @@ export const PostsList = ({ selectedGroup, refreshTrigger }: PostsListProps) => 
     try {
       const transformedPosts: Post[] = [];
       
-      for (const rawPost of data as RawPost[]) {
+      for (const rawPost of data as RawPostData[]) {
         // Create the post object with type safety
         const post: Post = {
           id: rawPost.id,
           user_id: rawPost.user_id,
           // Handle group_id or business_id as fallback
-          group_id: (rawPost.group_id && typeof rawPost.group_id === 'string') 
-                   ? rawPost.group_id 
-                   : (rawPost.business_id && typeof rawPost.business_id === 'string') 
-                   ? rawPost.business_id 
-                   : '',
+          group_id: rawPost.group_id || rawPost.business_id || '',
           content: rawPost.content,
           created_at: rawPost.created_at,
           // Handle optional fields
-          image_url: (rawPost.image_url && typeof rawPost.image_url === 'string') ? rawPost.image_url : null,
-          poll_id: (rawPost.poll_id && typeof rawPost.poll_id === 'string') ? rawPost.poll_id : null,
-          gif_url: (rawPost.gif_url && typeof rawPost.gif_url === 'string') ? rawPost.gif_url : null,
+          image_url: rawPost.image_url,
+          poll_id: rawPost.poll_id,
+          gif_url: rawPost.gif_url,
           // Set default group
           group: { name: 'Unknown Group' }
         };
 
         // Handle profile data safely
-        if (rawPost.profiles && 
-            typeof rawPost.profiles === 'object' && 
-            rawPost.profiles !== null) {
+        if (rawPost.profiles) {
           post.profile = {
             username: String(rawPost.profiles.username || ''),
             avatar_url: String(rawPost.profiles.avatar_url || '')
@@ -153,29 +148,25 @@ export const PostsList = ({ selectedGroup, refreshTrigger }: PostsListProps) => 
         }
 
         // Handle group data safely
-        if (rawPost.group && 
-            typeof rawPost.group === 'object' && 
-            rawPost.group !== null) {
+        if (rawPost.group) {
           post.group = { 
             name: rawPost.group.name ? String(rawPost.group.name) : 'Unknown Group' 
           };
         }
 
         // Handle poll data with comprehensive null checks
-        if (rawPost.poll && 
-            typeof rawPost.poll === 'object' && 
-            rawPost.poll !== null) {
-          
+        if (rawPost.poll) {
           const pollObj = rawPost.poll;
           
-          if (pollObj && 'id' in pollObj && pollObj.id && 
-              'question' in pollObj && pollObj.question) {
-            
+          if (pollObj && pollObj.id && pollObj.question) {
             const pollOptions: PollOption[] = [];
             
             // Process options safely
-            if (pollObj && 'options' in pollObj && pollObj.options && Array.isArray(pollObj.options)) {
-              pollObj.options.forEach(opt => {
+            if (pollObj.options && Array.isArray(pollObj.options)) {
+              // Type the options array correctly
+              const optionsArray = pollObj.options as any[];
+              
+              optionsArray.forEach(opt => {
                 if (typeof opt === 'string') {
                   // Handle string options
                   pollOptions.push({ id: crypto.randomUUID(), text: opt });
@@ -188,17 +179,17 @@ export const PostsList = ({ selectedGroup, refreshTrigger }: PostsListProps) => 
                 } else if (opt) {
                   // Handle any other non-null value by converting to string
                   pollOptions.push({ id: crypto.randomUUID(), text: String(opt) });
-                } else {
-                  // Handle null or undefined
-                  pollOptions.push({ id: crypto.randomUUID(), text: '' });
                 }
               });
             }
 
             // Process votes if they exist
             const pollVotes: PollVote[] = [];
-            if (pollObj && 'votes' in pollObj && pollObj.votes && Array.isArray(pollObj.votes)) {
-              pollObj.votes.forEach(vote => {
+            if (pollObj.votes && Array.isArray(pollObj.votes)) {
+              // Type the votes array correctly
+              const votesArray = pollObj.votes as any[];
+              
+              votesArray.forEach(vote => {
                 if (vote && typeof vote === 'object' && 
                     'id' in vote && 'poll_id' in vote && 
                     'user_id' in vote && 'option_index' in vote) {
