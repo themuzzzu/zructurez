@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Post, Poll, PollVote } from "./PostsList";
+import { Post, Poll, PollVote } from "./types/postTypes";
 
 interface PostItemProps {
   post: Post;

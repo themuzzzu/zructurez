@@ -46,10 +46,13 @@ export const Messages = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      // Using a custom table column for last_seen_at instead of default profile properties
       const { error } = await supabase
-        .from('profiles')
-        .update({ last_seen_at: new Date().toISOString() })
-        .eq('id', user.id);
+        .from('user_presence')
+        .upsert({ 
+          user_id: user.id,
+          last_seen_at: new Date().toISOString() 
+        });
 
       if (error) {
         console.error('Error updating user presence:', error);

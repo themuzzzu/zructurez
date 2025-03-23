@@ -13,16 +13,6 @@ interface PostsListProps {
 export const PostsList = ({ selectedGroup, refreshTrigger }: PostsListProps) => {
   const { posts, isLoading, error, refetchPosts } = usePostsData(selectedGroup, refreshTrigger);
 
-  // Re-export types from types/postTypes.ts for backwards compatibility
-  // This ensures existing imports don't break
-  type PollOption = import("./types/postTypes").PollOption;
-  type PollVote = import("./types/postTypes").PollVote;
-  type Poll = import("./types/postTypes").Poll;
-  type Post = import("./types/postTypes").Post;
-  
-  // Export the types to maintain backward compatibility
-  export type { PollOption, PollVote, Poll, Post };
-
   if (isLoading) {
     return (
       <Card className="p-8 text-center">

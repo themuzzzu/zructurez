@@ -1,4 +1,3 @@
-
 import { FoldersSection } from "@/components/chat/FoldersSection";
 import { ChatList } from "@/components/chat/ChatList";
 import { GroupList } from "@/components/groups/GroupList";
@@ -23,6 +22,7 @@ interface ChatSidebarProps {
   onFolderSelect: (folder: string) => void;
   onSearchChange: (query: string) => void;
   onNewChat: () => void;
+  userPresence?: Record<string, string>;
 }
 
 export const ChatSidebar = ({
@@ -39,6 +39,7 @@ export const ChatSidebar = ({
   onFolderSelect,
   onSearchChange,
   onNewChat,
+  userPresence = {},
 }: ChatSidebarProps) => {
   return (
     <div className="w-full md:col-span-4 lg:col-span-3 border-r border-t border-b md:border-l rounded-none md:rounded-l-lg overflow-hidden bg-background shadow-sm h-full flex flex-col">
@@ -83,6 +84,7 @@ export const ChatSidebar = ({
             searchQuery={searchQuery}
             onSearchChange={onSearchChange}
             onNewChat={onNewChat}
+            userPresence={userPresence}
           />
         </TabsContent>
 
