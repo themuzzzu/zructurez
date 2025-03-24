@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,12 +6,11 @@ import { Button } from "@/components/ui/button";
 import { MapPin, Store, Star, ArrowRightCircle } from "lucide-react";
 import { Business } from "@/types/business";
 
-// Updated interface to match what we're using
-interface LocalBusiness extends Partial<Business> {
+interface LocalBusiness {
   id: string;
   name: string;
   description: string;
-  image_url?: string; // Using image_url instead of logo_url
+  image_url?: string | null;
   rating?: number;
   distance: number;
   location: string | null;
@@ -23,7 +21,6 @@ export const LocalBusinessSpotlight = () => {
   const [locationPermission, setLocationPermission] = useState<'granted' | 'denied' | 'pending'>('pending');
 
   useEffect(() => {
-    // Check if geolocation is available in the browser
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -54,16 +51,15 @@ export const LocalBusinessSpotlight = () => {
 
       if (error) throw error;
 
-      // Calculate distance (simplified for demo) and add default rating if missing
-      return data.map((business) => {
-        // In a real app, use a proper distance calculation algorithm
-        // For demo purposes, we'll add a random distance
-        return {
-          ...business,
-          rating: 4.5, // Default rating if none exists
-          distance: Math.round(Math.random() * 10) / 10, // Random distance between 0-10 km
-        };
-      }).sort((a, b) => a.distance - b.distance) as LocalBusiness[];
+      return data.map((business: any) => ({
+        id: business.id,
+        name: business.name,
+        description: business.description,
+        image_url: business.image_url,
+        rating: 4.5,
+        distance: Math.round(Math.random() * 10) / 10,
+        location: business.location
+      })) as LocalBusiness[];
     },
     enabled: !!userLocation,
   });

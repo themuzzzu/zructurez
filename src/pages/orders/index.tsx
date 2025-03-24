@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -59,8 +58,8 @@ const OrdersPage = () => {
   const [orderFilter, setOrderFilter] = useState<'all' | 'pending' | 'processing' | 'shipped' | 'delivered'>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Fetch orders
-  const { data: orders = [], isLoading } = useQuery({
+  // Fetch orders with updated typings
+  const { data: ordersData = [], isLoading } = useQuery({
     queryKey: ['orders'],
     queryFn: async () => {
       const { data: session } = await supabase.auth.getSession();
@@ -99,15 +98,20 @@ const OrdersPage = () => {
               return { ...order, order_items: [] };
             }
             
-            // Fetch address data
-            const { data: addressData, error: addressError } = await supabase
-              .from('user_addresses')
-              .select('*')
-              .eq('id', order.address_id)
-              .single();
-              
-            if (addressError && addressError.code !== 'PGRST116') {
-              console.error('Error fetching address:', addressError);
+            // Fetch address data if address_id exists
+            let addressData = null;
+            if (order.address_id) {
+              const { data: address, error: addressError } = await supabase
+                .from('user_addresses')
+                .select('*')
+                .eq('id', order.address_id)
+                .single();
+                
+              if (addressError && addressError.code !== 'PGRST116') {
+                console.error('Error fetching address:', addressError);
+              } else {
+                addressData = address;
+              }
             }
             
             return { 
@@ -118,13 +122,13 @@ const OrdersPage = () => {
           })
         );
         
-        return ordersWithItems as Order[];
+        return ordersWithItems as unknown as Order[];
       });
     },
   });
 
-  // Filter orders based on status
-  const filteredOrders = orders.filter(order => {
+  // Filter the orders based on status and search
+  const filteredOrders = (ordersData || []).filter(order => {
     if (orderFilter !== 'all' && order.status !== orderFilter) {
       return false;
     }

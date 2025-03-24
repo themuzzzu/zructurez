@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -15,7 +14,6 @@ import { CheckoutPaymentMethod } from "@/components/checkout/CheckoutPaymentMeth
 import { CheckoutSummary } from "@/components/checkout/CheckoutSummary";
 import { measureApiCall } from "@/utils/performanceTracking";
 
-// Define interfaces
 interface CartItem {
   quantity: number;
   products: {
@@ -62,7 +60,6 @@ const CheckoutPage = () => {
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Fetch cart items
   const { data: cartItems = [], isLoading: isLoadingCart } = useQuery({
     queryKey: ['cart'],
     queryFn: async () => {
@@ -91,7 +88,6 @@ const CheckoutPage = () => {
     },
   });
 
-  // Fetch user addresses
   const { data: addresses = [], isLoading: isLoadingAddresses } = useQuery({
     queryKey: ['user-addresses'],
     queryFn: async () => {
@@ -113,7 +109,6 @@ const CheckoutPage = () => {
     },
   });
 
-  // Fetch available coupons
   const { data: coupons = [] } = useQuery({
     queryKey: ['coupons'],
     queryFn: async () => {
@@ -131,18 +126,15 @@ const CheckoutPage = () => {
     },
   });
 
-  // Auto-apply best coupon based on cart value
   useEffect(() => {
     if (coupons.length > 0 && cartItems.length > 0) {
       const cartTotal = calculateSubtotal();
       
-      // Find applicable coupons
       const applicableCoupons = coupons.filter(coupon => 
         cartTotal >= (coupon.min_order_value || 0)
       );
       
       if (applicableCoupons.length > 0) {
-        // Find the coupon with the highest discount value
         const bestCoupon = applicableCoupons.reduce((best, current) => {
           const bestDiscount = calculateCouponDiscount(best, cartTotal);
           const currentDiscount = calculateCouponDiscount(current, cartTotal);
@@ -156,7 +148,6 @@ const CheckoutPage = () => {
     }
   }, [coupons, cartItems]);
 
-  // Apply coupon mutation
   const applyCouponMutation = useMutation({
     mutationFn: async (code: string) => {
       return await measureApiCall('apply-coupon', async () => {
@@ -182,7 +173,6 @@ const CheckoutPage = () => {
     },
   });
 
-  // Place order mutation
   const placeOrderMutation = useMutation({
     mutationFn: async () => {
       const { data: session } = await supabase.auth.getSession();
@@ -195,7 +185,6 @@ const CheckoutPage = () => {
       }
 
       return await measureApiCall('place-order', async () => {
-        // 1. Create order
         const { data: order, error: orderError } = await supabase
           .from('orders')
           .insert({
@@ -214,7 +203,6 @@ const CheckoutPage = () => {
 
         if (orderError) throw orderError;
 
-        // 2. Create order items
         const orderItems = cartItems.map(item => ({
           order_id: order.id,
           product_id: item.products.id,
@@ -229,7 +217,6 @@ const CheckoutPage = () => {
 
         if (itemsError) throw itemsError;
 
-        // 3. Clear cart
         const { error: cartError } = await supabase
           .from('cart_items')
           .delete()
@@ -237,7 +224,6 @@ const CheckoutPage = () => {
 
         if (cartError) throw cartError;
 
-        // 4. Create a notification
         await supabase
           .from('notifications')
           .insert({
@@ -245,7 +231,6 @@ const CheckoutPage = () => {
             message: `Your order #${order.id.substr(0, 8)} has been placed successfully!`,
           });
 
-        // 5. Return order details
         return order;
       });
     },
@@ -259,7 +244,6 @@ const CheckoutPage = () => {
     },
   });
 
-  // Calculate prices
   const calculateSubtotal = () => {
     return cartItems.reduce((sum, item) => {
       return sum + (item.products?.price || 0) * item.quantity;
@@ -284,14 +268,13 @@ const CheckoutPage = () => {
 
   const calculateShippingFee = () => {
     const subtotal = calculateSubtotal();
-    return subtotal >= 500 ? 0 : 50; // Free shipping for orders over ₹500
+    return subtotal >= 500 ? 0 : 50;
   };
 
   const calculateTotal = () => {
     return calculateSubtotal() - calculateDiscount() + calculateShippingFee();
   };
 
-  // Format price in Indian Rupees
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
@@ -322,8 +305,6 @@ const CheckoutPage = () => {
       if (selectedPaymentMethod === 'cod') {
         await placeOrderMutation.mutateAsync();
       } else {
-        // For online payments, we would normally integrate with payment gateway here
-        // For demo purposes, we'll just simulate a successful payment
         setTimeout(async () => {
           await placeOrderMutation.mutateAsync();
           setIsProcessing(false);
@@ -334,7 +315,6 @@ const CheckoutPage = () => {
     }
   };
 
-  // Redirect to marketplace if cart is empty
   useEffect(() => {
     if (!isLoadingCart && cartItems.length === 0) {
       toast.error('Your cart is empty');
@@ -386,7 +366,6 @@ const CheckoutPage = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Checkout Steps */}
           <div className="col-span-2">
             {currentStep === 'address' && (
               <CheckoutAddress 
@@ -451,7 +430,6 @@ const CheckoutPage = () => {
             )}
           </div>
 
-          {/* Order Summary */}
           <div className="col-span-1">
             <CheckoutSummary
               cartItems={cartItems}

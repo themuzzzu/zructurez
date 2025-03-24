@@ -120,15 +120,28 @@ type CustomSchema = Database['public']['Tables'] & {
   };
 };
 
-// Create a custom type for our extended Supabase client
-type CustomSupabaseClient = ReturnType<typeof createClient<Database>> & {
+// Create the Supabase client with the standard types
+const supabaseClient = createClient<Database>(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY,
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+    },
+  }
+);
+
+// Create a custom type for our client that overrides the 'from' method
+export const supabase = {
+  ...supabaseClient,
+  from: (table: string) => {
+    return supabaseClient.from(table as any);
+  },
+} as unknown as ReturnType<typeof createClient<Database>> & {
   from<T extends keyof CustomSchema>(
     table: T
-  ): ReturnType<typeof createClient<Database>['from']> & {
-    select<U extends keyof CustomSchema[T]['Row']>(
-      columns?: U | '*'
-    ): any;
-  };
+  ): ReturnType<typeof createClient<Database>['from']>;
   rpc: ReturnType<typeof createClient<Database>>["rpc"] & {
     (
       fn: "increment_ad_views" | "increment_ad_clicks" | "update_user_presence" | "get_user_presence" | "record_ad_conversion" | "record_ad_impression",
@@ -142,15 +155,3 @@ type CustomSupabaseClient = ReturnType<typeof createClient<Database>> & {
     ): Promise<{ data: any; error: any }>;
   };
 };
-
-// Create and export the Supabase client with our custom type
-export const supabase = createClient<Database>(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY,
-  {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-    },
-  }
-) as CustomSupabaseClient;
