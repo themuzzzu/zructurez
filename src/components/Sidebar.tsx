@@ -27,7 +27,6 @@ interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 const FilledIcon = ({ Icon }: { Icon: React.ElementType }) => (
   <div className="relative">
     <Icon size={20} fill="white" stroke="black" strokeWidth={1.5} />
-    <div className="absolute -top-2 -right-1 w-2 h-2 bg-blue-500 rounded-full"></div>
   </div>
 );
 
@@ -73,7 +72,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
           variant="ghost"
           size="icon"
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="hover:bg-zinc-800 transition-all duration-200"
+          className="hover:bg-zinc-800 transition-all duration-200 rounded-full"
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {isCollapsed ? (
@@ -93,7 +92,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
               key={route.path}
               variant="ghost"
               className={cn(
-                "w-full p-0 justify-center",
+                "w-full p-0 justify-center rounded-full",
                 isActive && "bg-zinc-800"
               )}
               onClick={() => navigate(route.path)}
@@ -110,7 +109,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
               variant="ghost"
               className={cn(
                 "w-full justify-start gap-4 rounded-full px-4",
-                isActive ? "bg-gray-800" : "hover:bg-gray-800"
+                isActive ? "bg-zinc-800" : "hover:bg-zinc-800"
               )}
               onClick={() => navigate(route.path)}
             >
@@ -132,7 +131,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
         {isCollapsed ? (
           <Button
             variant="ghost"
-            className="w-full p-0 justify-center mt-4"
+            className="w-full p-0 justify-center mt-4 rounded-full"
             onClick={toggleTheme}
           >
             <SunMoon className="h-5 w-5 text-muted-foreground" />

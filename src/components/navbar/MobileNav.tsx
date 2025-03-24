@@ -15,7 +15,6 @@ import { cn } from "@/lib/utils";
 const FilledIcon = ({ Icon }: { Icon: React.ElementType }) => (
   <div className="relative">
     <Icon className="h-5 w-5" fill="white" stroke="black" strokeWidth={1.5} />
-    <div className="absolute -top-2 -right-1 w-2 h-2 bg-blue-500 rounded-full"></div>
   </div>
 );
 
@@ -49,7 +48,7 @@ export const MobileNav = () => {
               variant="ghost"
               size="icon"
               className={cn(
-                "flex items-center justify-center h-10 w-10 p-0",
+                "flex items-center justify-center h-10 w-10 p-0 rounded-full",
                 isActive && "bg-zinc-800"
               )}
               onClick={() => navigate(item.path)}
@@ -58,10 +57,7 @@ export const MobileNav = () => {
               {isActive ? (
                 <FilledIcon Icon={Icon} />
               ) : (
-                <Icon className={cn(
-                  "h-5 w-5", 
-                  isActive ? "text-white" : "text-muted-foreground"
-                )} />
+                <Icon className="h-5 w-5 text-muted-foreground" />
               )}
             </Button>
           );
@@ -71,7 +67,7 @@ export const MobileNav = () => {
             <Button 
               variant="ghost" 
               size="icon"
-              className="flex items-center justify-center h-10 w-10 p-0"
+              className="flex items-center justify-center h-10 w-10 p-0 rounded-full"
               aria-label="More options"
             >
               <MoreVertical className="h-5 w-5 text-muted-foreground" />
