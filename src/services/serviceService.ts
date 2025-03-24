@@ -290,7 +290,7 @@ export const getTrendingCategories = async (limit = 5) => {
     if (error) throw error;
     
     // Count occurrences of each category
-    const categoryCounts = {};
+    const categoryCounts: Record<string, number> = {};
     data.forEach(service => {
       if (service.category) {
         categoryCounts[service.category] = (categoryCounts[service.category] || 0) + 1;
@@ -300,7 +300,7 @@ export const getTrendingCategories = async (limit = 5) => {
     // Convert to array and sort by count
     const sortedCategories = Object.entries(categoryCounts)
       .map(([category, count]) => ({ category, count }))
-      .sort((a, b) => b.count - a.count)
+      .sort((a, b) => Number(b.count) - Number(a.count))
       .slice(0, limit);
     
     return sortedCategories;
