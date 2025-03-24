@@ -11,6 +11,14 @@ import {
 import { useTheme } from "../ThemeProvider";
 import { cn } from "@/lib/utils";
 
+// Create a filled icon component for mobile nav
+const FilledIcon = ({ Icon }: { Icon: React.ElementType }) => (
+  <div className="relative">
+    <Icon className="h-5 w-5" fill="white" stroke="black" strokeWidth={1.5} />
+    <div className="absolute -top-2 -right-1 w-2 h-2 bg-blue-500 rounded-full"></div>
+  </div>
+);
+
 export const MobileNav = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -47,10 +55,14 @@ export const MobileNav = () => {
               onClick={() => navigate(item.path)}
               aria-label={item.label}
             >
-              <Icon className={cn(
-                "h-5 w-5", 
-                isActive ? "text-white" : "text-muted-foreground"
-              )} />
+              {isActive ? (
+                <FilledIcon Icon={Icon} />
+              ) : (
+                <Icon className={cn(
+                  "h-5 w-5", 
+                  isActive ? "text-white" : "text-muted-foreground"
+                )} />
+              )}
             </Button>
           );
         })}

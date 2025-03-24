@@ -4,7 +4,7 @@ import { GroupsSidebar } from "@/components/communities/GroupsSidebar";
 import { PostCreator } from "@/components/communities/PostCreator";
 import { PostsList } from "@/components/communities/PostsList";
 import { Button } from "@/components/ui/button";
-import { Plus, Users, Filter } from "lucide-react";
+import { Plus, Users, Filter, Home, ArrowLeft } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { CreateGroupDialog } from "@/components/groups/CreateGroupDialog";
 import { JoinGroupDialog } from "@/components/communities/JoinGroupDialog";
@@ -78,18 +78,35 @@ const Communities = () => {
     setShowJoinGroupDialog(true);
   };
 
+  const handleBackToHome = () => {
+    navigate('/');
+  };
+
   return (
     <div className="container max-w-[1400px] pt-20 pb-16">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Communities</h1>
+        <div className="flex items-center gap-3">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleBackToHome}
+            className="flex items-center gap-1"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span className="hidden sm:inline">Back to Home</span>
+          </Button>
+          <h1 className="text-3xl font-bold">Communities</h1>
+        </div>
         <div className="flex gap-2">
           <Button onClick={handleCreateGroupClick} variant="outline">
             <Plus className="h-4 w-4 mr-2" />
-            Create Community
+            <span className="hidden sm:inline">Create Community</span>
+            <span className="sm:hidden">Create</span>
           </Button>
           <Button onClick={handleJoinGroupClick}>
             <Users className="h-4 w-4 mr-2" />
-            Join Communities
+            <span className="hidden sm:inline">Join Communities</span>
+            <span className="sm:hidden">Join</span>
           </Button>
         </div>
       </div>
