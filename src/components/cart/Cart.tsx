@@ -1,12 +1,17 @@
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { CartItem } from "./CartItem";
 import { Button } from "../ui/button";
 import { ShoppingBag, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+import { measureApiCall } from "@/utils/performanceTracking";
 
 export const Cart = () => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  
   const { data: cartItems, isLoading } = useQuery({
     queryKey: ['cart'],
     queryFn: async () => {
@@ -15,21 +20,23 @@ export const Cart = () => {
         throw new Error('User must be logged in to view cart');
       }
 
-      const { data, error } = await supabase
-        .from('cart_items')
-        .select(`
-          quantity,
-          products (
-            id,
-            title,
-            price,
-            image_url
-          )
-        `)
-        .order('created_at', { ascending: false });
+      return await measureApiCall('fetch-cart-items', async () => {
+        const { data, error } = await supabase
+          .from('cart_items')
+          .select(`
+            quantity,
+            products (
+              id,
+              title,
+              price,
+              image_url
+            )
+          `)
+          .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      return data;
+        if (error) throw error;
+        return data;
+      });
     },
   });
 
@@ -49,43 +56,20 @@ export const Cart = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cart'] });
-      toast.success("Order placed successfully!");
+      toast.success("Cart cleared successfully!");
     },
     onError: () => {
-      toast.error("Failed to process order");
+      toast.error("Failed to clear cart");
     },
   });
 
-  const handleCheckout = async () => {
+  const handleCheckout = () => {
     if (!cartItems?.length) {
       toast.error("Your cart is empty");
       return;
     }
-
-    try {
-      // Process the order
-      await clearCartMutation.mutateAsync();
-      
-      // Create a notification for the order
-      const { data: session } = await supabase.auth.getSession();
-      if (session?.session?.user) {
-        const { error: notificationError } = await supabase
-          .from('notifications')
-          .insert({
-            user_id: session.session.user.id,
-            message: `Your order has been placed successfully! Total amount: ${formatPrice(total)}`,
-          });
-
-        if (notificationError) {
-          console.error('Error creating notification:', notificationError);
-        }
-      }
-
-      toast.success("Order placed successfully!");
-    } catch (error) {
-      console.error('Error during checkout:', error);
-      toast.error("Checkout failed");
-    }
+    
+    navigate('/checkout');
   };
 
   const total = cartItems?.reduce((sum, item) => {
@@ -130,16 +114,9 @@ export const Cart = () => {
             <Button 
               className="w-full" 
               onClick={handleCheckout}
-              disabled={clearCartMutation.isPending}
             >
-              {clearCartMutation.isPending ? (
-                "Processing..."
-              ) : (
-                <>
-                  Proceed to Checkout
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </>
-              )}
+              Proceed to Checkout
+              <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
         </>
