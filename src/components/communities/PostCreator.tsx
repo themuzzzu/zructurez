@@ -1,346 +1,220 @@
-import { useState } from "react";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { ImageUpload } from "@/components/image-upload/ImageUpload";
-import { PollDialog } from "@/components/chat/PollDialog";
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { Image, ListChecks, Film, Send } from "lucide-react";
 
-interface PostCreatorProps {
+import { useState, useRef, ChangeEvent } from "react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Image as ImageIcon, Send, X, Calendar, CalendarClock } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { createPost, optimizeImage, generateVideoThumbnail } from "@/services/postService";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
+import { SchedulePostDialog } from "./SchedulePostDialog";
+
+type PostCreatorProps = {
   selectedGroup: string | null;
   onPostCreated: () => void;
-}
-
-// Define the post data interface with optional image_url and gif_url
-interface PostData {
-  content: string;
-  group_id: string;
-  user_id: string;
-  profile_id: string;
-  image_url?: string;
-  gif_url?: string;
-}
+};
 
 export const PostCreator = ({ selectedGroup, onPostCreated }: PostCreatorProps) => {
-  const [postContent, setPostContent] = useState("");
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [selectedGif, setSelectedGif] = useState<string | null>(null);
-  const [isPollDialogOpen, setIsPollDialogOpen] = useState(false);
-  const [isPosting, setIsPosting] = useState(false);
-  const [showGifPicker, setShowGifPicker] = useState(false);
-  const [gifSearch, setGifSearch] = useState("");
-  const [gifs, setGifs] = useState<any[]>([]);
+  const [content, setContent] = useState("");
+  const [image, setImage] = useState<string | null>(null);
+  const [imageLoading, setImageLoading] = useState(false);
+  const [posting, setPosting] = useState(false);
+  const [showScheduleDialog, setShowScheduleDialog] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { user, userDetails } = useAuth();
 
-  const TENOR_API_KEY = "LIVDSRZULELA"; // Use env variable in production
-  const TENOR_CLIENT_KEY = "marketplace_app";
+  const handleImageSelect = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  const createPost = async () => {
-    if (!postContent.trim() && !selectedImage && !selectedGif) {
+    try {
+      setImageLoading(true);
+
+      // Check if it's an image or video
+      if (file.type.startsWith('image/')) {
+        // Optimize and get the image
+        const optimizedImage = await optimizeImage(file);
+        setImage(optimizedImage);
+      } else if (file.type.startsWith('video/')) {
+        // Generate thumbnail for video
+        const thumbnail = await generateVideoThumbnail(file);
+        setImage(thumbnail);
+        // You could also upload the video separately if needed
+      } else {
+        toast.error("Unsupported file type");
+      }
+    } catch (error) {
+      console.error("Error processing media:", error);
+      toast.error("Error processing media");
+    } finally {
+      setImageLoading(false);
+    }
+  };
+
+  const handlePost = async () => {
+    if (!content.trim() && !image) {
       toast.error("Please add some content to your post");
       return;
     }
 
-    if (!selectedGroup) {
-      toast.error("Please select a group to post to");
+    if (!user) {
+      toast.error("You must be logged in to post");
       return;
     }
 
-    setIsPosting(true);
-
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast.error("You must be logged in to post");
-        return;
-      }
-
-      // Get user profile
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('id', user.id)
-        .single();
-
-      if (!profileData) {
-        toast.error("Profile not found");
-        return;
-      }
-
-      const postData: PostData = {
-        content: postContent,
-        group_id: selectedGroup,
-        user_id: user.id,
-        profile_id: profileData.id
-      };
-
-      if (selectedImage) {
-        postData.image_url = selectedImage;
-      }
-
-      if (selectedGif) {
-        postData.gif_url = selectedGif;
-      }
-
-      const { error } = await supabase
-        .from('posts')
-        .insert(postData)
-        .select();
-
-      if (error) {
-        throw error;
-      }
-
-      setPostContent("");
-      setSelectedImage(null);
-      setSelectedGif(null);
+      setPosting(true);
+      await createPost({
+        content,
+        image,
+        category: "general",
+        location: selectedGroup ? undefined : "local",
+      });
+      
+      setContent("");
+      setImage(null);
+      toast.success("Post created successfully!");
       onPostCreated();
-      toast.success("Post created successfully");
     } catch (error) {
-      console.error('Error creating post:', error);
+      console.error("Error creating post:", error);
       toast.error("Failed to create post");
     } finally {
-      setIsPosting(false);
+      setPosting(false);
     }
   };
 
-  const handleCreatePoll = async (question: string, options: string[]) => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast.error("You must be logged in to create a poll");
-        return;
-      }
-
-      // Insert poll with options as JSON
-      const { data: pollData, error: pollError } = await supabase
-        .from('polls')
-        .insert({
-          question,
-          user_id: user.id,
-          options // Store options directly as JSON
-        })
-        .select();
-
-      if (pollError || !pollData?.[0]) {
-        throw pollError;
-      }
-
-      const pollId = pollData[0].id;
-
-      // Get user profile
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('id', user.id)
-        .single();
-
-      // Create a post with the poll
-      if (selectedGroup) {
-        const { error: postError } = await supabase
-          .from('posts')
-          .insert({
-            content: question,
-            group_id: selectedGroup,
-            poll_id: pollId,
-            user_id: user.id,
-            profile_id: profileData?.id
-          });
-
-        if (postError) {
-          throw postError;
-        }
-      }
-
-      onPostCreated();
-      setIsPollDialogOpen(false);
-      toast.success("Poll created successfully");
-    } catch (error) {
-      console.error('Error creating poll:', error);
-      toast.error("Failed to create poll");
+  const removeImage = () => {
+    setImage(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   };
 
-  const searchGifs = async (searchTerm: string) => {
-    try {
-      const response = await fetch(
-        `https://api.tenor.com/v1/search?q=${encodeURIComponent(searchTerm)}&key=${TENOR_API_KEY}&client_key=${TENOR_CLIENT_KEY}&limit=12`
-      );
-      
-      const data = await response.json();
-      setGifs(data.results || []);
-    } catch (error) {
-      console.error('Error searching GIFs:', error);
-      toast.error("Failed to load GIFs");
+  const openScheduleDialog = () => {
+    if (!content.trim() && !image) {
+      toast.error("Please add some content to schedule");
+      return;
     }
+
+    if (!user) {
+      toast.error("You must be logged in to schedule posts");
+      return;
+    }
+
+    setShowScheduleDialog(true);
   };
 
-  const handleGifClick = (gifUrl: string) => {
-    setSelectedGif(gifUrl);
-    setShowGifPicker(false);
+  const handleScheduleSuccess = () => {
+    setContent("");
+    setImage(null);
+    onPostCreated();
   };
+
+  if (!user) {
+    return (
+      <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 mb-6 text-center">
+        <p className="text-muted-foreground">Please sign in to create posts</p>
+      </div>
+    );
+  }
 
   return (
-    <Card className="p-4 mb-6">
-      <div className="space-y-4">
-        <div className="flex items-center gap-4">
-          <Avatar className="h-10 w-10">
-            <AvatarFallback>U</AvatarFallback>
-          </Avatar>
-          <div className="flex-1">
-            <Textarea
-              placeholder="Share something with the community..."
-              value={postContent}
-              onChange={(e) => setPostContent(e.target.value)}
-              className="min-h-[100px]"
-            />
-          </div>
-        </div>
+    <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 mb-6">
+      <div className="flex gap-3">
+        <Avatar className="h-10 w-10">
+          <AvatarImage src={userDetails?.avatar_url || undefined} />
+          <AvatarFallback>{user?.email?.charAt(0) || "U"}</AvatarFallback>
+        </Avatar>
+        <div className="flex-grow space-y-3">
+          <Textarea
+            placeholder={
+              selectedGroup
+                ? "Share something with this community..."
+                : "What's on your mind?"
+            }
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            className="min-h-[80px] bg-zinc-800 border-zinc-700 resize-none"
+          />
 
-        {selectedImage && (
-          <div className="relative mt-2">
-            <img 
-              src={selectedImage} 
-              alt="Selected image" 
-              className="max-h-60 rounded-md object-contain"
-            />
-            <Button 
-              variant="destructive" 
-              size="sm" 
-              className="absolute top-2 right-2"
-              onClick={() => setSelectedImage(null)}
-            >
-              Remove
-            </Button>
-          </div>
-        )}
+          {imageLoading && (
+            <div className="h-40 rounded-md bg-zinc-800 animate-pulse flex items-center justify-center">
+              <p className="text-sm text-muted-foreground">Processing media...</p>
+            </div>
+          )}
 
-        {selectedGif && (
-          <div className="relative mt-2">
-            <img 
-              src={selectedGif} 
-              alt="Selected GIF" 
-              className="max-h-60 rounded-md object-contain"
-            />
-            <Button 
-              variant="destructive" 
-              size="sm" 
-              className="absolute top-2 right-2"
-              onClick={() => setSelectedGif(null)}
-            >
-              Remove
-            </Button>
-          </div>
-        )}
-
-        {!selectedImage && (
-          <div className="mt-2">
-            <ImageUpload
-              selectedImage={selectedImage}
-              onImageSelect={setSelectedImage}
-              skipAutoSave={true}
-            />
-          </div>
-        )}
-
-        {showGifPicker && (
-          <div className="mt-2 p-2 border rounded-md">
-            <div className="mb-2">
-              <Input
-                placeholder="Search GIFs..."
-                value={gifSearch}
-                onChange={(e) => setGifSearch(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    searchGifs(gifSearch);
-                  }
-                }}
+          {image && !imageLoading && (
+            <div className="relative">
+              <img
+                src={image}
+                alt="Selected"
+                className="max-h-96 rounded-md w-full object-cover"
               />
-              <Button 
-                className="mt-2" 
-                variant="outline"
-                onClick={() => searchGifs(gifSearch)}
+              <Button
+                variant="destructive"
+                size="icon"
+                className="absolute top-2 right-2 h-8 w-8"
+                onClick={removeImage}
               >
-                Search
+                <X className="h-4 w-4" />
               </Button>
             </div>
-            
-            <div className="grid grid-cols-3 gap-2 mt-2 max-h-[300px] overflow-y-auto">
-              {gifs.length === 0 ? (
-                <div className="col-span-3 text-center py-4 text-sm text-muted-foreground">
-                  Search for GIFs to see results
-                </div>
-              ) : (
-                gifs.map((gif, index) => (
-                  <div 
-                    key={index} 
-                    className="cursor-pointer hover:opacity-80 transition-opacity"
-                    onClick={() => handleGifClick(gif.media[0].gif.url)}
-                  >
-                    <img 
-                      src={gif.media[0].gif.preview} 
-                      alt={gif.content_description} 
-                      className="w-full h-24 object-cover rounded-md"
-                    />
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        )}
+          )}
 
-        <div className="flex flex-wrap gap-2">
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => setSelectedImage(null)}
-            disabled={!!selectedImage}
-          >
-            <Image className="h-4 w-4 mr-2" />
-            Image
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => {
-              setShowGifPicker(!showGifPicker);
-              if (!showGifPicker) {
-                setGifs([]);
-                setGifSearch("");
-              }
-            }}
-          >
-            <Film className="h-4 w-4 mr-2" />
-            GIF
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => setIsPollDialogOpen(true)}
-          >
-            <ListChecks className="h-4 w-4 mr-2" />
-            Poll
-          </Button>
-          <Button 
-            className="ml-auto"
-            onClick={createPost}
-            disabled={isPosting || (!postContent.trim() && !selectedImage && !selectedGif)}
-          >
-            <Send className="h-4 w-4 mr-2" />
-            {isPosting ? "Posting..." : "Post"}
-          </Button>
+          <div className="flex justify-between">
+            <div className="flex gap-2">
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleImageSelect}
+                className="hidden"
+                accept="image/*,video/*"
+              />
+              <Button
+                variant="ghost"
+                size="sm"
+                type="button"
+                disabled={posting || imageLoading}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <ImageIcon className="h-4 w-4 mr-2" />
+                Media
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                type="button"
+                disabled={posting || imageLoading}
+                onClick={openScheduleDialog}
+              >
+                <CalendarClock className="h-4 w-4 mr-2" />
+                Schedule
+              </Button>
+            </div>
+
+            <Button
+              onClick={handlePost}
+              disabled={posting || imageLoading || (!content.trim() && !image)}
+              className="gap-2"
+            >
+              <Send className="h-4 w-4" />
+              {posting ? "Posting..." : "Post"}
+            </Button>
+          </div>
         </div>
       </div>
 
-      {/* Poll creation dialog */}
-      <PollDialog
-        open={isPollDialogOpen}
-        onOpenChange={setIsPollDialogOpen}
-        onCreatePoll={handleCreatePoll}
+      <SchedulePostDialog
+        open={showScheduleDialog}
+        onClose={() => setShowScheduleDialog(false)}
+        content={content}
+        image={image}
+        category="general"
+        location={selectedGroup ? undefined : "local"}
+        groupId={selectedGroup}
+        onSuccess={handleScheduleSuccess}
       />
-    </Card>
+    </div>
   );
 };

@@ -4,7 +4,7 @@ import { GroupsSidebar } from "@/components/communities/GroupsSidebar";
 import { PostCreator } from "@/components/communities/PostCreator";
 import { PostsList } from "@/components/communities/PostsList";
 import { Button } from "@/components/ui/button";
-import { Plus, Users, Filter, Home, ArrowLeft } from "lucide-react";
+import { Plus, Users, Filter, Home, ArrowLeft, CalendarClock } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { CreateGroupDialog } from "@/components/groups/CreateGroupDialog";
 import { JoinGroupDialog } from "@/components/communities/JoinGroupDialog";
@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TrendingTopics } from "@/components/communities/TrendingTopics";
 import { CommunityHeader } from "@/components/communities/CommunityHeader";
+import { ScheduledPosts } from "@/components/communities/ScheduledPosts";
 import { supabase } from "@/integrations/supabase/client";
 
 const Communities = () => {
@@ -151,6 +152,8 @@ const Communities = () => {
           </Tabs>
 
           {activeTab === "trending" && <TrendingTopics />}
+          
+          {user && <ScheduledPosts />}
           
           <PostCreator 
             selectedGroup={selectedGroup} 

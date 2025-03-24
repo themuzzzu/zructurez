@@ -1623,6 +1623,69 @@ export type Database = {
           },
         ]
       }
+      scheduled_posts: {
+        Row: {
+          category: string | null
+          content: string
+          created_at: string
+          gif_url: string | null
+          group_id: string | null
+          id: string
+          image_url: string | null
+          location: string | null
+          poll_id: string | null
+          profile_id: string
+          scheduled_for: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          content: string
+          created_at?: string
+          gif_url?: string | null
+          group_id?: string | null
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          poll_id?: string | null
+          profile_id: string
+          scheduled_for: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          content?: string
+          created_at?: string
+          gif_url?: string | null
+          group_id?: string | null
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          poll_id?: string | null
+          profile_id?: string
+          scheduled_for?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduled_posts_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_posts_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_portfolio: {
         Row: {
           created_at: string
@@ -1920,6 +1983,10 @@ export type Database = {
           table_name: string
           record_id: string
         }
+        Returns: undefined
+      }
+      publish_scheduled_posts: {
+        Args: Record<PropertyKey, never>
         Returns: undefined
       }
       update_user_presence: {
