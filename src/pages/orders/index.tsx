@@ -45,12 +45,12 @@ interface Order {
   created_at: string;
   total: number;
   payment_method: string;
-  address_id: string;
+  address_id?: string;
   discount: number;
   shipping_fee: number;
   coupon_code: string | null;
   order_items: OrderItem[];
-  user_addresses: UserAddress;
+  user_addresses?: UserAddress;
 }
 
 const OrdersPage = () => {
@@ -95,7 +95,14 @@ const OrdersPage = () => {
             
             if (itemsError) {
               console.error('Error fetching order items:', itemsError);
-              return { ...order, order_items: [] };
+              return { 
+                ...order, 
+                order_items: [],
+                total: order.total_price,
+                payment_method: 'cod',
+                discount: 0,
+                shipping_fee: 0,
+              };
             }
             
             // Fetch address data if address_id exists
@@ -117,7 +124,11 @@ const OrdersPage = () => {
             return { 
               ...order, 
               order_items: itemsData || [],
-              user_addresses: addressData || null
+              user_addresses: addressData || null,
+              total: order.total_price,
+              payment_method: 'cod',
+              discount: 0,
+              shipping_fee: 0,
             };
           })
         );

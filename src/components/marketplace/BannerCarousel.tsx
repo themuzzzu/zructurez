@@ -14,6 +14,7 @@ import { Progress } from "@/components/ui/progress";
 export const BannerCarousel = () => {
   const [progressValue, setProgressValue] = useState(0);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [api, setApi] = useState<any>(null);
 
   const { data: bannerAds = [] } = useQuery({
     queryKey: ['banner-ads'],
@@ -47,7 +48,11 @@ export const BannerCarousel = () => {
         animationFrameId = requestAnimationFrame(animate);
       } else {
         // Move to next slide when progress completes
-        setCurrentSlide((prev) => (prev + 1) % bannerAds.length);
+        if (api) {
+          api.scrollNext();
+        } else {
+          setCurrentSlide((prev) => (prev + 1) % bannerAds.length);
+        }
         startTime = 0; // Reset start time for next slide
         animationFrameId = requestAnimationFrame(animate);
       }
@@ -58,7 +63,7 @@ export const BannerCarousel = () => {
     return () => {
       cancelAnimationFrame(animationFrameId);
     };
-  }, [bannerAds.length, currentSlide]);
+  }, [bannerAds.length, currentSlide, api]);
 
   if (!bannerAds.length) {
     // If no ads, return placeholder
@@ -77,24 +82,16 @@ export const BannerCarousel = () => {
   return (
     <div className="w-full relative">
       <Carousel
+        className="w-full"
+        setApi={setApi}
         opts={{
           align: "start",
           loop: true,
         }}
-        className="w-full"
-        autoplay
-        interval={5000}
-        setApi={(api) => {
-          // Set current slide when carousel changes
-          api?.on("select", () => {
-            setCurrentSlide(api?.selectedScrollSnap() || 0);
-            setProgressValue(0); // Reset progress when slide changes
-          });
-        }}
       >
         <CarouselContent>
           {bannerAds.map((ad) => (
-            <CarouselItem key={ad.id} className="basis-full">
+            <CarouselItem key={ad.id}>
               <BannerAd ad={ad} />
             </CarouselItem>
           ))}

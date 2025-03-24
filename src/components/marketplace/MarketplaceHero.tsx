@@ -99,11 +99,11 @@ export const MarketplaceHero = ({ onCategorySelect, onSearch }: MarketplaceHeroP
       
       <div className="bg-white dark:bg-zinc-800 p-4">
         <Carousel
+          className="w-full"
           opts={{
             align: "start",
             loop: true,
           }}
-          className="w-full"
         >
           <CarouselContent>
             {categoryShortcuts.map((category, index) => (

@@ -1,17 +1,17 @@
+
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MapPin, Store, Star, ArrowRightCircle } from "lucide-react";
-import { Business } from "@/types/business";
 
 interface LocalBusiness {
   id: string;
   name: string;
   description: string;
   image_url?: string | null;
-  rating?: number;
+  rating: number;
   distance: number;
   location: string | null;
 }
@@ -39,7 +39,7 @@ export const LocalBusinessSpotlight = () => {
     }
   }, []);
 
-  const { data: businesses = [], isLoading } = useQuery({
+  const { data: businessesData = [], isLoading } = useQuery({
     queryKey: ['local-businesses', userLocation],
     queryFn: async () => {
       if (!userLocation) return [];
@@ -50,16 +50,17 @@ export const LocalBusinessSpotlight = () => {
         .limit(4);
 
       if (error) throw error;
-
-      return data.map((business: any) => ({
+      
+      // Transform business data to match LocalBusiness interface
+      return data.map((business): LocalBusiness => ({
         id: business.id,
         name: business.name,
         description: business.description,
         image_url: business.image_url,
-        rating: 4.5,
-        distance: Math.round(Math.random() * 10) / 10,
+        rating: 4.5, // Mock rating
+        distance: Math.round(Math.random() * 10) / 10, // Mock distance
         location: business.location
-      })) as LocalBusiness[];
+      }));
     },
     enabled: !!userLocation,
   });
@@ -129,16 +130,16 @@ export const LocalBusinessSpotlight = () => {
         </div>
       )}
 
-      {locationPermission === 'granted' && !isLoading && businesses.length === 0 && (
+      {locationPermission === 'granted' && !isLoading && businessesData.length === 0 && (
         <Card className="p-6 text-center">
           <p className="mb-2">No local businesses found near your location</p>
           <p className="text-sm text-muted-foreground">Try searching in a different area</p>
         </Card>
       )}
 
-      {locationPermission === 'granted' && !isLoading && businesses.length > 0 && (
+      {locationPermission === 'granted' && !isLoading && businessesData.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {businesses.map((business) => (
+          {businessesData.map((business) => (
             <Card key={business.id} className="overflow-hidden transition-all hover:shadow-lg">
               <div className="h-40 bg-slate-100 dark:bg-slate-800 relative">
                 {business.image_url ? (
@@ -158,7 +159,7 @@ export const LocalBusinessSpotlight = () => {
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center">
                     <Star size={16} className="text-yellow-500 fill-yellow-500 mr-1" />
-                    <span className="text-sm">{business.rating || 4.5}</span>
+                    <span className="text-sm">{business.rating}</span>
                   </div>
                   <div className="flex items-center text-sm text-muted-foreground">
                     <MapPin size={14} className="mr-1" />

@@ -120,6 +120,57 @@ type CustomSchema = Database['public']['Tables'] & {
   };
 };
 
+// Update the orders table type to include address_id
+type EnhancedOrdersTable = {
+  orders: {
+    Row: {
+      id: string;
+      user_id: string;
+      status: string;
+      created_at: string;
+      total_price: number;
+      quantity: number;
+      product_id: string;
+      business_id?: string;
+      address_id?: string;
+      payment_method?: string;
+      coupon_code?: string;
+      discount?: number;
+      shipping_fee?: number;
+    };
+    Insert: {
+      id?: string;
+      user_id: string;
+      status?: string;
+      created_at?: string;
+      total_price: number;
+      quantity?: number;
+      product_id: string;
+      business_id?: string;
+      address_id?: string;
+      payment_method?: string;
+      coupon_code?: string;
+      discount?: number;
+      shipping_fee?: number;
+    };
+    Update: {
+      id?: string;
+      user_id?: string;
+      status?: string;
+      created_at?: string;
+      total_price?: number;
+      quantity?: number;
+      product_id?: string;
+      business_id?: string;
+      address_id?: string;
+      payment_method?: string;
+      coupon_code?: string;
+      discount?: number;
+      shipping_fee?: number;
+    };
+  };
+};
+
 // Create the Supabase client with the standard types
 const supabaseClient = createClient<Database>(
   SUPABASE_URL,
@@ -132,26 +183,12 @@ const supabaseClient = createClient<Database>(
   }
 );
 
-// Create a custom type for our client that overrides the 'from' method
-export const supabase = {
-  ...supabaseClient,
-  from: (table: string) => {
-    return supabaseClient.from(table as any);
-  },
-} as unknown as ReturnType<typeof createClient<Database>> & {
-  from<T extends keyof CustomSchema>(
+// Create a custom type for our client that correctly types the from method
+type CustomSupabaseClient = typeof supabaseClient & {
+  from<T extends keyof (CustomSchema & EnhancedOrdersTable)>(
     table: T
-  ): ReturnType<typeof createClient<Database>['from']>;
-  rpc: ReturnType<typeof createClient<Database>>["rpc"] & {
-    (
-      fn: "increment_ad_views" | "increment_ad_clicks" | "update_user_presence" | "get_user_presence" | "record_ad_conversion" | "record_ad_impression",
-      params: { 
-        ad_id?: string; 
-        user_id?: string; 
-        last_seen_time?: string;
-        conversion_type?: string;
-        location?: string;
-      }
-    ): Promise<{ data: any; error: any }>;
-  };
+  ): ReturnType<typeof supabaseClient['from']>;
 };
+
+// Cast the client to our custom type
+export const supabase = supabaseClient as CustomSupabaseClient;

@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -41,7 +40,6 @@ const ProductDetails = () => {
   const [quantity, setQuantity] = useState(1);
   const queryClient = useQueryClient();
 
-  // Fetch product details
   const { data: product, isLoading, error } = useQuery({
     queryKey: ['product', productId],
     queryFn: async () => {
@@ -57,7 +55,6 @@ const ProductDetails = () => {
     enabled: !!productId,
   });
 
-  // Fetch related products
   const { data: relatedProducts } = useQuery({
     queryKey: ['relatedProducts', product?.category],
     queryFn: async () => {
@@ -161,7 +158,6 @@ const ProductDetails = () => {
     }
   };
 
-  // Format price in Indian Rupees
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
@@ -172,7 +168,6 @@ const ProductDetails = () => {
 
   useEffect(() => {
     if (productId) {
-      // Increment view count when product page is loaded
       incrementViews('products', productId);
     }
   }, [productId]);
@@ -196,7 +191,6 @@ const ProductDetails = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Product Details Header */}
       <div className="bg-primary px-4 py-3 mb-4 shadow-md sticky top-0 z-10">
         <div className="max-w-[1400px] mx-auto">
           <div className="flex items-center gap-2">
@@ -217,7 +211,6 @@ const ProductDetails = () => {
 
       <div className="max-w-[1400px] mx-auto px-4 pb-20">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Product Images */}
           <div className="bg-background border border-border rounded-lg p-4">
             <div className="mb-4">
               <AspectRatio ratio={1}>
@@ -229,7 +222,6 @@ const ProductDetails = () => {
               </AspectRatio>
             </div>
             
-            {/* Thumbnails */}
             <div className="mt-4">
               <Carousel>
                 <CarouselContent>
@@ -242,7 +234,6 @@ const ProductDetails = () => {
                       />
                     </AspectRatio>
                   </CarouselItem>
-                  {/* Placeholder thumbnails for demo */}
                   {[1, 2, 3, 4].map((_, index) => (
                     <CarouselItem key={index} className="basis-1/4">
                       <AspectRatio ratio={1}>
@@ -258,7 +249,6 @@ const ProductDetails = () => {
               </Carousel>
             </div>
 
-            {/* Action Buttons */}
             <div className="grid grid-cols-2 gap-4 mt-6">
               <Button 
                 className="w-full" 
@@ -279,7 +269,6 @@ const ProductDetails = () => {
               </Button>
             </div>
 
-            {/* Share Options */}
             <div className="mt-4 flex items-center justify-between">
               <div className="text-sm text-muted-foreground flex items-center gap-1">
                 <Eye className="h-4 w-4" /> 
@@ -293,7 +282,6 @@ const ProductDetails = () => {
             </div>
           </div>
 
-          {/* Product Info */}
           <div className="space-y-6">
             <div>
               <h1 className="text-2xl font-bold text-foreground">{product.title}</h1>
@@ -307,7 +295,6 @@ const ProductDetails = () => {
               </div>
             </div>
 
-            {/* Price Section */}
             <div className="bg-card p-4 rounded-lg border border-border">
               <div className="flex items-baseline gap-2">
                 <span className="text-3xl font-bold text-foreground flex items-center">
@@ -326,7 +313,6 @@ const ProductDetails = () => {
                 )}
               </div>
 
-              {/* Quantity Selector */}
               <div className="mt-4">
                 <p className="text-sm text-muted-foreground mb-2">Quantity:</p>
                 <div className="flex items-center">
@@ -354,7 +340,6 @@ const ProductDetails = () => {
               </div>
             </div>
 
-            {/* Product Details */}
             <div className="bg-card p-4 rounded-lg border border-border">
               <h2 className="text-lg font-semibold text-foreground mb-2">Product Details</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
@@ -399,7 +384,6 @@ const ProductDetails = () => {
               </div>
             </div>
 
-            {/* Product Description */}
             <div className="bg-card p-4 rounded-lg border border-border">
               <Tabs defaultValue="description">
                 <TabsList className="grid w-full grid-cols-3">
@@ -454,7 +438,6 @@ const ProductDetails = () => {
               </Tabs>
             </div>
 
-            {/* Delivery Information */}
             <div className="bg-card p-4 rounded-lg border border-border">
               <h2 className="text-lg font-semibold text-foreground mb-4">Delivery & Services</h2>
               <div className="space-y-3">
@@ -482,7 +465,6 @@ const ProductDetails = () => {
               </div>
             </div>
 
-            {/* Badges Section */}
             <div className="flex flex-wrap gap-2">
               {product.is_branded && (
                 <Badge variant="outline" className="border-blue-500 text-blue-500 dark:border-blue-400 dark:text-blue-400">
@@ -503,7 +485,6 @@ const ProductDetails = () => {
           </div>
         </div>
 
-        {/* Related Products Section */}
         {relatedProducts && relatedProducts.length > 0 && (
           <div className="mt-12">
             <Separator className="my-8" />
