@@ -8,12 +8,15 @@ import { HomeLayout } from "@/components/layout/HomeLayout";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2 } from "lucide-react";
+import { Loader2, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<string>("for-you");
+  const [refreshing, setRefreshing] = useState(false);
 
-  const { data: posts = [], isLoading } = useQuery({
+  const { data: posts = [], isLoading, refetch } = useQuery({
     queryKey: ['posts', activeTab],
     queryFn: async () => {
       let query = supabase
@@ -38,6 +41,18 @@ const Index = () => {
       return data;
     }
   });
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await refetch();
+      toast.success("Feed refreshed");
+    } catch (error) {
+      toast.error("Failed to refresh feed");
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const renderPostsList = () => {
     if (isLoading) {
@@ -85,6 +100,19 @@ const Index = () => {
     <HomeLayout>
       <Card className="p-0 overflow-hidden border-0 shadow-none">
         <div className="sticky top-0 z-10 bg-background pt-2 pb-1 px-4 border-b">
+          <div className="flex justify-between items-center mb-2">
+            <h1 className="text-xl font-bold">Home</h1>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={handleRefresh} 
+              disabled={refreshing}
+              className="rounded-full hover:bg-primary/10"
+            >
+              <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
+            </Button>
+          </div>
+          
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="w-full grid grid-cols-2">
               <TabsTrigger value="for-you">For You</TabsTrigger>
