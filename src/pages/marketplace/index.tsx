@@ -11,6 +11,8 @@ import { CategoryTabContent } from "./CategoryTabContent";
 import { SearchTabContent } from "./SearchTabContent";
 import { MarketplaceFeatures } from "@/components/marketplace/MarketplaceFeatures";
 import { MarketplacePromotions } from "@/components/marketplace/MarketplacePromotions";
+import { MarketplaceHero } from "@/components/marketplace/MarketplaceHero";
+import { LocalBusinessSpotlight } from "@/components/marketplace/LocalBusinessSpotlight";
 
 const Marketplace = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -84,6 +86,14 @@ const Marketplace = () => {
         />
 
         <div className="max-w-[1400px] mx-auto px-4">
+          {/* Hero Section - Only visible on browse tab */}
+          {activeTab === "browse" && (
+            <MarketplaceHero 
+              onCategorySelect={handleCategorySelect}
+              onSearch={handleSearchSelect}
+            />
+          )}
+          
           {activeTab === "browse" && (
             <MarketplaceFeatures />
           )}
@@ -123,7 +133,10 @@ const Marketplace = () => {
           </MarketplaceTabs>
           
           {activeTab === "browse" && (
-            <MarketplacePromotions />
+            <>
+              <LocalBusinessSpotlight />
+              <MarketplacePromotions />
+            </>
           )}
         </div>
       </div>

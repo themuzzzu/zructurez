@@ -18,6 +18,8 @@ type CarouselProps = {
   plugins?: CarouselPlugin
   orientation?: "horizontal" | "vertical"
   setApi?: (api: CarouselApi) => void
+  autoplay?: boolean
+  interval?: number
 }
 
 type CarouselContextProps = {
@@ -27,6 +29,8 @@ type CarouselContextProps = {
   scrollNext: () => void
   canScrollPrev: boolean
   canScrollNext: boolean
+  autoplay?: boolean
+  interval?: number
 } & CarouselProps
 
 const CarouselContext = React.createContext<CarouselContextProps | null>(null)
@@ -53,6 +57,8 @@ const Carousel = React.forwardRef<
       plugins,
       className,
       children,
+      autoplay = false,
+      interval = 5000,
       ...props
     },
     ref
@@ -66,6 +72,32 @@ const Carousel = React.forwardRef<
     )
     const [canScrollPrev, setCanScrollPrev] = React.useState(false)
     const [canScrollNext, setCanScrollNext] = React.useState(false)
+    const autoplayTimerRef = React.useRef<NodeJS.Timeout | null>(null)
+
+    const startAutoplay = React.useCallback(() => {
+      if (!autoplay || !api) return
+      
+      // Clear any existing timer
+      if (autoplayTimerRef.current) {
+        clearInterval(autoplayTimerRef.current)
+      }
+      
+      // Set up autoplay interval
+      autoplayTimerRef.current = setInterval(() => {
+        if (api.canScrollNext()) {
+          api.scrollNext()
+        } else {
+          api.scrollTo(0) // Loop back to start
+        }
+      }, interval)
+    }, [api, autoplay, interval])
+
+    const stopAutoplay = React.useCallback(() => {
+      if (autoplayTimerRef.current) {
+        clearInterval(autoplayTimerRef.current)
+        autoplayTimerRef.current = null
+      }
+    }, [])
 
     const onSelect = React.useCallback((api: CarouselApi) => {
       if (!api) {
@@ -74,15 +106,26 @@ const Carousel = React.forwardRef<
 
       setCanScrollPrev(api.canScrollPrev())
       setCanScrollNext(api.canScrollNext())
-    }, [])
+      
+      // Restart autoplay when slide changes
+      if (autoplay) {
+        startAutoplay()
+      }
+    }, [autoplay, startAutoplay])
 
     const scrollPrev = React.useCallback(() => {
       api?.scrollPrev()
-    }, [api])
+      if (autoplay) {
+        startAutoplay() // Restart autoplay after manual navigation
+      }
+    }, [api, autoplay, startAutoplay])
 
     const scrollNext = React.useCallback(() => {
       api?.scrollNext()
-    }, [api])
+      if (autoplay) {
+        startAutoplay() // Restart autoplay after manual navigation
+      }
+    }, [api, autoplay, startAutoplay])
 
     const handleKeyDown = React.useCallback(
       (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -96,6 +139,42 @@ const Carousel = React.forwardRef<
       },
       [scrollPrev, scrollNext]
     )
+
+    // Setup autoplay
+    React.useEffect(() => {
+      if (api && autoplay) {
+        startAutoplay()
+      }
+      
+      return () => {
+        stopAutoplay()
+      }
+    }, [api, autoplay, startAutoplay, stopAutoplay])
+
+    // Stop autoplay on user interaction
+    React.useEffect(() => {
+      if (!api || !autoplay) return
+      
+      const onMouseEnter = () => stopAutoplay()
+      const onMouseLeave = () => startAutoplay()
+      const onTouchStart = () => stopAutoplay()
+      const onTouchEnd = () => startAutoplay()
+      
+      const element = carouselRef.current
+      if (element) {
+        element.addEventListener('mouseenter', onMouseEnter)
+        element.addEventListener('mouseleave', onMouseLeave)
+        element.addEventListener('touchstart', onTouchStart)
+        element.addEventListener('touchend', onTouchEnd)
+        
+        return () => {
+          element.removeEventListener('mouseenter', onMouseEnter)
+          element.removeEventListener('mouseleave', onMouseLeave)
+          element.removeEventListener('touchstart', onTouchStart)
+          element.removeEventListener('touchend', onTouchEnd)
+        }
+      }
+    }, [api, autoplay, carouselRef, startAutoplay, stopAutoplay])
 
     React.useEffect(() => {
       if (!api || !setApi) {
@@ -131,6 +210,8 @@ const Carousel = React.forwardRef<
           scrollNext,
           canScrollPrev,
           canScrollNext,
+          autoplay,
+          interval,
         }}
       >
         <div

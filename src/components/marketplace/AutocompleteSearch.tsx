@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,8 +22,20 @@ export const AutocompleteSearch = ({
 }: AutocompleteSearchProps) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
+  const [debouncedValue, setDebouncedValue] = useState(value);
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
+  
+  // Debounce search value
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedValue(value);
+    }, 300); // 300ms debounce time
+    
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [value]);
 
   // Get popular searches
   const { data: popularSearches } = useQuery({
@@ -42,20 +54,20 @@ export const AutocompleteSearch = ({
 
   // Get autocomplete suggestions based on input
   const { data: suggestions, isLoading } = useQuery({
-    queryKey: ['search-suggestions', value],
+    queryKey: ['search-suggestions', debouncedValue],
     queryFn: async () => {
-      if (!value || value.length < 2) return [];
+      if (!debouncedValue || debouncedValue.length < 2) return [];
       
       const { data, error } = await supabase
         .from('products')
         .select('title')
-        .ilike('title', `%${value}%`)
+        .ilike('title', `%${debouncedValue}%`)
         .limit(5);
       
       if (error) throw error;
       return data || [];
     },
-    enabled: value.length >= 2,
+    enabled: debouncedValue.length >= 2,
   });
 
   // Close suggestions when clicking outside
