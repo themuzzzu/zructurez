@@ -12,11 +12,12 @@ import { Loader2, RefreshCw, ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { InstagramGrid } from "@/components/instagram/InstagramGrid";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { useAuth } from "@/hooks/useAuth";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<string>("for-you");
   const [refreshing, setRefreshing] = useState(false);
+  const { user } = useAuth();
 
   const { data: posts = [], isLoading, refetch } = useQuery({
     queryKey: ['posts', activeTab],
