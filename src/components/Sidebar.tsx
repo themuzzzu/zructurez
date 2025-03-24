@@ -63,7 +63,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
 
   return (
     <div className={cn(
-      "h-screen border-r border-zinc-800 bg-black overflow-y-auto transition-all duration-300 fixed left-0 top-0 z-30",
+      "h-screen border-r border-zinc-200 bg-white dark:bg-black dark:border-zinc-800 overflow-y-auto transition-all duration-300 fixed left-0 top-0 z-30",
       isCollapsed ? "w-16" : "w-64",
       className
     )}>
@@ -72,7 +72,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
           variant="ghost"
           size="icon"
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="hover:bg-zinc-800 transition-all duration-200"
+          className="hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all duration-200"
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {isCollapsed ? (
@@ -93,7 +93,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
               variant="ghost"
               className={cn(
                 "w-full p-0 justify-center",
-                isActive && "bg-zinc-800"
+                isActive ? "bg-zinc-100 dark:bg-zinc-800" : "hover:bg-zinc-50 dark:hover:bg-zinc-800"
               )}
               onClick={() => navigate(route.path)}
             >
@@ -109,7 +109,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
               variant="ghost"
               className={cn(
                 "w-full justify-start gap-4 px-4",
-                isActive ? "bg-zinc-800" : "hover:bg-zinc-800"
+                isActive ? "bg-zinc-100 dark:bg-zinc-800" : "hover:bg-zinc-50 dark:hover:bg-zinc-800"
               )}
               onClick={() => navigate(route.path)}
             >
@@ -120,7 +120,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
                   <route.icon size={20} className="text-muted-foreground" />
                 )}
               </div>
-              <span className="text-lg font-medium">
+              <span className="text-lg font-medium text-gray-800 dark:text-white">
                 {route.name}
               </span>
             </Button>
@@ -145,7 +145,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
             <div className="flex items-center justify-center">
               <SunMoon size={20} className="text-muted-foreground" />
             </div>
-            <span className="text-lg font-medium">
+            <span className="text-lg font-medium text-gray-800 dark:text-white">
               Toggle Theme
             </span>
           </Button>
@@ -154,3 +154,4 @@ export const Sidebar = ({ className }: SidebarProps) => {
     </div>
   );
 };
+
