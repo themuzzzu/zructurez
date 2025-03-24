@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
@@ -77,7 +78,7 @@ export const CreatePost = ({ onSuccess }: CreatePostProps) => {
   };
 
   return (
-    <Card className="p-4 bg-black/90 border-zinc-800 shadow-lg">
+    <Card className="p-4 bg-white dark:bg-black/90 border-gray-200 dark:border-zinc-800 shadow-md dark:shadow-lg">
       <div className="flex items-start gap-4">
         <Avatar className="h-10 w-10">
           <AvatarImage 
@@ -91,7 +92,7 @@ export const CreatePost = ({ onSuccess }: CreatePostProps) => {
             placeholder="Share something with your neighborhood..."
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="min-h-[100px] bg-black/50 text-gray-200 hover:bg-black/60 focus:bg-black/60 transition-colors duration-300 border-zinc-800 placeholder:text-gray-400"
+            className="min-h-[100px] bg-gray-50 dark:bg-black/50 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-black/60 focus:bg-gray-100 dark:focus:bg-black/60 transition-colors duration-300 border-gray-200 dark:border-zinc-800 placeholder:text-gray-500 dark:placeholder:text-gray-400"
           />
 
           <ImageUpload 
@@ -120,7 +121,7 @@ export const CreatePost = ({ onSuccess }: CreatePostProps) => {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="text-gray-400 hover:text-gray-200 hover:bg-black/60"
+                className="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-black/60"
               >
                 <ImageIcon className="h-4 w-4 mr-2" />
                 Photo
@@ -129,7 +130,7 @@ export const CreatePost = ({ onSuccess }: CreatePostProps) => {
             <Button 
               variant="ghost" 
               size="sm" 
-              className="text-gray-400 hover:text-gray-200 hover:bg-black/60"
+              className="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-black/60"
               onClick={() => toast.info("Category selection feature coming soon!")}
             >
               <Tag className="h-4 w-4 mr-2" />
@@ -138,24 +139,24 @@ export const CreatePost = ({ onSuccess }: CreatePostProps) => {
             <Button 
               variant="ghost" 
               size="sm" 
-              className="text-gray-400 hover:text-gray-200 hover:bg-black/60"
+              className="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-black/60"
               onClick={() => toast.info("Poll creation feature coming soon!")}
             >
               <ListChecks className="h-4 w-4 mr-2" />
               Poll
             </Button>
             <Select onValueChange={setSelectedLocation} value={selectedLocation}>
-              <SelectTrigger className="w-[140px] bg-black/50 border-zinc-800">
+              <SelectTrigger className="w-[140px] bg-gray-50 dark:bg-black/50 border-gray-200 dark:border-zinc-800">
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="text-gray-400 hover:text-gray-200 -ml-3"
+                  className="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 -ml-3"
                 >
                   <MapPin className="h-4 w-4 mr-2" />
                   {selectedLocation || "Location"}
                 </Button>
               </SelectTrigger>
-              <SelectContent className="bg-black/90 border-zinc-800">
+              <SelectContent className="bg-white dark:bg-black/90 border-gray-200 dark:border-zinc-800">
                 <SelectItem value="local">Local</SelectItem>
                 <SelectItem value="district">District</SelectItem>
                 <SelectItem value="state">State</SelectItem>
