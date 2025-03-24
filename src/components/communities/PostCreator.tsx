@@ -21,7 +21,7 @@ export const PostCreator = ({ selectedGroup, onPostCreated }: PostCreatorProps) 
   const [posting, setPosting] = useState(false);
   const [showScheduleDialog, setShowScheduleDialog] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { user, userDetails } = useAuth();
+  const { user } = useAuth();
 
   const handleImageSelect = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -122,7 +122,7 @@ export const PostCreator = ({ selectedGroup, onPostCreated }: PostCreatorProps) 
     <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 mb-6">
       <div className="flex gap-3">
         <Avatar className="h-10 w-10">
-          <AvatarImage src={userDetails?.avatar_url || undefined} />
+          <AvatarImage src={user.user_metadata?.avatar_url} />
           <AvatarFallback>{user?.email?.charAt(0) || "U"}</AvatarFallback>
         </Avatar>
         <div className="flex-grow space-y-3">
