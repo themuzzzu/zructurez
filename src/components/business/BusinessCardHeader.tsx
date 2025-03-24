@@ -1,5 +1,7 @@
+
 import { Badge } from "@/components/ui/badge";
-import { Clock, ChevronDown } from "lucide-react";
+import { Clock, ChevronDown, CheckCircle } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface BusinessCardHeaderProps {
   name: string;
@@ -28,6 +30,30 @@ const getReasonLabel = (reason?: string) => {
   }
 };
 
+const getStatusDetails = (is_open?: boolean, wait_time?: string, closure_reason?: string) => {
+  if (is_open === undefined) return null;
+  
+  if (is_open) {
+    return {
+      label: "Open",
+      variant: "success",
+      tooltip: "This business is currently open"
+    };
+  } else if (wait_time) {
+    return {
+      label: "Temporarily Unavailable",
+      variant: "destructive",
+      tooltip: `Available in ${wait_time}${closure_reason ? ` (${getReasonLabel(closure_reason)})` : ''}`
+    };
+  } else {
+    return {
+      label: "Closed",
+      variant: "destructive",
+      tooltip: "This business is currently closed"
+    };
+  }
+};
+
 export const BusinessCardHeader = ({
   name,
   category,
@@ -36,6 +62,8 @@ export const BusinessCardHeader = ({
   wait_time,
   closure_reason
 }: BusinessCardHeaderProps) => {
+  const statusDetails = getStatusDetails(is_open, wait_time, closure_reason);
+  
   return (
     <div className="space-y-2">
       <div className="relative">
@@ -49,21 +77,46 @@ export const BusinessCardHeader = ({
       
       <div className="flex flex-col gap-1">
         <span className="text-sm text-gray-300">{category}</span>
-        <div className="flex items-center gap-2">
-          {typeof is_open === 'boolean' && (
-            <Badge 
-              variant={is_open ? "success" : "destructive"}
-              className="text-xs px-2 py-0.5"
-            >
-              {is_open ? "Open" : "Closed"}
-            </Badge>
+        <div className="flex flex-wrap items-center gap-2">
+          {statusDetails && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span>
+                    <Badge 
+                      variant={statusDetails.variant as any}
+                      className="text-xs px-2 py-0.5 transition-all duration-300 animate-pulse"
+                    >
+                      {statusDetails.label}
+                    </Badge>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{statusDetails.tooltip}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           )}
+          
           {verified && (
-            <Badge variant="outline" className="text-xs px-2 py-0.5">
-              Verified
-            </Badge>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span>
+                    <Badge variant="outline" className="text-xs px-2 py-0.5 flex items-center gap-1">
+                      <CheckCircle className="h-3 w-3 text-blue-500" />
+                      Verified
+                    </Badge>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>This business has been verified</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           )}
         </div>
+        
         {!is_open && wait_time && (
           <div className="flex items-center gap-2 text-sm text-gray-300">
             <Clock className="h-4 w-4" />

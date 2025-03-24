@@ -1,7 +1,8 @@
+
 import * as React from "react"
 import * as ToastPrimitives from "@radix-ui/react-toast"
 import { cva, type VariantProps } from "class-variance-authority"
-import { X } from "lucide-react"
+import { X, AlertCircle, CheckCircle, AlertTriangle, Info } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
@@ -92,7 +93,7 @@ const ToastTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ToastPrimitives.Title
     ref={ref}
-    className={cn("text-sm font-semibold", className)}
+    className={cn("text-sm font-semibold flex items-center gap-2", className)}
     {...props}
   />
 ))
@@ -113,6 +114,44 @@ ToastDescription.displayName = ToastPrimitives.Description.displayName
 type ToastProps = React.ComponentPropsWithoutRef<typeof Toast>
 
 type ToastActionElement = React.ReactElement<typeof ToastAction>
+
+// Updated Toaster component with toast type icons
+export function Toaster() {
+  const { toasts } = useToast();
+
+  return (
+    <ToastProvider>
+      {toasts.map(function ({ id, title, description, action, category, variant, ...props }) {
+        // Choose icon based on toast type
+        let Icon = Info;
+        if (title === "Success") Icon = CheckCircle;
+        else if (title === "Error") Icon = AlertCircle;
+        else if (title === "Warning") Icon = AlertTriangle;
+        else if (title?.toString().includes("Order")) Icon = CheckCircle;
+        else if (title?.toString().includes("Payment")) Icon = CheckCircle;
+
+        return (
+          <Toast key={id} variant={variant} {...props}>
+            <div className="grid gap-1">
+              {title && (
+                <ToastTitle>
+                  <Icon className="h-4 w-4" />
+                  {title}
+                </ToastTitle>
+              )}
+              {description && (
+                <ToastDescription>{description}</ToastDescription>
+              )}
+            </div>
+            {action}
+            <ToastClose />
+          </Toast>
+        );
+      })}
+      <ToastViewport />
+    </ToastProvider>
+  );
+}
 
 export {
   type ToastProps,

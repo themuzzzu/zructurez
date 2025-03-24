@@ -1,15 +1,14 @@
-import { useQuery } from "@tanstack/react-query";
+
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useEffect } from "react";
 import type { Business, StaffMember, BusinessOwner } from "@/types/business";
 
 export const useBusinesses = () => {
-  const fetchBusinesses = async () => {
-    const { data, error } = await supabase
-      .from("businesses")
-      .select("*");
+  const queryClient = useQueryClient();
 
-    if (error) throw error;
-
+  // Function to transform business data
+  const transformBusinessData = (data: any[]): Business[] => {
     return data.map((business: any) => ({
       ...business,
       staff_details: Array.isArray(business.staff_details) 
@@ -39,8 +38,52 @@ export const useBusinesses = () => {
     })) as Business[];
   };
 
+  const fetchBusinesses = async () => {
+    const { data, error } = await supabase
+      .from("businesses")
+      .select("*");
+
+    if (error) throw error;
+    
+    return transformBusinessData(data);
+  };
+
+  // Set up real-time subscription to business status changes
+  useEffect(() => {
+    const channel = supabase
+      .channel('business-status-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'businesses',
+          filter: `is_open:eq.true,is_open:eq.false`
+        },
+        (payload) => {
+          // Update the cache when a business status changes
+          queryClient.setQueryData(['businesses'], (oldData: Business[] | undefined) => {
+            if (!oldData) return oldData;
+            
+            return oldData.map(business => 
+              business.id === payload.new.id 
+                ? { ...business, ...payload.new }
+                : business
+            );
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+
   return useQuery({
     queryKey: ["businesses"],
     queryFn: fetchBusinesses,
+    staleTime: 3 * 60 * 1000, // 3 minutes
+    refetchInterval: 5 * 60 * 1000, // 5 minutes
   });
 };

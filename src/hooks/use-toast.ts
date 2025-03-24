@@ -1,3 +1,4 @@
+
 import * as React from "react"
 
 import type {
@@ -5,14 +6,18 @@ import type {
   ToastProps,
 } from "@/components/ui/toast"
 
-const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 1000000
+const TOAST_LIMIT = 5
+const TOAST_REMOVE_DELAY = 10000
+
+type NotificationPriority = 'critical' | 'high' | 'medium' | 'low'
 
 type ToasterToast = ToastProps & {
   id: string
   title?: React.ReactNode
   description?: React.ReactNode
   action?: ToastActionElement
+  priority?: NotificationPriority
+  category?: 'order' | 'payment' | 'system' | 'user' | 'message'
 }
 
 const actionTypes = {
@@ -71,12 +76,64 @@ const addToRemoveQueue = (toastId: string) => {
   toastTimeouts.set(toastId, timeout)
 }
 
+// Helper to get appropriate CSS classes based on priority and variant
+const getToastClasses = (priority?: NotificationPriority, variant?: ToastProps["variant"]) => {
+  if (variant === 'destructive') {
+    return 'destructive border-destructive bg-destructive text-destructive-foreground'
+  }
+  
+  switch (priority) {
+    case 'critical':
+      return 'border-red-500 bg-red-50 dark:bg-red-950 dark:border-red-900 text-red-900 dark:text-red-200'
+    case 'high':
+      return 'border-orange-500 bg-orange-50 dark:bg-orange-950 dark:border-orange-900 text-orange-900 dark:text-orange-200'
+    case 'medium':
+      return 'border-blue-500 bg-blue-50 dark:bg-blue-950 dark:border-blue-900 text-blue-900 dark:text-blue-200'
+    default:
+      return ''
+  }
+}
+
+// Compare toasts based on priority for sorting
+const comparePriority = (a: ToasterToast, b: ToasterToast) => {
+  const priorityOrder: Record<NotificationPriority, number> = {
+    critical: 0,
+    high: 1, 
+    medium: 2,
+    low: 3
+  }
+  
+  const aPriority = a.priority || 'low'
+  const bPriority = b.priority || 'low'
+  
+  // First sort by priority
+  if (priorityOrder[aPriority] !== priorityOrder[bPriority]) {
+    return priorityOrder[aPriority] - priorityOrder[bPriority]
+  }
+  
+  // Then sort by category (orders and payments first)
+  const categoryOrder: Record<string, number> = {
+    payment: 0,
+    order: 1,
+    system: 2,
+    message: 3,
+    user: 4
+  }
+  
+  const aCategory = a.category || 'user'
+  const bCategory = b.category || 'user'
+  
+  return (categoryOrder[aCategory] || 99) - (categoryOrder[bCategory] || 99)
+}
+
 export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case "ADD_TOAST":
       return {
         ...state,
-        toasts: [action.toast, ...state.toasts].slice(0, TOAST_LIMIT),
+        toasts: [...state.toasts, action.toast]
+          .sort(comparePriority)
+          .slice(0, TOAST_LIMIT),
       }
 
     case "UPDATE_TOAST":
@@ -137,9 +194,12 @@ function dispatch(action: Action) {
   })
 }
 
-type Toast = Omit<ToasterToast, "id">
+type ToastParams = Omit<ToasterToast, "id"> & {
+  priority?: NotificationPriority
+  category?: 'order' | 'payment' | 'system' | 'user' | 'message'
+}
 
-function toast({ ...props }: Toast) {
+function toast(props: ToastParams) {
   const id = genId()
 
   const update = (props: ToasterToast) =>
@@ -149,11 +209,17 @@ function toast({ ...props }: Toast) {
     })
   const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id })
 
+  // Apply custom classes based on priority
+  const className = props.className ? 
+    `${props.className} ${getToastClasses(props.priority, props.variant)}` : 
+    getToastClasses(props.priority, props.variant)
+
   dispatch({
     type: "ADD_TOAST",
     toast: {
       ...props,
       id,
+      className,
       open: true,
       onOpenChange: (open) => {
         if (!open) dismiss()
@@ -166,6 +232,73 @@ function toast({ ...props }: Toast) {
     dismiss,
     update,
   }
+}
+
+// Helper functions for different toast types with pre-set priorities
+toast.success = (message: string, options?: Partial<ToastParams>) => {
+  return toast({
+    variant: 'default',
+    title: "Success",
+    description: message,
+    priority: 'medium',
+    category: 'system',
+    ...options,
+  })
+}
+
+toast.error = (message: string, options?: Partial<ToastParams>) => {
+  return toast({
+    variant: 'destructive',
+    title: "Error",
+    description: message,
+    priority: 'high',
+    category: 'system',
+    ...options,
+  })
+}
+
+toast.warning = (message: string, options?: Partial<ToastParams>) => {
+  return toast({
+    variant: 'default',
+    title: "Warning",
+    description: message,
+    priority: 'medium',
+    category: 'system',
+    ...options,
+  })
+}
+
+toast.info = (message: string, options?: Partial<ToastParams>) => {
+  return toast({
+    variant: 'default',
+    title: "Information",
+    description: message,
+    priority: 'low',
+    category: 'system',
+    ...options,
+  })
+}
+
+toast.order = (message: string, options?: Partial<ToastParams>) => {
+  return toast({
+    variant: 'default',
+    title: "Order Update",
+    description: message,
+    priority: 'critical',
+    category: 'order',
+    ...options,
+  })
+}
+
+toast.payment = (message: string, options?: Partial<ToastParams>) => {
+  return toast({
+    variant: 'default',
+    title: "Payment Update",
+    description: message,
+    priority: 'critical',
+    category: 'payment',
+    ...options,
+  })
 }
 
 function useToast() {
