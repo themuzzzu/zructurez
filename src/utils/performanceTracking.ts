@@ -78,3 +78,55 @@ export const measureRenderTime = <T>(
     }
   }
 };
+
+/**
+ * Simulates a load test with a specified number of concurrent users
+ * @param userCount The number of simulated users
+ * @returns A promise that resolves when the load test is complete
+ */
+export const simulateLoad = async (userCount: number): Promise<void> => {
+  console.log(`Starting load test with ${userCount} simulated users`);
+  
+  // Create an array of dummy API calls to simulate concurrent users
+  const simulatedCalls = Array.from({ length: userCount }).map(async (_, index) => {
+    const delay = Math.random() * 1000; // Random delay between 0-1000ms
+    
+    try {
+      // Simulate a random API call
+      await measureApiCall(`load-test-${index}`, async () => {
+        // Simulate network latency and processing time
+        await new Promise(resolve => setTimeout(resolve, delay));
+        return { success: true, userId: `user-${index}` };
+      });
+    } catch (error) {
+      console.error(`Error in simulated call ${index}:`, error);
+    }
+  });
+  
+  // Wait for all simulated calls to complete
+  await Promise.all(simulatedCalls);
+  
+  // Log a summary to the performance metrics table
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    const userId = user?.id || 'anonymous';
+    
+    await supabase.from('performance_metrics').insert({
+      endpoint: 'load-test-summary',
+      response_time: 0, // Not applicable for summary
+      success: true,
+      user_id: userId,
+      error_message: null,
+      metadata: {
+        userAgent: navigator.userAgent,
+        timestamp: new Date().toISOString(),
+        concurrent_users: userCount,
+        test_type: 'simulation'
+      }
+    });
+    
+    console.log(`Load test with ${userCount} simulated users completed`);
+  } catch (error) {
+    console.error('Failed to log load test summary:', error);
+  }
+};

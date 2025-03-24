@@ -63,7 +63,6 @@ export const MarketplaceHero = ({ onCategorySelect, onSearch }: MarketplaceHeroP
               value={searchTerm}
               onChange={setSearchTerm}
               className="w-full rounded-r-none shadow-lg"
-              onKeyDown={handleKeyDown}
             />
             <Button 
               onClick={handleSearch}
