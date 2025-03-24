@@ -8,9 +8,11 @@ import { HomeLayout } from "@/components/layout/HomeLayout";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, RefreshCw } from "lucide-react";
+import { Loader2, RefreshCw, ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { InstagramGrid } from "@/components/instagram/InstagramGrid";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<string>("for-you");
@@ -23,22 +25,41 @@ const Index = () => {
         .from('posts')
         .select(`
           *,
-          profiles:profile_id (username, avatar_url)
+          profiles:profile_id (username, avatar_url),
+          likes(id),
+          comments(id)
         `)
         .order('created_at', { ascending: false });
       
       // If "Following" tab is active, filter for followed users
-      // This is just a placeholder - actual implementation would filter by followed users
       if (activeTab === "following") {
-        // In a real implementation, you'd filter by followed users
-        // For now, we'll just limit to fewer posts for demonstration
-        query = query.limit(3);
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          // Get user's following list
+          const { data: followingData } = await supabase
+            .from('followers')
+            .select('following_id')
+            .eq('follower_id', user.id);
+          
+          if (followingData && followingData.length > 0) {
+            const followingIds = followingData.map(f => f.following_id);
+            query = query.in('profile_id', followingIds);
+          } else {
+            return []; // Return empty if not following anyone
+          }
+        }
       }
 
       const { data, error } = await query;
 
       if (error) throw error;
-      return data;
+      
+      return data.map(post => ({
+        ...post,
+        likes: post.likes?.length || 0,
+        comments: post.comments?.length || 0,
+        isLiked: post.likes?.some((like: any) => like.user_id === user?.id) || false
+      }));
     }
   });
 
@@ -76,24 +97,30 @@ const Index = () => {
       );
     }
     
-    return (
-      posts.map((post) => (
-        <div key={post.id} className="hover:bg-muted/50 transition-colors">
-          <EnhancedPostCard
-            id={post.id}
-            author={post.profiles?.username || "Unknown"}
-            avatar={post.profiles?.avatar_url || ""}
-            time={post.created_at}
-            content={post.content}
-            category={post.category}
-            image={post.image_url}
-            likes={0}
-            comments={0}
-            views={post.views || 0}
-          />
-        </div>
-      ))
-    );
+    if (activeTab === "for-you") {
+      return (
+        posts.map((post) => (
+          <div key={post.id} className="hover:bg-muted/50 transition-colors">
+            <EnhancedPostCard
+              id={post.id}
+              author={post.profiles?.username || "Unknown"}
+              avatar={post.profiles?.avatar_url || ""}
+              time={post.created_at}
+              content={post.content}
+              category={post.category}
+              image={post.image_url}
+              likes={post.likes}
+              comments={post.comments}
+              views={post.views || 0}
+              isLiked={post.isLiked}
+            />
+          </div>
+        ))
+      );
+    } else {
+      // Instagram-like grid for following tab
+      return <InstagramGrid posts={posts} />;
+    }
   };
 
   return (
@@ -115,20 +142,22 @@ const Index = () => {
           
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="w-full grid grid-cols-2">
-              <TabsTrigger value="for-you">For You</TabsTrigger>
-              <TabsTrigger value="following">Following</TabsTrigger>
+              <TabsTrigger value="for-you" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                For You
+              </TabsTrigger>
+              <TabsTrigger value="following" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                Following
+              </TabsTrigger>
             </TabsList>
           
-            <TabsContent value="for-you" className="m-0">
+            <TabsContent value="for-you" className="mt-2">
               <div className="space-y-0 divide-y">
                 {renderPostsList()}
               </div>
             </TabsContent>
             
-            <TabsContent value="following" className="m-0">
-              <div className="space-y-0 divide-y">
-                {renderPostsList()}
-              </div>
+            <TabsContent value="following" className="mt-2">
+              {renderPostsList()}
             </TabsContent>
           </Tabs>
         </div>
