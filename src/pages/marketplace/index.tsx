@@ -9,6 +9,8 @@ import { MarketplaceTabs } from "./MarketplaceTabs";
 import { BrowseTabContent } from "./BrowseTabContent";
 import { CategoryTabContent } from "./CategoryTabContent";
 import { SearchTabContent } from "./SearchTabContent";
+import { MarketplaceFeatures } from "@/components/marketplace/MarketplaceFeatures";
+import { MarketplacePromotions } from "@/components/marketplace/MarketplacePromotions";
 
 const Marketplace = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -41,10 +43,16 @@ const Marketplace = () => {
   const handleCategorySelect = (category: string) => {
     console.log("Selected category:", category);
     setSelectedCategory(category);
+    if (activeTab !== "search") {
+      setActiveTab("search");
+    }
   };
 
   const handleSearchSelect = (term: string) => {
     setSearchQuery(term);
+    if (activeTab !== "search") {
+      setActiveTab("search");
+    }
   };
 
   const resetFilters = () => {
@@ -63,7 +71,7 @@ const Marketplace = () => {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-background pb-16">
+      <div className="min-h-screen bg-slate-50 dark:bg-zinc-900 pb-16">
         {/* Header */}
         <MarketplaceHeader 
           isCartOpen={isCartOpen}
@@ -76,22 +84,26 @@ const Marketplace = () => {
         />
 
         <div className="max-w-[1400px] mx-auto px-4">
+          {activeTab === "browse" && (
+            <MarketplaceFeatures />
+          )}
+          
           <MarketplaceTabs activeTab={activeTab} setActiveTab={setActiveTab}>
-            <TabsContent value="browse">
+            <TabsContent value="browse" className="animate-in fade-in-50 duration-300">
               <BrowseTabContent 
                 handleCategorySelect={handleCategorySelect}
                 handleSearchSelect={handleSearchSelect}
               />
             </TabsContent>
             
-            <TabsContent value="categories">
+            <TabsContent value="categories" className="animate-in fade-in-50 duration-300">
               <CategoryTabContent 
                 setSelectedCategory={setSelectedCategory}
                 setActiveTab={setActiveTab}
               />
             </TabsContent>
             
-            <TabsContent value="search">
+            <TabsContent value="search" className="animate-in fade-in-50 duration-300">
               <SearchTabContent
                 searchQuery={searchQuery}
                 selectedCategory={selectedCategory}
@@ -109,6 +121,10 @@ const Marketplace = () => {
               />
             </TabsContent>
           </MarketplaceTabs>
+          
+          {activeTab === "browse" && (
+            <MarketplacePromotions />
+          )}
         </div>
       </div>
     </Layout>

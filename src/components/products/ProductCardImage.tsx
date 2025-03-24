@@ -1,6 +1,5 @@
 
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { formatPrice } from "@/utils/productUtils";
 
 interface ProductCardImageProps {
   imageUrl: string | null;
@@ -11,8 +10,8 @@ interface ProductCardImageProps {
 
 export const ProductCardImage = ({ imageUrl, title, price, onClick }: ProductCardImageProps) => {
   return (
-    <div className="cursor-pointer group relative overflow-hidden w-full touch-manipulation" onClick={onClick}>
-      <AspectRatio ratio={1} className="bg-muted transition-all duration-300">
+    <div className="cursor-pointer group-hover:opacity-95 relative overflow-hidden w-full touch-manipulation" onClick={onClick}>
+      <AspectRatio ratio={1} className="bg-gray-100 dark:bg-zinc-700">
         {imageUrl ? (
           <img
             src={imageUrl}
@@ -21,13 +20,10 @@ export const ProductCardImage = ({ imageUrl, title, price, onClick }: ProductCar
             loading="lazy"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-muted">
-            <span className="text-muted-foreground text-xs">No image</span>
+          <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-zinc-700">
+            <span className="text-gray-400 dark:text-gray-500 text-xs">No image</span>
           </div>
         )}
-        <div className="absolute top-1 right-1 bg-primary text-white px-1.5 py-0.5 rounded-full text-[10px] font-medium">
-          ₹{formatPrice(price).replace('₹', '')}
-        </div>
       </AspectRatio>
     </div>
   );

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogTitle } from "./ui/dialog";
@@ -6,7 +7,10 @@ import { CreateProductForm } from "./marketplace/CreateProductForm";
 import { ProductCard } from "./products/ProductCard";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus } from "lucide-react";
+import { Plus, Filter, X } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { Skeleton } from "./ui/skeleton";
+import { Card } from "./ui/card";
 
 interface ShoppingSectionProps {
   searchQuery?: string;
@@ -28,9 +32,11 @@ export const ShoppingSection = ({
   priceRange = "all"
 }: ShoppingSectionProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isFilterMobileOpen, setIsFilterMobileOpen] = useState(false);
+  const [localSortOption, setLocalSortOption] = useState(sortOption);
 
-  const { data: products, refetch } = useQuery({
-    queryKey: ['products', searchQuery, selectedCategory, showDiscounted, showUsed, showBranded, sortOption, priceRange],
+  const { data: products, isLoading, refetch } = useQuery({
+    queryKey: ['products', searchQuery, selectedCategory, showDiscounted, showUsed, showBranded, localSortOption, priceRange],
     queryFn: async () => {
       let query = supabase
         .from('products')
@@ -93,7 +99,7 @@ export const ShoppingSection = ({
       }) || [];
       
       // Sort based on selected option
-      switch (sortOption) {
+      switch (localSortOption) {
         case 'newest':
           return productsWithRanking.sort((a, b) => 
             new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
@@ -119,18 +125,86 @@ export const ShoppingSection = ({
   });
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-semibold">
-          {selectedCategory && selectedCategory !== 'all' 
-            ? `${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} Products` 
-            : 'All Products'}
-        </h2>
-        <Button onClick={() => setIsDialogOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Product
-        </Button>
+    <div className="space-y-4">
+      <div className="flex flex-wrap gap-2 justify-between items-center bg-white dark:bg-zinc-800 p-3 rounded-lg border border-gray-200 dark:border-zinc-700 shadow-sm">
+        <div className="flex items-center gap-2">
+          <h2 className="text-lg font-semibold hidden sm:block">
+            {selectedCategory && selectedCategory !== 'all' 
+              ? `${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} Products` 
+              : 'All Products'}
+          </h2>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            className="sm:hidden flex items-center gap-1"
+            onClick={() => setIsFilterMobileOpen(!isFilterMobileOpen)}
+          >
+            <Filter size={16} />
+            Filters
+            {(showDiscounted || showUsed || showBranded || priceRange !== 'all') && (
+              <span className="ml-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full h-5 w-5 flex items-center justify-center">
+                !
+              </span>
+            )}
+          </Button>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground hidden sm:inline">Sort by:</span>
+            <Select value={localSortOption} onValueChange={(value) => setLocalSortOption(value)}>
+              <SelectTrigger className="w-[180px] h-9">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">Newest First</SelectItem>
+                <SelectItem value="price-low">Price: Low to High</SelectItem>
+                <SelectItem value="price-high">Price: High to Low</SelectItem>
+                <SelectItem value="most-viewed">Most Viewed</SelectItem>
+                <SelectItem value="best-selling">Best Selling</SelectItem>
+                <SelectItem value="trending">Trending</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <Button onClick={() => setIsDialogOpen(true)} className="bg-blue-600 hover:bg-blue-700">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Product
+          </Button>
+        </div>
       </div>
+
+      {/* Mobile filter panel */}
+      {isFilterMobileOpen && (
+        <div className="block sm:hidden bg-white dark:bg-zinc-800 p-4 rounded-lg border border-gray-200 dark:border-zinc-700 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-medium">Filters</h3>
+            <Button variant="ghost" size="icon" onClick={() => setIsFilterMobileOpen(false)}>
+              <X size={16} />
+            </Button>
+          </div>
+          
+          <div className="space-y-3">
+            <div>
+              <label className="text-sm font-medium mb-1 block">Sort by</label>
+              <Select value={localSortOption} onValueChange={(value) => setLocalSortOption(value)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">Newest First</SelectItem>
+                  <SelectItem value="price-low">Price: Low to High</SelectItem>
+                  <SelectItem value="price-high">Price: High to Low</SelectItem>
+                  <SelectItem value="most-viewed">Most Viewed</SelectItem>
+                  <SelectItem value="best-selling">Best Selling</SelectItem>
+                  <SelectItem value="trending">Trending</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-[600px] h-[90vh]">
@@ -146,14 +220,26 @@ export const ShoppingSection = ({
         </DialogContent>
       </Dialog>
 
-      {products && products.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
+      {isLoading ? (
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {[...Array(8)].map((_, i) => (
+            <Card key={i} className="overflow-hidden">
+              <Skeleton className="h-48 w-full" />
+              <div className="p-3">
+                <Skeleton className="h-4 w-3/4 mb-2" />
+                <Skeleton className="h-4 w-1/2" />
+              </div>
+            </Card>
+          ))}
+        </div>
+      ) : products && products.length > 0 ? (
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
       ) : (
-        <div className="text-center py-12 bg-white rounded-lg shadow-sm">
+        <div className="text-center py-12 bg-white rounded-lg shadow-sm dark:bg-zinc-800">
           <p className="text-muted-foreground">No products found matching your filters.</p>
           <Button variant="outline" className="mt-4" onClick={() => setIsDialogOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />

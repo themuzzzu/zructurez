@@ -1,116 +1,48 @@
 
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { useState } from "react";
+import { Card } from "@/components/ui/card";
 import { 
-  ShoppingBag, 
-  Smartphone, 
-  Tv, 
-  Laptop, 
-  Shirt, 
-  Baby, 
-  Home, 
-  BookOpen, 
-  Dumbbell, 
-  Utensils, 
-  Car, 
-  Gift
+  Smartphone, Laptop, Headphones, Watch, Camera, 
+  Shirt, Bookmark, Gift, Home, Coffee, Car, Baby
 } from "lucide-react";
-import { useState, useEffect } from "react";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 
 interface CategoryAvatarsProps {
   onCategorySelect: (category: string) => void;
 }
 
 export const CategoryAvatars = ({ onCategorySelect }: CategoryAvatarsProps) => {
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const navigate = useNavigate();
-  
-  const categories = [
-    { id: "all", name: "All", icon: <ShoppingBag className="h-8 w-8" /> },
-    { id: "electronics", name: "Electronics", icon: <Smartphone className="h-8 w-8" /> },
-    { id: "mobiles", name: "Mobiles", icon: <Smartphone className="h-8 w-8" /> },
-    { id: "tvs", name: "TVs & Appliances", icon: <Tv className="h-8 w-8" /> },
-    { id: "fashion", name: "Fashion", icon: <Shirt className="h-8 w-8" /> },
-    { id: "computers", name: "Computers", icon: <Laptop className="h-8 w-8" /> },
-    { id: "baby", name: "Baby & Kids", icon: <Baby className="h-8 w-8" /> },
-    { id: "home", name: "Home & Furniture", icon: <Home className="h-8 w-8" /> },
-    { id: "books", name: "Books & Education", icon: <BookOpen className="h-8 w-8" /> },
-    { id: "sports", name: "Sports & Fitness", icon: <Dumbbell className="h-8 w-8" /> },
-    { id: "grocery", name: "Grocery", icon: <Utensils className="h-8 w-8" /> },
-    { id: "auto", name: "Auto Accessories", icon: <Car className="h-8 w-8" /> },
-    { id: "gifts", name: "Gifts & Toys", icon: <Gift className="h-8 w-8" /> },
-  ];
-  
-  const handleCategoryClick = (categoryId: string) => {
-    setSelectedCategory(categoryId);
-    onCategorySelect(categoryId);
-    toast.success(`Browsing ${categories.find(c => c.id === categoryId)?.name} products`);
-  };
-  
-  // Initialize with "all" category on first render
-  useEffect(() => {
-    if (!selectedCategory) {
-      setSelectedCategory("all");
-      onCategorySelect("all");
-    }
-  }, []);
-  
-  const viewAllCategories = () => {
-    navigate('/marketplace/categories');
-  };
+  const [categories] = useState([
+    { name: "Electronics", icon: <Smartphone size={24} /> },
+    { name: "Computers", icon: <Laptop size={24} /> },
+    { name: "Audio", icon: <Headphones size={24} /> },
+    { name: "Wearables", icon: <Watch size={24} /> },
+    { name: "Cameras", icon: <Camera size={24} /> },
+    { name: "Fashion", icon: <Shirt size={24} /> },
+    { name: "Books", icon: <Bookmark size={24} /> },
+    { name: "Gifts", icon: <Gift size={24} /> },
+    { name: "Home", icon: <Home size={24} /> },
+    { name: "Kitchen", icon: <Coffee size={24} /> },
+    { name: "Automotive", icon: <Car size={24} /> },
+    { name: "Baby", icon: <Baby size={24} /> }
+  ]);
   
   return (
-    <div className="w-full bg-card rounded-lg p-4 shadow-sm border border-border">
-      <div className="flex justify-between items-center mb-3">
-        <h3 className="text-lg font-medium text-foreground">Shop by Category</h3>
-        <Button variant="ghost" size="sm" className="text-primary" onClick={viewAllCategories}>
-          View All
-        </Button>
+    <Card className="bg-white dark:bg-zinc-800 p-4 border border-gray-200 dark:border-zinc-700 shadow-sm">
+      <h2 className="text-lg font-bold mb-4">Shop by Category</h2>
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
+        {categories.map((category, index) => (
+          <button
+            key={index}
+            onClick={() => onCategorySelect(category.name.toLowerCase())}
+            className="flex flex-col items-center gap-2 p-3 rounded-lg transition-all hover:bg-blue-50 dark:hover:bg-blue-900/20 group"
+          >
+            <div className="h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform">
+              {category.icon}
+            </div>
+            <span className="text-xs font-medium">{category.name}</span>
+          </button>
+        ))}
       </div>
-      
-      <Carousel
-        opts={{
-          align: "start",
-          loop: false,
-        }}
-        className="w-full"
-      >
-        <CarouselContent className="-ml-2 md:-ml-4">
-          {categories.map((category) => (
-            <CarouselItem key={category.id} className="pl-2 md:pl-4 basis-1/4 sm:basis-1/5 md:basis-1/6 lg:basis-1/8">
-              <div 
-                className="flex flex-col items-center cursor-pointer group"
-                onClick={() => handleCategoryClick(category.id)}
-              >
-                <Avatar 
-                  className={`w-16 h-16 bg-primary/5 dark:bg-primary/10 p-2 
-                    group-hover:scale-110 transition-transform duration-200 
-                    ${selectedCategory === category.id ? 'ring-2 ring-primary shadow-md' : ''}`}
-                >
-                  <AvatarImage src="" alt={category.name} />
-                  <AvatarFallback className="text-primary/80">
-                    {category.icon}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="mt-2 text-xs text-center font-medium max-w-[80px] line-clamp-2 text-foreground">
-                  {category.name}
-                </span>
-              </div>
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-        <CarouselPrevious className="hidden md:flex bg-background/80 backdrop-blur-sm" />
-        <CarouselNext className="hidden md:flex bg-background/80 backdrop-blur-sm" />
-      </Carousel>
-    </div>
+    </Card>
   );
 };

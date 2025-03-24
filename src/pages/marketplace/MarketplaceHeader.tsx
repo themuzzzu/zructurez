@@ -1,10 +1,11 @@
 
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ShoppingCart, Filter } from "lucide-react";
+import { ArrowLeft, ShoppingCart, Filter, Search, Bell } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { AutocompleteSearch } from "@/components/marketplace/AutocompleteSearch";
 import { Cart } from "@/components/cart/Cart";
 import { useNavigate } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
 
 interface MarketplaceHeaderProps {
   isCartOpen: boolean;
@@ -28,7 +29,7 @@ export const MarketplaceHeader = ({
   const navigate = useNavigate();
 
   return (
-    <div className="bg-primary px-2 sm:px-4 py-2 sm:py-3 mb-4 shadow-md sticky top-0 z-10">
+    <div className="bg-gradient-to-r from-blue-600 to-blue-500 px-2 sm:px-4 py-3 sm:py-4 mb-4 shadow-md sticky top-0 z-10 transition-all">
       <div className="max-w-[1400px] mx-auto">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1 sm:gap-2">
@@ -44,16 +45,19 @@ export const MarketplaceHeader = ({
           </div>
           
           <div className="hidden md:flex items-center flex-1 max-w-2xl mx-4">
-            <AutocompleteSearch 
-              placeholder="Search products..."
-              value={searchQuery}
-              onChange={setSearchQuery}
-              className="w-full bg-white rounded-l-md"
-              onSearchSelect={setSearchQuery}
-            />
+            <div className="relative w-full flex items-center">
+              <AutocompleteSearch 
+                placeholder="Search for products, brands and more..."
+                value={searchQuery}
+                onChange={setSearchQuery}
+                className="w-full bg-white rounded-md pl-9"
+                onSearchSelect={setSearchQuery}
+              />
+              <Search className="absolute left-2 h-4 w-4 text-gray-400" />
+            </div>
           </div>
           
-          <div className="flex items-center gap-1 sm:gap-2">
+          <div className="flex items-center gap-1 sm:gap-3">
             <Button 
               variant="ghost" 
               size="icon" 
@@ -63,15 +67,27 @@ export const MarketplaceHeader = ({
               <Filter className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
             
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-white hover:bg-white/10 h-8 w-8 hidden sm:flex"
+            >
+              <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
+            </Button>
+            
             <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
               <SheetTrigger asChild>
                 <div className="relative">
-                  <Button variant="ghost" size="icon" className="text-white h-8 w-8">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="text-white hover:bg-white/10 h-8 w-8"
+                  >
                     <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" />
                     {cartItemCount > 0 && (
-                      <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-accent text-white text-[10px] flex items-center justify-center animate-fade-in">
+                      <Badge className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-yellow-400 text-blue-700 text-[10px] flex items-center justify-center p-0 font-bold">
                         {cartItemCount}
-                      </span>
+                      </Badge>
                     )}
                   </Button>
                 </div>
@@ -89,14 +105,15 @@ export const MarketplaceHeader = ({
         </div>
         
         {/* Mobile Search */}
-        <div className="mt-2 md:hidden">
+        <div className="mt-2 md:hidden relative">
           <AutocompleteSearch 
             placeholder="Search products..."
             value={searchQuery}
             onChange={setSearchQuery}
-            className="w-full bg-white"
+            className="w-full bg-white pl-9"
             onSearchSelect={setSearchQuery}
           />
+          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
         </div>
       </div>
     </div>

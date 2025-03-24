@@ -3,6 +3,8 @@ import { Card } from "../ui/card";
 import { useEffect } from "react";
 import { incrementViews } from "@/services/postService";
 import { useNavigate } from "react-router-dom";
+import { formatPrice } from "@/utils/productUtils";
+import { Badge } from "@/components/ui/badge";
 import { ProductCardImage } from "./ProductCardImage";
 import { ProductCardInfo } from "./ProductCardInfo";
 import { ProductCardActions } from "./ProductCardActions";
@@ -41,13 +43,27 @@ export const ProductCard = ({ product }: ProductCardProps) => {
   };
 
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 bg-card border-border">
-      <ProductCardImage 
-        imageUrl={product.image_url}
-        title={product.title}
-        price={product.price}
-        onClick={handleProductClick}
-      />
+    <Card className="overflow-hidden group transition-all duration-300 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 hover:shadow-md hover:border-blue-200 dark:hover:border-blue-700">
+      <div className="relative">
+        <ProductCardImage 
+          imageUrl={product.image_url}
+          title={product.title}
+          price={product.price}
+          onClick={handleProductClick}
+        />
+        
+        {product.is_discounted && (
+          <Badge className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold">
+            SALE
+          </Badge>
+        )}
+        
+        {product.is_branded && (
+          <Badge variant="outline" className="absolute bottom-2 left-2 bg-white/80 dark:bg-black/50 text-xs">
+            BRANDED
+          </Badge>
+        )}
+      </div>
       
       <ProductCardInfo 
         title={product.title}
