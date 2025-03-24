@@ -15,6 +15,43 @@ import { CheckoutPaymentMethod } from "@/components/checkout/CheckoutPaymentMeth
 import { CheckoutSummary } from "@/components/checkout/CheckoutSummary";
 import { measureApiCall } from "@/utils/performanceTracking";
 
+// Define interfaces
+interface CartItem {
+  quantity: number;
+  products: {
+    id: string;
+    title: string;
+    price: number;
+    image_url?: string;
+  };
+}
+
+interface Address {
+  id: string;
+  name: string;
+  phone: string;
+  address_line1: string;
+  address_line2?: string;
+  city: string;
+  state: string;
+  postal_code: string;
+  is_default: boolean;
+  address_type: 'home' | 'work' | 'other';
+  user_id: string;
+}
+
+interface Coupon {
+  id: string;
+  code: string;
+  discount_type: 'percentage' | 'fixed';
+  discount_value: number;
+  min_order_value: number;
+  max_discount?: number;
+  valid_from: string;
+  valid_until: string;
+  is_active: boolean;
+}
+
 const CheckoutPage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -22,7 +59,7 @@ const CheckoutPage = () => {
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>("cod");
   const [couponCode, setCouponCode] = useState<string>("");
-  const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
+  const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
   // Fetch cart items
@@ -49,7 +86,7 @@ const CheckoutPage = () => {
           .order('created_at', { ascending: false });
 
         if (error) throw error;
-        return data;
+        return data as CartItem[];
       });
     },
   });
@@ -71,7 +108,7 @@ const CheckoutPage = () => {
           .order('is_default', { ascending: false });
 
         if (error) throw error;
-        return data || [];
+        return (data || []) as Address[];
       });
     },
   });
@@ -89,7 +126,7 @@ const CheckoutPage = () => {
           .gte('valid_until', new Date().toISOString());
 
         if (error) throw error;
-        return data || [];
+        return (data || []) as Coupon[];
       });
     },
   });
@@ -133,7 +170,7 @@ const CheckoutPage = () => {
           .single();
 
         if (error) throw new Error('Invalid or expired coupon code');
-        return data;
+        return data as Coupon;
       });
     },
     onSuccess: (data) => {
@@ -229,7 +266,7 @@ const CheckoutPage = () => {
     }, 0);
   };
 
-  const calculateCouponDiscount = (coupon: any, subtotal: number) => {
+  const calculateCouponDiscount = (coupon: Coupon | null, subtotal: number) => {
     if (!coupon) return 0;
     
     if (coupon.discount_type === 'percentage') {

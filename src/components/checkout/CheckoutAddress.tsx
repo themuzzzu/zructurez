@@ -96,7 +96,7 @@ export const CheckoutAddress = ({
         .single();
 
       if (error) throw error;
-      return data;
+      return data as Address;
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['user-addresses'] });

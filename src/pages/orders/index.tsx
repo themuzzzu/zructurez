@@ -12,6 +12,48 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { measureApiCall } from "@/utils/performanceTracking";
 
+// Define interfaces for order data structure
+interface OrderItem {
+  id: string;
+  order_id: string;
+  product_id: string;
+  quantity: number;
+  price: number;
+  total: number;
+  products: {
+    id: string;
+    title: string;
+    price: number;
+    image_url: string | null;
+  };
+}
+
+interface UserAddress {
+  id: string;
+  user_id: string;
+  name: string;
+  address_line1: string;
+  address_line2?: string;
+  city: string;
+  state: string;
+  postal_code: string;
+}
+
+interface Order {
+  id: string;
+  user_id: string;
+  status: string;
+  created_at: string;
+  total: number;
+  payment_method: string;
+  address_id: string;
+  discount: number;
+  shipping_fee: number;
+  coupon_code: string | null;
+  order_items: OrderItem[];
+  user_addresses: UserAddress;
+}
+
 const OrdersPage = () => {
   const navigate = useNavigate();
   const [orderFilter, setOrderFilter] = useState<'all' | 'pending' | 'processing' | 'shipped' | 'delivered'>('all');
@@ -27,28 +69,56 @@ const OrdersPage = () => {
       }
 
       return await measureApiCall('fetch-user-orders', async () => {
-        const { data, error } = await supabase
+        // Fetch basic order data first
+        const { data: ordersData, error: ordersError } = await supabase
           .from('orders')
-          .select(`
-            *,
-            order_items (
-              *,
-              products (
-                id,
-                title,
-                price,
-                image_url
-              )
-            ),
-            user_addresses (
-              *
-            )
-          `)
+          .select('*')
           .eq('user_id', session.session.user.id)
           .order('created_at', { ascending: false });
 
-        if (error) throw error;
-        return data || [];
+        if (ordersError) throw ordersError;
+        
+        // Then fetch order items for each order
+        const ordersWithItems = await Promise.all(
+          (ordersData || []).map(async (order) => {
+            const { data: itemsData, error: itemsError } = await supabase
+              .from('order_items')
+              .select(`
+                *,
+                products:product_id (
+                  id,
+                  title,
+                  price,
+                  image_url
+                )
+              `)
+              .eq('order_id', order.id);
+            
+            if (itemsError) {
+              console.error('Error fetching order items:', itemsError);
+              return { ...order, order_items: [] };
+            }
+            
+            // Fetch address data
+            const { data: addressData, error: addressError } = await supabase
+              .from('user_addresses')
+              .select('*')
+              .eq('id', order.address_id)
+              .single();
+              
+            if (addressError && addressError.code !== 'PGRST116') {
+              console.error('Error fetching address:', addressError);
+            }
+            
+            return { 
+              ...order, 
+              order_items: itemsData || [],
+              user_addresses: addressData || null
+            };
+          })
+        );
+        
+        return ordersWithItems as Order[];
       });
     },
   });
@@ -65,7 +135,7 @@ const OrdersPage = () => {
       
       // Check if any product in the order matches the search query
       const productMatch = order.order_items.some(item => 
-        item.products.title.toLowerCase().includes(query)
+        (item.products?.title || '').toLowerCase().includes(query)
       );
       
       return orderIdMatch || productMatch;
@@ -201,7 +271,7 @@ const OrdersPage = () => {
                     </p>
                   </div>
                   <div className="md:text-right mt-2 md:mt-0">
-                    <p className="font-medium">{formatPrice(order.total)}</p>
+                    <p className="font-medium">{formatPrice(order.total || 0)}</p>
                     <p className="text-sm text-muted-foreground">
                       {order.payment_method === 'cod' ? 'Cash on Delivery' : 'Paid Online'}
                     </p>
@@ -214,7 +284,7 @@ const OrdersPage = () => {
                   {order.order_items.slice(0, 2).map((item) => (
                     <div key={item.id} className="flex gap-4">
                       <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded bg-slate-50">
-                        {item.products.image_url && (
+                        {item.products?.image_url && (
                           <img
                             src={item.products.image_url}
                             alt={item.products.title}
@@ -223,7 +293,7 @@ const OrdersPage = () => {
                         )}
                       </div>
                       <div className="flex flex-1 flex-col">
-                        <h3 className="text-sm font-medium line-clamp-1">{item.products.title}</h3>
+                        <h3 className="text-sm font-medium line-clamp-1">{item.products?.title}</h3>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                           <span>Qty: {item.quantity}</span>
                           <span>•</span>
