@@ -5,6 +5,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { X, AlertCircle, CheckCircle, AlertTriangle, Info } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { useToast } from "@/hooks/use-toast"
 
 const ToastProvider = ToastPrimitives.Provider
 
