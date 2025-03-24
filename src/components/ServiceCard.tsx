@@ -1,3 +1,4 @@
+
 import { Star, MapPin, Clock, Phone, Mail, Share2, Trash2 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
@@ -15,6 +16,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { trackContactClick } from "@/services/serviceService";
 
 interface ServiceCardProps {
   id: string;
@@ -53,6 +55,8 @@ export const ServiceCard = ({
 
   const handleContact = (e: React.MouseEvent) => {
     e.stopPropagation();
+    // Track the contact click for analytics
+    trackContactClick(id);
     toast.success("Contact request sent!");
   };
 

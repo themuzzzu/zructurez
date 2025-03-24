@@ -1,3 +1,4 @@
+
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,15 +8,20 @@ import { ServiceInfo } from "@/components/service-details/ServiceInfo";
 import { ServicePortfolio } from "@/components/service-details/ServicePortfolio";
 import { ServiceContactSidebar } from "@/components/service-details/ServiceContactSidebar";
 import { ServiceProducts } from "@/components/service-details/ServiceProducts";
+import { ServiceAnalytics } from "@/components/service-details/ServiceAnalytics";
 import { ErrorView } from "@/components/ErrorView";
 import { LoadingView } from "@/components/LoadingView";
 import { toast } from "sonner";
 import { BookAppointmentDialog } from "@/components/BookAppointmentDialog";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { trackServiceView, trackContactClick } from "@/services/serviceService";
+import { RecommendedServices } from "@/components/service-recommendations/RecommendedServices";
+import { useAuth } from "@/hooks/useAuth";
 
 const ServiceDetails = () => {
   const { id } = useParams();
   const [showBooking, setShowBooking] = useState(false);
+  const { user } = useAuth();
 
   const { data: service, isLoading, error } = useQuery({
     queryKey: ['service', id],
@@ -55,13 +61,25 @@ const ServiceDetails = () => {
 
       if (marketplaceError) throw marketplaceError;
 
+      // Determine if the current user is the owner of this service
+      const { data: { user } } = await supabase.auth.getUser();
+      const isOwner = user?.id === serviceData.user_id;
+
       return {
         ...serviceData,
         profile: profileData,
-        marketplaceProducts: marketplaceProducts || []
+        marketplaceProducts: marketplaceProducts || [],
+        isOwner
       };
     }
   });
+
+  // Track view when service details are loaded
+  useEffect(() => {
+    if (id && !isLoading && service && !service.isOwner) {
+      trackServiceView(id);
+    }
+  }, [id, isLoading, service]);
 
   const handleAddToCart = async (serviceProductId: string) => {
     try {
@@ -155,6 +173,12 @@ const ServiceDetails = () => {
     }
   };
 
+  const handleContactClick = () => {
+    if (id) {
+      trackContactClick(id);
+    }
+  };
+
   if (error) {
     return <ErrorView />;
   }
@@ -193,16 +217,27 @@ const ServiceDetails = () => {
                   onAddToCart={handleAddToCart}
                 />
               )}
+
+              {/* Service Analytics for service owners */}
+              {service.isOwner && (
+                <ServiceAnalytics serviceId={service.id} isOwner={service.isOwner} />
+              )}
             </div>
 
-            <ServiceContactSidebar
-              price={service.price}
-              contactInfo={service.contact_info}
-              providerName={service.profile?.username}
-              providerAvatar={service.profile?.avatar_url}
-              userId={service.user_id}
-              onBookAppointment={() => setShowBooking(true)}
-            />
+            <div className="space-y-6">
+              <ServiceContactSidebar
+                price={service.price}
+                contactInfo={service.contact_info}
+                providerName={service.profile?.username}
+                providerAvatar={service.profile?.avatar_url}
+                userId={service.user_id}
+                onBookAppointment={() => setShowBooking(true)}
+                onContactClick={handleContactClick}
+              />
+
+              {/* Recommended Services component */}
+              <RecommendedServices userLocation={service.location} />
+            </div>
           </div>
         </div>
       </div>
