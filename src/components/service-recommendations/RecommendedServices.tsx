@@ -25,9 +25,9 @@ interface ServiceItem {
   location: string;
   image_url?: string;
   profiles?: {
-    username: string;
+    username?: string;
     avatar_url?: string;
-  };
+  } | null;
 }
 
 export const RecommendedServices = ({ userLocation }: { userLocation?: string }) => {
@@ -44,13 +44,13 @@ export const RecommendedServices = ({ userLocation }: { userLocation?: string })
         // If user is logged in, get personalized recommendations
         if (user) {
           const recommendedData = await getRecommendedServices(user.id);
-          setRecommendations(recommendedData);
+          setRecommendations(recommendedData as ServiceItem[]);
         }
         
         // Get trending services in the area
         if (userLocation) {
           const trendingData = await getTrendingServicesInArea(userLocation);
-          setTrendingServices(trendingData);
+          setTrendingServices(trendingData as ServiceItem[]);
         }
       } catch (error) {
         console.error("Error loading service recommendations:", error);
@@ -158,6 +158,10 @@ const ServiceCard = ({
   onClick: () => void;
   trending?: boolean;
 }) => {
+  // Get username and avatar safely
+  const username = service.profiles?.username || "Service provider";
+  const avatarUrl = service.profiles?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${service.id}`;
+
   return (
     <div 
       className="border rounded-lg overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
@@ -186,12 +190,12 @@ const ServiceCard = ({
         </div>
         <div className="flex items-center mt-2">
           <img 
-            src={service.profiles?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${service.id}`} 
-            alt={service.profiles?.username || "Service provider"} 
+            src={avatarUrl} 
+            alt={username} 
             className="w-6 h-6 rounded-full" 
           />
           <span className="text-xs ml-2 text-muted-foreground">
-            {service.profiles?.username || "Service provider"}
+            {username}
           </span>
         </div>
       </div>
