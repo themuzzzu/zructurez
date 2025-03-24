@@ -4,14 +4,19 @@ import { supabase } from "@/integrations/supabase/client";
 import { Post } from "../types/postTypes";
 import { transformPosts } from "../utils/postTransformUtils";
 
-export const usePostsData = (selectedGroup: string | null, refreshTrigger: number) => {
+export const usePostsData = (
+  selectedGroup: string | null, 
+  refreshTrigger: number,
+  sortBy: string = "newest",
+  userPosts?: string
+) => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchPosts();
-  }, [selectedGroup, refreshTrigger]);
+  }, [selectedGroup, refreshTrigger, sortBy, userPosts]);
 
   const fetchPosts = async () => {
     setIsLoading(true);
@@ -33,10 +38,21 @@ export const usePostsData = (selectedGroup: string | null, refreshTrigger: numbe
           )
         `) as any;
       
-      query = query.order('created_at', { ascending: false });
+      // Apply sorting
+      if (sortBy === "newest") {
+        query = query.order('created_at', { ascending: false });
+      } else if (sortBy === "oldest") {
+        query = query.order('created_at', { ascending: true });
+      }
 
+      // Apply group filter
       if (selectedGroup) {
         query = query.eq('group_id', selectedGroup);
+      }
+
+      // Apply user filter
+      if (userPosts) {
+        query = query.eq('user_id', userPosts);
       }
 
       const { data, error } = await query;

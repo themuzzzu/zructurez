@@ -8,10 +8,12 @@ import { Post } from "./types/postTypes";
 interface PostsListProps {
   selectedGroup: string | null;
   refreshTrigger: number;
+  sortBy?: string;
+  userPosts?: string;
 }
 
-export const PostsList = ({ selectedGroup, refreshTrigger }: PostsListProps) => {
-  const { posts, isLoading, error, refetchPosts } = usePostsData(selectedGroup, refreshTrigger);
+export const PostsList = ({ selectedGroup, refreshTrigger, sortBy = "newest", userPosts }: PostsListProps) => {
+  const { posts, isLoading, error, refetchPosts } = usePostsData(selectedGroup, refreshTrigger, sortBy, userPosts);
 
   if (isLoading) {
     return (
@@ -37,9 +39,9 @@ export const PostsList = ({ selectedGroup, refreshTrigger }: PostsListProps) => 
         <Info className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
         <h3 className="text-xl font-medium mb-2">No posts yet</h3>
         <p className="text-muted-foreground mb-4">
-          Be the first to post in this community!
+          {userPosts ? "You haven't created any posts yet." : "Be the first to post in this community!"}
         </p>
-        {!selectedGroup && (
+        {!selectedGroup && !userPosts && (
           <p className="text-sm text-muted-foreground">
             Select a community to post in
           </p>

@@ -6,6 +6,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Post, Poll, PollVote } from "./types/postTypes";
+import { MessageSquare, ThumbsUp, Share2, Bookmark, Flag, MoreHorizontal } from "lucide-react";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/hooks/useAuth";
 
 interface PostItemProps {
   post: Post;
@@ -13,6 +21,11 @@ interface PostItemProps {
 }
 
 export const PostItem = ({ post, onVote }: PostItemProps) => {
+  const { user } = useAuth();
+  const [isLiked, setIsLiked] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [showComments, setShowComments] = useState(false);
+
   const handleVote = async (pollId: string, optionIndex: number) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -68,6 +81,33 @@ export const PostItem = ({ post, onVote }: PostItemProps) => {
     return post.poll.votes.length;
   };
 
+  const handleLike = () => {
+    if (!user) {
+      toast.error("Please sign in to like posts");
+      return;
+    }
+    setIsLiked(!isLiked);
+    toast.success(isLiked ? "Post unliked" : "Post liked");
+  };
+
+  const handleBookmark = () => {
+    if (!user) {
+      toast.error("Please sign in to bookmark posts");
+      return;
+    }
+    setIsBookmarked(!isBookmarked);
+    toast.success(isBookmarked ? "Post removed from bookmarks" : "Post bookmarked");
+  };
+
+  const handleShare = () => {
+    navigator.clipboard.writeText(`Check out this post: ${window.location.origin}/communities?post=${post.id}`);
+    toast.success("Link copied to clipboard");
+  };
+
+  const handleReport = () => {
+    toast.success("Post reported. Our team will review it.");
+  };
+
   return (
     <Card key={post.id} className="p-4">
       <div className="flex items-start gap-4">
@@ -87,6 +127,27 @@ export const PostItem = ({ post, onVote }: PostItemProps) => {
                 {post.group && ` • in ${post.group.name}`}
               </p>
             </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleBookmark}>
+                  <Bookmark className="h-4 w-4 mr-2" />
+                  {isBookmarked ? "Remove bookmark" : "Bookmark"}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleShare}>
+                  <Share2 className="h-4 w-4 mr-2" />
+                  Share
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleReport}>
+                  <Flag className="h-4 w-4 mr-2" />
+                  Report
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
           <p className="mt-2">{post.content}</p>
           
@@ -143,6 +204,51 @@ export const PostItem = ({ post, onVote }: PostItemProps) => {
               <p className="text-sm text-muted-foreground mt-2">
                 {getTotalVotes()} votes total
               </p>
+            </div>
+          )}
+          
+          <div className="flex items-center mt-4 gap-2">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className={`gap-2 ${isLiked ? 'text-primary' : ''}`}
+              onClick={handleLike}
+            >
+              <ThumbsUp className="h-4 w-4" />
+              Like
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="gap-2"
+              onClick={() => setShowComments(!showComments)}
+            >
+              <MessageSquare className="h-4 w-4" />
+              Comment
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="gap-2"
+              onClick={handleShare}
+            >
+              <Share2 className="h-4 w-4" />
+              Share
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className={`gap-2 ml-auto ${isBookmarked ? 'text-primary' : ''}`}
+              onClick={handleBookmark}
+            >
+              <Bookmark className="h-4 w-4" />
+              {isBookmarked ? "Saved" : "Save"}
+            </Button>
+          </div>
+          
+          {showComments && (
+            <div className="mt-4 border-t pt-4">
+              <p className="text-center text-muted-foreground">Comments will appear here</p>
             </div>
           )}
         </div>
