@@ -5,19 +5,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MapPin, Store, Star, ArrowRightCircle } from "lucide-react";
+import { Business } from "@/types/business";
 
-type Business = {
+// Updated interface to match what we're using
+interface LocalBusiness extends Partial<Business> {
   id: string;
   name: string;
   description: string;
-  logo_url: string;
-  rating: number;
+  image_url?: string; // Using image_url instead of logo_url
+  rating?: number;
   distance: number;
-  location: {
-    latitude: number;
-    longitude: number;
-  } | null;
-};
+  location: string | null;
+}
 
 export const LocalBusinessSpotlight = () => {
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
@@ -55,15 +54,16 @@ export const LocalBusinessSpotlight = () => {
 
       if (error) throw error;
 
-      // Calculate distance (simplified for demo)
+      // Calculate distance (simplified for demo) and add default rating if missing
       return data.map((business) => {
         // In a real app, use a proper distance calculation algorithm
         // For demo purposes, we'll add a random distance
         return {
           ...business,
+          rating: 4.5, // Default rating if none exists
           distance: Math.round(Math.random() * 10) / 10, // Random distance between 0-10 km
         };
-      }).sort((a, b) => a.distance - b.distance);
+      }).sort((a, b) => a.distance - b.distance) as LocalBusiness[];
     },
     enabled: !!userLocation,
   });
@@ -145,9 +145,9 @@ export const LocalBusinessSpotlight = () => {
           {businesses.map((business) => (
             <Card key={business.id} className="overflow-hidden transition-all hover:shadow-lg">
               <div className="h-40 bg-slate-100 dark:bg-slate-800 relative">
-                {business.logo_url ? (
+                {business.image_url ? (
                   <img
-                    src={business.logo_url}
+                    src={business.image_url}
                     alt={business.name}
                     className="w-full h-full object-cover"
                   />

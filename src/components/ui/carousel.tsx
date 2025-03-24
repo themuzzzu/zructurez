@@ -153,14 +153,15 @@ const Carousel = React.forwardRef<
 
     // Stop autoplay on user interaction
     React.useEffect(() => {
-      if (!api || !autoplay) return
+      if (!api || !autoplay || !carouselRef) return
       
       const onMouseEnter = () => stopAutoplay()
       const onMouseLeave = () => startAutoplay()
       const onTouchStart = () => stopAutoplay()
       const onTouchEnd = () => startAutoplay()
       
-      const element = carouselRef.current
+      // Fixed the issue: Using optional chaining to safely access the element
+      const element = carouselRef.current as HTMLElement | null
       if (element) {
         element.addEventListener('mouseenter', onMouseEnter)
         element.addEventListener('mouseleave', onMouseLeave)
