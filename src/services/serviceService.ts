@@ -240,10 +240,15 @@ export const getRecommendedServices = async (userId: string) => {
     // Further filter by price range on the client-side if needed
     let filteredData = data || [];
     if (preferences.priceRange && preferences.priceRange.min !== undefined && preferences.priceRange.max !== undefined) {
-      filteredData = filteredData.filter(service => 
-        service.price >= preferences.priceRange.min && 
-        service.price <= preferences.priceRange.max
-      );
+      filteredData = filteredData.filter(service => {
+        // Convert price to number before comparison
+        const servicePrice = Number(service.price);
+        const minPrice = Number(preferences.priceRange.min);
+        const maxPrice = Number(preferences.priceRange.max);
+        
+        return !isNaN(servicePrice) && !isNaN(minPrice) && !isNaN(maxPrice) &&
+               servicePrice >= minPrice && servicePrice <= maxPrice;
+      });
     }
     
     return filteredData;
