@@ -160,8 +160,8 @@ const Carousel = React.forwardRef<
       const onTouchStart = () => stopAutoplay()
       const onTouchEnd = () => startAutoplay()
       
-      // Fixed the issue: Using optional chaining to safely access the element
-      const element = carouselRef.current as HTMLElement | null
+      // Fix the typing issue by checking if current exists
+      const element = carouselRef.current
       if (element) {
         element.addEventListener('mouseenter', onMouseEnter)
         element.addEventListener('mouseleave', onMouseLeave)
@@ -175,6 +175,7 @@ const Carousel = React.forwardRef<
           element.removeEventListener('touchend', onTouchEnd)
         }
       }
+      return undefined
     }, [api, autoplay, carouselRef, startAutoplay, stopAutoplay])
 
     React.useEffect(() => {

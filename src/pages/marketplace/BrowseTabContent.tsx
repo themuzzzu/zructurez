@@ -1,7 +1,6 @@
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { MarketplaceBanner } from "@/components/marketplace/MarketplaceBanner";
 import { CategoryAvatars } from "@/components/marketplace/CategoryAvatars";
 import { TrendingSearches } from "@/components/marketplace/TrendingSearches";
 import { DealsSection } from "@/components/marketplace/DealsSection";
@@ -37,10 +36,10 @@ export const BrowseTabContent = ({
       <div className="mb-8">
         <div className="flex justify-between items-center mb-3">
           <div className="flex items-center gap-2">
-            <BadgePercent className="h-5 w-5 text-purple-600" />
+            <BadgePercent className="h-5 w-5 text-gray-700 dark:text-gray-300" />
             <h2 className="text-xl font-semibold">Sponsored Products</h2>
           </div>
-          <Button variant="link" className="text-blue-600 font-medium flex items-center gap-1">
+          <Button variant="ghost" className="font-medium flex items-center gap-1 text-black dark:text-white">
             View All <ArrowRightCircle size={16} />
           </Button>
         </div>
@@ -56,10 +55,10 @@ export const BrowseTabContent = ({
       <div className="mb-4">
         <div className="flex justify-between items-center mb-3">
           <div className="flex items-center gap-2">
-            <ShoppingBag className="h-5 w-5 text-blue-600" />
+            <ShoppingBag className="h-5 w-5 text-gray-700 dark:text-gray-300" />
             <h2 className="text-xl font-semibold">Today's Deals</h2>
           </div>
-          <Button variant="link" className="text-blue-600 font-medium flex items-center gap-1">
+          <Button variant="ghost" className="font-medium flex items-center gap-1 text-black dark:text-white">
             View All <ArrowRightCircle size={16} />
           </Button>
         </div>
@@ -72,10 +71,10 @@ export const BrowseTabContent = ({
       <div className="mb-8">
         <div className="flex justify-between items-center mb-3">
           <div className="flex items-center gap-2">
-            <Zap className="h-5 w-5 text-amber-500" />
+            <Zap className="h-5 w-5 text-gray-700 dark:text-gray-300" />
             <h2 className="text-xl font-semibold">Recommended For You</h2>
           </div>
-          <Button variant="link" className="text-blue-600 font-medium flex items-center gap-1">
+          <Button variant="ghost" className="font-medium flex items-center gap-1 text-black dark:text-white">
             View All <ArrowRightCircle size={16} />
           </Button>
         </div>
@@ -88,7 +87,7 @@ export const BrowseTabContent = ({
       <div className="mb-8">
         <div className="flex justify-between items-center mb-3">
           <h2 className="text-xl font-semibold">Trending Products</h2>
-          <Button variant="link" className="text-blue-600 font-medium flex items-center gap-1">
+          <Button variant="ghost" className="font-medium flex items-center gap-1 text-black dark:text-white">
             View All <ArrowRightCircle size={16} />
           </Button>
         </div>

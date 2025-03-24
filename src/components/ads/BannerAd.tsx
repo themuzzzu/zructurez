@@ -42,7 +42,7 @@ export const BannerAd = ({ ad }: BannerAdProps) => {
 
   return (
     <Card 
-      className="overflow-hidden cursor-pointer relative hover:shadow-md transition-all mb-4" 
+      className="overflow-hidden cursor-pointer relative hover:shadow-md transition-all border-0"
       onClick={handleClick}
     >
       {ad.image_url ? (
@@ -52,24 +52,24 @@ export const BannerAd = ({ ad }: BannerAdProps) => {
             alt={ad.title} 
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent flex items-center">
+          <div className="absolute inset-0 bg-gradient-to-r from-black/30 to-transparent flex items-center">
             <div className="p-4 md:p-6 text-white">
               <h3 className="text-lg md:text-xl font-bold">{ad.title}</h3>
               <p className="text-sm mt-1">Click to learn more</p>
             </div>
           </div>
-          <Badge className="absolute top-2 right-2 bg-yellow-500/90">
-            Sponsored
+          <Badge className="absolute top-2 right-2 bg-black/70 hover:bg-black text-white border-0">
+            Ad
           </Badge>
         </div>
       ) : (
-        <div className="bg-gradient-to-r from-primary/80 to-primary p-4 text-white flex justify-between items-center">
+        <div className="bg-gray-100 dark:bg-zinc-900 text-black dark:text-white p-4 flex justify-between items-center aspect-[5/1] sm:aspect-[6/1] md:aspect-[8/1]">
           <div>
             <h3 className="font-bold">{ad.title}</h3>
             <p className="text-sm">Click to learn more</p>
           </div>
-          <Badge className="bg-yellow-500/90">
-            Sponsored
+          <Badge className="bg-black/80 hover:bg-black text-white border-0">
+            Ad
           </Badge>
         </div>
       )}
