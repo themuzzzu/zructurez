@@ -65,10 +65,15 @@ export const useBusinesses = () => {
           queryClient.setQueryData(['businesses'], (oldData: Business[] | undefined) => {
             if (!oldData) return oldData;
             
-            // Check if payload.new exists and has an id property
-            if (payload.new && typeof payload.new === 'object' && 'id' in payload.new) {
+            // More robust type checking for the payload
+            if (payload.new && 
+                typeof payload.new === 'object' && 
+                'id' in payload.new && 
+                typeof payload.new.id === 'string') {
+              const businessId = payload.new.id;
+              
               return oldData.map(business => 
-                business.id === payload.new.id 
+                business.id === businessId 
                   ? { ...business, ...payload.new }
                   : business
               );
