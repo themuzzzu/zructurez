@@ -1,108 +1,127 @@
 
 import { CreatePost } from "@/components/CreatePost";
-import { GroupManagement } from "@/components/groups/GroupManagement";
-import { FollowSuggestions } from "@/components/follow/FollowSuggestions";
-import { PostCard } from "@/components/PostCard";
-import { SponsoredPosts } from "@/components/SponsoredPosts";
+import { EnhancedPostCard } from "@/components/EnhancedPostCard";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect, useState } from "react";
-import { Layout } from "@/components/layout/Layout";
+import { useState } from "react";
+import { HomeLayout } from "@/components/layout/HomeLayout";
+import { Card } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Loader2 } from "lucide-react";
 
 const Index = () => {
-  const [followSectionPosition, setFollowSectionPosition] = useState<number>(0);
-  const [sponsoredPosition, setSponsoredPosition] = useState<number>(2);
+  const [activeTab, setActiveTab] = useState<string>("for-you");
 
   const { data: posts = [], isLoading } = useQuery({
-    queryKey: ['posts'],
+    queryKey: ['posts', activeTab],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('posts')
         .select(`
           *,
           profiles:profile_id (username, avatar_url)
         `)
         .order('created_at', { ascending: false });
+      
+      // If "Following" tab is active, filter for followed users
+      // This is just a placeholder - actual implementation would filter by followed users
+      if (activeTab === "following") {
+        // In a real implementation, you'd filter by followed users
+        // For now, we'll just limit to fewer posts for demonstration
+        query = query.limit(3);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
       return data;
     }
   });
 
-  useEffect(() => {
-    // Randomly position the follow section between posts
-    if (posts.length > 0) {
-      const randomPosition = Math.floor(Math.random() * (posts.length + 1));
-      setFollowSectionPosition(randomPosition);
-      
-      // Position sponsored posts at a different position
-      let sponsoredPos = Math.floor(Math.random() * (posts.length + 1));
-      // Make sure sponsored and follow sections are not at the same position
-      while (sponsoredPos === randomPosition) {
-        sponsoredPos = Math.floor(Math.random() * (posts.length + 1));
-      }
-      setSponsoredPosition(sponsoredPos);
-    }
-  }, [posts]);
-
-  const renderContent = () => {
-    const content: JSX.Element[] = [];
-
-    posts.forEach((post, index) => {
-      if (index === followSectionPosition) {
-        content.push(<FollowSuggestions key="follow-suggestions" />);
-      }
-      
-      if (index === sponsoredPosition) {
-        content.push(<SponsoredPosts key="sponsored-posts" />);
-      }
-      
-      content.push(
-        <PostCard
-          key={post.id}
-          id={post.id}
-          author={post.profiles?.username || "Unknown"}
-          avatar={post.profiles?.avatar_url || ""}
-          time={new Date(post.created_at).toLocaleDateString()}
-          content={post.content}
-          category={post.category}
-          image={post.image_url}
-          likes={0}
-          comments={0}
-          views={post.views || 0}
-        />
-      );
-    });
-
-    // If the random positions are at the end, append them
-    if (followSectionPosition === posts.length) {
-      content.push(<FollowSuggestions key="follow-suggestions" />);
-    }
-    
-    if (sponsoredPosition === posts.length) {
-      content.push(<SponsoredPosts key="sponsored-posts" />);
-    }
-
-    return content;
-  };
-
   return (
-    <Layout>
-      <div className="container max-w-[800px] p-4 space-y-4">
-        <CreatePost />
-        <div className="space-y-4">
-          {isLoading ? (
-            <div>Loading posts...</div>
-          ) : (
-            renderContent()
-          )}
+    <HomeLayout>
+      <Card className="p-0 overflow-hidden border-0 shadow-none">
+        <div className="sticky top-0 z-10 bg-background pt-2 pb-1 px-4 border-b">
+          <Tabs defaultValue="for-you" className="w-full" onValueChange={setActiveTab}>
+            <TabsList className="w-full grid grid-cols-2">
+              <TabsTrigger value="for-you">For You</TabsTrigger>
+              <TabsTrigger value="following">Following</TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
-        <div className="my-8">
-          <h2 className="text-2xl font-bold mb-4">Groups</h2>
-          <GroupManagement />
+
+        <div className="p-4">
+          <CreatePost />
         </div>
-      </div>
-    </Layout>
+        
+        <Separator />
+        
+        <TabsContent value="for-you" className="m-0">
+          <div className="space-y-0 divide-y">
+            {isLoading ? (
+              <div className="flex justify-center py-10">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : posts.length === 0 ? (
+              <div className="text-center py-10">
+                <p className="text-muted-foreground">No posts yet</p>
+                <p className="text-sm text-muted-foreground mt-1">Be the first to post something!</p>
+              </div>
+            ) : (
+              posts.map((post) => (
+                <div key={post.id} className="hover:bg-muted/50 transition-colors">
+                  <EnhancedPostCard
+                    id={post.id}
+                    author={post.profiles?.username || "Unknown"}
+                    avatar={post.profiles?.avatar_url || ""}
+                    time={post.created_at}
+                    content={post.content}
+                    category={post.category}
+                    image={post.image_url}
+                    likes={0}
+                    comments={0}
+                    views={post.views || 0}
+                  />
+                </div>
+              ))
+            )}
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="following" className="m-0">
+          <div className="space-y-0 divide-y">
+            {isLoading ? (
+              <div className="flex justify-center py-10">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : posts.length === 0 ? (
+              <div className="text-center py-10">
+                <p className="text-muted-foreground">No posts from people you follow</p>
+                <p className="text-sm text-muted-foreground mt-1">Follow more people to see their posts here</p>
+              </div>
+            ) : (
+              posts.map((post) => (
+                <div key={post.id} className="hover:bg-muted/50 transition-colors">
+                  <EnhancedPostCard
+                    id={post.id}
+                    author={post.profiles?.username || "Unknown"}
+                    avatar={post.profiles?.avatar_url || ""}
+                    time={post.created_at}
+                    content={post.content}
+                    category={post.category}
+                    image={post.image_url}
+                    likes={0}
+                    comments={0}
+                    views={post.views || 0}
+                  />
+                </div>
+              ))
+            )}
+          </div>
+        </TabsContent>
+      </Card>
+    </HomeLayout>
   );
 };
 
