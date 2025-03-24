@@ -1,4 +1,6 @@
 
+import { supabase } from "@/integrations/supabase/client";
+
 interface CreateServiceData {
   title: string;
   description: string;
