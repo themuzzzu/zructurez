@@ -72,7 +72,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
           variant="ghost"
           size="icon"
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="hover:bg-zinc-800 transition-all duration-200 rounded-full"
+          className="hover:bg-zinc-800 transition-all duration-200"
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {isCollapsed ? (
@@ -92,7 +92,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
               key={route.path}
               variant="ghost"
               className={cn(
-                "w-full p-0 justify-center rounded-full",
+                "w-full p-0 justify-center",
                 isActive && "bg-zinc-800"
               )}
               onClick={() => navigate(route.path)}
@@ -108,7 +108,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
               key={route.path}
               variant="ghost"
               className={cn(
-                "w-full justify-start gap-4 rounded-full px-4",
+                "w-full justify-start gap-4 px-4",
                 isActive ? "bg-zinc-800" : "hover:bg-zinc-800"
               )}
               onClick={() => navigate(route.path)}
@@ -131,7 +131,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
         {isCollapsed ? (
           <Button
             variant="ghost"
-            className="w-full p-0 justify-center mt-4 rounded-full"
+            className="w-full p-0 justify-center mt-4"
             onClick={toggleTheme}
           >
             <SunMoon className="h-5 w-5 text-muted-foreground" />
@@ -139,7 +139,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
         ) : (
           <Button
             variant="ghost"
-            className="w-full justify-start gap-4 rounded-full px-4 mt-4"
+            className="w-full justify-start gap-4 px-4 mt-4"
             onClick={toggleTheme}
           >
             <div className="flex items-center justify-center">

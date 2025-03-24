@@ -48,7 +48,7 @@ export const MobileNav = () => {
               variant="ghost"
               size="icon"
               className={cn(
-                "flex items-center justify-center h-10 w-10 p-0 rounded-full",
+                "flex items-center justify-center h-10 w-10 p-0",
                 isActive && "bg-zinc-800"
               )}
               onClick={() => navigate(item.path)}
@@ -67,7 +67,7 @@ export const MobileNav = () => {
             <Button 
               variant="ghost" 
               size="icon"
-              className="flex items-center justify-center h-10 w-10 p-0 rounded-full"
+              className="flex items-center justify-center h-10 w-10 p-0"
               aria-label="More options"
             >
               <MoreVertical className="h-5 w-5 text-muted-foreground" />
