@@ -24,6 +24,7 @@ import ServiceDetails from "./pages/ServiceDetails";
 import BusinessDetails from "./pages/BusinessDetails";
 import Profile from "./pages/Profile";
 import Jobs from "./pages/Jobs";
+import Communities from "./pages/Communities";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -56,6 +57,7 @@ const App = () => (
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/business" element={<ProtectedRoute><Business /></ProtectedRoute>} />
             <Route path="/maps" element={<ProtectedRoute><Maps /></ProtectedRoute>} />
+            <Route path="/communities" element={<ProtectedRoute><Communities /></ProtectedRoute>} />
             {/* Catch-all route for 404 pages */}
             <Route path="*" element={<NotFound />} />
           </Routes>

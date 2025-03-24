@@ -31,8 +31,9 @@ export const usePostsData = (selectedGroup: string | null, refreshTrigger: numbe
             options:text,
             votes:poll_votes (id, poll_id, user_id, option_index)
           )
-        `)
-        .order('created_at', { ascending: false }) as any;
+        `) as any;
+      
+      query = query.order('created_at', { ascending: false });
 
       if (selectedGroup) {
         query = query.eq('group_id', selectedGroup);
