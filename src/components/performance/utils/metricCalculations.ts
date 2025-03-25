@@ -23,3 +23,19 @@ export const getMemoryUsageTrend = (data: any[]) => {
       memory_usage: Math.round(m.memory_usage * 100) / 100
     }));
 };
+
+// New function to get slow API calls for reporting
+export const getSlowApiCalls = (data: any[], thresholdMs: number = 500) => {
+  return data
+    .filter(m => m.response_time > thresholdMs)
+    .sort((a, b) => b.response_time - a.response_time);
+};
+
+// New function to calculate average memory usage
+export const calculateAverageMemoryUsage = (data: any[]) => {
+  const memoryData = data.filter(m => m.memory_usage != null);
+  if (memoryData.length === 0) return 0;
+  
+  const sum = memoryData.reduce((acc, curr) => acc + curr.memory_usage, 0);
+  return Math.round((sum / memoryData.length) * 100) / 100;
+};
