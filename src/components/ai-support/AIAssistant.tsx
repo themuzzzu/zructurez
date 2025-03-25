@@ -81,12 +81,17 @@ export const AIAssistant = () => {
       
       // Save conversation history if user is logged in
       if (currentUser) {
-        await supabase.from('ai_conversations').insert({
-          user_id: currentUser.id,
-          query: userMessage.content,
-          response: response,
-          query_type: detectQueryType(userMessage.content)
-        });
+        try {
+          await supabase.from('ai_conversations').insert({
+            user_id: currentUser.id,
+            query: userMessage.content,
+            response: response,
+            query_type: detectQueryType(userMessage.content)
+          });
+        } catch (error) {
+          console.error('Failed to save conversation:', error);
+          // Silently handle this error to not interrupt the UX
+        }
       }
     } catch (error) {
       console.error('Error processing message:', error);

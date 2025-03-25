@@ -42,7 +42,10 @@ export const SmartNotificationAgent = () => {
           
         if (trendingProducts && trendingProducts.length > 0) {
           const topProduct = trendingProducts[0];
-          const purchaseCount = topProduct.product_purchases?.length || 0;
+          // Fix: Check if product_purchases is an array before accessing length
+          const purchaseCount = Array.isArray(topProduct.product_purchases) 
+            ? topProduct.product_purchases.length 
+            : 0;
           
           alerts.push({
             id: `trending-${topProduct.id}`,

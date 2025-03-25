@@ -107,10 +107,23 @@ export const SmartProductRecommendations = () => {
               if (recentViews && recentViews.length > 0) {
                 // Extract product IDs from recent page views
                 const productIds = recentViews
-                  .filter(view => view.metadata?.path?.includes('/product/'))
+                  .filter(view => {
+                    // Fix: Safely access metadata.path with type checking
+                    const metadata = view.metadata;
+                    if (metadata && typeof metadata === 'object' && 'path' in metadata) {
+                      return (metadata.path as string)?.includes('/product/');
+                    }
+                    return false;
+                  })
                   .map(view => {
-                    const match = view.metadata?.path.match(/\/product\/([^\/]+)/);
-                    return match ? match[1] : null;
+                    // Fix: Safely access metadata.path with type checking
+                    const metadata = view.metadata;
+                    if (metadata && typeof metadata === 'object' && 'path' in metadata) {
+                      const path = metadata.path as string;
+                      const match = path?.match(/\/product\/([^\/]+)/);
+                      return match ? match[1] : null;
+                    }
+                    return null;
                   })
                   .filter(Boolean);
                   
@@ -142,10 +155,23 @@ export const SmartProductRecommendations = () => {
               if (recentCategories && recentCategories.length > 0) {
                 // Extract categories from recent searches or page views
                 const categoryParams = recentCategories
-                  .filter(view => view.metadata?.path?.includes('category='))
+                  .filter(view => {
+                    // Fix: Safely access metadata.path with type checking
+                    const metadata = view.metadata;
+                    if (metadata && typeof metadata === 'object' && 'path' in metadata) {
+                      return (metadata.path as string)?.includes('category=');
+                    }
+                    return false;
+                  })
                   .map(view => {
-                    const match = view.metadata?.path.match(/category=([^&]+)/);
-                    return match ? match[1] : null;
+                    // Fix: Safely access metadata.path with type checking
+                    const metadata = view.metadata;
+                    if (metadata && typeof metadata === 'object' && 'path' in metadata) {
+                      const path = metadata.path as string;
+                      const match = path?.match(/category=([^&]+)/);
+                      return match ? match[1] : null;
+                    }
+                    return null;
                   })
                   .filter(Boolean);
                   
