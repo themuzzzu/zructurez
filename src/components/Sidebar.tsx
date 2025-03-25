@@ -27,7 +27,7 @@ interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 // Create a filled icon component
 const FilledIcon = ({ Icon }: { Icon: React.ElementType }) => (
   <div className="relative">
-    <Icon size={18} className="text-zinc-800 dark:text-white" strokeWidth={2} />
+    <Icon size={18} className="text-zinc-200 dark:text-white" strokeWidth={2} />
   </div>
 );
 
@@ -98,10 +98,10 @@ export const Sidebar = ({ className }: SidebarProps) => {
               key={route.path}
               variant="ghost"
               className={cn(
-                "w-full p-2 justify-center rounded-full",
+                "w-full p-2 justify-center",
                 isActive 
-                  ? "bg-zinc-200 dark:bg-zinc-800" 
-                  : "hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                  ? "bg-zinc-900 dark:bg-zinc-900 rounded-lg" 
+                  : "hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full"
               )}
               onClick={() => navigate(route.path)}
             >
@@ -116,10 +116,10 @@ export const Sidebar = ({ className }: SidebarProps) => {
               key={route.path}
               variant="ghost"
               className={cn(
-                "w-full justify-start gap-3 px-3 py-2 rounded-full text-sm",
+                "w-full justify-start gap-3 px-3 py-2 text-sm",
                 isActive 
-                  ? "bg-zinc-200 dark:bg-zinc-800 font-semibold" 
-                  : "hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                  ? "bg-zinc-900 dark:bg-zinc-900 rounded-lg font-semibold" 
+                  : "hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full"
               )}
               onClick={() => navigate(route.path)}
             >
@@ -133,7 +133,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
               <span className={cn(
                 "text-sm",
                 isActive 
-                  ? "font-semibold text-zinc-800 dark:text-white" 
+                  ? "font-semibold text-zinc-200 dark:text-white" 
                   : "text-gray-800 dark:text-white"
               )}>
                 {route.name}
