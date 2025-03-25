@@ -9,7 +9,7 @@ import ServiceDetails from "./pages/ServiceDetails";
 import Business from "./pages/Business";
 import BusinessDetails from "./pages/BusinessDetails";
 import Settings from "./pages/Settings";
-import ProtectedRoute from "./components/auth/ProtectedRoute";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import Maps from "./pages/Maps";
 import Events from "./pages/Events";
 import Orders from "./pages/orders";
@@ -26,10 +26,10 @@ import AdDashboard from "./pages/admin/AdDashboard";
 import AdPlacement from "./pages/admin/AdPlacement";
 import AdAuction from "./pages/admin/AdAuction";
 import AdAnalytics from "./pages/admin/AdAnalytics";
-import NotFound from "./components/NotFound";
+import { NotFound } from "./components/NotFound";
 import BusinessDashboard from "./pages/BusinessDashboard";
 import GenericPage from "./pages/GenericPage";
-import Layout from "./components/layout/Layout";
+import { Layout } from "./components/layout/Layout";
 import "./App.css";
 
 // Create a query client

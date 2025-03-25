@@ -32,7 +32,7 @@ export const AdDashboard = () => {
       case "scheduled":
         return ad.status === "active" && now < startDate;
       case "completed":
-        return ad.status === "completed" || (ad.status === "active" && now > endDate);
+        return ad.status === "expired" || (ad.status === "active" && now > endDate);
       case "all":
       default:
         return true;
@@ -53,7 +53,7 @@ export const AdDashboard = () => {
     const endDate = new Date(ad.end_date);
     
     if (ad.status === "pending") return "bg-yellow-500";
-    if (ad.status === "cancelled") return "bg-red-500";
+    if (ad.status === "rejected") return "bg-red-500";
     if (now < startDate) return "bg-blue-500";
     if (now > endDate) return "bg-gray-500";
     return "bg-green-500";
@@ -65,7 +65,7 @@ export const AdDashboard = () => {
     const endDate = new Date(ad.end_date);
     
     if (ad.status === "pending") return "Pending";
-    if (ad.status === "cancelled") return "Cancelled";
+    if (ad.status === "rejected") return "Rejected";
     if (now < startDate) return "Scheduled";
     if (now > endDate) return "Completed";
     return "Active";

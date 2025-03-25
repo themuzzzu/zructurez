@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Json } from "@/integrations/supabase/types";
 
@@ -142,7 +141,7 @@ export const incrementAdView = async (adId: string): Promise<void> => {
     // Also update the advertisement reach counter
     await supabase
       .from('advertisements')
-      .update({ reach: supabase.rpc('increment', { value: 1 }) })
+      .update({ reach: (old: number) => old + 1 })
       .eq('id', adId);
     
   } catch (error) {
@@ -181,7 +180,7 @@ export const incrementAdClick = async (adId: string): Promise<void> => {
     // Also update the advertisement clicks counter
     await supabase
       .from('advertisements')
-      .update({ clicks: supabase.rpc('increment', { value: 1 }) })
+      .update({ clicks: (old: number) => old + 1 })
       .eq('id', adId);
     
   } catch (error) {

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -59,7 +58,6 @@ const AdAuctionPage = () => {
     }
   });
   
-  // Fetch ads for display in bidding
   const { data: ads = [] } = useQuery({
     queryKey: ['active-ads'],
     queryFn: async () => {
@@ -121,7 +119,6 @@ const AdAuctionPage = () => {
       setIsCreateDialogOpen(false);
       refetch();
       
-      // Reset form
       setNewAuction({
         keyword: "",
         category: "product",
@@ -136,7 +133,6 @@ const AdAuctionPage = () => {
     try {
       const bidAmount = Math.max(currentBid + 5, minBid); // Increment by at least 5
       
-      // First update the auction with the new bid
       const { error: auctionError } = await supabase
         .from('ad_auctions')
         .update({
@@ -147,17 +143,16 @@ const AdAuctionPage = () => {
         
       if (auctionError) throw auctionError;
       
-      // Then record the bid in the bid history
-      // Note: This would require a 'ad_bids' table in a real implementation
-      try {
-        await supabase.rpc('record_ad_bid', { 
-          auction_id: auctionId,
-          ad_id: adId,
-          bid_amount: bidAmount
+      const { error } = await supabase
+        .from('ad_bids')
+        .insert({ 
+          auction_id, 
+          ad_id, 
+          bid_amount, 
+          status: 'active' 
         });
-      } catch (rpcError) {
-        console.log("RPC error - bid recorded in auction but not in history:", rpcError);
-      }
+        
+      if (error) throw error;
       
       toast.success(`Bid of ₹${bidAmount} placed successfully`);
       refetch();
@@ -272,7 +267,6 @@ const AdAuctionPage = () => {
                   </TableRow>
                 ) : (
                   auctions.map((auction) => {
-                    // Find the winning ad if there is one
                     const winningAd = auction.winning_ad_id ? 
                       ads.find(ad => ad.id === auction.winning_ad_id) : null;
                     

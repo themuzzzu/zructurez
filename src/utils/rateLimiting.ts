@@ -44,6 +44,19 @@ export const applyRateLimit = (
 };
 
 /**
+ * Simplified rate limit function for general use
+ * @param clientId - The identifier for the client
+ * @param options - Rate limiting options
+ * @returns boolean - True if request is allowed, false if rate limited
+ */
+export const rateLimit = (
+  clientId: string,
+  options: Partial<RateLimitOptions> = {}
+): boolean => {
+  return applyRateLimit(clientId, 'general', options);
+};
+
+/**
  * Utility to get an identifier for the client
  */
 export const getClientIP = (): string => {
