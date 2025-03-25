@@ -1,3 +1,4 @@
+
 import { BusinessOfferings } from "./BusinessOfferings";
 import { BusinessProductsSection } from "./content/BusinessProductsSection";
 import { BusinessPortfolioSection } from "./content/BusinessPortfolioSection";
@@ -27,7 +28,7 @@ export const BusinessContent = ({
         />
       )}
 
-      <BusinessProductsSection products={business_products} />
+      <BusinessProductsSection products={business_products} businessId={businessId} />
       <BusinessPortfolioSection portfolio={business_portfolio} />
     </div>
   );
