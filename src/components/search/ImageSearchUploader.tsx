@@ -103,7 +103,7 @@ export function ImageSearchUploader({ onClose, onProcessingComplete }: ImageSear
         
       if (processError) throw processError;
       
-      // Instead of using RPC, use direct table insert
+      // Insert directly to the table
       if (currentUser?.id) {
         const { error: insertError } = await supabase
           .from('image_searches')

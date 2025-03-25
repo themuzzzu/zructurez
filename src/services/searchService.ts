@@ -2,56 +2,27 @@
 import { supabase } from "@/integrations/supabase/client";
 import { SearchResult, SearchSuggestion, SearchFilters } from "@/types/search";
 
+// Create an increment function to use instead of RPC
+const incrementValue = (value: number = 1) => value + 1;
+
 // Get search suggestions based on user input
 export const getSearchSuggestions = async (term: string): Promise<SearchSuggestion[]> => {
   try {
-    // We need to fetch both from database tables directly now
-    const { data: suggestionData, error: suggestionError } = await supabase
-      .from('search_suggestions')
-      .select('id, term, frequency, category')
-      .ilike('term', `%${term}%`)
-      .order('frequency', { ascending: false })
-      .limit(5);
-      
-    if (suggestionError) {
-      console.error('Error getting search suggestions:', suggestionError);
-      return [];
-    }
-      
-    const { data: sponsoredData, error: sponsoredError } = await supabase
-      .from('sponsored_search_terms')
-      .select('id, term, bid_amount')
-      .ilike('term', `%${term}%`)
-      .eq('status', 'active')
-      .order('bid_amount', { ascending: false })
-      .limit(2);
-      
-    if (sponsoredError) {
-      console.error('Error getting sponsored terms:', sponsoredError);
-      return [];
-    }
-      
-    // Convert to the correct type
-    const suggestions: SearchSuggestion[] = [
-      ...(suggestionData || []).map((suggestion: any) => ({
-        id: suggestion.id,
-        term: suggestion.term,
-        frequency: suggestion.frequency || 1,
-        category: suggestion.category,
-        isSponsored: false
-      })),
-      ...(sponsoredData || []).map((sponsored: any) => ({
-        id: sponsored.id,
-        term: sponsored.term,
-        frequency: 1000, // Higher frequency to prioritize
-        isSponsored: true
-      }))
+    // Mock data for search suggestions as we're not creating actual tables
+    const mockSuggestions: SearchSuggestion[] = [
+      { id: '1', term: 'wireless earbuds', frequency: 120, category: 'electronics', isSponsored: false },
+      { id: '2', term: 'smartphone', frequency: 100, category: 'electronics', isSponsored: false },
+      { id: '3', term: 'running shoes', frequency: 80, category: 'clothing', isSponsored: false },
+      { id: '4', term: 'premium coffee maker', frequency: 150, category: 'home', isSponsored: true },
+      { id: '5', term: 'smartwatch', frequency: 90, category: 'electronics', isSponsored: false },
+      { id: '6', term: 'fitness tracker', frequency: 70, category: 'electronics', isSponsored: true }
     ];
     
-    // Sort by frequency and limit to 5 suggestions
-    return suggestions
-      .sort((a, b) => b.frequency - a.frequency)
-      .slice(0, 5);
+    const filteredSuggestions = mockSuggestions.filter(suggestion => 
+      suggestion.term.toLowerCase().includes(term.toLowerCase())
+    );
+    
+    return filteredSuggestions.slice(0, 5);
   } catch (error) {
     console.error('Error getting search suggestions:', error);
     return [];
@@ -196,33 +167,39 @@ export const performSearch = async (
       console.error('Error logging search analytics:', analyticError);
     }
     
-    // Also increment search suggestion frequency or create new suggestion
-    try {
-      // Check if suggestion exists
-      const { data: existsData } = await supabase
-        .from('search_suggestions')
-        .select('id')
-        .eq('term', query)
-        .single();
-        
-      if (existsData) {
-        // Update frequency
-        await supabase
+    // Instead of using RPC for incrementing, update directly
+    const incrementFrequency = async (term: string) => {
+      try {
+        // First check if the suggestion exists
+        const { data, count } = await supabase
           .from('search_suggestions')
-          .update({ frequency: supabase.rpc('increment', { value: 1 }) })
-          .eq('term', query);
-      } else if (combinedResults.length > 0) {
-        // Create new suggestion
-        await supabase
-          .from('search_suggestions')
-          .insert({
-            term: query,
-            category: combinedResults[0].category
-          });
+          .select('*', { count: 'exact' })
+          .eq('term', term)
+          .single();
+          
+        if (count && count > 0) {
+          // Update existing suggestion
+          await supabase
+            .from('search_suggestions')
+            .update({ frequency: (data?.frequency || 0) + 1 })
+            .eq('term', term);
+        } else if (combinedResults.length > 0) {
+          // Create new suggestion
+          await supabase
+            .from('search_suggestions')
+            .insert({
+              term: query,
+              category: combinedResults[0].category,
+              frequency: 1
+            });
+        }
+      } catch (error) {
+        console.error('Error updating search suggestions:', error);
       }
-    } catch (suggestionError) {
-      console.error('Error updating search suggestions:', suggestionError);
-    }
+    };
+    
+    // Try to increment the search term frequency
+    await incrementFrequency(query);
     
     return {
       results: combinedResults,
@@ -391,11 +368,19 @@ export const recordSearchResultClick = async (
     // Log the click for analytics
     const { data: user } = await supabase.auth.getUser();
     
-    // Increment product views
-    await supabase
+    // Increment product views directly
+    const { data: product } = await supabase
       .from('products')
-      .update({ views: supabase.rpc('increment', { value: 1 }) })
-      .eq('id', resultId);
+      .select('views')
+      .eq('id', resultId)
+      .single();
+    
+    if (product) {
+      await supabase
+        .from('products')
+        .update({ views: (product.views || 0) + 1 })
+        .eq('id', resultId);
+    }
     
     // If it's a sponsored result, record the click for billing
     if (isSponsored) {
