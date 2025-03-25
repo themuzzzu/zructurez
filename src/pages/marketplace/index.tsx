@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Layout } from "@/components/layout/Layout";
@@ -13,8 +13,34 @@ import { MarketplaceFeatures } from "@/components/marketplace/MarketplaceFeature
 import { MarketplacePromotions } from "@/components/marketplace/MarketplacePromotions";
 import { MarketplaceHero } from "@/components/marketplace/MarketplaceHero";
 import { LocalBusinessSpotlight } from "@/components/marketplace/LocalBusinessSpotlight";
+import { Skeleton } from "@/components/ui/skeleton";
+import { measureRenderTime } from "@/utils/performanceTracking";
+import { globalCache } from "@/utils/cacheUtils";
+
+// Lazy load heavy components
+const LazyMarketplaceFeatures = () => (
+  <Suspense fallback={<Skeleton className="h-40 w-full" />}>
+    <MarketplaceFeatures />
+  </Suspense>
+);
+
+const LazyMarketplacePromotions = () => (
+  <Suspense fallback={<Skeleton className="h-40 w-full" />}>
+    <MarketplacePromotions />
+  </Suspense>
+);
 
 const Marketplace = () => {
+  // Track initial render performance
+  useEffect(() => {
+    const startTime = performance.now();
+    
+    return () => {
+      const endTime = performance.now();
+      console.debug(`Marketplace initial render time: ${(endTime - startTime).toFixed(2)}ms`);
+    };
+  }, []);
+
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -26,9 +52,17 @@ const Marketplace = () => {
   const [priceRange, setPriceRange] = useState("all");
   const [activeTab, setActiveTab] = useState("browse");
 
+  // Optimized cart count query with caching
   const { data: cartItemCount = 0 } = useQuery({
     queryKey: ['cartCount'],
     queryFn: async () => {
+      // Check cache first
+      const cacheKey = 'cart-count';
+      const cachedCount = globalCache.get<number>(cacheKey);
+      if (cachedCount !== null) {
+        return cachedCount;
+      }
+
       const { data: session } = await supabase.auth.getSession();
       if (!session?.session?.user) return 0;
 
@@ -38,8 +72,13 @@ const Marketplace = () => {
         .eq('user_id', session.session.user.id);
 
       if (error) throw error;
-      return count || 0;
+      
+      // Cache the result for 30 seconds
+      const result = count || 0;
+      globalCache.set(cacheKey, result, 30 * 1000);
+      return result;
     },
+    staleTime: 30 * 1000, // 30 seconds
   });
 
   const handleCategorySelect = (category: string) => {
@@ -71,7 +110,8 @@ const Marketplace = () => {
     window.scrollTo(0, 0);
   }, [selectedCategory]);
 
-  return (
+  // Use the measureRenderTime utility for performance tracking
+  return measureRenderTime('MarketplacePage', () => (
     <Layout>
       <div className="min-h-screen bg-slate-50 dark:bg-zinc-900 pb-16">
         {/* Header */}
@@ -95,7 +135,7 @@ const Marketplace = () => {
           )}
           
           {activeTab === "browse" && (
-            <MarketplaceFeatures />
+            <LazyMarketplaceFeatures />
           )}
           
           <MarketplaceTabs activeTab={activeTab} setActiveTab={setActiveTab}>
@@ -135,13 +175,13 @@ const Marketplace = () => {
           {activeTab === "browse" && (
             <>
               <LocalBusinessSpotlight />
-              <MarketplacePromotions />
+              <LazyMarketplacePromotions />
             </>
           )}
         </div>
       </div>
     </Layout>
-  );
+  ));
 };
 
 export default Marketplace;

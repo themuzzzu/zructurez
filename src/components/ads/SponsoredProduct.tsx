@@ -7,6 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { measureApiCall } from "@/utils/performanceTracking";
 
 interface SponsoredProductProps {
   ad: {
@@ -28,6 +30,41 @@ interface SponsoredProductProps {
 export const SponsoredProduct = ({ ad, productData }: SponsoredProductProps) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [imageLoaded, setImageLoaded] = useState(false);
+  
+  // Track ad impression when it becomes visible
+  useEffect(() => {
+    // Use Intersection Observer API to track when ad is visible
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            // Record impression only once
+            measureApiCall('ad-impression', async () => {
+              try {
+                await supabase.rpc('increment_ad_views', { ad_id: ad.id });
+              } catch (err) {
+                console.error('Error logging ad impression:', err);
+              }
+            });
+            // Disconnect after recording
+            observer.disconnect();
+          }
+        });
+      },
+      { threshold: 0.5 } // 50% visibility required
+    );
+    
+    // Get the current element for this component
+    const adElement = document.getElementById(`ad-${ad.id}`);
+    if (adElement) {
+      observer.observe(adElement);
+    }
+    
+    return () => {
+      observer.disconnect();
+    };
+  }, [ad.id]);
   
   const handleViewClick = async () => {
     // Record click
@@ -68,15 +105,28 @@ export const SponsoredProduct = ({ ad, productData }: SponsoredProductProps) => 
     },
   });
 
+  // Optimize image rendering
+  const optimizedImageUrl = ad.image_url 
+    ? ad.image_url.includes('?') 
+      ? `${ad.image_url}&quality=80&width=400` 
+      : `${ad.image_url}?quality=80&width=400`
+    : null;
+
   return (
-    <Card className="overflow-hidden border-yellow-300 hover:shadow-md transition-all">
+    <Card id={`ad-${ad.id}`} className="overflow-hidden border-yellow-300 hover:shadow-md transition-all">
       <div className="relative">
-        {ad.image_url && (
+        {optimizedImageUrl && (
           <div className="aspect-video w-full overflow-hidden">
+            {!imageLoaded && (
+              <div className="w-full h-full bg-gray-200 dark:bg-zinc-800 animate-pulse" />
+            )}
             <img 
-              src={ad.image_url} 
+              src={optimizedImageUrl} 
               alt={ad.title} 
-              className="w-full h-full object-cover"
+              className={`w-full h-full object-cover transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+              loading="lazy"
+              decoding="async"
+              onLoad={() => setImageLoaded(true)}
             />
           </div>
         )}
