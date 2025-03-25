@@ -31,11 +31,11 @@ export function SponsoredProduct({ ad, className }: SponsoredProductProps) {
     
     // Direct the user to the appropriate page based on ad type
     if (ad.type === "product") {
-      navigate(`/product/${ad.reference_id}`);
+      navigate(`/products/${ad.reference_id}`);
     } else if (ad.type === "business") {
-      navigate(`/business/${ad.reference_id}`);
+      navigate(`/businesses/${ad.reference_id}`);
     } else if (ad.type === "service") {
-      navigate(`/service/${ad.reference_id}`);
+      navigate(`/services/${ad.reference_id}`);
     } else {
       // Handle external URL or other ad types if needed
       window.open(ad.image_url || '', '_blank');

@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { BusinessCard } from "@/components/BusinessCard";
 import { supabase } from "@/integrations/supabase/client";

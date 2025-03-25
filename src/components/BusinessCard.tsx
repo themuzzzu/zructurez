@@ -56,7 +56,7 @@ export const BusinessCard = ({
   return (
     <>
       <BusinessCardUI 
-        onClick={() => navigate(`/business/${id}`)}
+        onClick={() => navigate(`/businesses/${id}`)}
       >
         <BusinessCardImage 
           src={image} 
