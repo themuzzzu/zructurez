@@ -103,13 +103,19 @@ export function ImageSearchUploader({ onClose, onProcessingComplete }: ImageSear
         
       if (processError) throw processError;
       
-      // Save to our database using RPC
+      // Instead of using RPC, use direct table insert
       if (currentUser?.id) {
-        await supabase.rpc('insert_image_search_with_description', {
-          user_id_param: currentUser.id,
-          image_url_param: publicUrl,
-          description_param: processResult.description
-        });
+        const { error: insertError } = await supabase
+          .from('image_searches')
+          .insert({
+            user_id: currentUser.id,
+            image_url: publicUrl,
+            description: processResult.description
+          });
+          
+        if (insertError) {
+          console.error('Error saving image search:', insertError);
+        }
       }
       
       onProcessingComplete(processResult.description);

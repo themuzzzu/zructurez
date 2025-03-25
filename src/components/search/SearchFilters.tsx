@@ -61,6 +61,7 @@ export function SearchFilters({ filters, onChange, onReset }: SearchFiltersProps
     ));
   };
   
+  // Define the valid sort options
   type SortOption = 'relevance' | 'price-asc' | 'price-desc' | 'newest';
   
   return (
@@ -72,7 +73,10 @@ export function SearchFilters({ filters, onChange, onReset }: SearchFiltersProps
         {/* Sort By */}
         <div>
           <h3 className="font-medium mb-2">Sort By</h3>
-          <RadioGroup value={filters.sortBy as SortOption} onValueChange={(value: SortOption) => onChange({ sortBy: value })}>
+          <RadioGroup 
+            value={filters.sortBy || 'relevance'} 
+            onValueChange={(value: SortOption) => onChange({ sortBy: value })}
+          >
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="relevance" id="sort-relevance" />
               <Label htmlFor="sort-relevance">Relevance</Label>

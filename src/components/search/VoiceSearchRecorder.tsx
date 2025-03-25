@@ -118,13 +118,19 @@ export function VoiceSearchRecorder({ onClose, onTranscriptionComplete }: VoiceS
         
       if (transcriptionError) throw transcriptionError;
       
-      // Save to our database using RPC
+      // Insert directly into the voice_recordings table
       if (currentUser?.id) {
-        await supabase.rpc('insert_voice_recording_with_transcription', {
-          user_id_param: currentUser.id,
-          audio_url_param: publicUrl,
-          transcription_param: transcriptionResult.transcription
-        });
+        const { error: insertError } = await supabase
+          .from('voice_recordings')
+          .insert({
+            user_id: currentUser.id,
+            audio_url: publicUrl,
+            transcription: transcriptionResult.transcription
+          });
+          
+        if (insertError) {
+          console.error('Error saving voice recording:', insertError);
+        }
       }
       
       onTranscriptionComplete(transcriptionResult.transcription);
