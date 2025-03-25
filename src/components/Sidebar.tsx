@@ -19,7 +19,6 @@ import {
   SunMoon,
 } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
-import { NavButton } from "./navbar/NavButton";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
@@ -27,13 +26,17 @@ interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 // Create a filled icon component
 const FilledIcon = ({ Icon }: { Icon: React.ElementType }) => (
   <div className="relative">
-    <Icon size={18} className="text-zinc-200 dark:text-white" strokeWidth={2} />
+    <Icon size={20} className="text-white" strokeWidth={1.75} fill="currentColor" />
   </div>
 );
 
 export const Sidebar = ({ className }: SidebarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [activeItem, setActiveItem] = useState(() => {
+    // Initialize with current path or default to home
+    return location.pathname || "/";
+  });
   const [isCollapsed, setIsCollapsed] = useState(localStorage.getItem("sidebarCollapsed") === "true");
   const { theme, setTheme } = useTheme();
   const isMobile = useMediaQuery("(max-width: 768px)");
@@ -45,6 +48,11 @@ export const Sidebar = ({ className }: SidebarProps) => {
     // Dispatch custom event to notify other components
     window.dispatchEvent(new Event('sidebarStateChanged'));
   }, [isCollapsed]);
+
+  // Update active item when route changes
+  useEffect(() => {
+    setActiveItem(location.pathname);
+  }, [location.pathname]);
 
   const routes = [
     { name: "Home", path: "/", icon: Home },
@@ -59,6 +67,11 @@ export const Sidebar = ({ className }: SidebarProps) => {
     { name: "Settings", path: "/settings", icon: Settings },
   ];
 
+  const handleItemClick = (path: string) => {
+    setActiveItem(path);
+    navigate(path);
+  };
+
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark");
   };
@@ -69,8 +82,8 @@ export const Sidebar = ({ className }: SidebarProps) => {
 
   return (
     <div className={cn(
-      "h-full bg-white/95 dark:bg-black/95 overflow-y-auto transition-all duration-300 fixed left-0 top-16 z-30", 
-      isCollapsed ? "w-12" : "w-44", // Reduced from w-16 : w-64
+      "h-full bg-black dark:bg-black overflow-y-auto transition-all duration-300 fixed left-0 top-16 z-30", 
+      isCollapsed ? "w-12" : "w-44", 
       className
     )}>
       <div className="flex justify-end py-1 px-1">
@@ -78,37 +91,37 @@ export const Sidebar = ({ className }: SidebarProps) => {
           variant="ghost"
           size="icon"
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full"
+          className="hover:bg-zinc-800 dark:hover:bg-zinc-800 rounded-full"
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {isCollapsed ? (
-            <PanelLeft className="h-3.5 w-3.5 text-muted-foreground" />
+            <PanelLeft className="h-3.5 w-3.5 text-white" />
           ) : (
-            <PanelLeftClose className="h-3.5 w-3.5 text-muted-foreground" />
+            <PanelLeftClose className="h-3.5 w-3.5 text-white" />
           )}
         </Button>
       </div>
       
-      <div className="space-y-0.5 px-1 py-1">
+      <div className="space-y-1 px-1 py-1">
         {routes.map((route) => {
-          const isActive = location.pathname === route.path;
+          const isActive = activeItem === route.path;
 
           return isCollapsed ? (
             <Button
               key={route.path}
               variant="ghost"
               className={cn(
-                "w-full p-2 justify-center",
+                "w-full p-2 justify-center transition-all duration-200",
                 isActive 
-                  ? "bg-zinc-900 dark:bg-zinc-900 rounded-lg" 
-                  : "hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full"
+                  ? "bg-zinc-900 rounded-full" 
+                  : "hover:bg-zinc-800 rounded-full"
               )}
-              onClick={() => navigate(route.path)}
+              onClick={() => handleItemClick(route.path)}
             >
               {isActive ? (
                 <FilledIcon Icon={route.icon} />
               ) : (
-                <route.icon className="h-4 w-4 text-muted-foreground" />
+                <route.icon className="h-5 w-5 text-zinc-400" />
               )}
             </Button>
           ) : (
@@ -116,25 +129,25 @@ export const Sidebar = ({ className }: SidebarProps) => {
               key={route.path}
               variant="ghost"
               className={cn(
-                "w-full justify-start gap-3 px-3 py-2 text-sm",
+                "w-full justify-start gap-3 px-3 py-2 text-sm transition-all duration-200",
                 isActive 
-                  ? "bg-zinc-900 dark:bg-zinc-900 rounded-lg font-semibold" 
-                  : "hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full"
+                  ? "bg-zinc-900 rounded-full" 
+                  : "hover:bg-zinc-800 rounded-full"
               )}
-              onClick={() => navigate(route.path)}
+              onClick={() => handleItemClick(route.path)}
             >
               <div className="flex items-center justify-center">
                 {isActive ? (
                   <FilledIcon Icon={route.icon} />
                 ) : (
-                  <route.icon size={18} className="text-muted-foreground" />
+                  <route.icon size={20} className="text-zinc-400" />
                 )}
               </div>
               <span className={cn(
                 "text-sm",
                 isActive 
-                  ? "font-semibold text-zinc-200 dark:text-white" 
-                  : "text-gray-800 dark:text-white"
+                  ? "font-bold text-white" 
+                  : "text-zinc-400 group-hover:text-zinc-200"
               )}>
                 {route.name}
               </span>
@@ -146,21 +159,21 @@ export const Sidebar = ({ className }: SidebarProps) => {
         {isCollapsed ? (
           <Button
             variant="ghost"
-            className="w-full p-2 justify-center rounded-full mt-1"
+            className="w-full p-2 justify-center rounded-full mt-1 transition-all duration-200 hover:bg-zinc-800"
             onClick={toggleTheme}
           >
-            <SunMoon className="h-4 w-4 text-muted-foreground" />
+            <SunMoon className="h-5 w-5 text-zinc-400" />
           </Button>
         ) : (
           <Button
             variant="ghost"
-            className="w-full justify-start gap-3 px-3 py-2 rounded-full mt-1 text-sm"
+            className="w-full justify-start gap-3 px-3 py-2 rounded-full mt-1 text-sm transition-all duration-200 hover:bg-zinc-800"
             onClick={toggleTheme}
           >
             <div className="flex items-center justify-center">
-              <SunMoon size={18} className="text-muted-foreground" />
+              <SunMoon size={20} className="text-zinc-400" />
             </div>
-            <span className="text-sm text-gray-800 dark:text-white">
+            <span className="text-sm text-zinc-400">
               Toggle Theme
             </span>
           </Button>

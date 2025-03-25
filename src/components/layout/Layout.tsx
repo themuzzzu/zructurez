@@ -39,7 +39,7 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
         {!hideSidebar && !isMobile && (
           <div 
             style={{ width: sidebarWidth + 'px', left: '0px' }} 
-            className="transition-all duration-300 fixed h-[calc(100vh-64px)] border-r border-zinc-200/50 dark:border-zinc-800/50"
+            className="transition-all duration-300 fixed h-[calc(100vh-64px)] border-r border-zinc-800/50"
           >
             <Sidebar />
           </div>

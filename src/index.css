@@ -95,6 +95,15 @@
   button:focus {
     @apply outline-none ring-0;
   }
+
+  /* Twitter-like sidebar animations */
+  .sidebar-icon {
+    @apply transition-all duration-300;
+  }
+  
+  .sidebar-icon-active {
+    @apply transform scale-110;
+  }
 }
 
 /* Typing indicator animation */
@@ -123,4 +132,18 @@
   50% {
     opacity: 1;
   }
+}
+
+/* Twitter-like icon fill animation */
+@keyframes icon-fill {
+  0% {
+    fill-opacity: 0;
+  }
+  100% {
+    fill-opacity: 1;
+  }
+}
+
+.icon-fill-animation {
+  animation: icon-fill 0.3s ease forwards;
 }
