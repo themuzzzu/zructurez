@@ -1,5 +1,13 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
+// Configuration for performance thresholds
+const PERFORMANCE_THRESHOLDS = {
+  SLOW_API_THRESHOLD_MS: 500, // API calls taking longer than 500ms are considered slow
+  MEMORY_WARNING_THRESHOLD: 80, // Memory usage above 80% triggers a warning
+  MEMORY_CRITICAL_THRESHOLD: 90, // Memory usage above 90% is considered critical
+};
 
 /**
  * Function to measure the performance of API calls
@@ -14,8 +22,20 @@ export const measureApiCall = async <T>(
   const startTime = performance.now();
   let success = false;
   let error: Error | null = null;
+  let memoryUsage: number | null = null;
   
   try {
+    // Get memory usage before the call (if available in the browser)
+    try {
+      if (performance && 'memory' in performance) {
+        // @ts-ignore - Not all browsers support this
+        const memory = performance.memory;
+        memoryUsage = (memory.usedJSHeapSize / memory.jsHeapSizeLimit) * 100;
+      }
+    } catch (memError) {
+      console.debug('Memory usage measurement not supported');
+    }
+    
     // Execute the API call
     const result = await apiFn();
     success = true;
@@ -27,30 +47,82 @@ export const measureApiCall = async <T>(
     const endTime = performance.now();
     const responseTime = endTime - startTime;
     
-    // Only log metrics if the call took longer than 50ms (to reduce noise)
-    if (responseTime > 50) {
-      try {
-        // Log performance metrics
-        const { data: { user } } = await supabase.auth.getUser();
-        const userId = user?.id || 'anonymous';
+    // Always log performance metrics for proper analytics
+    try {
+      // Log performance metrics
+      const { data: { user } } = await supabase.auth.getUser();
+      const userId = user?.id || 'anonymous';
+      
+      const metricsData = {
+        endpoint,
+        response_time: responseTime,
+        success,
+        user_id: userId,
+        error_message: error?.message,
+        memory_usage: memoryUsage,
+        timestamp: new Date().toISOString(),
+        // Additional optional metrics
+        metadata: {
+          userAgent: navigator.userAgent,
+          concurrent_users: document.visibilityState === 'visible' ? 1 : 0,
+          path: window.location.pathname
+        }
+      };
+      
+      await supabase.from('performance_metrics').insert([metricsData]);
+      
+      // Alert for slow API responses
+      if (responseTime > PERFORMANCE_THRESHOLDS.SLOW_API_THRESHOLD_MS) {
+        console.warn(`[Performance] Slow API call to ${endpoint}: ${responseTime.toFixed(2)}ms`);
         
-        await supabase.from('performance_metrics').insert({
-          endpoint,
-          response_time: responseTime,
-          success,
-          user_id: userId,
-          error_message: error?.message,
-          // Additional optional metrics
-          metadata: {
-            userAgent: navigator.userAgent,
-            timestamp: new Date().toISOString()
+        // Only show toast warning to admin users and on significant delays
+        if (responseTime > PERFORMANCE_THRESHOLDS.SLOW_API_THRESHOLD_MS * 2) {
+          const isAdmin = await isUserAdmin();
+          if (isAdmin) {
+            toast.warning(`Slow API response detected: ${endpoint} (${responseTime.toFixed(0)}ms)`);
           }
-        });
-      } catch (logError) {
-        // Do not block the main flow if logging fails
-        console.error('Failed to log performance metrics:', logError);
+        }
       }
+      
+      // Alert for high memory usage
+      if (memoryUsage !== null) {
+        if (memoryUsage > PERFORMANCE_THRESHOLDS.MEMORY_CRITICAL_THRESHOLD) {
+          console.error(`[Performance] Critical memory usage: ${memoryUsage.toFixed(2)}%`);
+          const isAdmin = await isUserAdmin();
+          if (isAdmin) {
+            toast.error(`Critical memory usage: ${memoryUsage.toFixed(1)}%`);
+          }
+        } else if (memoryUsage > PERFORMANCE_THRESHOLDS.MEMORY_WARNING_THRESHOLD) {
+          console.warn(`[Performance] High memory usage: ${memoryUsage.toFixed(2)}%`);
+          const isAdmin = await isUserAdmin();
+          if (isAdmin) {
+            toast.warning(`High memory usage: ${memoryUsage.toFixed(1)}%`);
+          }
+        }
+      }
+    } catch (logError) {
+      // Do not block the main flow if logging fails
+      console.error('Failed to log performance metrics:', logError);
     }
+  }
+};
+
+// Helper function to check if current user is an admin
+const isUserAdmin = async (): Promise<boolean> => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return false;
+    
+    const { data } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+      
+    return data?.role === 'admin';
+  } catch (error) {
+    console.error('Error checking admin status:', error);
+    return false;
   }
 };
 
@@ -75,6 +147,25 @@ export const measureRenderTime = <T>(
     // Only log if render takes longer than 16ms (approx. 60fps threshold)
     if (renderTime > 16) {
       console.debug(`[Performance] ${componentName} render: ${renderTime.toFixed(2)}ms`);
+      
+      // Log to performance metrics for renders that take significantly longer
+      if (renderTime > 100) {
+        try {
+          supabase.auth.getUser().then(({ data: { user } }) => {
+            if (!user) return;
+            
+            supabase.from('performance_metrics').insert([{
+              endpoint: `render-${componentName}`,
+              response_time: renderTime,
+              success: true,
+              user_id: user.id,
+              timestamp: new Date().toISOString()
+            }]);
+          });
+        } catch (error) {
+          // Silent fail for render metrics
+        }
+      }
     }
   }
 };
@@ -129,4 +220,61 @@ export const simulateLoad = async (userCount: number): Promise<void> => {
   } catch (error) {
     console.error('Failed to log load test summary:', error);
   }
+};
+
+// Add a helper function to get memory usage
+export const getMemoryUsage = (): number | null => {
+  try {
+    if (performance && 'memory' in performance) {
+      // @ts-ignore - Not all browsers support this
+      const memory = performance.memory;
+      return (memory.usedJSHeapSize / memory.jsHeapSizeLimit) * 100;
+    }
+  } catch (error) {
+    console.debug('Memory usage measurement not supported');
+  }
+  return null;
+};
+
+// Update utility functions in metricCalculations.ts to handle memory usage
+<lov-write file_path="src/components/performance/utils/metricCalculations.ts">
+export const formatTimestamp = (timestamp: string) => {
+  return new Date(timestamp).toLocaleTimeString();
+};
+
+export const calculateAverageResponseTime = (data: any[]) => {
+  if (data.length === 0) return 0;
+  const sum = data.reduce((acc, curr) => acc + curr.response_time, 0);
+  return Math.round(sum / data.length);
+};
+
+export const calculateSuccessRate = (data: any[]) => {
+  if (data.length === 0) return 0;
+  const successCount = data.filter(m => m.success).length;
+  return Math.round((successCount / data.length) * 100);
+};
+
+export const getMemoryUsageTrend = (data: any[]) => {
+  return data
+    .filter(m => m.memory_usage != null)
+    .map(m => ({
+      timestamp: m.timestamp,
+      memory_usage: Math.round(m.memory_usage * 100) / 100
+    }));
+};
+
+// New function to get slow API calls for reporting
+export const getSlowApiCalls = (data: any[], thresholdMs: number = 500) => {
+  return data
+    .filter(m => m.response_time > thresholdMs)
+    .sort((a, b) => b.response_time - a.response_time);
+};
+
+// New function to calculate average memory usage
+export const calculateAverageMemoryUsage = (data: any[]) => {
+  const memoryData = data.filter(m => m.memory_usage != null);
+  if (memoryData.length === 0) return 0;
+  
+  const sum = memoryData.reduce((acc, curr) => acc + curr.memory_usage, 0);
+  return Math.round((sum / memoryData.length) * 100) / 100;
 };

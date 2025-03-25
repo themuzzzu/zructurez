@@ -19,7 +19,12 @@ export const verifyAdminRole = async (): Promise<boolean> => {
       .eq('id', user.id)
       .single();
       
-    if (error || !profile) return false;
+    if (error) {
+      console.error('Error fetching user profile:', error);
+      return false;
+    }
+    
+    if (!profile || typeof profile.role !== 'string') return false;
     
     return profile.role === 'admin';
   } catch (error) {

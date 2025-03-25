@@ -2,15 +2,17 @@
 import { useState } from 'react';
 import { usePerformanceMetrics } from './hooks/usePerformanceMetrics';
 import { useBusinessAnalytics } from './hooks/useBusinessAnalytics';
-import { simulateLoad } from '../../utils/performanceTracking';
-import { calculateAverageResponseTime, calculateSuccessRate } from './utils/metricCalculations';
+import { simulateLoad, getMemoryUsage } from '../../utils/performanceTracking';
+import { calculateAverageResponseTime, calculateSuccessRate, calculateAverageMemoryUsage } from './utils/metricCalculations';
 import { MetricCard } from './components/MetricCard';
 import { ResponseTimeChart } from './components/ResponseTimeChart';
 import { MemoryUsageChart } from './components/MemoryUsageChart';
 import { ErrorList } from './components/ErrorList';
+import { SlowApiCallsTable } from './components/SlowApiCallsTable';
 import { BusinessAnalyticsCharts } from './components/BusinessAnalyticsCharts';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const PerformanceDashboard = () => {
   const [isLoadTesting, setIsLoadTesting] = useState(false);
@@ -20,6 +22,9 @@ export const PerformanceDashboard = () => {
   // Get the business ID from user metadata or another source
   const businessId = user?.id; // Make sure this is the correct way to get business ID in your app
   const { data: businessAnalytics, isLoading: isLoadingAnalytics } = useBusinessAnalytics(businessId);
+
+  // Get current memory usage for real-time display
+  const currentMemoryUsage = getMemoryUsage();
 
   const startLoadTest = async () => {
     if (!user) {
@@ -65,7 +70,8 @@ export const PerformanceDashboard = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-end mb-4">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold">Performance Monitoring</h2>
         <button
           onClick={startLoadTest}
           disabled={isLoadTesting}
@@ -87,17 +93,33 @@ export const PerformanceDashboard = () => {
           value={`${calculateSuccessRate(combinedData)}%`}
         />
         <MetricCard
-          title="Active Users"
-          description="Currently active users"
-          value={combinedData[0]?.concurrent_users || 'N/A'}
+          title="Memory Usage"
+          description="Current JS heap usage"
+          value={currentMemoryUsage ? `${currentMemoryUsage.toFixed(1)}%` : 'N/A'}
         />
       </div>
-
-      {businessAnalytics && <BusinessAnalyticsCharts data={businessAnalytics} />}
-
-      <ResponseTimeChart data={combinedData} />
-      <MemoryUsageChart data={combinedData} />
-      <ErrorList data={combinedData} />
+      
+      <Tabs defaultValue="performance">
+        <TabsList className="mb-4">
+          <TabsTrigger value="performance">Performance Metrics</TabsTrigger>
+          <TabsTrigger value="memory">Memory Usage</TabsTrigger>
+          <TabsTrigger value="business">Business Analytics</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="performance" className="space-y-4">
+          <ResponseTimeChart data={combinedData} />
+          <SlowApiCallsTable data={combinedData} threshold={500} />
+          <ErrorList data={combinedData} />
+        </TabsContent>
+        
+        <TabsContent value="memory" className="space-y-4">
+          <MemoryUsageChart data={combinedData} />
+        </TabsContent>
+        
+        <TabsContent value="business">
+          {businessAnalytics && <BusinessAnalyticsCharts data={businessAnalytics} />}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
