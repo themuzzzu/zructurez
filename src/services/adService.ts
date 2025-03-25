@@ -1,6 +1,61 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
+export type AdType = "business" | "service" | "product" | "sponsored";
+export type AdFormat = "standard" | "banner" | "carousel" | "video" | "boosted_post";
+export type TargetingOptions = {
+  locations?: string[];
+  interests?: string[];
+  ageMin?: number;
+  ageMax?: number;
+  gender?: "male" | "female" | "all";
+};
+
+export interface Advertisement {
+  id: string;
+  user_id: string;
+  title: string;
+  description: string;
+  type: AdType;
+  format: AdFormat;
+  reference_id: string;
+  location: string;
+  budget: number;
+  start_date: string;
+  end_date: string;
+  image_url: string | null;
+  video_url: string | null;
+  carousel_images: string[] | null;
+  targeting_locations: string[] | null;
+  targeting_interests: string[] | null;
+  targeting_age_min: number | null;
+  targeting_age_max: number | null;
+  targeting_gender: string | null;
+  status: string;
+  created_at: string;
+  clicks: number;
+  reach: number;
+  business_id?: string;
+}
+
+export const fetchUserAds = async (): Promise<Advertisement[]> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data, error } = await supabase
+    .from('advertisements')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching user ads:', error);
+    return [];
+  }
+
+  return data || [];
+};
+
 export const fetchActiveAds = async (
   businessId?: string, 
   type: string = "sponsored", 

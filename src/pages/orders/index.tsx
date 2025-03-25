@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -98,6 +99,7 @@ const OrdersPage = () => {
                 payment_method: order.payment_method || 'cod',
                 discount: order.discount || 0,
                 shipping_fee: order.shipping_fee || 0,
+                coupon_code: null
               };
             }
             
@@ -124,11 +126,12 @@ const OrdersPage = () => {
               payment_method: order.payment_method || 'cod',
               discount: order.discount || 0,
               shipping_fee: order.shipping_fee || 0,
-            };
+              coupon_code: null
+            } as Order;
           })
         );
         
-        return ordersWithItems as Order[];
+        return ordersWithItems;
       });
     },
   });
