@@ -36,13 +36,13 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
       <Navbar />
       <div className="flex pt-16"> {/* Add pt-16 to account for navbar height */}
         {!hideSidebar && !isMobile && (
-          <div style={{ width: sidebarWidth + 'px' }} className="transition-all duration-300 fixed">
+          <div style={{ width: sidebarWidth + 'px' }} className="transition-all duration-300 fixed h-[calc(100vh-64px)]">
             <Sidebar />
           </div>
         )}
         <main 
           className="flex-1 transition-all duration-300 pb-20 md:pb-4 w-full" 
-          style={{ marginLeft: hideSidebar || isMobile ? 0 : sidebarWidth + 'px' }}
+          style={{ marginLeft: hideSidebar || isMobile ? 0 : sidebarWidth + 'px', paddingLeft: 0, paddingRight: 0 }}
         >
           {children}
         </main>
