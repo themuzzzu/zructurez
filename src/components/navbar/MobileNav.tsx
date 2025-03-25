@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useTheme } from "../ThemeProvider";
 import { cn } from "@/lib/utils";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 // Create a filled icon component for mobile nav
 const FilledIcon = ({ Icon }: { Icon: React.ElementType }) => (
@@ -22,21 +23,26 @@ export const MobileNav = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   const mobileNavItems = [
     { icon: Home, label: "Home", path: "/" },
     { icon: Store, label: "Marketplace", path: "/marketplace" },
     { icon: Wrench, label: "Services", path: "/services" },
-    { icon: Building, label: "Business", path: "/business" },
+    { icon: Building, label: "Business", path: "/businesses" },
     { icon: MessageSquare, label: "Messages", path: "/messages" },
   ];
 
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark");
   };
+  
+  if (!isMobile) {
+    return null; // Don't render on non-mobile devices
+  }
 
   return (
-    <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-black/95 border-t border-zinc-800 py-3 px-1 sm:px-2 z-50 animate-slide-up backdrop-blur-sm">
+    <div className="fixed bottom-0 left-0 right-0 bg-black/95 border-t border-zinc-800 py-3 px-1 sm:px-2 z-50 animate-slide-up backdrop-blur-sm">
       <div className="flex justify-between items-center max-w-md mx-auto">
         {mobileNavItems.map((item) => {
           const Icon = item.icon;

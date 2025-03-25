@@ -1,4 +1,3 @@
-
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -20,6 +19,7 @@ import {
 } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { NavButton } from "./navbar/NavButton";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -35,6 +35,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
   const location = useLocation();
   const [isCollapsed, setIsCollapsed] = useState(localStorage.getItem("sidebarCollapsed") === "true");
   const { theme, setTheme } = useTheme();
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   // Save collapse state to localStorage and dispatch custom event
   useEffect(() => {
@@ -61,9 +62,13 @@ export const Sidebar = ({ className }: SidebarProps) => {
     setTheme(theme === "dark" ? "light" : "dark");
   };
 
+  if (isMobile) {
+    return null; // Don't render sidebar on mobile
+  }
+
   return (
     <div className={cn(
-      "h-screen border-r border-zinc-200 bg-white dark:bg-black dark:border-zinc-800 overflow-y-auto transition-all duration-300 fixed left-0 top-16 z-30", // Changed top-0 to top-16
+      "h-screen border-r border-zinc-200 bg-white dark:bg-black dark:border-zinc-800 overflow-y-auto transition-all duration-300 fixed left-0 top-16 z-30", 
       isCollapsed ? "w-16" : "w-64",
       className
     )}>

@@ -4,6 +4,7 @@ import { Navbar } from "@/components/Navbar";
 import { Sidebar } from "@/components/Sidebar";
 import { AIAssistant } from "@/components/ai-support/AIAssistant";
 import { SmartNotificationAgent } from "@/components/ai-notifications/SmartNotificationAgent";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 interface LayoutProps {
   children: ReactNode;
@@ -14,6 +15,8 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
   const [sidebarWidth, setSidebarWidth] = useState(() => {
     return localStorage.getItem("sidebarCollapsed") === "true" ? 64 : 256;
   });
+  
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   // Listen for sidebar state changes
   useEffect(() => {
@@ -32,12 +35,15 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="flex pt-16"> {/* Add pt-16 to account for navbar height */}
-        {!hideSidebar && (
+        {!hideSidebar && !isMobile && (
           <div style={{ width: sidebarWidth + 'px' }} className="transition-all duration-300">
             <Sidebar />
           </div>
         )}
-        <main className="flex-1 p-4 transition-all duration-300" style={{ marginLeft: hideSidebar ? 0 : 0 }}>
+        <main 
+          className="flex-1 p-4 transition-all duration-300 pb-20 md:pb-4" 
+          style={{ marginLeft: hideSidebar || isMobile ? 0 : 0 }}
+        >
           {children}
         </main>
       </div>
