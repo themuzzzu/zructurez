@@ -14,7 +14,7 @@ export function HomeLayout({ children }: HomeLayoutProps) {
 
   return (
     <Layout>
-      <div className="container grid grid-cols-1 md:grid-cols-12 gap-4 p-4 max-w-7xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-3 max-w-7xl mx-auto">
         {/* Main Content */}
         <main className="col-span-1 md:col-span-9 lg:col-span-8">
           {children}
@@ -22,7 +22,7 @@ export function HomeLayout({ children }: HomeLayoutProps) {
 
         {/* Right Sidebar */}
         <aside className="hidden md:block md:col-span-3 lg:col-span-4">
-          <div className="sticky top-20 space-y-6">
+          <div className="sticky top-20 space-y-4">
             <div className="bg-muted/50 rounded-lg overflow-hidden">
               <div className="p-4">
                 <h3 className="font-semibold flex items-center">
