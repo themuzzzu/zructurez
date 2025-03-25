@@ -1,3 +1,4 @@
+
 import { MapPin, Clock, ChevronDown } from "lucide-react";
 
 interface BusinessCardInfoProps {
@@ -20,7 +21,7 @@ export const BusinessCardInfo = ({
         <div className="flex-1 relative">
           <span className="inline-block pr-6">{location}</span>
           {location.length > 35 && (
-            <div className="absolute top-0 right-0 bg-gradient-to-l from-black/95 to-transparent px-2">
+            <div className="absolute top-0 right-0 bg-gradient-to-l from-black/95 dark:from-black/95 to-transparent px-2">
               <ChevronDown className="h-4 w-4 text-gray-400" />
             </div>
           )}
@@ -31,7 +32,7 @@ export const BusinessCardInfo = ({
         <div className="flex-1 relative">
           <span className="inline-block pr-6">{hours}</span>
           {hours.length > 35 && (
-            <div className="absolute top-0 right-0 bg-gradient-to-l from-black/95 to-transparent px-2">
+            <div className="absolute top-0 right-0 bg-gradient-to-l from-black/95 dark:from-black/95 to-transparent px-2">
               <ChevronDown className="h-4 w-4 text-gray-400" />
             </div>
           )}

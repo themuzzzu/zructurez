@@ -1,4 +1,3 @@
-
 import { Navbar } from "@/components/Navbar";
 import { BusinessCard } from "@/components/BusinessCard";
 import { BusinessCategoryFilter } from "@/components/BusinessCategoryFilter";
@@ -147,7 +146,6 @@ const Business = () => {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {sortedBusinesses.map((business) => {
-                    // Extract only the props that match BusinessCardProps
                     const {
                       id,
                       name,
