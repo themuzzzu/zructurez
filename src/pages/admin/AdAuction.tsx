@@ -64,24 +64,11 @@ export default function AdAuction() {
 
       if (auctionsError) throw auctionsError;
       
-      // Get all placement names to match with auctions
-      const { data: placementsData, error: placementsError } = await supabase
-        .from("ad_placements")
-        .select("id, name");
-        
-      if (placementsError) throw placementsError;
-      
-      // Create a map of placement ids to names
-      const placementMap = new Map(
-        placementsData.map((placement) => [placement.id, placement.name])
-      );
-      
-      // Combine auction data with placement names
+      // Since ad_auctions doesn't have an ad_placement_id field, we'll assign a default placement name
+      // In a real app, you would need to establish the actual relationship between auctions and placements
       return auctionsData.map((auction) => ({
         ...auction,
-        placement_name: auction.ad_placement_id 
-          ? placementMap.get(auction.ad_placement_id) || "Unknown Placement"
-          : "General Auction"
+        placement_name: auction.category || "General Auction"
       })) as Auction[];
     },
   });
