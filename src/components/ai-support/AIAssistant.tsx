@@ -9,6 +9,7 @@ import { Bot, Send, X, Minimize2, Maximize2, User } from "lucide-react";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { supabase } from "@/integrations/supabase/client";
 import { measureApiCall } from "@/utils/performanceTracking";
+import { rateLimit } from "@/utils/rateLimiting";
 import { toast } from "sonner";
 
 type Message = {
@@ -52,6 +53,12 @@ export const AIAssistant = () => {
 
   const handleSendMessage = async () => {
     if (input.trim() === '') return;
+    
+    // Apply rate limiting - allow 5 messages per minute
+    const userId = currentUser?.id || 'anonymous-user';
+    if (!rateLimit(userId, { maxRequests: 5, windowMs: 60 * 1000, message: "Please wait a moment before sending more messages." })) {
+      return;
+    }
     
     const userMessage: Message = {
       id: `user-${Date.now()}`,

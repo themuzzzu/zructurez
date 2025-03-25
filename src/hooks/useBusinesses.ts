@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
 import type { Business, StaffMember, BusinessOwner } from "@/types/business";
+import { withCache } from "@/utils/cacheUtils";
 
 export const useBusinesses = () => {
   const queryClient = useQueryClient();
@@ -38,7 +39,8 @@ export const useBusinesses = () => {
     })) as Business[];
   };
 
-  const fetchBusinesses = async () => {
+  // Original fetch function
+  const fetchBusinessesOriginal = async () => {
     const { data, error } = await supabase
       .from("businesses")
       .select("*");
@@ -47,6 +49,13 @@ export const useBusinesses = () => {
     
     return transformBusinessData(data);
   };
+
+  // Apply cache to fetch function - 3 minute TTL
+  const fetchBusinesses = withCache(
+    fetchBusinessesOriginal,
+    'businesses-list',
+    3 * 60 * 1000
+  );
 
   // Set up real-time subscription to business status changes
   useEffect(() => {
