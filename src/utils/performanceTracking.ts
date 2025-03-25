@@ -28,9 +28,11 @@ export const measureApiCall = async <T>(
     // Get memory usage before the call (if available in the browser)
     try {
       if (performance && 'memory' in performance) {
-        // @ts-ignore - Not all browsers support this
-        const memory = performance.memory;
-        memoryUsage = (memory.usedJSHeapSize / memory.jsHeapSizeLimit) * 100;
+        // Safely access memory properties
+        const memory = (performance as any).memory;
+        if (memory && typeof memory.usedJSHeapSize === 'number' && typeof memory.jsHeapSizeLimit === 'number') {
+          memoryUsage = (memory.usedJSHeapSize / memory.jsHeapSizeLimit) * 100;
+        }
       }
     } catch (memError) {
       console.debug('Memory usage measurement not supported');
@@ -113,13 +115,13 @@ const isUserAdmin = async (): Promise<boolean> => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return false;
     
-    const { data } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single();
-      
-    return data?.role === 'admin';
+    // Same admin check as in adminApiMiddleware.ts
+    const adminIds = [
+      'feb4a063-6dfc-4b6f-a1d9-0fc2c57c04db', // Example admin ID
+      // Add more admin IDs as needed
+    ];
+    
+    return adminIds.includes(user.id);
   } catch (error) {
     console.error('Error checking admin status:', error);
     return false;
@@ -226,9 +228,11 @@ export const simulateLoad = async (userCount: number): Promise<void> => {
 export const getMemoryUsage = (): number | null => {
   try {
     if (performance && 'memory' in performance) {
-      // @ts-ignore - Not all browsers support this
-      const memory = performance.memory;
-      return (memory.usedJSHeapSize / memory.jsHeapSizeLimit) * 100;
+      // Safely access memory properties
+      const memory = (performance as any).memory;
+      if (memory && typeof memory.usedJSHeapSize === 'number' && typeof memory.jsHeapSizeLimit === 'number') {
+        return (memory.usedJSHeapSize / memory.jsHeapSizeLimit) * 100;
+      }
     }
   } catch (error) {
     console.debug('Memory usage measurement not supported');

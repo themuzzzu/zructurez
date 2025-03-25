@@ -74,7 +74,11 @@ export const ProductInsightsTable = () => {
       
       return data.map(product => ({
         ...product,
-        purchases: Array.isArray(product.product_purchases) ? product.product_purchases.length : 0
+        purchases: Array.isArray(product.product_purchases) ? product.product_purchases.length : 0,
+        // Make sure product_purchases is an array to match our type
+        product_purchases: Array.isArray(product.product_purchases) 
+          ? product.product_purchases 
+          : []
       })) as ProductWithPurchases[];
     }
   });

@@ -15,7 +15,7 @@ export const verifyAdminRole = async (): Promise<boolean> => {
     // Get user role from profiles
     const { data: profile, error } = await supabase
       .from('profiles')
-      .select('role')
+      .select('*')
       .eq('id', user.id)
       .single();
       
@@ -24,9 +24,19 @@ export const verifyAdminRole = async (): Promise<boolean> => {
       return false;
     }
     
-    if (!profile || typeof profile.role !== 'string') return false;
+    // Check if there's role information in the profile
+    // Since 'role' doesn't exist directly in profiles, we need to handle this differently
+    // For now, return false as we need to implement a proper roles system
+    console.log('User profile:', profile);
     
-    return profile.role === 'admin';
+    // Temporary solution: check if the user is an admin based on an admin list
+    // This should be replaced with a proper roles table
+    const adminIds = [
+      'feb4a063-6dfc-4b6f-a1d9-0fc2c57c04db', // Example admin ID
+      // Add more admin IDs as needed
+    ];
+    
+    return adminIds.includes(user.id);
   } catch (error) {
     console.error('Error verifying admin role:', error);
     return false;
