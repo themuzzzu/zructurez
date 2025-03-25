@@ -45,7 +45,7 @@ interface Product {
 }
 
 interface ProductWithPurchases extends Product {
-  product_purchases: { id: string }[];
+  product_purchases: Array<{ id: string }>;
   purchases: number;
 }
 
