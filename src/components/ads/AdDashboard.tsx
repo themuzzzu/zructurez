@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AdForm } from "./AdForm";
 import { useQuery } from "@tanstack/react-query";
-import { fetchUserAds } from "@/services/adService";
+import { fetchUserAds, Advertisement } from "@/services/adService";
 import { Badge } from "@/components/ui/badge";
 import { Clock, Eye, MousePointer, Plus } from "lucide-react";
 import { format } from "date-fns";
@@ -39,7 +39,7 @@ export const AdDashboard = () => {
     }
   });
   
-  const getAdPerformance = (ad) => {
+  const getAdPerformance = (ad: Advertisement) => {
     const clicks = ad.clicks || 0;
     const views = ad.reach || 0;
     const ctr = views > 0 ? (clicks / views * 100).toFixed(2) : 0;
@@ -47,7 +47,7 @@ export const AdDashboard = () => {
     return { clicks, views, ctr };
   };
   
-  const getStatusColor = (ad) => {
+  const getStatusColor = (ad: Advertisement) => {
     const now = new Date();
     const startDate = new Date(ad.start_date);
     const endDate = new Date(ad.end_date);
@@ -59,7 +59,7 @@ export const AdDashboard = () => {
     return "bg-green-500";
   };
   
-  const getStatusText = (ad) => {
+  const getStatusText = (ad: Advertisement) => {
     const now = new Date();
     const startDate = new Date(ad.start_date);
     const endDate = new Date(ad.end_date);

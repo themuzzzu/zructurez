@@ -1,19 +1,23 @@
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client"; 
+import { AdPlacement } from "@/services/adService";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -21,304 +25,396 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
-import { z } from "zod"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { AdPlacement } from "@/services/adService";
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
+import { ArrowLeft, Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
-interface AdPlacementFormValues {
-  name: string;
-  type: string;
-  location: string;
-  cpm_rate: number;
-  cpc_rate: number;
-  description: string;
-  active: boolean;
-  size?: string;
-  max_size_kb?: number;
-  priority?: number;
-}
-
-const formSchema = z.object({
-  name: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
-  }),
-  type: z.string().min(2, {
-    message: "Type must be at least 2 characters.",
-  }),
-  location: z.string().min(2, {
-    message: "Location must be at least 2 characters.",
-  }),
-  cpm_rate: z.number(),
-  cpc_rate: z.number(),
-  description: z.string().min(10, {
-    message: "Description must be at least 10 characters.",
-  }),
-  active: z.boolean(),
-  size: z.string().optional(),
-  max_size_kb: z.number().optional(),
-  priority: z.number().optional(),
-})
-
-const fetchPlacementData = async () => {
-  const { data, error } = await supabase
-    .from('ad_placements')
-    .select('*')
-    .order('priority');
-    
-  if (error) throw error;
+const AdPlacementPage = () => {
+  const navigate = useNavigate();
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [newPlacement, setNewPlacement] = useState({
+    name: "",
+    description: "",
+    type: "",
+    location: "",
+    cpm_rate: 10,
+    cpc_rate: 1,
+    size: "",
+    max_size_kb: 1024,
+    priority: 1,
+    active: true
+  });
   
-  // Cast the data to ensure it matches our AdPlacement type
-  // Since the database might not have all the fields yet
-  return (data || []).map(item => ({
-    ...item,
-    impressions: item.impressions || 0,
-    clicks: item.clicks || 0,
-    revenue: item.revenue || 0
-  })) as AdPlacement[];
-};
-
-export default function AdPlacementPage() {
-  const [placements, setPlacements] = useState<AdPlacement[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const data = await fetchPlacementData();
-        setPlacements(data);
-      } catch (e: any) {
-        setError(e.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      type: "",
-      location: "",
-      cpm_rate: 0,
-      cpc_rate: 0,
-      description: "",
-      active: false,
-      size: "",
-      max_size_kb: 0,
-      priority: 0,
-    },
-  })
-
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
+  const { data: placements = [], isLoading, refetch } = useQuery({
+    queryKey: ['ad-placements'],
+    queryFn: async () => {
       const { data, error } = await supabase
         .from('ad_placements')
-        .insert([values])
-        .select()
-
+        .select('*')
+        .order('created_at', { ascending: false });
+        
       if (error) {
-        toast.error(error.message)
-      } else {
-        toast.success("Ad Placement created successfully")
-        setPlacements([...placements, data[0]])
-        setOpen(false)
+        toast.error("Failed to load ad placements");
+        throw error;
       }
-    } catch (error: any) {
-      toast.error(error.message)
+      
+      return data.map(placement => ({
+        ...placement,
+        impressions: 0,
+        clicks: 0,
+        revenue: 0
+      })) as AdPlacement[];
     }
-  }
-
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
-
+  });
+  
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type } = e.target;
+    
+    if (type === 'number') {
+      setNewPlacement(prev => ({
+        ...prev,
+        [name]: parseFloat(value)
+      }));
+    } else {
+      setNewPlacement(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
+  };
+  
+  const handleSwitchChange = (checked: boolean) => {
+    setNewPlacement(prev => ({
+      ...prev,
+      active: checked
+    }));
+  };
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      const placementData = {
+        ...newPlacement,
+        location: newPlacement.location,
+        name: newPlacement.name,
+        type: newPlacement.type
+      };
+      
+      const { data, error } = await supabase
+        .from('ad_placements')
+        .insert([placementData])
+        .select();
+        
+      if (error) throw error;
+      
+      toast.success("Ad placement created successfully");
+      setIsCreateDialogOpen(false);
+      refetch();
+      
+      // Reset form
+      setNewPlacement({
+        name: "",
+        description: "",
+        type: "",
+        location: "",
+        cpm_rate: 10,
+        cpc_rate: 1,
+        size: "",
+        max_size_kb: 1024,
+        priority: 1,
+        active: true
+      });
+    } catch (error: any) {
+      toast.error(`Failed to create ad placement: ${error.message}`);
+    }
+  };
+  
+  const handleToggleActive = async (id: string, currentActive: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('ad_placements')
+        .update({ active: !currentActive })
+        .eq('id', id);
+        
+      if (error) throw error;
+      
+      toast.success(`Ad placement ${currentActive ? 'deactivated' : 'activated'}`);
+      refetch();
+    } catch (error: any) {
+      toast.error(`Failed to update ad placement: ${error.message}`);
+    }
+  };
+  
   return (
-    <div className="container mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-4">Ad Placements</h1>
-
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <Button variant="outline">Create Ad Placement</Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Create Ad Placement</DialogTitle>
-            <DialogDescription>
-              Make changes to your ad placement here. Click save when you're
-              done.
-            </DialogDescription>
-          </DialogHeader>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Ad Placement Name" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Type</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Ad Placement Type" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="location"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Location</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Ad Placement Location" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="cpm_rate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>CPM Rate</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="CPM Rate" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="cpc_rate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>CPC Rate</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="CPC Rate" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Ad Placement Description" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="active"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-md border p-4">
-                    <div className="space-y-0.5">
-                      <FormLabel className="text-base">Active</FormLabel>
-                      <FormDescription>
-                        Whether the ad placement is active or not.
-                      </FormDescription>
-                    </div>
-                    <FormControl>
-                      <Input
-                        type="checkbox"
-                        checked={field.value}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit">Submit</Button>
+    <div className="container py-6 max-w-7xl mx-auto">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <h1 className="text-2xl font-bold">Ad Placement Management</h1>
+        </div>
+        
+        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Create Placement
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create New Ad Placement</DialogTitle>
+              <DialogDescription>
+                Define where and how ads will appear on your platform
+              </DialogDescription>
+            </DialogHeader>
+            
+            <form onSubmit={handleSubmit} className="space-y-4 pt-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Name</Label>
+                  <Input 
+                    id="name"
+                    name="name"
+                    placeholder="Homepage Banner"
+                    value={newPlacement.name}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="type">Type</Label>
+                  <Input 
+                    id="type"
+                    name="type"
+                    placeholder="banner, sidebar, popup"
+                    value={newPlacement.type}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="location">Location</Label>
+                <Input 
+                  id="location"
+                  name="location"
+                  placeholder="homepage, product page, category listing"
+                  value={newPlacement.location}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="description">Description</Label>
+                <Input 
+                  id="description"
+                  name="description"
+                  placeholder="Prominent banner at the top of homepage"
+                  value={newPlacement.description}
+                  onChange={handleInputChange}
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="cpm_rate">CPM Rate (₹)</Label>
+                  <Input 
+                    id="cpm_rate"
+                    name="cpm_rate"
+                    type="number"
+                    min="1"
+                    step="0.01"
+                    value={newPlacement.cpm_rate}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="cpc_rate">CPC Rate (₹)</Label>
+                  <Input 
+                    id="cpc_rate"
+                    name="cpc_rate"
+                    type="number"
+                    min="0.1"
+                    step="0.01"
+                    value={newPlacement.cpc_rate}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="size">Size</Label>
+                  <Input 
+                    id="size"
+                    name="size"
+                    placeholder="300x250, 728x90"
+                    value={newPlacement.size}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="max_size_kb">Max Size (KB)</Label>
+                  <Input 
+                    id="max_size_kb"
+                    name="max_size_kb"
+                    type="number"
+                    min="1"
+                    value={newPlacement.max_size_kb}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="priority">Priority</Label>
+                  <Input 
+                    id="priority"
+                    name="priority"
+                    type="number"
+                    min="1"
+                    max="10"
+                    value={newPlacement.priority}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                
+                <div className="flex items-center justify-end h-full">
+                  <div className="flex items-center space-x-2">
+                    <Switch 
+                      id="active"
+                      checked={newPlacement.active}
+                      onCheckedChange={handleSwitchChange}
+                    />
+                    <Label htmlFor="active">Active</Label>
+                  </div>
+                </div>
+              </div>
+              
+              <Button type="submit" className="w-full">Create Placement</Button>
             </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
-
-      <div className="rounded-md border">
-        <Table>
-          <TableCaption>A list of your ad placements.</TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[100px]">Name</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Location</TableHead>
-              <TableHead>CPM Rate</TableHead>
-              <TableHead>CPC Rate</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Active</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {placements.map((placement) => (
-              <TableRow key={placement.id}>
-                <TableCell className="font-medium">{placement.name}</TableCell>
-                <TableCell>{placement.type}</TableCell>
-                <TableCell>{placement.location}</TableCell>
-                <TableCell>{placement.cpm_rate}</TableCell>
-                <TableCell>{placement.cpc_rate}</TableCell>
-                <TableCell>{placement.description}</TableCell>
-                <TableCell>{placement.active ? "Yes" : "No"}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-          <TableFooter>
-            <TableRow>
-              <TableCell colSpan={6}>
-                Total {placements.length} ad placements
-              </TableCell>
-            </TableRow>
-          </TableFooter>
-        </Table>
+          </DialogContent>
+        </Dialog>
+      </div>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle>Ad Placements</CardTitle>
+          <CardDescription>Manage where ads appear across your platform</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="flex justify-center py-8">
+              <p>Loading ad placements...</p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Location</TableHead>
+                  <TableHead>CPM/CPC Rates</TableHead>
+                  <TableHead>Size</TableHead>
+                  <TableHead>Priority</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {placements.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-8">
+                      No ad placements found. Create your first placement.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  placements.map((placement) => (
+                    <TableRow key={placement.id}>
+                      <TableCell className="font-medium">{placement.name}</TableCell>
+                      <TableCell>{placement.type}</TableCell>
+                      <TableCell>{placement.location}</TableCell>
+                      <TableCell>₹{placement.cpm_rate} CPM<br/>₹{placement.cpc_rate} CPC</TableCell>
+                      <TableCell>{placement.size || "N/A"}</TableCell>
+                      <TableCell>{placement.priority}</TableCell>
+                      <TableCell>
+                        <span className={`px-2 py-1 rounded text-xs ${placement.active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                          {placement.active ? 'Active' : 'Inactive'}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleToggleActive(placement.id, placement.active)}
+                          >
+                            {placement.active ? 'Deactivate' : 'Activate'}
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Total Impressions</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">
+              {placements.reduce((sum, placement) => sum + (placement.impressions || 0), 0).toLocaleString()}
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Total Clicks</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">
+              {placements.reduce((sum, placement) => sum + (placement.clicks || 0), 0).toLocaleString()}
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Total Revenue</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">
+              ₹{placements.reduce((sum, placement) => sum + (placement.revenue || 0), 0).toLocaleString()}
+            </p>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
-}
+};
 
-/**
- * @param {string} message
- */
-function FormDescription({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="text-[0.8rem] text-muted-foreground">
-      {children}
-    </p>
-  )
-}
+export default AdPlacementPage;

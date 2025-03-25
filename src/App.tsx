@@ -1,118 +1,100 @@
 
-import {
-  createBrowserRouter,
-  RouterProvider,
-  createRoutesFromElements,
-  Route,
-} from "react-router-dom";
+import { Route, Routes, BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import Index from "@/pages/Index";
-import Marketplace from "@/pages/Marketplace";
-import ProductDetails from "@/pages/ProductDetails";
-import SearchPage from "@/pages/search";
-import { ThemeProvider } from "@/components/ThemeProvider";
-import { Toaster } from "sonner";
-import AdDashboard from "./pages/admin/AdDashboard";
-import AdAuction from "./pages/admin/AdAuction";
-import AdPlacement from "./pages/admin/AdPlacement";
-import AdAnalytics from "./pages/admin/AdAnalytics";
-import Services from "./pages/Services";
-import Maps from "./pages/Maps";
-import Settings from "./pages/Settings";
+import Index from "./pages/Index";
+import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
-import { NotFound } from "./components/NotFound";
+import Services from "./pages/Services";
+import ServiceDetails from "./pages/ServiceDetails";
+import Business from "./pages/Business";
+import BusinessDetails from "./pages/BusinessDetails";
+import Settings from "./pages/Settings";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
+import Maps from "./pages/Maps";
+import Events from "./pages/Events";
+import Orders from "./pages/orders";
+import Messages from "./pages/messages";
+import Communities from "./pages/Communities";
+import Checkout from "./pages/checkout";
+import Search from "./pages/search";
+import Marketplace from "./pages/Marketplace";
+import ProductDetails from "./pages/ProductDetails";
+import Jobs from "./pages/Jobs";
+import AdminIndex from "./pages/admin";
+import AdminApiDemo from "./pages/admin/AdminApiDemo";
+import AdDashboard from "./pages/admin/AdDashboard";
+import AdPlacement from "./pages/admin/AdPlacement";
+import AdAuction from "./pages/admin/AdAuction";
+import AdAnalytics from "./pages/admin/AdAnalytics";
+import NotFound from "./components/NotFound";
+import BusinessDashboard from "./pages/BusinessDashboard";
 import GenericPage from "./pages/GenericPage";
-import { lazy, Suspense } from "react";
-import { LoadingView } from "./components/LoadingView";
+import Layout from "./components/layout/Layout";
+import "./App.css";
 
-// Lazy load some components to improve initial load time
-const Messages = lazy(() => import("./pages/messages"));
-const Business = lazy(() => import("./pages/Business"));
-const Events = lazy(() => import("./pages/Events"));
-const Jobs = lazy(() => import("./pages/Jobs"));
-const Communities = lazy(() => import("./pages/Communities"));
-
-// Create a client
+// Create a query client
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5, // 5 minutes
-      refetchOnWindowFocus: false,
     },
   },
 });
 
-const router = createBrowserRouter(
-  createRoutesFromElements(
-    <>
-      <Route path="/" element={<Index />} />
-      <Route path="/marketplace" element={<Marketplace />} />
-      <Route path="/product/:productId" element={<ProductDetails />} />
-      <Route path="/search" element={<SearchPage />} />
-      <Route path="/admin/ads" element={<AdDashboard />} />
-      <Route path="/admin/ad-auction" element={<AdAuction />} />
-      <Route path="/admin/ad-placement" element={<AdPlacement />} />
-      <Route path="/admin/ad-analytics" element={<AdAnalytics />} />
-      <Route path="/services" element={<Services />} />
-      <Route path="/maps" element={<Maps />} />
-      <Route path="/settings" element={<Settings />} />
-      <Route path="/profile" element={<Profile />} />
-      
-      {/* Lazy loaded routes */}
-      <Route 
-        path="/messages/*" 
-        element={
-          <Suspense fallback={<LoadingView />}>
-            <Messages />
-          </Suspense>
-        } 
-      />
-      <Route 
-        path="/business" 
-        element={
-          <Suspense fallback={<LoadingView />}>
-            <Business />
-          </Suspense>
-        } 
-      />
-      <Route 
-        path="/events" 
-        element={
-          <Suspense fallback={<LoadingView />}>
-            <Events />
-          </Suspense>
-        } 
-      />
-      <Route 
-        path="/jobs" 
-        element={
-          <Suspense fallback={<LoadingView />}>
-            <Jobs />
-          </Suspense>
-        } 
-      />
-      <Route 
-        path="/communities" 
-        element={
-          <Suspense fallback={<LoadingView />}>
-            <Communities />
-          </Suspense>
-        } 
-      />
-      
-      {/* Generic placeholder pages for unimplemented routes */}
-      <Route path="*" element={<NotFound />} />
-    </>
-  )
-);
-
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="light">
-        <RouterProvider router={router} />
-        <Toaster position="top-right" />
-      </ThemeProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Index />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/profile/:id" element={<Profile />} />
+            <Route path="/services" element={<Services />} />
+            <Route path="/services/:id" element={<ServiceDetails />} />
+            <Route path="/businesses" element={<Business />} />
+            <Route path="/businesses/:id" element={<BusinessDetails />} />
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute>
+                  <Settings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/business-dashboard"
+              element={
+                <ProtectedRoute>
+                  <BusinessDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/maps" element={<Maps />} />
+            <Route path="/events" element={<Events />} />
+            <Route path="/orders" element={<Orders />} />
+            <Route path="/messages/*" element={<Messages />} />
+            <Route path="/communities" element={<Communities />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/search" element={<Search />} />
+            <Route path="/marketplace" element={<Marketplace />} />
+            <Route path="/products/:id" element={<ProductDetails />} />
+            <Route path="/jobs" element={<Jobs />} />
+            <Route path="/admin" element={<AdminIndex />} />
+            <Route path="/admin/api-demo" element={<AdminApiDemo />} />
+            <Route path="/admin/ad-dashboard" element={<AdDashboard />} />
+            <Route path="/admin/ad-placement" element={<AdPlacement />} />
+            <Route path="/admin/ad-auction" element={<AdAuction />} />
+            <Route path="/admin/ad-analytics" element={<AdAnalytics />} />
+            <Route path="/contact" element={<GenericPage title="Contact" />} />
+            <Route path="/about" element={<GenericPage title="About" />} />
+            <Route path="/faq" element={<GenericPage title="FAQ" />} />
+            <Route path="/terms" element={<GenericPage title="Terms of Service" />} />
+            <Route path="/privacy" element={<GenericPage title="Privacy Policy" />} />
+            <Route path="*" element={<NotFound />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
     </QueryClientProvider>
   );
 }

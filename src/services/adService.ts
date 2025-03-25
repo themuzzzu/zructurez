@@ -1,9 +1,10 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { Json } from "@/integrations/supabase/types";
 
 // Define the ad types as an enum for type safety
-export type AdType = "product" | "business" | "service" | "post";
-export type AdFormat = "standard" | "banner" | "video" | "carousel" | "recommendation";
+export type AdType = "product" | "business" | "service" | "sponsored" | "post";
+export type AdFormat = "standard" | "banner" | "video" | "carousel" | "recommendation" | "boosted_post";
 
 // Define the Advertisement type to match the database schema
 export interface Advertisement {
@@ -22,10 +23,10 @@ export interface Advertisement {
   updated_at?: string;
   image_url: string | null;
   video_url?: string;
-  carousel_images?: any[];
+  carousel_images?: Json;
   format?: AdFormat;
-  targeting_locations?: string[];
-  targeting_interests?: string[];
+  targeting_locations?: Json;
+  targeting_interests?: Json;
   targeting_age_min?: number;
   targeting_age_max?: number;
   targeting_gender?: string;
@@ -33,6 +34,7 @@ export interface Advertisement {
   clicks?: number;
   ctr?: number;
   business_id?: string;
+  reach?: number;
 }
 
 export interface AdPlacement {
@@ -88,38 +90,60 @@ export const fetchActiveAds = async (
   }
 };
 
-// Increment ad views
-export const incrementAdView = async (adId: string): Promise<void> => {
+// Fetch ads for a specific user
+export const fetchUserAds = async (): Promise<Advertisement[]> => {
   try {
-    // We'll use a direct update instead of RPC for simplicity
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
+    
     const { data, error } = await supabase
       .from('advertisements')
-      .select('impressions')
-      .eq('id', adId)
-      .single();
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
     
     if (error) throw error;
     
-    const newImpressions = (data?.impressions || 0) + 1;
+    return (data || []) as Advertisement[];
+  } catch (error) {
+    console.error('Error fetching user advertisements:', error);
+    return [];
+  }
+};
+
+// Increment ad views
+export const incrementAdView = async (adId: string): Promise<void> => {
+  try {
+    // We'll use the ad_analytics table
+    const { data, error } = await supabase
+      .from('ad_analytics')
+      .select('impressions')
+      .eq('ad_id', adId)
+      .single();
     
-    await supabase
-      .from('advertisements')
-      .update({ impressions: newImpressions })
-      .eq('id', adId);
-      
-    // Also record in ad_metrics if we have that table
-    try {
+    if (error && error.code !== 'PGRST116') throw error;
+    
+    if (!data) {
+      // Insert new record if it doesn't exist
       await supabase
-        .from('ad_metrics')
+        .from('ad_analytics')
         .insert({
           ad_id: adId,
-          type: 'impression',
-          timestamp: new Date().toISOString()
+          impressions: 1
         });
-    } catch (metricError) {
-      // Ignore errors with metrics
-      console.log('Could not record ad metric:', metricError);
+    } else {
+      // Update existing record
+      await supabase
+        .from('ad_analytics')
+        .update({ impressions: (data.impressions || 0) + 1 })
+        .eq('ad_id', adId);
     }
+    
+    // Also update the advertisement reach counter
+    await supabase
+      .from('advertisements')
+      .update({ reach: supabase.rpc('increment', { value: 1 }) })
+      .eq('id', adId);
     
   } catch (error) {
     console.error('Error incrementing ad view:', error);
@@ -129,35 +153,36 @@ export const incrementAdView = async (adId: string): Promise<void> => {
 // Increment ad clicks
 export const incrementAdClick = async (adId: string): Promise<void> => {
   try {
-    // We'll use a direct update instead of RPC for simplicity
+    // We'll use the ad_analytics table
     const { data, error } = await supabase
-      .from('advertisements')
+      .from('ad_analytics')
       .select('clicks')
-      .eq('id', adId)
+      .eq('ad_id', adId)
       .single();
     
-    if (error) throw error;
+    if (error && error.code !== 'PGRST116') throw error;
     
-    const newClicks = (data?.clicks || 0) + 1;
-    
-    await supabase
-      .from('advertisements')
-      .update({ clicks: newClicks })
-      .eq('id', adId);
-      
-    // Also record in ad_metrics if we have that table
-    try {
+    if (!data) {
+      // Insert new record if it doesn't exist
       await supabase
-        .from('ad_metrics')
+        .from('ad_analytics')
         .insert({
           ad_id: adId,
-          type: 'click',
-          timestamp: new Date().toISOString()
+          clicks: 1
         });
-    } catch (metricError) {
-      // Ignore errors with metrics
-      console.log('Could not record ad metric:', metricError);
+    } else {
+      // Update existing record
+      await supabase
+        .from('ad_analytics')
+        .update({ clicks: (data.clicks || 0) + 1 })
+        .eq('ad_id', adId);
     }
+    
+    // Also update the advertisement clicks counter
+    await supabase
+      .from('advertisements')
+      .update({ clicks: supabase.rpc('increment', { value: 1 }) })
+      .eq('id', adId);
     
   } catch (error) {
     console.error('Error incrementing ad click:', error);

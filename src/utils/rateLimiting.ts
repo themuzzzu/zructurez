@@ -1,30 +1,38 @@
 
-import { toast } from "sonner";
-
 export interface RateLimitOptions {
-  maxRequests: number;
   windowMs: number;
+  maxRequests: number;
   message: string;
 }
 
-export const rateLimit = (
+/**
+ * Applies rate limiting to a client request
+ * @param clientId - The identifier for the client
+ * @param endpoint - The API endpoint being accessed
+ * @param options - Rate limiting options
+ * @returns boolean - True if request is allowed, false if rate limited
+ */
+export const applyRateLimit = (
   clientId: string,
-  options: RateLimitOptions
+  endpoint: string,
+  options: Partial<RateLimitOptions> = {}
 ): boolean => {
-  const now = Date.now();
-  const windowStart = now - options.windowMs;
+  const windowMs = options.windowMs || 60000; // Default 1 minute
+  const maxRequests = options.maxRequests || 5; // Default 5 requests
   
-  // In a real implementation, this would use a persistent store
-  // For now, use localStorage for demo purposes
-  const key = `ratelimit:${clientId}`;
+  const now = Date.now();
+  const windowStart = now - windowMs;
+  const key = `ratelimit:${clientId}:${endpoint}`;
+  
+  // Get existing request timestamps from storage
   const requestTimesStr = localStorage.getItem(key) || '[]';
-  let requestTimes: number[] = JSON.parse(requestTimesStr);
+  let requestTimes = JSON.parse(requestTimesStr) as number[];
   
   // Filter request times to only include those within the current window
   requestTimes = requestTimes.filter(time => time > windowStart);
   
-  if (requestTimes.length >= options.maxRequests) {
-    toast.error(options.message);
+  // Check if rate limit exceeded
+  if (requestTimes.length >= maxRequests) {
     return false;
   }
   
@@ -35,31 +43,16 @@ export const rateLimit = (
   return true;
 };
 
-// Helper function to get client IP or unique identifier
+/**
+ * Utility to get an identifier for the client
+ */
 export const getClientIP = (): string => {
-  // In a real app, this would get the actual client IP
-  // For demo purposes, we'll return a random ID or use a stored one
-  const storedClientId = localStorage.getItem('client_id');
-  if (storedClientId) return storedClientId;
-  
-  const newClientId = Math.random().toString(36).substring(2, 15);
-  localStorage.setItem('client_id', newClientId);
-  return newClientId;
-};
-
-// Helper function to apply rate limiting easily
-export const applyRateLimit = (
-  identifier: string = getClientIP(),
-  options: Partial<RateLimitOptions> = {}
-): boolean => {
-  const defaultOptions: RateLimitOptions = {
-    maxRequests: 5,
-    windowMs: 60000, // 1 minute
-    message: 'Rate limit exceeded. Please try again later.',
-  };
-
-  return rateLimit(
-    identifier,
-    { ...defaultOptions, ...options }
-  );
+  // In a browser context, we don't have access to IP
+  // Use a random identifier stored in localStorage as fallback
+  let clientId = localStorage.getItem('client_id');
+  if (!clientId) {
+    clientId = `browser_${Math.random().toString(36).substring(2, 15)}`;
+    localStorage.setItem('client_id', clientId);
+  }
+  return clientId;
 };

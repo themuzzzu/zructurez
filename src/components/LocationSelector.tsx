@@ -11,7 +11,7 @@ import {
 export interface LocationSelectorProps {
   value: string;
   onChange: (location: string) => void;
-  className?: string; // Add className prop
+  className?: string;
 }
 
 export const LocationSelector = ({ 
