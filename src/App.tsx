@@ -5,10 +5,23 @@ import {
   createRoutesFromElements,
   Route,
 } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Index from "@/pages/Index";
 import Marketplace from "@/pages/Marketplace";
 import ProductDetails from "@/pages/ProductDetails";
 import SearchPage from "@/pages/search";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import { Toaster } from "sonner";
+
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -22,7 +35,14 @@ const router = createBrowserRouter(
 );
 
 function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider defaultTheme="light">
+        <RouterProvider router={router} />
+        <Toaster position="top-right" />
+      </ThemeProvider>
+    </QueryClientProvider>
+  );
 }
 
 export default App;
