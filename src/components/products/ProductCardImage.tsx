@@ -1,7 +1,7 @@
 
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Heart } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 
 interface ProductCardImageProps {
@@ -22,6 +22,39 @@ export const ProductCardImage = ({
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const imageRef = useRef<HTMLImageElement>(null);
+  
+  // Optimized image URL with quality and sizing parameters
+  const optimizedImageUrl = imageUrl 
+    ? `${imageUrl}${imageUrl.includes('?') ? '&' : '?'}quality=80&width=400&t=${Date.now() % 1000}`
+    : null;
+    
+  // Low quality placeholder (thumbnail) for faster initial render
+  const thumbnailUrl = optimizedImageUrl
+    ? optimizedImageUrl.replace('width=400', 'width=40&blur=10')
+    : null;
+
+  // Use intersection observer for lazy loading
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '200px' } // Start loading when within 200px of viewport
+    );
+    
+    if (imageRef.current) {
+      observer.observe(imageRef.current);
+    }
+    
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
 
   const handleWishlistClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -29,38 +62,50 @@ export const ProductCardImage = ({
     toast.success(isWishlisted ? "Removed from wishlist" : "Added to wishlist");
   };
 
-  // Optimize image rendering
-  const optimizedImageUrl = imageUrl 
-    ? imageUrl.includes('?') 
-      ? `${imageUrl}&quality=80&width=400` 
-      : `${imageUrl}?quality=80&width=400`
-    : null;
-
   return (
-    <div className="cursor-pointer group relative overflow-hidden w-full touch-manipulation" onClick={onClick}>
+    <div 
+      className="cursor-pointer group relative overflow-hidden w-full touch-manipulation" 
+      onClick={onClick}
+      ref={imageRef}
+    >
       <AspectRatio ratio={1} className="bg-gray-100 dark:bg-zinc-700">
-        {optimizedImageUrl ? (
-          <>
-            {/* Low quality placeholder */}
-            {!imageLoaded && !imageFailed && (
-              <div className="absolute inset-0 bg-gray-200 dark:bg-zinc-800 animate-pulse" />
-            )}
-            
-            <img
-              src={optimizedImageUrl}
-              alt={title}
-              className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 ${
-                imageLoaded ? 'opacity-100' : 'opacity-0'
-              }`}
-              loading="lazy"
-              decoding="async"
-              onLoad={() => setImageLoaded(true)}
-              onError={() => setImageFailed(true)}
-            />
-          </>
-        ) : (
+        {/* Show thumbnail placeholder while full image loads */}
+        {thumbnailUrl && !imageLoaded && !imageFailed && (
+          <img
+            src={thumbnailUrl}
+            alt=""
+            className="w-full h-full object-cover absolute inset-0 filter blur-sm scale-105"
+            aria-hidden="true"
+            loading="eager"
+          />
+        )}
+        
+        {/* Low quality placeholder */}
+        {!imageLoaded && !imageFailed && (
+          <div className="absolute inset-0 bg-gray-200 dark:bg-zinc-800 animate-pulse" />
+        )}
+        
+        {/* Main image - only load when in viewport */}
+        {optimizedImageUrl && isVisible && (
+          <img
+            src={optimizedImageUrl}
+            alt={title}
+            className={`w-full h-full object-cover transition-all duration-500 ${
+              imageLoaded 
+                ? 'opacity-100 group-hover:scale-110 duration-500' 
+                : 'opacity-0'
+            }`}
+            loading="lazy"
+            decoding="async"
+            onLoad={() => setImageLoaded(true)}
+            onError={() => setImageFailed(true)}
+          />
+        )}
+        
+        {/* Fallback for failed images */}
+        {imageFailed && (
           <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-zinc-700">
-            <span className="text-gray-400 dark:text-gray-500 text-xs">No image</span>
+            <span className="text-gray-400 dark:text-gray-500 text-xs">Image not available</span>
           </div>
         )}
       </AspectRatio>
@@ -83,3 +128,5 @@ export const ProductCardImage = ({
     </div>
   );
 };
+
+export default ProductCardImage;

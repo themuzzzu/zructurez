@@ -1,8 +1,8 @@
 
-import MarketplacePage from "./marketplace/index";
+import OptimizedMarketplace from "./marketplace/OptimizedMarketplace";
 
 const Marketplace = () => {
-  return <MarketplacePage />;
+  return <OptimizedMarketplace />;
 };
 
 export default Marketplace;
