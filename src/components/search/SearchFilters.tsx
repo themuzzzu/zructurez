@@ -1,14 +1,12 @@
+
 import { useState } from "react";
-import { Slider } from "@/components/ui/slider";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { RotateCcw, Filter, Check, X } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Slider } from "@/components/ui/slider";
 import { SearchFilters as SearchFiltersType } from "@/types/search";
 
 interface SearchFiltersProps {
@@ -19,19 +17,12 @@ interface SearchFiltersProps {
 
 export function SearchFilters({ filters, onChange, onReset }: SearchFiltersProps) {
   const [priceRange, setPriceRange] = useState<[number, number]>([
-    filters.priceMin ?? 0,
-    filters.priceMax ?? 10000
+    filters.priceMin || 0,
+    filters.priceMax || 10000
   ]);
-  const [showPriceInputs, setShowPriceInputs] = useState(false);
   
   const handlePriceChange = (value: number[]) => {
     setPriceRange([value[0], value[1]]);
-    if (!showPriceInputs) {
-      onChange({
-        priceMin: value[0],
-        priceMax: value[1]
-      });
-    }
   };
   
   const applyPriceRange = () => {
@@ -42,250 +33,124 @@ export function SearchFilters({ filters, onChange, onReset }: SearchFiltersProps
   };
   
   const categories = [
-    "Electronics",
-    "Fashion",
-    "Home",
-    "Kitchen",
-    "Beauty",
-    "Toys",
-    "Sports",
-    "Books",
-    "Automotive",
-    "Groceries"
+    { id: 'electronics', label: 'Electronics' },
+    { id: 'clothing', label: 'Clothing & Fashion' },
+    { id: 'home', label: 'Home & Garden' },
+    { id: 'toys', label: 'Toys & Games' },
+    { id: 'beauty', label: 'Beauty & Personal Care' }
   ];
   
+  const renderCategories = () => {
+    return categories.map(category => (
+      <div key={category.id} className="flex items-center space-x-2">
+        <Checkbox
+          id={`category-${category.id}`}
+          checked={filters.categories?.includes(category.id)}
+          onCheckedChange={(checked) => {
+            if (checked) {
+              const newCategories = [...(filters.categories || []), category.id];
+              onChange({ categories: newCategories });
+            } else {
+              const newCategories = filters.categories?.filter(id => id !== category.id) || [];
+              onChange({ categories: newCategories });
+            }
+          }}
+        />
+        <Label htmlFor={`category-${category.id}`}>{category.label}</Label>
+      </div>
+    ));
+  };
+  
+  type SortOption = 'relevance' | 'price-asc' | 'price-desc' | 'newest';
+  
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-medium">Filters</h3>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={onReset}
-          className="h-8 px-2"
-        >
-          <RotateCcw className="h-4 w-4 mr-2" />
-          Reset
-        </Button>
-      </div>
-      
-      {/* Sort by */}
-      <div className="space-y-2">
-        <h4 className="text-sm font-medium">Sort By</h4>
-        <RadioGroup
-          value={filters.sortBy || "relevance"}
-          onValueChange={(value) => onChange({ sortBy: value })}
-          className="flex flex-col gap-2"
-        >
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="relevance" id="relevance" />
-            <Label htmlFor="relevance">Relevance</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="price-asc" id="price-asc" />
-            <Label htmlFor="price-asc">Price: Low to High</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="price-desc" id="price-desc" />
-            <Label htmlFor="price-desc">Price: High to Low</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="newest" id="newest" />
-            <Label htmlFor="newest">Newest First</Label>
-          </div>
-        </RadioGroup>
-      </div>
-      
-      {/* Price Range */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <h4 className="text-sm font-medium">Price Range</h4>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => setShowPriceInputs(!showPriceInputs)}
-            className="h-6 px-2 text-xs"
-          >
-            {showPriceInputs ? "Use Slider" : "Custom Range"}
-          </Button>
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>Filters</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {/* Sort By */}
+        <div>
+          <h3 className="font-medium mb-2">Sort By</h3>
+          <RadioGroup value={filters.sortBy as SortOption} onValueChange={(value: SortOption) => onChange({ sortBy: value })}>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="relevance" id="sort-relevance" />
+              <Label htmlFor="sort-relevance">Relevance</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="price-asc" id="sort-price-asc" />
+              <Label htmlFor="sort-price-asc">Price: Low to High</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="price-desc" id="sort-price-desc" />
+              <Label htmlFor="sort-price-desc">Price: High to Low</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="newest" id="sort-newest" />
+              <Label htmlFor="sort-newest">Newest First</Label>
+            </div>
+          </RadioGroup>
         </div>
-        {showPriceInputs ? (
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <Label htmlFor="min-price" className="text-xs">Min</Label>
-              <Input
-                id="min-price"
-                type="number"
-                value={priceRange[0]}
-                onChange={(e) => {
-                  const min = parseInt(e.target.value) || 0;
-                  setPriceRange([min, priceRange[1]]);
-                }}
-                className="h-8"
-              />
-            </div>
-            <div>
-              <Label htmlFor="max-price" className="text-xs">Max</Label>
-              <Input
-                id="max-price"
-                type="number"
-                value={priceRange[1]}
-                onChange={(e) => {
-                  const max = parseInt(e.target.value) || 10000;
-                  setPriceRange([priceRange[0], max]);
-                }}
-                className="h-8"
-              />
-            </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="col-span-2 mt-1"
-              onClick={applyPriceRange}
-            >
-              Apply Price Range
-            </Button>
-          </div>
-        ) : (
-          <div className="pt-2 px-1">
+        
+        <Separator />
+        
+        {/* Price Range */}
+        <div>
+          <h3 className="font-medium mb-2">Price Range</h3>
+          <div className="space-y-4">
             <Slider
-              value={priceRange}
               min={0}
               max={10000}
               step={100}
+              value={priceRange}
               onValueChange={handlePriceChange}
-              className="my-4"
+              className="mb-6"
             />
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>${priceRange[0]}</span>
-              <span>${priceRange[1] === 10000 ? '10,000+' : priceRange[1]}</span>
+            <div className="flex justify-between text-sm">
+              <span>₹{priceRange[0].toLocaleString()}</span>
+              <span>₹{priceRange[1].toLocaleString()}</span>
+            </div>
+            <Button variant="outline" size="sm" onClick={applyPriceRange}>
+              Apply
+            </Button>
+          </div>
+        </div>
+        
+        <Separator />
+        
+        {/* Categories */}
+        <div>
+          <h3 className="font-medium mb-2">Categories</h3>
+          <div className="space-y-2">
+            {renderCategories()}
+          </div>
+        </div>
+        
+        <Separator />
+        
+        {/* Additional Filters */}
+        <div>
+          <h3 className="font-medium mb-2">Additional Filters</h3>
+          <div className="space-y-2">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="show-sponsored"
+                checked={filters.includeSponsored}
+                onCheckedChange={(checked) => onChange({ includeSponsored: !!checked })}
+              />
+              <Label htmlFor="show-sponsored">Show sponsored results</Label>
             </div>
           </div>
-        )}
-      </div>
-      
-      {/* Categories */}
-      <div className="space-y-2">
-        <h4 className="text-sm font-medium">Categories</h4>
-        <ScrollArea className="h-[180px] pr-3">
-          <div className="space-y-1">
-            {categories.map((category) => (
-              <div className="flex items-center space-x-2" key={category}>
-                <Checkbox
-                  id={`category-${category}`}
-                  checked={filters.categories?.includes(category)}
-                  onCheckedChange={(checked) => {
-                    const newCategories = [...(filters.categories || [])];
-                    if (checked) {
-                      newCategories.push(category);
-                    } else {
-                      const index = newCategories.indexOf(category);
-                      if (index !== -1) {
-                        newCategories.splice(index, 1);
-                      }
-                    }
-                    onChange({ categories: newCategories });
-                  }}
-                />
-                <Label
-                  htmlFor={`category-${category}`}
-                  className="text-sm"
-                >
-                  {category}
-                </Label>
-              </div>
-            ))}
-          </div>
-        </ScrollArea>
-      </div>
-      
-      {/* Other filters */}
-      <div className="space-y-2">
-        <h4 className="text-sm font-medium">Other Filters</h4>
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="include-sponsored"
-            checked={filters.includeSponsored}
-            onCheckedChange={(checked) => {
-              onChange({ includeSponsored: !!checked });
-            }}
-          />
-          <Label htmlFor="include-sponsored" className="text-sm">
-            Include sponsored results
-          </Label>
         </div>
-      </div>
-      
-      {/* Selected filters */}
-      {(filters.categories?.length || 
-         filters.priceMin !== undefined || 
-         filters.priceMax !== undefined || 
-         filters.sortBy !== 'relevance' || 
-         filters.includeSponsored === false) && (
-        <Card className="p-3">
-          <h4 className="text-sm font-medium mb-2">Active filters</h4>
-          <div className="flex flex-wrap gap-1">
-            {filters.sortBy && filters.sortBy !== 'relevance' && (
-              <Badge variant="secondary" className="text-xs">
-                Sort: {filters.sortBy.replace('-', ' ')}
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-4 w-4 ml-1 p-0" 
-                  onClick={() => onChange({ sortBy: 'relevance' })}
-                >
-                  <X className="h-2 w-2" />
-                </Button>
-              </Badge>
-            )}
-            
-            {(filters.priceMin !== undefined || filters.priceMax !== undefined) && (
-              <Badge variant="secondary" className="text-xs">
-                Price: {filters.priceMin ?? 0}$ - {filters.priceMax ?? '10,000+'}$
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-4 w-4 ml-1 p-0" 
-                  onClick={() => onChange({ priceMin: undefined, priceMax: undefined })}
-                >
-                  <X className="h-2 w-2" />
-                </Button>
-              </Badge>
-            )}
-            
-            {filters.categories?.map((category) => (
-              <Badge key={category} variant="secondary" className="text-xs">
-                {category}
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-4 w-4 ml-1 p-0" 
-                  onClick={() => {
-                    const newCategories = filters.categories?.filter(c => c !== category) || [];
-                    onChange({ categories: newCategories });
-                  }}
-                >
-                  <X className="h-2 w-2" />
-                </Button>
-              </Badge>
-            ))}
-            
-            {filters.includeSponsored === false && (
-              <Badge variant="secondary" className="text-xs">
-                No sponsored
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-4 w-4 ml-1 p-0" 
-                  onClick={() => onChange({ includeSponsored: true })}
-                >
-                  <X className="h-2 w-2" />
-                </Button>
-              </Badge>
-            )}
-          </div>
-        </Card>
-      )}
-    </div>
+        
+        <Button
+          variant="outline"
+          className="w-full"
+          onClick={onReset}
+        >
+          Reset All Filters
+        </Button>
+      </CardContent>
+    </Card>
   );
 }

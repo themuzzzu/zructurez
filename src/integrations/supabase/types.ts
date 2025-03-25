@@ -1059,6 +1059,30 @@ export type Database = {
         }
         Relationships: []
       }
+      image_searches: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          image_url: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       likes: {
         Row: {
           created_at: string
@@ -1713,6 +1737,87 @@ export type Database = {
           },
         ]
       }
+      search_queries: {
+        Row: {
+          corrected_query: string | null
+          created_at: string | null
+          id: string
+          model_used: string
+          query: string
+          results_count: number | null
+          user_id: string | null
+        }
+        Insert: {
+          corrected_query?: string | null
+          created_at?: string | null
+          id?: string
+          model_used: string
+          query: string
+          results_count?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          corrected_query?: string | null
+          created_at?: string | null
+          id?: string
+          model_used?: string
+          query?: string
+          results_count?: number | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      search_result_clicks: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_sponsored: boolean | null
+          query: string
+          result_id: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_sponsored?: boolean | null
+          query: string
+          result_id: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_sponsored?: boolean | null
+          query?: string
+          result_id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      search_suggestions: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          frequency: number | null
+          id: string
+          term: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          frequency?: number | null
+          id?: string
+          term: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          frequency?: number | null
+          id?: string
+          term?: string
+        }
+        Relationships: []
+      }
       service_portfolio: {
         Row: {
           created_at: string
@@ -1893,6 +1998,33 @@ export type Database = {
         }
         Relationships: []
       }
+      sponsored_search_terms: {
+        Row: {
+          bid_amount: number
+          business_id: string | null
+          created_at: string | null
+          id: string
+          status: string
+          term: string
+        }
+        Insert: {
+          bid_amount?: number
+          business_id?: string | null
+          created_at?: string | null
+          id?: string
+          status?: string
+          term: string
+        }
+        Update: {
+          bid_amount?: number
+          business_id?: string | null
+          created_at?: string | null
+          id?: string
+          status?: string
+          term?: string
+        }
+        Relationships: []
+      }
       user_presence: {
         Row: {
           is_online: boolean | null
@@ -1911,6 +2043,30 @@ export type Database = {
           last_seen_at?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      voice_recordings: {
+        Row: {
+          audio_url: string
+          created_at: string | null
+          id: string
+          transcription: string | null
+          user_id: string | null
+        }
+        Insert: {
+          audio_url: string
+          created_at?: string | null
+          id?: string
+          transcription?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          audio_url?: string
+          created_at?: string | null
+          id?: string
+          transcription?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -1948,9 +2104,22 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_search_suggestion_exists: {
+        Args: {
+          term_param: string
+        }
+        Returns: boolean
+      }
       cleanup_expired_messages: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      create_search_suggestion: {
+        Args: {
+          term_param: string
+          category_param: string
+        }
+        Returns: string
       }
       create_test_user: {
         Args: {
@@ -1971,6 +2140,12 @@ export type Database = {
           members: string[]
         }[]
       }
+      get_image_search_url: {
+        Args: {
+          image_id_param: string
+        }
+        Returns: Json
+      }
       get_sample_user_id: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -1978,6 +2153,12 @@ export type Database = {
       get_user_presence: {
         Args: {
           user_id: string
+        }
+        Returns: Json
+      }
+      get_voice_recording_url: {
+        Args: {
+          recording_id_param: string
         }
         Returns: Json
       }
@@ -2005,6 +2186,12 @@ export type Database = {
         }
         Returns: undefined
       }
+      increment_search_suggestion: {
+        Args: {
+          term_param: string
+        }
+        Returns: undefined
+      }
       increment_views: {
         Args: {
           table_name: string
@@ -2012,8 +2199,64 @@ export type Database = {
         }
         Returns: undefined
       }
+      insert_image_search: {
+        Args: {
+          user_id_param: string
+          image_url_param: string
+        }
+        Returns: string
+      }
+      insert_image_search_with_description: {
+        Args: {
+          user_id_param: string
+          image_url_param: string
+          description_param: string
+        }
+        Returns: string
+      }
+      insert_search_query: {
+        Args: {
+          user_id_param: string
+          query_param: string
+          corrected_query_param: string
+          model_used_param: string
+          results_count_param: number
+        }
+        Returns: string
+      }
+      insert_voice_recording: {
+        Args: {
+          user_id_param: string
+          audio_url_param: string
+        }
+        Returns: string
+      }
+      insert_voice_recording_with_transcription: {
+        Args: {
+          user_id_param: string
+          audio_url_param: string
+          transcription_param: string
+        }
+        Returns: string
+      }
       publish_scheduled_posts: {
         Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      record_search_result_click: {
+        Args: {
+          user_id_param: string
+          query_param: string
+          result_id_param: string
+          is_sponsored_param: boolean
+        }
+        Returns: string
+      }
+      update_image_search_description: {
+        Args: {
+          image_id_param: string
+          description_param: string
+        }
         Returns: undefined
       }
       update_user_presence: {
@@ -2022,6 +2265,13 @@ export type Database = {
           last_seen_time: string
         }
         Returns: boolean
+      }
+      update_voice_recording_transcription: {
+        Args: {
+          recording_id_param: string
+          transcription_param: string
+        }
+        Returns: undefined
       }
     }
     Enums: {

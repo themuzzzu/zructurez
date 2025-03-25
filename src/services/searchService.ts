@@ -5,18 +5,15 @@ import { SearchResult, SearchSuggestion, SearchFilters } from "@/types/search";
 // Get search suggestions based on user input
 export const getSearchSuggestions = async (term: string): Promise<SearchSuggestion[]> => {
   try {
-    // We have to use this approach since the tables were just created
-    // and TypeScript doesn't know about them yet
-    const { data: databaseSuggestions, error } = await supabase
+    // Create queries for both tables
+    const { data: suggestionData } = await supabase
       .from('search_suggestions')
-      .select('*')
+      .select('id, term, frequency, category')
       .ilike('term', `%${term}%`)
       .order('frequency', { ascending: false })
       .limit(5);
       
-    if (error) throw error;
-    
-    const { data: sponsoredSuggestions, error: sponsoredError } = await supabase
+    const { data: sponsoredData } = await supabase
       .from('sponsored_search_terms')
       .select('id, term, bid_amount')
       .ilike('term', `%${term}%`)
@@ -24,18 +21,16 @@ export const getSearchSuggestions = async (term: string): Promise<SearchSuggesti
       .order('bid_amount', { ascending: false })
       .limit(2);
       
-    if (sponsoredError) throw sponsoredError;
-    
-    // Combine regular and sponsored suggestions
+    // Convert to the correct type
     const suggestions: SearchSuggestion[] = [
-      ...(databaseSuggestions || []).map((suggestion: any) => ({
+      ...(suggestionData || []).map((suggestion: any) => ({
         id: suggestion.id,
         term: suggestion.term,
         frequency: suggestion.frequency || 1,
         category: suggestion.category,
         isSponsored: false
       })),
-      ...(sponsoredSuggestions || []).map((sponsored: any) => ({
+      ...(sponsoredData || []).map((sponsored: any) => ({
         id: sponsored.id,
         term: sponsored.term,
         frequency: 1000, // Higher frequency to prioritize
@@ -190,12 +185,12 @@ export const performSearch = async (
     
     // Also increment search suggestion frequency or create new suggestion
     try {
-      // We have to use custom RPC calls since these tables are new
-      const exists = await supabase.rpc('check_search_suggestion_exists', {
+      // Check if suggestion exists
+      const { data: exists } = await supabase.rpc('check_search_suggestion_exists', {
         term_param: query
       });
       
-      if (exists.data) {
+      if (exists) {
         await supabase.rpc('increment_search_suggestion', {
           term_param: query
         });
@@ -247,7 +242,7 @@ export const saveImageSearch = async (file: File): Promise<{ id: string } | null
     
     if (insertError) throw insertError;
     
-    return { id: data };
+    return { id: data as string };
   } catch (error) {
     console.error('Error saving image for search:', error);
     return null;
@@ -263,9 +258,11 @@ export const processImageSearch = async (imageId: string): Promise<string | null
     
     if (error) throw error;
     
+    const imageData = data as any;
+    
     const { data: processResult, error: processError } = await supabase.functions
       .invoke('process-image-search', {
-        body: { imageUrl: data.image_url },
+        body: { imageUrl: imageData.image_url },
       });
       
     if (processError) throw processError;
@@ -309,7 +306,7 @@ export const saveVoiceRecording = async (audioBlob: Blob): Promise<{ id: string 
     
     if (insertError) throw insertError;
     
-    return { id: data };
+    return { id: data as string };
   } catch (error) {
     console.error('Error saving voice recording:', error);
     return null;
@@ -325,9 +322,11 @@ export const processVoiceToText = async (recordingId: string): Promise<string | 
     
     if (error) throw error;
     
+    const recordingData = data as any;
+    
     const { data: processResult, error: processError } = await supabase.functions
       .invoke('process-voice-search', {
-        body: { audioUrl: data.audio_url },
+        body: { audioUrl: recordingData.audio_url },
       });
       
     if (processError) throw processError;
