@@ -28,8 +28,13 @@ export const GeneralSettings = () => {
   const handleThemeChange = async (value: Theme) => {
     setTheme(value);
     if (updateThemePreference) {
-      await updateThemePreference(value);
-      toast.success(`Theme changed to ${value} mode`);
+      try {
+        await updateThemePreference(value);
+        toast.success(`Theme changed to ${value} mode`);
+      } catch (error) {
+        console.error("Failed to update theme preference:", error);
+        toast.error("Failed to update theme preference");
+      }
     }
   };
 

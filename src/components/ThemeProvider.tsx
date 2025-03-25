@@ -50,40 +50,42 @@ export function ThemeProvider({
         : "light";
       
       root.classList.add(systemTheme);
-      // Save to localStorage for consistency
-      localStorage.setItem(storageKey, theme);
     } else {
       root.classList.add(theme);
-      localStorage.setItem(storageKey, theme);
     }
+
+    // Save to localStorage
+    localStorage.setItem(storageKey, theme);
   }, [theme, storageKey]);
 
-  // Listen for system theme changes
+  // Listen for system theme changes when system theme is selected
   useEffect(() => {
-    if (theme === "system") {
-      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-      
-      const handleChange = () => {
-        const root = window.document.documentElement;
-        root.classList.remove("light", "dark");
-        root.classList.add(mediaQuery.matches ? "dark" : "light");
-      };
-      
-      mediaQuery.addEventListener("change", handleChange);
-      
-      return () => {
-        mediaQuery.removeEventListener("change", handleChange);
-      };
-    }
+    if (theme !== "system") return;
+    
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    
+    const handleChange = () => {
+      const root = window.document.documentElement;
+      root.classList.remove("light", "dark");
+      root.classList.add(mediaQuery.matches ? "dark" : "light");
+    };
+    
+    mediaQuery.addEventListener("change", handleChange);
+    
+    // Apply initial system preference
+    handleChange();
+    
+    return () => {
+      mediaQuery.removeEventListener("change", handleChange);
+    };
   }, [theme]);
 
   const value = React.useMemo(() => ({
     theme,
     setTheme: (newTheme: Theme) => {
-      localStorage.setItem(storageKey, newTheme);
       setTheme(newTheme);
     },
-  }), [theme, storageKey]);
+  }), [theme]);
 
   return (
     <ThemeProviderContext.Provider {...props} value={value}>
