@@ -5,6 +5,7 @@ import { Sidebar } from "@/components/Sidebar";
 import { AIAssistant } from "@/components/ai-support/AIAssistant";
 import { SmartNotificationAgent } from "@/components/ai-notifications/SmartNotificationAgent";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { useTheme } from "@/components/ThemeProvider";
 
 interface LayoutProps {
   children: ReactNode;
@@ -18,6 +19,8 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
   });
   
   const isMobile = useMediaQuery("(max-width: 768px)");
+  const { theme } = useTheme();
+  const isDarkMode = theme === "dark";
 
   // Listen for sidebar state changes
   useEffect(() => {
@@ -39,7 +42,7 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
         {!hideSidebar && !isMobile && (
           <div 
             style={{ width: sidebarWidth + 'px', left: '0px' }} 
-            className="transition-all duration-300 fixed h-[calc(100vh-64px)] border-r border-zinc-800/50"
+            className={`transition-all duration-300 fixed h-[calc(100vh-64px)] ${isDarkMode ? 'border-zinc-800/50' : 'border-zinc-200/50 dark:border-zinc-800/50'} border-r`}
           >
             <Sidebar />
           </div>

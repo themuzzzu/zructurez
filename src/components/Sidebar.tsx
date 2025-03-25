@@ -40,6 +40,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
   const [isCollapsed, setIsCollapsed] = useState(localStorage.getItem("sidebarCollapsed") === "true");
   const { theme, setTheme } = useTheme();
   const isMobile = useMediaQuery("(max-width: 768px)");
+  const isDarkMode = theme === "dark";
 
   // Save collapse state to localStorage and dispatch custom event
   useEffect(() => {
@@ -82,7 +83,8 @@ export const Sidebar = ({ className }: SidebarProps) => {
 
   return (
     <div className={cn(
-      "h-full bg-black dark:bg-black overflow-y-auto transition-all duration-300 fixed left-0 top-16 z-30", 
+      "h-full overflow-y-auto transition-all duration-300 fixed left-0 top-16 z-30", 
+      isDarkMode ? "bg-black dark:bg-black" : "bg-white dark:bg-black",
       isCollapsed ? "w-12" : "w-44", 
       className
     )}>
@@ -91,13 +93,16 @@ export const Sidebar = ({ className }: SidebarProps) => {
           variant="ghost"
           size="icon"
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="hover:bg-zinc-800 dark:hover:bg-zinc-800 rounded-full"
+          className={cn(
+            "rounded-full",
+            isDarkMode ? "hover:bg-zinc-800 dark:hover:bg-zinc-800" : "hover:bg-zinc-200 dark:hover:bg-zinc-800"
+          )}
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {isCollapsed ? (
-            <PanelLeft className="h-3.5 w-3.5 text-white" />
+            <PanelLeft className={cn("h-3.5 w-3.5", isDarkMode ? "text-white" : "text-zinc-700 dark:text-white")} />
           ) : (
-            <PanelLeftClose className="h-3.5 w-3.5 text-white" />
+            <PanelLeftClose className={cn("h-3.5 w-3.5", isDarkMode ? "text-white" : "text-zinc-700 dark:text-white")} />
           )}
         </Button>
       </div>
@@ -113,15 +118,23 @@ export const Sidebar = ({ className }: SidebarProps) => {
               className={cn(
                 "w-full p-2 justify-center transition-all duration-200",
                 isActive 
-                  ? "bg-zinc-900 rounded-full" 
-                  : "hover:bg-zinc-800 rounded-full"
+                  ? isDarkMode 
+                    ? "bg-zinc-900 rounded-full" 
+                    : "bg-zinc-200 dark:bg-zinc-900 rounded-full"
+                  : isDarkMode
+                    ? "hover:bg-zinc-800 rounded-full"
+                    : "hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-full"
               )}
               onClick={() => handleItemClick(route.path)}
             >
               {isActive ? (
                 <FilledIcon Icon={route.icon} />
               ) : (
-                <route.icon className="h-5 w-5 text-zinc-400" />
+                <route.icon className={cn("h-5 w-5", 
+                  isDarkMode 
+                    ? "text-zinc-400" 
+                    : "text-zinc-700 dark:text-zinc-400"
+                )} />
               )}
             </Button>
           ) : (
@@ -131,8 +144,12 @@ export const Sidebar = ({ className }: SidebarProps) => {
               className={cn(
                 "w-full justify-start gap-3 px-3 py-2 text-sm transition-all duration-200",
                 isActive 
-                  ? "bg-zinc-900 rounded-full" 
-                  : "hover:bg-zinc-800 rounded-full"
+                  ? isDarkMode
+                    ? "bg-zinc-900 rounded-full" 
+                    : "bg-zinc-200 dark:bg-zinc-900 rounded-full"
+                  : isDarkMode
+                    ? "hover:bg-zinc-800 rounded-full"
+                    : "hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-full"
               )}
               onClick={() => handleItemClick(route.path)}
             >
@@ -140,14 +157,20 @@ export const Sidebar = ({ className }: SidebarProps) => {
                 {isActive ? (
                   <FilledIcon Icon={route.icon} />
                 ) : (
-                  <route.icon size={20} className="text-zinc-400" />
+                  <route.icon size={20} className={cn(
+                    isDarkMode ? "text-zinc-400" : "text-zinc-700 dark:text-zinc-400"
+                  )} />
                 )}
               </div>
               <span className={cn(
                 "text-sm",
                 isActive 
-                  ? "font-bold text-white" 
-                  : "text-zinc-400 group-hover:text-zinc-200"
+                  ? isDarkMode
+                    ? "font-bold text-white" 
+                    : "font-bold text-zinc-900 dark:text-white"
+                  : isDarkMode
+                    ? "text-zinc-400 group-hover:text-zinc-200"
+                    : "text-zinc-700 dark:text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-200"
               )}>
                 {route.name}
               </span>
@@ -159,21 +182,40 @@ export const Sidebar = ({ className }: SidebarProps) => {
         {isCollapsed ? (
           <Button
             variant="ghost"
-            className="w-full p-2 justify-center rounded-full mt-1 transition-all duration-200 hover:bg-zinc-800"
+            className={cn(
+              "w-full p-2 justify-center rounded-full mt-1 transition-all duration-200",
+              isDarkMode
+                ? "hover:bg-zinc-800"
+                : "hover:bg-zinc-200 dark:hover:bg-zinc-800"
+            )}
             onClick={toggleTheme}
           >
-            <SunMoon className="h-5 w-5 text-zinc-400" />
+            <SunMoon className={cn("h-5 w-5", 
+              isDarkMode 
+                ? "text-zinc-400" 
+                : "text-zinc-700 dark:text-zinc-400"
+            )} />
           </Button>
         ) : (
           <Button
             variant="ghost"
-            className="w-full justify-start gap-3 px-3 py-2 rounded-full mt-1 text-sm transition-all duration-200 hover:bg-zinc-800"
+            className={cn(
+              "w-full justify-start gap-3 px-3 py-2 rounded-full mt-1 text-sm transition-all duration-200",
+              isDarkMode
+                ? "hover:bg-zinc-800"
+                : "hover:bg-zinc-200 dark:hover:bg-zinc-800"
+            )}
             onClick={toggleTheme}
           >
             <div className="flex items-center justify-center">
-              <SunMoon size={20} className="text-zinc-400" />
+              <SunMoon size={20} className={cn(
+                isDarkMode ? "text-zinc-400" : "text-zinc-700 dark:text-zinc-400"
+              )} />
             </div>
-            <span className="text-sm text-zinc-400">
+            <span className={cn(
+              "text-sm",
+              isDarkMode ? "text-zinc-400" : "text-zinc-700 dark:text-zinc-400"
+            )}>
               Toggle Theme
             </span>
           </Button>

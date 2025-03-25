@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 export type Theme = "dark" | "light" | "system";
 
@@ -19,7 +19,7 @@ const initialState: ThemeProviderState = {
   setTheme: () => null,
 };
 
-const ThemeProviderContext = React.createContext<ThemeProviderState>(initialState);
+const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 
 export function ThemeProvider({
   children,
@@ -27,7 +27,7 @@ export function ThemeProvider({
   storageKey = "vite-ui-theme",
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = React.useState<Theme>(
+  const [theme, setTheme] = useState<Theme>(
     () => {
       if (typeof window !== "undefined") {
         const storedTheme = localStorage.getItem(storageKey) as Theme | null;
@@ -37,23 +37,41 @@ export function ThemeProvider({
     }
   );
 
-  React.useEffect(() => {
-    if (typeof window === "undefined") return;
-    
+  useEffect(() => {
     const root = window.document.documentElement;
+    
+    // Remove existing theme classes
     root.classList.remove("light", "dark");
 
+    // Set the appropriate theme
     if (theme === "system") {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-        .matches
+      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
         ? "dark"
         : "light";
-
+      
       root.classList.add(systemTheme);
-      return;
+    } else {
+      root.classList.add(theme);
     }
+  }, [theme]);
 
-    root.classList.add(theme);
+  // Listen for system theme changes
+  useEffect(() => {
+    if (theme === "system") {
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+      
+      const handleChange = () => {
+        const root = window.document.documentElement;
+        root.classList.remove("light", "dark");
+        root.classList.add(mediaQuery.matches ? "dark" : "light");
+      };
+      
+      mediaQuery.addEventListener("change", handleChange);
+      
+      return () => {
+        mediaQuery.removeEventListener("change", handleChange);
+      };
+    }
   }, [theme]);
 
   const value = React.useMemo(() => ({
@@ -74,7 +92,7 @@ export function ThemeProvider({
 }
 
 export const useTheme = (): ThemeProviderState => {
-  const context = React.useContext(ThemeProviderContext);
+  const context = useContext(ThemeProviderContext);
 
   if (context === undefined)
     throw new Error("useTheme must be used within a ThemeProvider");
