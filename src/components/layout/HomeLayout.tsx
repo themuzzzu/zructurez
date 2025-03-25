@@ -21,7 +21,7 @@ export function HomeLayout({ children }: HomeLayoutProps) {
         </main>
 
         {/* Right Sidebar */}
-        <aside className="hidden md:block md:col-span-3 lg:col-span-4 pl-2">
+        <aside className="hidden md:block md:col-span-3 lg:col-span-4">
           <div className="sticky top-20 space-y-4">
             <div className="bg-muted/50 rounded-lg overflow-hidden">
               <div className="p-4">

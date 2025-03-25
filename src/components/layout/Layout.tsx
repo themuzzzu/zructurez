@@ -34,7 +34,7 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="flex pt-16"> {/* Add pt-16 to account for navbar height */}
+      <div className="flex pt-16"> {/* Account for navbar height */}
         {!hideSidebar && !isMobile && (
           <div style={{ width: sidebarWidth + 'px' }} className="transition-all duration-300 fixed h-[calc(100vh-64px)]">
             <Sidebar />
@@ -42,7 +42,7 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
         )}
         <main 
           className="flex-1 transition-all duration-300 pb-20 md:pb-4 w-full" 
-          style={{ marginLeft: hideSidebar || isMobile ? 0 : sidebarWidth + 'px', paddingLeft: 0, paddingRight: 0 }}
+          style={{ marginLeft: hideSidebar || isMobile ? 0 : sidebarWidth + 'px', padding: 0 }}
         >
           {children}
         </main>

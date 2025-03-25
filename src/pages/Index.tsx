@@ -126,9 +126,9 @@ const Index = () => {
 
   return (
     <HomeLayout>
-      <Card className="p-0 overflow-hidden border-0 shadow-none">
-        <div className="sticky top-0 z-10 bg-background pt-2 pb-1 px-2 border-b">
-          <div className="flex justify-between items-center mb-2">
+      <Card className="overflow-hidden border-0 shadow-none">
+        <div className="sticky top-0 z-10 bg-background pt-2 pb-1 border-b">
+          <div className="flex justify-between items-center mb-2 px-2">
             <h1 className="text-xl font-bold">Home</h1>
             <Button 
               variant="ghost" 
@@ -163,7 +163,7 @@ const Index = () => {
           </Tabs>
         </div>
 
-        <div className="p-2">
+        <div className="px-2 py-2">
           <CreatePost />
         </div>
         
