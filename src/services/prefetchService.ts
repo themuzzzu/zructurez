@@ -81,41 +81,40 @@ export const predictNextPaths = (currentPath: string): string[] => {
  */
 export const prefetchRelatedProducts = async (productId: string): Promise<void> => {
   try {
-    // Get products frequently viewed together with this one
-    const { data: relatedProducts } = await supabase
-      .from('product_views')
-      .select('related_product_id')
-      .eq('product_id', productId)
-      .order('view_count', { ascending: false })
-      .limit(5);
+    // Instead of product_views, fetch products from the same category
+    const { data: currentProduct } = await supabase
+      .from('products')
+      .select('category')
+      .eq('id', productId)
+      .single();
     
-    if (!relatedProducts?.length) return;
+    if (!currentProduct?.category) return;
     
-    // Extract product IDs
-    const relatedIds = relatedProducts.map(item => item.related_product_id);
-    
-    // Prefetch the products
+    // Find other products in the same category
     setTimeout(async () => {
       try {
-        const { data: products } = await supabase
+        const { data: relatedProducts } = await supabase
           .from('products')
           .select('*')
-          .in('id', relatedIds);
+          .eq('category', currentProduct.category)
+          .neq('id', productId) // Exclude current product
+          .order('views', { ascending: false })
+          .limit(5);
         
-        if (products?.length) {
+        if (relatedProducts?.length) {
           // Cache the products
-          products.forEach(product => {
+          relatedProducts.forEach(product => {
             const cacheKey = `product:${product.id}`;
             globalCache.set(cacheKey, product, 5 * 60 * 1000); // Cache for 5 minutes
           });
           
           // Preload images
-          const imageUrls = products
+          const imageUrls = relatedProducts
             .filter(product => product.image_url)
             .map(product => product.image_url);
           
           preloadImages(imageUrls);
-          console.debug(`Prefetched ${products.length} related products for ${productId}`);
+          console.debug(`Prefetched ${relatedProducts.length} related products for ${productId}`);
         }
       } catch (error) {
         console.error('Error prefetching related products:', error);
