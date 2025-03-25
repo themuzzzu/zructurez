@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Json } from "@/integrations/supabase/types";
 
@@ -140,10 +139,7 @@ export const incrementAdView = async (adId: string): Promise<void> => {
     }
     
     // Also update the advertisement reach counter directly
-    await supabase
-      .from('advertisements')
-      .update({ reach: supabase.rpc('increment_ad_views', { ad_id: adId }) })
-      .eq('id', adId);
+    await supabase.rpc('increment_ad_views', { ad_id: adId });
     
   } catch (error) {
     console.error('Error incrementing ad view:', error);
@@ -178,11 +174,8 @@ export const incrementAdClick = async (adId: string): Promise<void> => {
         .eq('ad_id', adId);
     }
     
-    // Also update the advertisement clicks counter directly
-    await supabase
-      .from('advertisements')
-      .update({ clicks: supabase.rpc('increment_ad_clicks', { ad_id: adId }) })
-      .eq('id', adId);
+    // Also update the advertisement clicks counter directly using RPC properly
+    await supabase.rpc('increment_ad_clicks', { ad_id: adId });
     
   } catch (error) {
     console.error('Error incrementing ad click:', error);

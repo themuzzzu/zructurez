@@ -1,5 +1,5 @@
 
-import { Route, Routes, BrowserRouter } from "react-router-dom";
+import { Route, Routes, BrowserRouter, Outlet } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -46,7 +46,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Layout />}>
+          <Route path="/" element={<Layout><Outlet /></Layout>}>
             <Route index element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/profile/:id" element={<Profile />} />
