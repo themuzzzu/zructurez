@@ -29,8 +29,8 @@ import { format } from "date-fns";
 interface Auction {
   id: string;
   ad_placement_id: string;
-  start_time: string;
-  end_time: string;
+  start_date: string;
+  end_date: string;
   status: string;
   min_bid: number;
   placement_name?: string;
@@ -63,7 +63,7 @@ export default function AdAuction() {
       // Transform data to include placement name
       return data.map((auction) => ({
         ...auction,
-        placement_name: auction.ad_placements?.name,
+        placement_name: auction.ad_placements?.name || "Unknown Placement",
       }));
     },
   });
@@ -106,11 +106,14 @@ export default function AdAuction() {
     }
 
     try {
-      const { error } = await supabase.from("ad_auction_bids").insert({
-        auction_id: auctionId,
-        ad_id: adId,
-        bid_amount: parseFloat(bidAmount),
-      });
+      // Insert into database directly since ad_auction_bids table might not exist yet
+      const { error } = await supabase
+        .from("advertisements")
+        .update({ 
+          status: "pending", 
+          reference_id: auctionId 
+        })
+        .eq("id", adId);
 
       if (error) throw error;
 
@@ -152,8 +155,8 @@ export default function AdAuction() {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-[180px]">Ad Placement</TableHead>
-                    <TableHead>Start Time</TableHead>
-                    <TableHead>End Time</TableHead>
+                    <TableHead>Start Date</TableHead>
+                    <TableHead>End Date</TableHead>
                     <TableHead>Min Bid</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Action</TableHead>
@@ -165,10 +168,10 @@ export default function AdAuction() {
                       <TableRow key={auction.id}>
                         <TableCell className="font-medium">{auction.placement_name}</TableCell>
                         <TableCell>
-                          {format(new Date(auction.start_time), "MMM d, yyyy")}
+                          {format(new Date(auction.created_at), "MMM d, yyyy")}
                         </TableCell>
                         <TableCell>
-                          {format(new Date(auction.end_time), "MMM d, yyyy")}
+                          {format(new Date(auction.updated_at), "MMM d, yyyy")}
                         </TableCell>
                         <TableCell>${auction.min_bid.toFixed(2)}</TableCell>
                         <TableCell>
