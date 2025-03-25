@@ -14,16 +14,16 @@ export function HomeLayout({ children }: HomeLayoutProps) {
 
   return (
     <Layout>
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 max-w-7xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-0 md:gap-0 max-w-7xl mx-auto">
         {/* Main Content */}
-        <main className="col-span-1 md:col-span-9 lg:col-span-8 border-r border-zinc-200 dark:border-zinc-800">
+        <main className="col-span-1 md:col-span-9 lg:col-span-8 border-r border-zinc-200/50 dark:border-zinc-800/50">
           {children}
         </main>
 
         {/* Right Sidebar */}
         <aside className="hidden md:block md:col-span-3 lg:col-span-4">
           <div className="sticky top-20 space-y-4 pl-4">
-            <div className="bg-muted/50 rounded-lg overflow-hidden">
+            <div className="bg-muted/30 rounded-lg overflow-hidden">
               <div className="p-4">
                 <h3 className="font-semibold flex items-center">
                   <TrendingUp className="w-4 h-4 mr-2" />
@@ -31,7 +31,7 @@ export function HomeLayout({ children }: HomeLayoutProps) {
                 </h3>
                 <div className="mt-3 space-y-3">
                   {["Local Business", "Neighborhood Events", "Community Help"].map((topic, i) => (
-                    <div key={i} className="hover:bg-muted p-2 rounded-md cursor-pointer">
+                    <div key={i} className="hover:bg-muted/50 p-2 rounded-md cursor-pointer">
                       <div className="text-xs text-muted-foreground">Trending in your area</div>
                       <div className="font-medium">{topic}</div>
                       <div className="text-xs text-muted-foreground">{100 * (i + 1)} posts</div>

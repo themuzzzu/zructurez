@@ -27,7 +27,7 @@ interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 // Create a filled icon component
 const FilledIcon = ({ Icon }: { Icon: React.ElementType }) => (
   <div className="relative">
-    <Icon size={20} fill="white" stroke="black" strokeWidth={1.5} />
+    <Icon size={20} className="text-primary" strokeWidth={2} />
   </div>
 );
 
@@ -69,16 +69,16 @@ export const Sidebar = ({ className }: SidebarProps) => {
 
   return (
     <div className={cn(
-      "h-full border-r-0 bg-white dark:bg-black overflow-y-auto transition-all duration-300 fixed left-0 top-16 z-30 no-gap", 
+      "h-full bg-white/95 dark:bg-black/95 overflow-y-auto transition-all duration-300 fixed left-0 top-16 z-30", 
       isCollapsed ? "w-16" : "w-64",
       className
     )}>
-      <div className="flex justify-end py-1 px-1">
+      <div className="flex justify-end py-2 px-2">
         <Button
           variant="ghost"
           size="icon"
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all duration-200"
+          className="hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full"
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {isCollapsed ? (
@@ -89,7 +89,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
         </Button>
       </div>
       
-      <div className="space-y-1 px-1">
+      <div className="space-y-1 px-2 py-2">
         {routes.map((route) => {
           const isActive = location.pathname === route.path;
 
@@ -98,8 +98,8 @@ export const Sidebar = ({ className }: SidebarProps) => {
               key={route.path}
               variant="ghost"
               className={cn(
-                "w-full p-0 justify-center",
-                isActive ? "bg-zinc-100 dark:bg-zinc-800" : "hover:bg-zinc-50 dark:hover:bg-zinc-800"
+                "w-full p-3 justify-center rounded-full",
+                isActive ? "bg-primary/10" : "hover:bg-zinc-100 dark:hover:bg-zinc-800"
               )}
               onClick={() => navigate(route.path)}
             >
@@ -114,8 +114,8 @@ export const Sidebar = ({ className }: SidebarProps) => {
               key={route.path}
               variant="ghost"
               className={cn(
-                "w-full justify-start gap-4 px-4",
-                isActive ? "bg-zinc-100 dark:bg-zinc-800" : "hover:bg-zinc-50 dark:hover:bg-zinc-800"
+                "w-full justify-start gap-4 px-4 py-3 rounded-full",
+                isActive ? "bg-primary/10 font-semibold" : "hover:bg-zinc-100 dark:hover:bg-zinc-800"
               )}
               onClick={() => navigate(route.path)}
             >
@@ -126,7 +126,10 @@ export const Sidebar = ({ className }: SidebarProps) => {
                   <route.icon size={20} className="text-muted-foreground" />
                 )}
               </div>
-              <span className="text-lg font-medium text-gray-800 dark:text-white">
+              <span className={cn(
+                "text-base",
+                isActive ? "font-semibold text-primary" : "text-gray-800 dark:text-white"
+              )}>
                 {route.name}
               </span>
             </Button>
@@ -137,7 +140,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
         {isCollapsed ? (
           <Button
             variant="ghost"
-            className="w-full p-0 justify-center mt-2"
+            className="w-full p-3 justify-center rounded-full mt-2"
             onClick={toggleTheme}
           >
             <SunMoon className="h-5 w-5 text-muted-foreground" />
@@ -145,13 +148,13 @@ export const Sidebar = ({ className }: SidebarProps) => {
         ) : (
           <Button
             variant="ghost"
-            className="w-full justify-start gap-4 px-4 mt-2"
+            className="w-full justify-start gap-4 px-4 py-3 rounded-full mt-2"
             onClick={toggleTheme}
           >
             <div className="flex items-center justify-center">
               <SunMoon size={20} className="text-muted-foreground" />
             </div>
-            <span className="text-lg font-medium text-gray-800 dark:text-white">
+            <span className="text-base text-gray-800 dark:text-white">
               Toggle Theme
             </span>
           </Button>

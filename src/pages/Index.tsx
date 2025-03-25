@@ -8,7 +8,7 @@ import { HomeLayout } from "@/components/layout/HomeLayout";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, RefreshCw, ImageIcon } from "lucide-react";
+import { Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { InstagramGrid } from "@/components/instagram/InstagramGrid";
@@ -101,7 +101,7 @@ const Index = () => {
     if (activeTab === "for-you") {
       return (
         posts.map((post) => (
-          <div key={post.id} className="hover:bg-muted/50 transition-colors">
+          <div key={post.id} className="hover:bg-muted/10 transition-colors border-b border-zinc-200/50 dark:border-zinc-800/50">
             <EnhancedPostCard
               id={post.id}
               author={post.profiles?.username || "Unknown"}
@@ -126,8 +126,8 @@ const Index = () => {
 
   return (
     <HomeLayout>
-      <Card className="overflow-hidden border-0 shadow-none rounded-md">
-        <div className="sticky top-0 z-10 bg-background pt-2 pb-1 border-b">
+      <Card className="overflow-hidden border-0 shadow-none">
+        <div className="sticky top-0 z-10 bg-background pt-2 pb-1 border-b border-zinc-200/50 dark:border-zinc-800/50">
           <div className="flex justify-between items-center mb-2 px-4">
             <h1 className="text-xl font-bold">Home</h1>
             <Button 
@@ -152,7 +152,7 @@ const Index = () => {
             </TabsList>
           
             <TabsContent value="for-you" className="mt-0">
-              <div className="space-y-0 divide-y">
+              <div className="divide-y divide-zinc-200/50 dark:divide-zinc-800/50">
                 {renderPostsList()}
               </div>
             </TabsContent>

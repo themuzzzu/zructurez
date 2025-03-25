@@ -58,17 +58,27 @@
     @apply bg-background text-foreground;
   }
   
-  /* Twitter-like layout fixes */
+  /* Social media layout styles */
   .layout-container {
     @apply flex h-full w-full;
   }
   
-  /* Remove all gaps between layout elements */
+  /* Lighter borders for a more modern look */
+  .border-light {
+    @apply border-zinc-200/50 dark:border-zinc-800/50;
+  }
+  
+  /* Subtle hover effects for interactive items */
+  .hover-item {
+    @apply hover:bg-muted/20 transition-colors;
+  }
+  
+  /* No gap utility - still available but made less aggressive */
   .no-gap {
-    gap: 0 !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    border-spacing: 0 !important;
+    gap: 0;
+    padding: 0;
+    margin: 0;
+    border-spacing: 0;
   }
 }
 
