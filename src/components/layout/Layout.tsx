@@ -12,8 +12,9 @@ interface LayoutProps {
 }
 
 export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
+  // Reduce sidebar width by approximately 30% of original values
   const [sidebarWidth, setSidebarWidth] = useState(() => {
-    return localStorage.getItem("sidebarCollapsed") === "true" ? 64 : 256;
+    return localStorage.getItem("sidebarCollapsed") === "true" ? 45 : 180; // Reduced from 64 : 256
   });
   
   const isMobile = useMediaQuery("(max-width: 768px)");
@@ -21,7 +22,7 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
   // Listen for sidebar state changes
   useEffect(() => {
     const handleSidebarChange = () => {
-      setSidebarWidth(localStorage.getItem("sidebarCollapsed") === "true" ? 64 : 256);
+      setSidebarWidth(localStorage.getItem("sidebarCollapsed") === "true" ? 45 : 180);
     };
 
     window.addEventListener('sidebarStateChanged', handleSidebarChange);
@@ -36,7 +37,10 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
       <Navbar />
       <div className="flex pt-16 w-full">
         {!hideSidebar && !isMobile && (
-          <div style={{ width: sidebarWidth + 'px' }} className="transition-all duration-300 fixed h-[calc(100vh-64px)] border-r border-zinc-200/50 dark:border-zinc-800/50">
+          <div 
+            style={{ width: sidebarWidth + 'px', left: '0px' }} 
+            className="transition-all duration-300 fixed h-[calc(100vh-64px)] border-r border-zinc-200/50 dark:border-zinc-800/50"
+          >
             <Sidebar />
           </div>
         )}
