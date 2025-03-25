@@ -53,7 +53,7 @@ export const fetchUserAds = async (): Promise<Advertisement[]> => {
     return [];
   }
 
-  return data || [];
+  return data as Advertisement[] || [];
 };
 
 export const fetchActiveAds = async (

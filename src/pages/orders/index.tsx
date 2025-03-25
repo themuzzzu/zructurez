@@ -53,6 +53,21 @@ interface Order {
   user_addresses?: UserAddress;
 }
 
+interface OrderData {
+  id: string;
+  user_id: string;
+  status: string;
+  created_at: string;
+  total_price: number;
+  product_id: string;
+  quantity: number;
+  business_id: string | null;
+  payment_method?: string;
+  address_id?: string;
+  discount?: number;
+  shipping_fee?: number;
+}
+
 const OrdersPage = () => {
   const navigate = useNavigate();
   const [orderFilter, setOrderFilter] = useState<'all' | 'pending' | 'processing' | 'shipped' | 'delivered'>('all');
@@ -76,7 +91,7 @@ const OrdersPage = () => {
         if (ordersError) throw ordersError;
         
         const ordersWithItems = await Promise.all(
-          (ordersData || []).map(async (order) => {
+          (ordersData || []).map(async (order: OrderData) => {
             const { data: itemsData, error: itemsError } = await supabase
               .from('order_items')
               .select(`
@@ -100,7 +115,7 @@ const OrdersPage = () => {
                 discount: order.discount || 0,
                 shipping_fee: order.shipping_fee || 0,
                 coupon_code: null
-              };
+              } as Order;
             }
             
             let addressData = null;
@@ -131,7 +146,7 @@ const OrdersPage = () => {
           })
         );
         
-        return ordersWithItems;
+        return ordersWithItems as Order[];
       });
     },
   });
