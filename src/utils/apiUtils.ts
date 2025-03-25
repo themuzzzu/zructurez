@@ -1,20 +1,11 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { applyRateLimit, getClientIP, RateLimitOptions } from "./rateLimiting";
+import { RateLimitOptions } from "./rateLimiting";
 import { validateRequest } from "./requestValidation";
 import { z } from "zod";
 import { toast } from "sonner";
-import { measureApiCall } from "./performanceTracking";
 
-/**
- * A wrapper function that combines rate limiting, validation, and performance tracking
- * @param endpoint Endpoint identifier for tracking
- * @param requestData Request data to validate
- * @param schema Zod schema for validation
- * @param apiCallFn The API call function to execute
- * @param rateLimitOptions Rate limiting options
- * @returns Result of the API call or null if validation fails or rate limit exceeded
- */
+// Updated version that doesn't rely on applyRateLimit
 export const safeApiCall = async <TData, TResult>(
   endpoint: string,
   requestData: TData,
@@ -33,60 +24,60 @@ export const safeApiCall = async <TData, TResult>(
     const { data: { user } } = await supabase.auth.getUser();
     const clientId = user?.id || 'anonymous-user';
     
-    // 3. Apply rate limiting
-    return await applyRateLimit(
-      // 4. Measure API call performance
-      () => measureApiCall(endpoint, () => apiCallFn(validData)),
-      clientId,
-      rateLimitOptions
-    );
-  } catch (error) {
-    if (error instanceof Error && error.message === "Rate limit exceeded") {
-      // Already handled by rate limiting utility
+    // 3. Apply manual rate limiting using the rateLimit function
+    const now = Date.now();
+    const windowMs = rateLimitOptions?.windowMs || 60000; // Default 1 minute
+    const maxRequests = rateLimitOptions?.maxRequests || 5; // Default 5 requests
+    const message = rateLimitOptions?.message || 'Rate limit exceeded. Please try again later.';
+    
+    const windowStart = now - windowMs;
+    const key = `ratelimit:${clientId}:${endpoint}`;
+    const requestTimesStr = localStorage.getItem(key) || '[]';
+    let requestTimes: number[] = JSON.parse(requestTimesStr);
+    
+    // Filter request times to only include those within the current window
+    requestTimes = requestTimes.filter(time => time > windowStart);
+    
+    if (requestTimes.length >= maxRequests) {
+      toast.error(message);
       return null;
     }
     
-    // Handle other errors
+    // Add the current request time and save
+    requestTimes.push(now);
+    localStorage.setItem(key, JSON.stringify(requestTimes));
+    
+    // 4. Execute the API call and measure performance
+    const startTime = performance.now();
+    const result = await apiCallFn(validData);
+    const endTime = performance.now();
+    
+    // Log performance metrics
+    console.log(`API call to ${endpoint} took ${endTime - startTime}ms`);
+    
+    return result;
+  } catch (error) {
+    // Handle errors
     console.error(`API call to ${endpoint} failed:`, error);
     toast.error(`Request failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     return null;
   }
 };
 
-// Example usage for reference:
-/*
-import { safeApiCall } from '@/utils/apiUtils';
-import { z } from 'zod';
-
-// Define a schema for your data
-const messageSchema = z.object({
-  content: z.string().min(1, "Message cannot be empty"),
-  receiverId: z.string().uuid("Invalid receiver ID")
-});
-
-// Use in an API call
-const sendMessage = async (content: string, receiverId: string) => {
-  const result = await safeApiCall(
-    'sendMessage',
-    { content, receiverId },
-    messageSchema,
-    async (data) => {
-      // The actual API call logic
-      const { data: message, error } = await supabase
-        .from('messages')
-        .insert([{
-          content: data.content,
-          receiver_id: data.receiverId,
-          sender_id: user.id
-        }])
-        .single();
-        
-      if (error) throw error;
-      return message;
-    },
-    { maxRequests: 10, windowMs: 10000 } // Custom rate limit: 10 messages per 10 seconds
-  );
-  
-  return result;
+// Helper function to measure API call performance
+export const measureApiCall = async <T>(
+  endpoint: string, 
+  fn: () => Promise<T>
+): Promise<T> => {
+  const startTime = performance.now();
+  try {
+    const result = await fn();
+    const endTime = performance.now();
+    console.log(`API call to ${endpoint} took ${endTime - startTime}ms`);
+    return result;
+  } catch (error) {
+    const endTime = performance.now();
+    console.error(`API call to ${endpoint} failed after ${endTime - startTime}ms:`, error);
+    throw error;
+  }
 };
-*/

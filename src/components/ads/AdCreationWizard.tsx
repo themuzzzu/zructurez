@@ -1,4 +1,5 @@
 
+// Fix the Badge import
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -41,6 +42,7 @@ import { Slider } from "@/components/ui/slider";
 import { ImageUpload } from "@/components/ImageUpload";
 import { LocationSelector } from "@/components/LocationSelector";
 import { Calendar } from "@/components/ui/calendar";
+import { Badge } from "@/components/ui/badge"; // Add this import
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { 

@@ -1,327 +1,324 @@
-
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Separator } from "@/components/ui/separator";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft, RefreshCw, Plus, ChartBar, Image, Video } from "lucide-react";
-import { toast } from "sonner";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { AdPlacement } from "@/services/adService";
 
-interface AdPlacement {
-  id: string;
+interface AdPlacementFormValues {
   name: string;
-  type: "banner" | "sponsored" | "recommendation" | "sidebar";
+  type: string;
   location: string;
   cpm_rate: number;
   cpc_rate: number;
+  description: string;
   active: boolean;
-  impressions: number;
-  clicks: number;
-  revenue: number;
+  size?: string;
+  max_size_kb?: number;
+  priority?: number;
 }
 
-const AdPlacement = () => {
-  const navigate = useNavigate();
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [newPlacementName, setNewPlacementName] = useState("");
-  const [newPlacementType, setNewPlacementType] = useState<string>("banner");
-  const [newPlacementLocation, setNewPlacementLocation] = useState<string>("homepage");
+const formSchema = z.object({
+  name: z.string().min(2, {
+    message: "Name must be at least 2 characters.",
+  }),
+  type: z.string().min(2, {
+    message: "Type must be at least 2 characters.",
+  }),
+  location: z.string().min(2, {
+    message: "Location must be at least 2 characters.",
+  }),
+  cpm_rate: z.number(),
+  cpc_rate: z.number(),
+  description: z.string().min(10, {
+    message: "Description must be at least 10 characters.",
+  }),
+  active: z.boolean(),
+  size: z.string().optional(),
+  max_size_kb: z.number().optional(),
+  priority: z.number().optional(),
+})
+
+const fetchPlacementData = async () => {
+  const { data, error } = await supabase
+    .from('ad_placements')
+    .select('*')
+    .order('priority');
+    
+  if (error) throw error;
   
-  // Fetch ad placements
-  const { data: placements = [], isLoading, refetch } = useQuery({
-    queryKey: ['ad-placements'],
-    queryFn: async () => {
+  // Cast the data to ensure it matches our AdPlacement type
+  // Since the database might not have all the fields yet
+  return (data || []).map(item => ({
+    ...item,
+    impressions: item.impressions || 0,
+    clicks: item.clicks || 0,
+    revenue: item.revenue || 0
+  })) as AdPlacement[];
+};
+
+export default function AdPlacementPage() {
+  const [placements, setPlacements] = useState<AdPlacement[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await fetchPlacementData();
+        setPlacements(data);
+      } catch (e: any) {
+        setError(e.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      type: "",
+      location: "",
+      cpm_rate: 0,
+      cpc_rate: 0,
+      description: "",
+      active: false,
+      size: "",
+      max_size_kb: 0,
+      priority: 0,
+    },
+  })
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
       const { data, error } = await supabase
         .from('ad_placements')
-        .select('*')
-        .order('name');
-      
+        .insert([values])
+        .select()
+
       if (error) {
-        toast.error("Failed to load ad placements");
-        throw error;
+        toast.error(error.message)
+      } else {
+        toast.success("Ad Placement created successfully")
+        setPlacements([...placements, data[0]])
+        setOpen(false)
       }
-      
-      return data as AdPlacement[] || [];
+    } catch (error: any) {
+      toast.error(error.message)
     }
-  });
-  
-  // Create new placement
-  const handleCreatePlacement = async () => {
-    if (!newPlacementName || !newPlacementType || !newPlacementLocation) {
-      toast.error("Please fill in all required fields");
-      return;
-    }
-    
-    try {
-      const { error } = await supabase.from('ad_placements').insert({
-        name: newPlacementName,
-        type: newPlacementType,
-        location: newPlacementLocation,
-        cpm_rate: newPlacementType === 'banner' ? 30 : 15,
-        cpc_rate: newPlacementType === 'sponsored' ? 2.5 : 1.0,
-        active: true
-      });
-      
-      if (error) throw error;
-      
-      toast.success("Ad placement created successfully");
-      setNewPlacementName("");
-      refetch();
-    } catch (error) {
-      console.error('Error creating ad placement:', error);
-      toast.error("Failed to create ad placement");
-    }
-  };
-  
-  // Toggle placement status
-  const togglePlacementStatus = async (id: string, currentStatus: boolean) => {
-    try {
-      const { error } = await supabase
-        .from('ad_placements')
-        .update({ active: !currentStatus })
-        .eq('id', id);
-        
-      if (error) throw error;
-      
-      toast.success(`Placement ${currentStatus ? 'disabled' : 'enabled'} successfully`);
-      refetch();
-    } catch (error) {
-      console.error('Error toggling placement status:', error);
-      toast.error("Failed to update placement status");
-    }
-  };
-  
-  // Refresh data
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-    await refetch();
-    setIsRefreshing(false);
-    toast.success("Placement data refreshed");
-  };
-  
-  // Calculate stats
-  const totalRevenue = placements.reduce((sum, p) => sum + (p.revenue || 0), 0);
-  const totalImpressions = placements.reduce((sum, p) => sum + (p.impressions || 0), 0);
-  const totalClicks = placements.reduce((sum, p) => sum + (p.clicks || 0), 0);
-  const averageCTR = totalImpressions > 0 ? (totalClicks / totalImpressions * 100).toFixed(2) : "0";
-  
+  }
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+
   return (
-    <div className="container py-6 max-w-7xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="text-2xl font-bold">Ad Placement Manager</h1>
-        </div>
-        <Button 
-          variant="outline" 
-          onClick={handleRefresh} 
-          disabled={isRefreshing}
-          className="flex items-center gap-2"
-        >
-          <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-          Refresh Data
-        </Button>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold">₹{totalRevenue.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</div>
-            <p className="text-muted-foreground">Total Revenue</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold">{totalImpressions.toLocaleString('en-IN')}</div>
-            <p className="text-muted-foreground">Total Impressions</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold">{totalClicks.toLocaleString('en-IN')}</div>
-            <p className="text-muted-foreground">Total Clicks</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold">{averageCTR}%</div>
-            <p className="text-muted-foreground">Average CTR</p>
-          </CardContent>
-        </Card>
-      </div>
-      
-      <div className="grid md:grid-cols-3 gap-6">
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle>Ad Placements</CardTitle>
-            <CardDescription>Manage ad placements across the platform</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead>CPM Rate</TableHead>
-                  <TableHead>CPC Rate</TableHead>
-                  <TableHead>Performance</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center py-4">
-                      Loading placements...
-                    </TableCell>
-                  </TableRow>
-                ) : placements.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center py-4">
-                      No ad placements found
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  placements.map((placement) => {
-                    const ctr = placement.impressions > 0 
-                      ? (placement.clicks / placement.impressions * 100).toFixed(2) 
-                      : "0";
-                      
-                    return (
-                      <TableRow key={placement.id}>
-                        <TableCell className="font-medium">{placement.name}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline">
-                            {placement.type === 'banner' && <Image className="h-3 w-3 mr-1" />}
-                            {placement.type === 'sponsored' && <ChartBar className="h-3 w-3 mr-1" />}
-                            {placement.type === 'recommendation' && <Video className="h-3 w-3 mr-1" />}
-                            {placement.type.charAt(0).toUpperCase() + placement.type.slice(1)}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{placement.location}</TableCell>
-                        <TableCell>₹{placement.cpm_rate}</TableCell>
-                        <TableCell>₹{placement.cpc_rate}</TableCell>
-                        <TableCell>
-                          <div className="text-xs">
-                            <div>CTR: {ctr}%</div>
-                            <div>Impr: {placement.impressions?.toLocaleString('en-IN') || 0}</div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Switch 
-                            checked={placement.active} 
-                            onCheckedChange={() => togglePlacementStatus(placement.id, placement.active)}
-                          />
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })
+    <div className="container mx-auto py-10">
+      <h1 className="text-3xl font-bold mb-4">Ad Placements</h1>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <Button variant="outline">Create Ad Placement</Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Create Ad Placement</DialogTitle>
+            <DialogDescription>
+              Make changes to your ad placement here. Click save when you're
+              done.
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ad Placement Name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Create New Placement</CardTitle>
-            <CardDescription>Add a new advertisement placement</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="placement-name">Placement Name</Label>
-                <Input 
-                  id="placement-name"
-                  value={newPlacementName} 
-                  onChange={(e) => setNewPlacementName(e.target.value)}
-                  placeholder="e.g., Homepage Top Banner"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="placement-type">Placement Type</Label>
-                <Select 
-                  value={newPlacementType} 
-                  onValueChange={setNewPlacementType}
-                >
-                  <SelectTrigger id="placement-type">
-                    <SelectValue placeholder="Select type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="banner">Banner Ad</SelectItem>
-                    <SelectItem value="sponsored">Sponsored Listing</SelectItem>
-                    <SelectItem value="recommendation">Recommendation Ad</SelectItem>
-                    <SelectItem value="sidebar">Sidebar Ad</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="placement-location">Location</Label>
-                <Select 
-                  value={newPlacementLocation} 
-                  onValueChange={setNewPlacementLocation}
-                >
-                  <SelectTrigger id="placement-location">
-                    <SelectValue placeholder="Select location" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="homepage">Homepage</SelectItem>
-                    <SelectItem value="marketplace">Marketplace</SelectItem>
-                    <SelectItem value="search">Search Results</SelectItem>
-                    <SelectItem value="product-detail">Product Detail</SelectItem>
-                    <SelectItem value="category">Category Pages</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <Separator />
-              
-              <Button
-                type="button"
-                onClick={handleCreatePlacement}
-                className="w-full"
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Create Placement
-              </Button>
+              />
+              <FormField
+                control={form.control}
+                name="type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Type</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ad Placement Type" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="location"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Location</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ad Placement Location" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="cpm_rate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>CPM Rate</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="CPM Rate" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="cpc_rate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>CPC Rate</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="CPC Rate" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ad Placement Description" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="active"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-md border p-4">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-base">Active</FormLabel>
+                      <FormDescription>
+                        Whether the ad placement is active or not.
+                      </FormDescription>
+                    </div>
+                    <FormControl>
+                      <Input
+                        type="checkbox"
+                        checked={field.value}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit">Submit</Button>
             </form>
-          </CardContent>
-        </Card>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      <div className="rounded-md border">
+        <Table>
+          <TableCaption>A list of your ad placements.</TableCaption>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[100px]">Name</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>Location</TableHead>
+              <TableHead>CPM Rate</TableHead>
+              <TableHead>CPC Rate</TableHead>
+              <TableHead>Description</TableHead>
+              <TableHead>Active</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {placements.map((placement) => (
+              <TableRow key={placement.id}>
+                <TableCell className="font-medium">{placement.name}</TableCell>
+                <TableCell>{placement.type}</TableCell>
+                <TableCell>{placement.location}</TableCell>
+                <TableCell>{placement.cpm_rate}</TableCell>
+                <TableCell>{placement.cpc_rate}</TableCell>
+                <TableCell>{placement.description}</TableCell>
+                <TableCell>{placement.active ? "Yes" : "No"}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+          <TableFooter>
+            <TableRow>
+              <TableCell colSpan={6}>
+                Total {placements.length} ad placements
+              </TableCell>
+            </TableRow>
+          </TableFooter>
+        </Table>
       </div>
     </div>
   );
-};
+}
 
-export default AdPlacement;
+/**
+ * @param {string} message
+ */
+function FormDescription({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="text-[0.8rem] text-muted-foreground">
+      {children}
+    </p>
+  )
+}

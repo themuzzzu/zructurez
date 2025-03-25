@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchActiveAds, incrementAdView } from "@/services/adService";
@@ -21,7 +20,6 @@ export const BannerCarousel = () => {
     queryFn: () => fetchActiveAds(undefined, "banner", 5),
   });
 
-  // Record views for the ads
   useEffect(() => {
     if (bannerAds?.length) {
       bannerAds.forEach(ad => {
@@ -30,7 +28,6 @@ export const BannerCarousel = () => {
     }
   }, [bannerAds]);
 
-  // Handle progress bar animation
   useEffect(() => {
     if (!bannerAds.length) return;
     
@@ -47,7 +44,6 @@ export const BannerCarousel = () => {
       if (elapsed < duration) {
         animationFrameId = requestAnimationFrame(animate);
       } else {
-        // Move to next slide when progress completes
         if (api) {
           api.scrollNext();
         } else {
@@ -66,13 +62,12 @@ export const BannerCarousel = () => {
   }, [bannerAds.length, currentSlide, api]);
 
   if (!bannerAds.length) {
-    // If no ads, return placeholder
     return (
       <Card className="w-full overflow-hidden bg-white dark:bg-zinc-950">
         <div className="bg-white dark:bg-zinc-950 aspect-[5/1] sm:aspect-[6/1] md:aspect-[8/1] flex items-center justify-center">
           <div className="text-center p-4">
             <h3 className="text-lg md:text-xl font-bold">Discover Great Deals</h3>
-            <p className="text-sm text-muted-foreground">Explore our marketplace for special offers</p>
+            <p className="text-sm text-muted-foreground mt-1">Explore our marketplace for special offers</p>
           </div>
         </div>
       </Card>
@@ -98,12 +93,10 @@ export const BannerCarousel = () => {
         </CarouselContent>
       </Carousel>
       
-      {/* Progress bar */}
       <div className="absolute bottom-0 left-0 right-0 z-10">
         <Progress value={progressValue} className="h-1 rounded-none bg-gray-200/50" indicatorClassName="bg-black dark:bg-white" />
       </div>
       
-      {/* Slide indicators - small dots */}
       {bannerAds.length > 1 && (
         <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-10">
           {bannerAds.map((_, index) => (

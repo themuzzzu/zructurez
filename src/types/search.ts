@@ -7,3 +7,24 @@ export interface SearchFilters {
   priceMax?: number;
   includeSponsored?: boolean;
 }
+
+export interface SearchResult {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl?: string;
+  category?: string;
+  price?: number;
+  type: string;
+  url: string;
+  isSponsored?: boolean;
+  relevanceScore?: number;
+}
+
+export interface SearchSuggestion {
+  id: string;
+  term: string;
+  frequency: number;
+  category?: string;
+  isSponsored?: boolean;
+}

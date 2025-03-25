@@ -1,80 +1,106 @@
-import * as React from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 
-const locations = [
-  "New York",
-  "Los Angeles",
-  "Chicago",
-  "Houston",
-  "Phoenix",
-  "Philadelphia",
-  "San Antonio",
-  "San Diego",
-  "Dallas",
-  "San Jose",
-];
+import { useState, useMemo } from "react";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
 
-interface LocationSelectorProps {
+export interface LocationSelectorProps {
   value: string;
-  onChange: (value: string) => void;
+  onChange: (location: string) => void;
+  className?: string; // Add className prop
 }
 
-export function LocationSelector({ value, onChange }: LocationSelectorProps) {
-  const [open, setOpen] = React.useState(false);
+export const LocationSelector = ({ 
+  value, 
+  onChange,
+  className = ""
+}: LocationSelectorProps) => {
+  const [selectedMetro, setSelectedMetro] = useState<string>(
+    value.includes(" - ") ? value.split(" - ")[0] : "All India"
+  );
+
+  const metros = useMemo(() => [
+    "All India",
+    "Delhi NCR",
+    "Mumbai",
+    "Bengaluru",
+    "Hyderabad",
+    "Chennai",
+    "Kolkata",
+    "Pune",
+    "Ahmedabad",
+    "Jaipur"
+  ], []);
+
+  const regions = useMemo(() => {
+    const regionMap: Record<string, string[]> = {
+      "Delhi NCR": ["Delhi", "Gurugram", "Noida", "Faridabad", "Ghaziabad"],
+      "Mumbai": ["Mumbai", "Navi Mumbai", "Thane", "Kalyan"],
+      "Bengaluru": ["Central", "East", "North", "South", "West"],
+      "Hyderabad": ["Secunderabad", "Cyberabad", "Hitech City", "Old City"],
+      "Chennai": ["Central", "North", "South", "West", "Anna Nagar"],
+      "Kolkata": ["North", "South", "Central", "Salt Lake", "Howrah"],
+      "Pune": ["Central", "East", "West", "Pimpri-Chinchwad"],
+      "Ahmedabad": ["East", "West", "North", "South", "Gandhinagar"],
+      "Jaipur": ["Walled City", "Civil Lines", "Mansarovar", "Vaishali Nagar"]
+    };
+    
+    return regionMap;
+  }, []);
+
+  const handleMetroChange = (metro: string) => {
+    setSelectedMetro(metro);
+    if (metro === "All India") {
+      onChange("All India");
+    } else {
+      onChange(`${metro} - All Areas`);
+    }
+  };
+
+  const handleRegionChange = (region: string) => {
+    onChange(`${selectedMetro} - ${region}`);
+  };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="w-full justify-between"
+    <div className={className}>
+      <Select
+        value={selectedMetro}
+        onValueChange={handleMetroChange}
+      >
+        <SelectTrigger className="mb-2">
+          <SelectValue placeholder="Select location" />
+        </SelectTrigger>
+        <SelectContent>
+          {metros.map((metro) => (
+            <SelectItem key={metro} value={metro}>
+              {metro}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      {selectedMetro !== "All India" && (
+        <Select
+          value={value.includes(" - ") ? value.split(" - ")[1] : "All Areas"}
+          onValueChange={handleRegionChange}
         >
-          {value ? value : "Select location..."}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-full p-0">
-        <Command>
-          <CommandInput placeholder="Search location..." />
-          <CommandEmpty>No location found.</CommandEmpty>
-          <CommandGroup>
-            {locations.map((location) => (
-              <CommandItem
-                key={location}
-                value={location}
-                onSelect={(currentValue) => {
-                  onChange(currentValue);
-                  setOpen(false);
-                }}
-              >
-                <Check
-                  className={cn(
-                    "mr-2 h-4 w-4",
-                    value === location ? "opacity-100" : "opacity-0"
-                  )}
-                />
-                {location}
-              </CommandItem>
+          <SelectTrigger>
+            <SelectValue placeholder="Select area" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="All Areas">All Areas</SelectItem>
+            {regions[selectedMetro]?.map((region) => (
+              <SelectItem key={region} value={region}>
+                {region}
+              </SelectItem>
             ))}
-          </CommandGroup>
-        </Command>
-      </PopoverContent>
-    </Popover>
+          </SelectContent>
+        </Select>
+      )}
+    </div>
   );
-}
+};
