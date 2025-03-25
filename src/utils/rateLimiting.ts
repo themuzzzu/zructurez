@@ -1,4 +1,6 @@
 
+import { toast } from "sonner";
+
 export interface RateLimitOptions {
   windowMs: number;
   maxRequests: number;
@@ -6,66 +8,96 @@ export interface RateLimitOptions {
 }
 
 /**
- * Applies rate limiting to a client request
- * @param clientId - The identifier for the client
- * @param endpoint - The API endpoint being accessed
- * @param options - Rate limiting options
- * @returns boolean - True if request is allowed, false if rate limited
+ * Rate limiter utility to prevent excessive API calls
+ * @param key Unique identifier for the rate limit (e.g., endpoint name)
+ * @param options Configuration options for rate limiting
+ * @returns Boolean indicating if the request is allowed (true) or rate limited (false)
  */
-export const applyRateLimit = (
-  clientId: string,
-  endpoint: string,
+export const rateLimit = (
+  key: string, 
   options: Partial<RateLimitOptions> = {}
 ): boolean => {
-  const windowMs = options.windowMs || 60000; // Default 1 minute
-  const maxRequests = options.maxRequests || 5; // Default 5 requests
+  // Default options
+  const windowMs = options.windowMs || 60000; // Default: 1 minute window
+  const maxRequests = options.maxRequests || 5; // Default: 5 requests per window
+  const message = options.message || "Too many requests, please try again later.";
   
+  // Get the current time
   const now = Date.now();
+  
+  // Create a storage key specific to this rate limit
+  const storageKey = `ratelimit:${key}`;
+  
+  // Get existing timestamps from local storage
+  const storedData = localStorage.getItem(storageKey);
+  let timestamps: number[] = storedData ? JSON.parse(storedData) : [];
+  
+  // Filter out timestamps that are outside the current window
   const windowStart = now - windowMs;
-  const key = `ratelimit:${clientId}:${endpoint}`;
-  
-  // Get existing request timestamps from storage
-  const requestTimesStr = localStorage.getItem(key) || '[]';
-  let requestTimes = JSON.parse(requestTimesStr) as number[];
-  
-  // Filter request times to only include those within the current window
-  requestTimes = requestTimes.filter(time => time > windowStart);
+  timestamps = timestamps.filter(timestamp => timestamp > windowStart);
   
   // Check if rate limit exceeded
-  if (requestTimes.length >= maxRequests) {
+  if (timestamps.length >= maxRequests) {
+    // Show toast warning to user
+    toast.error(message);
+    
+    // Return false to indicate the request should be blocked
     return false;
   }
   
-  // Add the current request time and save
-  requestTimes.push(now);
-  localStorage.setItem(key, JSON.stringify(requestTimes));
+  // Add current timestamp and save back to storage
+  timestamps.push(now);
+  localStorage.setItem(storageKey, JSON.stringify(timestamps));
   
+  // Return true to indicate the request should proceed
   return true;
 };
 
 /**
- * Simplified rate limit function for general use
- * @param clientId - The identifier for the client
- * @param options - Rate limiting options
- * @returns boolean - True if request is allowed, false if rate limited
+ * Helper function to clear all rate limit data (useful for testing)
  */
-export const rateLimit = (
-  clientId: string,
-  options: Partial<RateLimitOptions> = {}
-): boolean => {
-  return applyRateLimit(clientId, 'general', options);
+export const clearRateLimitHistory = (): void => {
+  // Find and remove all rate limit entries in localStorage
+  Object.keys(localStorage).forEach(key => {
+    if (key.startsWith('ratelimit:')) {
+      localStorage.removeItem(key);
+    }
+  });
 };
 
 /**
- * Utility to get an identifier for the client
+ * Helper to check remaining requests in the current window
+ * @param key Unique identifier for the rate limit
+ * @param options Configuration options (same as rateLimit)
+ * @returns Object with count and remaining requests
  */
-export const getClientIP = (): string => {
-  // In a browser context, we don't have access to IP
-  // Use a random identifier stored in localStorage as fallback
-  let clientId = localStorage.getItem('client_id');
-  if (!clientId) {
-    clientId = `browser_${Math.random().toString(36).substring(2, 15)}`;
-    localStorage.setItem('client_id', clientId);
+export const getRateLimitStatus = (
+  key: string, 
+  options: Partial<RateLimitOptions> = {}
+): { used: number; remaining: number; reset: number } => {
+  const windowMs = options.windowMs || 60000;
+  const maxRequests = options.maxRequests || 5;
+  const now = Date.now();
+  const windowStart = now - windowMs;
+  
+  // Get timestamps from storage
+  const storageKey = `ratelimit:${key}`;
+  const storedData = localStorage.getItem(storageKey);
+  const timestamps: number[] = storedData 
+    ? JSON.parse(storedData).filter((ts: number) => ts > windowStart)
+    : [];
+  
+  // Calculate reset time in milliseconds
+  let resetTime = windowMs;
+  if (timestamps.length > 0) {
+    // Find the oldest timestamp and calculate when its window expires
+    const oldest = Math.min(...timestamps);
+    resetTime = Math.max(0, oldest + windowMs - now);
   }
-  return clientId;
+  
+  return {
+    used: timestamps.length,
+    remaining: Math.max(0, maxRequests - timestamps.length),
+    reset: Math.ceil(resetTime / 1000) // Reset time in seconds
+  };
 };

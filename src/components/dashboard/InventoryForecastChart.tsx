@@ -48,31 +48,43 @@ export const InventoryForecastChart = ({ data = [], inventoryData, isLoading }: 
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Inventory Forecast</CardTitle>
+    <Card className="w-full">
+      <CardHeader className="pb-2 md:pb-4">
+        <CardTitle className="text-lg md:text-xl">Inventory Forecast</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="mb-4">
-          <h4 className="text-sm font-medium">
+        <div className="mb-4 flex items-center">
+          <h4 className="text-xs md:text-sm font-medium">
             Prediction Accuracy: {accuracy.toFixed(1)}%
-            {accuracy >= 95 ? <ArrowUpIcon className="inline-block h-4 w-4 text-green-500 ml-1 mb-0.5" /> : <ArrowDownIcon className="inline-block h-4 w-4 text-red-500 ml-1 mb-0.5" />}
+            {accuracy >= 95 ? <ArrowUpIcon className="inline-block h-3 w-3 md:h-4 md:w-4 text-green-500 ml-1 mb-0.5" /> : <ArrowDownIcon className="inline-block h-3 w-3 md:h-4 md:w-4 text-red-500 ml-1 mb-0.5" />}
           </h4>
         </div>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Line type="monotone" dataKey="current" stroke="#8884d8" name="Current Inventory" />
-            <Line type="monotone" dataKey="predicted" stroke="#82ca9d" name="Predicted Inventory" />
-            {reorderPoint > 0 && (
-              <ReferenceLine y={reorderPoint} stroke="red" strokeDasharray="3 3" label={{ position: 'right', value: 'Reorder Point', fill: 'red' }} />
-            )}
-          </LineChart>
-        </ResponsiveContainer>
+        <div className="h-[200px] md:h-[300px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={chartData} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" tick={{ fontSize: 10 }} />
+              <YAxis tick={{ fontSize: 10 }} />
+              <Tooltip contentStyle={{ fontSize: '12px' }} />
+              <Legend wrapperStyle={{ fontSize: '10px', marginTop: '5px' }} />
+              <Line type="monotone" dataKey="current" stroke="#8884d8" name="Current Inventory" strokeWidth={2} />
+              <Line type="monotone" dataKey="predicted" stroke="#82ca9d" name="Predicted Inventory" strokeWidth={2} />
+              {reorderPoint > 0 && (
+                <ReferenceLine 
+                  y={reorderPoint} 
+                  stroke="red" 
+                  strokeDasharray="3 3" 
+                  label={{ 
+                    position: 'right', 
+                    value: 'Reorder Point', 
+                    fill: 'red',
+                    fontSize: 10,
+                  }} 
+                />
+              )}
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
       </CardContent>
     </Card>
   );

@@ -24,30 +24,35 @@ interface ResponseTimeChartProps {
 
 export const ResponseTimeChart = ({ data }: ResponseTimeChartProps) => {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Response Times</CardTitle>
-        <CardDescription>Average response time by endpoint over time</CardDescription>
+    <Card className="w-full">
+      <CardHeader className="pb-2 md:pb-4">
+        <CardTitle className="text-lg md:text-xl">Response Times</CardTitle>
+        <CardDescription className="text-sm">Average response time by endpoint over time</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="h-[400px]">
+        <div className="h-[250px] md:h-[400px]">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data}>
+            <LineChart data={data} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis 
                 dataKey="timestamp" 
                 tickFormatter={formatTimestamp}
+                tick={{ fontSize: 10 }}
               />
-              <YAxis />
+              <YAxis tick={{ fontSize: 10 }} />
               <Tooltip 
                 labelFormatter={(value) => formatTimestamp(value as string)}
+                contentStyle={{ fontSize: '12px' }}
               />
-              <Legend />
+              <Legend wrapperStyle={{ fontSize: '11px', marginTop: '5px' }} />
               <Line
                 type="monotone"
                 dataKey="response_time"
                 stroke="#e31837"
                 name="Response Time (ms)"
+                strokeWidth={2}
+                dot={{ r: 2 }}
+                activeDot={{ r: 4 }}
               />
             </LineChart>
           </ResponsiveContainer>

@@ -1,16 +1,5 @@
 
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { AdType } from "@/services/adService";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import React, { useState } from "react";
 import {
   Card,
   CardContent,
@@ -19,445 +8,301 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Advertisement } from "@/services/adService";
 import { toast } from "sonner";
-import { ArrowLeft, Plus } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { format } from "date-fns";
 
-// Create an ad_bids table in Supabase if it doesn't exist
-// This table will store bidding information for ad auctions
+interface Auction {
+  id: string;
+  ad_placement_id: string;
+  start_time: string;
+  end_time: string;
+  status: string;
+  min_bid: number;
+  placement_name?: string;
+}
 
-const AdAuctionPage = () => {
-  const navigate = useNavigate();
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [newAuction, setNewAuction] = useState({
-    keyword: "",
-    category: "product",
-    min_bid: 50,
-  });
-  
-  const { data: auctions = [], isLoading, refetch } = useQuery({
-    queryKey: ['ad-auctions'],
+interface AdPlacement {
+  id: string;
+  name: string;
+  type: string;
+  location: string;
+  cpm_rate: number;
+  cpc_rate: number;
+  description: string;
+}
+
+export default function AdAuction() {
+  const [auctionId, setAuctionId] = useState("");
+  const [adId, setAdId] = useState("");
+  const [bidAmount, setBidAmount] = useState("");
+
+  const { data: auctions, isLoading: auctionsLoading } = useQuery({
+    queryKey: ["auctions"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('ad_auctions')
-        .select('*')
-        .order('created_at', { ascending: false });
-        
-      if (error) {
-        toast.error("Failed to load ad auctions");
-        throw error;
-      }
-      
-      return data;
-    }
+        .from("ad_auctions")
+        .select("*, ad_placements(name)");
+
+      if (error) throw error;
+
+      // Transform data to include placement name
+      return data.map((auction) => ({
+        ...auction,
+        placement_name: auction.ad_placements?.name,
+      }));
+    },
   });
-  
-  const { data: ads = [] } = useQuery({
-    queryKey: ['active-ads'],
+
+  const { data: adPlacements, isLoading: placementsLoading } = useQuery({
+    queryKey: ["ad-placements"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('advertisements')
-        .select('id, title, user_id, business_id, businesses:business_id(name)')
-        .eq('status', 'active');
-        
-      if (error) {
-        toast.error("Failed to load active ads");
-        throw error;
-      }
-      
+        .from("ad_placements")
+        .select("*")
+        .eq("active", true);
+
+      if (error) throw error;
       return data;
-    }
+    },
   });
-  
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type } = e.target;
-    
-    if (type === 'number') {
-      setNewAuction(prev => ({
-        ...prev,
-        [name]: parseFloat(value)
-      }));
-    } else {
-      setNewAuction(prev => ({
-        ...prev,
-        [name]: value
-      }));
-    }
-  };
-  
-  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setNewAuction(prev => ({
-      ...prev,
-      category: e.target.value
-    }));
-  };
-  
-  const handleSubmit = async (e: React.FormEvent) => {
+
+  const { data: ads, isLoading: adsLoading } = useQuery({
+    queryKey: ["user-ads"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      const { data, error } = await supabase
+        .from("advertisements")
+        .select("*")
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+      return data as Advertisement[];
+    },
+  });
+
+  const handleSubmitBid = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
+    if (!auctionId || !adId || !bidAmount) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
     try {
-      const { data, error } = await supabase
-        .from('ad_auctions')
-        .insert({
-          keyword: newAuction.keyword,
-          category: newAuction.category,
-          min_bid: newAuction.min_bid,
-          current_bid: 0,
-          status: 'active'
-        })
-        .select();
-        
-      if (error) throw error;
-      
-      toast.success("Ad auction created successfully");
-      setIsCreateDialogOpen(false);
-      refetch();
-      
-      setNewAuction({
-        keyword: "",
-        category: "product",
-        min_bid: 50,
+      const { error } = await supabase.from("ad_auction_bids").insert({
+        auction_id: auctionId,
+        ad_id: adId,
+        bid_amount: parseFloat(bidAmount),
       });
-    } catch (error: any) {
-      toast.error(`Failed to create ad auction: ${error.message}`);
-    }
-  };
-  
-  const handlePlaceBid = async (auctionId: string, adId: string, currentBid: number, minBid: number) => {
-    try {
-      const bidAmount = Math.max(currentBid + 5, minBid); // Increment by at least 5
-      
-      const { error: auctionError } = await supabase
-        .from('ad_auctions')
-        .update({
-          current_bid: bidAmount,
-          winning_ad_id: adId
-        })
-        .eq('id', auctionId);
-        
-      if (auctionError) throw auctionError;
-      
-      // Instead of using a direct RPC call to ad_bids, insert directly into the table
-      const { error } = await supabase
-        .from('advertisements')
-        .update({ 
-          auction_bid: bidAmount
-        })
-        .eq('id', adId);
-        
+
       if (error) throw error;
-      
-      toast.success(`Bid of ₹${bidAmount} placed successfully`);
-      refetch();
-    } catch (error: any) {
-      toast.error(`Failed to place bid: ${error.message}`);
+
+      toast.success("Bid submitted successfully");
+      setBidAmount("");
+    } catch (error) {
+      console.error("Error submitting bid:", error);
+      toast.error("Failed to submit bid");
     }
   };
-  
+
   return (
-    <div className="container py-6 max-w-7xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="text-2xl font-bold">Keyword Auction System</h1>
+    <div className="container mx-auto py-6 px-4 md:px-6 space-y-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Ad Auction</h1>
+          <p className="text-muted-foreground mt-1">Bid on premium ad slots for your advertisements</p>
         </div>
-        
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Create Auction
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Create New Keyword Auction</DialogTitle>
-              <DialogDescription>
-                Set up a keyword auction for advertisers to bid on
-              </DialogDescription>
-            </DialogHeader>
-            
-            <form onSubmit={handleSubmit} className="space-y-4 pt-4">
-              <div className="space-y-2">
-                <Label htmlFor="keyword">Keyword or Phrase</Label>
-                <Input 
-                  id="keyword"
-                  name="keyword"
-                  placeholder="e.g., shoes, electronics, fitness"
-                  value={newAuction.keyword}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="category">Category</Label>
-                <select
-                  id="category"
-                  name="category"
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  value={newAuction.category}
-                  onChange={handleCategoryChange}
-                  required
-                >
-                  <option value="product">Product</option>
-                  <option value="service">Service</option>
-                  <option value="business">Business</option>
-                  <option value="general">General</option>
-                </select>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="min_bid">Minimum Bid (₹)</Label>
-                <Input 
-                  id="min_bid"
-                  name="min_bid"
-                  type="number"
-                  min="10"
-                  step="5"
-                  value={newAuction.min_bid}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              
-              <Button type="submit" className="w-full">Create Auction</Button>
-            </form>
-          </DialogContent>
-        </Dialog>
       </div>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>Active Keyword Auctions</CardTitle>
-          <CardDescription>Bid on keywords to have your ads shown when users search for these terms</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="flex justify-center py-8">
-              <p>Loading auctions...</p>
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Keyword</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Current Bid</TableHead>
-                  <TableHead>Min. Bid</TableHead>
-                  <TableHead>Current Winner</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {auctions.length === 0 ? (
+
+      <Tabs defaultValue="active-auctions" className="w-full">
+        <TabsList className="grid w-full md:w-auto grid-cols-2 md:grid-cols-3">
+          <TabsTrigger value="active-auctions">Active Auctions</TabsTrigger>
+          <TabsTrigger value="place-bid">Place Bid</TabsTrigger>
+          <TabsTrigger value="my-bids" className="hidden md:block">My Bids</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="active-auctions" className="space-y-4 mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Available Auction Slots</CardTitle>
+              <CardDescription>
+                Bid on these placements to showcase your advertisements
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="overflow-auto">
+              <Table>
+                <TableCaption>A list of active ad placement auctions</TableCaption>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8">
-                      No active auctions found. Create your first keyword auction.
-                    </TableCell>
+                    <TableHead className="w-[180px]">Ad Placement</TableHead>
+                    <TableHead>Start Time</TableHead>
+                    <TableHead>End Time</TableHead>
+                    <TableHead>Min Bid</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Action</TableHead>
                   </TableRow>
-                ) : (
-                  auctions.map((auction) => {
-                    // Find the winning ad for this auction
-                    const winningAd = auction.winning_ad_id ? 
-                      ads.find((ad: any) => ad.id === auction.winning_ad_id) : null;
-                    
-                    return (
+                </TableHeader>
+                <TableBody>
+                  {!auctionsLoading && auctions ? (
+                    auctions.map((auction) => (
                       <TableRow key={auction.id}>
-                        <TableCell className="font-medium">{auction.keyword}</TableCell>
-                        <TableCell className="capitalize">{auction.category}</TableCell>
+                        <TableCell className="font-medium">{auction.placement_name}</TableCell>
                         <TableCell>
-                          {auction.current_bid > 0 ? 
-                            `₹${auction.current_bid}` : 
-                            <span className="text-muted-foreground">No bids yet</span>
-                          }
-                        </TableCell>
-                        <TableCell>₹{auction.min_bid}</TableCell>
-                        <TableCell>
-                          {winningAd ? (
-                            <div className="font-medium text-sm">
-                              <div>{winningAd.title}</div>
-                              <div className="text-xs text-muted-foreground">
-                                {winningAd.businesses?.name || "Unknown Business"}
-                              </div>
-                            </div>
-                          ) : (
-                            <span className="text-muted-foreground">No winner yet</span>
-                          )}
+                          {format(new Date(auction.start_time), "MMM d, yyyy")}
                         </TableCell>
                         <TableCell>
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button variant="outline" size="sm">
-                                Place Bid
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>Place Bid on "{auction.keyword}"</DialogTitle>
-                                <DialogDescription>
-                                  Current highest bid: 
-                                  {auction.current_bid > 0 ? 
-                                    ` ₹${auction.current_bid}` : 
-                                    " No bids yet"
-                                  }
-                                </DialogDescription>
-                              </DialogHeader>
-                              
-                              <div className="space-y-4 py-4">
-                                <div className="space-y-2">
-                                  <Label>Select Your Ad</Label>
-                                  <div className="grid gap-2 pt-2">
-                                    {ads.length === 0 ? (
-                                      <p className="text-muted-foreground">No active ads available for bidding</p>
-                                    ) : (
-                                      ads.map((ad: any) => (
-                                        <div key={ad.id} className="flex items-center justify-between p-2 border rounded-md">
-                                          <div>
-                                            <div className="font-medium">{ad.title}</div>
-                                            <div className="text-sm text-muted-foreground">
-                                              {ad.businesses?.name || "Unknown Business"}
-                                            </div>
-                                          </div>
-                                          <Button 
-                                            size="sm"
-                                            onClick={() => {
-                                              handlePlaceBid(
-                                                auction.id,
-                                                ad.id,
-                                                auction.current_bid,
-                                                auction.min_bid
-                                              );
-                                            }}
-                                          >
-                                            Bid ₹{Math.max(auction.current_bid + 5, auction.min_bid)}
-                                          </Button>
-                                        </div>
-                                      ))
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                            </DialogContent>
-                          </Dialog>
+                          {format(new Date(auction.end_time), "MMM d, yyyy")}
+                        </TableCell>
+                        <TableCell>${auction.min_bid.toFixed(2)}</TableCell>
+                        <TableCell>
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                              auction.status === "active"
+                                ? "bg-green-100 text-green-800"
+                                : auction.status === "pending"
+                                ? "bg-yellow-100 text-yellow-800"
+                                : "bg-red-100 text-red-800"
+                            }`}
+                          >
+                            {auction.status}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setAuctionId(auction.id);
+                              setBidAmount(auction.min_bid.toString());
+                              document.getElementById("place-bid-tab")?.click();
+                            }}
+                          >
+                            Place Bid
+                          </Button>
                         </TableCell>
                       </TableRow>
-                    );
-                  })
-                )}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Auction Benefits</CardTitle>
-            <CardDescription>Why bid on keywords?</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-start space-x-3">
-              <div className="bg-primary/10 p-2 rounded-full">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-              </div>
-              <div>
-                <h3 className="font-medium">Targeted Visibility</h3>
-                <p className="text-sm text-muted-foreground">Your ads appear when users search for specific keywords related to your business</p>
-              </div>
-            </div>
-            
-            <div className="flex items-start space-x-3">
-              <div className="bg-primary/10 p-2 rounded-full">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              </div>
-              <div>
-                <h3 className="font-medium">Higher Conversion Rates</h3>
-                <p className="text-sm text-muted-foreground">Better ROI as users are actively searching for your products or services</p>
-              </div>
-            </div>
-            
-            <div className="flex items-start space-x-3">
-              <div className="bg-primary/10 p-2 rounded-full">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
-              </div>
-              <div>
-                <h3 className="font-medium">Market Positioning</h3>
-                <p className="text-sm text-muted-foreground">Outbid competitors for key search terms in your industry</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Top Performing Keywords</CardTitle>
-            <CardDescription>Keywords with highest engagement</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium leading-none">Handmade Jewelry</p>
-                  <p className="text-sm text-muted-foreground">Product category</p>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-8">
+                        {auctionsLoading ? "Loading..." : "No auctions available"}
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="place-bid" id="place-bid-tab" className="space-y-4 mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Submit Your Bid</CardTitle>
+              <CardDescription>
+                Enter your bid details for the selected ad placement
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmitBid} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="auction-slot">Auction Slot</Label>
+                    <select
+                      id="auction-slot"
+                      value={auctionId}
+                      onChange={(e) => setAuctionId(e.target.value)}
+                      className="w-full p-2 border rounded-md"
+                      required
+                    >
+                      <option value="">Select an auction slot</option>
+                      {!auctionsLoading &&
+                        auctions?.map((auction) => (
+                          <option key={auction.id} value={auction.id}>
+                            {auction.placement_name} (${auction.min_bid} min)
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="advertisement">Your Advertisement</Label>
+                    <select
+                      id="advertisement"
+                      value={adId}
+                      onChange={(e) => setAdId(e.target.value)}
+                      className="w-full p-2 border rounded-md"
+                      required
+                    >
+                      <option value="">Select your advertisement</option>
+                      {!adsLoading &&
+                        ads?.map((ad) => (
+                          <option key={ad.id} value={ad.id}>
+                            {ad.title}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
                 </div>
-                <div className="text-sm text-right">
-                  <p className="font-medium">12.4%</p>
-                  <p className="text-muted-foreground">CTR</p>
+
+                <div className="space-y-2">
+                  <Label htmlFor="bid-amount">Bid Amount ($)</Label>
+                  <Input
+                    id="bid-amount"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={bidAmount}
+                    onChange={(e) => setBidAmount(e.target.value)}
+                    placeholder="Enter your bid amount"
+                    className="w-full"
+                    required
+                  />
                 </div>
+
+                <Button type="submit" className="w-full md:w-auto">
+                  Submit Bid
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="my-bids" className="space-y-4 mt-6">
+          {/* My bids content here */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Your Active Bids</CardTitle>
+              <CardDescription>
+                Track the status of your bids on ad placements
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {/* Bids table would go here */}
+              <div className="text-center py-10 text-muted-foreground">
+                No active bids found
               </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium leading-none">Interior Design</p>
-                  <p className="text-sm text-muted-foreground">Service category</p>
-                </div>
-                <div className="text-sm text-right">
-                  <p className="font-medium">10.8%</p>
-                  <p className="text-muted-foreground">CTR</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium leading-none">Organic Food</p>
-                  <p className="text-sm text-muted-foreground">Product category</p>
-                </div>
-                <div className="text-sm text-right">
-                  <p className="font-medium">9.6%</p>
-                  <p className="text-muted-foreground">CTR</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium leading-none">Local Bakery</p>
-                  <p className="text-sm text-muted-foreground">Business category</p>
-                </div>
-                <div className="text-sm text-right">
-                  <p className="font-medium">8.9%</p>
-                  <p className="text-muted-foreground">CTR</p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
-};
-
-export default AdAuctionPage;
+}

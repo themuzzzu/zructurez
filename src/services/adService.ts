@@ -139,10 +139,10 @@ export const incrementAdView = async (adId: string): Promise<void> => {
         .eq('ad_id', adId);
     }
     
-    // Also update the advertisement reach counter
+    // Also update the advertisement reach counter directly
     await supabase
       .from('advertisements')
-      .update({ reach: supabase.rpc('increment', { row_id: 1 }) })
+      .update({ reach: supabase.rpc('increment_ad_views', { ad_id: adId }) })
       .eq('id', adId);
     
   } catch (error) {
@@ -178,10 +178,10 @@ export const incrementAdClick = async (adId: string): Promise<void> => {
         .eq('ad_id', adId);
     }
     
-    // Also update the advertisement clicks counter
+    // Also update the advertisement clicks counter directly
     await supabase
       .from('advertisements')
-      .update({ clicks: supabase.rpc('increment', { row_id: 1 }) })
+      .update({ clicks: supabase.rpc('increment_ad_clicks', { ad_id: adId }) })
       .eq('id', adId);
     
   } catch (error) {
