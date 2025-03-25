@@ -6,7 +6,6 @@ import { Upload, X, Image as ImageIcon, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { v4 as uuidv4 } from "uuid";
 
 interface ImageSearchUploaderProps {
   onClose: () => void;
@@ -79,10 +78,10 @@ export function ImageSearchUploader({ onClose, onProcessingComplete }: ImageSear
       
       // Upload to Supabase Storage
       const fileExt = image.name.split('.').pop();
-      const fileName = `${uuidv4()}.${fileExt}`;
+      const fileName = `${Date.now()}.${fileExt}`;
       const filePath = `image-search/${fileName}`;
       
-      const { error: uploadError, data } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('search-images')
         .upload(filePath, image);
         
@@ -104,13 +103,14 @@ export function ImageSearchUploader({ onClose, onProcessingComplete }: ImageSear
         
       if (processError) throw processError;
       
-      // Save to image_search_uploads table
-      await supabase.from('image_search_uploads').insert({
-        user_id: currentUser.id,
-        image_url: publicUrl,
-        description: processResult.description,
-        processed: true
-      });
+      // Save to our database using RPC
+      if (currentUser?.id) {
+        await supabase.rpc('insert_image_search_with_description', {
+          user_id_param: currentUser.id,
+          image_url_param: publicUrl,
+          description_param: processResult.description
+        });
+      }
       
       onProcessingComplete(processResult.description);
     } catch (error) {

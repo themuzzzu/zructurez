@@ -1,6 +1,7 @@
 
 import { useState, useCallback } from "react";
-import { saveVoiceRecording, processVoiceToText } from "@/services/searchService";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface UseVoiceSearchProps {
   onTranscription?: (text: string) => void;
@@ -70,15 +71,31 @@ export const useVoiceSearch = ({ onTranscription }: UseVoiceSearchProps = {}) =>
         // Create audio blob from chunks
         const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
         
-        // Save recording to server
-        const recording = await saveVoiceRecording(audioBlob);
+        // Upload the audio directly to the edge function
+        const fileName = `${Date.now()}.webm`;
+        const filePath = `voice-search/${fileName}`;
         
-        if (!recording) {
-          throw new Error("Failed to save recording");
-        }
+        const { error: uploadError, data } = await supabase.storage
+          .from('voice-recordings')
+          .upload(filePath, audioBlob);
+          
+        if (uploadError) throw uploadError;
+        
+        // Get the public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('voice-recordings')
+          .getPublicUrl(filePath);
         
         // Process the audio to text
-        const transcription = await processVoiceToText(recording.id);
+        const { data: processResult, error: functionError } = await supabase.functions
+          .invoke('process-voice-search', {
+            body: { audioUrl: publicUrl }
+          });
+        
+        if (functionError) throw functionError;
+        
+        // Get the transcription
+        const transcription = processResult.transcription;
         
         if (transcription && onTranscription) {
           onTranscription(transcription);
@@ -86,6 +103,7 @@ export const useVoiceSearch = ({ onTranscription }: UseVoiceSearchProps = {}) =>
       } catch (err) {
         console.error("Error processing voice recording:", err);
         setError("Failed to process voice recording");
+        toast.error("Failed to process voice recording");
       } finally {
         setIsProcessing(false);
         setAudioChunks([]);

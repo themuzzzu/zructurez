@@ -6,7 +6,6 @@ import { Mic, Square, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import { v4 as uuidv4 } from "uuid";
 
 interface VoiceSearchRecorderProps {
   onClose: () => void;
@@ -97,10 +96,10 @@ export function VoiceSearchRecorder({ onClose, onTranscriptionComplete }: VoiceS
       }
       
       // Upload to Supabase Storage
-      const fileName = `${uuidv4()}.webm`;
+      const fileName = `${Date.now()}.webm`;
       const filePath = `voice-search/${fileName}`;
       
-      const { error: uploadError, data } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('voice-recordings')
         .upload(filePath, audioBlob);
         
@@ -119,13 +118,14 @@ export function VoiceSearchRecorder({ onClose, onTranscriptionComplete }: VoiceS
         
       if (transcriptionError) throw transcriptionError;
       
-      // Save to voice_search_recordings table
-      await supabase.from('voice_search_recordings').insert({
-        user_id: currentUser.id,
-        audio_url: publicUrl,
-        transcription: transcriptionResult.transcription,
-        processed: true
-      });
+      // Save to our database using RPC
+      if (currentUser?.id) {
+        await supabase.rpc('insert_voice_recording_with_transcription', {
+          user_id_param: currentUser.id,
+          audio_url_param: publicUrl,
+          transcription_param: transcriptionResult.transcription
+        });
+      }
       
       onTranscriptionComplete(transcriptionResult.transcription);
     } catch (error) {

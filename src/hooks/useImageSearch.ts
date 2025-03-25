@@ -1,6 +1,7 @@
 
 import { useState, useCallback } from "react";
-import { saveImageSearch, processImageSearch } from "@/services/searchService";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface UseImageSearchProps {
   onImageProcessed?: (description: string) => void;
@@ -21,18 +22,31 @@ export const useImageSearch = ({ onImageProcessed }: UseImageSearchProps = {}) =
       const objectUrl = URL.createObjectURL(imageFile);
       setPreviewUrl(objectUrl);
       
-      // Resize/compress the image if needed (optional step)
-      // For this example, we'll just use the original
-      
       // Upload the image
-      const imageData = await saveImageSearch(imageFile);
+      const fileExt = imageFile.name.split('.').pop();
+      const fileName = `${Date.now()}.${fileExt}`;
+      const filePath = `image-search/${fileName}`;
       
-      if (!imageData) {
-        throw new Error("Failed to upload image");
-      }
+      const { error: uploadError } = await supabase.storage
+        .from('search-images')
+        .upload(filePath, imageFile);
+        
+      if (uploadError) throw uploadError;
       
-      // Process the image
-      const description = await processImageSearch(imageData.id);
+      // Get the public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('search-images')
+        .getPublicUrl(filePath);
+      
+      // Process the image using the edge function
+      const { data: processResult, error: functionError } = await supabase.functions
+        .invoke('process-image-search', {
+          body: { imageUrl: publicUrl }
+        });
+      
+      if (functionError) throw functionError;
+      
+      const description = processResult.description;
       
       if (description && onImageProcessed) {
         onImageProcessed(description);
@@ -42,6 +56,7 @@ export const useImageSearch = ({ onImageProcessed }: UseImageSearchProps = {}) =
     } catch (err) {
       console.error("Error processing image:", err);
       setError("Failed to process image. Please try again.");
+      toast.error("Failed to process image. Please try again.");
       return null;
     } finally {
       setIsLoading(false);
@@ -60,12 +75,14 @@ export const useImageSearch = ({ onImageProcessed }: UseImageSearchProps = {}) =
     // Check file type
     if (!file.type.startsWith('image/')) {
       setError("Please upload an image file");
+      toast.error("Please upload an image file");
       return;
     }
     
     // Check file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       setError("Image size should be less than 5MB");
+      toast.error("Image size should be less than 5MB");
       return;
     }
     

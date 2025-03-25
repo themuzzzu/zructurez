@@ -5,7 +5,8 @@ import { SearchResult, SearchSuggestion, SearchFilters } from "@/types/search";
 // Get search suggestions based on user input
 export const getSearchSuggestions = async (term: string): Promise<SearchSuggestion[]> => {
   try {
-    // Get matching suggestions from the database
+    // We have to use this approach since the tables were just created
+    // and TypeScript doesn't know about them yet
     const { data: databaseSuggestions, error } = await supabase
       .from('search_suggestions')
       .select('*')
@@ -15,10 +16,9 @@ export const getSearchSuggestions = async (term: string): Promise<SearchSuggesti
       
     if (error) throw error;
     
-    // Get sponsored suggestions that match the term
     const { data: sponsoredSuggestions, error: sponsoredError } = await supabase
       .from('sponsored_search_terms')
-      .select('id, term')
+      .select('id, term, bid_amount')
       .ilike('term', `%${term}%`)
       .eq('status', 'active')
       .order('bid_amount', { ascending: false })
@@ -28,14 +28,14 @@ export const getSearchSuggestions = async (term: string): Promise<SearchSuggesti
     
     // Combine regular and sponsored suggestions
     const suggestions: SearchSuggestion[] = [
-      ...(databaseSuggestions || []).map(suggestion => ({
+      ...(databaseSuggestions || []).map((suggestion: any) => ({
         id: suggestion.id,
         term: suggestion.term,
-        frequency: suggestion.frequency,
+        frequency: suggestion.frequency || 1,
         category: suggestion.category,
         isSponsored: false
       })),
-      ...(sponsoredSuggestions || []).map(sponsored => ({
+      ...(sponsoredSuggestions || []).map((sponsored: any) => ({
         id: sponsored.id,
         term: sponsored.term,
         frequency: 1000, // Higher frequency to prioritize
@@ -173,43 +173,38 @@ export const performSearch = async (
     }
     
     // Save search query to database for analytics
-    const { data: user } = await supabase.auth.getUser();
-    if (user?.user) {
-      await supabase.from('search_queries').insert({
-        user_id: user.user.id,
-        query,
-        corrected_query: correctedQuery,
-        model_used: 'keyword', // In a real app, this would be the AI model used
-        results_count: combinedResults.length
-      });
+    try {
+      const { data: user } = await supabase.auth.getUser();
+      if (user?.user) {
+        await supabase.rpc('insert_search_query', {
+          user_id_param: user.user.id,
+          query_param: query,
+          corrected_query_param: correctedQuery,
+          model_used_param: 'keyword',
+          results_count_param: combinedResults.length
+        });
+      }
+    } catch (analyticError) {
+      console.error('Error logging search analytics:', analyticError);
     }
     
     // Also increment search suggestion frequency or create new suggestion
     try {
-      const { data: existingSuggestion } = await supabase
-        .from('search_suggestions')
-        .select('id, frequency')
-        .eq('term', query)
-        .maybeSingle();
-        
-      if (existingSuggestion) {
-        // Increment frequency
-        await supabase
-          .from('search_suggestions')
-          .update({ 
-            frequency: existingSuggestion.frequency + 1,
-            last_used: new Date().toISOString()
-          })
-          .eq('id', existingSuggestion.id);
+      // We have to use custom RPC calls since these tables are new
+      const exists = await supabase.rpc('check_search_suggestion_exists', {
+        term_param: query
+      });
+      
+      if (exists.data) {
+        await supabase.rpc('increment_search_suggestion', {
+          term_param: query
+        });
       } else if (combinedResults.length > 0) {
         // Only add suggestion if it returned results
-        await supabase
-          .from('search_suggestions')
-          .insert({
-            term: query,
-            frequency: 1,
-            category: combinedResults[0].category
-          });
+        await supabase.rpc('create_search_suggestion', {
+          term_param: query,
+          category_param: combinedResults[0].category
+        });
       }
     } catch (suggestionError) {
       console.error('Error updating search suggestions:', suggestionError);
@@ -222,6 +217,131 @@ export const performSearch = async (
   } catch (error) {
     console.error('Error performing search:', error);
     return { results: [] };
+  }
+};
+
+// Save an image for image search
+export const saveImageSearch = async (file: File): Promise<{ id: string } | null> => {
+  try {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user?.user) return null;
+    
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Date.now()}.${fileExt}`;
+    const filePath = `image-search/${fileName}`;
+    
+    const { error } = await supabase.storage
+      .from('search-images')
+      .upload(filePath, file);
+      
+    if (error) throw error;
+    
+    const { data: { publicUrl } } = supabase.storage
+      .from('search-images')
+      .getPublicUrl(filePath);
+    
+    const { data, error: insertError } = await supabase.rpc('insert_image_search', {
+      user_id_param: user.user.id,
+      image_url_param: publicUrl
+    });
+    
+    if (insertError) throw insertError;
+    
+    return { id: data };
+  } catch (error) {
+    console.error('Error saving image for search:', error);
+    return null;
+  }
+};
+
+// Process an image for search
+export const processImageSearch = async (imageId: string): Promise<string | null> => {
+  try {
+    const { data, error } = await supabase.rpc('get_image_search_url', {
+      image_id_param: imageId
+    });
+    
+    if (error) throw error;
+    
+    const { data: processResult, error: processError } = await supabase.functions
+      .invoke('process-image-search', {
+        body: { imageUrl: data.image_url },
+      });
+      
+    if (processError) throw processError;
+    
+    // Update the record with the description
+    await supabase.rpc('update_image_search_description', {
+      image_id_param: imageId,
+      description_param: processResult.description
+    });
+    
+    return processResult.description;
+  } catch (error) {
+    console.error('Error processing image search:', error);
+    return null;
+  }
+};
+
+// Save a voice recording
+export const saveVoiceRecording = async (audioBlob: Blob): Promise<{ id: string } | null> => {
+  try {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user?.user) return null;
+    
+    const fileName = `${Date.now()}.webm`;
+    const filePath = `voice-search/${fileName}`;
+    
+    const { error } = await supabase.storage
+      .from('voice-recordings')
+      .upload(filePath, audioBlob);
+      
+    if (error) throw error;
+    
+    const { data: { publicUrl } } = supabase.storage
+      .from('voice-recordings')
+      .getPublicUrl(filePath);
+    
+    const { data, error: insertError } = await supabase.rpc('insert_voice_recording', {
+      user_id_param: user.user.id,
+      audio_url_param: publicUrl
+    });
+    
+    if (insertError) throw insertError;
+    
+    return { id: data };
+  } catch (error) {
+    console.error('Error saving voice recording:', error);
+    return null;
+  }
+};
+
+// Process a voice recording to text
+export const processVoiceToText = async (recordingId: string): Promise<string | null> => {
+  try {
+    const { data, error } = await supabase.rpc('get_voice_recording_url', {
+      recording_id_param: recordingId
+    });
+    
+    if (error) throw error;
+    
+    const { data: processResult, error: processError } = await supabase.functions
+      .invoke('process-voice-search', {
+        body: { audioUrl: data.audio_url },
+      });
+      
+    if (processError) throw processError;
+    
+    // Update the record with the transcription
+    await supabase.rpc('update_voice_recording_transcription', {
+      recording_id_param: recordingId,
+      transcription_param: processResult.transcription
+    });
+    
+    return processResult.transcription;
+  } catch (error) {
+    console.error('Error processing voice to text:', error);
+    return null;
   }
 };
 
@@ -246,27 +366,12 @@ export const recordSearchResultClick = async (
     
     // Record user interaction if logged in
     if (user?.user) {
-      // Update the search query with the clicked result
-      const { data: searchQueries } = await supabase
-        .from('search_queries')
-        .select('id')
-        .eq('user_id', user.user.id)
-        .eq('query', query)
-        .order('created_at', { ascending: false })
-        .limit(1);
-        
-      if (searchQueries && searchQueries.length > 0) {
-        await supabase
-          .from('search_queries')
-          .update({
-            clicked_results: supabase.sql`clicked_results || ${JSON.stringify([{
-              result_id: resultId,
-              is_sponsored: isSponsored,
-              clicked_at: new Date().toISOString()
-            }])}`
-          })
-          .eq('id', searchQueries[0].id);
-      }
+      await supabase.rpc('record_search_result_click', {
+        user_id_param: user.user.id,
+        query_param: query,
+        result_id_param: resultId,
+        is_sponsored_param: isSponsored
+      });
     }
   } catch (error) {
     console.error('Error recording search result click:', error);

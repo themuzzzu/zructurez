@@ -8,6 +8,8 @@ const corsHeaders = {
 };
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+const deepSeekApiKey = Deno.env.get('DEEPSEEK_API_KEY');
+const qwenApiKey = Deno.env.get('QWEN_API_KEY');
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -16,7 +18,7 @@ serve(async (req) => {
   }
 
   try {
-    const { audioUrl } = await req.json();
+    const { audioUrl, modelProvider = 'openai' } = await req.json();
     
     if (!audioUrl) {
       return new Response(
@@ -25,10 +27,10 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Processing audio: ${audioUrl}`);
+    console.log(`Processing audio with ${modelProvider}: ${audioUrl}`);
     
-    // If OpenAI key is available, use Whisper API
-    if (openAIApiKey) {
+    // If OpenAI key is available and modelProvider is openai, use Whisper API
+    if (openAIApiKey && modelProvider === 'openai') {
       // First, we need to download the audio file
       const audioResponse = await fetch(audioUrl);
       if (!audioResponse.ok) {
@@ -63,24 +65,22 @@ serve(async (req) => {
         JSON.stringify({ transcription: data.text }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
-    } else {
-      // Fallback if no API key available - return mock transcription
-      console.log('No OpenAI API key available, returning mock response');
-      
-      const mockTranscriptions = [
-        "show me winter jackets",
-        "I'm looking for running shoes",
-        "find me a black dress for a party",
-        "show me kitchen appliances under 5000 rupees",
-        "I need a new phone with good camera"
-      ];
-      
-      const transcription = mockTranscriptions[Math.floor(Math.random() * mockTranscriptions.length)];
-      
-      return new Response(
-        JSON.stringify({ transcription }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    } 
+    // Handle DeepSeek API
+    else if (deepSeekApiKey && modelProvider === 'deepseek') {
+      // DeepSeek API integration would go here
+      // For now, return a mock response
+      return mockResponse();
+    }
+    // Handle Qwen API
+    else if (qwenApiKey && modelProvider === 'qwen') {
+      // Qwen API integration would go here
+      // For now, return a mock response
+      return mockResponse();
+    }
+    // Fallback if no API key available or unsupported provider
+    else {
+      return mockResponse();
     }
   } catch (error) {
     console.error('Error processing audio:', error);
@@ -88,6 +88,26 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ error: error.message || 'Failed to process audio' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+  
+  // Helper function to return a mock response when API keys are not available
+  function mockResponse() {
+    console.log('No API key available or unsupported provider, returning mock response');
+    
+    const mockTranscriptions = [
+      "show me winter jackets",
+      "I'm looking for running shoes",
+      "find me a black dress for a party",
+      "show me kitchen appliances under 5000 rupees",
+      "I need a new phone with good camera"
+    ];
+    
+    const transcription = mockTranscriptions[Math.floor(Math.random() * mockTranscriptions.length)];
+    
+    return new Response(
+      JSON.stringify({ transcription }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
