@@ -69,7 +69,7 @@ export const BusinessCardHeader = ({
       <div className="relative">
         <h3 className="font-semibold text-xl pr-8">{name}</h3>
         {name.length > 25 && (
-          <div className="absolute top-1/2 right-0 -translate-y-1/2 bg-gradient-to-l from-black/95 dark:from-black/95 to-transparent px-2">
+          <div className="absolute top-1/2 right-0 -translate-y-1/2 bg-gradient-to-l from-black/95 to-transparent px-2">
             <ChevronDown className="h-4 w-4 text-gray-400" />
           </div>
         )}
