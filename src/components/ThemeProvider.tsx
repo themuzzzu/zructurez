@@ -50,10 +50,13 @@ export function ThemeProvider({
         : "light";
       
       root.classList.add(systemTheme);
+      // Save to localStorage for consistency
+      localStorage.setItem(storageKey, theme);
     } else {
       root.classList.add(theme);
+      localStorage.setItem(storageKey, theme);
     }
-  }, [theme]);
+  }, [theme, storageKey]);
 
   // Listen for system theme changes
   useEffect(() => {
@@ -76,11 +79,9 @@ export function ThemeProvider({
 
   const value = React.useMemo(() => ({
     theme,
-    setTheme: (theme: Theme) => {
-      if (typeof window !== "undefined") {
-        localStorage.setItem(storageKey, theme);
-      }
-      setTheme(theme);
+    setTheme: (newTheme: Theme) => {
+      localStorage.setItem(storageKey, newTheme);
+      setTheme(newTheme);
     },
   }), [theme, storageKey]);
 

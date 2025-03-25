@@ -21,8 +21,6 @@ import {
 import { useTheme } from "@/components/ThemeProvider";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 
-interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
-
 // Create a filled icon component
 const FilledIcon = ({ Icon }: { Icon: React.ElementType }) => (
   <div className="relative">
@@ -30,7 +28,7 @@ const FilledIcon = ({ Icon }: { Icon: React.ElementType }) => (
   </div>
 );
 
-export const Sidebar = ({ className }: SidebarProps) => {
+export const Sidebar = ({ className }: React.HTMLAttributes<HTMLDivElement>) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [activeItem, setActiveItem] = useState(() => {
@@ -84,7 +82,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
   return (
     <div className={cn(
       "h-full overflow-y-auto transition-all duration-300 fixed left-0 top-16 z-30", 
-      isDarkMode ? "bg-black dark:bg-black" : "bg-white dark:bg-black",
+      isDarkMode ? "bg-background dark:bg-background" : "bg-background",
       isCollapsed ? "w-12" : "w-44", 
       className
     )}>
@@ -100,9 +98,9 @@ export const Sidebar = ({ className }: SidebarProps) => {
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {isCollapsed ? (
-            <PanelLeft className={cn("h-3.5 w-3.5", isDarkMode ? "text-white" : "text-zinc-700 dark:text-white")} />
+            <PanelLeft className={cn("h-3.5 w-3.5", isDarkMode ? "text-foreground" : "text-foreground")} />
           ) : (
-            <PanelLeftClose className={cn("h-3.5 w-3.5", isDarkMode ? "text-white" : "text-zinc-700 dark:text-white")} />
+            <PanelLeftClose className={cn("h-3.5 w-3.5", isDarkMode ? "text-foreground" : "text-foreground")} />
           )}
         </Button>
       </div>
@@ -132,8 +130,8 @@ export const Sidebar = ({ className }: SidebarProps) => {
               ) : (
                 <route.icon className={cn("h-5 w-5", 
                   isDarkMode 
-                    ? "text-zinc-400" 
-                    : "text-zinc-700 dark:text-zinc-400"
+                    ? "text-muted-foreground" 
+                    : "text-muted-foreground"
                 )} />
               )}
             </Button>
@@ -158,7 +156,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
                   <FilledIcon Icon={route.icon} />
                 ) : (
                   <route.icon size={20} className={cn(
-                    isDarkMode ? "text-zinc-400" : "text-zinc-700 dark:text-zinc-400"
+                    "text-muted-foreground"
                   )} />
                 )}
               </div>
@@ -166,11 +164,9 @@ export const Sidebar = ({ className }: SidebarProps) => {
                 "text-sm",
                 isActive 
                   ? isDarkMode
-                    ? "font-bold text-white" 
-                    : "font-bold text-zinc-900 dark:text-white"
-                  : isDarkMode
-                    ? "text-zinc-400 group-hover:text-zinc-200"
-                    : "text-zinc-700 dark:text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-200"
+                    ? "font-bold text-foreground" 
+                    : "font-bold text-foreground"
+                  : "text-muted-foreground"
               )}>
                 {route.name}
               </span>
@@ -190,11 +186,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
             )}
             onClick={toggleTheme}
           >
-            <SunMoon className={cn("h-5 w-5", 
-              isDarkMode 
-                ? "text-zinc-400" 
-                : "text-zinc-700 dark:text-zinc-400"
-            )} />
+            <SunMoon className="h-5 w-5 text-muted-foreground" />
           </Button>
         ) : (
           <Button
@@ -208,14 +200,9 @@ export const Sidebar = ({ className }: SidebarProps) => {
             onClick={toggleTheme}
           >
             <div className="flex items-center justify-center">
-              <SunMoon size={20} className={cn(
-                isDarkMode ? "text-zinc-400" : "text-zinc-700 dark:text-zinc-400"
-              )} />
+              <SunMoon size={20} className="text-muted-foreground" />
             </div>
-            <span className={cn(
-              "text-sm",
-              isDarkMode ? "text-zinc-400" : "text-zinc-700 dark:text-zinc-400"
-            )}>
+            <span className="text-sm text-muted-foreground">
               Toggle Theme
             </span>
           </Button>

@@ -20,14 +20,17 @@ export const GeneralSettings = () => {
 
   // Sync theme with profile preference on component mount
   useEffect(() => {
-    if (profile.theme_preference) {
+    if (profile?.theme_preference) {
       setTheme(profile.theme_preference as Theme);
     }
-  }, [profile.theme_preference, setTheme]);
+  }, [profile?.theme_preference, setTheme]);
 
   const handleThemeChange = async (value: Theme) => {
     setTheme(value);
-    await updateThemePreference(value);
+    if (updateThemePreference) {
+      await updateThemePreference(value);
+      toast.success(`Theme changed to ${value} mode`);
+    }
   };
 
   const handleSeparateGroupsChange = (checked: boolean) => {

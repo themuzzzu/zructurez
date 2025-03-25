@@ -15,7 +15,7 @@ import { useMediaQuery } from "@/hooks/useMediaQuery";
 // Create a filled icon component for mobile nav
 const FilledIcon = ({ Icon }: { Icon: React.ElementType }) => (
   <div className="relative">
-    <Icon className="h-5 w-5" fill="white" stroke="black" strokeWidth={1.5} />
+    <Icon className="h-5 w-5" fill="currentColor" stroke="black" strokeWidth={1.5} />
   </div>
 );
 
@@ -24,6 +24,7 @@ export const MobileNav = () => {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
   const isMobile = useMediaQuery("(max-width: 768px)");
+  const isDarkMode = theme === "dark";
 
   const mobileNavItems = [
     { icon: Home, label: "Home", path: "/" },
@@ -42,7 +43,7 @@ export const MobileNav = () => {
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-black/95 border-t border-zinc-800 py-3 px-1 sm:px-2 z-50 animate-slide-up backdrop-blur-sm">
+    <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border py-3 px-1 sm:px-2 z-50 animate-slide-up backdrop-blur-sm">
       <div className="flex justify-between items-center max-w-md mx-auto">
         {mobileNavItems.map((item) => {
           const Icon = item.icon;
@@ -55,7 +56,7 @@ export const MobileNav = () => {
               size="icon"
               className={cn(
                 "flex items-center justify-center h-10 w-10 p-0",
-                isActive && "bg-zinc-800"
+                isActive && "bg-accent"
               )}
               onClick={() => navigate(item.path)}
               aria-label={item.label}
@@ -79,20 +80,20 @@ export const MobileNav = () => {
               <MoreVertical className="h-5 w-5 text-muted-foreground" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-40 bg-zinc-900 text-white border-zinc-700">
-            <DropdownMenuItem onClick={() => navigate('/jobs')} className="hover:bg-zinc-800">
+          <DropdownMenuContent align="end" className="w-40">
+            <DropdownMenuItem onClick={() => navigate('/jobs')}>
               Jobs
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate('/communities')} className="hover:bg-zinc-800">
+            <DropdownMenuItem onClick={() => navigate('/communities')}>
               Communities
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate('/events')} className="hover:bg-zinc-800">
+            <DropdownMenuItem onClick={() => navigate('/events')}>
               Events
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate('/maps')} className="hover:bg-zinc-800">
+            <DropdownMenuItem onClick={() => navigate('/maps')}>
               Maps
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={toggleTheme} className="hover:bg-zinc-800">
+            <DropdownMenuItem onClick={toggleTheme}>
               <SunMoon className="mr-2 h-4 w-4" />
               Toggle Theme
             </DropdownMenuItem>
