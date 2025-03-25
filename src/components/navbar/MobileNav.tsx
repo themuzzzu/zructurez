@@ -1,5 +1,5 @@
 
-import { Home, Store, Wrench, Building, MessageSquare, MoreVertical, SunMoon } from "lucide-react";
+import { Home, Store, Wrench, Building, MessageSquare, MoreVertical, SunMoon, Users, Briefcase, Calendar, Map } from "lucide-react";
 import { Button } from "../ui/button";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
@@ -26,12 +26,21 @@ export const MobileNav = () => {
   const isMobile = useMediaQuery("(max-width: 768px)");
   const isDarkMode = theme === "dark";
 
+  // Main navigation items - match what's in Sidebar.tsx
   const mobileNavItems = [
     { icon: Home, label: "Home", path: "/" },
     { icon: Store, label: "Marketplace", path: "/marketplace" },
     { icon: Wrench, label: "Services", path: "/services" },
     { icon: Building, label: "Business", path: "/businesses" },
     { icon: MessageSquare, label: "Messages", path: "/messages" },
+  ];
+
+  // Additional items for the dropdown menu
+  const dropdownItems = [
+    { icon: Briefcase, label: "Jobs", path: "/jobs" },
+    { icon: Users, label: "Communities", path: "/communities" },
+    { icon: Calendar, label: "Events", path: "/events" },
+    { icon: Map, label: "Maps", path: "/maps" },
   ];
 
   const toggleTheme = () => {
@@ -55,8 +64,8 @@ export const MobileNav = () => {
               variant="ghost"
               size="icon"
               className={cn(
-                "flex items-center justify-center h-10 w-10 p-0",
-                isActive && "bg-accent"
+                "flex flex-col items-center justify-center h-14 w-14 p-0 gap-1",
+                isActive ? "bg-accent" : ""
               )}
               onClick={() => navigate(item.path)}
               aria-label={item.label}
@@ -66,6 +75,9 @@ export const MobileNav = () => {
               ) : (
                 <Icon className="h-5 w-5 text-muted-foreground" />
               )}
+              <span className="text-xs font-medium">
+                {item.label}
+              </span>
             </Button>
           );
         })}
@@ -74,28 +86,27 @@ export const MobileNav = () => {
             <Button 
               variant="ghost" 
               size="icon"
-              className="flex items-center justify-center h-10 w-10 p-0"
+              className="flex flex-col items-center justify-center h-14 w-14 p-0 gap-1"
               aria-label="More options"
             >
               <MoreVertical className="h-5 w-5 text-muted-foreground" />
+              <span className="text-xs font-medium">More</span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-40">
-            <DropdownMenuItem onClick={() => navigate('/jobs')}>
-              Jobs
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate('/communities')}>
-              Communities
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate('/events')}>
-              Events
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate('/maps')}>
-              Maps
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={toggleTheme}>
+          <DropdownMenuContent align="end" className="w-56">
+            {dropdownItems.map((item) => (
+              <DropdownMenuItem 
+                key={item.path}
+                onClick={() => navigate(item.path)}
+                className="cursor-pointer"
+              >
+                <item.icon className="mr-2 h-4 w-4" />
+                {item.label}
+              </DropdownMenuItem>
+            ))}
+            <DropdownMenuItem onClick={toggleTheme} className="cursor-pointer">
               <SunMoon className="mr-2 h-4 w-4" />
-              Toggle Theme
+              {isDarkMode ? "Light Mode" : "Dark Mode"}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
