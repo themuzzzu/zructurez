@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -45,6 +44,11 @@ interface Product {
   stock: number;
 }
 
+interface ProductWithPurchases extends Product {
+  product_purchases: { id: string }[];
+  purchases: number;
+}
+
 export const ProductInsightsTable = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("views");
@@ -66,7 +70,7 @@ export const ProductInsightsTable = () => {
       return data.map(product => ({
         ...product,
         purchases: product.product_purchases ? product.product_purchases.length : 0
-      })) as (Product & { purchases: number })[];
+      })) as ProductWithPurchases[];
     }
   });
   

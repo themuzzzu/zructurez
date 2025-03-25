@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   Table, 
@@ -39,7 +38,6 @@ import {
   DialogHeader, 
   DialogTitle,
   DialogFooter,
-  DialogClose
 } from "@/components/ui/dialog";
 
 interface AdManagementTableProps {
@@ -347,9 +345,7 @@ export const AdManagementTable = ({ ads, isLoading }: AdManagementTableProps) =>
             </div>
           )}
           <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline">Close</Button>
-            </DialogClose>
+            <Button variant="outline" onClick={() => setViewDialogOpen(false)}>Close</Button>
             {selectedAd && selectedAd.status === 'pending' && (
               <>
                 <Button 
