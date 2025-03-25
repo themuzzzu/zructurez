@@ -34,3 +34,32 @@ export const rateLimit = (
   
   return true;
 };
+
+// Helper function to get client IP or unique identifier
+export const getClientIP = (): string => {
+  // In a real app, this would get the actual client IP
+  // For demo purposes, we'll return a random ID or use a stored one
+  const storedClientId = localStorage.getItem('client_id');
+  if (storedClientId) return storedClientId;
+  
+  const newClientId = Math.random().toString(36).substring(2, 15);
+  localStorage.setItem('client_id', newClientId);
+  return newClientId;
+};
+
+// Helper function to apply rate limiting easily
+export const applyRateLimit = (
+  identifier: string = getClientIP(),
+  options: Partial<RateLimitOptions> = {}
+): boolean => {
+  const defaultOptions: RateLimitOptions = {
+    maxRequests: 5,
+    windowMs: 60000, // 1 minute
+    message: 'Rate limit exceeded. Please try again later.',
+  };
+
+  return rateLimit(
+    identifier,
+    { ...defaultOptions, ...options }
+  );
+};
