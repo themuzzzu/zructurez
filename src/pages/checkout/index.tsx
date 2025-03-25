@@ -185,19 +185,23 @@ const CheckoutPage = () => {
       }
 
       return await measureApiCall('place-order', async () => {
+        const orderData = {
+          user_id: session.session.user.id,
+          address_id: selectedAddress,
+          payment_method: selectedPaymentMethod,
+          subtotal: calculateSubtotal(),
+          discount: calculateDiscount(),
+          shipping_fee: calculateShippingFee(),
+          total_price: calculateTotal(),
+          coupon_code: appliedCoupon?.code || null,
+          status: selectedPaymentMethod === 'cod' ? 'pending' : 'payment_pending',
+          product_id: cartItems[0]?.products?.id || '',
+          quantity: cartItems.reduce((sum, item) => sum + item.quantity, 0)
+        };
+
         const { data: order, error: orderError } = await supabase
           .from('orders')
-          .insert({
-            user_id: session.session.user.id,
-            address_id: selectedAddress,
-            payment_method: selectedPaymentMethod,
-            subtotal: calculateSubtotal(),
-            discount: calculateDiscount(),
-            shipping_fee: calculateShippingFee(),
-            total: calculateTotal(),
-            coupon_code: appliedCoupon?.code || null,
-            status: selectedPaymentMethod === 'cod' ? 'pending' : 'payment_pending',
-          })
+          .insert(orderData)
           .select()
           .single();
 

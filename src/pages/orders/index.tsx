@@ -11,7 +11,6 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { measureApiCall } from "@/utils/performanceTracking";
 
-// Define interfaces for order data structure
 interface OrderItem {
   id: string;
   order_id: string;
@@ -58,7 +57,6 @@ const OrdersPage = () => {
   const [orderFilter, setOrderFilter] = useState<'all' | 'pending' | 'processing' | 'shipped' | 'delivered'>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Fetch orders with updated typings
   const { data: ordersData = [], isLoading } = useQuery({
     queryKey: ['orders'],
     queryFn: async () => {
@@ -68,7 +66,6 @@ const OrdersPage = () => {
       }
 
       return await measureApiCall('fetch-user-orders', async () => {
-        // Fetch basic order data first
         const { data: ordersData, error: ordersError } = await supabase
           .from('orders')
           .select('*')
@@ -77,7 +74,6 @@ const OrdersPage = () => {
 
         if (ordersError) throw ordersError;
         
-        // Then fetch order items for each order
         const ordersWithItems = await Promise.all(
           (ordersData || []).map(async (order) => {
             const { data: itemsData, error: itemsError } = await supabase
@@ -99,13 +95,12 @@ const OrdersPage = () => {
                 ...order, 
                 order_items: [],
                 total: order.total_price,
-                payment_method: 'cod',
-                discount: 0,
-                shipping_fee: 0,
+                payment_method: order.payment_method || 'cod',
+                discount: order.discount || 0,
+                shipping_fee: order.shipping_fee || 0,
               };
             }
             
-            // Fetch address data if address_id exists
             let addressData = null;
             if (order.address_id) {
               const { data: address, error: addressError } = await supabase
@@ -126,19 +121,18 @@ const OrdersPage = () => {
               order_items: itemsData || [],
               user_addresses: addressData || null,
               total: order.total_price,
-              payment_method: 'cod',
-              discount: 0,
-              shipping_fee: 0,
+              payment_method: order.payment_method || 'cod',
+              discount: order.discount || 0,
+              shipping_fee: order.shipping_fee || 0,
             };
           })
         );
         
-        return ordersWithItems as unknown as Order[];
+        return ordersWithItems as Order[];
       });
     },
   });
 
-  // Filter the orders based on status and search
   const filteredOrders = (ordersData || []).filter(order => {
     if (orderFilter !== 'all' && order.status !== orderFilter) {
       return false;
@@ -148,7 +142,6 @@ const OrdersPage = () => {
       const query = searchQuery.toLowerCase();
       const orderIdMatch = order.id.toLowerCase().includes(query);
       
-      // Check if any product in the order matches the search query
       const productMatch = order.order_items.some(item => 
         (item.products?.title || '').toLowerCase().includes(query)
       );
@@ -159,7 +152,6 @@ const OrdersPage = () => {
     return true;
   });
 
-  // Format price in Indian Rupees
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
@@ -168,7 +160,6 @@ const OrdersPage = () => {
     }).format(price);
   };
 
-  // Format date
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-IN', {
