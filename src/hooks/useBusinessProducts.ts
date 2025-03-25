@@ -3,17 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
 import { withCache } from "@/utils/cacheUtils";
-
-interface BusinessProduct {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  image_url?: string;
-  business_id: string;
-  stock: number;
-  created_at: string;
-}
+import type { BusinessProduct } from "@/types/business";
 
 export const useBusinessProducts = (businessId: string | null) => {
   const queryClient = useQueryClient();

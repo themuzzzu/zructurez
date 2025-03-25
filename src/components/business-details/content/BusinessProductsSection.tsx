@@ -29,7 +29,7 @@ const ProductCard = memo(({ product }: { product: Business['business_products'][
       <p className="text-sm text-muted-foreground">{product.description}</p>
       <div className="flex justify-between items-center">
         <div className="font-semibold">₹{product.price}</div>
-        <StockBadge stock={product.stock} />
+        <StockBadge stock={product.stock || 0} />
       </div>
     </Card>
   );
@@ -90,7 +90,7 @@ export const BusinessProductsSection = ({ products: initialProducts, businessId 
             </Card>
           ))
         ) : (
-          // Actual product cards
+          // Actual product cards - ensure we're passing the correct type by casting if needed
           displayProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))
