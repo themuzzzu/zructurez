@@ -11,6 +11,7 @@ import { ServiceSettings } from "@/components/settings/ServiceSettings";
 import { AdvertisementsTab } from "@/components/settings/AdvertisementsTab";
 import { OrdersTab } from "@/components/settings/OrdersTab";
 import { LikedBusinessesTab } from "@/components/profile/LikedBusinessesTab";
+import { SubscribedBusinessesTab } from "@/components/profile/SubscribedBusinessesTab";
 import { AppointmentsTab } from "@/components/settings/AppointmentsTab";
 import { AnalyticsTab } from "@/components/settings/AnalyticsTab";
 import { Layout } from "@/components/layout/Layout";
@@ -40,6 +41,8 @@ const Settings = () => {
         return <AdvertisementsTab />;
       case "liked":
         return <LikedBusinessesTab />;
+      case "subscribed":
+        return <SubscribedBusinessesTab />;
       case "analytics":
         return <AnalyticsTab />;
       default:

@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { Settings, Bell, Shield, User, Package, Briefcase, Wrench, Megaphone, ShoppingBag, Heart, Calendar, BarChart } from "lucide-react";
+import { Settings, Bell, Shield, User, Package, Briefcase, Wrench, Megaphone, ShoppingBag, Heart, Calendar, BarChart, Bell as BellIcon } from "lucide-react";
 
 interface SettingsNavProps {
   activeTab: string;
@@ -16,6 +16,7 @@ export const SettingsNav = ({ activeTab, setActiveTab }: SettingsNavProps) => {
     { id: "appointments", label: "Appointments", icon: Calendar },
     { id: "orders", label: "Orders", icon: ShoppingBag },
     { id: "liked", label: "Liked Businesses", icon: Heart },
+    { id: "subscribed", label: "Subscribed Businesses", icon: BellIcon },
     { id: "business", label: "Business", icon: Briefcase },
     { id: "services", label: "Services", icon: Wrench },
     { id: "products", label: "Products", icon: Package },
