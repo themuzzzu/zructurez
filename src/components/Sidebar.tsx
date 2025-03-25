@@ -48,7 +48,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
     { name: "Home", path: "/", icon: Home },
     { name: "Marketplace", path: "/marketplace", icon: Store },
     { name: "Services", path: "/services", icon: Wrench },
-    { name: "Business", path: "/business", icon: Building },
+    { name: "Business", path: "/businesses", icon: Building },
     { name: "Jobs", path: "/jobs", icon: Briefcase },
     { name: "Communities", path: "/communities", icon: Users },
     { name: "Messages", path: "/messages", icon: MessageSquare },
@@ -63,7 +63,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
 
   return (
     <div className={cn(
-      "h-screen border-r border-zinc-200 bg-white dark:bg-black dark:border-zinc-800 overflow-y-auto transition-all duration-300 fixed left-0 top-0 z-30",
+      "h-screen border-r border-zinc-200 bg-white dark:bg-black dark:border-zinc-800 overflow-y-auto transition-all duration-300 fixed left-0 top-16 z-30", // Changed top-0 to top-16
       isCollapsed ? "w-16" : "w-64",
       className
     )}>
@@ -154,4 +154,3 @@ export const Sidebar = ({ className }: SidebarProps) => {
     </div>
   );
 };
-

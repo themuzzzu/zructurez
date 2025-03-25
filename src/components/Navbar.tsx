@@ -42,7 +42,7 @@ export const Navbar = () => {
 
   return (
     <>
-      <nav className="border-b bg-background py-3 fixed top-0 w-full z-50">
+      <nav className="border-b bg-background py-3 fixed top-0 left-0 right-0 w-full z-50 h-16">
         <div className="container max-w-[1400px] flex items-center justify-between animate-fade-down">
           <div className="flex items-center gap-4">
             <Sheet>
