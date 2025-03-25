@@ -1,180 +1,223 @@
-import { supabase } from "@/integrations/supabase/client";
-import type { 
-  SearchResult, 
-  SearchSuggestion, 
-  SearchFilters, 
-  VoiceSearchData,
-  ImageSearchData,
-  SponsoredTerm
-} from "@/types/search";
 
-// Get search suggestions as user types
+import { supabase } from "@/integrations/supabase/client";
+import { SearchResult, SearchSuggestion, SearchFilters } from "@/types/search";
+
+// Get search suggestions based on user input
 export const getSearchSuggestions = async (term: string): Promise<SearchSuggestion[]> => {
-  if (!term || term.length < 2) return [];
-  
   try {
-    // Get from suggestions table first
-    const { data: suggestions, error } = await supabase
+    // Get matching suggestions from the database
+    const { data: databaseSuggestions, error } = await supabase
       .from('search_suggestions')
       .select('*')
       .ilike('term', `%${term}%`)
       .order('frequency', { ascending: false })
       .limit(5);
-    
+      
     if (error) throw error;
     
-    // If we have enough suggestions, return them
-    if (suggestions.length >= 3) {
-      return suggestions.map(s => ({
-        id: s.id,
-        term: s.term,
-        frequency: s.frequency,
-        category: s.category,
-        isSponsored: s.is_sponsored
-      }));
-    }
+    // Get sponsored suggestions that match the term
+    const { data: sponsoredSuggestions, error: sponsoredError } = await supabase
+      .from('sponsored_search_terms')
+      .select('id, term')
+      .ilike('term', `%${term}%`)
+      .eq('status', 'active')
+      .order('bid_amount', { ascending: false })
+      .limit(2);
+      
+    if (sponsoredError) throw sponsoredError;
     
-    // Otherwise, also search products table for additional suggestions
-    const { data: products } = await supabase
-      .from('products')
-      .select('id, title')
-      .ilike('title', `%${term}%`)
-      .limit(5 - suggestions.length);
+    // Combine regular and sponsored suggestions
+    const suggestions: SearchSuggestion[] = [
+      ...(databaseSuggestions || []).map(suggestion => ({
+        id: suggestion.id,
+        term: suggestion.term,
+        frequency: suggestion.frequency,
+        category: suggestion.category,
+        isSponsored: false
+      })),
+      ...(sponsoredSuggestions || []).map(sponsored => ({
+        id: sponsored.id,
+        term: sponsored.term,
+        frequency: 1000, // Higher frequency to prioritize
+        isSponsored: true
+      }))
+    ];
     
-    const productSuggestions = products?.map(p => ({
-      id: p.id,
-      term: p.title,
-      frequency: 1,
-      category: 'product'
-    })) || [];
-    
-    return [...suggestions.map(s => ({
-      id: s.id,
-      term: s.term,
-      frequency: s.frequency,
-      category: s.category,
-      isSponsored: s.is_sponsored
-    })), ...productSuggestions];
+    // Sort by frequency and limit to 5 suggestions
+    return suggestions
+      .sort((a, b) => b.frequency - a.frequency)
+      .slice(0, 5);
   } catch (error) {
-    console.error('Error fetching search suggestions:', error);
+    console.error('Error getting search suggestions:', error);
     return [];
   }
 };
 
-// Search function for products
-export const searchProducts = async (
+// Perform search with filters
+export const performSearch = async (
   query: string, 
-  filters?: SearchFilters
-): Promise<SearchResult[]> => {
+  filters: SearchFilters = { includeSponsored: true }
+): Promise<{ results: SearchResult[], correctedQuery?: string }> => {
   try {
-    let searchQuery = supabase
+    // Check if we need to correct the query
+    let correctedQuery: string | undefined = undefined;
+    
+    // Apply search filters
+    let dbQuery = supabase
       .from('products')
       .select('*');
     
-    // Apply text search
-    searchQuery = searchQuery.or(`title.ilike.%${query}%, description.ilike.%${query}%`);
+    // Basic search - in a real app this would use FTS or vector search
+    dbQuery = dbQuery.ilike('title', `%${query}%`);
     
-    // Apply filters if provided
-    if (filters) {
-      if (filters.categories && filters.categories.length > 0) {
-        searchQuery = searchQuery.in('category', filters.categories);
-      }
-      
-      if (filters.priceMin !== undefined) {
-        searchQuery = searchQuery.gte('price', filters.priceMin);
-      }
-      
-      if (filters.priceMax !== undefined) {
-        searchQuery = searchQuery.lte('price', filters.priceMax);
-      }
+    // Apply category filter
+    if (filters.categories && filters.categories.length > 0) {
+      dbQuery = dbQuery.in('category', filters.categories);
+    }
+    
+    // Apply price filters
+    if (filters.priceMin !== undefined) {
+      dbQuery = dbQuery.gte('price', filters.priceMin);
+    }
+    
+    if (filters.priceMax !== undefined) {
+      dbQuery = dbQuery.lte('price', filters.priceMax);
     }
     
     // Apply sorting
-    if (filters?.sortBy) {
+    if (filters.sortBy) {
       switch (filters.sortBy) {
         case 'price-asc':
-          searchQuery = searchQuery.order('price', { ascending: true });
+          dbQuery = dbQuery.order('price', { ascending: true });
           break;
         case 'price-desc':
-          searchQuery = searchQuery.order('price', { ascending: false });
+          dbQuery = dbQuery.order('price', { ascending: false });
           break;
         case 'newest':
-          searchQuery = searchQuery.order('created_at', { ascending: false });
+          dbQuery = dbQuery.order('created_at', { ascending: false });
           break;
-        default:
-          // Default sort by relevance (handled client-side for now)
-          searchQuery = searchQuery.order('views', { ascending: false });
+        default: // 'relevance' - in a real app this would use ranking
+          dbQuery = dbQuery.order('views', { ascending: false });
       }
     } else {
-      // Default sorting
-      searchQuery = searchQuery.order('views', { ascending: false });
+      // Default sort by relevance (views in this demo)
+      dbQuery = dbQuery.order('views', { ascending: false });
     }
     
-    const { data, error } = await searchQuery;
+    // Execute query
+    const { data: products, error } = await dbQuery.limit(20);
     
     if (error) throw error;
     
-    // Transform to search results
-    return data.map(product => ({
+    // Get sponsored results if enabled
+    let sponsoredResults: any[] = [];
+    if (filters.includeSponsored) {
+      const { data: sponsored, error: sponsoredError } = await supabase
+        .from('products')
+        .select('*')
+        .eq('is_branded', true)  // Using branded as proxy for sponsored
+        .ilike('title', `%${query}%`)
+        .limit(3);
+        
+      if (!sponsoredError && sponsored) {
+        sponsoredResults = sponsored.map(item => ({
+          ...item,
+          isSponsored: true,
+          relevanceScore: 100  // Higher score to prioritize
+        }));
+      }
+    }
+    
+    // Map results to SearchResult type
+    const regularResults: SearchResult[] = (products || []).map(product => ({
       id: product.id,
       title: product.title,
-      description: product.description,
+      description: product.description || '',
       imageUrl: product.image_url,
       category: product.category,
       price: product.price,
       type: 'product',
       url: `/product/${product.id}`,
-      isSponsored: false
+      relevanceScore: product.views || 0
     }));
-  } catch (error) {
-    console.error('Error searching products:', error);
-    return [];
-  }
-};
-
-// Combined search that looks across multiple entity types
-export const performSearch = async (
-  query: string,
-  filters?: SearchFilters
-): Promise<{results: SearchResult[], correctedQuery?: string}> => {
-  try {
-    if (!query || query.trim().length === 0) {
-      return { results: [] };
-    }
     
-    // Log the search query if user is logged in
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      await supabase.from('search_queries').insert({
-        user_id: user.id,
-        query: query,
-        model_used: 'keyword', // For now, just using keyword search
-        session_id: sessionStorage.getItem('sessionId') || crypto.randomUUID()
+    // Map sponsored results
+    const mappedSponsoredResults: SearchResult[] = sponsoredResults.map(product => ({
+      id: product.id,
+      title: product.title,
+      description: product.description || '',
+      imageUrl: product.image_url,
+      category: product.category,
+      price: product.price,
+      type: 'product',
+      url: `/product/${product.id}`,
+      isSponsored: true,
+      relevanceScore: product.relevanceScore || 0
+    }));
+    
+    // Combine and sort results
+    // In a real app, this would use a sophisticated ranking algorithm
+    // For now, we'll put a sponsored result at positions 1, 3, and 6
+    let combinedResults: SearchResult[] = [...regularResults];
+    
+    if (mappedSponsoredResults.length > 0) {
+      // Insert sponsored results at strategic positions
+      mappedSponsoredResults.forEach((sponsored, index) => {
+        const position = [0, 2, 5][index]; // Positions 1, 3, 6
+        if (position !== undefined && position <= combinedResults.length) {
+          combinedResults.splice(position, 0, sponsored);
+        } else {
+          combinedResults.push(sponsored);
+        }
       });
     }
     
-    // Get sponsored results if enabled
-    let sponsoredResults: SearchResult[] = [];
-    if (filters?.includeSponsored !== false) {
-      const sponsoredProducts = await getSponsoredResults(query);
-      sponsoredResults = sponsoredProducts;
+    // Save search query to database for analytics
+    const { data: user } = await supabase.auth.getUser();
+    if (user?.user) {
+      await supabase.from('search_queries').insert({
+        user_id: user.user.id,
+        query,
+        corrected_query: correctedQuery,
+        model_used: 'keyword', // In a real app, this would be the AI model used
+        results_count: combinedResults.length
+      });
     }
     
-    // Get regular search results
-    const productResults = await searchProducts(query, filters);
-    
-    // Look for businesses and services matching the query
-    const businessResults = await searchBusinesses(query);
-    
-    // Check for spelling corrections (simplified for now)
-    const correctedQuery = checkSpellingCorrection(query);
-    
-    // Merge and sort results, with sponsored results at top
-    const allResults = [...sponsoredResults, ...productResults, ...businessResults];
+    // Also increment search suggestion frequency or create new suggestion
+    try {
+      const { data: existingSuggestion } = await supabase
+        .from('search_suggestions')
+        .select('id, frequency')
+        .eq('term', query)
+        .maybeSingle();
+        
+      if (existingSuggestion) {
+        // Increment frequency
+        await supabase
+          .from('search_suggestions')
+          .update({ 
+            frequency: existingSuggestion.frequency + 1,
+            last_used: new Date().toISOString()
+          })
+          .eq('id', existingSuggestion.id);
+      } else if (combinedResults.length > 0) {
+        // Only add suggestion if it returned results
+        await supabase
+          .from('search_suggestions')
+          .insert({
+            term: query,
+            frequency: 1,
+            category: combinedResults[0].category
+          });
+      }
+    } catch (suggestionError) {
+      console.error('Error updating search suggestions:', suggestionError);
+    }
     
     return {
-      results: allResults,
-      correctedQuery: correctedQuery !== query ? correctedQuery : undefined
+      results: combinedResults,
+      correctedQuery
     };
   } catch (error) {
     console.error('Error performing search:', error);
@@ -182,312 +225,50 @@ export const performSearch = async (
   }
 };
 
-// Simple spelling correction (placeholder for more advanced implementation)
-const checkSpellingCorrection = (query: string): string => {
-  // Common misspellings dictionary (simplified example)
-  const corrections: Record<string, string> = {
-    'phne': 'phone',
-    'labtop': 'laptop',
-    'camrea': 'camera',
-    'cloths': 'clothes',
-    'jaket': 'jacket',
-    'shrt': 'shirt'
-  };
-  
-  const words = query.toLowerCase().split(' ');
-  const correctedWords = words.map(word => corrections[word] || word);
-  const corrected = correctedWords.join(' ');
-  
-  return corrected;
-};
-
-// Get sponsored search results
-const getSponsoredResults = async (query: string): Promise<SearchResult[]> => {
+// Record when a user clicks on a search result
+export const recordSearchResultClick = async (
+  resultId: string,
+  isSponsored: boolean,
+  query: string
+): Promise<void> => {
   try {
-    // Find sponsored terms that match the search query
-    const { data: sponsoredTerms } = await supabase
-      .from('sponsored_search_terms')
-      .select(`
-        *,
-        businesses(id, name, description, image_url, category)
-      `)
-      .eq('status', 'active')
-      .lte('spent_today', supabase.raw('max_daily_budget'))
-      .or(`term.ilike.%${query}%, term.eq.${query}`);
+    // Log the click for analytics
+    const { data: user } = await supabase.auth.getUser();
     
-    if (!sponsoredTerms || sponsoredTerms.length === 0) {
-      return [];
-    }
+    // Increment product views
+    await supabase.rpc('increment_product_views', { product_id_param: resultId });
     
-    // Increment impressions for these terms
-    const termIds = sponsoredTerms.map(term => term.id);
-    await supabase.rpc('increment_sponsored_impressions', { term_ids: termIds });
-    
-    // Get products from these businesses that match the query
-    const businessIds = sponsoredTerms.map(term => term.business_id);
-    
-    const { data: products } = await supabase
-      .from('products')
-      .select('*')
-      .in('user_id', businessIds)
-      .or(`title.ilike.%${query}%, description.ilike.%${query}%`)
-      .limit(3);
-    
-    if (!products || products.length === 0) {
-      return [];
-    }
-    
-    // Convert to search results with sponsored flag
-    return products.map(product => ({
-      id: product.id,
-      title: product.title,
-      description: product.description,
-      imageUrl: product.image_url,
-      category: product.category,
-      price: product.price,
-      type: 'product',
-      url: `/product/${product.id}`,
-      isSponsored: true
-    }));
-  } catch (error) {
-    console.error('Error getting sponsored results:', error);
-    return [];
-  }
-};
-
-// Search businesses
-const searchBusinesses = async (query: string): Promise<SearchResult[]> => {
-  try {
-    const { data, error } = await supabase
-      .from('businesses')
-      .select('*')
-      .or(`name.ilike.%${query}%, description.ilike.%${query}%, category.ilike.%${query}%`)
-      .order('verified', { ascending: false })
-      .limit(5);
-    
-    if (error) throw error;
-    
-    return (data || []).map(business => ({
-      id: business.id,
-      title: business.name,
-      description: business.description,
-      imageUrl: business.image_url,
-      category: business.category,
-      type: 'business',
-      url: `/business/${business.id}`,
-      isSponsored: false
-    }));
-  } catch (error) {
-    console.error('Error searching businesses:', error);
-    return [];
-  }
-};
-
-// Record a click on a search result
-export const recordSearchResultClick = async (resultId: string, isSponsored: boolean, query: string) => {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    
-    // Update the user's recent search
-    const { data: searchQueries } = await supabase
-      .from('search_queries')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('query', query)
-      .order('created_at', { ascending: false })
-      .limit(1);
-    
-    if (searchQueries && searchQueries.length > 0) {
-      await supabase
-        .from('search_queries')
-        .update({
-          clicked_results: supabase.raw(`clicked_results || '{"${resultId}": "${new Date().toISOString()}"}'::jsonb`)
-        })
-        .eq('id', searchQueries[0].id);
-    }
-    
-    // If it's a sponsored result, record the click and update billing
+    // If it's a sponsored result, record the click for billing
     if (isSponsored) {
-      // First, find which sponsored term led to this result
-      const { data: products } = await supabase
-        .from('products')
-        .select('user_id')
-        .eq('id', resultId)
-        .single();
-      
-      if (products) {
-        const { data: sponsoredTerms } = await supabase
-          .from('sponsored_search_terms')
-          .select('id, bid_amount')
-          .eq('business_id', products.user_id)
-          .like('term', `%${query}%`)
-          .eq('status', 'active')
-          .limit(1);
+      // In a real app, this would update ad metrics and billing
+      console.log('Recording sponsored click for', resultId);
+    }
+    
+    // Record user interaction if logged in
+    if (user?.user) {
+      // Update the search query with the clicked result
+      const { data: searchQueries } = await supabase
+        .from('search_queries')
+        .select('id')
+        .eq('user_id', user.user.id)
+        .eq('query', query)
+        .order('created_at', { ascending: false })
+        .limit(1);
         
-        if (sponsoredTerms && sponsoredTerms.length > 0) {
-          // Record click and update spend
-          await supabase
-            .from('sponsored_search_terms')
-            .update({
-              clicks: supabase.raw('clicks + 1'),
-              spent_today: supabase.raw(`spent_today + ${sponsoredTerms[0].bid_amount}`)
-            })
-            .eq('id', sponsoredTerms[0].id);
-        }
+      if (searchQueries && searchQueries.length > 0) {
+        await supabase
+          .from('search_queries')
+          .update({
+            clicked_results: supabase.sql`clicked_results || ${JSON.stringify([{
+              result_id: resultId,
+              is_sponsored: isSponsored,
+              clicked_at: new Date().toISOString()
+            }])}`
+          })
+          .eq('id', searchQueries[0].id);
       }
     }
   } catch (error) {
     console.error('Error recording search result click:', error);
-  }
-};
-
-// Save voice recording for speech-to-text processing
-export const saveVoiceRecording = async (audioBlob: Blob): Promise<VoiceSearchData | null> => {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('User must be logged in');
-    
-    // Create a unique filename
-    const filename = `voice-search-${user.id}-${new Date().getTime()}.webm`;
-    
-    // Upload the audio file to Supabase Storage
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('voice-searches')
-      .upload(filename, audioBlob, {
-        contentType: 'audio/webm',
-      });
-    
-    if (uploadError) throw uploadError;
-    
-    // Get the public URL
-    const { data: { publicUrl } } = supabase.storage
-      .from('voice-searches')
-      .getPublicUrl(filename);
-    
-    // Save the record in the database
-    const { data, error } = await supabase
-      .from('voice_search_recordings')
-      .insert({
-        user_id: user.id,
-        audio_url: publicUrl,
-        processed: false
-      })
-      .select()
-      .single();
-    
-    if (error) throw error;
-    
-    return {
-      id: data.id,
-      audioUrl: data.audio_url,
-      createdAt: data.created_at
-    };
-  } catch (error) {
-    console.error('Error saving voice recording:', error);
-    return null;
-  }
-};
-
-// Process voice recording with speech-to-text
-export const processVoiceToText = async (recordingId: string): Promise<string | null> => {
-  try {
-    // Call the speech-to-text edge function
-    const { data, error } = await supabase.functions.invoke('process-voice-search', {
-      body: { recordingId }
-    });
-    
-    if (error) throw error;
-    
-    // Update the database with the transcription
-    if (data.transcription) {
-      await supabase
-        .from('voice_search_recordings')
-        .update({
-          transcription: data.transcription,
-          processed: true
-        })
-        .eq('id', recordingId);
-    }
-    
-    return data.transcription || null;
-  } catch (error) {
-    console.error('Error processing voice to text:', error);
-    return null;
-  }
-};
-
-// Save image for visual search
-export const saveImageSearch = async (imageBlob: Blob): Promise<ImageSearchData | null> => {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('User must be logged in');
-    
-    // Create a unique filename
-    const filename = `image-search-${user.id}-${new Date().getTime()}.jpg`;
-    
-    // Upload the image file to Supabase Storage
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('image-searches')
-      .upload(filename, imageBlob, {
-        contentType: 'image/jpeg',
-      });
-    
-    if (uploadError) throw uploadError;
-    
-    // Get the public URL
-    const { data: { publicUrl } } = supabase.storage
-      .from('image-searches')
-      .getPublicUrl(filename);
-    
-    // Save the record in the database
-    const { data, error } = await supabase
-      .from('image_search_uploads')
-      .insert({
-        user_id: user.id,
-        image_url: publicUrl,
-        processed: false
-      })
-      .select()
-      .single();
-    
-    if (error) throw error;
-    
-    return {
-      id: data.id,
-      imageUrl: data.image_url,
-      createdAt: data.created_at
-    };
-  } catch (error) {
-    console.error('Error saving image search:', error);
-    return null;
-  }
-};
-
-// Process image for visual search
-export const processImageSearch = async (imageId: string): Promise<string | null> => {
-  try {
-    // Call the image-to-text edge function
-    const { data, error } = await supabase.functions.invoke('process-image-search', {
-      body: { imageId }
-    });
-    
-    if (error) throw error;
-    
-    // Update the database with the description
-    if (data.description) {
-      await supabase
-        .from('image_search_uploads')
-        .update({
-          description: data.description,
-          processed: true
-        })
-        .eq('id', imageId);
-    }
-    
-    return data.description || null;
-  } catch (error) {
-    console.error('Error processing image search:', error);
-    return null;
   }
 };

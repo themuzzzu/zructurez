@@ -1,87 +1,142 @@
 
-import { Card } from "../ui/card";
-import { useEffect } from "react";
-import { incrementViews } from "@/services/postService";
-import { useNavigate } from "react-router-dom";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ProductCardImage } from "./ProductCardImage";
-import { ProductCardInfo } from "./ProductCardInfo";
-import { ProductCardActions } from "./ProductCardActions";
-
-interface Product {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  original_price?: number | null;
-  discount_percentage?: number | null;
-  category: string;
-  subcategory: string | null;
-  image_url: string | null;
-  stock: number;
-  views?: number;
-  reach?: number;
-  is_branded?: boolean;
-  is_used?: boolean;
-  is_discounted?: boolean;
-}
+import { Button } from "@/components/ui/button";
+import { ShoppingCart, Heart, Star } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 interface ProductCardProps {
-  product: Product;
+  product: {
+    id: string;
+    title: string;
+    price: number;
+    image_url?: string;
+    description?: string;
+    category?: string;
+    is_discounted?: boolean;
+    discount_percentage?: number;
+    original_price?: number;
+    views?: number;
+    sales_count?: number;
+    trending_score?: number;
+  };
+  onClick?: () => void;
 }
 
-export const ProductCard = ({ product }: ProductCardProps) => {
+export const ProductCard = ({ product, onClick }: ProductCardProps) => {
   const navigate = useNavigate();
-
-  useEffect(() => {
-    incrementViews('products', product.id);
-  }, [product.id]);
-
-  const handleProductClick = () => {
-    navigate(`/product/${product.id}`);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  
+  const handleClick = () => {
+    if (onClick) {
+      onClick();
+    } else {
+      navigate(`/product/${product.id}`);
+    }
   };
-
+  
+  const addToCart = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    try {
+      setIsAddingToCart(true);
+      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("Please sign in to add items to your cart");
+        return;
+      }
+      
+      const { error } = await supabase.from('cart_items').insert({
+        user_id: user.id,
+        product_id: product.id,
+        quantity: 1
+      });
+      
+      if (error) throw error;
+      toast.success("Product added to cart");
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      toast.error("Failed to add product to cart");
+    } finally {
+      setIsAddingToCart(false);
+    }
+  };
+  
   return (
-    <Card className="overflow-hidden group transition-all duration-300 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 hover:shadow-md hover:border-blue-200 dark:hover:border-blue-700 rounded-xl">
-      <div className="relative">
-        <ProductCardImage 
-          imageUrl={product.image_url}
-          title={product.title}
-          price={product.price}
-          onClick={handleProductClick}
-          productId={product.id}
-        />
-        
+    <Card className="overflow-hidden hover:shadow-md transition-all h-full">
+      <div 
+        className="aspect-square relative cursor-pointer" 
+        onClick={handleClick}
+      >
+        {product.image_url ? (
+          <img 
+            src={product.image_url} 
+            alt={product.title} 
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
+        ) : (
+          <div className="w-full h-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+            <span className="text-muted-foreground">No image</span>
+          </div>
+        )}
         {product.is_discounted && (
-          <Badge className="absolute top-2 left-2 bg-red-500 hover:bg-red-600 text-white text-xs font-bold">
-            SALE
+          <Badge className="absolute top-2 right-2 bg-red-500">
+            {product.discount_percentage}% OFF
           </Badge>
         )}
-        
-        {product.is_branded && (
-          <Badge variant="outline" className="absolute bottom-2 left-2 bg-white/80 dark:bg-black/50 text-xs border-0">
-            PREMIUM
-          </Badge>
-        )}
+        <Button 
+          size="icon" 
+          variant="ghost" 
+          className="absolute top-2 left-2 h-8 w-8 bg-white/80 hover:bg-white dark:bg-black/80 dark:hover:bg-black text-pink-500 hover:text-pink-600"
+          onClick={(e) => {
+            e.stopPropagation();
+            toast.success("Added to wishlist");
+          }}
+        >
+          <Heart className="h-4 w-4" />
+        </Button>
       </div>
       
-      <ProductCardInfo 
-        title={product.title}
-        description={product.description}
-        category={product.category}
-        subcategory={product.subcategory}
-        price={product.price}
-        originalPrice={product.original_price}
-        discountPercentage={product.discount_percentage}
-        onClick={handleProductClick}
-        stock={product.stock}
-      />
-      
-      <ProductCardActions 
-        productId={product.id}
-        stock={product.stock}
-        views={product.views || 0}
-      />
+      <div className="p-3 flex flex-col h-[calc(100%-100%)]">
+        <h3 className="font-medium text-sm line-clamp-2 flex-grow" title={product.title}>
+          {product.title}
+        </h3>
+        
+        <div className="mt-2">
+          <div className="flex items-center mb-1">
+            <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
+            <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
+            <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
+            <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
+            <Star className="h-3 w-3 text-yellow-500" />
+            <span className="text-xs text-muted-foreground ml-1">(4.0)</span>
+          </div>
+          
+          <div className="flex items-baseline gap-2">
+            <span className="text-lg font-bold">₹{product.price}</span>
+            {product.is_discounted && product.original_price && (
+              <span className="text-sm text-muted-foreground line-through">
+                ₹{product.original_price}
+              </span>
+            )}
+          </div>
+        </div>
+        
+        <Button 
+          className="w-full mt-2"
+          size="sm"
+          onClick={addToCart}
+          disabled={isAddingToCart}
+        >
+          <ShoppingCart className="mr-2 h-4 w-4" />
+          Add to Cart
+        </Button>
+      </div>
     </Card>
   );
 };

@@ -1,70 +1,51 @@
 
 import { useState, useRef, useEffect } from "react";
-import { Search, Mic, Camera, X, CornerDownLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { 
-  Popover,
-  PopoverContent,
-  PopoverTrigger
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
 import { useSearch } from "@/hooks/useSearch";
-import { useVoiceSearch } from "@/hooks/useVoiceSearch";
-import { useImageSearch } from "@/hooks/useImageSearch";
-import { SearchSuggestion } from "@/types/search";
+import { Search as SearchIcon, X, Mic, Image } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { useClickOutside } from "@/hooks/useClickOutside";
+import { useNavigate } from "react-router-dom";
 import { VoiceSearchRecorder } from "./VoiceSearchRecorder";
 import { ImageSearchUploader } from "./ImageSearchUploader";
 
 interface SearchBarProps {
-  className?: string;
-  onSearch?: (query: string) => void;
   placeholder?: string;
+  onSearch?: (query: string) => void;
+  showSuggestions?: boolean;
   autoFocus?: boolean;
+  className?: string;
   showVoiceSearch?: boolean;
   showImageSearch?: boolean;
 }
 
 export function SearchBar({
-  className,
+  placeholder = "Search...",
   onSearch,
-  placeholder = "Search products, businesses, services...",
+  showSuggestions = true,
   autoFocus = false,
-  showVoiceSearch = true,
-  showImageSearch = true,
+  className = "",
+  showVoiceSearch = false,
+  showImageSearch = false,
 }: SearchBarProps) {
+  const navigate = useNavigate();
+  const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [isFocused, setIsFocused] = useState(false);
-  const [voiceModalOpen, setVoiceModalOpen] = useState(false);
-  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [isVoiceSearchOpen, setIsVoiceSearchOpen] = useState(false);
+  const [isImageSearchOpen, setIsImageSearchOpen] = useState(false);
   
-  const { 
-    query, 
-    setQuery, 
+  const {
+    query,
+    setQuery,
     suggestions,
-    showSuggestions,
-    setShowSuggestions,
+    isLoading,
     applySuggestion,
-    search
+    showSuggestions: showSuggestionsState,
+    setShowSuggestions
   } = useSearch({
-    suggestionsEnabled: true
-  });
-  
-  const { startRecording, stopRecording } = useVoiceSearch({
-    onTranscription: (text) => {
-      setQuery(text);
-      handleSearch(text);
-      setVoiceModalOpen(false);
-    }
-  });
-  
-  const { handleImageUpload } = useImageSearch({
-    onImageProcessed: (description) => {
-      setQuery(description);
-      handleSearch(description);
-      setImageModalOpen(false);
-    }
+    suggestionsEnabled: showSuggestions,
   });
   
   // Focus input on mount if autoFocus is true
@@ -74,150 +55,133 @@ export function SearchBar({
     }
   }, [autoFocus]);
   
-  // Handle input focus
-  const handleFocus = () => {
-    setIsFocused(true);
-    setShowSuggestions(true);
-  };
-  
-  // Handle input blur
-  const handleBlur = () => {
-    // Delay hiding suggestions to allow for clicks
-    setTimeout(() => {
-      setIsFocused(false);
-      setShowSuggestions(false);
-    }, 150);
-  };
-  
-  // Handle suggestion click
-  const handleSuggestionClick = (suggestion: SearchSuggestion) => {
-    applySuggestion(suggestion);
-    if (onSearch) {
-      onSearch(suggestion.term);
-    }
-  };
+  // Handle click outside to close suggestions
+  useClickOutside(searchRef, () => {
+    setShowSuggestions(false);
+  });
   
   // Handle search submission
-  const handleSearch = (searchQuery: string = query) => {
-    search(searchQuery);
-    setShowSuggestions(false);
-    if (onSearch) {
-      onSearch(searchQuery);
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (query.trim()) {
+      if (onSearch) {
+        onSearch(query);
+      } else {
+        navigate(`/search?q=${encodeURIComponent(query)}`);
+      }
+      setShowSuggestions(false);
     }
   };
   
-  // Handle Enter key press
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      handleSearch();
+  // Handle voice search result
+  const handleVoiceSearchResult = (transcript: string) => {
+    setQuery(transcript);
+    setIsVoiceSearchOpen(false);
+    
+    if (transcript.trim() && onSearch) {
+      onSearch(transcript);
+    }
+  };
+  
+  // Handle image search result
+  const handleImageSearchResult = (description: string) => {
+    setQuery(description);
+    setIsImageSearchOpen(false);
+    
+    if (description.trim() && onSearch) {
+      onSearch(description);
     }
   };
   
   return (
-    <div className={cn("relative w-full", className)}>
-      <div className="relative flex items-center">
-        <Search className="absolute left-3 h-4 w-4 text-muted-foreground" />
-        
+    <div ref={searchRef} className={`relative ${className}`}>
+      <form onSubmit={handleSubmit} className="relative">
         <Input
           ref={inputRef}
+          type="text"
+          placeholder={placeholder}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          onKeyDown={handleKeyDown}
-          placeholder={placeholder}
-          className={cn(
-            "pl-9 pr-[4.5rem] h-10",
-            isFocused && "border-primary ring-1 ring-primary"
-          )}
+          onFocus={() => showSuggestions && setShowSuggestions(true)}
+          className="pl-10 pr-16 h-11 w-full bg-white dark:bg-zinc-800"
         />
+        <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         
-        {query && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="absolute right-[4.5rem] h-7 w-7"
-            onClick={() => setQuery("")}
-          >
-            <X className="h-4 w-4" />
-            <span className="sr-only">Clear search</span>
-          </Button>
-        )}
-        
-        <div className="absolute right-1 flex space-x-1">
+        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
+          {query && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6"
+              onClick={() => setQuery("")}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
+          
           {showVoiceSearch && (
-            <Popover open={voiceModalOpen} onOpenChange={setVoiceModalOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                >
-                  <Mic className="h-4 w-4" />
-                  <span className="sr-only">Voice search</span>
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80 p-0">
-                <VoiceSearchRecorder
-                  onStart={startRecording}
-                  onStop={stopRecording}
-                  onCancel={() => setVoiceModalOpen(false)}
-                />
-              </PopoverContent>
-            </Popover>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={() => setIsVoiceSearchOpen(true)}
+            >
+              <Mic className="h-4 w-4 text-muted-foreground" />
+            </Button>
           )}
           
           {showImageSearch && (
-            <Popover open={imageModalOpen} onOpenChange={setImageModalOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                >
-                  <Camera className="h-4 w-4" />
-                  <span className="sr-only">Image search</span>
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80 p-0">
-                <ImageSearchUploader 
-                  onUpload={handleImageUpload}
-                  onCancel={() => setImageModalOpen(false)}
-                />
-              </PopoverContent>
-            </Popover>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={() => setIsImageSearchOpen(true)}
+            >
+              <Image className="h-4 w-4 text-muted-foreground" />
+            </Button>
           )}
         </div>
-      </div>
+      </form>
       
-      {/* Suggestions popover */}
-      {showSuggestions && suggestions.length > 0 && (
-        <div className="absolute top-full left-0 w-full z-50 bg-white dark:bg-zinc-800 shadow-lg rounded-md mt-1 border border-input overflow-hidden">
+      {/* Suggestions dropdown */}
+      {showSuggestionsState && suggestions.length > 0 && (
+        <Card className="absolute z-10 w-full mt-1 shadow-lg overflow-hidden">
           <ul className="py-1">
             {suggestions.map((suggestion) => (
-              <li
+              <li 
                 key={suggestion.id}
-                className="px-3 py-2 hover:bg-muted cursor-pointer flex items-center justify-between"
-                onClick={() => handleSuggestionClick(suggestion)}
+                className="px-4 py-2 cursor-pointer hover:bg-accent flex items-center justify-between"
+                onClick={() => applySuggestion(suggestion)}
               >
-                <div className="flex items-center gap-2">
-                  <Search className="h-3 w-3 text-muted-foreground" />
-                  <span>{suggestion.term}</span>
-                </div>
+                <span>{suggestion.term}</span>
                 {suggestion.isSponsored && (
-                  <Badge variant="outline" className="text-xs">Sponsored</Badge>
+                  <Badge variant="outline" className="text-xs">
+                    Sponsored
+                  </Badge>
                 )}
               </li>
             ))}
-            <li className="px-3 py-2 text-xs text-muted-foreground border-t flex items-center">
-              <CornerDownLeft className="h-3 w-3 mr-1" /> 
-              Press Enter to search
-            </li>
           </ul>
-        </div>
+        </Card>
+      )}
+      
+      {/* Voice search modal */}
+      {isVoiceSearchOpen && (
+        <VoiceSearchRecorder 
+          onClose={() => setIsVoiceSearchOpen(false)}
+          onTranscriptionComplete={handleVoiceSearchResult}
+        />
+      )}
+      
+      {/* Image search modal */}
+      {isImageSearchOpen && (
+        <ImageSearchUploader
+          onClose={() => setIsImageSearchOpen(false)}
+          onProcessingComplete={handleImageSearchResult}
+        />
       )}
     </div>
   );
