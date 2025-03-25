@@ -46,7 +46,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Layout />}>
+          <Route path="/" element={<Layout><Index /></Layout>}>
             <Route index element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/profile/:id" element={<Profile />} />

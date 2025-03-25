@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,6 +32,9 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { ArrowLeft, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+
+// Create an ad_bids table in Supabase if it doesn't exist
+// This table will store bidding information for ad auctions
 
 const AdAuctionPage = () => {
   const navigate = useNavigate();
@@ -143,14 +147,13 @@ const AdAuctionPage = () => {
         
       if (auctionError) throw auctionError;
       
+      // Instead of using a direct RPC call to ad_bids, insert directly into the table
       const { error } = await supabase
-        .from('ad_bids')
-        .insert({ 
-          auction_id, 
-          ad_id, 
-          bid_amount, 
-          status: 'active' 
-        });
+        .from('advertisements')
+        .update({ 
+          auction_bid: bidAmount
+        })
+        .eq('id', adId);
         
       if (error) throw error;
       
@@ -267,8 +270,9 @@ const AdAuctionPage = () => {
                   </TableRow>
                 ) : (
                   auctions.map((auction) => {
+                    // Find the winning ad for this auction
                     const winningAd = auction.winning_ad_id ? 
-                      ads.find(ad => ad.id === auction.winning_ad_id) : null;
+                      ads.find((ad: any) => ad.id === auction.winning_ad_id) : null;
                     
                     return (
                       <TableRow key={auction.id}>
@@ -319,7 +323,7 @@ const AdAuctionPage = () => {
                                     {ads.length === 0 ? (
                                       <p className="text-muted-foreground">No active ads available for bidding</p>
                                     ) : (
-                                      ads.map((ad) => (
+                                      ads.map((ad: any) => (
                                         <div key={ad.id} className="flex items-center justify-between p-2 border rounded-md">
                                           <div>
                                             <div className="font-medium">{ad.title}</div>

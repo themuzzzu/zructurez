@@ -17,6 +17,7 @@ import {
   CollapsibleTrigger 
 } from "@/components/ui/collapsible";
 import { TargetingOptionsProps } from "../types";
+import { MouseEvent } from "react";
 
 export function TargetingOptions({
   showTargeting,
@@ -38,6 +39,16 @@ export function TargetingOptions({
   targetGender,
   setTargetGender
 }: TargetingOptionsProps) {
+  const handleAddLocation = (e: MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    addTargetingLocation();
+  };
+
+  const handleAddInterest = (e: MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    addTargetingInterest();
+  };
+
   return (
     <Collapsible open={showTargeting} onOpenChange={setShowTargeting}>
       <CollapsibleTrigger asChild>
@@ -56,14 +67,14 @@ export function TargetingOptions({
             />
             <Button 
               type="button" 
-              onClick={addTargetingLocation}
+              onClick={handleAddLocation}
               disabled={!newLocation}
             >
               Add
             </Button>
           </div>
           <div className="flex flex-wrap gap-2 mt-2">
-            {targetingLocations.map((location) => (
+            {targetingLocations.map((location, index) => (
               <Badge 
                 key={location} 
                 variant="secondary"
@@ -72,7 +83,7 @@ export function TargetingOptions({
                 {location}
                 <X 
                   className="h-3 w-3 cursor-pointer" 
-                  onClick={() => removeTargetingLocation(location)} 
+                  onClick={() => removeTargetingLocation(index)} 
                 />
               </Badge>
             ))}
@@ -89,14 +100,14 @@ export function TargetingOptions({
             />
             <Button 
               type="button" 
-              onClick={addTargetingInterest}
+              onClick={handleAddInterest}
               disabled={!newInterest}
             >
               Add
             </Button>
           </div>
           <div className="flex flex-wrap gap-2 mt-2">
-            {targetingInterests.map((interest) => (
+            {targetingInterests.map((interest, index) => (
               <Badge 
                 key={interest} 
                 variant="secondary"
@@ -105,7 +116,7 @@ export function TargetingOptions({
                 {interest}
                 <X 
                   className="h-3 w-3 cursor-pointer" 
-                  onClick={() => removeTargetingInterest(interest)} 
+                  onClick={() => removeTargetingInterest(index)} 
                 />
               </Badge>
             ))}

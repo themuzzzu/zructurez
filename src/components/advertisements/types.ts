@@ -1,5 +1,6 @@
 
 import { AdFormat, AdType } from "@/services/adService";
+import { MouseEventHandler } from "react";
 
 export interface AdFormValues {
   type: AdType;
@@ -70,12 +71,12 @@ export interface TargetingOptionsProps {
   newLocation: string;
   setNewLocation: (location: string) => void;
   targetingLocations: string[];
-  addTargetingLocation: (location: string) => void;
+  addTargetingLocation: () => void;
   removeTargetingLocation: (index: number) => void;
   newInterest: string;
   setNewInterest: (interest: string) => void;
   targetingInterests: string[];
-  addTargetingInterest: (interest: string) => void;
+  addTargetingInterest: () => void;
   removeTargetingInterest: (index: number) => void;
   targetAgeMin: string;
   setTargetAgeMin: (age: string) => void;

@@ -108,8 +108,10 @@ export const useAdvertisementForm = (onClose: () => void) => {
     }
   };
 
-  const removeTargetingLocation = (location: string) => {
-    setTargetingLocations(targetingLocations.filter(loc => loc !== location));
+  const removeTargetingLocation = (index: number) => {
+    const updatedLocations = [...targetingLocations];
+    updatedLocations.splice(index, 1);
+    setTargetingLocations(updatedLocations);
   };
 
   // Targeting interest management
@@ -120,8 +122,10 @@ export const useAdvertisementForm = (onClose: () => void) => {
     }
   };
 
-  const removeTargetingInterest = (interest: string) => {
-    setTargetingInterests(targetingInterests.filter(int => int !== interest));
+  const removeTargetingInterest = (index: number) => {
+    const updatedInterests = [...targetingInterests];
+    updatedInterests.splice(index, 1);
+    setTargetingInterests(updatedInterests);
   };
 
   const formValues: AdFormValues = {

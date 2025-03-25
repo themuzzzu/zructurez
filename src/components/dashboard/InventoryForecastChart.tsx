@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceLine } from "recharts";
 import { ArrowUpIcon, ArrowDownIcon } from "lucide-react";
@@ -9,9 +10,11 @@ interface InventoryForecastChartProps {
     predicted: number;
     reorderPoint?: number;
   }[];
+  inventoryData?: any[];
+  isLoading?: boolean;
 }
 
-export const InventoryForecastChart = ({ data = [] }: InventoryForecastChartProps) => {
+export const InventoryForecastChart = ({ data = [], inventoryData, isLoading }: InventoryForecastChartProps) => {
   // Default data if none provided
   const defaultData = [
     { date: "Jun 1", current: 120, predicted: 120 },
@@ -24,6 +27,7 @@ export const InventoryForecastChart = ({ data = [] }: InventoryForecastChartProp
     { date: "Sep 15", current: null, predicted: 10 }
   ];
 
+  // Use provided data or default
   const chartData = data.length > 0 ? data : defaultData;
   
   // Find the reorder point
