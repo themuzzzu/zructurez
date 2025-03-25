@@ -34,15 +34,15 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="flex pt-16 w-full no-gap"> {/* Added no-gap class */}
+      <div className="flex pt-16 w-full no-gap">
         {!hideSidebar && !isMobile && (
           <div style={{ width: sidebarWidth + 'px' }} className="transition-all duration-300 fixed h-[calc(100vh-64px)] border-r border-zinc-200 dark:border-zinc-800">
             <Sidebar />
           </div>
         )}
         <main 
-          className="flex-1 transition-all duration-300 w-full no-gap" 
-          style={{ marginLeft: hideSidebar || isMobile ? 0 : sidebarWidth + 'px', padding: 0 }}
+          className={`flex-1 transition-all duration-300 w-full ${hideSidebar || isMobile ? 'px-4 sm:px-6' : 'no-gap'}`}
+          style={{ marginLeft: hideSidebar || isMobile ? 0 : sidebarWidth + 'px' }}
         >
           {children}
         </main>

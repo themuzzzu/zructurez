@@ -101,7 +101,7 @@ const Index = () => {
     if (activeTab === "for-you") {
       return (
         posts.map((post) => (
-          <div key={post.id} className="hover:bg-muted/50 transition-colors no-gap">
+          <div key={post.id} className="hover:bg-muted/50 transition-colors">
             <EnhancedPostCard
               id={post.id}
               author={post.profiles?.username || "Unknown"}
@@ -126,7 +126,7 @@ const Index = () => {
 
   return (
     <HomeLayout>
-      <Card className="overflow-hidden border-0 shadow-none rounded-none no-gap">
+      <Card className="overflow-hidden border-0 shadow-none rounded-md">
         <div className="sticky top-0 z-10 bg-background pt-2 pb-1 border-b">
           <div className="flex justify-between items-center mb-2 px-4">
             <h1 className="text-xl font-bold">Home</h1>
@@ -151,13 +151,13 @@ const Index = () => {
               </TabsTrigger>
             </TabsList>
           
-            <TabsContent value="for-you" className="mt-0 no-gap">
-              <div className="space-y-0 divide-y no-gap">
+            <TabsContent value="for-you" className="mt-0">
+              <div className="space-y-0 divide-y">
                 {renderPostsList()}
               </div>
             </TabsContent>
             
-            <TabsContent value="following" className="mt-0 no-gap">
+            <TabsContent value="following" className="mt-0">
               {renderPostsList()}
             </TabsContent>
           </Tabs>
