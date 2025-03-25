@@ -20,7 +20,7 @@ const Jobs = () => {
   const [selectedEmploymentType, setSelectedEmploymentType] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const jobs = [
+  const jobListings = [
     {
       id: 1,
       title: "Software Engineer",
@@ -119,7 +119,7 @@ const Jobs = () => {
 
   const employmentTypeOptions = ["all", "full-time", "part-time", "freelance"];
 
-  const filteredJobs = jobs.filter((job) => {
+  const filteredJobs = jobListings.filter((job) => {
     const matchesJobType = selectedJobType ? job.type === selectedJobType : true;
     const matchesSalaryRange = selectedSalaryRange 
       ? getSalaryRange(job.salary) === selectedSalaryRange 
