@@ -14,14 +14,14 @@ export function HomeLayout({ children }: HomeLayoutProps) {
 
   return (
     <Layout>
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-0 max-w-7xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-0 max-w-7xl mx-auto no-gap">
         {/* Main Content */}
-        <main className="col-span-1 md:col-span-9 lg:col-span-8 border-r border-zinc-200 dark:border-zinc-800">
+        <main className="col-span-1 md:col-span-9 lg:col-span-8 border-r border-zinc-200 dark:border-zinc-800 no-gap">
           {children}
         </main>
 
         {/* Right Sidebar */}
-        <aside className="hidden md:block md:col-span-3 lg:col-span-4">
+        <aside className="hidden md:block md:col-span-3 lg:col-span-4 no-gap">
           <div className="sticky top-20 space-y-4 pl-4 pr-4">
             <div className="bg-muted/50 rounded-lg overflow-hidden">
               <div className="p-4">

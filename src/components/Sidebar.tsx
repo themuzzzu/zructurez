@@ -69,7 +69,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
 
   return (
     <div className={cn(
-      "h-full border-r-0 bg-white dark:bg-black overflow-y-auto transition-all duration-300 fixed left-0 top-16 z-30", 
+      "h-full border-r-0 bg-white dark:bg-black overflow-y-auto transition-all duration-300 fixed left-0 top-16 z-30 no-gap", 
       isCollapsed ? "w-16" : "w-64",
       className
     )}>
@@ -159,4 +159,4 @@ export const Sidebar = ({ className }: SidebarProps) => {
       </div>
     </div>
   );
-};
+}
