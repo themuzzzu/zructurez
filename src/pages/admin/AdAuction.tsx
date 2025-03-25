@@ -28,11 +28,14 @@ import { format } from "date-fns";
 
 interface Auction {
   id: string;
-  ad_placement_id: string;
-  start_date: string;
-  end_date: string;
-  status: string;
+  category: string;
   min_bid: number;
+  current_bid: number;
+  status: string;
+  keyword: string;
+  created_at: string;
+  updated_at: string;
+  winning_ad_id: string | null;
   placement_name?: string;
 }
 
@@ -51,20 +54,35 @@ export default function AdAuction() {
   const [adId, setAdId] = useState("");
   const [bidAmount, setBidAmount] = useState("");
 
+  // Separate queries for auctions and placements
   const { data: auctions, isLoading: auctionsLoading } = useQuery({
     queryKey: ["auctions"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data: auctionsData, error: auctionsError } = await supabase
         .from("ad_auctions")
-        .select("*, ad_placements(name)");
+        .select("*");
 
-      if (error) throw error;
-
-      // Transform data to include placement name
-      return data.map((auction) => ({
+      if (auctionsError) throw auctionsError;
+      
+      // Get all placement names to match with auctions
+      const { data: placementsData, error: placementsError } = await supabase
+        .from("ad_placements")
+        .select("id, name");
+        
+      if (placementsError) throw placementsError;
+      
+      // Create a map of placement ids to names
+      const placementMap = new Map(
+        placementsData.map((placement) => [placement.id, placement.name])
+      );
+      
+      // Combine auction data with placement names
+      return auctionsData.map((auction) => ({
         ...auction,
-        placement_name: auction.ad_placements?.name || "Unknown Placement",
-      }));
+        placement_name: auction.ad_placement_id 
+          ? placementMap.get(auction.ad_placement_id) || "Unknown Placement"
+          : "General Auction"
+      })) as Auction[];
     },
   });
 
@@ -106,7 +124,7 @@ export default function AdAuction() {
     }
 
     try {
-      // Insert into database directly since ad_auction_bids table might not exist yet
+      // Update advertisement to reference the auction
       const { error } = await supabase
         .from("advertisements")
         .update({ 
