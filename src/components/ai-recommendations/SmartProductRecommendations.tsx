@@ -37,7 +37,7 @@ const recommendationTypes: RecommendationType[] = [
   {
     id: 'category',
     label: 'Related Categories',
-    description: 'Items from categories you've shown interest in'
+    description: "Items from categories you've shown interest in"
   }
 ];
 
