@@ -1,78 +1,79 @@
 
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/integrations/supabase/client";
+import { Advertisement, incrementAdClick, incrementAdView } from "@/services/adService";
+import { ExternalLink } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface BannerAdProps {
-  ad: {
-    id: string;
-    title: string;
-    image_url?: string;
-    type: string;
-    reference_id: string;
-  };
+  ad: Advertisement;
+  className?: string;
 }
 
-export const BannerAd = ({ ad }: BannerAdProps) => {
+export function BannerAd({ ad, className }: BannerAdProps) {
   const navigate = useNavigate();
+  const [hasTrackedView, setHasTrackedView] = useState(false);
+  
+  useEffect(() => {
+    const trackImpression = async () => {
+      if (!hasTrackedView) {
+        await incrementAdView(ad.id);
+        setHasTrackedView(true);
+      }
+    };
+    
+    trackImpression();
+  }, [ad.id, hasTrackedView]);
   
   const handleClick = async () => {
-    // Record click
-    try {
-      const { error } = await supabase.rpc('increment_ad_clicks', { ad_id: ad.id });
-      if (error) console.error('Error incrementing clicks:', error);
-      
-      // Navigate based on type
-      switch(ad.type) {
-        case 'business':
-          navigate(`/business/${ad.reference_id}`);
-          break;
-        case 'service':
-          navigate(`/services/${ad.reference_id}`);
-          break;
-        case 'product':
-          navigate(`/product/${ad.reference_id}`);
-          break;
-      }
-    } catch (err) {
-      console.error('Error handling ad click:', err);
+    await incrementAdClick(ad.id);
+    
+    // Direct the user to the appropriate page based on ad type
+    if (ad.type === "product") {
+      navigate(`/product/${ad.reference_id}`);
+    } else if (ad.type === "business") {
+      navigate(`/business/${ad.reference_id}`);
+    } else if (ad.type === "service") {
+      navigate(`/service/${ad.reference_id}`);
+    } else {
+      // Handle external URL or other ad types if needed
+      window.open(ad.image_url, '_blank');
     }
   };
-
+  
   return (
     <Card 
-      className="overflow-hidden cursor-pointer relative hover:shadow-md transition-all border-0"
+      className={`relative overflow-hidden cursor-pointer hover:shadow-lg transition-shadow ${className}`}
       onClick={handleClick}
     >
       {ad.image_url ? (
-        <div className="relative aspect-[5/1] sm:aspect-[6/1] md:aspect-[8/1]">
+        <div className="relative">
           <img 
             src={ad.image_url} 
-            alt={ad.title} 
-            className="w-full h-full object-cover"
+            alt={ad.title}
+            className="w-full h-40 md:h-60 object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/30 to-transparent flex items-center">
-            <div className="p-4 md:p-6 text-white">
-              <h3 className="text-lg md:text-xl font-bold">{ad.title}</h3>
-              <p className="text-sm mt-1">Click to learn more</p>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
+            <div>
+              <h3 className="text-white text-lg font-semibold line-clamp-2">{ad.title}</h3>
+              <p className="text-white/80 text-sm line-clamp-2">{ad.description}</p>
+              <div className="flex items-center text-white text-xs mt-2">
+                <ExternalLink className="h-3 w-3 mr-1" />
+                <span>Sponsored</span>
+              </div>
             </div>
           </div>
-          <Badge className="absolute top-2 right-2 bg-black/70 hover:bg-black text-white border-0">
-            Ad
-          </Badge>
         </div>
       ) : (
-        <div className="bg-gray-100 dark:bg-zinc-900 text-black dark:text-white p-4 flex justify-between items-center aspect-[5/1] sm:aspect-[6/1] md:aspect-[8/1]">
-          <div>
-            <h3 className="font-bold">{ad.title}</h3>
-            <p className="text-sm">Click to learn more</p>
+        <div className="p-4 bg-muted">
+          <h3 className="font-semibold">{ad.title}</h3>
+          <p className="text-muted-foreground text-sm mt-1">{ad.description}</p>
+          <div className="flex items-center text-xs text-muted-foreground mt-2">
+            <ExternalLink className="h-3 w-3 mr-1" />
+            <span>Sponsored</span>
           </div>
-          <Badge className="bg-black/80 hover:bg-black text-white border-0">
-            Ad
-          </Badge>
         </div>
       )}
     </Card>
   );
-};
+}
