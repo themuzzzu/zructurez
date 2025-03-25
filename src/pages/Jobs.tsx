@@ -1,7 +1,5 @@
 
 import { useState } from "react";
-import { Navbar } from "@/components/Navbar";
-import { Sidebar } from "@/components/Sidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -11,6 +9,7 @@ import { CreateBusinessListing } from "@/components/CreateBusinessListing";
 import { useNavigate } from "react-router-dom";
 import { CategoryFilter } from "@/components/CategoryFilter";
 import { Badge } from "@/components/ui/badge";
+import { Layout } from "@/components/layout/Layout";
 
 const Jobs = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -120,6 +119,79 @@ const Jobs = () => {
 
   const employmentTypeOptions = ["all", "full-time", "part-time", "freelance"];
 
+  const jobs = [
+    {
+      id: 1,
+      title: "Software Engineer",
+      company: "Tech Corp",
+      location: "San Francisco, CA",
+      type: "mnc",
+      employmentType: "full-time",
+      salary: 130000,
+      posted: "2 days ago",
+    },
+    {
+      id: 2,
+      title: "Product Manager",
+      company: "Innovation Labs",
+      location: "New York, NY",
+      type: "mnc",
+      employmentType: "full-time",
+      salary: 145000,
+      posted: "1 day ago",
+    },
+    {
+      id: 3,
+      title: "UX Designer",
+      company: "Creative Studio",
+      location: "Los Angeles, CA",
+      type: "local",
+      employmentType: "part-time",
+      salary: 95000,
+      posted: "3 days ago",
+    },
+    {
+      id: 4,
+      title: "Administrative Assistant",
+      company: "Government Office",
+      location: "Washington, DC",
+      type: "government",
+      employmentType: "full-time",
+      salary: 50000,
+      posted: "5 days ago",
+    },
+    {
+      id: 5,
+      title: "Content Writer",
+      company: "Media Group",
+      location: "Chicago, IL",
+      type: "local",
+      employmentType: "freelance",
+      salary: 70000,
+      posted: "1 week ago",
+    },
+    {
+      id: 6,
+      title: "Marketing Consultant",
+      company: "Brand Builders",
+      location: "Remote",
+      type: "mnc",
+      employmentType: "freelance",
+      salary: 85000,
+      posted: "2 weeks ago",
+    },
+    {
+      id: 7,
+      title: "Part-time Accountant",
+      company: "Small Business Solutions",
+      location: "Boston, MA",
+      type: "local",
+      employmentType: "part-time",
+      salary: 45000,
+      posted: "3 days ago",
+    }
+  ];
+
   const filteredJobs = jobs.filter((job) => {
     const matchesJobType = selectedJobType ? job.type === selectedJobType : true;
     const matchesSalaryRange = selectedSalaryRange 
@@ -141,135 +213,131 @@ const Jobs = () => {
   });
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <div className="container max-w-[1400px] pt-16 px-4">
-        <div className="flex gap-6">
-          <Sidebar className="w-64 hidden lg:block sticky top-16 shrink-0" />
-          <main className="flex-1 space-y-6">
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-4">
-                <Button 
-                  variant="ghost" 
-                  size="icon"
-                  onClick={() => navigate('/')}
-                >
-                  <ArrowLeft className="h-5 w-5" />
-                </Button>
-                <h1 className="text-3xl font-bold">Find Your Next Opportunity</h1>
+    <Layout hideSidebar>
+      <div className="container max-w-[1400px] py-6 px-4">
+        <main className="space-y-6">
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-4">
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => navigate('/')}
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <h1 className="text-3xl font-bold">Find Your Next Opportunity</h1>
+            </div>
+            <div className="flex justify-between items-center">
+              <div className="flex gap-4 flex-1">
+                <Input
+                  placeholder="Search jobs by title, company, or location..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="max-w-xl"
+                />
+                <Button>Search</Button>
               </div>
-              <div className="flex justify-between items-center">
-                <div className="flex gap-4 flex-1">
-                  <Input
-                    placeholder="Search jobs by title, company, or location..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="max-w-xl"
-                  />
-                  <Button>Search</Button>
-                </div>
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button className="flex items-center gap-2">
-                      <ListPlus className="h-4 w-4" />
-                      Post a Job
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-0">
-                    <CreateBusinessListing onClose={() => setIsDialogOpen(false)} />
-                  </DialogContent>
-                </Dialog>
-              </div>
-              <CategoryFilter 
-                onCategorySelect={() => {}} 
-                onJobTypeSelect={setSelectedJobType}
-                onSalaryRangeSelect={setSelectedSalaryRange}
-                onLocationSelect={setSelectedLocation}
-                selectedLocation={selectedLocation}
-              />
-              
-              <div className="mt-2">
-                <h3 className="text-sm font-medium mb-2">Employment Type</h3>
-                <div className="flex flex-wrap gap-2">
-                  {employmentTypeOptions.map((type) => (
-                    <Badge
-                      key={type}
-                      variant="outline"
-                      className={`cursor-pointer ${
-                        selectedEmploymentType === type ? 
-                        getEmploymentTypeBadgeColor(type) : 
-                        "hover:bg-accent"
-                      }`}
-                      onClick={() => setSelectedEmploymentType(type)}
-                    >
-                      {type === "all" ? "All Types" : 
-                        type.split('-').map(word => 
-                          word.charAt(0).toUpperCase() + word.slice(1)
-                        ).join('-')}
-                    </Badge>
-                  ))}
-                </div>
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="flex items-center gap-2">
+                    <ListPlus className="h-4 w-4" />
+                    Post a Job
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-0">
+                  <CreateBusinessListing onClose={() => setIsDialogOpen(false)} />
+                </DialogContent>
+              </Dialog>
+            </div>
+            <CategoryFilter 
+              onCategorySelect={() => {}} 
+              onJobTypeSelect={setSelectedJobType}
+              onSalaryRangeSelect={setSelectedSalaryRange}
+              onLocationSelect={setSelectedLocation}
+              selectedLocation={selectedLocation}
+            />
+            
+            <div className="mt-2">
+              <h3 className="text-sm font-medium mb-2">Employment Type</h3>
+              <div className="flex flex-wrap gap-2">
+                {employmentTypeOptions.map((type) => (
+                  <Badge
+                    key={type}
+                    variant="outline"
+                    className={`cursor-pointer ${
+                      selectedEmploymentType === type ? 
+                      getEmploymentTypeBadgeColor(type) : 
+                      "hover:bg-accent"
+                    }`}
+                    onClick={() => setSelectedEmploymentType(type)}
+                  >
+                    {type === "all" ? "All Types" : 
+                      type.split('-').map(word => 
+                        word.charAt(0).toUpperCase() + word.slice(1)
+                      ).join('-')}
+                  </Badge>
+                ))}
               </div>
             </div>
+          </div>
 
-            <div className="grid gap-4">
-              {filteredJobs.length === 0 ? (
-                <Card className="p-6 text-center">
-                  <h3 className="text-lg font-medium mb-2">No jobs found</h3>
-                  <p className="text-muted-foreground">Try adjusting your filters or search query</p>
-                </Card>
-              ) : (
-                filteredJobs.map((job) => (
-                  <Card key={job.id} className="p-6">
-                    <div className="flex flex-col gap-4">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h2 className="text-xl font-semibold">{job.title}</h2>
-                          <div className="flex items-center gap-2 text-muted-foreground mt-1">
-                            <Building className="h-4 w-4" />
-                            <span>{job.company}</span>
-                          </div>
-                        </div>
-                        <div className="flex flex-col items-end gap-2">
-                          <Badge
-                            className={getEmploymentTypeBadgeColor(job.employmentType)}
-                          >
-                            {job.employmentType.split('-').map(word => 
-                              word.charAt(0).toUpperCase() + word.slice(1)
-                            ).join('-')}
-                          </Badge>
-                          <Button>Apply Now</Button>
+          <div className="grid gap-4">
+            {filteredJobs.length === 0 ? (
+              <Card className="p-6 text-center">
+                <h3 className="text-lg font-medium mb-2">No jobs found</h3>
+                <p className="text-muted-foreground">Try adjusting your filters or search query</p>
+              </Card>
+            ) : (
+              filteredJobs.map((job) => (
+                <Card key={job.id} className="p-6">
+                  <div className="flex flex-col gap-4">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h2 className="text-xl font-semibold">{job.title}</h2>
+                        <div className="flex items-center gap-2 text-muted-foreground mt-1">
+                          <Building className="h-4 w-4" />
+                          <span>{job.company}</span>
                         </div>
                       </div>
-                      <div className="flex gap-4 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <MapPin className="h-4 w-4" />
-                          {job.location}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Briefcase className="h-4 w-4" />
-                          {job.type === 'government' ? 'Government' : 
-                           job.type === 'local' ? 'Local' : 
-                           job.type === 'mnc' ? 'MNC' : job.type}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-4 w-4" />
-                          {job.posted}
-                        </div>
-                      </div>
-                      <div className="text-sm">
-                        <span className="font-medium">Salary: </span>
-                        {formatSalary(job.salary)}
+                      <div className="flex flex-col items-end gap-2">
+                        <Badge
+                          className={getEmploymentTypeBadgeColor(job.employmentType)}
+                        >
+                          {job.employmentType.split('-').map(word => 
+                            word.charAt(0).toUpperCase() + word.slice(1)
+                          ).join('-')}
+                        </Badge>
+                        <Button>Apply Now</Button>
                       </div>
                     </div>
-                  </Card>
-                ))
-              )}
-            </div>
-          </main>
-        </div>
+                    <div className="flex gap-4 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <MapPin className="h-4 w-4" />
+                        {job.location}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Briefcase className="h-4 w-4" />
+                        {job.type === 'government' ? 'Government' : 
+                         job.type === 'local' ? 'Local' : 
+                         job.type === 'mnc' ? 'MNC' : job.type}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-4 w-4" />
+                        {job.posted}
+                      </div>
+                    </div>
+                    <div className="text-sm">
+                      <span className="font-medium">Salary: </span>
+                      {formatSalary(job.salary)}
+                    </div>
+                  </div>
+                </Card>
+              ))
+            )}
+          </div>
+        </main>
       </div>
-    </div>
+    </Layout>
   );
 };
 
