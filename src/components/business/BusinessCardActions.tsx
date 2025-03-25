@@ -1,7 +1,5 @@
-
 import { MessageSquare, Share2, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
 interface BusinessCardActionsProps {
   appointment_price?: number;
   onBookClick: (e: React.MouseEvent) => void;
@@ -10,7 +8,6 @@ interface BusinessCardActionsProps {
   onCallClick: (e: React.MouseEvent) => void;
   is_open?: boolean;
 }
-
 export const BusinessCardActions = ({
   appointment_price,
   onBookClick,
@@ -19,42 +16,21 @@ export const BusinessCardActions = ({
   onCallClick,
   is_open
 }: BusinessCardActionsProps) => {
-  return (
-    <div className="grid grid-cols-2 gap-2 pt-2">
-      {appointment_price && (
-        <Button 
-          onClick={onBookClick}
-          className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700"
-          variant="default"
-          disabled={!is_open}
-        >
+  return <div className="grid grid-cols-2 gap-2 pt-2">
+      {appointment_price && <Button onClick={onBookClick} className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700" variant="default" disabled={!is_open}>
           Book Now
-        </Button>
-      )}
-      <Button 
-        onClick={onWhatsAppClick}
-        className={`w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 ${!appointment_price ? 'col-span-2' : ''}`}
-        variant="default"
-      >
+        </Button>}
+      <Button onClick={onWhatsAppClick} className={`w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 ${!appointment_price ? 'col-span-2' : ''}`} variant="default">
         <MessageSquare className="h-4 w-4" />
         Message
       </Button>
-      <Button
-        onClick={onShareClick}
-        variant="outline"
-        className="w-full flex items-center justify-center gap-2 border-gray-700 hover:bg-gray-800"
-      >
+      <Button onClick={onShareClick} variant="outline" className="w-full flex items-center justify-center gap-2 border-gray-700 hover:bg-gray-800 text-slate-50 font-light rounded-3xl text-base text-justify">
         <Share2 className="h-4 w-4" />
         Share
       </Button>
-      <Button 
-        onClick={onCallClick}
-        variant="outline"
-        className="w-full col-span-2 flex items-center justify-center gap-2 border-gray-700 hover:bg-gray-800"
-      >
+      <Button onClick={onCallClick} variant="outline" className="w-full col-span-2 flex items-center justify-center gap-2 border-gray-700 hover:bg-gray-800">
         <Phone className="h-4 w-4" />
         Call
       </Button>
-    </div>
-  );
+    </div>;
 };
