@@ -1,20 +1,14 @@
 
-import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
+import { Label } from "@/components/ui/label";
+import { DateSelectorProps } from "../types";
 
-interface DateSelectorProps {
-  startDate: Date | undefined;
-  endDate: Date | undefined;
-  onStartDateChange: (date: Date | undefined) => void;
-  onEndDateChange: (date: Date | undefined) => void;
-}
-
-export const DateSelector = ({ 
-  startDate, 
-  endDate, 
-  onStartDateChange, 
-  onEndDateChange 
-}: DateSelectorProps) => {
+export function DateSelector({
+  startDate,
+  endDate,
+  onStartDateChange,
+  onEndDateChange
+}: DateSelectorProps) {
   return (
     <div className="grid grid-cols-2 gap-4">
       <div>
@@ -37,4 +31,4 @@ export const DateSelector = ({
       </div>
     </div>
   );
-};
+}

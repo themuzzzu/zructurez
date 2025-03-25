@@ -57,8 +57,8 @@ export const fetchUserAds = async (): Promise<Advertisement[]> => {
 };
 
 export const fetchActiveAds = async (
+  type?: string,
   businessId?: string, 
-  type: string = "sponsored", 
   limit: number = 10
 ) => {
   let query = supabase
@@ -108,7 +108,6 @@ export const incrementAdClick = async (adId: string) => {
   }
 };
 
-// For future use - we'll rely on existing RPC functions for now
 export const recordAdImpression = async (adId: string) => {
   try {
     return await incrementAdView(adId);

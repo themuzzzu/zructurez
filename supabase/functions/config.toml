@@ -1,2 +1,20 @@
 
 project_id = "kjmlxafygdzkrlopyyvk"
+
+[generate-bid-recommendations]
+verify_jwt = true
+max_retries = 0
+[generate-bid-recommendations.import_map_path]
+file = "./import_map.json"
+
+[process-image-search]
+verify_jwt = true
+max_retries = 0
+[process-image-search.import_map_path]
+file = "./import_map.json"
+
+[increment]
+verify_jwt = false
+max_retries = 0
+[increment.import_map_path]
+file = "./import_map.json"

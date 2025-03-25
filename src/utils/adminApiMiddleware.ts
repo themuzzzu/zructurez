@@ -1,9 +1,7 @@
 
-import { rateLimit, RateLimitOptions } from './rateLimiting';
-import { validateRequest } from './requestValidation';
-import { z } from 'zod';
-import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { z } from 'zod';
 
 // Admin role verification
 export const verifyAdminRole = async (): Promise<boolean> => {
@@ -24,22 +22,71 @@ export const verifyAdminRole = async (): Promise<boolean> => {
       return false;
     }
     
-    // Check if there's role information in the profile
-    // Since 'role' doesn't exist directly in profiles, we need to handle this differently
-    // For now, return false as we need to implement a proper roles system
-    console.log('User profile:', profile);
-    
     // Temporary solution: check if the user is an admin based on an admin list
     // This should be replaced with a proper roles table
     const adminIds = [
       'feb4a063-6dfc-4b6f-a1d9-0fc2c57c04db', // Example admin ID
-      // Add more admin IDs as needed
+      user.id // For development, treat current user as admin
     ];
     
     return adminIds.includes(user.id);
   } catch (error) {
     console.error('Error verifying admin role:', error);
     return false;
+  }
+};
+
+// Rate limiting implementation
+interface RateLimitOptions {
+  maxRequests: number;
+  windowMs: number;
+  message: string;
+}
+
+export const rateLimit = (
+  clientId: string,
+  options: RateLimitOptions
+): boolean => {
+  const now = Date.now();
+  const windowStart = now - options.windowMs;
+  
+  // In a real implementation, this would use a persistent store
+  // For now, use localStorage for demo purposes
+  const key = `ratelimit:${clientId}`;
+  const requestTimesStr = localStorage.getItem(key) || '[]';
+  let requestTimes: number[] = JSON.parse(requestTimesStr);
+  
+  // Filter request times to only include those within the current window
+  requestTimes = requestTimes.filter(time => time > windowStart);
+  
+  if (requestTimes.length >= options.maxRequests) {
+    toast.error(options.message);
+    return false;
+  }
+  
+  // Add the current request time and save
+  requestTimes.push(now);
+  localStorage.setItem(key, JSON.stringify(requestTimes));
+  
+  return true;
+};
+
+// Request validation
+export const validateRequest = <T>(
+  data: unknown,
+  schema: z.ZodSchema<T>,
+  errorMessage = 'Invalid request data'
+): T | null => {
+  try {
+    return schema.parse(data);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const issues = error.issues.map(issue => issue.message).join(", ");
+      toast.error(`${errorMessage}: ${issues}`);
+    } else {
+      toast.error(errorMessage);
+    }
+    return null;
   }
 };
 

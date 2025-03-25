@@ -1,29 +1,34 @@
 
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AdvertisementFormatSelectProps } from "../types";
 import { AdFormat } from "@/services/adService";
 
-interface AdvertisementFormatSelectProps {
-  value: AdFormat;
-  onChange: (value: AdFormat) => void;
-}
-
-export const AdvertisementFormatSelect = ({ value, onChange }: AdvertisementFormatSelectProps) => {
+export function AdvertisementFormatSelect({ value, onChange }: AdvertisementFormatSelectProps) {
   return (
     <div>
-      <Label>Ad Format</Label>
-      <Select value={value} onValueChange={(value: AdFormat) => onChange(value)}>
+      <Label>Advertisement Format</Label>
+      <Select 
+        value={value} 
+        onValueChange={(newValue: AdFormat) => onChange(newValue)}
+      >
         <SelectTrigger>
           <SelectValue placeholder="Select format" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="standard">Standard Ad</SelectItem>
-          <SelectItem value="banner">Banner Ad</SelectItem>
-          <SelectItem value="carousel">Carousel Ad</SelectItem>
-          <SelectItem value="video">Video Ad</SelectItem>
-          <SelectItem value="boosted_post">Boost Existing Post</SelectItem>
+          <SelectItem value="standard">Standard</SelectItem>
+          <SelectItem value="banner">Banner</SelectItem>
+          <SelectItem value="carousel">Carousel</SelectItem>
+          <SelectItem value="video">Video</SelectItem>
+          <SelectItem value="boosted_post">Boosted Post</SelectItem>
         </SelectContent>
       </Select>
     </div>
   );
-};
+}

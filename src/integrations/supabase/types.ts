@@ -44,13 +44,129 @@ export type Database = {
           },
         ]
       }
+      ad_auctions: {
+        Row: {
+          category: string
+          created_at: string | null
+          current_bid: number
+          id: string
+          keyword: string
+          min_bid: number
+          status: string
+          updated_at: string | null
+          winning_ad_id: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          current_bid?: number
+          id?: string
+          keyword: string
+          min_bid?: number
+          status?: string
+          updated_at?: string | null
+          winning_ad_id?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          current_bid?: number
+          id?: string
+          keyword?: string
+          min_bid?: number
+          status?: string
+          updated_at?: string | null
+          winning_ad_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_auctions_winning_ad_id_fkey"
+            columns: ["winning_ad_id"]
+            isOneToOne: false
+            referencedRelation: "advertisements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ad_categories: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          min_bid: number
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          min_bid?: number
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          min_bid?: number
+          name?: string
+        }
+        Relationships: []
+      }
+      ad_placements: {
+        Row: {
+          active: boolean
+          cpc_rate: number
+          cpm_rate: number
+          created_at: string | null
+          description: string | null
+          id: string
+          location: string
+          max_size_kb: number | null
+          name: string
+          priority: number | null
+          size: string | null
+          type: string
+        }
+        Insert: {
+          active?: boolean
+          cpc_rate?: number
+          cpm_rate?: number
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          location: string
+          max_size_kb?: number | null
+          name: string
+          priority?: number | null
+          size?: string | null
+          type: string
+        }
+        Update: {
+          active?: boolean
+          cpc_rate?: number
+          cpm_rate?: number
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          location?: string
+          max_size_kb?: number | null
+          name?: string
+          priority?: number | null
+          size?: string | null
+          type?: string
+        }
+        Relationships: []
+      }
       advertisements: {
         Row: {
           budget: number
           business_id: string | null
+          carousel_images: Json | null
+          clicks: number | null
           created_at: string
           description: string
           end_date: string
+          format: string | null
           id: string
           image_url: string | null
           location: string
@@ -58,16 +174,25 @@ export type Database = {
           reference_id: string
           start_date: string
           status: string
+          targeting_age_max: number | null
+          targeting_age_min: number | null
+          targeting_gender: string | null
+          targeting_interests: Json | null
+          targeting_locations: Json | null
           title: string
           type: string
           user_id: string
+          video_url: string | null
         }
         Insert: {
           budget: number
           business_id?: string | null
+          carousel_images?: Json | null
+          clicks?: number | null
           created_at?: string
           description: string
           end_date: string
+          format?: string | null
           id?: string
           image_url?: string | null
           location: string
@@ -75,16 +200,25 @@ export type Database = {
           reference_id: string
           start_date: string
           status?: string
+          targeting_age_max?: number | null
+          targeting_age_min?: number | null
+          targeting_gender?: string | null
+          targeting_interests?: Json | null
+          targeting_locations?: Json | null
           title: string
           type: string
           user_id: string
+          video_url?: string | null
         }
         Update: {
           budget?: number
           business_id?: string | null
+          carousel_images?: Json | null
+          clicks?: number | null
           created_at?: string
           description?: string
           end_date?: string
+          format?: string | null
           id?: string
           image_url?: string | null
           location?: string
@@ -92,9 +226,15 @@ export type Database = {
           reference_id?: string
           start_date?: string
           status?: string
+          targeting_age_max?: number | null
+          targeting_age_min?: number | null
+          targeting_gender?: string | null
+          targeting_interests?: Json | null
+          targeting_locations?: Json | null
           title?: string
           type?: string
           user_id?: string
+          video_url?: string | null
         }
         Relationships: [
           {
