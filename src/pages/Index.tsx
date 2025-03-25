@@ -126,9 +126,9 @@ const Index = () => {
 
   return (
     <HomeLayout>
-      <Card className="overflow-hidden border-0 shadow-none">
+      <Card className="overflow-hidden border-0 shadow-none rounded-none">
         <div className="sticky top-0 z-10 bg-background pt-2 pb-1 border-b">
-          <div className="flex justify-between items-center mb-2 px-2">
+          <div className="flex justify-between items-center mb-2 px-4">
             <h1 className="text-xl font-bold">Home</h1>
             <Button 
               variant="ghost" 
@@ -151,19 +151,19 @@ const Index = () => {
               </TabsTrigger>
             </TabsList>
           
-            <TabsContent value="for-you" className="mt-2">
+            <TabsContent value="for-you" className="mt-0">
               <div className="space-y-0 divide-y">
                 {renderPostsList()}
               </div>
             </TabsContent>
             
-            <TabsContent value="following" className="mt-2">
+            <TabsContent value="following" className="mt-0">
               {renderPostsList()}
             </TabsContent>
           </Tabs>
         </div>
 
-        <div className="px-2 py-2">
+        <div className="px-4 py-3">
           <CreatePost />
         </div>
         

@@ -57,6 +57,18 @@
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Twitter-like layout fixes */
+  .layout-container {
+    @apply flex h-full w-full;
+  }
+  
+  /* Remove all gaps between layout elements */
+  .no-gap {
+    gap: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
 }
 
 /* Typing indicator animation */

@@ -1,3 +1,4 @@
+
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -68,11 +69,11 @@ export const Sidebar = ({ className }: SidebarProps) => {
 
   return (
     <div className={cn(
-      "h-screen border-r border-zinc-200 bg-white dark:bg-black dark:border-zinc-800 overflow-y-auto transition-all duration-300 fixed left-0 top-16 z-30", 
+      "h-full border-r-0 bg-white dark:bg-black overflow-y-auto transition-all duration-300 fixed left-0 top-16 z-30", 
       isCollapsed ? "w-16" : "w-64",
       className
     )}>
-      <div className="flex justify-end p-2">
+      <div className="flex justify-end py-1 px-1">
         <Button
           variant="ghost"
           size="icon"
@@ -88,7 +89,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
         </Button>
       </div>
       
-      <div className="space-y-2 p-2">
+      <div className="space-y-1 px-1">
         {routes.map((route) => {
           const isActive = location.pathname === route.path;
 
@@ -136,7 +137,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
         {isCollapsed ? (
           <Button
             variant="ghost"
-            className="w-full p-0 justify-center mt-4"
+            className="w-full p-0 justify-center mt-2"
             onClick={toggleTheme}
           >
             <SunMoon className="h-5 w-5 text-muted-foreground" />
@@ -144,7 +145,7 @@ export const Sidebar = ({ className }: SidebarProps) => {
         ) : (
           <Button
             variant="ghost"
-            className="w-full justify-start gap-4 px-4 mt-4"
+            className="w-full justify-start gap-4 px-4 mt-2"
             onClick={toggleTheme}
           >
             <div className="flex items-center justify-center">
