@@ -16,13 +16,13 @@ const setInitialTheme = () => {
   }
   
   // Apply stored font size
-  const storedFontSize = localStorage.getItem('appFontSize');
+  const storedFontSize = localStorage.getItem("appFontSize");
   if (storedFontSize) {
     document.documentElement.style.fontSize = `${storedFontSize}%`;
   }
   
   // Apply stored UI color
-  const storedUiColor = localStorage.getItem('appUiColor');
+  const storedUiColor = localStorage.getItem("appUiColor");
   if (storedUiColor && storedUiColor !== 'default') {
     document.documentElement.classList.add(`ui-${storedUiColor}`);
   }
@@ -32,6 +32,11 @@ const setInitialTheme = () => {
 const addUiColorStyles = () => {
   const style = document.createElement('style');
   style.textContent = `
+    :root {
+      --primary: 221.2 83.2% 53.3%;
+      --primary-foreground: 210 40% 98%;
+    }
+    
     .ui-purple {
       --primary: 271 81% 75%;
       --primary-foreground: 0 0% 100%;
@@ -42,6 +47,24 @@ const addUiColorStyles = () => {
     }
     .ui-yellow {
       --primary: 43 96% 58%;
+      --primary-foreground: 0 0% 0%;
+    }
+    
+    .dark {
+      --primary: 217.2 91.2% 59.8%;
+      --primary-foreground: 222.2 47.4% 11.2%;
+    }
+    
+    .dark.ui-purple {
+      --primary: 271 81% 65%;
+      --primary-foreground: 0 0% 100%;
+    }
+    .dark.ui-red {
+      --primary: 359 84% 48%;
+      --primary-foreground: 0 0% 100%;
+    }
+    .dark.ui-yellow {
+      --primary: 43 96% 53%;
       --primary-foreground: 0 0% 0%;
     }
   `;

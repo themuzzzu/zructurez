@@ -68,10 +68,34 @@ export const useProfileSettings = (
       return false;
     }
   };
+  
+  const updateDisplayPreferences = async (
+    setting: "font_size" | "ui_color",
+    value: number | string
+  ) => {
+    try {
+      const updates: Partial<Profile> = {
+        display_preferences: {
+          ...profile.display_preferences,
+          [setting]: value
+        }
+      };
+      const success = await updateProfile(updates);
+      if (success) {
+        toast.success(`Display preference updated`);
+      }
+      return success;
+    } catch (error) {
+      console.error('Error updating display preferences:', error);
+      toast.error('Failed to update display preferences');
+      return false;
+    }
+  };
 
   return {
     updateThemePreference,
     updatePrivacySettings,
-    updateNotificationPreferences
+    updateNotificationPreferences,
+    updateDisplayPreferences
   };
 };

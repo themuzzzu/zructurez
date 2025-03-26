@@ -56,7 +56,17 @@ export const GeneralSettings = () => {
     }
     
     localStorage.setItem("appUiColor", uiColor);
-  }, [uiColor]);
+    
+    // If the profile exists, update display preferences
+    if (profile && updateProfile) {
+      updateProfile({
+        display_preferences: {
+          ...profile.display_preferences,
+          ui_color: uiColor
+        }
+      });
+    }
+  }, [uiColor, profile, updateProfile]);
 
   const handleThemeChange = async (value: Theme) => {
     setTheme(value);
@@ -95,17 +105,6 @@ export const GeneralSettings = () => {
   const handleUiColorChange = (value: string) => {
     if (!value) return;
     setUiColor(value);
-    
-    // Save UI color preference to profile
-    if (updateProfile) {
-      updateProfile({
-        display_preferences: {
-          ...profile?.display_preferences,
-          ui_color: value
-        }
-      });
-    }
-    
     toast.success(`UI color set to ${value === "default" ? "default" : value}`);
   };
 
@@ -156,7 +155,7 @@ export const GeneralSettings = () => {
               <span>Large</span>
             </div>
             <Slider
-              defaultValue={[fontSize]}
+              value={[fontSize]}
               min={75}
               max={150}
               step={5}
