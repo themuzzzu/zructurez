@@ -1,5 +1,5 @@
 
-import { useState, useEffect, Suspense, lazy } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Layout } from "@/components/layout/Layout";
@@ -16,25 +16,13 @@ import { measureRenderTime } from "@/utils/performanceTracking";
 import { trackNavigation, prefetchCategoryProducts } from "@/services/prefetchService";
 import { useLocation } from "react-router-dom";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { MarketplaceHero } from "@/components/marketplace/MarketplaceHero";
+import { MarketplaceFeatures } from "@/components/marketplace/MarketplaceFeatures";
+import { MarketplacePromotions } from "@/components/marketplace/MarketplacePromotions";
+import { LocalBusinessSpotlight } from "@/components/marketplace/LocalBusinessSpotlight";
+import { BannerCarousel } from "@/components/marketplace/BannerCarousel";
 
-// Lazy load these components for code splitting
-const LazyMarketplaceHero = lazy(() => import("@/components/marketplace/MarketplaceHero").then(
-  module => ({ default: module.MarketplaceHero })
-));
-const LazyMarketplaceFeatures = lazy(() => import("@/components/marketplace/MarketplaceFeatures").then(
-  module => ({ default: module.MarketplaceFeatures })
-));
-const LazyMarketplacePromotions = lazy(() => import("@/components/marketplace/MarketplacePromotions").then(
-  module => ({ default: module.MarketplacePromotions })
-));
-const LazyLocalBusinessSpotlight = lazy(() => import("@/components/marketplace/LocalBusinessSpotlight").then(
-  module => ({ default: module.LocalBusinessSpotlight })
-));
-const LazyBannerCarousel = lazy(() => import("@/components/marketplace/BannerCarousel").then(
-  module => ({ default: module.BannerCarousel })
-));
-
-// Fallback components while lazy components load
+// Fallback components for loading states
 const HeroFallback = () => <Skeleton className="h-56 w-full rounded-lg mb-6" />;
 const FeaturesFallback = () => <Skeleton className="h-32 w-full rounded-lg mb-6" />;
 const PromotionsFallback = () => <Skeleton className="h-48 w-full rounded-lg mb-6" />;
@@ -164,7 +152,7 @@ const OptimizedMarketplace = () => {
           {activeTab === "browse" && (
             <>
               <Suspense fallback={<HeroFallback />}>
-                <LazyMarketplaceHero 
+                <MarketplaceHero 
                   onCategorySelect={handleCategorySelect}
                   onSearch={handleSearchSelect}
                 />
@@ -172,12 +160,12 @@ const OptimizedMarketplace = () => {
               
               {!isMobile && (
                 <Suspense fallback={<Skeleton className="h-56 w-full rounded-lg mb-6" />}>
-                  <LazyBannerCarousel />
+                  <BannerCarousel />
                 </Suspense>
               )}
               
               <Suspense fallback={<FeaturesFallback />}>
-                <LazyMarketplaceFeatures />
+                <MarketplaceFeatures />
               </Suspense>
             </>
           )}
@@ -219,11 +207,11 @@ const OptimizedMarketplace = () => {
           {activeTab === "browse" && (
             <>
               <Suspense fallback={<SpotlightFallback />}>
-                <LazyLocalBusinessSpotlight />
+                <LocalBusinessSpotlight />
               </Suspense>
               
               <Suspense fallback={<PromotionsFallback />}>
-                <LazyMarketplacePromotions />
+                <MarketplacePromotions />
               </Suspense>
             </>
           )}

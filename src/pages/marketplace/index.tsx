@@ -17,18 +17,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { measureRenderTime } from "@/utils/performanceTracking";
 import { globalCache } from "@/utils/cacheUtils";
 
-// Lazy load heavy components
-const LazyMarketplaceFeatures = () => (
-  <Suspense fallback={<Skeleton className="h-40 w-full" />}>
-    <MarketplaceFeatures />
-  </Suspense>
-);
-
-const LazyMarketplacePromotions = () => (
-  <Suspense fallback={<Skeleton className="h-40 w-full" />}>
-    <MarketplacePromotions />
-  </Suspense>
-);
+// Simple fallback components
+const FeaturesFallback = () => <Skeleton className="h-40 w-full" />;
+const PromotionsFallback = () => <Skeleton className="h-40 w-full" />;
 
 const Marketplace = () => {
   // Track initial render performance
@@ -135,7 +126,9 @@ const Marketplace = () => {
           )}
           
           {activeTab === "browse" && (
-            <LazyMarketplaceFeatures />
+            <Suspense fallback={<FeaturesFallback />}>
+              <MarketplaceFeatures />
+            </Suspense>
           )}
           
           <MarketplaceTabs activeTab={activeTab} setActiveTab={setActiveTab}>
@@ -175,7 +168,9 @@ const Marketplace = () => {
           {activeTab === "browse" && (
             <>
               <LocalBusinessSpotlight />
-              <LazyMarketplacePromotions />
+              <Suspense fallback={<PromotionsFallback />}>
+                <MarketplacePromotions />
+              </Suspense>
             </>
           )}
         </div>
