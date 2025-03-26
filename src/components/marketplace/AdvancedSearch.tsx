@@ -4,17 +4,24 @@ import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Mic, Camera, ArrowRight } from "lucide-react";
+import { useState } from "react";
 
 interface AdvancedSearchProps {
   className?: string;
+  onSearch?: (query: string) => void;
 }
 
-export function AdvancedSearch({ className }: AdvancedSearchProps) {
+export function AdvancedSearch({ className, onSearch }: AdvancedSearchProps) {
   const navigate = useNavigate();
+  const [searchValue, setSearchValue] = useState("");
   
   const handleSearch = (query: string) => {
     if (query.trim()) {
-      navigate(`/search?q=${encodeURIComponent(query)}`);
+      if (onSearch) {
+        onSearch(query);
+      } else {
+        navigate(`/marketplace?search=${encodeURIComponent(query)}`);
+      }
     }
   };
   
@@ -35,13 +42,14 @@ export function AdvancedSearch({ className }: AdvancedSearchProps) {
             placeholder="What are you looking for today?"
             showVoiceSearch={true}
             showImageSearch={true}
+            autoFocus={false}
           />
           
           <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
             <Button
               size="sm"
               className="h-8 gap-1 px-3 rounded-full hidden sm:flex"
-              onClick={() => navigate("/search")}
+              onClick={() => handleSearch(searchValue)}
             >
               Search
               <ArrowRight className="h-3.5 w-3.5" />

@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchActiveAds, incrementAdView } from "@/services/adService";
@@ -27,6 +28,17 @@ export const BannerCarousel = () => {
       });
     }
   }, [bannerAds]);
+
+  useEffect(() => {
+    if (!bannerAds.length) return;
+    
+    if (api) {
+      api.on("select", () => {
+        setCurrentSlide(api.selectedScrollSnap());
+        setProgressValue(0); // Reset progress when slide changes
+      });
+    }
+  }, [api, bannerAds.length]);
 
   useEffect(() => {
     if (!bannerAds.length) return;
@@ -61,9 +73,10 @@ export const BannerCarousel = () => {
     };
   }, [bannerAds.length, currentSlide, api]);
 
+  // Fallback content if no banner ads are available
   if (!bannerAds.length) {
     return (
-      <Card className="w-full overflow-hidden bg-white dark:bg-zinc-950">
+      <Card className="w-full overflow-hidden bg-white dark:bg-zinc-950 mb-8">
         <div className="bg-white dark:bg-zinc-950 aspect-[5/1] sm:aspect-[6/1] md:aspect-[8/1] flex items-center justify-center">
           <div className="text-center p-4">
             <h3 className="text-lg md:text-xl font-bold">Discover Great Deals</h3>
@@ -75,7 +88,7 @@ export const BannerCarousel = () => {
   }
 
   return (
-    <div className="w-full relative">
+    <div className="w-full relative mb-8">
       <Carousel
         className="w-full"
         setApi={setApi}

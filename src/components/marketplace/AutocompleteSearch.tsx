@@ -1,9 +1,9 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 
 interface AutocompleteSearchProps {
   placeholder?: string;
@@ -20,6 +20,7 @@ export const AutocompleteSearch = ({
   className,
   onSearchSelect
 }: AutocompleteSearchProps) => {
+  const navigate = useNavigate();
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -100,6 +101,14 @@ export const AutocompleteSearch = ({
     }
   };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (value.trim() && onSearchSelect) {
+      onSearchSelect(value);
+      setShowSuggestions(false);
+    }
+  };
+
   const handleSuggestionClick = (suggestion: string) => {
     onChange(suggestion);
     setShowSuggestions(false);
@@ -110,28 +119,27 @@ export const AutocompleteSearch = ({
 
   return (
     <div className={`relative ${className}`}>
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-zinc-400" />
+      <form onSubmit={handleSubmit} className="relative">
         <Input
           ref={inputRef}
-          type="search"
+          type="text"
           placeholder={placeholder}
           value={value}
           onChange={handleInputChange}
-          className="pl-10 w-full"
+          className="w-full pl-3"
           onFocus={() => {
             setIsFocused(true);
             setShowSuggestions(value.length >= 2);
           }}
-          onBlur={() => setIsFocused(false)}
+          onBlur={() => setTimeout(() => setIsFocused(false), 200)}
         />
-      </div>
+      </form>
 
       {((showSuggestions && suggestions && suggestions.length > 0) || 
          (isFocused && !value && popularSearches && popularSearches.length > 0)) && (
         <div 
           ref={suggestionsRef}
-          className="absolute z-10 mt-1 w-full bg-white dark:bg-zinc-800 shadow-lg rounded-md border border-border overflow-hidden"
+          className="absolute z-50 mt-1 w-full bg-white dark:bg-zinc-800 shadow-lg rounded-md border border-border overflow-hidden"
         >
           <div className="p-2">
             <h4 className="text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">

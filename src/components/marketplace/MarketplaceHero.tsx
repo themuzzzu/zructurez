@@ -17,7 +17,7 @@ export const MarketplaceHero = ({ onCategorySelect, onSearch }: MarketplaceHeroP
           Explore thousands of products from local businesses and trusted sellers
         </p>
         
-        <AdvancedSearch />
+        <AdvancedSearch onSearch={onSearch} />
       </div>
       
       {/* Abstract pattern for the background */}

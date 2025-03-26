@@ -96,6 +96,7 @@ export function SearchBar({
   return (
     <div ref={searchRef} className={`relative ${className}`}>
       <form onSubmit={handleSubmit} className="relative">
+        <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
         <Input
           ref={inputRef}
           type="text"
@@ -105,7 +106,6 @@ export function SearchBar({
           onFocus={() => showSuggestions && setShowSuggestions(true)}
           className="pl-10 pr-16 h-11 w-full bg-white dark:bg-zinc-800"
         />
-        <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         
         <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
           {query && (
@@ -148,7 +148,7 @@ export function SearchBar({
       
       {/* Suggestions dropdown */}
       {showSuggestionsState && suggestions.length > 0 && (
-        <Card className="absolute z-10 w-full mt-1 shadow-lg overflow-hidden">
+        <Card className="absolute z-50 w-full mt-1 shadow-lg overflow-hidden">
           <ul className="py-1">
             {suggestions.map((suggestion) => (
               <li 

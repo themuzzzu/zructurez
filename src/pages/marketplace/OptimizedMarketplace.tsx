@@ -14,7 +14,7 @@ import { fetchWithPerformance } from "@/utils/apiPerformance";
 import { globalCache } from "@/utils/cacheUtils";
 import { measureRenderTime } from "@/utils/performanceTracking";
 import { trackNavigation, prefetchCategoryProducts } from "@/services/prefetchService";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { MarketplaceHero } from "@/components/marketplace/MarketplaceHero";
 import { MarketplaceFeatures } from "@/components/marketplace/MarketplaceFeatures";
@@ -27,8 +27,13 @@ const HeroFallback = () => <Skeleton className="h-56 w-full rounded-lg mb-6" />;
 const FeaturesFallback = () => <Skeleton className="h-32 w-full rounded-lg mb-6" />;
 const PromotionsFallback = () => <Skeleton className="h-48 w-full rounded-lg mb-6" />;
 const SpotlightFallback = () => <Skeleton className="h-40 w-full rounded-lg mb-6" />;
+const BannerFallback = () => <Skeleton className="h-56 w-full rounded-lg mb-6" />;
 
 const OptimizedMarketplace = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  
   // Track initial render performance
   useEffect(() => {
     const startTime = performance.now();
@@ -40,17 +45,30 @@ const OptimizedMarketplace = () => {
   }, []);
 
   const isMobile = useMediaQuery("(max-width: 768px)");
-  const location = useLocation();
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
+  const [selectedCategory, setSelectedCategory] = useState<string>(searchParams.get("category") || "all");
   const [showDiscounted, setShowDiscounted] = useState(false);
   const [showUsed, setShowUsed] = useState(false);
   const [showBranded, setShowBranded] = useState(false);
   const [sortOption, setSortOption] = useState("newest");
   const [priceRange, setPriceRange] = useState("all");
-  const [activeTab, setActiveTab] = useState("browse");
+  const [activeTab, setActiveTab] = useState(searchQuery || selectedCategory !== "all" ? "search" : "browse");
+
+  // Update URL when search or category changes
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (searchQuery) params.set("search", searchQuery);
+    if (selectedCategory !== "all") params.set("category", selectedCategory);
+    
+    const newSearch = params.toString();
+    if (newSearch) {
+      navigate(`/marketplace?${newSearch}`, { replace: true });
+    } else {
+      navigate('/marketplace', { replace: true });
+    }
+  }, [searchQuery, selectedCategory, navigate]);
 
   // Track page navigation for prefetching
   useEffect(() => {
@@ -148,7 +166,7 @@ const OptimizedMarketplace = () => {
         />
 
         <div className="max-w-[1400px] mx-auto px-4">
-          {/* Hero Section - Only visible on browse tab and code-split */}
+          {/* Hero Section - Only visible on browse tab */}
           {activeTab === "browse" && (
             <>
               <Suspense fallback={<HeroFallback />}>
@@ -159,7 +177,7 @@ const OptimizedMarketplace = () => {
               </Suspense>
               
               {!isMobile && (
-                <Suspense fallback={<Skeleton className="h-56 w-full rounded-lg mb-6" />}>
+                <Suspense fallback={<BannerFallback />}>
                   <BannerCarousel />
                 </Suspense>
               )}

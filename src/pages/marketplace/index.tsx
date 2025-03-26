@@ -13,15 +13,22 @@ import { MarketplaceFeatures } from "@/components/marketplace/MarketplaceFeature
 import { MarketplacePromotions } from "@/components/marketplace/MarketplacePromotions";
 import { MarketplaceHero } from "@/components/marketplace/MarketplaceHero";
 import { LocalBusinessSpotlight } from "@/components/marketplace/LocalBusinessSpotlight";
+import { BannerCarousel } from "@/components/marketplace/BannerCarousel";
 import { Skeleton } from "@/components/ui/skeleton";
 import { measureRenderTime } from "@/utils/performanceTracking";
 import { globalCache } from "@/utils/cacheUtils";
+import { useNavigate, useLocation } from "react-router-dom";
 
 // Simple fallback components
 const FeaturesFallback = () => <Skeleton className="h-40 w-full" />;
 const PromotionsFallback = () => <Skeleton className="h-40 w-full" />;
+const BannerFallback = () => <Skeleton className="h-56 w-full rounded-lg mb-6" />;
 
 const Marketplace = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  
   // Track initial render performance
   useEffect(() => {
     const startTime = performance.now();
@@ -34,15 +41,29 @@ const Marketplace = () => {
 
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
+  const [selectedCategory, setSelectedCategory] = useState<string>(searchParams.get("category") || "all");
   const [showDiscounted, setShowDiscounted] = useState(false);
   const [showUsed, setShowUsed] = useState(false);
   const [showBranded, setShowBranded] = useState(false);
   const [sortOption, setSortOption] = useState("newest");
   const [priceRange, setPriceRange] = useState("all");
-  const [activeTab, setActiveTab] = useState("browse");
+  const [activeTab, setActiveTab] = useState(searchQuery || selectedCategory !== "all" ? "search" : "browse");
 
+  // Update URL when search or category changes
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (searchQuery) params.set("search", searchQuery);
+    if (selectedCategory !== "all") params.set("category", selectedCategory);
+    
+    const newSearch = params.toString();
+    if (newSearch) {
+      navigate(`/marketplace?${newSearch}`, { replace: true });
+    } else {
+      navigate('/marketplace', { replace: true });
+    }
+  }, [searchQuery, selectedCategory, navigate]);
+  
   // Optimized cart count query with caching
   const { data: cartItemCount = 0 } = useQuery({
     queryKey: ['cartCount'],
@@ -119,10 +140,16 @@ const Marketplace = () => {
         <div className="max-w-[1400px] mx-auto px-4">
           {/* Hero Section - Only visible on browse tab */}
           {activeTab === "browse" && (
-            <MarketplaceHero 
-              onCategorySelect={handleCategorySelect}
-              onSearch={handleSearchSelect}
-            />
+            <>
+              <MarketplaceHero 
+                onCategorySelect={handleCategorySelect}
+                onSearch={handleSearchSelect}
+              />
+              
+              <Suspense fallback={<BannerFallback />}>
+                <BannerCarousel />
+              </Suspense>
+            </>
           )}
           
           {activeTab === "browse" && (

@@ -28,6 +28,11 @@ export const MarketplaceHeader = ({
 }: MarketplaceHeaderProps) => {
   const navigate = useNavigate();
 
+  const handleSearchSelect = (term: string) => {
+    setSearchQuery(term);
+    navigate(`/search?q=${encodeURIComponent(term)}`);
+  };
+
   return (
     <div className="bg-gradient-to-r from-blue-600 to-blue-500 px-2 sm:px-4 py-3 sm:py-4 mb-4 shadow-md sticky top-0 z-10 transition-all">
       <div className="max-w-[1400px] mx-auto">
@@ -46,14 +51,14 @@ export const MarketplaceHeader = ({
           
           <div className="hidden md:flex items-center flex-1 max-w-2xl mx-4">
             <div className="relative w-full flex items-center">
+              <Search className="absolute left-2 h-4 w-4 text-gray-400 z-10" />
               <AutocompleteSearch 
                 placeholder="Search for products, brands and more..."
                 value={searchQuery}
                 onChange={setSearchQuery}
                 className="w-full bg-white rounded-md pl-9"
-                onSearchSelect={setSearchQuery}
+                onSearchSelect={handleSearchSelect}
               />
-              <Search className="absolute left-2 h-4 w-4 text-gray-400" />
             </div>
           </div>
           
@@ -106,14 +111,14 @@ export const MarketplaceHeader = ({
         
         {/* Mobile Search */}
         <div className="mt-2 md:hidden relative">
+          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 z-10" />
           <AutocompleteSearch 
             placeholder="Search products..."
             value={searchQuery}
             onChange={setSearchQuery}
             className="w-full bg-white pl-9"
-            onSearchSelect={setSearchQuery}
+            onSearchSelect={handleSearchSelect}
           />
-          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
         </div>
       </div>
     </div>
