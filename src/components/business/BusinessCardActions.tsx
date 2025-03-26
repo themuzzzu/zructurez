@@ -24,10 +24,10 @@ export const BusinessCardActions = ({
   const isDarkMode = theme === "dark";
 
   return <div className="grid grid-cols-2 gap-2 pt-2">
-      {appointment_price && <Button onClick={onBookClick} className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700" variant="default" disabled={!is_open}>
+      {appointment_price && <Button onClick={onBookClick} className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90" variant="default" disabled={!is_open}>
           Book Now
         </Button>}
-      <Button onClick={onWhatsAppClick} className={`w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 ${!appointment_price ? 'col-span-2' : ''}`} variant="default">
+      <Button onClick={onWhatsAppClick} className={`w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 ${!appointment_price ? 'col-span-2' : ''}`} variant="default">
         <MessageSquare className="h-4 w-4" />
         Message
       </Button>
