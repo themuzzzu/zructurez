@@ -16,9 +16,17 @@ const setInitialTheme = () => {
   }
 };
 
-// Error handler for React
+// Enhanced error handlers for React
 window.addEventListener('error', (event) => {
   console.error('Global error caught:', event.error);
+  // Prevent the error from breaking the entire app
+  event.preventDefault();
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('Unhandled Promise Rejection:', event.reason);
+  // Prevent the error from breaking the entire app
+  event.preventDefault();
 });
 
 // Run before rendering to prevent flash

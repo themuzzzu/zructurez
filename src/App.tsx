@@ -31,14 +31,19 @@ import BusinessDashboard from "./pages/BusinessDashboard";
 import GenericPage from "./pages/GenericPage";
 import { Layout } from "./components/layout/Layout";
 import { ThemeProvider } from "./components/ThemeProvider";
+import { ErrorView } from "./components/ErrorView";
 import "./App.css";
 
-// Create a query client
+// Create a query client with error handling
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5, // 5 minutes
       retry: 1, // Reduce retries to avoid excessive requests
+      refetchOnWindowFocus: false, // Disable refetching on window focus
+      onError: (error) => {
+        console.error("Query error:", error);
+      }
     },
   },
 });
@@ -49,6 +54,7 @@ function App() {
       <ThemeProvider defaultTheme="system" storageKey="app-theme">
         <BrowserRouter>
           <Routes>
+            {/* Main routes with layout */}
             <Route path="/" element={<Layout><Outlet /></Layout>}>
               <Route index element={<Index />} />
               <Route path="/auth" element={<Auth />} />
@@ -95,7 +101,10 @@ function App() {
               <Route path="/terms" element={<GenericPage title="Terms of Service" />} />
               <Route path="/privacy" element={<GenericPage title="Privacy Policy" />} />
               
-              {/* Add a catch-all route for deployment previews */}
+              {/* Error page for explicit error handling */}
+              <Route path="/error" element={<ErrorView />} />
+              
+              {/* Catch-all route for deployment previews and 404s */}
               <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>

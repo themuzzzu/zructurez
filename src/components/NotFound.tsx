@@ -10,6 +10,18 @@ export const NotFound = () => {
   // Log 404 errors for debugging
   useEffect(() => {
     console.error(`404 Not Found: ${window.location.pathname}`);
+    
+    // Report the 404 for monitoring
+    const reportError = () => {
+      try {
+        // In a real app, you might send this to an error tracking service
+        console.info("Reporting 404 error to monitoring service");
+      } catch (err) {
+        console.error("Failed to report 404 error:", err);
+      }
+    };
+    
+    reportError();
   }, []);
 
   return (
