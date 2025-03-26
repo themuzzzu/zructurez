@@ -112,7 +112,7 @@ const Marketplace = () => {
 
   // Use the measureRenderTime utility for performance tracking
   return measureRenderTime('MarketplacePage', () => (
-    <Layout>
+    <Layout hideSidebar>
       <div className="min-h-screen bg-slate-50 dark:bg-zinc-900 pb-16">
         {/* Header */}
         <MarketplaceHeader 
