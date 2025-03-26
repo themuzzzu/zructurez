@@ -16,4 +16,8 @@ export interface Profile {
     sms?: boolean;
     push?: boolean;
   };
+  display_preferences?: {
+    font_size?: number;
+    ui_color?: string;
+  };
 }
