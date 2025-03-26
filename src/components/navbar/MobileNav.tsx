@@ -24,9 +24,9 @@ const FilledIcon = ({ Icon }: { Icon: React.ElementType }) => {
     <div className="relative">
       <Icon 
         className="h-5 w-5" 
-        fill="currentColor" 
-        stroke={isDarkMode || isStore ? "white" : "black"} 
-        strokeWidth={isStore ? 1 : 1.5} 
+        fill="white" 
+        stroke="black" 
+        strokeWidth={1.5} 
       />
     </div>
   );
@@ -73,11 +73,7 @@ export const MobileNav = () => {
           
           // Create special styling for marketplace when active
           const isMarketplace = item.path === "/marketplace";
-          const marketplaceActiveStyle = isMarketplace && isActive 
-            ? isDarkMode 
-              ? "bg-zinc-800" 
-              : "bg-zinc-800 text-white"
-            : "";
+          const activeStyle = isActive ? "bg-zinc-800 text-white" : "";
           
           return (
             <Button
@@ -86,7 +82,7 @@ export const MobileNav = () => {
               size="icon"
               className={cn(
                 "flex flex-col items-center justify-center h-14 w-14 p-0 gap-1",
-                isActive ? (isMarketplace ? marketplaceActiveStyle : "bg-accent") : ""
+                isActive ? activeStyle : ""
               )}
               onClick={() => navigate(item.path)}
               aria-label={item.label}
@@ -98,7 +94,7 @@ export const MobileNav = () => {
               )}
               <span className={cn(
                 "text-xs font-medium",
-                isMarketplace && isActive && !isDarkMode ? "text-white" : ""
+                isActive ? "text-white" : ""
               )}>
                 {item.label}
               </span>

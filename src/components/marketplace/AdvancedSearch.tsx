@@ -44,8 +44,8 @@ export function AdvancedSearch({ className, onSearch }: AdvancedSearchProps) {
             showVoiceSearch={false}
             showImageSearch={false}
             autoFocus={false}
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
+            query={searchValue}
+            setQuery={setSearchValue}
           />
           
           <div className="absolute right-2 top-1/2 transform -translate-y-1/2">

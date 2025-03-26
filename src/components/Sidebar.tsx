@@ -22,7 +22,7 @@ import { useTheme } from "@/components/ThemeProvider";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 // Custom filled icon component for the sidebar
-const FilledIcon = ({ Icon, isDarkMode }: { Icon: React.ElementType; isDarkMode: boolean }) => {
+const FilledIcon = ({ Icon }: { Icon: React.ElementType }) => {
   // Determine if this is the Store icon (for marketplace)
   const isStore = Icon === Store;
   
@@ -30,12 +30,9 @@ const FilledIcon = ({ Icon, isDarkMode }: { Icon: React.ElementType; isDarkMode:
     <div className="relative">
       <Icon 
         size={20} 
-        className={cn(
-          isDarkMode ? "text-white" : "text-black",
-          isStore && !isDarkMode ? "fill-gray-900" : "" // Make store icon lines black in light mode
-        )}
-        strokeWidth={1.75} 
-        fill="currentColor" 
+        fill="white" 
+        stroke="black" 
+        strokeWidth={1.5}
       />
     </div>
   );
@@ -122,11 +119,7 @@ export const Sidebar = ({ className }: React.HTMLAttributes<HTMLDivElement>) => 
         {routes.map((route) => {
           const isActive = activeItem === route.path;
           // For the active item, we'll apply a dark square background similar to the image
-          const activeBackground = route.path === "/marketplace" && isActive 
-            ? "bg-zinc-800 dark:bg-zinc-800" 
-            : isDarkMode 
-              ? "bg-zinc-800" 
-              : "bg-zinc-200 dark:bg-zinc-800";
+          const activeBackground = "bg-zinc-800";
 
           return isCollapsed ? (
             <Button
@@ -143,7 +136,7 @@ export const Sidebar = ({ className }: React.HTMLAttributes<HTMLDivElement>) => 
               onClick={() => handleItemClick(route.path)}
             >
               {isActive ? (
-                <FilledIcon Icon={route.icon} isDarkMode={isDarkMode} />
+                <FilledIcon Icon={route.icon} />
               ) : (
                 <route.icon className={cn("h-5 w-5", 
                   isDarkMode 
@@ -168,7 +161,7 @@ export const Sidebar = ({ className }: React.HTMLAttributes<HTMLDivElement>) => 
             >
               <div className="flex items-center justify-center">
                 {isActive ? (
-                  <FilledIcon Icon={route.icon} isDarkMode={isDarkMode} />
+                  <FilledIcon Icon={route.icon} />
                 ) : (
                   <route.icon size={20} className={cn(
                     "text-muted-foreground"
@@ -178,9 +171,7 @@ export const Sidebar = ({ className }: React.HTMLAttributes<HTMLDivElement>) => 
               <span className={cn(
                 "text-sm",
                 isActive 
-                  ? isDarkMode
-                    ? "font-bold text-foreground" 
-                    : "font-bold text-foreground"
+                  ? "font-bold text-white" 
                   : "text-muted-foreground"
               )}>
                 {route.name}
