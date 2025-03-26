@@ -13,11 +13,21 @@ import { cn } from "@/lib/utils";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 // Create a filled icon component for mobile nav
-const FilledIcon = ({ Icon }: { Icon: React.ElementType }) => (
-  <div className="relative">
-    <Icon className="h-5 w-5" fill="currentColor" stroke="black" strokeWidth={1.5} />
-  </div>
-);
+const FilledIcon = ({ Icon }: { Icon: React.ElementType }) => {
+  const { theme } = useTheme();
+  const isDarkMode = theme === "dark";
+  
+  return (
+    <div className="relative">
+      <Icon 
+        className="h-5 w-5" 
+        fill="currentColor" 
+        stroke={isDarkMode ? "white" : "black"} 
+        strokeWidth={1.5} 
+      />
+    </div>
+  );
+};
 
 export const MobileNav = () => {
   const location = useLocation();

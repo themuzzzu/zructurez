@@ -1,3 +1,4 @@
+
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -21,9 +22,14 @@ import { useTheme } from "@/components/ThemeProvider";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 // Create a filled icon component
-const FilledIcon = ({ Icon }: { Icon: React.ElementType }) => (
+const FilledIcon = ({ Icon, isDarkMode }: { Icon: React.ElementType; isDarkMode: boolean }) => (
   <div className="relative">
-    <Icon size={20} className="text-white" strokeWidth={1.75} fill="currentColor" />
+    <Icon 
+      size={20} 
+      className={isDarkMode ? "text-white" : "text-black"}
+      strokeWidth={1.75} 
+      fill="currentColor" 
+    />
   </div>
 );
 
@@ -125,7 +131,7 @@ export const Sidebar = ({ className }: React.HTMLAttributes<HTMLDivElement>) => 
               onClick={() => handleItemClick(route.path)}
             >
               {isActive ? (
-                <FilledIcon Icon={route.icon} />
+                <FilledIcon Icon={route.icon} isDarkMode={isDarkMode} />
               ) : (
                 <route.icon className={cn("h-5 w-5", 
                   isDarkMode 
@@ -152,7 +158,7 @@ export const Sidebar = ({ className }: React.HTMLAttributes<HTMLDivElement>) => 
             >
               <div className="flex items-center justify-center">
                 {isActive ? (
-                  <FilledIcon Icon={route.icon} />
+                  <FilledIcon Icon={route.icon} isDarkMode={isDarkMode} />
                 ) : (
                   <route.icon size={20} className={cn(
                     "text-muted-foreground"
