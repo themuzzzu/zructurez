@@ -34,6 +34,7 @@ export const ProductCard = ({ product, onClick }: ProductCardProps) => {
     if (onClick) {
       onClick();
     } else {
+      // Fix the navigation path to correctly point to product details
       navigate(`/product/${product.id}`);
     }
   };

@@ -169,22 +169,14 @@ const OptimizedMarketplace = () => {
           {/* Hero Section - Only visible on browse tab */}
           {activeTab === "browse" && (
             <>
-              <Suspense fallback={<HeroFallback />}>
-                <MarketplaceHero 
-                  onCategorySelect={handleCategorySelect}
-                  onSearch={handleSearchSelect}
-                />
-              </Suspense>
+              <MarketplaceHero 
+                onCategorySelect={handleCategorySelect}
+                onSearch={handleSearchSelect}
+              />
               
-              {!isMobile && (
-                <Suspense fallback={<BannerFallback />}>
-                  <BannerCarousel />
-                </Suspense>
-              )}
+              <BannerCarousel />
               
-              <Suspense fallback={<FeaturesFallback />}>
-                <MarketplaceFeatures />
-              </Suspense>
+              <MarketplaceFeatures />
             </>
           )}
           
@@ -224,13 +216,8 @@ const OptimizedMarketplace = () => {
           
           {activeTab === "browse" && (
             <>
-              <Suspense fallback={<SpotlightFallback />}>
-                <LocalBusinessSpotlight />
-              </Suspense>
-              
-              <Suspense fallback={<PromotionsFallback />}>
-                <MarketplacePromotions />
-              </Suspense>
+              <LocalBusinessSpotlight />
+              <MarketplacePromotions />
             </>
           )}
         </div>

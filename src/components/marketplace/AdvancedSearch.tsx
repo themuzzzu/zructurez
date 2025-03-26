@@ -3,7 +3,7 @@ import { SearchBar } from "@/components/search/SearchBar";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Mic, Camera, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useState } from "react";
 
 interface AdvancedSearchProps {
@@ -20,6 +20,7 @@ export function AdvancedSearch({ className, onSearch }: AdvancedSearchProps) {
       if (onSearch) {
         onSearch(query);
       } else {
+        // Ensure we're navigating to the correct marketplace search URL
         navigate(`/marketplace?search=${encodeURIComponent(query)}`);
       }
     }
@@ -40,9 +41,11 @@ export function AdvancedSearch({ className, onSearch }: AdvancedSearchProps) {
           <SearchBar
             onSearch={handleSearch}
             placeholder="What are you looking for today?"
-            showVoiceSearch={true}
-            showImageSearch={true}
+            showVoiceSearch={false}
+            showImageSearch={false}
             autoFocus={false}
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
           />
           
           <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
@@ -69,25 +72,6 @@ export function AdvancedSearch({ className, onSearch }: AdvancedSearchProps) {
               {term}
             </Badge>
           ))}
-        </div>
-        
-        <div className="flex gap-2 sm:hidden">
-          <Button 
-            variant="outline" 
-            className="flex-1 gap-1"
-            onClick={() => navigate("/search?mode=voice")}
-          >
-            <Mic className="h-4 w-4" />
-            Voice Search
-          </Button>
-          <Button 
-            variant="outline" 
-            className="flex-1 gap-1"
-            onClick={() => navigate("/search?mode=image")}
-          >
-            <Camera className="h-4 w-4" />
-            Image Search
-          </Button>
         </div>
       </div>
     </div>
