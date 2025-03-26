@@ -21,6 +21,11 @@ import { MarketplaceFeatures } from "@/components/marketplace/MarketplaceFeature
 import { MarketplacePromotions } from "@/components/marketplace/MarketplacePromotions";
 import { LocalBusinessSpotlight } from "@/components/marketplace/LocalBusinessSpotlight";
 import { BannerCarousel } from "@/components/marketplace/BannerCarousel";
+import { CategoryIconGrid } from "@/components/marketplace/CategoryIconGrid";
+import { WishlistSuggestions } from "@/components/marketplace/WishlistSuggestions";
+import { DiscountCollection } from "@/components/marketplace/DiscountCollection";
+import { SponsoredProducts } from "@/components/marketplace/SponsoredProducts";
+import { TrendingProducts } from "@/components/marketplace/TrendingProducts";
 
 // Fallback components for loading states
 const HeroFallback = () => <Skeleton className="h-56 w-full rounded-lg mb-6" />;
@@ -55,6 +60,21 @@ const OptimizedMarketplace = () => {
   const [sortOption, setSortOption] = useState("newest");
   const [priceRange, setPriceRange] = useState("all");
   const [activeTab, setActiveTab] = useState(searchQuery || selectedCategory !== "all" ? "search" : "browse");
+
+  // Sample data for discount collections
+  const homeAppliancesData = [
+    { id: "1", name: "Air Conditioners", image: "https://images.unsplash.com/photo-1599619339570-40c0d33ea93b?q=80&w=200&auto=format&fit=crop" },
+    { id: "2", name: "Refrigerators", image: "https://images.unsplash.com/photo-1584269600519-b5144c90c3ea?q=80&w=200&auto=format&fit=crop" },
+    { id: "3", name: "Washing Machines", image: "https://images.unsplash.com/photo-1626806819282-2c1dc01a5e0c?q=80&w=200&auto=format&fit=crop" },
+    { id: "4", name: "Microwaves", image: "https://images.unsplash.com/photo-1585657786027-b314574ebd91?q=80&w=200&auto=format&fit=crop" },
+  ];
+  
+  const fashionData = [
+    { id: "1", name: "Women's Clothing", image: "https://images.unsplash.com/photo-1525507119028-ed4c629a60a3?q=80&w=200&auto=format&fit=crop" },
+    { id: "2", name: "Men's Clothing", image: "https://images.unsplash.com/photo-1516257984-b1b4d707412e?q=80&w=200&auto=format&fit=crop" },
+    { id: "3", name: "Shoes", image: "https://images.unsplash.com/photo-1460353581641-37baddab0fa2?q=80&w=200&auto=format&fit=crop" },
+    { id: "4", name: "Accessories", image: "https://images.unsplash.com/photo-1589782182703-2aaa69037b5b?q=80&w=200&auto=format&fit=crop" },
+  ];
 
   // Update URL when search or category changes
   useEffect(() => {
@@ -176,6 +196,28 @@ const OptimizedMarketplace = () => {
               
               <BannerCarousel />
               
+              <CategoryIconGrid />
+              
+              <WishlistSuggestions />
+              
+              <DiscountCollection
+                title="Home Appliances"
+                subtitle="Great deals on essentials"
+                discount="Up to 55% off"
+                items={homeAppliancesData}
+                viewAllLink="/marketplace?category=appliances"
+              />
+              
+              <SponsoredProducts />
+              
+              <DiscountCollection
+                title="Fashion & Accessories"
+                subtitle="Latest trends and styles"
+                discount="Up to 60% off"
+                items={fashionData}
+                viewAllLink="/marketplace?category=fashion"
+              />
+              
               <MarketplaceFeatures />
             </>
           )}
@@ -186,6 +228,11 @@ const OptimizedMarketplace = () => {
                 handleCategorySelect={handleCategorySelect}
                 handleSearchSelect={handleSearchSelect}
               />
+              
+              <TrendingProducts />
+              
+              <LocalBusinessSpotlight />
+              <MarketplacePromotions />
             </TabsContent>
             
             <TabsContent value="categories" className="animate-in fade-in-50 duration-300">
@@ -213,13 +260,6 @@ const OptimizedMarketplace = () => {
               />
             </TabsContent>
           </MarketplaceTabs>
-          
-          {activeTab === "browse" && (
-            <>
-              <LocalBusinessSpotlight />
-              <MarketplacePromotions />
-            </>
-          )}
         </div>
       </div>
     </Layout>

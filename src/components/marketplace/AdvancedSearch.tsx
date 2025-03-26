@@ -3,7 +3,7 @@ import { SearchBar } from "@/components/search/SearchBar";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Search } from "lucide-react";
 import { useState } from "react";
 
 interface AdvancedSearchProps {
@@ -24,6 +24,10 @@ export function AdvancedSearch({ className, onSearch }: AdvancedSearchProps) {
         navigate(`/marketplace?search=${encodeURIComponent(query)}`);
       }
     }
+  };
+  
+  const handleInputChange = (value: string) => {
+    setSearchValue(value);
   };
   
   const popularSearches = [

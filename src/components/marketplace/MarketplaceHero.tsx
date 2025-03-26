@@ -1,5 +1,8 @@
 
 import { AdvancedSearch } from "@/components/marketplace/AdvancedSearch";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
 
 interface MarketplaceHeroProps {
   onCategorySelect: (category: string) => void;
@@ -7,6 +10,14 @@ interface MarketplaceHeroProps {
 }
 
 export const MarketplaceHero = ({ onCategorySelect, onSearch }: MarketplaceHeroProps) => {
+  const popularCategories = [
+    "Electronics",
+    "Fashion",
+    "Home Appliances",
+    "Beauty",
+    "Furniture"
+  ];
+
   return (
     <div className="relative rounded-xl overflow-hidden bg-gradient-to-r from-blue-600 to-indigo-600 mb-8 p-6 md:p-8">
       <div className="max-w-xl relative z-10">
@@ -18,6 +29,21 @@ export const MarketplaceHero = ({ onCategorySelect, onSearch }: MarketplaceHeroP
         </p>
         
         <AdvancedSearch onSearch={onSearch} />
+        
+        <div className="flex flex-wrap gap-2 mt-4">
+          {popularCategories.map((category) => (
+            <Button 
+              key={category}
+              variant="outline" 
+              size="sm"
+              className="bg-white/10 text-white border-white/20 hover:bg-white/20"
+              onClick={() => onCategorySelect(category.toLowerCase())}
+            >
+              {category}
+              <ArrowRight className="ml-1 h-3.5 w-3.5" />
+            </Button>
+          ))}
+        </div>
       </div>
       
       {/* Abstract pattern for the background */}

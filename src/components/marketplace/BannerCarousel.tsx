@@ -6,10 +6,13 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
 } from "@/components/ui/carousel";
 import { BannerAd } from "@/components/ads/BannerAd";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export const BannerCarousel = () => {
   const [progressValue, setProgressValue] = useState(0);
@@ -77,7 +80,7 @@ export const BannerCarousel = () => {
   if (!bannerAds.length) {
     return (
       <Card className="w-full overflow-hidden bg-white dark:bg-zinc-950 mb-8">
-        <div className="bg-white dark:bg-zinc-950 aspect-[5/1] sm:aspect-[6/1] md:aspect-[8/1] flex items-center justify-center">
+        <div className="bg-white dark:bg-zinc-950 aspect-[16/5] sm:aspect-[16/4] flex items-center justify-center">
           <div className="text-center p-4">
             <h3 className="text-lg md:text-xl font-bold">Discover Great Deals</h3>
             <p className="text-sm text-muted-foreground mt-1">Explore our marketplace for special offers</p>
@@ -104,20 +107,29 @@ export const BannerCarousel = () => {
             </CarouselItem>
           ))}
         </CarouselContent>
+        
+        <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 h-9 w-9 border border-white/40 bg-black/30 hover:bg-black/50">
+          <ChevronLeft className="h-5 w-5 text-white" />
+        </CarouselPrevious>
+        
+        <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 h-9 w-9 border border-white/40 bg-black/30 hover:bg-black/50">
+          <ChevronRight className="h-5 w-5 text-white" />
+        </CarouselNext>
       </Carousel>
       
       <div className="absolute bottom-0 left-0 right-0 z-10">
-        <Progress value={progressValue} className="h-1 rounded-none bg-gray-200/50" indicatorClassName="bg-black dark:bg-white" />
+        <Progress value={progressValue} className="h-1 rounded-none bg-gray-200/50" indicatorClassName="bg-primary" />
       </div>
       
       {bannerAds.length > 1 && (
-        <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-10">
+        <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-10">
           {bannerAds.map((_, index) => (
             <div 
               key={index} 
-              className={`h-1.5 w-1.5 rounded-full transition-all ${
-                index === currentSlide ? 'bg-black dark:bg-white scale-100' : 'bg-gray-400/50 scale-75'
+              className={`h-2 w-2 rounded-full transition-all ${
+                index === currentSlide ? 'bg-white scale-100' : 'bg-white/50 scale-75'
               }`}
+              onClick={() => api?.scrollTo(index)}
             />
           ))}
         </div>

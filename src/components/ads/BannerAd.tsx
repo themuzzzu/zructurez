@@ -2,8 +2,10 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Advertisement, incrementAdClick, incrementAdView } from "@/services/adService";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Info } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 interface BannerAdProps {
   ad: Advertisement;
@@ -41,6 +43,13 @@ export function BannerAd({ ad, className }: BannerAdProps) {
     }
   };
   
+  // Extract price from description if available (e.g. "From ₹12,999*")
+  const priceMatch = ad.description?.match(/From [₹$]([0-9,]+)/);
+  const price = priceMatch ? priceMatch[0] : null;
+  
+  // Extract other details from description
+  const details = ad.description?.replace(price || '', '').trim();
+  
   return (
     <Card 
       className={`relative overflow-hidden cursor-pointer hover:shadow-lg transition-shadow ${className}`}
@@ -51,13 +60,34 @@ export function BannerAd({ ad, className }: BannerAdProps) {
           <img 
             src={ad.image_url} 
             alt={ad.title}
-            className="w-full h-40 md:h-60 object-cover"
+            className="w-full h-40 sm:h-60 md:h-[400px] object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
-            <div>
-              <h3 className="text-white text-lg font-semibold line-clamp-2">{ad.title}</h3>
-              <p className="text-white/80 text-sm line-clamp-2">{ad.description}</p>
-              <div className="flex items-center text-white text-xs mt-2">
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-6">
+            <div className="w-full max-w-xl">
+              <Badge 
+                variant="outline" 
+                className="mb-2 border-white/40 text-white bg-black/20 backdrop-blur-sm"
+              >
+                Featured Deal
+              </Badge>
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-2">{ad.title}</h2>
+              
+              {price && (
+                <p className="text-lg sm:text-xl font-semibold text-white/90 mb-1">{price}</p>
+              )}
+              
+              {details && (
+                <p className="text-sm text-white/80 mb-3">{details}</p>
+              )}
+              
+              <Button 
+                size="sm" 
+                className="bg-white text-black hover:bg-white/90 transition-colors"
+              >
+                Shop Now
+              </Button>
+              
+              <div className="flex items-center text-white/70 text-xs mt-4">
                 <ExternalLink className="h-3 w-3 mr-1" />
                 <span>Sponsored</span>
               </div>
@@ -65,12 +95,26 @@ export function BannerAd({ ad, className }: BannerAdProps) {
           </div>
         </div>
       ) : (
-        <div className="p-4 bg-muted">
-          <h3 className="font-semibold">{ad.title}</h3>
-          <p className="text-muted-foreground text-sm mt-1">{ad.description}</p>
-          <div className="flex items-center text-xs text-muted-foreground mt-2">
-            <ExternalLink className="h-3 w-3 mr-1" />
-            <span>Sponsored</span>
+        <div className="p-6 bg-gradient-to-r from-blue-500 to-indigo-600 text-white min-h-[300px] flex items-center">
+          <div className="max-w-xl">
+            <Badge 
+              variant="outline" 
+              className="mb-2 border-white/40 text-white bg-white/10"
+            >
+              Limited Time Offer
+            </Badge>
+            <h2 className="text-2xl sm:text-3xl font-bold mb-2">{ad.title}</h2>
+            <p className="text-white/80 text-lg mb-6">{ad.description}</p>
+            <Button 
+              size="sm" 
+              className="bg-white text-black hover:bg-white/90 transition-colors"
+            >
+              Learn More
+            </Button>
+            <div className="flex items-center text-white/70 text-xs mt-4">
+              <Info className="h-3 w-3 mr-1" />
+              <span>Sponsored</span>
+            </div>
           </div>
         </div>
       )}
