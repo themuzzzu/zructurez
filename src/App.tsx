@@ -1,5 +1,5 @@
 
-import { Route, Routes, BrowserRouter, Outlet } from "react-router-dom";
+import { Route, Routes, BrowserRouter, Outlet, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -38,6 +38,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: 1, // Reduce retries to avoid excessive requests
     },
   },
 });
@@ -93,6 +94,8 @@ function App() {
               <Route path="/faq" element={<GenericPage title="FAQ" />} />
               <Route path="/terms" element={<GenericPage title="Terms of Service" />} />
               <Route path="/privacy" element={<GenericPage title="Privacy Policy" />} />
+              
+              {/* Add a catch-all route for deployment previews */}
               <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>

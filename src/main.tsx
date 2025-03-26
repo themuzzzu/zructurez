@@ -16,6 +16,11 @@ const setInitialTheme = () => {
   }
 };
 
+// Error handler for React
+window.addEventListener('error', (event) => {
+  console.error('Global error caught:', event.error);
+});
+
 // Run before rendering to prevent flash
 setInitialTheme();
 

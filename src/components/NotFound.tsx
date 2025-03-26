@@ -2,9 +2,15 @@
 import { Button } from "./ui/button";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "./layout/Layout";
+import { useEffect } from "react";
 
 export const NotFound = () => {
   const navigate = useNavigate();
+
+  // Log 404 errors for debugging
+  useEffect(() => {
+    console.error(`404 Not Found: ${window.location.pathname}`);
+  }, []);
 
   return (
     <Layout hideSidebar>
