@@ -14,12 +14,6 @@ import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 // Create a filled icon component for mobile nav
 const FilledIcon = ({ Icon }: { Icon: React.ElementType }) => {
-  const { theme } = useTheme();
-  const isDarkMode = theme === "dark";
-  
-  // Special case for Store icon
-  const isStore = Icon === Store;
-  
   return (
     <div className="relative">
       <Icon 
@@ -71,10 +65,6 @@ export const MobileNav = () => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
           
-          // Create special styling for marketplace when active
-          const isMarketplace = item.path === "/marketplace";
-          const activeStyle = isActive ? "bg-zinc-800 text-white" : "";
-          
           return (
             <Button
               key={item.path}
@@ -82,7 +72,7 @@ export const MobileNav = () => {
               size="icon"
               className={cn(
                 "flex flex-col items-center justify-center h-14 w-14 p-0 gap-1",
-                isActive ? activeStyle : ""
+                isActive ? "bg-zinc-800 text-white" : ""
               )}
               onClick={() => navigate(item.path)}
               aria-label={item.label}
