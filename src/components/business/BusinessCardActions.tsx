@@ -25,11 +25,11 @@ export const BusinessCardActions = ({
         <MessageSquare className="h-4 w-4" />
         Message
       </Button>
-      <Button onClick={onShareClick} variant="outline" className="w-full flex items-center justify-center gap-2 border-gray-700 hover:bg-gray-800 text-slate-50 font-light rounded-3xl text-base text-justify">
+      <Button onClick={onShareClick} variant="outline" className="w-full flex items-center justify-center gap-2 border-gray-700 hover:bg-gray-800 text-white font-light rounded-3xl">
         <Share2 className="h-4 w-4" />
         Share
       </Button>
-      <Button onClick={onCallClick} variant="outline" className="w-full col-span-2 flex items-center justify-center gap-2 border-gray-700 hover:bg-gray-800">
+      <Button onClick={onCallClick} variant="outline" className="w-full col-span-2 flex items-center justify-center gap-2 border-gray-700 hover:bg-gray-800 text-white">
         <Phone className="h-4 w-4" />
         Call
       </Button>
