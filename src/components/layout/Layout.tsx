@@ -49,7 +49,10 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
         )}
         <main 
           className={`flex-1 transition-all duration-300 w-full ${hideSidebar || isMobile ? 'px-4 sm:px-6 pb-20' : ''}`}
-          style={{ marginLeft: hideSidebar || isMobile ? 0 : sidebarWidth + 'px', paddingBottom: isMobile ? '5rem' : '' }}
+          style={{ 
+            marginLeft: hideSidebar || isMobile ? 0 : (sidebarWidth * 0.3) + 'px', 
+            paddingBottom: isMobile ? '5rem' : '' 
+          }}
         >
           {children}
         </main>
