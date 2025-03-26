@@ -1,7 +1,5 @@
 
 import { useState, useMemo } from "react";
-import { Navbar } from "@/components/Navbar";
-import { Sidebar } from "@/components/Sidebar";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -86,61 +84,51 @@ const Events = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <div className="container max-w-[1400px] pt-20 pb-16">
-        <div className="flex gap-6">
-          <Sidebar className="w-64 hidden lg:block" />
-          <main className="flex-1">
-            <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-4">
-                  <Link to="/">
-                    <Button variant="ghost" size="icon">
-                      <ArrowLeft className="h-5 w-5" />
-                    </Button>
-                  </Link>
-                  <h1 className="text-3xl font-bold">Events</h1>
-                </div>
-                <Button onClick={() => setIsCreateDialogOpen(true)}>
-                  Create Event
-                </Button>
-              </div>
-              
-              {popularEvents.length > 0 && (
-                <div className="space-y-2">
-                  <h2 className="text-xl font-semibold">Popular Events</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {popularEvents.map((event) => (
-                      <EventCard key={`popular-${event.id}`} {...event} />
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold">All Events</h2>
-                <Select value={sortOption} onValueChange={setSortOption}>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Sort by" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="popular">Most Popular</SelectItem>
-                    <SelectItem value="newest">Newest First</SelectItem>
-                    <SelectItem value="oldest">Oldest First</SelectItem>
-                    <SelectItem value="mostAttendees">Most Attendees</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {sortedEvents.map((event) => (
-                  <EventCard key={event.id} {...event} />
-                ))}
-              </div>
-            </div>
-          </main>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div className="flex items-center gap-4">
+          <Link to="/">
+            <Button variant="ghost" size="icon">
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+          </Link>
+          <h1 className="text-3xl font-bold">Events</h1>
         </div>
+        <Button onClick={() => setIsCreateDialogOpen(true)}>
+          Create Event
+        </Button>
+      </div>
+      
+      {popularEvents.length > 0 && (
+        <div className="space-y-2">
+          <h2 className="text-xl font-semibold">Popular Events</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {popularEvents.map((event) => (
+              <EventCard key={`popular-${event.id}`} {...event} />
+            ))}
+          </div>
+        </div>
+      )}
+      
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-semibold">All Events</h2>
+        <Select value={sortOption} onValueChange={setSortOption}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Sort by" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="popular">Most Popular</SelectItem>
+            <SelectItem value="newest">Newest First</SelectItem>
+            <SelectItem value="oldest">Oldest First</SelectItem>
+            <SelectItem value="mostAttendees">Most Attendees</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {sortedEvents.map((event) => (
+          <EventCard key={event.id} {...event} />
+        ))}
       </div>
 
       <CreateEventDialog 
