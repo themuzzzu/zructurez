@@ -1,3 +1,4 @@
+
 import { Home, Store, Wrench, Building, MessageSquare, MoreVertical, SunMoon, Users, Briefcase, Calendar, Map } from "lucide-react";
 import { Button } from "../ui/button";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -16,13 +17,16 @@ const FilledIcon = ({ Icon }: { Icon: React.ElementType }) => {
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
   
+  // Special case for Store icon
+  const isStore = Icon === Store;
+  
   return (
     <div className="relative">
       <Icon 
         className="h-5 w-5" 
         fill="currentColor" 
-        stroke={isDarkMode ? "white" : "black"} 
-        strokeWidth={1.5} 
+        stroke={isDarkMode || isStore ? "white" : "black"} 
+        strokeWidth={isStore ? 1 : 1.5} 
       />
     </div>
   );
@@ -61,11 +65,19 @@ export const MobileNav = () => {
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border py-3 px-1 sm:px-2 z-50 animate-slide-up backdrop-blur-sm">
+    <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border py-2 px-1 sm:px-2 z-50 animate-slide-up backdrop-blur-sm">
       <div className="flex justify-between items-center max-w-md mx-auto">
         {mobileNavItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
+          
+          // Create special styling for marketplace when active
+          const isMarketplace = item.path === "/marketplace";
+          const marketplaceActiveStyle = isMarketplace && isActive 
+            ? isDarkMode 
+              ? "bg-zinc-800" 
+              : "bg-zinc-800 text-white"
+            : "";
           
           return (
             <Button
@@ -74,7 +86,7 @@ export const MobileNav = () => {
               size="icon"
               className={cn(
                 "flex flex-col items-center justify-center h-14 w-14 p-0 gap-1",
-                isActive ? "bg-accent" : ""
+                isActive ? (isMarketplace ? marketplaceActiveStyle : "bg-accent") : ""
               )}
               onClick={() => navigate(item.path)}
               aria-label={item.label}
@@ -84,7 +96,10 @@ export const MobileNav = () => {
               ) : (
                 <Icon className="h-5 w-5 text-muted-foreground" />
               )}
-              <span className="text-xs font-medium">
+              <span className={cn(
+                "text-xs font-medium",
+                isMarketplace && isActive && !isDarkMode ? "text-white" : ""
+              )}>
                 {item.label}
               </span>
             </Button>

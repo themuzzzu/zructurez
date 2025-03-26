@@ -21,17 +21,25 @@ import {
 import { useTheme } from "@/components/ThemeProvider";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 
-// Create a filled icon component
-const FilledIcon = ({ Icon, isDarkMode }: { Icon: React.ElementType; isDarkMode: boolean }) => (
-  <div className="relative">
-    <Icon 
-      size={20} 
-      className={isDarkMode ? "text-white" : "text-black"}
-      strokeWidth={1.75} 
-      fill="currentColor" 
-    />
-  </div>
-);
+// Custom filled icon component for the sidebar
+const FilledIcon = ({ Icon, isDarkMode }: { Icon: React.ElementType; isDarkMode: boolean }) => {
+  // Determine if this is the Store icon (for marketplace)
+  const isStore = Icon === Store;
+  
+  return (
+    <div className="relative">
+      <Icon 
+        size={20} 
+        className={cn(
+          isDarkMode ? "text-white" : "text-black",
+          isStore && !isDarkMode ? "fill-gray-900" : "" // Make store icon lines black in light mode
+        )}
+        strokeWidth={1.75} 
+        fill="currentColor" 
+      />
+    </div>
+  );
+};
 
 export const Sidebar = ({ className }: React.HTMLAttributes<HTMLDivElement>) => {
   const navigate = useNavigate();
@@ -113,6 +121,12 @@ export const Sidebar = ({ className }: React.HTMLAttributes<HTMLDivElement>) => 
       <div className="space-y-1 px-1 py-1">
         {routes.map((route) => {
           const isActive = activeItem === route.path;
+          // For the active item, we'll apply a dark square background similar to the image
+          const activeBackground = route.path === "/marketplace" && isActive 
+            ? "bg-zinc-800 dark:bg-zinc-800" 
+            : isDarkMode 
+              ? "bg-zinc-800" 
+              : "bg-zinc-200 dark:bg-zinc-800";
 
           return isCollapsed ? (
             <Button
@@ -121,12 +135,10 @@ export const Sidebar = ({ className }: React.HTMLAttributes<HTMLDivElement>) => 
               className={cn(
                 "w-full p-2 justify-center transition-all duration-200",
                 isActive 
-                  ? isDarkMode 
-                    ? "bg-zinc-900 rounded-full" 
-                    : "bg-zinc-200 dark:bg-zinc-900 rounded-full"
+                  ? activeBackground + " rounded-lg" // Make it more square-like with rounded-lg
                   : isDarkMode
-                    ? "hover:bg-zinc-800 rounded-full"
-                    : "hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-full"
+                    ? "hover:bg-zinc-800 rounded-lg"
+                    : "hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-lg"
               )}
               onClick={() => handleItemClick(route.path)}
             >
@@ -147,12 +159,10 @@ export const Sidebar = ({ className }: React.HTMLAttributes<HTMLDivElement>) => 
               className={cn(
                 "w-full justify-start gap-3 px-3 py-2 text-sm transition-all duration-200",
                 isActive 
-                  ? isDarkMode
-                    ? "bg-zinc-900 rounded-full" 
-                    : "bg-zinc-200 dark:bg-zinc-900 rounded-full"
+                  ? activeBackground + " rounded-lg" // Make it more square-like with rounded-lg
                   : isDarkMode
-                    ? "hover:bg-zinc-800 rounded-full"
-                    : "hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-full"
+                    ? "hover:bg-zinc-800 rounded-lg"
+                    : "hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-lg"
               )}
               onClick={() => handleItemClick(route.path)}
             >
@@ -184,7 +194,7 @@ export const Sidebar = ({ className }: React.HTMLAttributes<HTMLDivElement>) => 
           <Button
             variant="ghost"
             className={cn(
-              "w-full p-2 justify-center rounded-full mt-1 transition-all duration-200",
+              "w-full p-2 justify-center rounded-lg mt-1 transition-all duration-200",
               isDarkMode
                 ? "hover:bg-zinc-800"
                 : "hover:bg-zinc-200 dark:hover:bg-zinc-800"
@@ -197,7 +207,7 @@ export const Sidebar = ({ className }: React.HTMLAttributes<HTMLDivElement>) => 
           <Button
             variant="ghost"
             className={cn(
-              "w-full justify-start gap-3 px-3 py-2 rounded-full mt-1 text-sm transition-all duration-200",
+              "w-full justify-start gap-3 px-3 py-2 rounded-lg mt-1 text-sm transition-all duration-200",
               isDarkMode
                 ? "hover:bg-zinc-800"
                 : "hover:bg-zinc-200 dark:hover:bg-zinc-800"
