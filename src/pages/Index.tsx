@@ -1,4 +1,3 @@
-
 import { CreatePost } from "@/components/CreatePost";
 import { EnhancedPostCard } from "@/components/EnhancedPostCard";
 import { useQuery } from "@tanstack/react-query";
@@ -114,6 +113,7 @@ const Index = () => {
               image={post.image_url}
               likes={post.likes}
               comments={post.comments}
+              reposts={post.reposts}
               views={post.views || 0}
               isLiked={post.isLiked}
             />
