@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -61,54 +60,24 @@ export const useBatchOperations = (notifications: Notification[]) => {
   // Delete all notifications for current user
   const deleteAllNotificationsMutation = useMutation({
     mutationFn: async () => {
+      // Get current user session first
       const { data: session } = await supabase.auth.getSession();
-      if (!session?.session?.user) return;
-
-      console.log("Fetching all notification IDs for user:", session.session.user.id);
+      if (!session?.session?.user) {
+        throw new Error("User not authenticated");
+      }
       
-      // First, get all notification IDs
-      const { data, error: fetchError } = await supabase
+      const userId = session.session.user.id;
+      console.log("Deleting all notifications for user:", userId);
+      
+      // Direct approach - delete all notifications for the user
+      const { error } = await supabase
         .from('notifications')
-        .select('id')
-        .eq('user_id', session.session.user.id);
+        .delete()
+        .eq('user_id', userId);
       
-      if (fetchError) {
-        console.error("Error fetching notification IDs:", fetchError);
-        throw fetchError;
-      }
-      
-      if (!data || data.length === 0) {
-        console.log("No notifications to delete");
-        return;
-      }
-      
-      const notificationIds = data.map(n => n.id);
-      console.log(`Deleting ${notificationIds.length} notifications in batches`);
-      
-      // Split ids into smaller chunks to avoid query size limits
-      const batchSize = 50;
-      const batches = [];
-      
-      for (let i = 0; i < notificationIds.length; i += batchSize) {
-        batches.push(notificationIds.slice(i, i + batchSize));
-      }
-
-      console.log(`Processing ${batches.length} batches of max ${batchSize} items each`);
-      
-      // Process each batch sequentially
-      for (let i = 0; i < batches.length; i++) {
-        const batch = batches[i];
-        console.log(`Processing batch ${i+1}/${batches.length} with ${batch.length} items`);
-        
-        const { error } = await supabase
-          .from('notifications')
-          .delete()
-          .in('id', batch);
-
-        if (error) {
-          console.error(`Error in batch ${i+1}:`, error);
-          throw error;
-        }
+      if (error) {
+        console.error("Error deleting all notifications:", error);
+        throw error;
       }
     },
     onSuccess: () => {
