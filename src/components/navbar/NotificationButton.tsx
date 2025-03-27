@@ -13,7 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export const NotificationButton = () => {
-  const { data: unreadCount = 0 } = useQuery({
+  const { data: unreadCount = 0, isLoading } = useQuery({
     queryKey: ['unreadCount'],
     queryFn: async () => {
       const { data: session } = await supabase.auth.getSession();
@@ -28,6 +28,7 @@ export const NotificationButton = () => {
       if (error) throw error;
       return count || 0;
     },
+    refetchInterval: 30000, // Refetch every 30 seconds
   });
 
   return (
@@ -36,7 +37,7 @@ export const NotificationButton = () => {
         <div className="relative">
           <Button variant="ghost" size="icon" className="relative transition-transform duration-300 hover:scale-110">
             <Bell className="h-5 w-5" />
-            {unreadCount > 0 && (
+            {!isLoading && unreadCount > 0 && (
               <span className="absolute -top-2 -right-2 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center shadow-sm animate-fade-in">
                 {unreadCount}
               </span>

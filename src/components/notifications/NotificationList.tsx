@@ -14,7 +14,7 @@ export const NotificationList = () => {
   const [selectedNotifications, setSelectedNotifications] = useState<string[]>([]);
   const [selectMode, setSelectMode] = useState(false);
 
-  const { data: notifications = [] } = useQuery<Notification[]>({
+  const { data: notifications = [], isLoading, isError } = useQuery<Notification[]>({
     queryKey: ['notifications'],
     queryFn: async () => {
       const { data: session } = await supabase.auth.getSession();
@@ -171,7 +171,7 @@ export const NotificationList = () => {
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="text-xs h-8 px-2 text-destructive"
+                className="text-xs h-8 px-2 text-destructive hover:text-destructive"
                 onClick={handleDeleteSelected}
                 disabled={selectedNotifications.length === 0 || deleteSelectedNotificationsMutation.isPending}
               >
@@ -203,7 +203,11 @@ export const NotificationList = () => {
         </div>
       </div>
       <ScrollArea className="h-[400px]">
-        {notifications.length === 0 ? (
+        {isLoading ? (
+          <div className="p-4 text-center text-muted-foreground">Loading notifications...</div>
+        ) : isError ? (
+          <div className="p-4 text-center text-destructive">Error loading notifications</div>
+        ) : notifications.length === 0 ? (
           <div className="p-4 text-center text-muted-foreground">
             No notifications
           </div>
