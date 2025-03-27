@@ -3,15 +3,39 @@ import { formatDistanceToNow } from "date-fns";
 import { Check, Trash } from "lucide-react";
 import { Button } from "../ui/button";
 import { Notification } from "@/types/notification";
+import { Checkbox } from "../ui/checkbox";
 
 interface NotificationItemProps extends Notification {
   onMarkAsRead: (id: string) => void;
   onDelete: (id: string) => void;
+  selectMode?: boolean;
+  isSelected?: boolean;
+  onToggleSelect?: () => void;
 }
 
-export const NotificationItem = ({ id, message, created_at, read, onMarkAsRead, onDelete }: NotificationItemProps) => {
+export const NotificationItem = ({ 
+  id, 
+  message, 
+  created_at, 
+  read, 
+  onMarkAsRead, 
+  onDelete,
+  selectMode = false,
+  isSelected = false,
+  onToggleSelect
+}: NotificationItemProps) => {
   return (
     <div className={`p-4 flex items-start gap-3 border-b ${read ? 'bg-muted/50' : 'bg-background'}`}>
+      {selectMode && (
+        <div className="pt-1">
+          <Checkbox 
+            checked={isSelected} 
+            onCheckedChange={onToggleSelect}
+            id={`select-notification-${id}`}
+            aria-label="Select notification"
+          />
+        </div>
+      )}
       <div className="flex-1">
         <p className="text-sm">{message}</p>
         <span className="text-xs text-muted-foreground">

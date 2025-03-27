@@ -6,10 +6,13 @@ import { ScrollArea } from "../ui/scroll-area";
 import { toast } from "sonner";
 import { Notification } from "@/types/notification";
 import { Button } from "../ui/button";
-import { Trash2 } from "lucide-react";
+import { Trash2, CheckSquare } from "lucide-react";
+import { useState } from "react";
 
 export const NotificationList = () => {
   const queryClient = useQueryClient();
+  const [selectedNotifications, setSelectedNotifications] = useState<string[]>([]);
+  const [selectMode, setSelectMode] = useState(false);
 
   const { data: notifications = [] } = useQuery<Notification[]>({
     queryKey: ['notifications'],
@@ -65,6 +68,29 @@ export const NotificationList = () => {
     },
   });
 
+  const deleteSelectedNotificationsMutation = useMutation({
+    mutationFn: async (notificationIds: string[]) => {
+      if (notificationIds.length === 0) return;
+      
+      const { error } = await supabase
+        .from('notifications')
+        .delete()
+        .in('id', notificationIds);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['unreadCount'] });
+      toast.success("Selected notifications deleted");
+      setSelectedNotifications([]);
+      setSelectMode(false);
+    },
+    onError: () => {
+      toast.error("Failed to delete selected notifications");
+    },
+  });
+
   const clearAllNotificationsMutation = useMutation({
     mutationFn: async () => {
       const { data: session } = await supabase.auth.getSession();
@@ -81,6 +107,8 @@ export const NotificationList = () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       queryClient.invalidateQueries({ queryKey: ['unreadCount'] });
       toast.success("All notifications deleted");
+      setSelectedNotifications([]);
+      setSelectMode(false);
     },
     onError: () => {
       toast.error("Failed to delete notifications");
@@ -92,20 +120,83 @@ export const NotificationList = () => {
     clearAllNotificationsMutation.mutate();
   };
 
+  const handleDeleteSelected = () => {
+    if (selectedNotifications.length === 0) return;
+    deleteSelectedNotificationsMutation.mutate(selectedNotifications);
+  };
+
+  const toggleSelectMode = () => {
+    setSelectMode(!selectMode);
+    if (selectMode) {
+      setSelectedNotifications([]);
+    }
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedNotifications.length === notifications.length) {
+      setSelectedNotifications([]);
+    } else {
+      setSelectedNotifications(notifications.map(notification => notification.id));
+    }
+  };
+
+  const toggleSelectNotification = (id: string) => {
+    if (selectedNotifications.includes(id)) {
+      setSelectedNotifications(selectedNotifications.filter(nId => nId !== id));
+    } else {
+      setSelectedNotifications([...selectedNotifications, id]);
+    }
+  };
+
   return (
     <div>
       <div className="flex justify-between items-center mb-2 px-4 py-2">
         <h3 className="text-sm font-medium">Your Notifications</h3>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="text-xs h-8 px-2"
-          onClick={handleClearAll}
-          disabled={notifications.length === 0 || clearAllNotificationsMutation.isPending}
-        >
-          <Trash2 className="h-3.5 w-3.5 mr-1" />
-          Delete All
-        </Button>
+        <div className="flex gap-2">
+          {selectMode && (
+            <>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="text-xs h-8 px-2"
+                onClick={toggleSelectAll}
+                disabled={notifications.length === 0}
+              >
+                {selectedNotifications.length === notifications.length ? "Deselect All" : "Select All"}
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="text-xs h-8 px-2 text-destructive"
+                onClick={handleDeleteSelected}
+                disabled={selectedNotifications.length === 0 || deleteSelectedNotificationsMutation.isPending}
+              >
+                <Trash2 className="h-3.5 w-3.5 mr-1" />
+                Delete Selected
+              </Button>
+            </>
+          )}
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="text-xs h-8 px-2"
+            onClick={toggleSelectMode}
+            disabled={notifications.length === 0}
+          >
+            <CheckSquare className="h-3.5 w-3.5 mr-1" />
+            {selectMode ? "Cancel" : "Select"}
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="text-xs h-8 px-2"
+            onClick={handleClearAll}
+            disabled={notifications.length === 0 || clearAllNotificationsMutation.isPending}
+          >
+            <Trash2 className="h-3.5 w-3.5 mr-1" />
+            Delete All
+          </Button>
+        </div>
       </div>
       <ScrollArea className="h-[400px]">
         {notifications.length === 0 ? (
@@ -119,6 +210,9 @@ export const NotificationList = () => {
               {...notification}
               onMarkAsRead={markAsReadMutation.mutate}
               onDelete={deleteNotificationMutation.mutate}
+              selectMode={selectMode}
+              isSelected={selectedNotifications.includes(notification.id)}
+              onToggleSelect={() => toggleSelectNotification(notification.id)}
             />
           ))
         )}
