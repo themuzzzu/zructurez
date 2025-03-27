@@ -104,7 +104,8 @@ export const showNotificationToast = (
     supabase.from('notifications').insert({
       user_id: currentUser.id,
       message: `${alert.title}: ${alert.message}`,
-      read: false
+      read: false,
+      type: 'marketplace' // Set the type to marketplace for auto-deletion
     }).then(({ error }) => {
       if (error) {
         console.error('Error saving notification:', error);

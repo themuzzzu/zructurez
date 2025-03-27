@@ -1304,6 +1304,7 @@ export type Database = {
           message: string
           muted: boolean | null
           read: boolean | null
+          type: string | null
           user_id: string
         }
         Insert: {
@@ -1312,6 +1313,7 @@ export type Database = {
           message: string
           muted?: boolean | null
           read?: boolean | null
+          type?: string | null
           user_id: string
         }
         Update: {
@@ -1320,6 +1322,7 @@ export type Database = {
           message?: string
           muted?: boolean | null
           read?: boolean | null
+          type?: string | null
           user_id?: string
         }
         Relationships: []
@@ -2251,6 +2254,10 @@ export type Database = {
         Returns: boolean
       }
       cleanup_expired_messages: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      cleanup_marketplace_notifications: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
