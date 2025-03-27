@@ -8,11 +8,23 @@ import { Notification } from "@/types/notification";
 import { Button } from "../ui/button";
 import { Trash2, CheckSquare } from "lucide-react";
 import { useState } from "react";
+import { 
+  AlertDialog,
+  AlertDialogAction, 
+  AlertDialogCancel, 
+  AlertDialogContent, 
+  AlertDialogDescription, 
+  AlertDialogFooter, 
+  AlertDialogHeader, 
+  AlertDialogTitle
+} from "../ui/alert-dialog";
 
 export const NotificationList = () => {
   const queryClient = useQueryClient();
   const [selectedNotifications, setSelectedNotifications] = useState<string[]>([]);
   const [selectMode, setSelectMode] = useState(false);
+  const [isDeleteAllAlertOpen, setIsDeleteAllAlertOpen] = useState(false);
+  const [isDeleteSelectedAlertOpen, setIsDeleteSelectedAlertOpen] = useState(false);
 
   const { data: notifications = [], isLoading, isError } = useQuery<Notification[]>({
     queryKey: ['notifications'],
@@ -73,51 +85,103 @@ export const NotificationList = () => {
     },
   });
 
+  // New batch delete function that processes notifications in chunks
   const deleteSelectedNotificationsMutation = useMutation({
     mutationFn: async (notificationIds: string[]) => {
       if (notificationIds.length === 0) return;
       
-      console.log("Deleting selected notifications:", notificationIds);
+      console.log(`Deleting ${notificationIds.length} notifications in batches`);
       
-      // Using the 'in' operator to delete multiple records at once
-      const { error } = await supabase
-        .from('notifications')
-        .delete()
-        .in('id', notificationIds);
+      // Split ids into smaller chunks to avoid query size limits
+      const batchSize = 50;
+      const batches = [];
+      
+      for (let i = 0; i < notificationIds.length; i += batchSize) {
+        batches.push(notificationIds.slice(i, i + batchSize));
+      }
 
-      if (error) {
-        console.error("Delete selected error:", error);
-        throw error;
+      console.log(`Processing ${batches.length} batches of max ${batchSize} items each`);
+      
+      // Process each batch sequentially
+      for (let i = 0; i < batches.length; i++) {
+        const batch = batches[i];
+        console.log(`Processing batch ${i+1}/${batches.length} with ${batch.length} items`);
+        
+        const { error } = await supabase
+          .from('notifications')
+          .delete()
+          .in('id', batch);
+
+        if (error) {
+          console.error(`Error in batch ${i+1}:`, error);
+          throw error;
+        }
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       queryClient.invalidateQueries({ queryKey: ['unreadCount'] });
-      toast.success(`${selectedNotifications.length} notifications deleted`);
+      toast.success(`Notifications deleted successfully`);
       setSelectedNotifications([]);
       setSelectMode(false);
     },
     onError: (error) => {
       console.error("Delete selected mutation error:", error);
-      toast.error("Failed to delete selected notifications");
+      toast.error("Failed to delete notifications");
     },
   });
 
+  // Updated delete all mutation to use batching
   const deleteAllNotificationsMutation = useMutation({
     mutationFn: async () => {
       const { data: session } = await supabase.auth.getSession();
       if (!session?.session?.user) return;
 
-      console.log("Deleting all notifications for user:", session.session.user.id);
+      console.log("Fetching all notification IDs for user:", session.session.user.id);
       
-      const { error } = await supabase
+      // First, get all notification IDs
+      const { data, error: fetchError } = await supabase
         .from('notifications')
-        .delete()
+        .select('id')
         .eq('user_id', session.session.user.id);
+      
+      if (fetchError) {
+        console.error("Error fetching notification IDs:", fetchError);
+        throw fetchError;
+      }
+      
+      if (!data || data.length === 0) {
+        console.log("No notifications to delete");
+        return;
+      }
+      
+      const notificationIds = data.map(n => n.id);
+      console.log(`Deleting ${notificationIds.length} notifications in batches`);
+      
+      // Split ids into smaller chunks to avoid query size limits
+      const batchSize = 50;
+      const batches = [];
+      
+      for (let i = 0; i < notificationIds.length; i += batchSize) {
+        batches.push(notificationIds.slice(i, i + batchSize));
+      }
 
-      if (error) {
-        console.error("Delete all error:", error);
-        throw error;
+      console.log(`Processing ${batches.length} batches of max ${batchSize} items each`);
+      
+      // Process each batch sequentially
+      for (let i = 0; i < batches.length; i++) {
+        const batch = batches[i];
+        console.log(`Processing batch ${i+1}/${batches.length} with ${batch.length} items`);
+        
+        const { error } = await supabase
+          .from('notifications')
+          .delete()
+          .in('id', batch);
+
+        if (error) {
+          console.error(`Error in batch ${i+1}:`, error);
+          throw error;
+        }
       }
     },
     onSuccess: () => {
@@ -135,20 +199,22 @@ export const NotificationList = () => {
 
   const handleDeleteAll = () => {
     if (notifications.length === 0) return;
-    
-    // Using window.confirm for simplicity
-    if (window.confirm("Are you sure you want to delete all notifications?")) {
-      deleteAllNotificationsMutation.mutate();
-    }
+    setIsDeleteAllAlertOpen(true);
+  };
+
+  const confirmDeleteAll = () => {
+    setIsDeleteAllAlertOpen(false);
+    deleteAllNotificationsMutation.mutate();
   };
 
   const handleDeleteSelected = () => {
     if (selectedNotifications.length === 0) return;
-    
-    // Using window.confirm for simplicity
-    if (window.confirm(`Are you sure you want to delete ${selectedNotifications.length} selected notifications?`)) {
-      deleteSelectedNotificationsMutation.mutate(selectedNotifications);
-    }
+    setIsDeleteSelectedAlertOpen(true);
+  };
+
+  const confirmDeleteSelected = () => {
+    setIsDeleteSelectedAlertOpen(false);
+    deleteSelectedNotificationsMutation.mutate(selectedNotifications);
   };
 
   const toggleSelectMode = () => {
@@ -253,6 +319,42 @@ export const NotificationList = () => {
           ))
         )}
       </ScrollArea>
+
+      {/* Delete All Confirmation Dialog */}
+      <AlertDialog open={isDeleteAllAlertOpen} onOpenChange={setIsDeleteAllAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete All Notifications</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete all notifications? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteAll} className="bg-destructive text-destructive-foreground">
+              Delete All
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Selected Confirmation Dialog */}
+      <AlertDialog open={isDeleteSelectedAlertOpen} onOpenChange={setIsDeleteSelectedAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Selected Notifications</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete {selectedNotifications.length} selected notifications? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteSelected} className="bg-destructive text-destructive-foreground">
+              Delete Selected
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
