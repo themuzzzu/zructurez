@@ -1,3 +1,4 @@
+
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { ProductCardImage } from "./ProductCardImage";
+import { ProductCardActions } from "./ProductCardActions";
 
 interface ProductCardProps {
   product: {
@@ -126,47 +129,13 @@ export const ProductCard = ({ product, onClick }: ProductCardProps) => {
   
   return (
     <Card className="overflow-hidden hover:shadow-md transition-all h-full">
-      <div 
-        className="aspect-square relative cursor-pointer" 
+      <ProductCardImage 
+        imageUrl={product.image_url || null}
+        title={product.title}
+        price={product.price}
         onClick={handleClick}
-      >
-        {product.image_url ? (
-          <img 
-            src={product.image_url} 
-            alt={product.title} 
-            className="w-full h-full object-cover"
-            loading="lazy"
-          />
-        ) : (
-          <div className="w-full h-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-            <span className="text-muted-foreground">No image</span>
-          </div>
-        )}
-        {product.is_discounted && (
-          <Badge className="absolute top-2 right-2 bg-red-500">
-            {product.discount_percentage}% OFF
-          </Badge>
-        )}
-        <Button 
-          size="icon" 
-          variant="ghost" 
-          className="absolute top-2 left-2 h-8 w-8 bg-white/80 hover:bg-white dark:bg-black/80 dark:hover:bg-black text-pink-500 hover:text-pink-600"
-          onClick={(e) => {
-            e.stopPropagation();
-            if (!isAddingToWishlist) {
-              setIsAddingToWishlist(true);
-              addToWishlistMutation.mutate(undefined, {
-                onSettled: () => {
-                  setIsAddingToWishlist(false);
-                }
-              });
-            }
-          }}
-          disabled={isAddingToWishlist}
-        >
-          <Heart className={`h-4 w-4 ${isAddingToWishlist ? 'animate-pulse' : ''}`} />
-        </Button>
-      </div>
+        productId={product.id}
+      />
       
       <div className="p-3 flex flex-col h-[calc(100%-100%)]">
         <h3 className="font-medium text-sm line-clamp-2 flex-grow" title={product.title}>

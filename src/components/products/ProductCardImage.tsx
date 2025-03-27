@@ -128,5 +128,3 @@ export const ProductCardImage = ({
     </div>
   );
 };
-
-export default ProductCardImage;

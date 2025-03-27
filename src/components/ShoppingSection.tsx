@@ -29,9 +29,13 @@ export const ShoppingSection = ({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isFilterMobileOpen, setIsFilterMobileOpen] = useState(false);
   const [localSortOption, setLocalSortOption] = useState(sortOption);
+  const [localShowDiscounted, setLocalShowDiscounted] = useState(showDiscounted);
+  const [localShowUsed, setLocalShowUsed] = useState(showUsed);
+  const [localShowBranded, setLocalShowBranded] = useState(showBranded);
+  const [localPriceRange, setLocalPriceRange] = useState(priceRange);
 
   const { data: products, isLoading, refetch } = useQuery({
-    queryKey: ['products', searchQuery, selectedCategory, showDiscounted, showUsed, showBranded, localSortOption, priceRange],
+    queryKey: ['products', searchQuery, selectedCategory, localShowDiscounted, localShowUsed, localShowBranded, localSortOption, localPriceRange],
     queryFn: async () => {
       let query = supabase
         .from('products')
@@ -45,20 +49,20 @@ export const ShoppingSection = ({
         query = query.eq('category', selectedCategory);
       }
 
-      if (showDiscounted) {
+      if (localShowDiscounted) {
         query = query.eq('is_discounted', true);
       }
 
-      if (showUsed) {
+      if (localShowUsed) {
         query = query.eq('is_used', true);
       }
 
-      if (showBranded) {
+      if (localShowBranded) {
         query = query.eq('is_branded', true);
       }
 
-      if (priceRange !== 'all') {
-        const [min, max] = priceRange.split('-').map(Number);
+      if (localPriceRange !== 'all') {
+        const [min, max] = localPriceRange.split('-').map(Number);
         if (max) {
           query = query.gte('price', min).lte('price', max);
         } else {
@@ -119,7 +123,7 @@ export const ShoppingSection = ({
     }
   });
 
-  const hasActiveFilters = showDiscounted || showUsed || showBranded || priceRange !== 'all';
+  const hasActiveFilters = localShowDiscounted || localShowUsed || localShowBranded || localPriceRange !== 'all';
 
   return (
     <div className="space-y-4">
@@ -134,16 +138,16 @@ export const ShoppingSection = ({
 
       <FilterPanel 
         selectedCategory={selectedCategory}
-        showDiscounted={showDiscounted}
-        showUsed={showUsed}
-        showBranded={showBranded}
+        showDiscounted={localShowDiscounted}
+        showUsed={localShowUsed}
+        showBranded={localShowBranded}
         sortOption={localSortOption}
-        priceRange={priceRange}
-        onDiscountedChange={(checked) => setShowDiscounted(checked)}
-        onUsedChange={(checked) => setShowUsed(checked)}
-        onBrandedChange={(checked) => setShowBranded(checked)}
+        priceRange={localPriceRange}
+        onDiscountedChange={(checked) => setLocalShowDiscounted(checked)}
+        onUsedChange={(checked) => setLocalShowUsed(checked)}
+        onBrandedChange={(checked) => setLocalShowBranded(checked)}
         onSortChange={(value) => setLocalSortOption(value)}
-        onPriceRangeChange={(value) => setPriceRange(value)}
+        onPriceRangeChange={(value) => setLocalPriceRange(value)}
         onCloseMobileFilter={() => setIsFilterMobileOpen(false)}
         isFilterMobileOpen={isFilterMobileOpen}
       />
