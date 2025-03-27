@@ -11,6 +11,16 @@ import { MarketplaceHero } from "@/components/marketplace/MarketplaceHero";
 const OptimizedMarketplace = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("browse");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  
+  // Filter states
+  const [showDiscounted, setShowDiscounted] = useState(false);
+  const [showUsed, setShowUsed] = useState(false);
+  const [showBranded, setShowBranded] = useState(false);
+  const [sortOption, setSortOption] = useState("newest");
+  const [priceRange, setPriceRange] = useState("all");
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -18,12 +28,21 @@ const OptimizedMarketplace = () => {
   };
 
   const handleCategorySelect = (category: string) => {
+    setSelectedCategory(category);
     setActiveTab("category");
   };
 
   const handleSearchSelect = (term: string) => {
     setSearchQuery(term);
     setActiveTab("search");
+  };
+
+  const resetFilters = () => {
+    setShowDiscounted(false);
+    setShowUsed(false);
+    setShowBranded(false);
+    setSortOption("newest");
+    setPriceRange("all");
   };
 
   return (
@@ -33,7 +52,15 @@ const OptimizedMarketplace = () => {
         <BannerCarousel />
       </div>
 
-      <MarketplaceHeader onSearch={handleSearch} />
+      <MarketplaceHeader 
+        isCartOpen={isCartOpen}
+        setIsCartOpen={setIsCartOpen}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        isFilterOpen={isFilterOpen}
+        setIsFilterOpen={setIsFilterOpen}
+        cartItemCount={0} // You can replace this with actual cart count
+      />
 
       <Tabs
         defaultValue="browse"
@@ -55,11 +82,28 @@ const OptimizedMarketplace = () => {
         </TabsContent>
 
         <TabsContent value="category" className="mt-0">
-          <CategoryTabContent />
+          <CategoryTabContent 
+            setSelectedCategory={setSelectedCategory}
+            setActiveTab={setActiveTab}
+          />
         </TabsContent>
 
         <TabsContent value="search" className="mt-0">
-          <SearchTabContent query={searchQuery} />
+          <SearchTabContent 
+            searchQuery={searchQuery}
+            selectedCategory={selectedCategory}
+            showDiscounted={showDiscounted}
+            setShowDiscounted={setShowDiscounted}
+            showUsed={showUsed}
+            setShowUsed={setShowUsed}
+            showBranded={showBranded}
+            setShowBranded={setShowBranded}
+            sortOption={sortOption}
+            setSortOption={setSortOption}
+            priceRange={priceRange}
+            setPriceRange={setPriceRange}
+            resetFilters={resetFilters}
+          />
         </TabsContent>
       </Tabs>
     </div>
