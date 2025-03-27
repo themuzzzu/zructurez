@@ -1,16 +1,15 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { User } from "@supabase/supabase-js";
 
-export const useNotificationLimiter = (currentUser: User | null) => {
+export const useNotificationLimiter = (userId: string | undefined) => {
   const [lastNotificationTime, setLastNotificationTime] = useState<Date | null>(null);
   const [notificationCount, setNotificationCount] = useState<number>(0);
   const MAX_NOTIFICATIONS = 5; // Limit to 5 notifications per day
   
   // Fetch existing notification count on component mount
   useEffect(() => {
-    if (!currentUser) return;
+    if (!userId) return;
     
     const fetchNotificationCount = async () => {
       const today = new Date();
@@ -19,7 +18,7 @@ export const useNotificationLimiter = (currentUser: User | null) => {
       const { count, error } = await supabase
         .from('notifications')
         .select('*', { count: 'exact', head: true })
-        .eq('user_id', currentUser.id)
+        .eq('user_id', userId)
         .gte('created_at', today.toISOString()); // Count only today's notifications
         
       if (!error && count !== null) {
@@ -29,7 +28,7 @@ export const useNotificationLimiter = (currentUser: User | null) => {
     };
     
     fetchNotificationCount();
-  }, [currentUser]);
+  }, [userId]);
 
   const canSendNotification = (now: Date) => {
     const minTimeBetweenNotifications = 2 * 60 * 60 * 1000; // 2 hours between notifications

@@ -3,11 +3,11 @@ import { toast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { DynamicAlert } from "../hooks/useAlertData";
 import { supabase } from "@/integrations/supabase/client";
-import { User } from "@supabase/supabase-js";
+import { Profile } from "@/types/profile";
 
 export const showNotificationToast = (
   alert: DynamicAlert, 
-  currentUser: User | null
+  currentUser: Profile
 ) => {
   // Show notification based on the alert type
   switch(alert.type) {

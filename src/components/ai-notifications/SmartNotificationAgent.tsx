@@ -8,7 +8,7 @@ import { showNotificationToast } from "./utils/showNotificationToast";
 export const SmartNotificationAgent = () => {
   const { data: currentUser } = useCurrentUser();
   const { dynamicAlerts } = useAlertData();
-  const { canSendNotification, incrementNotificationCount } = useNotificationLimiter(currentUser);
+  const { canSendNotification, incrementNotificationCount } = useNotificationLimiter(currentUser?.id);
   
   // Show notifications with daily limit and prioritization
   useEffect(() => {
