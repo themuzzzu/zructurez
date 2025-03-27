@@ -13,7 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export const NotificationButton = () => {
-  const { data: unreadCount = 0, isLoading } = useQuery({
+  const { data: unreadCount = 0, isLoading, refetch } = useQuery({
     queryKey: ['unreadCount'],
     queryFn: async () => {
       const { data: session } = await supabase.auth.getSession();
@@ -28,11 +28,18 @@ export const NotificationButton = () => {
       if (error) throw error;
       return count || 0;
     },
-    refetchInterval: 30000, // Refetch every 30 seconds
+    refetchInterval: 15000, // Refetch every 15 seconds
   });
 
+  const handleSheetOpenChange = (open: boolean) => {
+    if (!open) {
+      // Refetch the unread count when the sheet is closed
+      refetch();
+    }
+  };
+
   return (
-    <Sheet>
+    <Sheet onOpenChange={handleSheetOpenChange}>
       <SheetTrigger asChild>
         <div className="relative">
           <Button variant="ghost" size="icon" className="relative transition-transform duration-300 hover:scale-110">

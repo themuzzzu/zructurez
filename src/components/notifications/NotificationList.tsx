@@ -51,19 +51,24 @@ export const NotificationList = () => {
 
   const deleteNotificationMutation = useMutation({
     mutationFn: async (notificationId: string) => {
+      console.log("Deleting notification:", notificationId);
       const { error } = await supabase
         .from('notifications')
         .delete()
         .eq('id', notificationId);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Delete error:", error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       queryClient.invalidateQueries({ queryKey: ['unreadCount'] });
       toast.success("Notification deleted");
     },
-    onError: () => {
+    onError: (error) => {
+      console.error("Delete mutation error:", error);
       toast.error("Failed to delete notification");
     },
   });
@@ -72,12 +77,18 @@ export const NotificationList = () => {
     mutationFn: async (notificationIds: string[]) => {
       if (notificationIds.length === 0) return;
       
+      console.log("Deleting selected notifications:", notificationIds);
+      
+      // Using the 'in' operator to delete multiple records at once
       const { error } = await supabase
         .from('notifications')
         .delete()
         .in('id', notificationIds);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Delete selected error:", error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
@@ -86,7 +97,8 @@ export const NotificationList = () => {
       setSelectedNotifications([]);
       setSelectMode(false);
     },
-    onError: () => {
+    onError: (error) => {
+      console.error("Delete selected mutation error:", error);
       toast.error("Failed to delete selected notifications");
     },
   });
@@ -96,12 +108,17 @@ export const NotificationList = () => {
       const { data: session } = await supabase.auth.getSession();
       if (!session?.session?.user) return;
 
+      console.log("Deleting all notifications for user:", session.session.user.id);
+      
       const { error } = await supabase
         .from('notifications')
         .delete()
         .eq('user_id', session.session.user.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Delete all error:", error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
@@ -110,13 +127,16 @@ export const NotificationList = () => {
       setSelectedNotifications([]);
       setSelectMode(false);
     },
-    onError: () => {
+    onError: (error) => {
+      console.error("Delete all mutation error:", error);
       toast.error("Failed to delete notifications");
     },
   });
 
   const handleDeleteAll = () => {
     if (notifications.length === 0) return;
+    
+    // Using window.confirm for simplicity
     if (window.confirm("Are you sure you want to delete all notifications?")) {
       deleteAllNotificationsMutation.mutate();
     }
@@ -124,6 +144,8 @@ export const NotificationList = () => {
 
   const handleDeleteSelected = () => {
     if (selectedNotifications.length === 0) return;
+    
+    // Using window.confirm for simplicity
     if (window.confirm(`Are you sure you want to delete ${selectedNotifications.length} selected notifications?`)) {
       deleteSelectedNotificationsMutation.mutate(selectedNotifications);
     }
@@ -198,7 +220,7 @@ export const NotificationList = () => {
             disabled={notifications.length === 0 || deleteAllNotificationsMutation.isPending}
           >
             <Trash2 className="h-3.5 w-3.5 mr-1" />
-            Delete All
+            Clear All
           </Button>
         </div>
       </div>
@@ -216,8 +238,14 @@ export const NotificationList = () => {
             <NotificationItem
               key={notification.id}
               {...notification}
-              onMarkAsRead={markAsReadMutation.mutate}
-              onDelete={deleteNotificationMutation.mutate}
+              onMarkAsRead={(id) => {
+                console.log("Marking as read:", id);
+                markAsReadMutation.mutate(id);
+              }}
+              onDelete={(id) => {
+                console.log("Deleting notification:", id);
+                deleteNotificationMutation.mutate(id);
+              }}
               selectMode={selectMode}
               isSelected={selectedNotifications.includes(notification.id)}
               onToggleSelect={() => toggleSelectNotification(notification.id)}
