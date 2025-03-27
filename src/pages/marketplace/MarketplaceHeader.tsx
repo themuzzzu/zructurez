@@ -27,6 +27,9 @@ export const MarketplaceHeader = ({
   cartItemCount,
 }: MarketplaceHeaderProps) => {
   const navigate = useNavigate();
+  // For demonstration, we'll use a static notification count
+  // In a real app, this would come from a prop or hook
+  const notificationCount = 2;
 
   const handleSearchSelect = (term: string) => {
     setSearchQuery(term);
@@ -72,13 +75,21 @@ export const MarketplaceHeader = ({
               <Filter className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
             
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-white hover:bg-white/10 h-8 w-8 hidden sm:flex"
-            >
-              <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
-            </Button>
+            {/* Updated Notification Button with Badge */}
+            <div className="relative">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-white hover:bg-white/10 h-8 w-8 relative bg-zinc-800"
+              >
+                <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
+                {notificationCount > 0 && (
+                  <Badge className="absolute -top-1.5 -right-1.5 h-5 w-5 p-0 rounded-full bg-red-500 flex items-center justify-center text-[10px] font-semibold border-2 border-zinc-800">
+                    {notificationCount}
+                  </Badge>
+                )}
+              </Button>
+            </div>
             
             <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
               <SheetTrigger asChild>
