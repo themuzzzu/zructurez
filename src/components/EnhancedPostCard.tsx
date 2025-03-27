@@ -6,6 +6,7 @@ import { Eye } from "lucide-react";
 import { PostHeader } from "./post/PostHeader";
 import { PostActions } from "./post/PostActions";
 import { usePostLike } from "@/hooks/usePostLike";
+import { CommentSection } from "./CommentSection";
 
 interface PostCardProps {
   id: string;
@@ -17,6 +18,7 @@ interface PostCardProps {
   image?: string | null;
   likes: number;
   comments: number;
+  reposts?: number;
   views?: number;
   isLiked?: boolean;
 }
@@ -31,6 +33,7 @@ export const EnhancedPostCard = ({
   image,
   likes,
   comments,
+  reposts = 0,
   views = 0,
   isLiked = false,
 }: PostCardProps) => {
@@ -68,6 +71,7 @@ export const EnhancedPostCard = ({
             id={id}
             likes={likes}
             comments={comments}
+            reposts={reposts}
             currentLikeStatus={currentLikeStatus}
             toggleLike={toggleLike}
             setShowComments={setShowComments}
@@ -76,7 +80,7 @@ export const EnhancedPostCard = ({
           
           {showComments && (
             <div className="mt-4 pt-4 border-t">
-              <p className="text-sm text-center text-muted-foreground">Comments are loading...</p>
+              <CommentSection postId={id} />
             </div>
           )}
         </div>

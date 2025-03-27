@@ -28,7 +28,8 @@ const Index = () => {
           *,
           profiles:profile_id (username, avatar_url),
           likes(id),
-          comments(id)
+          comments(id),
+          reposts(id)
         `)
         .order('created_at', { ascending: false });
       
@@ -59,6 +60,7 @@ const Index = () => {
         ...post,
         likes: post.likes?.length || 0,
         comments: post.comments?.length || 0,
+        reposts: post.reposts?.length || 0,
         isLiked: post.likes?.some((like: any) => like.user_id === user?.id) || false
       }));
     }
