@@ -5,6 +5,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { toast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { measureApiCall } from "@/utils/performanceTracking";
+import { ToastAction } from "@/components/ui/toast";
 
 interface DynamicAlert {
   id: string;
@@ -172,14 +173,18 @@ export const SmartNotificationAgent = () => {
           toast({
             title: alert.title,
             description: alert.message,
-            action: {
-              label: "View Deal",
-              onClick: () => {
-                if (alert.productId) {
-                  window.location.href = `/product/${alert.productId}`;
-                }
-              }
-            },
+            action: (
+              <ToastAction 
+                altText="View Deal" 
+                onClick={() => {
+                  if (alert.productId) {
+                    window.location.href = `/product/${alert.productId}`;
+                  }
+                }}
+              >
+                View Deal
+              </ToastAction>
+            ),
             duration: 8000,
             priority: 'medium',
             category: 'system'
@@ -190,14 +195,18 @@ export const SmartNotificationAgent = () => {
           toast({
             title: alert.title,
             description: alert.message,
-            action: {
-              label: "See Now",
-              onClick: () => {
-                if (alert.productId) {
-                  window.location.href = `/product/${alert.productId}`;
-                }
-              }
-            },
+            action: (
+              <ToastAction 
+                altText="See Now" 
+                onClick={() => {
+                  if (alert.productId) {
+                    window.location.href = `/product/${alert.productId}`;
+                  }
+                }}
+              >
+                See Now
+              </ToastAction>
+            ),
             duration: 7000,
             priority: 'medium',
             category: 'system'
@@ -208,14 +217,18 @@ export const SmartNotificationAgent = () => {
           toast({
             title: alert.title,
             description: alert.message,
-            action: {
-              label: "Buy Now",
-              onClick: () => {
-                if (alert.productId) {
-                  window.location.href = `/product/${alert.productId}`;
-                }
-              }
-            },
+            action: (
+              <ToastAction 
+                altText="Buy Now" 
+                onClick={() => {
+                  if (alert.productId) {
+                    window.location.href = `/product/${alert.productId}`;
+                  }
+                }}
+              >
+                Buy Now
+              </ToastAction>
+            ),
             duration: 10000,
             priority: 'high',
             category: 'system'
@@ -226,14 +239,18 @@ export const SmartNotificationAgent = () => {
           toast({
             title: alert.title,
             description: alert.message,
-            action: {
-              label: "Check it out",
-              onClick: () => {
-                if (alert.productId) {
-                  window.location.href = `/product/${alert.productId}`;
-                }
-              }
-            },
+            action: (
+              <ToastAction 
+                altText="Check it out" 
+                onClick={() => {
+                  if (alert.productId) {
+                    window.location.href = `/product/${alert.productId}`;
+                  }
+                }}
+              >
+                Check it out
+              </ToastAction>
+            ),
             duration: 5000,
             priority: 'low',
             category: 'system'
