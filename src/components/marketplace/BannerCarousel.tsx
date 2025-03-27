@@ -19,11 +19,13 @@ export const BannerCarousel = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [api, setApi] = useState<any>(null);
 
+  // Fetch banner ads from Supabase using the adService
   const { data: bannerAds = [] } = useQuery({
     queryKey: ['banner-ads'],
     queryFn: () => fetchActiveAds(undefined, "banner", 5),
   });
 
+  // Record views for the ads when they are displayed
   useEffect(() => {
     if (bannerAds?.length) {
       bannerAds.forEach(ad => {
@@ -32,6 +34,7 @@ export const BannerCarousel = () => {
     }
   }, [bannerAds]);
 
+  // Handle slide changes
   useEffect(() => {
     if (!bannerAds.length) return;
     
@@ -43,6 +46,7 @@ export const BannerCarousel = () => {
     }
   }, [api, bannerAds.length]);
 
+  // Auto-scroll implementation with 5-second interval
   useEffect(() => {
     if (!bannerAds.length) return;
     
@@ -117,10 +121,12 @@ export const BannerCarousel = () => {
         </CarouselNext>
       </Carousel>
       
+      {/* Progress bar to indicate time until next slide */}
       <div className="absolute bottom-0 left-0 right-0 z-10">
         <Progress value={progressValue} className="h-1 rounded-none bg-gray-200/50" indicatorClassName="bg-primary" />
       </div>
       
+      {/* Pagination dots for the carousel */}
       {bannerAds.length > 1 && (
         <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-10">
           {bannerAds.map((_, index) => (
