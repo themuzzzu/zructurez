@@ -49,7 +49,7 @@ export function BannerAd({ ad, className }: BannerAdProps) {
     }
   };
   
-  // Extract price from description if available (e.g. "From ₹12,999*")
+  // Extract price or discount from description if available (e.g. "From ₹12,999*" or "40% Off")
   const priceMatch = ad.description?.match(/([₹$][0-9,]+|[0-9]+%\s+Off)/i);
   const price = priceMatch ? priceMatch[0] : null;
   
@@ -70,6 +70,10 @@ export function BannerAd({ ad, className }: BannerAdProps) {
     }
   };
   
+  // Get credit card and offer info if available in the description
+  const creditCardMatch = ad.description?.match(/([\d]+%\s+Instant\s+Discount.+)/i);
+  const creditCardInfo = creditCardMatch ? creditCardMatch[0] : null;
+  
   return (
     <Card 
       className={`relative overflow-hidden cursor-pointer hover:shadow-lg transition-shadow ${className}`}
@@ -82,7 +86,7 @@ export function BannerAd({ ad, className }: BannerAdProps) {
             alt={ad.title}
             className="w-full h-auto sm:h-60 md:h-[400px] object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex items-end p-6">
+          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-transparent to-transparent flex items-center p-6">
             <div className="w-full max-w-xl">
               <Badge 
                 variant="outline" 
@@ -90,19 +94,32 @@ export function BannerAd({ ad, className }: BannerAdProps) {
               >
                 {getBadgeLabel()}
               </Badge>
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-2">{ad.title}</h2>
               
-              {price && (
-                <p className="text-lg sm:text-xl font-semibold text-white/90 mb-1">{price}</p>
+              <h2 className="text-xl sm:text-2xl md:text-4xl font-bold text-white mb-2">
+                {ad.title.includes("Orient Electric") ? (
+                  <>
+                    <div className="text-2xl md:text-4xl">Sleek. Slim. Stunning.</div>
+                    <div className="text-3xl md:text-5xl mt-2 text-white">Up to 40% Off</div>
+                    <div className="text-lg md:text-xl mt-2 font-normal">Next-gen BLDC fans</div>
+                  </>
+                ) : (
+                  ad.title
+                )}
+              </h2>
+              
+              {creditCardInfo && (
+                <div className="mt-4 mb-3 bg-white/20 backdrop-blur-sm p-2 rounded-md inline-block">
+                  <p className="text-white font-medium">{creditCardInfo}</p>
+                </div>
               )}
               
-              {details && (
+              {details && !creditCardInfo && (
                 <p className="text-sm text-white/80 mb-3 max-w-lg line-clamp-2">{details}</p>
               )}
               
               <Button 
                 size="sm" 
-                className="bg-white text-black hover:bg-white/90 transition-colors flex items-center gap-1"
+                className="bg-white text-black hover:bg-white/90 transition-colors flex items-center gap-1 mt-3"
               >
                 <ShoppingBag className="h-4 w-4" />
                 Shop Now

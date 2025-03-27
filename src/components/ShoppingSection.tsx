@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,7 +5,6 @@ import { ShoppingHeader } from "./shopping/ShoppingHeader";
 import { FilterPanel } from "./shopping/FilterPanel";
 import { ProductsGrid } from "./shopping/ProductsGrid";
 import { AddProductDialog } from "./shopping/AddProductDialog";
-import { BannerCarousel } from "./marketplace/BannerCarousel";
 
 interface ShoppingSectionProps {
   searchQuery?: string;
@@ -78,9 +76,7 @@ export const ShoppingSection = ({
         throw error;
       }
       
-      // Calculate sales count and trending score
       const productsWithRanking = data?.map(product => {
-        // Safely access product_purchases
         const salesCount = Array.isArray(product.product_purchases) 
           ? product.product_purchases.length 
           : 0;
@@ -88,7 +84,6 @@ export const ShoppingSection = ({
         const viewsWeight = 0.3;
         const salesWeight = 0.7;
         
-        // Calculate trending score based on views and sales
         const trendingScore = (product.views * viewsWeight) + (salesCount * salesWeight);
         
         return {
@@ -98,7 +93,6 @@ export const ShoppingSection = ({
         };
       }) || [];
       
-      // Sort based on selected option
       switch (localSortOption) {
         case 'newest':
           return productsWithRanking.sort((a, b) => 
@@ -128,9 +122,6 @@ export const ShoppingSection = ({
 
   return (
     <div className="space-y-4">
-      {/* Banner Carousel for Advertisements */}
-      <BannerCarousel />
-
       <ShoppingHeader 
         selectedCategory={selectedCategory}
         onOpenAddProductDialog={() => setIsDialogOpen(true)}

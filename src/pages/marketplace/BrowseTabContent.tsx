@@ -9,7 +9,6 @@ import { TrendingProducts } from "@/components/marketplace/TrendingProducts";
 import { ShoppingBag, ArrowRightCircle, BadgePercent, Zap } from "lucide-react";
 import { ShoppingSection } from "@/components/ShoppingSection";
 import { RecommendedProducts } from "@/components/marketplace/RecommendedProducts";
-import { BannerCarousel } from "@/components/marketplace/BannerCarousel";
 
 interface BrowseTabContentProps {
   handleCategorySelect: (category: string) => void;
@@ -22,11 +21,6 @@ export const BrowseTabContent = ({
 }: BrowseTabContentProps) => {
   return (
     <div className="space-y-8">
-      {/* Banner Carousel Section */}
-      <div className="mb-6">
-        <BannerCarousel />
-      </div>
-
       {/* Categories */}
       <div className="mb-4">
         <CategoryAvatars onCategorySelect={handleCategorySelect} />

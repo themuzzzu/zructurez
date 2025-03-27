@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchActiveAds, incrementAdView, AdType, AdFormat, Advertisement } from "@/services/adService";
@@ -20,12 +19,12 @@ const sampleBannerAds: Advertisement[] = [
     id: "1",
     title: "Orient Electric Cooling Days",
     description: "Sleek. Slim. Stunning. Up to 40% Off. Next-gen BLDC fans. 10% Instant Discount on Credit Card & EMI Transactions.",
-    image_url: "/lovable-uploads/b38b66c5-f4bc-40ed-8783-f72b12afa884.png",
+    image_url: "/lovable-uploads/a727b8a0-84a4-45b2-88da-392010b1b66c.png",
     business_id: "orient-electric",
-    type: "product",
+    type: "product" as AdType,
     reference_id: "fan-collection",
     budget: 5000,
-    format: "banner",
+    format: "banner" as AdFormat,
     status: "active"
   },
   {
@@ -145,7 +144,6 @@ export const BannerCarousel = () => {
   const [isHovered, setIsHovered] = useState(false);
 
   // Use the sample banner ads instead of fetching from API for now
-  // This ensures we have 10 banners to showcase the functionality
   const bannerAds = sampleBannerAds;
 
   // Record views for the ads when they are displayed (mock functionality)
