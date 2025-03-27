@@ -143,11 +143,11 @@ export const ShoppingSection = ({
         showBranded={localShowBranded}
         sortOption={localSortOption}
         priceRange={localPriceRange}
-        onDiscountedChange={(checked) => setLocalShowDiscounted(checked)}
-        onUsedChange={(checked) => setLocalShowUsed(checked)}
-        onBrandedChange={(checked) => setLocalShowBranded(checked)}
-        onSortChange={(value) => setLocalSortOption(value)}
-        onPriceRangeChange={(value) => setLocalPriceRange(value)}
+        onDiscountedChange={setLocalShowDiscounted}
+        onUsedChange={setLocalShowUsed}
+        onBrandedChange={setLocalShowBranded}
+        onSortChange={setLocalSortOption}
+        onPriceRangeChange={setLocalPriceRange}
         onCloseMobileFilter={() => setIsFilterMobileOpen(false)}
         isFilterMobileOpen={isFilterMobileOpen}
       />
