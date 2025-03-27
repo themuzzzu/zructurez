@@ -3,7 +3,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Notification } from "@/types/notification";
 import { toast } from "sonner";
-import { useState } from "react";
 
 export const useNotifications = () => {
   const queryClient = useQueryClient();

@@ -22,21 +22,25 @@ export const SmartNotificationAgent = () => {
   const { data: currentUser } = useCurrentUser();
   const [lastNotificationTime, setLastNotificationTime] = useState<Date | null>(null);
   const [notificationCount, setNotificationCount] = useState<number>(0);
-  const MAX_NOTIFICATIONS = 5;
+  const MAX_NOTIFICATIONS = 5; // Limit to 5 notifications per day
   
   // Fetch existing notification count on component mount
   useEffect(() => {
     if (!currentUser) return;
     
     const fetchNotificationCount = async () => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
       const { count, error } = await supabase
         .from('notifications')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', currentUser.id)
-        .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()); // Last 24 hours
+        .gte('created_at', today.toISOString()); // Count only today's notifications
         
       if (!error && count !== null) {
         setNotificationCount(count);
+        console.log(`User already has ${count} notifications today`);
       }
     };
     
@@ -143,19 +147,20 @@ export const SmartNotificationAgent = () => {
     staleTime: 10 * 60 * 1000, // Consider data stale after 10 minutes
   });
   
-  // Show notifications with limits and prioritization
+  // Show notifications with daily limit and prioritization
   useEffect(() => {
     if (!dynamicAlerts || dynamicAlerts.length === 0 || !currentUser) return;
     
     const now = new Date();
-    const minTimeBetweenNotifications = 4 * 60 * 60 * 1000; // 4 hours between notifications
+    const minTimeBetweenNotifications = 2 * 60 * 60 * 1000; // 2 hours between notifications
     
-    // Check if we've reached the maximum notifications or if enough time has passed
+    // Check if we've reached the maximum notifications for today or if enough time has passed
     if (
       notificationCount >= MAX_NOTIFICATIONS ||
       (lastNotificationTime !== null && 
        now.getTime() - lastNotificationTime.getTime() <= minTimeBetweenNotifications)
     ) {
+      console.log(`Skipping notification: count=${notificationCount}, max=${MAX_NOTIFICATIONS}, timeCheck=${lastNotificationTime ? 'true' : 'false'}`);
       return;
     }
     
@@ -260,6 +265,7 @@ export const SmartNotificationAgent = () => {
       // Update the last notification time
       setLastNotificationTime(now);
       setNotificationCount(prev => prev + 1);
+      console.log(`Sending notification #${notificationCount + 1} for today`);
       
       // Record this notification in the database
       if (currentUser) {

@@ -31,7 +31,7 @@ export const NotificationButton = () => {
       if (error) throw error;
       return count || 0;
     },
-    refetchInterval: 15000, // Refetch every 15 seconds
+    refetchInterval: 30000, // Refetch every 30 seconds
   });
 
   const handleSheetOpenChange = (open: boolean) => {
