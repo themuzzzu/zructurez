@@ -25,7 +25,7 @@ export const NotificationItem = ({
   onToggleSelect
 }: NotificationItemProps) => {
   return (
-    <div className={`p-4 flex items-start gap-3 border-b ${read ? 'bg-muted/50' : 'bg-background'}`}>
+    <div className={`p-4 flex items-start gap-3 border-b ${read ? 'bg-muted/50' : 'bg-background'} ${isSelected ? 'bg-accent/20' : ''}`}>
       {selectMode && (
         <div className="pt-1">
           <Checkbox 

@@ -82,7 +82,7 @@ export const NotificationList = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       queryClient.invalidateQueries({ queryKey: ['unreadCount'] });
-      toast.success("Selected notifications deleted");
+      toast.success(`${selectedNotifications.length} notifications deleted`);
       setSelectedNotifications([]);
       setSelectMode(false);
     },
@@ -91,7 +91,7 @@ export const NotificationList = () => {
     },
   });
 
-  const clearAllNotificationsMutation = useMutation({
+  const deleteAllNotificationsMutation = useMutation({
     mutationFn: async () => {
       const { data: session } = await supabase.auth.getSession();
       if (!session?.session?.user) return;
@@ -115,14 +115,18 @@ export const NotificationList = () => {
     },
   });
 
-  const handleClearAll = () => {
+  const handleDeleteAll = () => {
     if (notifications.length === 0) return;
-    clearAllNotificationsMutation.mutate();
+    if (window.confirm("Are you sure you want to delete all notifications?")) {
+      deleteAllNotificationsMutation.mutate();
+    }
   };
 
   const handleDeleteSelected = () => {
     if (selectedNotifications.length === 0) return;
-    deleteSelectedNotificationsMutation.mutate(selectedNotifications);
+    if (window.confirm(`Are you sure you want to delete ${selectedNotifications.length} selected notifications?`)) {
+      deleteSelectedNotificationsMutation.mutate(selectedNotifications);
+    }
   };
 
   const toggleSelectMode = () => {
@@ -172,7 +176,7 @@ export const NotificationList = () => {
                 disabled={selectedNotifications.length === 0 || deleteSelectedNotificationsMutation.isPending}
               >
                 <Trash2 className="h-3.5 w-3.5 mr-1" />
-                Delete Selected
+                Delete Selected ({selectedNotifications.length})
               </Button>
             </>
           )}
@@ -190,8 +194,8 @@ export const NotificationList = () => {
             variant="outline" 
             size="sm" 
             className="text-xs h-8 px-2"
-            onClick={handleClearAll}
-            disabled={notifications.length === 0 || clearAllNotificationsMutation.isPending}
+            onClick={handleDeleteAll}
+            disabled={notifications.length === 0 || deleteAllNotificationsMutation.isPending}
           >
             <Trash2 className="h-3.5 w-3.5 mr-1" />
             Delete All
