@@ -46,6 +46,25 @@ export const NotificationList = () => {
     },
   });
 
+  const deleteNotificationMutation = useMutation({
+    mutationFn: async (notificationId: string) => {
+      const { error } = await supabase
+        .from('notifications')
+        .delete()
+        .eq('id', notificationId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['unreadCount'] });
+      toast.success("Notification deleted");
+    },
+    onError: () => {
+      toast.error("Failed to delete notification");
+    },
+  });
+
   const clearAllNotificationsMutation = useMutation({
     mutationFn: async () => {
       const { data: session } = await supabase.auth.getSession();
@@ -53,7 +72,7 @@ export const NotificationList = () => {
 
       const { error } = await supabase
         .from('notifications')
-        .update({ read: true })
+        .delete()
         .eq('user_id', session.session.user.id);
 
       if (error) throw error;
@@ -61,10 +80,10 @@ export const NotificationList = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       queryClient.invalidateQueries({ queryKey: ['unreadCount'] });
-      toast.success("All notifications cleared");
+      toast.success("All notifications deleted");
     },
     onError: () => {
-      toast.error("Failed to clear notifications");
+      toast.error("Failed to delete notifications");
     },
   });
 
@@ -85,7 +104,7 @@ export const NotificationList = () => {
           disabled={notifications.length === 0 || clearAllNotificationsMutation.isPending}
         >
           <Trash2 className="h-3.5 w-3.5 mr-1" />
-          Clear All
+          Delete All
         </Button>
       </div>
       <ScrollArea className="h-[400px]">
@@ -99,6 +118,7 @@ export const NotificationList = () => {
               key={notification.id}
               {...notification}
               onMarkAsRead={markAsReadMutation.mutate}
+              onDelete={deleteNotificationMutation.mutate}
             />
           ))
         )}

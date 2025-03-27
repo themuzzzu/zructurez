@@ -1,13 +1,15 @@
+
 import { formatDistanceToNow } from "date-fns";
-import { Check } from "lucide-react";
+import { Check, Trash } from "lucide-react";
 import { Button } from "../ui/button";
 import { Notification } from "@/types/notification";
 
 interface NotificationItemProps extends Notification {
   onMarkAsRead: (id: string) => void;
+  onDelete: (id: string) => void;
 }
 
-export const NotificationItem = ({ id, message, created_at, read, onMarkAsRead }: NotificationItemProps) => {
+export const NotificationItem = ({ id, message, created_at, read, onMarkAsRead, onDelete }: NotificationItemProps) => {
   return (
     <div className={`p-4 flex items-start gap-3 border-b ${read ? 'bg-muted/50' : 'bg-background'}`}>
       <div className="flex-1">
@@ -16,16 +18,28 @@ export const NotificationItem = ({ id, message, created_at, read, onMarkAsRead }
           {formatDistanceToNow(new Date(created_at), { addSuffix: true })}
         </span>
       </div>
-      {!read && (
+      <div className="flex space-x-1">
+        {!read && (
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8 shrink-0"
+            onClick={() => onMarkAsRead(id)}
+            title="Mark as read"
+          >
+            <Check className="h-4 w-4" />
+          </Button>
+        )}
         <Button 
           variant="ghost" 
           size="icon" 
-          className="h-8 w-8 shrink-0"
-          onClick={() => onMarkAsRead(id)}
+          className="h-8 w-8 shrink-0 text-destructive hover:text-destructive"
+          onClick={() => onDelete(id)}
+          title="Delete notification"
         >
-          <Check className="h-4 w-4" />
+          <Trash className="h-4 w-4" />
         </Button>
-      )}
+      </div>
     </div>
   );
 };
