@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { fetchActiveAds, incrementAdView } from "@/services/adService";
+import { fetchActiveAds, incrementAdView, AdType, AdFormat, Advertisement } from "@/services/adService";
 import {
   Carousel,
   CarouselContent,
@@ -15,7 +15,7 @@ import { Progress } from "@/components/ui/progress";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 // Sample banner ad data for demonstration
-const sampleBannerAds = [
+const sampleBannerAds: Advertisement[] = [
   {
     id: "1",
     title: "Orient Electric Cooling Days",
