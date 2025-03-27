@@ -14,23 +14,145 @@ import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
+// Sample banner ad data for demonstration
+const sampleBannerAds = [
+  {
+    id: "1",
+    title: "Orient Electric Cooling Days",
+    description: "Sleek. Slim. Stunning. Up to 40% Off. Next-gen BLDC fans. 10% Instant Discount on Credit Card & EMI Transactions.",
+    image_url: "/lovable-uploads/b38b66c5-f4bc-40ed-8783-f72b12afa884.png",
+    business_id: "orient-electric",
+    type: "product",
+    reference_id: "fan-collection",
+    budget: 5000,
+    format: "banner",
+    status: "active"
+  },
+  {
+    id: "2",
+    title: "Summer Fashion Sale",
+    description: "Upgrade your wardrobe with the latest summer collection. Up to 50% off on all items.",
+    image_url: "https://images.unsplash.com/photo-1556740738-b6a63e27c4df?q=80&w=2070&auto=format&fit=crop",
+    business_id: "fashion-hub",
+    type: "business",
+    reference_id: "summer-collection",
+    budget: 3500,
+    format: "banner",
+    status: "active"
+  },
+  {
+    id: "3",
+    title: "Premium Electronics",
+    description: "Latest gadgets and electronics at unbeatable prices. Free delivery on orders above $100.",
+    image_url: "https://images.unsplash.com/photo-1550009158-9ebf69173e03?q=80&w=1901&auto=format&fit=crop",
+    business_id: "tech-world",
+    type: "product",
+    reference_id: "electronics-sale",
+    budget: 4000,
+    format: "banner",
+    status: "active"
+  },
+  {
+    id: "4",
+    title: "Luxury Home Decor",
+    description: "Transform your living space with our premium home decor items. Use code HOME30 for 30% off.",
+    image_url: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=1932&auto=format&fit=crop",
+    business_id: "home-luxe",
+    type: "product",
+    reference_id: "home-collection",
+    budget: 3000,
+    format: "banner",
+    status: "active"
+  },
+  {
+    id: "5",
+    title: "Fitness Gear Sale",
+    description: "Get fit with premium fitness equipment. Buy one get one free on selected items.",
+    image_url: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=2070&auto=format&fit=crop",
+    business_id: "fitness-pro",
+    type: "service",
+    reference_id: "fitness-program",
+    budget: 2500,
+    format: "banner",
+    status: "active"
+  },
+  {
+    id: "6",
+    title: "Gourmet Food Festival",
+    description: "Experience the taste of luxury. Special offers on gourmet food items.",
+    image_url: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=2070&auto=format&fit=crop",
+    business_id: "food-delight",
+    type: "business",
+    reference_id: "food-festival",
+    budget: 2000,
+    format: "banner",
+    status: "active"
+  },
+  {
+    id: "7",
+    title: "Travel Adventures",
+    description: "Explore exotic destinations with our special travel packages. Book now and save 20%.",
+    image_url: "https://images.unsplash.com/photo-1526772662000-3f88f10405ff?q=80&w=1974&auto=format&fit=crop",
+    business_id: "travel-escape",
+    type: "service",
+    reference_id: "travel-packages",
+    budget: 4500,
+    format: "banner",
+    status: "active"
+  },
+  {
+    id: "8",
+    title: "Beauty Products Sale",
+    description: "Reveal your natural beauty with our premium beauty products. Up to 40% off this week only.",
+    image_url: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?q=80&w=2080&auto=format&fit=crop",
+    business_id: "beauty-hub",
+    type: "product",
+    reference_id: "beauty-collection",
+    budget: 3000,
+    format: "banner",
+    status: "active"
+  },
+  {
+    id: "9",
+    title: "Jewelry Collection",
+    description: "Adorn yourself with our exquisite jewelry collection. Special launch prices for limited time.",
+    image_url: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=1984&auto=format&fit=crop",
+    business_id: "jewelry-box",
+    type: "product",
+    reference_id: "jewelry-sale",
+    budget: 5500,
+    format: "banner",
+    status: "active"
+  },
+  {
+    id: "10",
+    title: "Book Fair",
+    description: "Expand your knowledge with our vast collection of books. Buy 2 get 1 free on all items.",
+    image_url: "https://images.unsplash.com/photo-1526243741027-444d633d7365?q=80&w=2071&auto=format&fit=crop",
+    business_id: "book-haven",
+    type: "business",
+    reference_id: "book-fair",
+    budget: 2000,
+    format: "banner",
+    status: "active"
+  }
+];
+
 export const BannerCarousel = () => {
   const [progressValue, setProgressValue] = useState(0);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [api, setApi] = useState<any>(null);
+  const [isHovered, setIsHovered] = useState(false);
 
-  // Fetch banner ads from Supabase using the adService
-  const { data: bannerAds = [] } = useQuery({
-    queryKey: ['banner-ads'],
-    queryFn: () => fetchActiveAds(undefined, "banner", 5),
-  });
+  // Use the sample banner ads instead of fetching from API for now
+  // This ensures we have 10 banners to showcase the functionality
+  const bannerAds = sampleBannerAds;
 
-  // Record views for the ads when they are displayed
+  // Record views for the ads when they are displayed (mock functionality)
   useEffect(() => {
     if (bannerAds?.length) {
-      bannerAds.forEach(ad => {
-        incrementAdView(ad.id);
-      });
+      // In a real implementation, this would call the incrementAdView function
+      console.log("Showing ads:", bannerAds.map(ad => ad.title).join(", "));
     }
   }, [bannerAds]);
 
@@ -48,7 +170,7 @@ export const BannerCarousel = () => {
 
   // Auto-scroll implementation with 5-second interval
   useEffect(() => {
-    if (!bannerAds.length) return;
+    if (!bannerAds.length || isHovered) return;
     
     let animationFrameId: number;
     let startTime: number;
@@ -78,7 +200,7 @@ export const BannerCarousel = () => {
     return () => {
       cancelAnimationFrame(animationFrameId);
     };
-  }, [bannerAds.length, currentSlide, api]);
+  }, [bannerAds.length, currentSlide, api, isHovered]);
 
   // Fallback content if no banner ads are available
   if (!bannerAds.length) {
@@ -95,7 +217,11 @@ export const BannerCarousel = () => {
   }
 
   return (
-    <div className="w-full relative mb-8">
+    <div 
+      className="w-full relative mb-8"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <Carousel
         className="w-full"
         setApi={setApi}
@@ -132,7 +258,7 @@ export const BannerCarousel = () => {
           {bannerAds.map((_, index) => (
             <div 
               key={index} 
-              className={`h-2 w-2 rounded-full transition-all ${
+              className={`h-2 w-2 rounded-full transition-all cursor-pointer ${
                 index === currentSlide ? 'bg-white scale-100' : 'bg-white/50 scale-75'
               }`}
               onClick={() => api?.scrollTo(index)}

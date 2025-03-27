@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Json } from "@/integrations/supabase/types";
 
@@ -8,17 +9,17 @@ export type AdFormat = "standard" | "banner" | "video" | "carousel" | "recommend
 // Define the Advertisement type to match the database schema
 export interface Advertisement {
   id: string;
-  user_id: string;
+  user_id?: string;
   title: string;
   description: string;
   type: AdType;
   reference_id: string;
-  location: string;
+  location?: string;
   budget: number;
-  start_date: string;
-  end_date: string;
+  start_date?: string;
+  end_date?: string;
   status: "active" | "pending" | "rejected" | "expired";
-  created_at: string;
+  created_at?: string;
   updated_at?: string;
   image_url: string | null;
   video_url?: string;

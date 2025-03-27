@@ -6,6 +6,7 @@ import { ShoppingHeader } from "./shopping/ShoppingHeader";
 import { FilterPanel } from "./shopping/FilterPanel";
 import { ProductsGrid } from "./shopping/ProductsGrid";
 import { AddProductDialog } from "./shopping/AddProductDialog";
+import { BannerCarousel } from "./marketplace/BannerCarousel";
 
 interface ShoppingSectionProps {
   searchQuery?: string;
@@ -127,6 +128,9 @@ export const ShoppingSection = ({
 
   return (
     <div className="space-y-4">
+      {/* Banner Carousel for Advertisements */}
+      <BannerCarousel />
+
       <ShoppingHeader 
         selectedCategory={selectedCategory}
         onOpenAddProductDialog={() => setIsDialogOpen(true)}
