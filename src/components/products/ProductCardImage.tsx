@@ -3,6 +3,7 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Heart } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
+import { useWishlist } from "@/hooks/useWishlist";
 
 interface ProductCardImageProps {
   imageUrl: string | null;
@@ -19,7 +20,7 @@ export const ProductCardImage = ({
   onClick,
   productId
 }: ProductCardImageProps) => {
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const { isInWishlist, toggleWishlist, loading } = useWishlist();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
@@ -58,8 +59,7 @@ export const ProductCardImage = ({
 
   const handleWishlistClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsWishlisted(!isWishlisted);
-    toast.success(isWishlisted ? "Removed from wishlist" : "Added to wishlist");
+    toggleWishlist(productId);
   };
 
   return (
@@ -120,10 +120,14 @@ export const ProductCardImage = ({
       {/* Wishlist button */}
       <button 
         onClick={handleWishlistClick}
-        className="absolute top-2 right-2 p-2 bg-white dark:bg-zinc-800 rounded-full shadow-md hover:scale-110 transition-transform z-10"
-        aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+        className={`absolute top-2 right-2 p-2 bg-white dark:bg-zinc-800 rounded-full shadow-md hover:scale-110 transition-transform z-10 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+        aria-label={isInWishlist(productId) ? "Remove from wishlist" : "Add to wishlist"}
+        disabled={loading}
       >
-        <Heart size={16} className={isWishlisted ? "fill-red-500 text-red-500" : "text-gray-500"} />
+        <Heart 
+          size={16} 
+          className={isInWishlist(productId) ? "fill-red-500 text-red-500" : "text-gray-500"} 
+        />
       </button>
     </div>
   );
