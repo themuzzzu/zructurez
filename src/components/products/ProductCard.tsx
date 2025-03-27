@@ -1,4 +1,3 @@
-
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -7,6 +6,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface ProductCardProps {
   product: {
@@ -28,16 +28,73 @@ interface ProductCardProps {
 
 export const ProductCard = ({ product, onClick }: ProductCardProps) => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
   
   const handleClick = () => {
     if (onClick) {
       onClick();
     } else {
-      // Fix the navigation path to correctly point to product details
       navigate(`/product/${product.id}`);
     }
   };
+  
+  const addToWishlistMutation = useMutation({
+    mutationFn: async () => {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session?.session?.user) {
+        throw new Error('User must be logged in to add items to wishlist');
+      }
+
+      const { data: existingItems, error: checkError } = await supabase
+        .from('wishlists')
+        .select('*')
+        .eq('user_id', session.session.user.id)
+        .eq('product_id', product.id)
+        .single();
+
+      if (checkError && checkError.code !== 'PGRST116') {
+        throw checkError;
+      }
+
+      if (existingItems) {
+        const { error: deleteError } = await supabase
+          .from('wishlists')
+          .delete()
+          .eq('id', existingItems.id);
+          
+        if (deleteError) throw deleteError;
+        return { action: 'removed' };
+      }
+
+      const { error: insertError } = await supabase
+        .from('wishlists')
+        .insert({
+          user_id: session.session.user.id,
+          product_id: product.id
+        });
+
+      if (insertError) throw insertError;
+      return { action: 'added' };
+    },
+    onSuccess: (result) => {
+      if (result.action === 'added') {
+        toast.success("Added to wishlist");
+      } else {
+        toast.success("Removed from wishlist");
+      }
+      queryClient.invalidateQueries({ queryKey: ['wishlists'] });
+    },
+    onError: (error) => {
+      console.error('Error updating wishlist:', error);
+      if (error instanceof Error && error.message.includes('logged in')) {
+        toast.error(error.message);
+      } else {
+        toast.error("Failed to update wishlist");
+      }
+    },
+  });
   
   const addToCart = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -96,10 +153,18 @@ export const ProductCard = ({ product, onClick }: ProductCardProps) => {
           className="absolute top-2 left-2 h-8 w-8 bg-white/80 hover:bg-white dark:bg-black/80 dark:hover:bg-black text-pink-500 hover:text-pink-600"
           onClick={(e) => {
             e.stopPropagation();
-            toast.success("Added to wishlist");
+            if (!isAddingToWishlist) {
+              setIsAddingToWishlist(true);
+              addToWishlistMutation.mutate(undefined, {
+                onSettled: () => {
+                  setIsAddingToWishlist(false);
+                }
+              });
+            }
           }}
+          disabled={isAddingToWishlist}
         >
-          <Heart className="h-4 w-4" />
+          <Heart className={`h-4 w-4 ${isAddingToWishlist ? 'animate-pulse' : ''}`} />
         </Button>
       </div>
       
