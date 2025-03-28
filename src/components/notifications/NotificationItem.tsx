@@ -1,6 +1,6 @@
 
 import { formatDistanceToNow } from "date-fns";
-import { Check, Trash } from "lucide-react";
+import { Check, Trash2 } from "lucide-react";
 import { Button } from "../ui/button";
 import { Notification } from "@/types/notification";
 import { Checkbox } from "../ui/checkbox";
@@ -64,11 +64,11 @@ export const NotificationItem = ({
         <Button 
           variant="ghost" 
           size="icon" 
-          className="h-8 w-8 shrink-0 text-destructive hover:text-destructive"
+          className="h-8 w-8 shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10"
           onClick={handleDelete}
           title="Delete notification"
         >
-          <Trash className="h-4 w-4" />
+          <Trash2 className="h-4 w-4" />
         </Button>
       </div>
     </div>
