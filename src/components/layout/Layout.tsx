@@ -52,8 +52,8 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
           style={{ 
             marginLeft: hideSidebar || isMobile ? 0 : sidebarWidth + 'px', 
             paddingBottom: isMobile ? '5rem' : '',
-            // Reduce the horizontal padding when sidebar is open
-            paddingLeft: (!hideSidebar && !isMobile) ? '1rem' : ''
+            // Significantly reduce the horizontal padding when sidebar is open to match the second image
+            paddingLeft: (!hideSidebar && !isMobile) ? '0.25rem' : ''
           }}
         >
           {children}
