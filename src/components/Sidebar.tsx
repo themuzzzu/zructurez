@@ -1,6 +1,5 @@
 
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import {
@@ -14,29 +13,12 @@ import {
   Briefcase,
   Map,
   Building,
-  PanelLeftClose,
-  PanelLeft,
-  SunMoon,
 } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-
-// Custom filled icon component for the sidebar
-const FilledIcon = ({ Icon }: { Icon: React.ElementType }) => {
-  // Determine if this is the Store icon (for marketplace)
-  const isStore = Icon === Store;
-  
-  return (
-    <div className="relative">
-      <Icon 
-        size={20} 
-        fill="white" 
-        stroke="black" 
-        strokeWidth={1.5}
-      />
-    </div>
-  );
-};
+import { SidebarItem } from "./sidebar/SidebarItem";
+import { ThemeToggle } from "./sidebar/ThemeToggle";
+import { CollapseButton } from "./sidebar/CollapseButton";
 
 export const Sidebar = ({ className }: React.HTMLAttributes<HTMLDivElement>) => {
   const navigate = useNavigate();
@@ -97,122 +79,33 @@ export const Sidebar = ({ className }: React.HTMLAttributes<HTMLDivElement>) => 
       className
     )}>
       <div className="flex justify-end py-1 px-1">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className={cn(
-            "rounded-full",
-            isDarkMode ? "hover:bg-zinc-800 dark:hover:bg-zinc-800" : "hover:bg-zinc-200 dark:hover:bg-zinc-800"
-          )}
-          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          {isCollapsed ? (
-            <PanelLeft className={cn("h-3.5 w-3.5", isDarkMode ? "text-foreground" : "text-foreground")} />
-          ) : (
-            <PanelLeftClose className={cn("h-3.5 w-3.5", isDarkMode ? "text-foreground" : "text-foreground")} />
-          )}
-        </Button>
+        <CollapseButton 
+          isCollapsed={isCollapsed} 
+          isDarkMode={isDarkMode} 
+          onClick={() => setIsCollapsed(!isCollapsed)} 
+        />
       </div>
       
       <div className="space-y-1 px-1 py-1">
-        {routes.map((route) => {
-          const isActive = activeItem === route.path;
-          // For the active item, we'll apply a dark square background similar to the image
-          const activeBackground = "bg-zinc-800";
-
-          return isCollapsed ? (
-            <Button
-              key={route.path}
-              variant="ghost"
-              className={cn(
-                "w-full p-2 justify-center transition-all duration-200",
-                isActive 
-                  ? activeBackground + " rounded-lg" // Make it more square-like with rounded-lg
-                  : isDarkMode
-                    ? "hover:bg-zinc-800 rounded-lg"
-                    : "hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-lg"
-              )}
-              onClick={() => handleItemClick(route.path)}
-            >
-              {isActive ? (
-                <FilledIcon Icon={route.icon} />
-              ) : (
-                <route.icon className={cn("h-5 w-5", 
-                  isDarkMode 
-                    ? "text-muted-foreground" 
-                    : "text-muted-foreground"
-                )} />
-              )}
-            </Button>
-          ) : (
-            <Button
-              key={route.path}
-              variant="ghost"
-              className={cn(
-                "w-full justify-start gap-3 px-3 py-2 text-sm transition-all duration-200",
-                isActive 
-                  ? activeBackground + " rounded-lg" // Make it more square-like with rounded-lg
-                  : isDarkMode
-                    ? "hover:bg-zinc-800 rounded-lg"
-                    : "hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-lg"
-              )}
-              onClick={() => handleItemClick(route.path)}
-            >
-              <div className="flex items-center justify-center">
-                {isActive ? (
-                  <FilledIcon Icon={route.icon} />
-                ) : (
-                  <route.icon size={20} className={cn(
-                    "text-muted-foreground"
-                  )} />
-                )}
-              </div>
-              <span className={cn(
-                "text-sm",
-                isActive 
-                  ? "font-bold text-white" 
-                  : "text-muted-foreground"
-              )}>
-                {route.name}
-              </span>
-            </Button>
-          );
-        })}
+        {routes.map((route) => (
+          <SidebarItem
+            key={route.path}
+            name={route.name}
+            path={route.path}
+            icon={route.icon}
+            isActive={activeItem === route.path}
+            isCollapsed={isCollapsed}
+            isDarkMode={isDarkMode}
+            onClick={handleItemClick}
+          />
+        ))}
         
         {/* Theme toggle */}
-        {isCollapsed ? (
-          <Button
-            variant="ghost"
-            className={cn(
-              "w-full p-2 justify-center rounded-lg mt-1 transition-all duration-200",
-              isDarkMode
-                ? "hover:bg-zinc-800"
-                : "hover:bg-zinc-200 dark:hover:bg-zinc-800"
-            )}
-            onClick={toggleTheme}
-          >
-            <SunMoon className="h-5 w-5 text-muted-foreground" />
-          </Button>
-        ) : (
-          <Button
-            variant="ghost"
-            className={cn(
-              "w-full justify-start gap-3 px-3 py-2 rounded-lg mt-1 text-sm transition-all duration-200",
-              isDarkMode
-                ? "hover:bg-zinc-800"
-                : "hover:bg-zinc-200 dark:hover:bg-zinc-800"
-            )}
-            onClick={toggleTheme}
-          >
-            <div className="flex items-center justify-center">
-              <SunMoon size={20} className="text-muted-foreground" />
-            </div>
-            <span className="text-sm text-muted-foreground">
-              Toggle Theme
-            </span>
-          </Button>
-        )}
+        <ThemeToggle 
+          isCollapsed={isCollapsed} 
+          isDarkMode={isDarkMode} 
+          onClick={toggleTheme} 
+        />
       </div>
     </div>
   );
