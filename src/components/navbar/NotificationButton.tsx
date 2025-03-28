@@ -12,6 +12,7 @@ import { NotificationList } from "../notifications/NotificationList";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
+import { Badge } from "../ui/badge";
 
 export const NotificationButton = () => {
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -28,7 +29,10 @@ export const NotificationButton = () => {
         .eq('user_id', session.session.user.id)
         .eq('read', false);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching unread notifications:", error);
+        throw error;
+      }
       return count || 0;
     },
     refetchInterval: 30000, // Refetch every 30 seconds
@@ -51,9 +55,12 @@ export const NotificationButton = () => {
           <Button variant="ghost" size="icon" className="relative transition-transform duration-300 hover:scale-110">
             <Bell className="h-5 w-5" />
             {!isLoading && unreadCount > 0 && (
-              <span className="absolute -top-2 -right-2 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center shadow-sm animate-fade-in">
+              <Badge 
+                variant="destructive" 
+                className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center rounded-full text-[10px] font-bold animate-fade-in"
+              >
                 {unreadCount}
-              </span>
+              </Badge>
             )}
           </Button>
         </div>
