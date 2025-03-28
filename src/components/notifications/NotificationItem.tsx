@@ -24,6 +24,11 @@ export const NotificationItem = ({
   isSelected = false,
   onToggleSelect
 }: NotificationItemProps) => {
+  const handleDelete = () => {
+    console.log("Deleting notification with ID:", id);
+    onDelete(id);
+  };
+
   return (
     <div 
       className={`p-4 flex items-start gap-3 border-b ${read ? 'bg-muted/50' : 'bg-background'} ${isSelected ? 'bg-accent/20' : ''}`}
@@ -60,7 +65,7 @@ export const NotificationItem = ({
           variant="ghost" 
           size="icon" 
           className="h-8 w-8 shrink-0 text-destructive hover:text-destructive"
-          onClick={() => onDelete(id)}
+          onClick={handleDelete}
           title="Delete notification"
         >
           <Trash className="h-4 w-4" />
