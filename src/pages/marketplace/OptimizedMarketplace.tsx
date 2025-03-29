@@ -46,9 +46,9 @@ const OptimizedMarketplace = () => {
   };
 
   return (
-    <div className="container px-4 mx-auto max-w-screen-xl py-4 pb-16">
+    <div className="container px-2 sm:px-4 mx-auto max-w-screen-xl py-4 pb-16">
       {/* Display the banner carousel at the top of the page */}
-      <div className="mb-8">
+      <div className="mb-6">
         <BannerCarousel />
       </div>
 

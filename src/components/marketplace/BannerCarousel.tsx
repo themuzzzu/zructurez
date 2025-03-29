@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchActiveAds, incrementAdView, AdType, AdFormat, Advertisement } from "@/services/adService";
@@ -228,19 +229,19 @@ export const BannerCarousel = () => {
           loop: true,
         }}
       >
-        <CarouselContent>
+        <CarouselContent className="!ml-0">
           {bannerAds.map((ad) => (
-            <CarouselItem key={ad.id}>
+            <CarouselItem key={ad.id} className="!pl-0 sm:!pl-4">
               <BannerAd ad={ad} />
             </CarouselItem>
           ))}
         </CarouselContent>
         
-        <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 h-9 w-9 border border-white/40 bg-black/30 hover:bg-black/50">
+        <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 h-9 w-9 border border-white/40 bg-black/30 hover:bg-black/50 z-10">
           <ChevronLeft className="h-5 w-5 text-white" />
         </CarouselPrevious>
         
-        <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 h-9 w-9 border border-white/40 bg-black/30 hover:bg-black/50">
+        <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 h-9 w-9 border border-white/40 bg-black/30 hover:bg-black/50 z-10">
           <ChevronRight className="h-5 w-5 text-white" />
         </CarouselNext>
       </Carousel>
