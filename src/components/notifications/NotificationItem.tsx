@@ -25,17 +25,15 @@ export const NotificationItem = ({
           {formatDistanceToNow(new Date(created_at), { addSuffix: true })}
         </span>
       </div>
-      <div className="flex space-x-1">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="h-8 w-8 shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10"
-          onClick={() => onDelete(id)}
-          title="Delete notification"
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
-      </div>
+      <Button 
+        variant="ghost" 
+        size="icon" 
+        className="h-8 w-8 shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+        onClick={() => onDelete(id)}
+        title="Delete notification"
+      >
+        <Trash2 className="h-4 w-4" />
+      </Button>
     </div>
   );
 };

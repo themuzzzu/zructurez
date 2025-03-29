@@ -23,7 +23,6 @@ export const useNotificationLimiter = (userId: string | undefined) => {
         
       if (!error && count !== null) {
         setNotificationCount(count);
-        console.log(`User already has ${count} notifications today`);
       }
     };
     
@@ -39,7 +38,6 @@ export const useNotificationLimiter = (userId: string | undefined) => {
       (lastNotificationTime !== null && 
         now.getTime() - lastNotificationTime.getTime() <= minTimeBetweenNotifications)
     ) {
-      console.log(`Skipping notification: count=${notificationCount}, max=${MAX_NOTIFICATIONS}, timeCheck=${lastNotificationTime ? 'true' : 'false'}`);
       return false;
     }
     
@@ -49,7 +47,6 @@ export const useNotificationLimiter = (userId: string | undefined) => {
   const incrementNotificationCount = () => {
     setLastNotificationTime(new Date());
     setNotificationCount(prev => prev + 1);
-    console.log(`Sending notification #${notificationCount + 1} for today`);
   };
 
   return {
