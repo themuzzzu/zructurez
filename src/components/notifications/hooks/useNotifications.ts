@@ -51,24 +51,19 @@ export const useNotifications = () => {
   // Delete notification mutation
   const deleteNotificationMutation = useMutation({
     mutationFn: async (notificationId: string) => {
-      console.log("Deleting notification:", notificationId);
       const { error } = await supabase
         .from('notifications')
         .delete()
         .eq('id', notificationId);
 
-      if (error) {
-        console.error("Delete error:", error);
-        throw error;
-      }
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       queryClient.invalidateQueries({ queryKey: ['unreadCount'] });
       toast.success("Notification deleted");
     },
-    onError: (error) => {
-      console.error("Delete mutation error:", error);
+    onError: () => {
       toast.error("Failed to delete notification");
     },
   });

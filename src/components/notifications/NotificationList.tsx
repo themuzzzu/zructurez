@@ -3,7 +3,6 @@ import { useNotifications } from "./hooks/useNotifications";
 import { useBatchOperations } from "./hooks/useBatchOperations";
 import { NotificationItem } from "./NotificationItem";
 import { NotificationHeader } from "./NotificationHeader";
-import { NotificationConfirmDialog } from "./NotificationConfirmDialog";
 import { ScrollArea } from "../ui/scroll-area";
 
 export const NotificationList = () => {
@@ -20,16 +19,10 @@ export const NotificationList = () => {
   const {
     selectedNotifications,
     selectMode,
-    isDeleteAllAlertOpen,
-    isDeleteSelectedAlertOpen,
-    setIsDeleteAllAlertOpen,
-    setIsDeleteSelectedAlertOpen,
     deleteSelectedNotificationsMutation,
     deleteAllNotificationsMutation,
     handleDeleteAll,
-    confirmDeleteAll,
     handleDeleteSelected,
-    confirmDeleteSelected,
     toggleSelectMode,
     toggleSelectAll,
     toggleSelectNotification
@@ -64,11 +57,9 @@ export const NotificationList = () => {
               key={notification.id}
               {...notification}
               onMarkAsRead={(id) => {
-                console.log("Marking as read:", id);
                 markAsReadMutation.mutate(id);
               }}
               onDelete={(id) => {
-                console.log("Deleting notification:", id);
                 deleteNotificationMutation.mutate(id);
               }}
               selectMode={selectMode}
@@ -78,26 +69,6 @@ export const NotificationList = () => {
           ))
         )}
       </ScrollArea>
-
-      {/* Delete All Confirmation Dialog */}
-      <NotificationConfirmDialog 
-        isOpen={isDeleteAllAlertOpen}
-        onOpenChange={setIsDeleteAllAlertOpen}
-        onConfirm={confirmDeleteAll}
-        title="Delete All Notifications"
-        description="Are you sure you want to delete all notifications? This action cannot be undone."
-        confirmText="Delete All"
-      />
-
-      {/* Delete Selected Confirmation Dialog */}
-      <NotificationConfirmDialog
-        isOpen={isDeleteSelectedAlertOpen}
-        onOpenChange={setIsDeleteSelectedAlertOpen}
-        onConfirm={confirmDeleteSelected}
-        title="Delete Selected Notifications"
-        description={`Are you sure you want to delete ${selectedNotifications.length} selected notifications? This action cannot be undone.`}
-        confirmText="Delete Selected"
-      />
     </div>
   );
 };

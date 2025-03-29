@@ -92,25 +92,13 @@ export const useBatchOperations = (notifications: Notification[]) => {
   // Handle delete all notification
   const handleDeleteAll = () => {
     if (notifications.length === 0) return;
-    setIsDeleteAllAlertOpen(true);
-  };
-
-  // Confirm delete all
-  const confirmDeleteAll = () => {
     deleteAllNotificationsMutation.mutate();
-    setIsDeleteAllAlertOpen(false);
   };
 
   // Handle delete selected notifications
   const handleDeleteSelected = () => {
     if (selectedNotifications.length === 0) return;
-    setIsDeleteSelectedAlertOpen(true);
-  };
-
-  // Confirm delete selected
-  const confirmDeleteSelected = () => {
     deleteSelectedNotificationsMutation.mutate();
-    setIsDeleteSelectedAlertOpen(false);
   };
 
   return {
@@ -126,8 +114,6 @@ export const useBatchOperations = (notifications: Notification[]) => {
     toggleSelectAll,
     toggleSelectNotification,
     handleDeleteAll,
-    confirmDeleteAll,
     handleDeleteSelected,
-    confirmDeleteSelected,
   };
 };
