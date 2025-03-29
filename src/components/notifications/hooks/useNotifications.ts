@@ -29,25 +29,6 @@ export const useNotifications = () => {
     },
   });
 
-  // Mark as read mutation
-  const markAsReadMutation = useMutation({
-    mutationFn: async (notificationId: string) => {
-      const { error } = await supabase
-        .from('notifications')
-        .update({ read: true })
-        .eq('id', notificationId);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications'] });
-      queryClient.invalidateQueries({ queryKey: ['unreadCount'] });
-    },
-    onError: () => {
-      toast.error("Failed to mark notification as read");
-    },
-  });
-
   // Delete notification mutation
   const deleteNotificationMutation = useMutation({
     mutationFn: async (notificationId: string) => {
@@ -68,11 +49,34 @@ export const useNotifications = () => {
     },
   });
 
+  // Delete all notifications
+  const deleteAllNotificationsMutation = useMutation({
+    mutationFn: async () => {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session?.session?.user) return;
+      
+      const { error } = await supabase
+        .from('notifications')
+        .delete()
+        .eq('user_id', session.session.user.id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['unreadCount'] });
+      toast.success("All notifications cleared");
+    },
+    onError: () => {
+      toast.error("Failed to clear notifications");
+    },
+  });
+
   return {
     notifications,
     isLoading,
     isError,
-    markAsReadMutation,
     deleteNotificationMutation,
+    deleteAllNotificationsMutation,
   };
 };

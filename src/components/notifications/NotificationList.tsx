@@ -1,9 +1,9 @@
 
 import { useNotifications } from "./hooks/useNotifications";
-import { useBatchOperations } from "./hooks/useBatchOperations";
 import { NotificationItem } from "./NotificationItem";
-import { NotificationHeader } from "./NotificationHeader";
 import { ScrollArea } from "../ui/scroll-area";
+import { Button } from "../ui/button";
+import { Trash2 } from "lucide-react";
 
 export const NotificationList = () => {
   // Get notification data and operations
@@ -11,36 +11,38 @@ export const NotificationList = () => {
     notifications, 
     isLoading, 
     isError, 
-    markAsReadMutation, 
-    deleteNotificationMutation 
+    deleteNotificationMutation,
+    deleteAllNotificationsMutation
   } = useNotifications();
 
-  // Get batch operations
-  const {
-    selectedNotifications,
-    selectMode,
-    deleteSelectedNotificationsMutation,
-    deleteAllNotificationsMutation,
-    handleDeleteAll,
-    handleDeleteSelected,
-    toggleSelectMode,
-    toggleSelectAll,
-    toggleSelectNotification
-  } = useBatchOperations(notifications);
+  // Handle delete notification
+  const handleDelete = (id: string) => {
+    deleteNotificationMutation.mutate(id);
+  };
+
+  // Handle delete all notifications
+  const handleDeleteAll = () => {
+    if (notifications.length === 0) return;
+    deleteAllNotificationsMutation.mutate();
+  };
 
   return (
     <div>
-      <NotificationHeader 
-        notifications={notifications}
-        selectMode={selectMode}
-        selectedNotifications={selectedNotifications}
-        deleteSelectedIsPending={deleteSelectedNotificationsMutation.isPending}
-        deleteAllIsPending={deleteAllNotificationsMutation.isPending}
-        onToggleSelectMode={toggleSelectMode}
-        onToggleSelectAll={toggleSelectAll}
-        onDeleteSelected={handleDeleteSelected}
-        onDeleteAll={handleDeleteAll}
-      />
+      <div className="flex justify-between items-center mb-2 px-4 py-2">
+        <h3 className="text-sm font-medium">Your Notifications</h3>
+        {notifications.length > 0 && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="text-xs h-8 px-2"
+            onClick={handleDeleteAll}
+            disabled={deleteAllNotificationsMutation.isPending}
+          >
+            <Trash2 className="h-3.5 w-3.5 mr-1" />
+            Clear All
+          </Button>
+        )}
+      </div>
 
       <ScrollArea className="h-[400px]">
         {isLoading ? (
@@ -56,15 +58,7 @@ export const NotificationList = () => {
             <NotificationItem
               key={notification.id}
               {...notification}
-              onMarkAsRead={(id) => {
-                markAsReadMutation.mutate(id);
-              }}
-              onDelete={(id) => {
-                deleteNotificationMutation.mutate(id);
-              }}
-              selectMode={selectMode}
-              isSelected={selectedNotifications.includes(notification.id)}
-              onToggleSelect={() => toggleSelectNotification(notification.id)}
+              onDelete={handleDelete}
             />
           ))
         )}
