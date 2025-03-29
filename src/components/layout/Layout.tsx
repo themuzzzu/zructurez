@@ -3,7 +3,6 @@ import { ReactNode, useEffect, useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Sidebar } from "@/components/Sidebar";
 import { AIAssistant } from "@/components/ai-support/AIAssistant";
-import { SmartNotificationAgent } from "@/components/ai-notifications/SmartNotificationAgent";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useTheme } from "@/components/ThemeProvider";
 
@@ -62,7 +61,6 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
       
       {/* AI Components */}
       <AIAssistant />
-      <SmartNotificationAgent />
     </div>
   );
 };
