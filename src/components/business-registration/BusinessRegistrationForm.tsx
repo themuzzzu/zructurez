@@ -24,6 +24,8 @@ export type BusinessFormValues = z.infer<typeof businessFormSchema>;
 export const BusinessRegistrationForm = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [userHasBusiness, setUserHasBusiness] = useState(false);
   const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -46,6 +48,7 @@ export const BusinessRegistrationForm = () => {
       return {
         name: "",
         category: "",
+        otherCategory: "",
         description: "",
         appointment_price: "",
         consultation_price: "",
@@ -80,6 +83,49 @@ export const BusinessRegistrationForm = () => {
   
   const { handleSubmit, watch, formState: { errors, isDirty, isValid }, reset } = methods;
   const formValues = watch();
+  
+  // Check if user already has a business
+  useEffect(() => {
+    const checkUserBusiness = async () => {
+      setLoading(true);
+      try {
+        // Get current user
+        const { data: userData } = await supabase.auth.getUser();
+        if (userData?.user) {
+          // Check if user already has a business
+          const { data: businesses, error } = await supabase
+            .from('businesses')
+            .select('id')
+            .eq('user_id', userData.user.id)
+            .limit(1);
+          
+          if (error) {
+            throw error;
+          }
+          
+          if (businesses && businesses.length > 0) {
+            setUserHasBusiness(true);
+            toast({
+              title: "You already have a business",
+              description: "Only one business is allowed per user. Please manage your existing business.",
+              variant: "destructive",
+            });
+            
+            // Redirect after 3 seconds
+            setTimeout(() => {
+              navigate(`/businesses/${businesses[0].id}`);
+            }, 3000);
+          }
+        }
+      } catch (error) {
+        console.error("Error checking user business:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    checkUserBusiness();
+  }, [navigate, toast]);
   
   // Setup auto-save
   useEffect(() => {
@@ -130,8 +176,14 @@ export const BusinessRegistrationForm = () => {
     let canProceed = true;
     
     if (currentStep === 1) {
-      const { name, category, description, appointment_price, consultation_price } = methods.getValues();
-      canProceed = !!name && !!category && !!description && !!appointment_price && !!consultation_price;
+      const { name, category, description } = methods.getValues();
+      canProceed = !!name && !!category && !!description;
+      
+      // Check if "other" category requires a value
+      if (category === "other") {
+        const otherCategory = methods.getValues("otherCategory");
+        canProceed = canProceed && !!otherCategory;
+      }
     } else if (currentStep === 2) {
       const owners = methods.getValues("owners");
       canProceed = owners.length > 0 && !!owners[0].name && !!owners[0].role && !!owners[0].position;
@@ -165,7 +217,18 @@ export const BusinessRegistrationForm = () => {
   };
   
   const onSubmit = async (data: BusinessFormValues) => {
+    if (userHasBusiness) {
+      toast({
+        title: "Registration not allowed",
+        description: "You already have a registered business. Only one business is allowed per user.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     try {
+      setLoading(true);
+      
       // Store image first if it exists
       let image_url = data.image;
       
@@ -200,12 +263,38 @@ export const BusinessRegistrationForm = () => {
         return;
       }
       
+      // Check if user already has a business
+      const { data: existingBusinesses, error: checkError } = await supabase
+        .from('businesses')
+        .select('id')
+        .eq('user_id', userData.user.id)
+        .limit(1);
+      
+      if (checkError) {
+        throw checkError;
+      }
+      
+      if (existingBusinesses && existingBusinesses.length > 0) {
+        toast({
+          title: "Registration failed",
+          description: "You already have a registered business. Only one business is allowed per user.",
+          variant: "destructive",
+        });
+        setUserHasBusiness(true);
+        return;
+      }
+      
+      // Prepare category (incorporate otherCategory if needed)
+      const finalCategory = data.category === "other" && data.otherCategory 
+        ? data.otherCategory 
+        : data.category;
+      
       // Insert business into database
       const { data: business, error } = await supabase
         .from('businesses')
         .insert({
           name: data.name,
-          category: data.category,
+          category: finalCategory,
           description: data.description,
           appointment_price: data.appointment_price ? parseFloat(data.appointment_price) : null,
           consultation_price: data.consultation_price ? parseFloat(data.consultation_price) : null,
@@ -259,10 +348,41 @@ export const BusinessRegistrationForm = () => {
         description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   };
   
   const progressPercentage = (currentStep / 5) * 100;
+  
+  if (loading && !userHasBusiness) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto mb-4"></div>
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  if (userHasBusiness) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container max-w-7xl mx-auto pt-20 pb-16">
+          <div className="bg-card rounded-lg shadow-md p-6 text-center">
+            <h2 className="text-2xl font-bold mb-4">Business Registration Limit Reached</h2>
+            <p className="mb-4">You already have a registered business. Only one business is allowed per user ID.</p>
+            <p className="mb-6">You will be redirected to your existing business page shortly.</p>
+            <Button onClick={() => navigate("/businesses")}>
+              Go to Businesses
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className="min-h-screen bg-background">
@@ -326,9 +446,9 @@ export const BusinessRegistrationForm = () => {
                       ) : (
                         <Button 
                           type="submit"
-                          disabled={!isValid || !methods.getValues("agree_terms")}
+                          disabled={!isValid || !methods.getValues("agree_terms") || loading}
                         >
-                          Submit Registration
+                          {loading ? "Submitting..." : "Submit Registration"}
                         </Button>
                       )}
                     </div>

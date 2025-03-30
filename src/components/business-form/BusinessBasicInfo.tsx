@@ -1,3 +1,4 @@
+
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Label } from "../ui/label";
@@ -72,6 +73,18 @@ export const BusinessBasicInfo = ({ formData, onChange }: BusinessBasicInfoProps
           </SelectContent>
         </Select>
       </div>
+      
+      {formData.category === "other" && (
+        <div className="space-y-2">
+          <Label htmlFor="otherCategory">Specify Category</Label>
+          <Input
+            id="otherCategory"
+            value={formData.otherCategory || ""}
+            onChange={(e) => onChange("otherCategory", e.target.value)}
+            placeholder="Enter your specific business category"
+          />
+        </div>
+      )}
 
       <div className="space-y-2">
         <Label htmlFor="description">Description</Label>
@@ -85,24 +98,24 @@ export const BusinessBasicInfo = ({ formData, onChange }: BusinessBasicInfoProps
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="appointment_price">Appointment Price (₹)</Label>
+        <Label htmlFor="appointment_price">Appointment Price (₹) (Optional)</Label>
         <Input
           id="appointment_price"
           type="number"
           value={formData.appointment_price}
           onChange={(e) => onChange("appointment_price", e.target.value)}
-          placeholder="Enter appointment price"
+          placeholder="Enter appointment price (leave empty if not applicable)"
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="consultation_price">Consultation Price (₹)</Label>
+        <Label htmlFor="consultation_price">Consultation Price (₹) (Optional)</Label>
         <Input
           id="consultation_price"
           type="number"
           value={formData.consultation_price}
           onChange={(e) => onChange("consultation_price", e.target.value)}
-          placeholder="Enter consultation price"
+          placeholder="Enter consultation price (leave empty if not applicable)"
         />
       </div>
 

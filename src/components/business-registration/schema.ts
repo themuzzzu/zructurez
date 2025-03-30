@@ -41,9 +41,10 @@ export const businessFormSchema = z.object({
   // Step 1: Basic Information
   name: z.string().min(1, "Business name is required"),
   category: z.string().min(1, "Category is required"),
+  otherCategory: z.string().optional(),
   description: z.string().min(10, "Description must be at least 10 characters"),
-  appointment_price: z.string().min(1, "Appointment price is required"),
-  consultation_price: z.string().min(1, "Consultation price is required"),
+  appointment_price: z.string().optional().or(z.literal("")),
+  consultation_price: z.string().optional().or(z.literal("")),
   website: z.string().url().optional().or(z.literal("")),
   social_media: socialMediaSchema.optional().default({}),
   

@@ -1,3 +1,4 @@
+
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Checkbox } from "../ui/checkbox";
@@ -20,7 +21,7 @@ export const BusinessPricing = ({ formData, onChange }: BusinessPricingProps) =>
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label>Price Types</Label>
+        <Label>Price Types (Optional)</Label>
         <div className="flex flex-col space-y-2">
           <div className="flex items-center space-x-2">
             <Checkbox 
@@ -51,7 +52,7 @@ export const BusinessPricing = ({ formData, onChange }: BusinessPricingProps) =>
             step="0.01"
             value={formData.appointment_price}
             onChange={(e) => onChange("appointment_price", e.target.value)}
-            placeholder="Enter appointment price"
+            placeholder="Enter appointment price (optional)"
           />
         </div>
       ) : null}
@@ -66,7 +67,7 @@ export const BusinessPricing = ({ formData, onChange }: BusinessPricingProps) =>
             step="0.01"
             value={formData.consultation_price}
             onChange={(e) => onChange("consultation_price", e.target.value)}
-            placeholder="Enter consultation price"
+            placeholder="Enter consultation price (optional)"
           />
         </div>
       ) : null}
