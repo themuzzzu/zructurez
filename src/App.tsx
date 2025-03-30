@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -20,16 +21,12 @@ import Settings from "@/pages/Settings";
 import Wishlist from "@/pages/Wishlist";
 import Maps from "@/pages/Maps";
 import Communities from "@/pages/Communities";
-import Messages from "@/pages/Messages";
-import Search from "@/pages/Search";
-import Orders from "@/pages/Orders";
-import Checkout from "@/pages/Checkout";
-import NotFound from "@/pages/NotFound";
+import { Messages } from "@/pages/messages/Messages";
+import { NotFound } from "@/components/NotFound";
 import AdDashboard from "@/pages/admin/AdDashboard";
 import AdAnalytics from "@/pages/admin/AdAnalytics";
 import AdPlacement from "@/pages/admin/AdPlacement";
 import AdAuction from "@/pages/admin/AdAuction";
-import BusinessDashboard from "@/pages/dashboard/BusinessDashboard";
 import { BusinessRegistrationForm } from "@/components/business-registration/BusinessRegistrationForm";
 
 function App() {
@@ -46,7 +43,7 @@ function App() {
       <ThemeProvider defaultTheme="dark" storageKey="lovable-theme">
         <div className={isLoading ? "hidden" : "app"}>
           <Routes>
-            <Route path="/" element={<Index isFirstLogin={firstLogin} />} />
+            <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/events" element={<Events />} />
             <Route path="/jobs" element={<Jobs />} />
@@ -65,14 +62,14 @@ function App() {
             <Route path="/communities" element={<Communities />} />
             <Route path="/messages/*" element={<Messages />} />
             <Route path="/messages" element={<Messages />} />
-            <Route path="/search" element={<Search />} />
-            <Route path="/orders" element={<Orders />} />
-            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/search" element={<NotFound />} />
+            <Route path="/orders" element={<NotFound />} />
+            <Route path="/checkout" element={<NotFound />} />
             <Route path="/admin/ads" element={<AdDashboard />} />
             <Route path="/admin/analytics" element={<AdAnalytics />} />
             <Route path="/admin/placement" element={<AdPlacement />} />
             <Route path="/admin/auction" element={<AdAuction />} />
-            <Route path="/dashboard" element={<BusinessDashboard />} />
+            <Route path="/dashboard" element={<NotFound />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
