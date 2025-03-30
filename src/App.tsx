@@ -22,7 +22,10 @@ import Wishlist from "@/pages/Wishlist";
 import Maps from "@/pages/Maps";
 import Communities from "@/pages/Communities";
 import { Messages } from "@/pages/messages/Messages";
-import { NotFound } from "@/components/NotFound";
+import Search from "@/pages/search";
+import Orders from "@/pages/orders";
+import Checkout from "@/pages/checkout";
+import NotFound from "@/pages/NotFound";
 import AdDashboard from "@/pages/admin/AdDashboard";
 import AdAnalytics from "@/pages/admin/AdAnalytics";
 import AdPlacement from "@/pages/admin/AdPlacement";
@@ -31,7 +34,6 @@ import { BusinessRegistrationForm } from "@/components/business-registration/Bus
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
-  const [firstLogin, setFirstLogin] = useState(false);
   const queryClient = new QueryClient();
 
   setTimeout(() => {
@@ -62,9 +64,9 @@ function App() {
             <Route path="/communities" element={<Communities />} />
             <Route path="/messages/*" element={<Messages />} />
             <Route path="/messages" element={<Messages />} />
-            <Route path="/search" element={<NotFound />} />
-            <Route path="/orders" element={<NotFound />} />
-            <Route path="/checkout" element={<NotFound />} />
+            <Route path="/search" element={<Search />} />
+            <Route path="/orders" element={<Orders />} />
+            <Route path="/checkout" element={<Checkout />} />
             <Route path="/admin/ads" element={<AdDashboard />} />
             <Route path="/admin/analytics" element={<AdAnalytics />} />
             <Route path="/admin/placement" element={<AdPlacement />} />

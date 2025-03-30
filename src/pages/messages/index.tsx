@@ -1,4 +1,6 @@
 
 import { Messages } from "./Messages";
 
-export default Messages;
+export default function MessagesPage() {
+  return <Messages />;
+}
