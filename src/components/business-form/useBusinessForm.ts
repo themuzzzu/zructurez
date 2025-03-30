@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -14,6 +15,7 @@ export const useBusinessForm = (initialData?: any, onSuccess?: () => void) => {
   const [formData, setFormData] = useState<BusinessFormData>({
     name: "",
     category: "",
+    otherCategory: "",
     description: "",
     location: "",
     contact: "",
@@ -41,6 +43,7 @@ export const useBusinessForm = (initialData?: any, onSuccess?: () => void) => {
       setFormData({
         name: initialData.name || "",
         category: initialData.category || "",
+        otherCategory: initialData.otherCategory || "",
         description: initialData.description || "",
         location: initialData.location || "",
         contact: initialData.contact || "",
