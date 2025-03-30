@@ -36,19 +36,19 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-hidden">
       <Navbar />
-      <div className="flex pt-16 w-full">
+      <div className="flex pt-16 w-full overflow-hidden">
         {!hideSidebar && !isMobile && (
           <div 
             style={{ width: sidebarWidth + 'px', left: '0px' }} 
-            className={`transition-all duration-300 fixed h-[calc(100vh-64px)] ${isDarkMode ? 'border-zinc-800/50' : 'border-zinc-200/50'} border-r`}
+            className={`transition-all duration-300 fixed h-[calc(100vh-64px)] ${isDarkMode ? 'border-zinc-800/50' : 'border-zinc-200/50'} border-r scrollbar-hide overflow-hidden`}
           >
             <Sidebar />
           </div>
         )}
         <main 
-          className={`flex-1 transition-all duration-300 w-full ${hideSidebar || isMobile ? 'px-4 sm:px-6 pb-20' : ''}`}
+          className={`flex-1 transition-all duration-300 w-full overflow-auto scrollbar-hide ${hideSidebar || isMobile ? 'px-4 sm:px-6 pb-20' : ''}`}
           style={{ 
             marginLeft: hideSidebar || isMobile ? 0 : sidebarWidth + 'px', 
             paddingBottom: isMobile ? '5rem' : '',

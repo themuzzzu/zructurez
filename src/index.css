@@ -56,6 +56,25 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* Hide scrollbars for the entire app */
+    overflow: hidden;
+  }
+  
+  /* Hide scrollbars globally but keep functionality */
+  ::-webkit-scrollbar {
+    width: 0; /* Hide scrollbar width */
+    height: 0; /* Hide scrollbar height */
+    display: none; /* Hide scrollbar completely */
+  }
+  
+  /* Firefox */
+  * {
+    scrollbar-width: none;
+  }
+  
+  /* IE and Edge */
+  * {
+    -ms-overflow-style: none;
   }
   
   /* Social media layout styles */

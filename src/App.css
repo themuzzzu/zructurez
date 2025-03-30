@@ -3,6 +3,7 @@
   width: 100%;
   margin: 0 auto;
   text-align: center;
+  overflow: hidden; /* Hide overflow on root */
 }
 
 .logo {
@@ -60,4 +61,14 @@
   main {
     padding-bottom: 80px !important;
   }
+}
+
+/* Utility class to hide scrollbars while allowing scrolling functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
 }
