@@ -1,10 +1,11 @@
 
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { BusinessStatus } from "./header/BusinessStatus";
 import { TemporaryStatus } from "./header/TemporaryStatus";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 interface BusinessHeaderProps {
   id: string;
@@ -23,25 +24,42 @@ export const BusinessHeader = ({
   isOpen = true,
   onEdit 
 }: BusinessHeaderProps) => {
+  const isMobile = useMediaQuery("(max-width: 768px)");
+  const navigate = useNavigate();
+  
+  const handleBackClick = () => {
+    navigate(-1);
+  };
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <Link to="/businesses">
-            <Button variant="ghost" size="icon">
+        <div className="flex items-center gap-2 sm:gap-4">
+          {isMobile ? (
+            <Button variant="ghost" size="icon" onClick={handleBackClick}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
-          </Link>
-          <div className="flex items-center gap-2">
-            <h1 className="text-3xl font-bold">{name}</h1>
-            <Badge variant={isOpen ? "success" : "destructive"}>
-              {isOpen ? "Open" : "Closed"}
-            </Badge>
+          ) : (
+            <Link to="/businesses">
+              <Button variant="ghost" size="icon">
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+            </Link>
+          )}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+            <h1 className="text-2xl sm:text-3xl font-bold">{name}</h1>
+            <div className="flex items-center gap-2">
+              <Badge variant={isOpen ? "success" : "destructive"} className="mt-1 sm:mt-0">
+                {isOpen ? "Open" : "Closed"}
+              </Badge>
+              <div className="text-muted-foreground text-sm mt-1 sm:mt-0">{category}</div>
+            </div>
           </div>
-          <div className="text-muted-foreground">{category}</div>
         </div>
         {isOwner && onEdit && (
-          <Button onClick={onEdit}>Edit Business</Button>
+          <Button onClick={onEdit} size={isMobile ? "sm" : "default"}>
+            Edit
+          </Button>
         )}
       </div>
 

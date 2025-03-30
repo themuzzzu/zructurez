@@ -11,11 +11,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { CreateBusinessForm } from "@/components/CreateBusinessForm";
 import { useState } from "react";
 import { BusinessTabs } from "@/components/business-details/BusinessTabs";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import type { Business, StaffMember, BusinessOwner, MembershipPlan } from "@/types/business";
 
 const BusinessDetails = () => {
   const { id } = useParams();
   const [isEditing, setIsEditing] = useState(false);
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id || '');
 
@@ -111,8 +113,10 @@ const BusinessDetails = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
-      <div className="container max-w-[1400px] pt-20 pb-16">
+      {/* Only show Navbar on desktop */}
+      {!isMobile && <Navbar />}
+      
+      <div className={`max-w-[1400px] mx-auto ${isMobile ? 'pt-4' : 'pt-20'} pb-16 px-3 sm:px-6`}>
         <div className="space-y-6">
           <BusinessHeader
             id={business.id}

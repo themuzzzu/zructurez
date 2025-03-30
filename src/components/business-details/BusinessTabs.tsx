@@ -1,3 +1,4 @@
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BusinessAboutTab } from "./tabs/BusinessAboutTab";
 import { BusinessProductsTab } from "./tabs/BusinessProductsTab";
@@ -5,6 +6,7 @@ import { BusinessServicesTab } from "./tabs/BusinessServicesTab";
 import { BusinessPortfolioTab } from "./tabs/BusinessPortfolioTab";
 import { BusinessPostsTab } from "./tabs/BusinessPostsTab";
 import { BusinessBookingsTab } from "./tabs/BusinessBookingsTab";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import type { Business } from "@/types/business";
 
 interface BusinessTabsProps {
@@ -14,15 +16,20 @@ interface BusinessTabsProps {
 }
 
 export const BusinessTabs = ({ business, isOwner, onRefetch }: BusinessTabsProps) => {
+  const isMobile = useMediaQuery("(max-width: 768px)");
+  
   return (
     <Tabs defaultValue="about" className="w-full">
-      <TabsList className="grid w-full" style={{ gridTemplateColumns: 'repeat(6, 1fr)' }}>
-        <TabsTrigger value="about">About</TabsTrigger>
-        <TabsTrigger value="products">Products</TabsTrigger>
-        <TabsTrigger value="services">Services</TabsTrigger>
-        <TabsTrigger value="portfolio">Notable Works</TabsTrigger>
-        <TabsTrigger value="posts">Posts</TabsTrigger>
-        {isOwner && <TabsTrigger value="bookings">Bookings</TabsTrigger>}
+      <TabsList 
+        className={`w-full overflow-x-auto ${isMobile ? 'flex' : 'grid'}`} 
+        style={!isMobile ? { gridTemplateColumns: 'repeat(6, 1fr)' } : undefined}
+      >
+        <TabsTrigger value="about" className={isMobile ? 'flex-1 min-w-20' : ''}>About</TabsTrigger>
+        <TabsTrigger value="products" className={isMobile ? 'flex-1 min-w-20' : ''}>Products</TabsTrigger>
+        <TabsTrigger value="services" className={isMobile ? 'flex-1 min-w-20' : ''}>Services</TabsTrigger>
+        <TabsTrigger value="portfolio" className={isMobile ? 'flex-1 min-w-28' : ''}>Notable Works</TabsTrigger>
+        <TabsTrigger value="posts" className={isMobile ? 'flex-1 min-w-20' : ''}>Posts</TabsTrigger>
+        {isOwner && <TabsTrigger value="bookings" className={isMobile ? 'flex-1 min-w-20' : ''}>Bookings</TabsTrigger>}
       </TabsList>
 
       <div className="mt-6">

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { BusinessImageSection } from "./profile/BusinessImageSection";
 import { BusinessActionButtons } from "./profile/BusinessActionButtons";
@@ -8,7 +9,7 @@ import { BusinessBioSection } from "./profile/BusinessBioSection";
 import { BusinessTeamSection } from "./profile/BusinessTeamSection";
 import { BusinessCommentSection } from "./comments/BusinessCommentSection";
 import { BookAppointmentDialog } from "@/components/BookAppointmentDialog";
-import { Card } from "@/components/ui/card";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import type { Business } from "@/types/business";
 
 interface BusinessProfileProps {
@@ -49,14 +50,15 @@ export const BusinessProfile = ({
   business_products,
 }: BusinessProfileProps) => {
   const [showBooking, setShowBooking] = useState(false);
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <BusinessImageSection image_url={image_url} />
       
       <BusinessActionButtons businessId={id} />
       
-      <BusinessAdvertisements businessId={id} />
+      {!isMobile && <BusinessAdvertisements businessId={id} />}
       
       <BusinessAboutSection
         businessId={id}
