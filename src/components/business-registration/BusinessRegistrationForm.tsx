@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -6,7 +5,7 @@ import { z } from "zod";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, ArrowRight, Save } from "lucide-react";
+import { ArrowLeft, ArrowRight, Save, X } from "lucide-react";
 import { BasicInfoStep } from "./steps/BasicInfoStep";
 import { OwnersStaffStep } from "./steps/OwnersStaffStep";
 import { LocationContactStep } from "./steps/LocationContactStep";
@@ -34,10 +33,8 @@ export const BusinessRegistrationForm = () => {
     resolver: zodResolver(businessFormSchema),
     mode: "onChange",
     defaultValues: async () => {
-      // Load from localStorage if available
       const savedData = getLocalStorageFormData();
       if (savedData) {
-        // Also restore the step
         const savedStep = localStorage.getItem("business-registration-step");
         if (savedStep) {
           setCurrentStep(parseInt(savedStep));
@@ -84,15 +81,12 @@ export const BusinessRegistrationForm = () => {
   const { handleSubmit, watch, formState: { errors, isDirty, isValid }, reset } = methods;
   const formValues = watch();
   
-  // Check if user already has a business
   useEffect(() => {
     const checkUserBusiness = async () => {
       setLoading(true);
       try {
-        // Get current user
         const { data: userData } = await supabase.auth.getUser();
         if (userData?.user) {
-          // Check if user already has a business
           const { data: businesses, error } = await supabase
             .from('businesses')
             .select('id')
@@ -111,7 +105,6 @@ export const BusinessRegistrationForm = () => {
               variant: "destructive",
             });
             
-            // Redirect after 3 seconds
             setTimeout(() => {
               navigate(`/businesses/${businesses[0].id}`);
             }, 3000);
@@ -127,7 +120,6 @@ export const BusinessRegistrationForm = () => {
     checkUserBusiness();
   }, [navigate, toast]);
   
-  // Setup auto-save
   useEffect(() => {
     if (isDirty) {
       if (autoSaveTimer) clearTimeout(autoSaveTimer);
@@ -140,7 +132,7 @@ export const BusinessRegistrationForm = () => {
           description: "Your form data has been automatically saved",
           duration: 2000,
         });
-      }, 30000); // Auto-save every 30 seconds
+      }, 30000);
       
       setAutoSaveTimer(timer);
     }
@@ -150,7 +142,6 @@ export const BusinessRegistrationForm = () => {
     };
   }, [formValues, isDirty, currentStep]);
   
-  // Save current step to localStorage
   useEffect(() => {
     localStorage.setItem("business-registration-step", currentStep.toString());
   }, [currentStep]);
@@ -179,7 +170,6 @@ export const BusinessRegistrationForm = () => {
       const { name, category, description } = methods.getValues();
       canProceed = !!name && !!category && !!description;
       
-      // Check if "other" category requires a value
       if (category === "other") {
         const otherCategory = methods.getValues("otherCategory");
         canProceed = canProceed && !!otherCategory;
@@ -216,6 +206,38 @@ export const BusinessRegistrationForm = () => {
     }
   };
   
+  const handleCancelRegistration = () => {
+    if (window.confirm("Are you sure you want to cancel? Your progress will be saved, but you'll exit the registration form.")) {
+      if (isDirty) {
+        saveFormDataToLocalStorage(formValues);
+        localStorage.setItem("business-registration-step", currentStep.toString());
+        toast({
+          title: "Progress saved",
+          description: "You can continue registration later",
+          duration: 3000,
+        });
+      }
+      navigate("/businesses");
+    }
+  };
+  
+  const handleBackToBusinesses = () => {
+    if (isDirty) {
+      if (window.confirm("Going back will save your current progress. Continue?")) {
+        saveFormDataToLocalStorage(formValues);
+        localStorage.setItem("business-registration-step", currentStep.toString());
+        toast({
+          title: "Progress saved",
+          description: "You can continue registration later",
+          duration: 3000,
+        });
+      } else {
+        return;
+      }
+    }
+    navigate("/businesses");
+  };
+  
   const onSubmit = async (data: BusinessFormValues) => {
     if (userHasBusiness) {
       toast({
@@ -229,10 +251,8 @@ export const BusinessRegistrationForm = () => {
     try {
       setLoading(true);
       
-      // Store image first if it exists
       let image_url = data.image;
       
-      // Handle owner images
       const processedOwners = await Promise.all(
         data.owners.map(async (owner) => {
           return {
@@ -242,7 +262,6 @@ export const BusinessRegistrationForm = () => {
         })
       );
       
-      // Handle staff images
       const processedStaff = await Promise.all(
         (data.staff_details || []).map(async (staff) => {
           return {
@@ -252,7 +271,6 @@ export const BusinessRegistrationForm = () => {
         })
       );
       
-      // Get current user
       const { data: userData } = await supabase.auth.getUser();
       if (!userData?.user) {
         toast({
@@ -263,7 +281,6 @@ export const BusinessRegistrationForm = () => {
         return;
       }
       
-      // Check if user already has a business
       const { data: existingBusinesses, error: checkError } = await supabase
         .from('businesses')
         .select('id')
@@ -284,12 +301,10 @@ export const BusinessRegistrationForm = () => {
         return;
       }
       
-      // Prepare category (incorporate otherCategory if needed)
       const finalCategory = data.category === "other" && data.otherCategory 
         ? data.otherCategory 
         : data.category;
       
-      // Insert business into database
       const { data: business, error } = await supabase
         .from('businesses')
         .insert({
@@ -328,11 +343,9 @@ export const BusinessRegistrationForm = () => {
         description: "Your business has been registered and is now live.",
       });
       
-      // Clear localStorage
       localStorage.removeItem("business-registration-form");
       localStorage.removeItem("business-registration-step");
       
-      // Redirect to business page
       if (business) {
         setTimeout(() => {
           navigate(`/businesses/${business.id}`);
@@ -388,22 +401,39 @@ export const BusinessRegistrationForm = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="container max-w-7xl mx-auto pt-20 pb-16">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold">Register Your Business</h1>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              onClick={handleBackToBusinesses}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" /> Back to Businesses
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleCancelRegistration}
+              className="flex items-center gap-2"
+            >
+              <X className="h-4 w-4" /> Cancel Registration
+            </Button>
+          </div>
+        </div>
+        
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar */}
           <div className="w-full lg:w-1/4">
             <FormSidebar currentStep={currentStep} setCurrentStep={setCurrentStep} />
           </div>
           
-          {/* Main Form */}
           <div className="w-full lg:w-3/4">
             <div className="bg-card rounded-lg shadow-md p-6">
               <div className="mb-6">
-                <h1 className="text-2xl font-bold mb-2">Register Your Business</h1>
-                <Progress value={progressPercentage} className="h-2" />
-                <div className="flex justify-between mt-2 text-sm text-muted-foreground">
-                  <span>Step {currentStep} of 5</span>
-                  <span>{Math.round(progressPercentage)}% Complete</span>
+                <div className="flex justify-between items-center mb-2">
+                  <h2 className="text-2xl font-bold">Step {currentStep} of 5</h2>
+                  <span className="text-sm text-muted-foreground">{Math.round(progressPercentage)}% Complete</span>
                 </div>
+                <Progress value={progressPercentage} className="h-2" />
               </div>
               
               <FormProvider {...methods}>
