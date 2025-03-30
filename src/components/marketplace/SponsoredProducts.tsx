@@ -7,8 +7,11 @@ import { ProductCard } from "@/components/products/ProductCard";
 import { Badge } from "@/components/ui/badge";
 import { Megaphone } from "lucide-react";
 
+// Define a type for grid layout options
+type GridLayoutType = "grid4x4" | "grid2x2" | "grid1x1";
+
 interface SponsoredProductsProps {
-  gridLayout?: "grid4x4" | "grid2x2" | "grid1x1";
+  gridLayout?: GridLayoutType;
 }
 
 export const SponsoredProducts = ({ gridLayout = "grid4x4" }: SponsoredProductsProps) => {
@@ -76,7 +79,7 @@ export const SponsoredProducts = ({ gridLayout = "grid4x4" }: SponsoredProductsP
             key={product.id} 
             product={product} 
             layout={gridLayout}
-            sponsored 
+            sponsored={true}
           />
         ))}
       </div>

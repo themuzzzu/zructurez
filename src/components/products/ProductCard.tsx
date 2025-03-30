@@ -1,4 +1,3 @@
-
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -30,9 +29,10 @@ interface ProductCardProps {
   };
   onClick?: () => void;
   layout?: "grid4x4" | "grid2x2" | "grid1x1";
+  sponsored?: boolean;
 }
 
-export const ProductCard = ({ product, onClick, layout = "grid4x4" }: ProductCardProps) => {
+export const ProductCard = ({ product, onClick, layout = "grid4x4", sponsored = false }: ProductCardProps) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isAddingToCart, setIsAddingToCart] = useState(false);
@@ -130,9 +130,8 @@ export const ProductCard = ({ product, onClick, layout = "grid4x4" }: ProductCar
     }
   };
 
-  // Generate a rating for display purposes
-  const rating = (Math.floor(Math.random() * 15) + 35) / 10; // Random rating between 3.5 and 5.0
-  
+  const rating = (Math.floor(Math.random() * 15) + 35) / 10;
+
   if (layout === "grid1x1") {
     return (
       <Card className="overflow-hidden hover:shadow-md transition-all h-full">
@@ -153,6 +152,11 @@ export const ProductCard = ({ product, onClick, layout = "grid4x4" }: ProductCar
               {product.is_discounted && product.discount_percentage && (
                 <Badge className="absolute top-1 right-1 bg-red-500 text-xs">
                   {product.discount_percentage}% OFF
+                </Badge>
+              )}
+              {sponsored && (
+                <Badge variant="outline" className="absolute top-1 left-1 text-xs bg-purple-100 text-purple-600 border-purple-200">
+                  Ad
                 </Badge>
               )}
             </div>
@@ -245,6 +249,12 @@ export const ProductCard = ({ product, onClick, layout = "grid4x4" }: ProductCar
         {product.is_discounted && product.discount_percentage && (
           <Badge className="absolute top-2 left-2 bg-red-500 text-xs py-0 px-1.5">
             {product.discount_percentage}% OFF
+          </Badge>
+        )}
+        
+        {sponsored && (
+          <Badge variant="outline" className="absolute top-2 right-10 text-xs py-0 px-1.5 bg-purple-100 text-purple-600 border-purple-200">
+            Ad
           </Badge>
         )}
         
