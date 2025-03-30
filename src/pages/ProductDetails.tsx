@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -18,6 +19,13 @@ import {
   Eye,
   CheckCircle,
   Clock,
+  AlertTriangle,
+  ThumbsUp,
+  MessageCircle,
+  Gift,
+  Tag,
+  Percent,
+  MapPin,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -34,13 +42,23 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { incrementViews } from "@/services/postService";
 import { Badge } from "@/components/ui/badge";
 import { Layout } from "@/components/layout/Layout";
+import { getPeopleBoughtTogether } from "@/services/recommendationService";
+import { ProductCard } from "@/components/products/ProductCard";
+import { ProductHighlights } from "@/components/products/ProductHighlights";
+import { ProductSpecifications } from "@/components/products/ProductSpecifications";
+import { ProductOffers } from "@/components/products/ProductOffers";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const ProductDetails = () => {
   const { id: productId } = useParams();
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
   const queryClient = useQueryClient();
 
+  // Fetch product details
   const { data: product, isLoading, error } = useQuery({
     queryKey: ['product', productId],
     queryFn: async () => {
@@ -56,22 +74,14 @@ const ProductDetails = () => {
     enabled: !!productId,
   });
 
-  const { data: relatedProducts } = useQuery({
-    queryKey: ['relatedProducts', product?.category],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .eq('category', product?.category)
-        .neq('id', productId)
-        .limit(5);
-
-      if (error) throw error;
-      return data || [];
-    },
-    enabled: !!product?.category,
+  // Fetch people also bought products
+  const { data: relatedProducts = [] } = useQuery({
+    queryKey: ['peopleBoughtTogether', productId],
+    queryFn: () => getPeopleBoughtTogether(productId as string),
+    enabled: !!productId,
   });
 
+  // Add to cart mutation
   const addToCartMutation = useMutation({
     mutationFn: async ({ productId, quantity }: { productId: string; quantity: number }) => {
       const { data: session } = await supabase.auth.getSession();
@@ -96,7 +106,7 @@ const ProductDetails = () => {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['cart'] });
+      queryClient.invalidateQueries({ queryKey: ['cartCount'] });
       toast.success("Added to cart!");
     },
     onError: (error) => {
@@ -105,6 +115,7 @@ const ProductDetails = () => {
     },
   });
 
+  // Add to wishlist mutation
   const addToWishlistMutation = useMutation({
     mutationFn: async (productId: string) => {
       const { data: session } = await supabase.auth.getSession();
@@ -134,6 +145,19 @@ const ProductDetails = () => {
       toast.error(error instanceof Error ? error.message : "Failed to add to wishlist");
     },
   });
+
+  const buyNowHandler = () => {
+    if (addToCartMutation.isPending) return;
+    
+    addToCartMutation.mutate({ 
+      productId: product.id, 
+      quantity 
+    }, {
+      onSuccess: () => {
+        navigate('/checkout');
+      }
+    });
+  };
 
   const handleShare = async (platform: 'copy' | 'whatsapp' | 'facebook' | 'twitter') => {
     const productUrl = window.location.href;
@@ -167,6 +191,16 @@ const ProductDetails = () => {
     }).format(price);
   };
 
+  // Calculate discount percentage if not provided
+  const getDiscountPercentage = () => {
+    if (product.discount_percentage) return product.discount_percentage;
+    if (product.original_price && product.price) {
+      return Math.round(((product.original_price - product.price) / product.original_price) * 100);
+    }
+    return 0;
+  };
+
+  // Increment product views
   useEffect(() => {
     if (productId) {
       incrementViews('products', productId);
@@ -194,10 +228,42 @@ const ProductDetails = () => {
     );
   }
 
+  // Mock data for product images (in a real app, this would come from the database)
+  const productImages = [
+    product.image_url || '/placeholder.svg',
+    // Additional images would be here in a real application
+  ];
+
+  // Sample offers for the product
+  const productOffers = [
+    { 
+      title: "Bank Offer", 
+      description: "10% off on HDFC Bank Credit Card, up to ₹1500 on orders above ₹5000" 
+    },
+    { 
+      title: "Special Price", 
+      description: `Get ${getDiscountPercentage()}% off on this product` 
+    },
+    { 
+      title: "No Cost EMI", 
+      description: "No Cost EMI available on select cards" 
+    },
+    { 
+      title: "Partner Offer", 
+      description: "Get GST invoice and save up to 28% on business purchases" 
+    }
+  ];
+
+  const stockStatus = product.stock > 10 
+    ? "In Stock" 
+    : product.stock > 0 
+      ? `Only ${product.stock} left in stock - order soon` 
+      : "Out of Stock";
+
   return (
     <Layout hideSidebar>
       <div className="min-h-screen bg-background">
-        <div className="bg-primary px-4 py-3 mb-4 shadow-md sticky top-0 z-10">
+        <div className="bg-primary px-4 py-3 mb-4 shadow-md sticky top-0 z-30">
           <div className="max-w-[1400px] mx-auto">
             <div className="flex items-center gap-2">
               <Button 
@@ -217,81 +283,117 @@ const ProductDetails = () => {
         </div>
 
         <div className="max-w-[1400px] mx-auto px-4 pb-20">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="bg-background border border-border rounded-lg p-4">
-              <div className="mb-4">
-                <AspectRatio ratio={1}>
-                  <img 
-                    src={product.image_url || '/placeholder.svg'} 
-                    alt={product.title} 
-                    className="w-full h-full object-contain rounded-md"
-                  />
-                </AspectRatio>
-              </div>
-              
-              <div className="mt-4">
-                <Carousel>
-                  <CarouselContent>
-                    <CarouselItem className="basis-1/4">
-                      <AspectRatio ratio={1}>
-                        <img 
-                          src={product.image_url || '/placeholder.svg'} 
-                          alt={product.title} 
-                          className="w-full h-full object-cover rounded-md border-2 border-primary"
-                        />
-                      </AspectRatio>
-                    </CarouselItem>
-                    {[1, 2, 3, 4].map((_, index) => (
-                      <CarouselItem key={index} className="basis-1/4">
-                        <AspectRatio ratio={1}>
-                          <div className="w-full h-full bg-muted flex items-center justify-center rounded-md">
-                            <span className="text-muted-foreground text-sm">View {index + 1}</span>
-                          </div>
-                        </AspectRatio>
-                      </CarouselItem>
-                    ))}
-                  </CarouselContent>
-                  <CarouselPrevious />
-                  <CarouselNext />
-                </Carousel>
-              </div>
+          {/* Breadcrumb navigation */}
+          <div className="text-sm text-muted-foreground mb-4">
+            <span className="hover:underline cursor-pointer" onClick={() => navigate('/marketplace')}>Home</span>
+            <span> &gt; </span>
+            <span className="hover:underline cursor-pointer" onClick={() => navigate(`/marketplace?category=${product.category}`)}>{product.category}</span>
+            <span> &gt; </span>
+            <span>{product.title}</span>
+          </div>
 
-              <div className="grid grid-cols-2 gap-4 mt-6">
-                <Button 
-                  className="w-full" 
-                  onClick={() => addToCartMutation.mutate({ productId: product.id, quantity })}
-                  disabled={addToCartMutation.isPending}
-                >
-                  <ShoppingCart className="h-4 w-4 mr-2" />
-                  Add to Cart
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full" 
-                  onClick={() => addToWishlistMutation.mutate(product.id)}
-                  disabled={addToWishlistMutation.isPending}
-                >
-                  <Heart className="h-4 w-4 mr-2" />
-                  Wishlist
-                </Button>
-              </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left column - Product Images */}
+            <div className="lg:col-span-1">
+              <div className="sticky top-24 space-y-4">
+                <div className="bg-background border border-border rounded-lg p-4">
+                  <div className="mb-4 relative group">
+                    <AspectRatio ratio={1}>
+                      <img 
+                        src={productImages[activeImageIndex]} 
+                        alt={product.title} 
+                        className="w-full h-full object-contain rounded-md transition-transform duration-300 group-hover:scale-105" 
+                      />
+                    </AspectRatio>
 
-              <div className="mt-4 flex items-center justify-between">
-                <div className="text-sm text-muted-foreground flex items-center gap-1">
-                  <Eye className="h-4 w-4" /> 
-                  {product.views || 0} views
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="sm" onClick={() => handleShare('copy')}>
-                    <Share2 className="h-4 w-4" />
-                  </Button>
+                    {product.is_discounted && (
+                      <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-md text-xs font-bold">
+                        {getDiscountPercentage()}% OFF
+                      </div>
+                    )}
+
+                    {product.is_branded && (
+                      <div className="absolute top-2 right-2 bg-blue-500 text-white px-2 py-1 rounded-md text-xs font-bold">
+                        BRANDED
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="mt-4">
+                    <Carousel>
+                      <CarouselContent>
+                        {productImages.map((img, index) => (
+                          <CarouselItem key={index} className="basis-1/4">
+                            <AspectRatio ratio={1}>
+                              <img 
+                                src={img} 
+                                alt={`${product.title} - View ${index + 1}`} 
+                                className={`w-full h-full object-cover rounded-md cursor-pointer border-2 ${
+                                  activeImageIndex === index ? 'border-primary' : 'border-transparent'
+                                }`}
+                                onClick={() => setActiveImageIndex(index)}
+                              />
+                            </AspectRatio>
+                          </CarouselItem>
+                        ))}
+                      </CarouselContent>
+                      <CarouselPrevious />
+                      <CarouselNext />
+                    </Carousel>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 mt-6">
+                    <Button 
+                      className="w-full" 
+                      onClick={() => addToCartMutation.mutate({ productId: product.id, quantity })}
+                      disabled={addToCartMutation.isPending || product.stock <= 0}
+                    >
+                      <ShoppingCart className="h-4 w-4 mr-2" />
+                      Add to Cart
+                    </Button>
+                    <Button 
+                      variant="secondary" 
+                      className="w-full" 
+                      onClick={buyNowHandler}
+                      disabled={addToCartMutation.isPending || product.stock <= 0}
+                    >
+                      Buy Now
+                    </Button>
+                  </div>
+
+                  <div className="mt-4 flex items-center justify-between">
+                    <Button 
+                      variant="outline" 
+                      className="w-full mr-2" 
+                      onClick={() => addToWishlistMutation.mutate(product.id)}
+                      disabled={addToWishlistMutation.isPending}
+                    >
+                      <Heart className="h-4 w-4 mr-2" />
+                      Wishlist
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="w-full" 
+                      onClick={() => handleShare('copy')}
+                    >
+                      <Share2 className="h-4 w-4 mr-2" />
+                      Share
+                    </Button>
+                  </div>
+
+                  <div className="mt-4 text-sm text-muted-foreground flex items-center gap-1">
+                    <Eye className="h-4 w-4" /> 
+                    {product.views || 0} people viewed this
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="space-y-6">
-              <div>
+            {/* Center column - Product Details */}
+            <div className="lg:col-span-2 space-y-6">
+              <div className="bg-card p-6 rounded-lg border border-border">
                 <h1 className="text-2xl font-bold text-foreground">{product.title}</h1>
+                
                 <div className="flex items-center mt-2">
                   <div className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-sm flex items-center">
                     <Star className="h-3 w-3 fill-current mr-1" />
@@ -299,35 +401,81 @@ const ProductDetails = () => {
                   </div>
                   <span className="mx-2 text-muted-foreground">|</span>
                   <span className="text-muted-foreground text-sm">{product.views || 0} views</span>
+                  <span className="mx-2 text-muted-foreground">|</span>
+                  <span className="text-muted-foreground text-sm">42 ratings & 15 reviews</span>
                 </div>
-              </div>
 
-              <div className="bg-card p-4 rounded-lg border border-border">
-                <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-bold text-foreground flex items-center">
-                    <IndianRupee className="h-5 w-5" />
-                    {formatPrice(product.price).replace('₹', '')}
-                  </span>
-                  {product.original_price && (
-                    <>
-                      <span className="text-lg text-muted-foreground line-through">
-                        ₹{formatPrice(product.original_price).replace('₹', '')}
-                      </span>
-                      <span className="text-green-600 dark:text-green-400 text-sm font-medium">
-                        {product.discount_percentage}% off
-                      </span>
-                    </>
+                {/* Stock status */}
+                <div className="mt-2">
+                  {product.stock > 0 ? (
+                    <span className="text-green-600 font-medium flex items-center gap-1">
+                      <CheckCircle className="h-4 w-4" /> {stockStatus}
+                    </span>
+                  ) : (
+                    <span className="text-red-500 font-medium flex items-center gap-1">
+                      <AlertTriangle className="h-4 w-4" /> Out of Stock
+                    </span>
                   )}
                 </div>
 
-                <div className="mt-4">
-                  <p className="text-sm text-muted-foreground mb-2">Quantity:</p>
+                {/* Price section */}
+                <div className="mt-6">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl font-bold text-foreground flex items-center">
+                      <IndianRupee className="h-5 w-5" />
+                      {formatPrice(product.price).replace('₹', '')}
+                    </span>
+                    {product.original_price && (
+                      <>
+                        <span className="text-lg text-muted-foreground line-through">
+                          ₹{formatPrice(product.original_price).replace('₹', '')}
+                        </span>
+                        <span className="text-green-600 dark:text-green-400 text-sm font-medium">
+                          {getDiscountPercentage()}% off
+                        </span>
+                      </>
+                    )}
+                  </div>
+                  
+                  {product.stock > 0 && (
+                    <div className="text-xs text-muted-foreground mt-1">
+                      Inclusive of all taxes
+                    </div>
+                  )}
+                </div>
+
+                {/* Offers section */}
+                <div className="mt-6">
+                  <h3 className="font-semibold flex items-center gap-2">
+                    <Tag className="h-4 w-4 text-orange-500" /> Available Offers
+                  </h3>
+                  <ProductOffers offers={productOffers} />
+                </div>
+
+                {/* Delivery information */}
+                <div className="mt-6 flex items-start gap-4">
+                  <MapPin className="h-5 w-5 text-muted-foreground mt-1" />
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span>Deliver to:</span>
+                      <span className="font-medium">Enter Pincode</span>
+                      <Button variant="link" className="h-auto p-0 text-sm">Change</Button>
+                    </div>
+                    <div className="text-sm text-muted-foreground mt-1">
+                      Typically delivered in 5-7 days
+                    </div>
+                  </div>
+                </div>
+
+                {/* Quantity selector */}
+                <div className="mt-6">
+                  <p className="text-sm font-medium mb-2">Quantity:</p>
                   <div className="flex items-center">
                     <Button 
                       variant="outline" 
                       size="icon" 
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      disabled={quantity <= 1}
+                      disabled={quantity <= 1 || product.stock <= 0}
                     >
                       <Minus className="h-4 w-4" />
                     </Button>
@@ -336,7 +484,7 @@ const ProductDetails = () => {
                       variant="outline" 
                       size="icon" 
                       onClick={() => setQuantity(quantity + 1)}
-                      disabled={quantity >= (product.stock || 10)}
+                      disabled={quantity >= (product.stock || 10) || product.stock <= 0}
                     >
                       <Plus className="h-4 w-4" />
                     </Button>
@@ -345,63 +493,37 @@ const ProductDetails = () => {
                     </span>
                   </div>
                 </div>
-              </div>
 
-              <div className="bg-card p-4 rounded-lg border border-border">
-                <h2 className="text-lg font-semibold text-foreground mb-2">Product Details</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <p className="flex justify-between py-1 border-b border-border">
-                      <span className="text-muted-foreground">Category</span>
-                      <span className="font-medium text-foreground">{product.category}</span>
-                    </p>
-                    {product.subcategory && (
-                      <p className="flex justify-between py-1 border-b border-border">
-                        <span className="text-muted-foreground">Subcategory</span>
-                        <span className="font-medium text-foreground">{product.subcategory}</span>
-                      </p>
-                    )}
-                    {product.brand_name && (
-                      <p className="flex justify-between py-1 border-b border-border">
-                        <span className="text-muted-foreground">Brand</span>
-                        <span className="font-medium text-foreground">{product.brand_name}</span>
-                      </p>
-                    )}
-                  </div>
-                  <div>
-                    {product.model && (
-                      <p className="flex justify-between py-1 border-b border-border">
-                        <span className="text-muted-foreground">Model</span>
-                        <span className="font-medium text-foreground">{product.model}</span>
-                      </p>
-                    )}
-                    {product.size && (
-                      <p className="flex justify-between py-1 border-b border-border">
-                        <span className="text-muted-foreground">Size</span>
-                        <span className="font-medium text-foreground">{product.size}</span>
-                      </p>
-                    )}
-                    {product.condition && (
-                      <p className="flex justify-between py-1 border-b border-border">
-                        <span className="text-muted-foreground">Condition</span>
-                        <span className="font-medium text-foreground">{product.condition}</span>
-                      </p>
-                    )}
-                  </div>
+                {/* Highlights section */}
+                <div className="mt-6">
+                  <h3 className="font-semibold">Highlights</h3>
+                  <ProductHighlights product={product} />
                 </div>
               </div>
 
-              <div className="bg-card p-4 rounded-lg border border-border">
+              {/* Product specifications */}
+              <div className="bg-card p-6 rounded-lg border border-border">
+                <h2 className="text-lg font-semibold text-foreground mb-4">Specifications</h2>
+                <ProductSpecifications product={product} />
+              </div>
+
+              {/* Product details tabs */}
+              <div className="bg-card p-6 rounded-lg border border-border">
                 <Tabs defaultValue="description">
-                  <TabsList className="grid w-full grid-cols-3">
+                  <TabsList className="grid w-full grid-cols-4">
                     <TabsTrigger value="description">Description</TabsTrigger>
                     <TabsTrigger value="features">Features</TabsTrigger>
-                    <TabsTrigger value="specs">Specifications</TabsTrigger>
+                    <TabsTrigger value="reviews">Reviews</TabsTrigger>
+                    <TabsTrigger value="questions">Questions</TabsTrigger>
                   </TabsList>
+                  
                   <TabsContent value="description" className="mt-4">
+                    <h3 className="font-semibold mb-2">Product Description</h3>
                     <p className="text-foreground">{product.description}</p>
                   </TabsContent>
+                  
                   <TabsContent value="features" className="mt-4">
+                    <h3 className="font-semibold mb-2">Key Features</h3>
                     <ul className="list-disc pl-5 space-y-2 text-foreground">
                       <li>High-quality material</li>
                       <li>Durable design</li>
@@ -410,113 +532,154 @@ const ProductDetails = () => {
                       <li>Modern aesthetic</li>
                     </ul>
                   </TabsContent>
-                  <TabsContent value="specs" className="mt-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <p className="flex justify-between py-1 border-b border-border">
-                          <span className="text-muted-foreground">Dimensions</span>
-                          <span className="font-medium text-foreground">10 x 5 x 2 cm</span>
-                        </p>
-                        <p className="flex justify-between py-1 border-b border-border">
-                          <span className="text-muted-foreground">Weight</span>
-                          <span className="font-medium text-foreground">150g</span>
-                        </p>
-                        <p className="flex justify-between py-1 border-b border-border">
-                          <span className="text-muted-foreground">Material</span>
-                          <span className="font-medium text-foreground">Premium plastic</span>
-                        </p>
+                  
+                  <TabsContent value="reviews" className="mt-4">
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="font-semibold">Customer Reviews</h3>
+                      <Button variant="outline" size="sm">Write a Review</Button>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div className="p-4 bg-muted rounded-lg">
+                        <div className="flex justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-sm flex items-center">
+                              <Star className="h-3 w-3 fill-current mr-1" />
+                              5.0
+                            </div>
+                            <span className="font-medium">Great product!</span>
+                          </div>
+                          <span className="text-sm text-muted-foreground">2 days ago</span>
+                        </div>
+                        <p className="mt-2 text-sm">This product exceeded my expectations. The quality is excellent and it arrived quickly.</p>
+                        <div className="flex items-center gap-4 mt-2">
+                          <Button variant="ghost" size="sm" className="h-8">
+                            <ThumbsUp className="h-4 w-4 mr-2" />
+                            Helpful (3)
+                          </Button>
+                          <Button variant="ghost" size="sm" className="h-8">
+                            <MessageCircle className="h-4 w-4 mr-2" />
+                            Comment
+                          </Button>
+                        </div>
                       </div>
-                      <div>
-                        <p className="flex justify-between py-1 border-b border-border">
-                          <span className="text-muted-foreground">Color</span>
-                          <span className="font-medium text-foreground">Multiple available</span>
-                        </p>
-                        <p className="flex justify-between py-1 border-b border-border">
-                          <span className="text-muted-foreground">Warranty</span>
-                          <span className="font-medium text-foreground">1 year</span>
-                        </p>
-                        <p className="flex justify-between py-1 border-b border-border">
-                          <span className="text-muted-foreground">Manufacturing</span>
-                          <span className="font-medium text-foreground">Made in India</span>
-                        </p>
+                      
+                      <div className="p-4 bg-muted rounded-lg">
+                        <div className="flex justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-sm flex items-center">
+                              <Star className="h-3 w-3 fill-current mr-1" />
+                              4.0
+                            </div>
+                            <span className="font-medium">Good value for money</span>
+                          </div>
+                          <span className="text-sm text-muted-foreground">1 week ago</span>
+                        </div>
+                        <p className="mt-2 text-sm">Good product for the price. Delivery was prompt and packaging was secure.</p>
+                        <div className="flex items-center gap-4 mt-2">
+                          <Button variant="ghost" size="sm" className="h-8">
+                            <ThumbsUp className="h-4 w-4 mr-2" />
+                            Helpful (1)
+                          </Button>
+                          <Button variant="ghost" size="sm" className="h-8">
+                            <MessageCircle className="h-4 w-4 mr-2" />
+                            Comment
+                          </Button>
+                        </div>
                       </div>
                     </div>
+                    
+                    <Button variant="outline" className="w-full mt-4">
+                      Load More Reviews
+                    </Button>
+                  </TabsContent>
+                  
+                  <TabsContent value="questions" className="mt-4">
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="font-semibold">Questions & Answers</h3>
+                      <Button variant="outline" size="sm">Ask a Question</Button>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div className="p-4 bg-muted rounded-lg">
+                        <div className="flex items-start gap-2">
+                          <span className="font-medium text-primary">Q:</span>
+                          <span>Does this product come with a warranty?</span>
+                        </div>
+                        <div className="flex items-start gap-2 mt-2">
+                          <span className="font-medium text-green-600">A:</span>
+                          <span>Yes, it comes with a 1-year manufacturer warranty.</span>
+                        </div>
+                      </div>
+                      
+                      <div className="p-4 bg-muted rounded-lg">
+                        <div className="flex items-start gap-2">
+                          <span className="font-medium text-primary">Q:</span>
+                          <span>Is this product water resistant?</span>
+                        </div>
+                        <div className="flex items-start gap-2 mt-2">
+                          <span className="font-medium text-green-600">A:</span>
+                          <span>It is water resistant but not waterproof. It can handle light splashes but shouldn't be submerged in water.</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <Button variant="outline" className="w-full mt-4">
+                      See All Questions
+                    </Button>
                   </TabsContent>
                 </Tabs>
               </div>
 
-              <div className="bg-card p-4 rounded-lg border border-border">
+              {/* Delivery & warranty */}
+              <div className="bg-card p-6 rounded-lg border border-border">
                 <h2 className="text-lg font-semibold text-foreground mb-4">Delivery & Services</h2>
-                <div className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="flex items-start gap-3">
-                    <Truck className="h-5 w-5 text-muted-foreground" />
+                    <Truck className="h-5 w-5 text-primary" />
                     <div>
                       <p className="font-medium text-foreground">Free Delivery</p>
-                      <p className="text-sm text-muted-foreground">Delivered within 3-7 business days</p>
+                      <p className="text-sm text-muted-foreground">Delivered within 5-7 business days</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <Shield className="h-5 w-5 text-muted-foreground" />
+                    <Shield className="h-5 w-5 text-primary" />
                     <div>
                       <p className="font-medium text-foreground">Warranty Protection</p>
                       <p className="text-sm text-muted-foreground">1 year manufacturer warranty</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <RefreshCw className="h-5 w-5 text-muted-foreground" />
+                    <RefreshCw className="h-5 w-5 text-primary" />
                     <div>
-                      <p className="font-medium text-foreground">7 Days Return Policy</p>
-                      <p className="text-sm text-muted-foreground">Easy returns if you change your mind</p>
+                      <p className="font-medium text-foreground">Easy Returns</p>
+                      <p className="text-sm text-muted-foreground">10 days return policy</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <CheckCircle className="h-5 w-5 text-primary" />
+                    <div>
+                      <p className="font-medium text-foreground">Genuine Product</p>
+                      <p className="text-sm text-muted-foreground">100% authentic products</p>
                     </div>
                   </div>
                 </div>
               </div>
-
-              <div className="flex flex-wrap gap-2">
-                {product.is_branded && (
-                  <Badge variant="outline" className="border-blue-500 text-blue-500 dark:border-blue-400 dark:text-blue-400">
-                    <CheckCircle className="h-3 w-3 mr-1" /> Branded
-                  </Badge>
-                )}
-                {product.is_discounted && (
-                  <Badge variant="outline" className="border-green-500 text-green-500 dark:border-green-400 dark:text-green-400">
-                    <CheckCircle className="h-3 w-3 mr-1" /> On Sale
-                  </Badge>
-                )}
-                {product.is_used && (
-                  <Badge variant="outline" className="border-amber-500 text-amber-500 dark:border-amber-400 dark:text-amber-400">
-                    <Clock className="h-3 w-3 mr-1" /> Used Item
-                  </Badge>
-                )}
-              </div>
             </div>
           </div>
 
-          {relatedProducts && relatedProducts.length > 0 && (
+          {/* People also bought section */}
+          {relatedProducts.length > 0 && (
             <div className="mt-12">
               <Separator className="my-8" />
-              <h2 className="text-xl font-semibold text-foreground mb-6">Related Products</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              <h2 className="text-xl font-semibold text-foreground mb-6">People Also Bought</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                 {relatedProducts.map((relatedProduct) => (
-                  <div 
-                    key={relatedProduct.id}
-                    className="bg-card border border-border rounded-lg overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
-                    onClick={() => navigate(`/product/${relatedProduct.id}`)}
-                  >
-                    <AspectRatio ratio={16/9}>
-                      <img 
-                        src={relatedProduct.image_url || '/placeholder.svg'} 
-                        alt={relatedProduct.title} 
-                        className="w-full h-full object-cover"
-                      />
-                    </AspectRatio>
-                    <div className="p-3">
-                      <h3 className="font-medium text-foreground truncate">{relatedProduct.title}</h3>
-                      <p className="text-primary font-semibold mt-1">
-                        ₹{formatPrice(relatedProduct.price).replace('₹', '')}
-                      </p>
-                    </div>
-                  </div>
+                  <ProductCard 
+                    key={relatedProduct.id} 
+                    product={relatedProduct}
+                    layout="grid4x4"
+                  />
                 ))}
               </div>
             </div>
