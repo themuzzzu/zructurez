@@ -101,7 +101,7 @@ export const SponsoredProducts = ({ gridLayout = "grid4x4" }: SponsoredProductsP
           <ProductCard 
             key={product.id} 
             product={product}
-            isSponsored
+            sponsored={true}
           />
         ))}
       </div>

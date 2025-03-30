@@ -104,7 +104,6 @@ export const ProductWishlist = () => {
             <ProductCard 
               key={product.id}
               product={product}
-              showWishlistButton
             />
           ))}
         </div>
