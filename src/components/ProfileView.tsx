@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useProfile } from "@/hooks/useProfile";
 import { ProfileEditForm } from "@/components/profile/ProfileEditForm";
@@ -27,6 +27,15 @@ export const ProfileView = ({ profileId, isOwnProfile = true }: ProfileViewProps
     updateProfile, 
     uploadAvatar 
   } = useProfile();
+
+  useEffect(() => {
+    // Track profile view if viewing someone else's profile
+    if (profileId && !isOwnProfile) {
+      console.log(`Profile viewed: ${profileId}`);
+      // This would ideally call a server function to increment profile views
+      // For example: trackProfileView(profileId);
+    }
+  }, [profileId, isOwnProfile]);
 
   const handleSave = async (updatedProfile: Partial<Profile>) => {
     const success = await updateProfile(updatedProfile);

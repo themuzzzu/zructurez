@@ -1,4 +1,3 @@
-
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,7 +8,7 @@ import { BusinessHeader } from "@/components/business-details/BusinessHeader";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { CreateBusinessForm } from "@/components/CreateBusinessForm";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BusinessTabs } from "@/components/business-details/BusinessTabs";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import type { Business, StaffMember, BusinessOwner, MembershipPlan } from "@/types/business";
@@ -98,6 +97,24 @@ const BusinessDetails = () => {
   });
 
   const isOwner = currentUser?.id === business?.user_id;
+
+  useEffect(() => {
+    if (id && !isLoading && business && currentUser?.id !== business.user_id) {
+      // Track business view
+      const trackView = async () => {
+        try {
+          const { error } = await supabase.rpc('increment_business_views', { business_id_param: id });
+          if (error) {
+            console.error('Error tracking business view:', error);
+          }
+        } catch (err) {
+          console.error('Error calling business view function:', err);
+        }
+      };
+      
+      trackView();
+    }
+  }, [id, isLoading, business, currentUser]);
 
   if (!isValidUUID || error) {
     return <ErrorView message={!isValidUUID ? "Invalid business ID format" : undefined} />;

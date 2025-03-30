@@ -9,6 +9,7 @@ import { BusinessBookingsTab } from "./tabs/BusinessBookingsTab";
 import { BusinessPhotosTab } from "./tabs/BusinessPhotosTab";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useState, useEffect } from "react";
 import type { Business } from "@/types/business";
 
 interface BusinessTabsProps {
@@ -19,9 +20,19 @@ interface BusinessTabsProps {
 
 export const BusinessTabs = ({ business, isOwner, onRefetch }: BusinessTabsProps) => {
   const isMobile = useMediaQuery("(max-width: 768px)");
+  const [activeTab, setActiveTab] = useState("about");
+  
+  // Track tab views for analytics
+  useEffect(() => {
+    if (!isOwner && business.id) {
+      // Here you would call a function to track which tab was viewed
+      console.log(`Business tab viewed: ${activeTab} for business ${business.id}`);
+      // You could implement trackBusinessTabView(business.id, activeTab) similar to other tracking functions
+    }
+  }, [activeTab, business.id, isOwner]);
   
   return (
-    <Tabs defaultValue="about" className="w-full">
+    <Tabs defaultValue="about" className="w-full" onValueChange={setActiveTab}>
       <div className="relative rounded-md border border-border/30">
         <ScrollArea className="pb-1">
           <TabsList className="flex w-full min-w-fit justify-between px-1 py-1 rounded-none bg-transparent">

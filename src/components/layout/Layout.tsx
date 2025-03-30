@@ -42,7 +42,7 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
         {!hideSidebar && !isMobile && (
           <div 
             style={{ width: sidebarWidth + 'px', left: '0px' }} 
-            className={`transition-all duration-300 fixed h-[calc(100vh-64px)] ${isDarkMode ? 'border-zinc-800/50' : 'border-zinc-200/50'} border-r scrollbar-hide`}
+            className={`transition-all duration-300 fixed h-[calc(100vh-64px)] ${isDarkMode ? 'border-zinc-800/50' : 'border-zinc-200/50'} border-r scrollbar-hide overflow-y-auto`}
           >
             <Sidebar />
           </div>
