@@ -20,6 +20,7 @@ interface FilterPanelProps {
   onPriceRangeChange: (value: string) => void;
   onCloseMobileFilter: () => void;
   isFilterMobileOpen: boolean;
+  children?: React.ReactNode; // Add children prop
 }
 
 export const FilterPanel = ({
@@ -35,7 +36,8 @@ export const FilterPanel = ({
   onSortChange,
   onPriceRangeChange,
   onCloseMobileFilter,
-  isFilterMobileOpen
+  isFilterMobileOpen,
+  children
 }: FilterPanelProps) => {
   if (!isFilterMobileOpen) return null;
 
@@ -95,6 +97,9 @@ export const FilterPanel = ({
             </div>
           </div>
         </div>
+        
+        {/* Render children if provided */}
+        {children}
       </div>
     </div>
   );
