@@ -6,7 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ProductCard } from "@/components/products/ProductCard";
 import { ThumbsUp } from "lucide-react";
 
-// Define a type for grid layout options
+// Define a type for grid layout options as a string literal type
 type GridLayoutType = "grid4x4" | "grid2x2" | "grid1x1";
 
 interface RecommendedProductsProps {
