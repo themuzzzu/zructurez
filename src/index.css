@@ -124,6 +124,19 @@
   .sidebar-icon-active {
     @apply transform scale-110;
   }
+  
+  /* Mobile responsiveness */
+  @media (max-width: 768px) {
+    .container {
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+    }
+    
+    .section-container {
+      padding-left: 1rem !important;
+      padding-right: 1rem !important;
+    }
+  }
 }
 
 /* Typing indicator animation */

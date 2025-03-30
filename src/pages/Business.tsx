@@ -95,8 +95,8 @@ const Business = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="container max-w-[1400px] pt-20 pb-16">
-        <div className="space-y-6">
+      <div className="w-full max-w-[1400px] mx-auto pt-20 pb-16 px-0">
+        <div className="space-y-6 px-4 sm:px-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Link to="/">

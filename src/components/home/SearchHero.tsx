@@ -31,7 +31,7 @@ export const SearchHero = () => {
   return (
     <div className="relative w-full bg-gradient-to-r from-blue-600 to-blue-800 text-white">
       <div className="absolute inset-0 bg-black opacity-20"></div>
-      <div className="container mx-auto px-4 py-16 md:py-24 relative z-10">
+      <div className="w-full px-4 py-16 md:py-24 relative z-10">
         <div className="max-w-3xl mx-auto text-center mb-8">
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
             Find Local Businesses & Services

@@ -83,7 +83,7 @@ export const LocalBusinessSpotlight = () => {
   };
 
   return (
-    <div className="my-8">
+    <div className="my-8 px-4 sm:px-0">
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-2">
           <Store className="h-5 w-5 text-emerald-600" />
@@ -116,7 +116,7 @@ export const LocalBusinessSpotlight = () => {
       )}
 
       {locationPermission === 'granted' && isLoading && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, index) => (
             <Card key={index} className="animate-pulse">
               <div className="h-40 bg-slate-200 dark:bg-slate-700"></div>
@@ -138,7 +138,7 @@ export const LocalBusinessSpotlight = () => {
       )}
 
       {locationPermission === 'granted' && !isLoading && businessesData.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {businessesData.map((business) => (
             <Card key={business.id} className="overflow-hidden transition-all hover:shadow-lg">
               <div className="h-40 bg-slate-100 dark:bg-slate-800 relative">

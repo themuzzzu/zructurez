@@ -48,7 +48,7 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
           </div>
         )}
         <main 
-          className={`flex-1 transition-all duration-300 w-full overflow-y-auto scrollbar-hide ${hideSidebar || isMobile ? 'px-4 sm:px-6 pb-20' : ''}`}
+          className={`flex-1 transition-all duration-300 w-full overflow-y-auto scrollbar-hide ${hideSidebar || isMobile ? 'px-0 sm:px-6 pb-20' : ''}`}
           style={{ 
             marginLeft: hideSidebar || isMobile ? 0 : sidebarWidth + 'px', 
             paddingBottom: isMobile ? '5rem' : '',

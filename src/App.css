@@ -60,6 +60,26 @@
   main {
     padding-bottom: 80px !important;
   }
+  
+  .container {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    max-width: 100% !important;
+  }
+  
+  /* Remove container padding but keep inner content padding */
+  .container > * {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  /* Make all full-width elements truly full-width */
+  .w-full, .max-w-full {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
 }
 
 /* Utility class to hide scrollbars while allowing scrolling functionality */
@@ -77,4 +97,14 @@
 .content-area {
   overflow-y: auto;
   max-height: 100%;
+}
+
+/* Responsive full-width sections */
+.full-width-section {
+  width: 100%;
+  max-width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: 0;
+  padding-right: 0;
 }
