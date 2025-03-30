@@ -1,4 +1,6 @@
 
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { BusinessCard } from "@/components/BusinessCard";
 import { BusinessCategoryFilter } from "@/components/BusinessCategoryFilter";
@@ -6,13 +8,13 @@ import { SearchInput } from "@/components/SearchInput";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useState } from "react";
 import { CreateBusinessForm } from "@/components/CreateBusinessForm";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { LoadingView } from "@/components/LoadingView";
 import { ErrorView } from "@/components/ErrorView";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SearchHero } from "@/components/home/SearchHero";
 import { BusinessCategoryGrid } from "@/components/home/BusinessCategoryGrid";
 import { QuickAccessServices } from "@/components/home/QuickAccessServices";
 import { TrendingServices } from "@/components/home/TrendingServices";
@@ -21,6 +23,7 @@ import { FeaturedBusinesses } from "@/components/home/FeaturedBusinesses";
 import { DealsSection } from "@/components/home/DealsSection";
 
 const Business = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -128,99 +131,99 @@ const Business = () => {
             />
           ) : (
             <>
-              <SearchInput
-                placeholder="Search businesses by name, description, category, or location..."
-                value={searchQuery}
-                onChange={setSearchQuery}
-                className="w-full mb-6"
-              />
+              {/* Hero Section with Search */}
+              <SearchHero />
               
-              {/* Business Categories Grid */}
-              <BusinessCategoryGrid />
-              
-              {/* Quick Access Services */}
-              <QuickAccessServices />
-              
-              {/* Trending Services */}
-              <TrendingServices />
-              
-              {/* Popular Categories with Horizontal Scroll */}
-              <PopularCategories />
-              
-              {/* Featured Businesses */}
-              <FeaturedBusinesses />
-              
-              {/* Deals & Offers Section */}
-              <DealsSection />
+              <div className="space-y-12 mt-8">
+                {/* Business Categories Grid */}
+                <BusinessCategoryGrid />
+                
+                {/* Quick Access Services */}
+                <QuickAccessServices />
+                
+                {/* Trending Services */}
+                <TrendingServices />
+                
+                {/* Popular Categories */}
+                <PopularCategories />
+                
+                {/* Featured Businesses */}
+                <FeaturedBusinesses />
+                
+                {/* Deals & Offers Section */}
+                <DealsSection />
 
-              <div className="mt-8">
-                <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between mb-6">
-                  <BusinessCategoryFilter onCategoryChange={handleCategoryChange} />
-                  <div className="w-full md:w-64">
-                    <Select value={sortBy} onValueChange={setSortBy}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Sort by" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="newest">Newest First</SelectItem>
-                        <SelectItem value="oldest">Oldest First</SelectItem>
-                        <SelectItem value="rating">Highest Rated</SelectItem>
-                        <SelectItem value="name_asc">Name (A-Z)</SelectItem>
-                        <SelectItem value="name_desc">Name (Z-A)</SelectItem>
-                      </SelectContent>
-                    </Select>
+                <div className="mt-8">
+                  <h2 className="text-2xl font-bold mb-6">All Businesses</h2>
+                  
+                  <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between mb-6">
+                    <BusinessCategoryFilter onCategoryChange={handleCategoryChange} />
+                    <div className="w-full md:w-64">
+                      <Select value={sortBy} onValueChange={setSortBy}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sort by" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="newest">Newest First</SelectItem>
+                          <SelectItem value="oldest">Oldest First</SelectItem>
+                          <SelectItem value="rating">Highest Rated</SelectItem>
+                          <SelectItem value="name_asc">Name (A-Z)</SelectItem>
+                          <SelectItem value="name_desc">Name (Z-A)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
+
+                  {sortedBusinesses.length === 0 ? (
+                    <div className="text-center py-12">
+                      <p className="text-muted-foreground">No businesses found. Be the first to register your business!</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {sortedBusinesses.map((business) => {
+                        const {
+                          id,
+                          name,
+                          category,
+                          description,
+                          image_url,
+                          location,
+                          contact,
+                          hours,
+                          verified,
+                          appointment_price,
+                          consultation_price,
+                          is_open,
+                          wait_time,
+                          closure_reason
+                        } = business;
+                        
+                        return (
+                          <div key={id} className="h-full">
+                            <BusinessCard 
+                              id={id}
+                              name={name}
+                              category={category}
+                              description={description}
+                              image={image_url || '/placeholder.svg'}
+                              rating={business.average_rating || 0}
+                              reviews={business.business_ratings?.length || 0}
+                              location={location || ''}
+                              contact={contact || ''}
+                              hours={hours || ''}
+                              verified={verified || false}
+                              appointment_price={appointment_price}
+                              consultation_price={consultation_price}
+                              is_open={is_open}
+                              wait_time={wait_time}
+                              closure_reason={closure_reason}
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
-
-                {sortedBusinesses.length === 0 ? (
-                  <div className="text-center py-12">
-                    <p className="text-muted-foreground">No businesses found. Be the first to register your business!</p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {sortedBusinesses.map((business) => {
-                      const {
-                        id,
-                        name,
-                        category,
-                        description,
-                        image_url,
-                        location,
-                        contact,
-                        hours,
-                        verified,
-                        appointment_price,
-                        consultation_price,
-                        is_open,
-                        wait_time,
-                        closure_reason
-                      } = business;
-                      
-                      return (
-                        <div key={id} className="h-full">
-                          <BusinessCard 
-                            id={id}
-                            name={name}
-                            category={category}
-                            description={description}
-                            image={image_url || '/placeholder.svg'}
-                            rating={business.average_rating || 0}
-                            reviews={business.business_ratings?.length || 0}
-                            location={location || ''}
-                            contact={contact || ''}
-                            hours={hours || ''}
-                            verified={verified || false}
-                            appointment_price={appointment_price}
-                            consultation_price={consultation_price}
-                            is_open={is_open}
-                            wait_time={wait_time}
-                            closure_reason={closure_reason}
-                          />
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
               </div>
             </>
           )}

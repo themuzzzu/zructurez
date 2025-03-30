@@ -1,6 +1,6 @@
+
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
-import { SearchHero } from "@/components/home/SearchHero";
 import { HomeLayout } from "@/components/layout/HomeLayout";
 
 export default function Index() {
@@ -10,15 +10,12 @@ export default function Index() {
     <div className="min-h-screen bg-background">
       <Navbar />
       <main className="w-full">
-        {/* Hero Section with Search */}
-        <SearchHero />
-        
         {/* Main Content */}
         <HomeLayout>
           <div className="py-8">
             <div className="space-y-6">
               <h2 className="text-2xl font-bold">Recent Posts</h2>
-              <p className="text-muted-foreground">Content from the previous home page will go here</p>
+              <p className="text-muted-foreground">Content from the previous home page</p>
               
               <div className="mt-8 flex justify-center">
                 <button 
