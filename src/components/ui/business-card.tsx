@@ -11,7 +11,7 @@ const BusinessCard = React.forwardRef<
   <Card
     ref={ref}
     className={cn(
-      "overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer w-full max-w-[360px] bg-black text-white flex flex-col",
+      "overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer w-full max-w-[360px] bg-black text-white flex flex-col h-full",
       className
     )}
     {...props}

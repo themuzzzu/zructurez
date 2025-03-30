@@ -164,12 +164,7 @@ const Business = () => {
                     } = business;
                     
                     return (
-                      <div key={id} className="h-full flex">
-                        {business.average_rating >= 4.5 && (
-                          <Badge variant="success" className="absolute top-2 right-2 z-10 px-2 py-1">
-                            Top Rated
-                          </Badge>
-                        )}
+                      <div key={id} className="h-full">
                         <BusinessCard 
                           id={id}
                           name={name}

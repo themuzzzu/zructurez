@@ -43,7 +43,7 @@ export const BusinessCardInfo = ({
         </div>
       )}
       {(appointment_price || consultation_price) && (
-        <div className="flex flex-wrap gap-2 text-sm text-white">
+        <div className="flex flex-wrap gap-2 text-sm text-white mt-2">
           {appointment_price && (
             <div className="bg-primary/20 rounded-full px-3 py-1">
               <span className="font-medium">Appointment:</span> ₹{appointment_price}

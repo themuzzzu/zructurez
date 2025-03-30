@@ -57,7 +57,7 @@ export const BusinessCard = ({
     <>
       <BusinessCardUI 
         onClick={() => navigate(`/businesses/${id}`)}
-        className="h-full" // Make all cards the same height
+        className="group"
       >
         <BusinessCardImage 
           src={image} 
