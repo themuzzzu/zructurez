@@ -1,6 +1,8 @@
-import OptimizedMarketplace from "./marketplace/OptimizedMarketplace";
+
+import { Layout } from "@/components/layout/Layout";
 import { NotFound } from "@/components/NotFound";
 import { useParams } from "react-router-dom";
+import OptimizedMarketplace from "./marketplace/OptimizedMarketplace";
 
 const Marketplace = () => {
   const params = useParams();
@@ -10,8 +12,13 @@ const Marketplace = () => {
     return <NotFound />;
   }
   
-  // Otherwise, render the marketplace
-  return <OptimizedMarketplace />;
+  // Render the marketplace with the proper layout
+  // Important: We're NOT hiding the sidebar in desktop view anymore
+  return (
+    <Layout>
+      <OptimizedMarketplace />
+    </Layout>
+  );
 };
 
 export default Marketplace;

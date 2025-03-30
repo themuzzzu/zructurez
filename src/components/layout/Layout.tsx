@@ -5,6 +5,7 @@ import { Sidebar } from "@/components/Sidebar";
 import { AIAssistant } from "@/components/ai-support/AIAssistant";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useTheme } from "@/components/ThemeProvider";
+import { MobileNav } from "@/components/navbar/MobileNav";
 
 interface LayoutProps {
   children: ReactNode;
@@ -61,6 +62,9 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
       
       {/* AI Components */}
       <AIAssistant />
+      
+      {/* Mobile Navigation - Make sure this is always rendered regardless of hideSidebar */}
+      <MobileNav />
     </div>
   );
 };
