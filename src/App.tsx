@@ -21,7 +21,7 @@ import Settings from "@/pages/Settings";
 import Wishlist from "@/pages/Wishlist";
 import Maps from "@/pages/Maps";
 import Communities from "@/pages/Communities";
-import { Messages } from "@/pages/messages/Messages";
+import MessagesPage from "@/pages/messages";
 import Search from "@/pages/search";
 import Orders from "@/pages/orders";
 import Checkout from "@/pages/checkout";
@@ -30,6 +30,7 @@ import AdDashboard from "@/pages/admin/AdDashboard";
 import AdAnalytics from "@/pages/admin/AdAnalytics";
 import AdPlacement from "@/pages/admin/AdPlacement";
 import AdAuction from "@/pages/admin/AdAuction";
+import Dashboard from "@/pages/dashboard";
 import { BusinessRegistrationForm } from "@/components/business-registration/BusinessRegistrationForm";
 
 function App() {
@@ -62,8 +63,8 @@ function App() {
             <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/maps" element={<Maps />} />
             <Route path="/communities" element={<Communities />} />
-            <Route path="/messages/*" element={<Messages />} />
-            <Route path="/messages" element={<Messages />} />
+            <Route path="/messages/*" element={<MessagesPage />} />
+            <Route path="/messages" element={<MessagesPage />} />
             <Route path="/search" element={<Search />} />
             <Route path="/orders" element={<Orders />} />
             <Route path="/checkout" element={<Checkout />} />
@@ -71,7 +72,7 @@ function App() {
             <Route path="/admin/analytics" element={<AdAnalytics />} />
             <Route path="/admin/placement" element={<AdPlacement />} />
             <Route path="/admin/auction" element={<AdAuction />} />
-            <Route path="/dashboard" element={<NotFound />} />
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
