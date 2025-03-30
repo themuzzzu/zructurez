@@ -32,39 +32,40 @@ export const BusinessHeader = ({
   };
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-2 sm:gap-4">
-          {isMobile ? (
-            <Button variant="ghost" size="icon" onClick={handleBackClick}>
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-          ) : (
-            <Link to="/businesses">
-              <Button variant="ghost" size="icon">
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-            </Link>
-          )}
+    <div className="flex flex-col gap-4 animate-fade-in">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={handleBackClick}
+            className="transition-all hover:bg-muted"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
           <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-            <h1 className="text-2xl sm:text-3xl font-bold">{name}</h1>
+            <h1 className="text-xl sm:text-2xl font-bold truncate">{name}</h1>
             <div className="flex items-center gap-2">
-              <Badge variant={isOpen ? "success" : "destructive"} className="mt-1 sm:mt-0">
+              <Badge variant={isOpen ? "success" : "destructive"} className="text-xs">
                 {isOpen ? "Open" : "Closed"}
               </Badge>
-              <div className="text-muted-foreground text-sm mt-1 sm:mt-0">{category}</div>
+              <div className="text-muted-foreground text-xs">{category}</div>
             </div>
           </div>
         </div>
         {isOwner && onEdit && (
-          <Button onClick={onEdit} size={isMobile ? "sm" : "default"}>
+          <Button 
+            onClick={onEdit} 
+            size="sm"
+            className="animate-fade-in transition-all hover:scale-105"
+          >
             Edit
           </Button>
         )}
       </div>
 
       {isOwner && (
-        <div className="flex flex-wrap items-start gap-6 p-4 border rounded-lg bg-background">
+        <div className="flex flex-wrap items-start gap-4 p-3 border rounded-lg bg-background animate-fade-in">
           <BusinessStatus id={id} initialIsOpen={isOpen} />
           <TemporaryStatus id={id} isOpen={isOpen} />
         </div>

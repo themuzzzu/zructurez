@@ -7,6 +7,7 @@ import { BusinessPortfolioTab } from "./tabs/BusinessPortfolioTab";
 import { BusinessPostsTab } from "./tabs/BusinessPostsTab";
 import { BusinessBookingsTab } from "./tabs/BusinessBookingsTab";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Business } from "@/types/business";
 
 interface BusinessTabsProps {
@@ -20,24 +21,57 @@ export const BusinessTabs = ({ business, isOwner, onRefetch }: BusinessTabsProps
   
   return (
     <Tabs defaultValue="about" className="w-full">
-      <TabsList 
-        className={`w-full overflow-x-auto ${isMobile ? 'flex' : 'grid'}`} 
-        style={!isMobile ? { gridTemplateColumns: 'repeat(6, 1fr)' } : undefined}
-      >
-        <TabsTrigger value="about" className={isMobile ? 'flex-1 min-w-20' : ''}>About</TabsTrigger>
-        <TabsTrigger value="products" className={isMobile ? 'flex-1 min-w-20' : ''}>Products</TabsTrigger>
-        <TabsTrigger value="services" className={isMobile ? 'flex-1 min-w-20' : ''}>Services</TabsTrigger>
-        <TabsTrigger value="portfolio" className={isMobile ? 'flex-1 min-w-28' : ''}>Notable Works</TabsTrigger>
-        <TabsTrigger value="posts" className={isMobile ? 'flex-1 min-w-20' : ''}>Posts</TabsTrigger>
-        {isOwner && <TabsTrigger value="bookings" className={isMobile ? 'flex-1 min-w-20' : ''}>Bookings</TabsTrigger>}
-      </TabsList>
+      <div className="relative overflow-hidden rounded-md">
+        <ScrollArea className="pb-1">
+          <TabsList className="flex w-full min-w-fit">
+            <TabsTrigger 
+              value="about" 
+              className="animate-fade-in transition-all px-4 py-2"
+            >
+              About
+            </TabsTrigger>
+            <TabsTrigger 
+              value="products" 
+              className="animate-fade-in transition-all px-4 py-2"
+            >
+              Products
+            </TabsTrigger>
+            <TabsTrigger 
+              value="services" 
+              className="animate-fade-in transition-all px-4 py-2"
+            >
+              Services
+            </TabsTrigger>
+            <TabsTrigger 
+              value="portfolio" 
+              className="animate-fade-in transition-all px-4 py-2"
+            >
+              Notable Works
+            </TabsTrigger>
+            <TabsTrigger 
+              value="posts" 
+              className="animate-fade-in transition-all px-4 py-2"
+            >
+              Posts
+            </TabsTrigger>
+            {isOwner && (
+              <TabsTrigger 
+                value="bookings" 
+                className="animate-fade-in transition-all px-4 py-2"
+              >
+                Bookings
+              </TabsTrigger>
+            )}
+          </TabsList>
+        </ScrollArea>
+      </div>
 
-      <div className="mt-6">
-        <TabsContent value="about">
+      <div className={`mt-6 animate-fade-in transition-all duration-300`}>
+        <TabsContent value="about" className="animate-scale-in">
           <BusinessAboutTab business={business} />
         </TabsContent>
 
-        <TabsContent value="products">
+        <TabsContent value="products" className="animate-scale-in">
           <BusinessProductsTab
             businessId={business.id}
             isOwner={isOwner}
@@ -46,7 +80,7 @@ export const BusinessTabs = ({ business, isOwner, onRefetch }: BusinessTabsProps
           />
         </TabsContent>
 
-        <TabsContent value="services">
+        <TabsContent value="services" className="animate-scale-in">
           <BusinessServicesTab
             appointmentPrice={business.appointment_price}
             consultationPrice={business.consultation_price}
@@ -55,19 +89,19 @@ export const BusinessTabs = ({ business, isOwner, onRefetch }: BusinessTabsProps
           />
         </TabsContent>
 
-        <TabsContent value="portfolio">
+        <TabsContent value="portfolio" className="animate-scale-in">
           <BusinessPortfolioTab 
             portfolio={business.business_portfolio} 
             businessId={isOwner ? business.id : undefined}
           />
         </TabsContent>
 
-        <TabsContent value="posts">
+        <TabsContent value="posts" className="animate-scale-in">
           <BusinessPostsTab business={business} />
         </TabsContent>
 
         {isOwner && (
-          <TabsContent value="bookings">
+          <TabsContent value="bookings" className="animate-scale-in">
             <BusinessBookingsTab businessId={business.id} />
           </TabsContent>
         )}

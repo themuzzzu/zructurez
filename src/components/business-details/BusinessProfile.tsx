@@ -53,7 +53,7 @@ export const BusinessProfile = ({
   const isMobile = useMediaQuery("(max-width: 768px)");
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-4 sm:space-y-6 animate-fade-in">
       <BusinessImageSection image_url={image_url} />
       
       <BusinessActionButtons businessId={id} />

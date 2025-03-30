@@ -116,8 +116,8 @@ const BusinessDetails = () => {
       {/* Only show Navbar on desktop */}
       {!isMobile && <Navbar />}
       
-      <div className={`max-w-[1400px] mx-auto ${isMobile ? 'pt-4' : 'pt-20'} pb-16 px-3 sm:px-6`}>
-        <div className="space-y-6">
+      <div className={`max-w-[1400px] mx-auto ${isMobile ? 'pt-2' : 'pt-20'} pb-16 px-3 sm:px-6`}>
+        <div className="space-y-4 animate-fade-in">
           <BusinessHeader
             id={business.id}
             name={business.name}
