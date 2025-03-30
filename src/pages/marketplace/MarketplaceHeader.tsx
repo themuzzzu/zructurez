@@ -49,7 +49,7 @@ export const MarketplaceHeader = ({
             >
               <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white truncate">Marketplace</h1>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white truncate">Zructs</h1>
           </div>
           
           <div className="hidden md:flex items-center flex-1 max-w-2xl mx-4">

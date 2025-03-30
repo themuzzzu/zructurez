@@ -36,7 +36,7 @@ export const MobileNav = () => {
   // Main navigation items - match what's in Sidebar.tsx
   const mobileNavItems = [
     { icon: Home, label: "Home", path: "/" },
-    { icon: Store, label: "Marketplace", path: "/marketplace" },
+    { icon: Store, label: "Zructs", path: "/marketplace" },
     { icon: Wrench, label: "Services", path: "/services" },
     { icon: Building, label: "Business", path: "/businesses" },
     { icon: MessageSquare, label: "Messages", path: "/messages" },
@@ -83,7 +83,7 @@ export const MobileNav = () => {
                 <Icon className="h-5 w-5 text-muted-foreground" />
               )}
               <span className={cn(
-                "text-xs font-medium",
+                "text-[10px] font-medium", // Decreased from text-xs (12px) to text-[10px]
                 isActive ? "text-white" : ""
               )}>
                 {item.label}
@@ -100,7 +100,7 @@ export const MobileNav = () => {
               aria-label="More options"
             >
               <MoreVertical className="h-5 w-5 text-muted-foreground" />
-              <span className="text-xs font-medium">More</span>
+              <span className="text-[10px] font-medium">More</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
