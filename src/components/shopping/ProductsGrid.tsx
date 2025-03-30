@@ -4,12 +4,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ProductCard } from "@/components/products/ProductCard";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { GridLayoutType } from "@/components/products/types/ProductTypes";
 
 interface ProductsGridProps {
   products: any[] | null;
   isLoading: boolean;
   onOpenAddProductDialog: () => void;
-  layout?: "grid4x4" | "grid2x2" | "grid1x1";
+  layout?: GridLayoutType;
 }
 
 export const ProductsGrid = ({ 

@@ -8,6 +8,7 @@ import { ProductCard } from "@/components/products/ProductCard";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, ExternalLink } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { GridLayoutType } from "@/components/products/types/ProductTypes";
 
 interface SponsoredRecommendationsProps {
   category?: string;

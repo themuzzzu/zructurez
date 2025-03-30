@@ -8,6 +8,7 @@ import { SearchTabContent } from "./SearchTabContent";
 import { BannerCarousel } from "@/components/marketplace/BannerCarousel";
 import { MarketplaceHero } from "@/components/marketplace/MarketplaceHero";
 import { GridLayoutSelector } from "@/components/marketplace/GridLayoutSelector";
+import { GridLayoutType } from "@/components/products/types/ProductTypes";
 
 const OptimizedMarketplace = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -15,7 +16,7 @@ const OptimizedMarketplace = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [gridLayout, setGridLayout] = useState<"grid4x4" | "grid2x2" | "grid1x1">("grid4x4");
+  const [gridLayout, setGridLayout] = useState<GridLayoutType>("grid4x4");
   
   // Filter states
   const [showDiscounted, setShowDiscounted] = useState(false);

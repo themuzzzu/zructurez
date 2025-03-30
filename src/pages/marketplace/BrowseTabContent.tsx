@@ -5,11 +5,12 @@ import { DiscountCollection } from "@/components/marketplace/DiscountCollection"
 import { CategoryAvatars } from "@/components/marketplace/CategoryAvatars";
 import { SponsoredProducts } from "@/components/marketplace/SponsoredProducts";
 import { TrendingSearches } from "@/components/marketplace/TrendingSearches";
+import { GridLayoutType } from "@/components/products/types/ProductTypes";
 
 interface BrowseTabContentProps {
   handleCategorySelect: (category: string) => void;
   handleSearchSelect: (term: string) => void;
-  gridLayout?: "grid4x4" | "grid2x2" | "grid1x1";
+  gridLayout?: GridLayoutType;
 }
 
 export const BrowseTabContent = ({ 

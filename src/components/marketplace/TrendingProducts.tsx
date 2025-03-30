@@ -6,9 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ProductCard } from "@/components/products/ProductCard";
 import { useNavigate } from "react-router-dom";
 import { Flame } from "lucide-react";
-
-// Define the GridLayoutType at the module level to avoid recursive type references
-type GridLayoutType = "grid4x4" | "grid2x2" | "grid1x1";
+import { GridLayoutType } from "@/components/products/types/ProductTypes";
 
 interface TrendingProductsProps {
   gridLayout?: GridLayoutType;

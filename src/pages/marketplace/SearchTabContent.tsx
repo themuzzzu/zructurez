@@ -1,5 +1,6 @@
 
 import { ShoppingSection } from "@/components/ShoppingSection";
+import { GridLayoutType } from "@/components/products/types/ProductTypes";
 
 interface SearchTabContentProps {
   searchQuery: string;
@@ -15,7 +16,7 @@ interface SearchTabContentProps {
   priceRange: string;
   setPriceRange: (value: string) => void;
   resetFilters: () => void;
-  gridLayout?: "grid4x4" | "grid2x2" | "grid1x1";
+  gridLayout?: GridLayoutType;
 }
 
 export const SearchTabContent = ({ 

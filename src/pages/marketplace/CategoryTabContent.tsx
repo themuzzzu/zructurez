@@ -17,11 +17,12 @@ import {
   ShoppingBag,
   Paintbrush
 } from "lucide-react";
+import { GridLayoutType } from "@/components/products/types/ProductTypes";
 
 interface CategoryTabContentProps {
   setSelectedCategory: (category: string) => void;
   setActiveTab: (tab: string) => void;
-  gridLayout?: "grid4x4" | "grid2x2" | "grid1x1";
+  gridLayout?: GridLayoutType;
 }
 
 export const CategoryTabContent = ({ 
