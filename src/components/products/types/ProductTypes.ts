@@ -1,19 +1,26 @@
 
+// Product card layout type
+export type GridLayoutType = "grid4x4" | "grid2x2" | "grid1x1";
+
+// Basic product type
 export interface ProductType {
   id: string;
-  title: string;
+  name: string;
+  description?: string;
   price: number;
   image_url?: string;
-  description?: string;
+  discount_price?: number;
+  rating?: number;
+  seller?: string;
   category?: string;
-  is_discounted?: boolean;
-  discount_percentage?: number;
-  original_price?: number;
-  views?: number;
-  sales_count?: number;
-  trending_score?: number;
   brand?: string;
+  is_featured?: boolean;
+  stock_count?: number;
+  created_at?: string;
+  updated_at?: string;
+  tags?: string[];
+  is_new?: boolean;
+  is_sale?: boolean;
+  is_bestseller?: boolean;
+  [key: string]: any; // For other dynamic properties
 }
-
-// Define the layout type as a string literal type to be shared across components
-export type GridLayoutType = "grid4x4" | "grid2x2" | "grid1x1";

@@ -1,6 +1,5 @@
 
 import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { fetchActiveAds, incrementAdView, AdType, AdFormat, Advertisement } from "@/services/adService";
 import {
   Carousel,
@@ -217,7 +216,7 @@ export const BannerCarousel = () => {
 
   return (
     <div 
-      className="w-full relative mb-8"
+      className="w-full relative mb-8 px-0 sm:px-4"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -237,12 +236,12 @@ export const BannerCarousel = () => {
           ))}
         </CarouselContent>
         
-        <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 h-9 w-9 border border-white/40 bg-black/30 hover:bg-black/50 z-10">
-          <ChevronLeft className="h-5 w-5 text-white" />
+        <CarouselPrevious className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 h-8 w-8 sm:h-9 sm:w-9 border border-white/40 bg-black/30 hover:bg-black/50 z-10">
+          <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
         </CarouselPrevious>
         
-        <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 h-9 w-9 border border-white/40 bg-black/30 hover:bg-black/50 z-10">
-          <ChevronRight className="h-5 w-5 text-white" />
+        <CarouselNext className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 h-8 w-8 sm:h-9 sm:w-9 border border-white/40 bg-black/30 hover:bg-black/50 z-10">
+          <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
         </CarouselNext>
       </Carousel>
       
@@ -253,7 +252,7 @@ export const BannerCarousel = () => {
       
       {/* Pagination dots for the carousel */}
       {bannerAds.length > 1 && (
-        <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-10">
+        <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-10">
           {bannerAds.map((_, index) => (
             <div 
               key={index} 
@@ -268,3 +267,4 @@ export const BannerCarousel = () => {
     </div>
   );
 };
+
