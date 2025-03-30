@@ -2086,6 +2086,7 @@ export type Database = {
           price: number
           title: string
           user_id: string
+          views: number | null
         }
         Insert: {
           availability?: string | null
@@ -2100,6 +2101,7 @@ export type Database = {
           price: number
           title: string
           user_id: string
+          views?: number | null
         }
         Update: {
           availability?: string | null
@@ -2114,6 +2116,7 @@ export type Database = {
           price?: number
           title?: string
           user_id?: string
+          views?: number | null
         }
         Relationships: []
       }
@@ -2327,6 +2330,12 @@ export type Database = {
         }
         Returns: undefined
       }
+      increment_post_views: {
+        Args: {
+          post_id_param: string
+        }
+        Returns: undefined
+      }
       increment_product_views: {
         Args: {
           product_id_param: string
@@ -2336,6 +2345,12 @@ export type Database = {
       increment_search_suggestion: {
         Args: {
           term_param: string
+        }
+        Returns: undefined
+      }
+      increment_service_views: {
+        Args: {
+          service_id_param: string
         }
         Returns: undefined
       }

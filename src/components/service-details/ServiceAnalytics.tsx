@@ -29,7 +29,7 @@ export const ServiceAnalytics = ({ serviceId, isOwner }: ServiceAnalyticsProps) 
         // Count contact clicks and bookings
         const { data: contactClicksData, error: contactClicksError } = await supabase
           .from('search_result_clicks')
-          .select('*', { count: 'exact' })
+          .select('*')
           .eq('result_id', serviceId);
           
         if (contactClicksError) throw contactClicksError;
@@ -38,7 +38,7 @@ export const ServiceAnalytics = ({ serviceId, isOwner }: ServiceAnalyticsProps) 
         
         const { data: bookingsData, error: bookingsError } = await supabase
           .from('appointments')
-          .select('*', { count: 'exact' })
+          .select('*')
           .eq('service_name', serviceId);
           
         if (bookingsError) throw bookingsError;

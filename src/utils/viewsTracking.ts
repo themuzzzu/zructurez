@@ -100,17 +100,17 @@ export const fetchBusinessAnalytics = async (userId: string | undefined) => {
       console.error('Error fetching product analytics:', productsError);
     }
     
-    // Fetch service view counts - use proper error handling
-    const { data: servicesRaw, error: servicesError } = await supabase
+    // Fetch service view counts - handle properly now that services has views column
+    const { data: services, error: servicesError } = await supabase
       .from('services')
       .select('id, title, views')
       .eq('user_id', userId)
       .order('views', { ascending: false });
       
     // Handle services data with proper default values when error or no data
-    const services = servicesError || !servicesRaw 
+    const serviceAnalytics = servicesError || !services 
       ? [] 
-      : servicesRaw.map(service => ({
+      : services.map(service => ({
           id: service.id,
           title: service.title,
           views: service.views || 0
@@ -135,7 +135,7 @@ export const fetchBusinessAnalytics = async (userId: string | undefined) => {
     return {
       businessViews: analyticsData?.page_views || 0,
       productAnalytics: products || [],
-      serviceAnalytics: services || [],
+      serviceAnalytics: serviceAnalytics,
       postAnalytics: posts || [],
       lastUpdated: analyticsData?.last_updated || new Date().toISOString()
     };
