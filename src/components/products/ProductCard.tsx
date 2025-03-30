@@ -4,12 +4,12 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { ProductCardCompact } from "./ProductCardCompact";
 import { ProductCardStandard } from "./ProductCardStandard";
-import { ProductType } from "./types/ProductTypes";
+import { ProductType, GridLayoutType } from "./types/ProductTypes";
 
 export interface ProductCardProps {
   product: ProductType;
   onClick?: () => void;
-  layout?: "grid4x4" | "grid2x2" | "grid1x1";
+  layout?: GridLayoutType;
   sponsored?: boolean;
 }
 

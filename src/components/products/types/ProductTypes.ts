@@ -14,3 +14,6 @@ export interface ProductType {
   trending_score?: number;
   brand?: string;
 }
+
+// Define the layout type as a string literal type to be shared across components
+export type GridLayoutType = "grid4x4" | "grid2x2" | "grid1x1";

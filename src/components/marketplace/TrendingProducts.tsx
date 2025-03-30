@@ -7,8 +7,11 @@ import { ProductCard } from "@/components/products/ProductCard";
 import { useNavigate } from "react-router-dom";
 import { Flame } from "lucide-react";
 
+// Define the GridLayoutType at the module level to avoid recursive type references
+type GridLayoutType = "grid4x4" | "grid2x2" | "grid1x1";
+
 interface TrendingProductsProps {
-  gridLayout?: "grid4x4" | "grid2x2" | "grid1x1";
+  gridLayout?: GridLayoutType;
 }
 
 export const TrendingProducts = ({ gridLayout = "grid4x4" }: TrendingProductsProps) => {

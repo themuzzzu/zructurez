@@ -7,7 +7,7 @@ import { ProductCard } from "@/components/products/ProductCard";
 import { Badge } from "@/components/ui/badge";
 import { Megaphone } from "lucide-react";
 
-// Define a type for grid layout options as a string literal type
+// Define the GridLayoutType at the module level to avoid recursive type references
 type GridLayoutType = "grid4x4" | "grid2x2" | "grid1x1";
 
 interface SponsoredProductsProps {
