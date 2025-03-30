@@ -129,14 +129,14 @@ export function BannerAd({ ad, className }: BannerAdProps) {
                   </Button>
                 </div>
               </div>
+              
+              {/* Sponsored tag - moved to top right for better visibility and to avoid overlapping */}
+              <div className="absolute top-2 right-2 flex items-center bg-black/50 backdrop-blur-sm text-white/80 text-xs px-2 py-1 rounded-full">
+                <ExternalLink className="h-3 w-3 mr-1" />
+                <span>Sponsored</span>
+              </div>
             </div>
           </AspectRatio>
-          
-          {/* Sponsored tag - positioned at the bottom for better visibility on mobile */}
-          <div className="absolute bottom-2 left-2 flex items-center bg-black/50 backdrop-blur-sm text-white/80 text-xs px-2 py-1 rounded-full">
-            <ExternalLink className="h-3 w-3 mr-1" />
-            <span>Sponsored</span>
-          </div>
         </div>
       ) : (
         <AspectRatio ratio={16/9}>
@@ -157,7 +157,8 @@ export function BannerAd({ ad, className }: BannerAdProps) {
                 Learn More
               </Button>
               
-              <div className="flex items-center text-white/70 text-xs mt-4 bg-black/30 px-2 py-1 rounded-full inline-flex">
+              {/* Sponsored tag - positioned at top right in text-only ads */}
+              <div className="absolute top-2 right-2 flex items-center text-white/70 text-xs bg-black/30 px-2 py-1 rounded-full inline-flex">
                 <Info className="h-3 w-3 mr-1" />
                 <span>Sponsored</span>
               </div>
@@ -168,4 +169,3 @@ export function BannerAd({ ad, className }: BannerAdProps) {
     </Card>
   );
 }
-
