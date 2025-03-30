@@ -3,7 +3,6 @@
   width: 100%;
   margin: 0 auto;
   text-align: center;
-  overflow: hidden; /* Hide overflow on root */
 }
 
 .logo {
@@ -67,8 +66,15 @@
 .scrollbar-hide {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
+  overflow-y: auto;
 }
 
 .scrollbar-hide::-webkit-scrollbar {
   display: none; /* Chrome, Safari and Opera */
+}
+
+/* Ensure content areas have proper scrolling */
+.content-area {
+  overflow-y: auto;
+  max-height: 100%;
 }

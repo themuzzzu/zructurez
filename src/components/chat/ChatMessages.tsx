@@ -85,7 +85,7 @@ export const ChatMessages = ({
   const isOtherUserTyping = otherUserId && typingUsers[otherUserId];
 
   return (
-    <ScrollArea ref={scrollRef} className="h-[calc(100vh-15rem)] px-4">
+    <div ref={scrollRef} className="h-[calc(100vh-15rem)] px-4 overflow-y-auto scrollbar-hide">
       <div className="py-4 space-y-6">
         {Object.entries(groupedMessages).map(([date, dateMessages]) => (
           <div key={date} className="space-y-4">
@@ -125,6 +125,6 @@ export const ChatMessages = ({
           </div>
         )}
       </div>
-    </ScrollArea>
+    </div>
   );
 };

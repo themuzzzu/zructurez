@@ -56,8 +56,9 @@
   }
   body {
     @apply bg-background text-foreground;
-    /* Hide scrollbars for the entire app */
-    overflow: hidden;
+    /* Keep scrolling functionality but hide scrollbars */
+    overflow-y: auto;
+    overflow-x: hidden;
   }
   
   /* Hide scrollbars globally but keep functionality */
@@ -165,4 +166,10 @@
 
 .icon-fill-animation {
   animation: icon-fill 0.3s ease forwards;
+}
+
+/* Utility class to ensure content is scrollable while hiding scrollbars */
+.scrollable {
+  overflow-y: auto;
+  overflow-x: hidden;
 }

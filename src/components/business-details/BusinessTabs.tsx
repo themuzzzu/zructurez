@@ -73,7 +73,7 @@ export const BusinessTabs = ({ business, isOwner, onRefetch }: BusinessTabsProps
         </ScrollArea>
       </div>
 
-      <div className={`mt-6 animate-fade-in transition-all duration-300`}>
+      <div className="mt-6 animate-fade-in transition-all duration-300 max-h-[calc(100vh-280px)] overflow-y-auto scrollbar-hide">
         <TabsContent value="about" className="animate-scale-in">
           <BusinessAboutTab business={business} />
         </TabsContent>

@@ -19,7 +19,7 @@ export const ProfileTabs = ({ profileId }: ProfileTabsProps) => {
   return (
     <Tabs defaultValue="posts" className="space-y-4 animate-fade-in">
       <div className="relative overflow-hidden rounded-md">
-        <ScrollArea className="pb-1 scrollbar-hide">
+        <ScrollArea className="pb-1">
           <TabsList className="flex w-full min-w-fit">
             <TabsTrigger value="posts" className="animate-fade-in transition-all px-4 py-2">
               Posts
@@ -44,35 +44,37 @@ export const ProfileTabs = ({ profileId }: ProfileTabsProps) => {
       </div>
       
       <Card className="overflow-hidden">
-        <TabsContent value="posts" className="p-4 animate-scale-in">
-          <PostsTab profileId={profileId} />
-        </TabsContent>
-        
-        <TabsContent value="businesses" className="p-4 animate-scale-in">
-          <BusinessesTab />
-        </TabsContent>
-        
-        <TabsContent value="services" className="p-4 animate-scale-in">
-          <ServicesTab />
-        </TabsContent>
-        
-        <TabsContent value="wishlist" className="p-4 animate-scale-in">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            <LikedBusinessesTab />
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="reviews" className="p-4 animate-scale-in">
-          <div className="text-center py-8">
-            <p className="text-muted-foreground">No reviews yet</p>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="photos" className="p-4 animate-scale-in">
-          <div className="text-center py-8">
-            <p className="text-muted-foreground">No photos yet</p>
-          </div>
-        </TabsContent>
+        <div className="max-h-[calc(100vh-280px)] overflow-y-auto scrollbar-hide">
+          <TabsContent value="posts" className="p-4 animate-scale-in">
+            <PostsTab profileId={profileId} />
+          </TabsContent>
+          
+          <TabsContent value="businesses" className="p-4 animate-scale-in">
+            <BusinessesTab />
+          </TabsContent>
+          
+          <TabsContent value="services" className="p-4 animate-scale-in">
+            <ServicesTab />
+          </TabsContent>
+          
+          <TabsContent value="wishlist" className="p-4 animate-scale-in">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              <LikedBusinessesTab />
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="reviews" className="p-4 animate-scale-in">
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">No reviews yet</p>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="photos" className="p-4 animate-scale-in">
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">No photos yet</p>
+            </div>
+          </TabsContent>
+        </div>
       </Card>
     </Tabs>
   );
