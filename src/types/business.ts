@@ -1,3 +1,4 @@
+
 export interface StaffMember {
   name: string | null;
   position: string | null;
@@ -24,6 +25,7 @@ export interface BusinessProduct {
   image_url: string | null;
   stock: number | null;
   created_at: string;
+  category?: string;
 }
 
 export interface BusinessPortfolio {

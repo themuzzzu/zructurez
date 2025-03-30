@@ -32,19 +32,19 @@ export const BusinessHeader = ({
   };
 
   return (
-    <div className="flex flex-col gap-4 animate-fade-in">
+    <div className="flex flex-col gap-3 animate-fade-in">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <Button 
             variant="ghost" 
             size="icon" 
             onClick={handleBackClick}
-            className="transition-all hover:bg-muted"
+            className="transition-all hover:bg-muted mr-1"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-            <h1 className="text-xl sm:text-2xl font-bold truncate">{name}</h1>
+            <h1 className="text-lg sm:text-xl font-bold truncate">{name}</h1>
             <div className="flex items-center gap-2">
               <Badge variant={isOpen ? "success" : "destructive"} className="text-xs">
                 {isOpen ? "Open" : "Closed"}
@@ -65,7 +65,7 @@ export const BusinessHeader = ({
       </div>
 
       {isOwner && (
-        <div className="flex flex-wrap items-start gap-4 p-3 border rounded-lg bg-background animate-fade-in">
+        <div className="flex flex-wrap items-start gap-3 p-3 border rounded-lg bg-background animate-fade-in">
           <BusinessStatus id={id} initialIsOpen={isOpen} />
           <TemporaryStatus id={id} isOpen={isOpen} />
         </div>

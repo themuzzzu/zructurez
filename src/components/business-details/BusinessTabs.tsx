@@ -6,6 +6,7 @@ import { BusinessServicesTab } from "./tabs/BusinessServicesTab";
 import { BusinessPortfolioTab } from "./tabs/BusinessPortfolioTab";
 import { BusinessPostsTab } from "./tabs/BusinessPostsTab";
 import { BusinessBookingsTab } from "./tabs/BusinessBookingsTab";
+import { BusinessPhotosTab } from "./tabs/BusinessPhotosTab";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Business } from "@/types/business";
@@ -21,43 +22,49 @@ export const BusinessTabs = ({ business, isOwner, onRefetch }: BusinessTabsProps
   
   return (
     <Tabs defaultValue="about" className="w-full">
-      <div className="relative overflow-hidden rounded-md">
+      <div className="relative rounded-md border border-border/30">
         <ScrollArea className="pb-1">
-          <TabsList className="flex w-full min-w-fit">
+          <TabsList className="flex w-full min-w-fit justify-between px-1 py-1 rounded-none bg-transparent">
             <TabsTrigger 
               value="about" 
-              className="animate-fade-in transition-all px-4 py-2"
+              className="flex-1 animate-fade-in transition-all px-3 py-2 text-xs sm:text-sm rounded-md"
             >
               About
             </TabsTrigger>
             <TabsTrigger 
               value="products" 
-              className="animate-fade-in transition-all px-4 py-2"
+              className="flex-1 animate-fade-in transition-all px-3 py-2 text-xs sm:text-sm rounded-md"
             >
               Products
             </TabsTrigger>
             <TabsTrigger 
               value="services" 
-              className="animate-fade-in transition-all px-4 py-2"
+              className="flex-1 animate-fade-in transition-all px-3 py-2 text-xs sm:text-sm rounded-md"
             >
               Services
             </TabsTrigger>
             <TabsTrigger 
               value="portfolio" 
-              className="animate-fade-in transition-all px-4 py-2"
+              className="flex-1 animate-fade-in transition-all px-3 py-2 text-xs sm:text-sm rounded-md"
             >
               Notable Works
             </TabsTrigger>
             <TabsTrigger 
+              value="photos" 
+              className="flex-1 animate-fade-in transition-all px-3 py-2 text-xs sm:text-sm rounded-md"
+            >
+              Photos
+            </TabsTrigger>
+            <TabsTrigger 
               value="posts" 
-              className="animate-fade-in transition-all px-4 py-2"
+              className="flex-1 animate-fade-in transition-all px-3 py-2 text-xs sm:text-sm rounded-md"
             >
               Posts
             </TabsTrigger>
             {isOwner && (
               <TabsTrigger 
                 value="bookings" 
-                className="animate-fade-in transition-all px-4 py-2"
+                className="flex-1 animate-fade-in transition-all px-3 py-2 text-xs sm:text-sm rounded-md"
               >
                 Bookings
               </TabsTrigger>
@@ -93,6 +100,13 @@ export const BusinessTabs = ({ business, isOwner, onRefetch }: BusinessTabsProps
           <BusinessPortfolioTab 
             portfolio={business.business_portfolio} 
             businessId={isOwner ? business.id : undefined}
+          />
+        </TabsContent>
+
+        <TabsContent value="photos" className="animate-scale-in">
+          <BusinessPhotosTab
+            businessId={isOwner ? business.id : undefined}
+            businessName={business.name}
           />
         </TabsContent>
 
