@@ -23,11 +23,23 @@ export const BusinessCardActions = ({
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
 
-  return <div className="grid grid-cols-2 gap-2 pt-2">
-      {appointment_price && <Button onClick={onBookClick} className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90" variant="default" disabled={!is_open}>
+  return (
+    <div className="grid grid-cols-2 gap-2 mt-auto pt-3">
+      {appointment_price && (
+        <Button 
+          onClick={onBookClick} 
+          className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 transition-colors" 
+          variant="default" 
+          disabled={!is_open}
+        >
           Book Now
-        </Button>}
-      <Button onClick={onWhatsAppClick} className={`w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 ${!appointment_price ? 'col-span-2' : ''}`} variant="default">
+        </Button>
+      )}
+      <Button 
+        onClick={onWhatsAppClick} 
+        className={`w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 transition-colors ${!appointment_price ? 'col-span-2' : ''}`} 
+        variant="default"
+      >
         <MessageSquare className="h-4 w-4" />
         Message
       </Button>
@@ -38,7 +50,7 @@ export const BusinessCardActions = ({
           ${isDarkMode 
             ? "border-gray-700 hover:bg-gray-800 text-white" 
             : "border-gray-300 hover:bg-gray-100 text-gray-800"} 
-          font-light rounded-3xl`}
+          font-light`}
       >
         <Share2 className="h-4 w-4" />
         Share
@@ -46,7 +58,7 @@ export const BusinessCardActions = ({
       <Button 
         onClick={onCallClick} 
         variant="outline" 
-        className={`w-full col-span-2 flex items-center justify-center gap-2 
+        className={`w-full flex items-center justify-center gap-2 
           ${isDarkMode 
             ? "border-gray-700 hover:bg-gray-800 text-white" 
             : "border-gray-300 hover:bg-gray-100 text-gray-800"}`}
@@ -54,5 +66,6 @@ export const BusinessCardActions = ({
         <Phone className="h-4 w-4" />
         Call
       </Button>
-    </div>;
+    </div>
+  );
 };

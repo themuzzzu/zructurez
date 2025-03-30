@@ -3,7 +3,7 @@ import { BusinessCard } from "@/components/BusinessCard";
 import { BusinessCategoryFilter } from "@/components/BusinessCategoryFilter";
 import { SearchInput } from "@/components/SearchInput";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Plus, MapPin } from "lucide-react";
+import { ArrowLeft, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { CreateBusinessForm } from "@/components/CreateBusinessForm";
@@ -164,17 +164,11 @@ const Business = () => {
                     } = business;
                     
                     return (
-                      <div key={id} className="relative">
+                      <div key={id} className="h-full flex">
                         {business.average_rating >= 4.5 && (
                           <Badge variant="success" className="absolute top-2 right-2 z-10 px-2 py-1">
                             Top Rated
                           </Badge>
-                        )}
-                        {location && (
-                          <div className="absolute bottom-2 left-2 z-10 bg-black/70 text-white text-xs rounded px-2 py-1 flex items-center">
-                            <MapPin className="h-3 w-3 mr-1" />
-                            {location}
-                          </div>
                         )}
                         <BusinessCard 
                           id={id}
