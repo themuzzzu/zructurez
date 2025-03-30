@@ -24,7 +24,7 @@ export const ProductCardImage = ({
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-  const imageRef = useRef<HTMLImageElement>(null);
+  const imageRef = useRef<HTMLDivElement>(null);
   
   // Optimized image URL with quality and sizing parameters
   const optimizedImageUrl = imageUrl 

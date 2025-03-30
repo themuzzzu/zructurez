@@ -83,7 +83,7 @@ export const LocalBusinessSpotlight = () => {
   };
 
   return (
-    <div className="my-8 px-4 sm:px-0">
+    <div className="my-8 mobile-container">
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-2">
           <Store className="h-5 w-5 text-emerald-600" />
@@ -147,6 +147,7 @@ export const LocalBusinessSpotlight = () => {
                     src={business.image_url}
                     alt={business.name}
                     className="w-full h-full object-cover"
+                    loading="lazy"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-emerald-100 dark:bg-emerald-900">

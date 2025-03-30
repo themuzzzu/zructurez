@@ -48,11 +48,11 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
           </div>
         )}
         <main 
-          className={`flex-1 transition-all duration-300 w-full overflow-y-auto scrollbar-hide ${hideSidebar || isMobile ? 'px-0 sm:px-6 pb-20' : ''}`}
+          className={`flex-1 transition-all duration-300 w-full overflow-y-auto scrollbar-hide ${hideSidebar || isMobile ? 'mobile-container' : ''}`}
           style={{ 
             marginLeft: hideSidebar || isMobile ? 0 : sidebarWidth + 'px', 
             paddingBottom: isMobile ? '5rem' : '',
-            // Significantly reduce the horizontal padding when sidebar is open to match the second image
+            // Reduce padding on mobile
             paddingLeft: (!hideSidebar && !isMobile) ? '0.25rem' : '',
             maxHeight: 'calc(100vh - 64px)',
           }}

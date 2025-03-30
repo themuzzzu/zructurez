@@ -30,24 +30,26 @@ export const QuickAccessServices = () => {
   };
 
   return (
-    <section>
+    <section className="mobile-container my-4">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">Quick Access Services</h2>
       </div>
       
-      <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-3">
-        {services.map((service) => (
-          <div 
-            key={service.id}
-            onClick={() => handleServiceClick(service.id)}
-            className="flex flex-col items-center bg-white dark:bg-gray-800 rounded-lg p-3 cursor-pointer hover:shadow-md transition-shadow"
-          >
-            <div className={`${service.color} p-2 rounded-full mb-2`}>
-              {service.icon}
+      <div className="overflow-x-auto scrollbar-hide pb-2">
+        <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-8 gap-3 min-w-[600px]">
+          {services.map((service) => (
+            <div 
+              key={service.id}
+              onClick={() => handleServiceClick(service.id)}
+              className="flex flex-col items-center bg-white dark:bg-gray-800 rounded-lg p-3 cursor-pointer hover:shadow-md transition-shadow"
+            >
+              <div className={`${service.color} p-2 rounded-full mb-2`}>
+                {service.icon}
+              </div>
+              <span className="text-sm text-center">{service.name}</span>
             </div>
-            <span className="text-sm text-center">{service.name}</span>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </section>
   );

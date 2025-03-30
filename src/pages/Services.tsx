@@ -93,7 +93,7 @@ const Services = () => {
   };
 
   return (
-    <div className="container max-w-[1400px] pb-16">
+    <div className="container max-w-[1400px] pb-16 services-top-gap mobile-container">
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -102,7 +102,7 @@ const Services = () => {
                 <ArrowLeft className="h-5 w-5" />
               </Button>
             </Link>
-            <h1 className="text-3xl font-bold animate-fade-up">Local Services</h1>
+            <h1 className="text-3xl font-bold animate-fade-up">Services</h1>
           </div>
           <Button 
             onClick={() => setShowCreateForm(!showCreateForm)}
@@ -128,7 +128,9 @@ const Services = () => {
                 onChange={setSearchQuery}
                 className="max-w-xl"
               />
-              <ServiceCategoryFilter onCategoryChange={handleCategoryChange} />
+              <div className="overflow-x-auto scrollbar-hide">
+                <ServiceCategoryFilter onCategoryChange={handleCategoryChange} />
+              </div>
             </div>
 
             {isLoading ? (
