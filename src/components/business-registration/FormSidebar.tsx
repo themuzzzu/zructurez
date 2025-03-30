@@ -1,12 +1,13 @@
-
 import { Check, AlertCircle } from "lucide-react";
 import { useFormContext } from "react-hook-form";
 import { cn } from "@/lib/utils";
 import type { BusinessFormValues } from "./BusinessRegistrationForm";
+import { useState } from "react";
 
 interface FormSidebarProps {
   currentStep: number;
   setCurrentStep: (step: number) => void;
+  standaloneMode?: boolean;
 }
 
 interface StepItem {
@@ -16,8 +17,16 @@ interface StepItem {
   requiredFields: (keyof BusinessFormValues)[];
 }
 
-export const FormSidebar = ({ currentStep, setCurrentStep }: FormSidebarProps) => {
-  const { getValues, formState: { errors } } = useFormContext<BusinessFormValues>();
+export const FormSidebar = ({ currentStep, setCurrentStep, standaloneMode = false }: FormSidebarProps) => {
+  const [mockComplete, setMockComplete] = useState<{[key: number]: boolean}>({
+    1: true,
+    2: false,
+    3: false,
+    4: false,
+    5: false
+  });
+  
+  const formContext = standaloneMode ? null : useFormContext<BusinessFormValues>();
   
   const steps: StepItem[] = [
     {
@@ -53,18 +62,20 @@ export const FormSidebar = ({ currentStep, setCurrentStep }: FormSidebarProps) =
   ];
   
   const isStepComplete = (step: StepItem) => {
-    const values = getValues();
+    if (standaloneMode) {
+      return mockComplete[step.id] || false;
+    }
     
-    // Check for required fields
+    const values = formContext?.getValues();
+    if (!values) return false;
+    
     for (const field of step.requiredFields) {
-      // Special handling for arrays
       if (field === "owners") {
         const owners = values.owners || [];
         if (owners.length === 0 || !owners[0].name || !owners[0].role || !owners[0].position) {
           return false;
         }
       } 
-      // Standard field check
       else if (!values[field]) {
         return false;
       }
