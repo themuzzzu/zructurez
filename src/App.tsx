@@ -1,80 +1,91 @@
+import { useState } from "react";
+import { Routes, Route } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import { Toaster } from "@/components/ui/toaster";
+import { Loader2 } from "lucide-react";
 
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { ThemeProvider } from "./components/ThemeProvider";
-import { Toaster } from "@/components/ui/sonner";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { queryClient } from "@/lib/react-query";
-
-// Pages
 import Index from "@/pages/Index";
-import Marketplace from "@/pages/Marketplace";
 import Auth from "@/pages/Auth";
-import ProductDetails from "@/pages/ProductDetails";
-import ServiceDetails from "@/pages/ServiceDetails";
-import Services from "@/pages/Services";
-import Profile from "@/pages/Profile";
-import Wishlist from "@/pages/Wishlist";
-import Settings from "@/pages/Settings";
-import BusinessDetails from "@/pages/BusinessDetails";
-import Business from "@/pages/Business";
 import Events from "@/pages/Events";
-import Communities from "@/pages/Communities";
-import Messages from "@/pages/messages";
-import OrdersPage from "@/pages/orders";
-import CheckoutPage from "@/pages/checkout";
-import SearchPage from "@/pages/search";
 import Jobs from "@/pages/Jobs";
+import Marketplace from "@/pages/Marketplace";
+import Business from "@/pages/Business";
+import BusinessDetails from "@/pages/BusinessDetails";
+import ProductDetails from "@/pages/ProductDetails";
+import Services from "@/pages/Services";
+import ServiceDetails from "@/pages/ServiceDetails";
+import Profile from "@/pages/Profile";
+import Settings from "@/pages/Settings";
+import Wishlist from "@/pages/Wishlist";
 import Maps from "@/pages/Maps";
-import GenericPage from "@/pages/GenericPage";
-import BusinessDashboard from "@/pages/BusinessDashboard";
-import NotFoundPage from "@/pages/NotFound";
+import Communities from "@/pages/Communities";
+import Messages from "@/pages/Messages";
+import Search from "@/pages/Search";
+import Orders from "@/pages/Orders";
+import Checkout from "@/pages/Checkout";
+import NotFound from "@/pages/NotFound";
+import AdDashboard from "@/pages/admin/AdDashboard";
+import AdAnalytics from "@/pages/admin/AdAnalytics";
+import AdPlacement from "@/pages/admin/AdPlacement";
+import AdAuction from "@/pages/admin/AdAuction";
+import BusinessDashboard from "@/pages/dashboard/BusinessDashboard";
+import { BusinessRegistrationForm } from "@/components/business-registration/BusinessRegistrationForm";
 
-export default function App() {
+function App() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [firstLogin, setFirstLogin] = useState(false);
+  const queryClient = new QueryClient();
+
+  setTimeout(() => {
+    setIsLoading(false);
+  }, 1500);
+
   return (
-    <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <Toaster />
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider defaultTheme="dark" storageKey="lovable-theme">
+        <div className={isLoading ? "hidden" : "app"}>
           <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/marketplace" element={<Marketplace />} />
+            <Route path="/" element={<Index isFirstLogin={firstLogin} />} />
             <Route path="/auth" element={<Auth />} />
-            <Route path="/products/:id" element={<ProductDetails />} />
-            <Route path="/services/:id" element={<ServiceDetails />} />
-            <Route path="/services" element={<Services />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/wishlist" element={<Wishlist />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/businesses/:id" element={<BusinessDetails />} />
-            <Route path="/businesses" element={<Business />} />
             <Route path="/events" element={<Events />} />
-            <Route path="/communities" element={<Communities />} />
-            <Route path="/messages" element={<Messages />} />
-            <Route path="/orders" element={<OrdersPage />} />
-            <Route path="/checkout" element={<CheckoutPage />} />
-            <Route path="/search" element={<SearchPage />} />
             <Route path="/jobs" element={<Jobs />} />
+            <Route path="/marketplace" element={<Marketplace />} />
+            <Route path="/marketplace/*" element={<Marketplace />} />
+            <Route path="/businesses" element={<Business />} />
+            <Route path="/businesses/:id" element={<BusinessDetails />} />
+            <Route path="/register-business" element={<BusinessRegistrationForm />} />
+            <Route path="/products/:id" element={<ProductDetails />} />
+            <Route path="/services" element={<Services />} />
+            <Route path="/services/:id" element={<ServiceDetails />} />
+            <Route path="/profile/:id" element={<Profile />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/maps" element={<Maps />} />
-            <Route path="/generic-page" element={<GenericPage title="Page Under Construction" />} />
-            <Route path="/business-dashboard" element={<BusinessDashboard />} />
-            <Route path="/admin/*" element={<AdminRoutes />} />
-            <Route path="*" element={<NotFoundPage />} />
+            <Route path="/communities" element={<Communities />} />
+            <Route path="/messages/*" element={<Messages />} />
+            <Route path="/messages" element={<Messages />} />
+            <Route path="/search" element={<Search />} />
+            <Route path="/orders" element={<Orders />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/admin/ads" element={<AdDashboard />} />
+            <Route path="/admin/analytics" element={<AdAnalytics />} />
+            <Route path="/admin/placement" element={<AdPlacement />} />
+            <Route path="/admin/auction" element={<AdAuction />} />
+            <Route path="/dashboard" element={<BusinessDashboard />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
-        </BrowserRouter>
-      </QueryClientProvider>
-    </ThemeProvider>
+        </div>
+        {isLoading && (
+          <div className="flex flex-col space-y-4 items-center justify-center min-h-screen">
+            <Loader2 className="h-10 w-10 animate-spin text-primary" />
+            <p className="animate-pulse">Loading application...</p>
+          </div>
+        )}
+        <Toaster />
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }
 
-const AdminRoutes = () => {
-  return (
-    <Routes>
-      <Route path="/" element={<div>Admin Dashboard</div>} />
-      <Route path="/users" element={<div>User Management</div>} />
-      <Route path="/products" element={<div>Product Management</div>} />
-      <Route path="/orders" element={<div>Order Management</div>} />
-      <Route path="/analytics" element={<div>Analytics Dashboard</div>} />
-      <Route path="/settings" element={<div>Admin Settings</div>} />
-    </Routes>
-  );
-};
+export default App;

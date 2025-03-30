@@ -1,0 +1,344 @@
+
+import { useState, useEffect } from "react";
+import { useForm, FormProvider } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Navbar } from "@/components/Navbar";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { ArrowLeft, ArrowRight, Save } from "lucide-react";
+import { BasicInfoStep } from "./steps/BasicInfoStep";
+import { OwnersStaffStep } from "./steps/OwnersStaffStep";
+import { LocationContactStep } from "./steps/LocationContactStep";
+import { BusinessHoursStep } from "./steps/BusinessHoursStep";
+import { FinalSubmitStep } from "./steps/FinalSubmitStep";
+import { FormSidebar } from "./FormSidebar";
+import { useToast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { businessFormSchema } from "./schema";
+import { getLocalStorageFormData, saveFormDataToLocalStorage } from "./utils";
+
+export type BusinessFormValues = z.infer<typeof businessFormSchema>;
+
+export const BusinessRegistrationForm = () => {
+  const [currentStep, setCurrentStep] = useState(1);
+  const [saving, setSaving] = useState(false);
+  const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(null);
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  
+  const methods = useForm<BusinessFormValues>({
+    resolver: zodResolver(businessFormSchema),
+    mode: "onChange",
+    defaultValues: async () => {
+      // Load from localStorage if available
+      const savedData = getLocalStorageFormData();
+      if (savedData) {
+        // Also restore the step
+        const savedStep = localStorage.getItem("business-registration-step");
+        if (savedStep) {
+          setCurrentStep(parseInt(savedStep));
+        }
+        return savedData;
+      }
+      
+      return {
+        name: "",
+        category: "",
+        description: "",
+        appointment_price: "",
+        consultation_price: "",
+        website: "",
+        social_media: {
+          facebook: "",
+          instagram: "",
+          twitter: ""
+        },
+        owners: [{
+          name: "",
+          role: "Founder",
+          position: "",
+          experience: "",
+          qualifications: "",
+          bio: "",
+          image_url: null
+        }],
+        staff_details: [],
+        location: "",
+        contact: "",
+        whatsapp: "",
+        email: "",
+        is_24_7: false,
+        hours: "Mon-Fri: 9:00 AM - 6:00 PM, Sat: 10:00 AM - 4:00 PM, Sun: Closed",
+        image: null,
+        agree_terms: false,
+        membership_plans: []
+      };
+    }
+  });
+  
+  const { handleSubmit, watch, formState: { errors, isDirty, isValid }, reset } = methods;
+  const formValues = watch();
+  
+  // Setup auto-save
+  useEffect(() => {
+    if (isDirty) {
+      if (autoSaveTimer) clearTimeout(autoSaveTimer);
+      
+      const timer = setTimeout(() => {
+        saveFormDataToLocalStorage(formValues);
+        localStorage.setItem("business-registration-step", currentStep.toString());
+        toast({
+          title: "Progress auto-saved",
+          description: "Your form data has been automatically saved",
+          duration: 2000,
+        });
+      }, 30000); // Auto-save every 30 seconds
+      
+      setAutoSaveTimer(timer);
+    }
+    
+    return () => {
+      if (autoSaveTimer) clearTimeout(autoSaveTimer);
+    };
+  }, [formValues, isDirty, currentStep]);
+  
+  // Save current step to localStorage
+  useEffect(() => {
+    localStorage.setItem("business-registration-step", currentStep.toString());
+  }, [currentStep]);
+  
+  const saveAndContinueLater = () => {
+    setSaving(true);
+    saveFormDataToLocalStorage(formValues);
+    localStorage.setItem("business-registration-step", currentStep.toString());
+    
+    toast({
+      title: "Progress saved",
+      description: "You can continue registration later",
+      duration: 3000,
+    });
+    
+    setTimeout(() => {
+      setSaving(false);
+      navigate("/businesses");
+    }, 1000);
+  };
+  
+  const handleNext = async () => {
+    let canProceed = true;
+    
+    if (currentStep === 1) {
+      const { name, category, description, appointment_price, consultation_price } = methods.getValues();
+      canProceed = !!name && !!category && !!description && !!appointment_price && !!consultation_price;
+    } else if (currentStep === 2) {
+      const owners = methods.getValues("owners");
+      canProceed = owners.length > 0 && !!owners[0].name && !!owners[0].role && !!owners[0].position;
+    } else if (currentStep === 3) {
+      const { location, contact } = methods.getValues();
+      canProceed = !!location && !!contact;
+    } else if (currentStep === 4) {
+      const { hours } = methods.getValues();
+      canProceed = !!hours;
+    }
+    
+    if (canProceed) {
+      if (currentStep < 5) {
+        setCurrentStep(prev => prev + 1);
+        window.scrollTo(0, 0);
+      }
+    } else {
+      toast({
+        title: "Please fill all required fields",
+        description: "You need to complete all required fields before proceeding",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  const handlePrevious = () => {
+    if (currentStep > 1) {
+      setCurrentStep(prev => prev - 1);
+      window.scrollTo(0, 0);
+    }
+  };
+  
+  const onSubmit = async (data: BusinessFormValues) => {
+    try {
+      // Store image first if it exists
+      let image_url = data.image;
+      
+      // Handle owner images
+      const processedOwners = await Promise.all(
+        data.owners.map(async (owner) => {
+          return {
+            ...owner,
+            image_url: owner.image_url
+          };
+        })
+      );
+      
+      // Handle staff images
+      const processedStaff = await Promise.all(
+        (data.staff_details || []).map(async (staff) => {
+          return {
+            ...staff,
+            image_url: staff.image_url
+          };
+        })
+      );
+      
+      // Get current user
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData?.user) {
+        toast({
+          title: "Error",
+          description: "You must be logged in to register a business",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Insert business into database
+      const { data: business, error } = await supabase
+        .from('businesses')
+        .insert({
+          name: data.name,
+          category: data.category,
+          description: data.description,
+          appointment_price: data.appointment_price ? parseFloat(data.appointment_price) : null,
+          consultation_price: data.consultation_price ? parseFloat(data.consultation_price) : null,
+          website: data.website || null,
+          location: data.location,
+          contact: data.contact,
+          hours: data.hours,
+          image_url: image_url,
+          user_id: userData.user.id,
+          owners: processedOwners,
+          staff_details: processedStaff,
+          is_open: true,
+          bio: data.owners[0].bio || "",
+          membership_plans: data.membership_plans.length > 0 ? data.membership_plans : undefined
+        })
+        .select()
+        .single();
+      
+      if (error) {
+        console.error("Error submitting form:", error);
+        toast({
+          title: "Registration failed",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      toast({
+        title: "Business registered successfully!",
+        description: "Your business has been registered and is now live.",
+      });
+      
+      // Clear localStorage
+      localStorage.removeItem("business-registration-form");
+      localStorage.removeItem("business-registration-step");
+      
+      // Redirect to business page
+      if (business) {
+        setTimeout(() => {
+          navigate(`/businesses/${business.id}`);
+        }, 2000);
+      } else {
+        navigate("/businesses");
+      }
+      
+    } catch (error) {
+      console.error("Error in form submission:", error);
+      toast({
+        title: "Registration failed",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  const progressPercentage = (currentStep / 5) * 100;
+  
+  return (
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      <div className="container max-w-7xl mx-auto pt-20 pb-16">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Sidebar */}
+          <div className="w-full lg:w-1/4">
+            <FormSidebar currentStep={currentStep} setCurrentStep={setCurrentStep} />
+          </div>
+          
+          {/* Main Form */}
+          <div className="w-full lg:w-3/4">
+            <div className="bg-card rounded-lg shadow-md p-6">
+              <div className="mb-6">
+                <h1 className="text-2xl font-bold mb-2">Register Your Business</h1>
+                <Progress value={progressPercentage} className="h-2" />
+                <div className="flex justify-between mt-2 text-sm text-muted-foreground">
+                  <span>Step {currentStep} of 5</span>
+                  <span>{Math.round(progressPercentage)}% Complete</span>
+                </div>
+              </div>
+              
+              <FormProvider {...methods}>
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                  {currentStep === 1 && <BasicInfoStep />}
+                  {currentStep === 2 && <OwnersStaffStep />}
+                  {currentStep === 3 && <LocationContactStep />}
+                  {currentStep === 4 && <BusinessHoursStep />}
+                  {currentStep === 5 && <FinalSubmitStep />}
+                  
+                  <div className="flex justify-between pt-6 border-t">
+                    <div>
+                      {currentStep > 1 && (
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          onClick={handlePrevious}
+                        >
+                          <ArrowLeft className="h-4 w-4 mr-2" /> Previous
+                        </Button>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={saveAndContinueLater}
+                        disabled={saving}
+                      >
+                        <Save className="h-4 w-4 mr-2" /> Save & Continue Later
+                      </Button>
+                      
+                      {currentStep < 5 ? (
+                        <Button 
+                          type="button" 
+                          onClick={handleNext}
+                        >
+                          Next <ArrowRight className="h-4 w-4 ml-2" />
+                        </Button>
+                      ) : (
+                        <Button 
+                          type="submit"
+                          disabled={!isValid || !methods.getValues("agree_terms")}
+                        >
+                          Submit Registration
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </form>
+              </FormProvider>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

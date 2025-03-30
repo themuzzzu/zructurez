@@ -1,3 +1,4 @@
+
 import { Navbar } from "@/components/Navbar";
 import { BusinessCard } from "@/components/BusinessCard";
 import { BusinessCategoryFilter } from "@/components/BusinessCategoryFilter";
@@ -97,13 +98,22 @@ const Business = () => {
               </Link>
               <h1 className="text-3xl font-bold animate-fade-up">Local Businesses</h1>
             </div>
-            <Button 
-              onClick={() => setShowCreateForm(!showCreateForm)}
-              className="gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              {showCreateForm ? "Cancel" : "Register Business"}
-            </Button>
+            <div className="flex gap-3">
+              <Link to="/register-business">
+                <Button className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  Register Business
+                </Button>
+              </Link>
+              {showCreateForm && (
+                <Button 
+                  onClick={() => setShowCreateForm(false)}
+                  variant="outline"
+                >
+                  Cancel
+                </Button>
+              )}
+            </div>
           </div>
 
           {showCreateForm ? (

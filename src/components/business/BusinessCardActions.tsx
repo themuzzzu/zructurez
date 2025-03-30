@@ -24,7 +24,7 @@ export const BusinessCardActions = ({
   const isDarkMode = theme === "dark";
 
   return (
-    <div className="grid grid-cols-2 gap-2 mt-auto pt-3">
+    <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-gray-800">
       {appointment_price && (
         <Button 
           onClick={onBookClick} 
