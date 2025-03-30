@@ -52,8 +52,9 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
           style={{ 
             marginLeft: hideSidebar || isMobile ? 0 : sidebarWidth + 'px', 
             paddingBottom: isMobile ? '5rem' : '',
-            // Reduce padding on mobile
-            paddingLeft: (!hideSidebar && !isMobile) ? '0.25rem' : '',
+            // Add small padding on mobile
+            paddingLeft: isMobile ? '12px' : (!hideSidebar && !isMobile) ? '0.25rem' : '',
+            paddingRight: isMobile ? '12px' : '',
             maxHeight: 'calc(100vh - 64px)',
           }}
         >

@@ -4,6 +4,7 @@ import { Heart } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { useWishlist } from "@/hooks/useWishlist";
+import { trackEntityView } from "@/utils/viewsTracking";
 
 interface ProductCardImageProps {
   imageUrl: string | null;
@@ -57,9 +58,28 @@ export const ProductCardImage = ({
     };
   }, []);
 
+  // Track product view when the product becomes visible
+  useEffect(() => {
+    if (isVisible && productId) {
+      // Track the view after a small delay to ensure the user actually sees the product
+      const timer = setTimeout(() => {
+        trackEntityView('product', productId);
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isVisible, productId]);
+
   const handleWishlistClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     toggleWishlist(productId);
+    
+    // Show toast message
+    if (isInWishlist(productId)) {
+      toast.success("Removed from wishlist");
+    } else {
+      toast.success("Added to wishlist");
+    }
   };
 
   return (

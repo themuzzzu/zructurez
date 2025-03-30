@@ -30,9 +30,9 @@ export const QuickAccessServices = () => {
   };
 
   return (
-    <section className="mobile-container my-4">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold">Quick Access Services</h2>
+    <section className="services-top-gap px-3 my-4">
+      <div className="flex justify-between items-center mb-4 px-1">
+        <h2 className="text-2xl font-bold">Services</h2>
       </div>
       
       <div className="overflow-x-auto scrollbar-hide pb-2">

@@ -6,10 +6,11 @@ import { SearchInput } from "@/components/SearchInput";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Plus, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { trackEntityView } from "@/utils/viewsTracking";
 
 const Services = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -24,7 +25,8 @@ const Services = () => {
       // First, get all services
       const { data: servicesData, error: servicesError } = await supabase
         .from('services')
-        .select('*');
+        .select('*, views')
+        .order('created_at', { ascending: false });
 
       console.log('Services data:', servicesData);
       console.log('Services error:', servicesError);
@@ -93,8 +95,8 @@ const Services = () => {
   };
 
   return (
-    <div className="container max-w-[1400px] pb-16 services-top-gap mobile-container">
-      <div className="space-y-6">
+    <div className="container max-w-[1400px] pb-16 services-top-gap">
+      <div className="space-y-6 px-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link to="/">
@@ -160,6 +162,8 @@ const Services = () => {
                     availability={service.availability || "Contact for availability"}
                     isOwner={service.isOwner}
                     onDelete={handleServiceDelete}
+                    onView={() => trackEntityView('service', service.id)}
+                    views={service.views || 0}
                   />
                 ))}
               </div>

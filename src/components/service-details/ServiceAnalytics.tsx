@@ -1,9 +1,9 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getServiceAnalytics } from "@/services/serviceService";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ServiceAnalyticsProps {
   serviceId: string;
@@ -17,8 +17,40 @@ export const ServiceAnalytics = ({ serviceId, isOwner }: ServiceAnalyticsProps) 
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
-        const data = await getServiceAnalytics(serviceId);
-        setAnalytics(data);
+        // Fetch service view data
+        const { data: serviceData, error: serviceError } = await supabase
+          .from('services')
+          .select('views')
+          .eq('id', serviceId)
+          .single();
+          
+        if (serviceError) throw serviceError;
+        
+        // Count contact clicks and bookings
+        const { data: contactClicksData, error: contactClicksError } = await supabase
+          .from('search_result_clicks')
+          .select('count(*)', { count: 'exact' })
+          .eq('result_id', serviceId);
+          
+        if (contactClicksError) throw contactClicksError;
+        
+        const { count: contactClicks } = contactClicksData;
+        
+        const { data: bookingsData, error: bookingsError } = await supabase
+          .from('appointments')
+          .select('count(*)', { count: 'exact' })
+          .eq('service_name', serviceId);
+          
+        if (bookingsError) throw bookingsError;
+        
+        const { count: bookings } = bookingsData;
+        
+        setAnalytics({
+          views: serviceData.views || 0,
+          contact_clicks: contactClicks || 0,
+          bookings: bookings || 0,
+          last_updated: new Date().toISOString()
+        });
       } catch (error) {
         console.error("Failed to fetch analytics:", error);
       } finally {

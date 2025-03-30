@@ -38,6 +38,8 @@ import { AdPerformanceTable } from "@/components/dashboard/AdPerformanceTable";
 import { RealtimeOrdersTable } from "@/components/dashboard/RealtimeOrdersTable";
 import { PerformanceMetricsCards } from "@/components/dashboard/PerformanceMetricsCards";
 import { UpgradeAIFeaturesCard } from "@/components/dashboard/UpgradeAIFeaturesCard";
+import { useBusinessAnalytics } from "@/components/performance/hooks/useBusinessAnalytics";
+import { BusinessAnalyticsCharts } from "@/components/performance/components/BusinessAnalyticsCharts";
 
 const BusinessDashboard = () => {
   const { user } = useAuth();
@@ -117,13 +119,17 @@ const BusinessDashboard = () => {
     enabled: !!businessData?.id && !!user?.id
   });
   
+  // Fetch business analytics data
+  const { data: businessAnalytics, isLoading: analyticsLoading, refetch: refetchAnalytics } = useBusinessAnalytics(user?.id);
+  
   const refreshData = async () => {
     setIsRefreshing(true);
     await Promise.all([
       refetchBusiness(),
       refetchSales(),
       refetchAds(),
-      refetchInventory()
+      refetchInventory(),
+      refetchAnalytics()
     ]);
     setIsRefreshing(false);
     toast.success("Dashboard data refreshed");
@@ -141,7 +147,7 @@ const BusinessDashboard = () => {
   const averageCTR = totalImpressions > 0 ? (totalClicks / totalImpressions * 100).toFixed(2) : "0";
   
   return (
-    <div className="container py-6 max-w-7xl mx-auto">
+    <div className="container py-6 max-w-7xl mx-auto px-3">
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
         <div>
           <h1 className="text-3xl font-bold">Business Dashboard</h1>
@@ -172,6 +178,33 @@ const BusinessDashboard = () => {
         </Card>
       ) : (
         <>
+          {/* Business Analytics Section */}
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>Business Analytics</CardTitle>
+              <CardDescription>
+                Track views, engagement and performance
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {analyticsLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <RefreshCw className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              ) : !businessAnalytics ? (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground">No analytics data available</p>
+                </div>
+              ) : (
+                <BusinessAnalyticsCharts 
+                  data={businessAnalytics} 
+                  onRefresh={refetchAnalytics}
+                  isLoading={analyticsLoading}
+                />
+              )}
+            </CardContent>
+          </Card>
+          
           <PerformanceMetricsCards 
             totalSales={totalSales}
             totalOrders={totalOrders}
@@ -217,20 +250,20 @@ const BusinessDashboard = () => {
           </div>
           
           <Tabs defaultValue="sales" className="space-y-6">
-            <TabsList>
-              <TabsTrigger value="sales">
+            <TabsList className="overflow-x-auto whitespace-nowrap w-full border-b scrollbar-hide">
+              <TabsTrigger value="sales" className="inline-flex">
                 <ShoppingCart className="h-4 w-4 mr-2" />
                 Sales
               </TabsTrigger>
-              <TabsTrigger value="inventory">
+              <TabsTrigger value="inventory" className="inline-flex">
                 <BarChart3 className="h-4 w-4 mr-2" />
                 Inventory
               </TabsTrigger>
-              <TabsTrigger value="ads">
+              <TabsTrigger value="ads" className="inline-flex">
                 <Target className="h-4 w-4 mr-2" />
                 Ads
               </TabsTrigger>
-              <TabsTrigger value="pricing">
+              <TabsTrigger value="pricing" className="inline-flex">
                 <DollarSign className="h-4 w-4 mr-2" />
                 AI Pricing
               </TabsTrigger>
