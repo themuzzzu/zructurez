@@ -13,7 +13,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { LoadingView } from "@/components/LoadingView";
 import { ErrorView } from "@/components/ErrorView";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
+import { BusinessCategoryGrid } from "@/components/home/BusinessCategoryGrid";
+import { QuickAccessServices } from "@/components/home/QuickAccessServices";
+import { TrendingServices } from "@/components/home/TrendingServices";
+import { PopularCategories } from "@/components/home/PopularCategories";
+import { FeaturedBusinesses } from "@/components/home/FeaturedBusinesses";
+import { DealsSection } from "@/components/home/DealsSection";
 
 const Business = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -123,14 +128,34 @@ const Business = () => {
             />
           ) : (
             <>
-              <div className="flex flex-col gap-6">
-                <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-                  <SearchInput
-                    placeholder="Search businesses by name, description, category, or location..."
-                    value={searchQuery}
-                    onChange={setSearchQuery}
-                    className="w-full md:max-w-xl"
-                  />
+              <SearchInput
+                placeholder="Search businesses by name, description, category, or location..."
+                value={searchQuery}
+                onChange={setSearchQuery}
+                className="w-full mb-6"
+              />
+              
+              {/* Business Categories Grid */}
+              <BusinessCategoryGrid />
+              
+              {/* Quick Access Services */}
+              <QuickAccessServices />
+              
+              {/* Trending Services */}
+              <TrendingServices />
+              
+              {/* Popular Categories with Horizontal Scroll */}
+              <PopularCategories />
+              
+              {/* Featured Businesses */}
+              <FeaturedBusinesses />
+              
+              {/* Deals & Offers Section */}
+              <DealsSection />
+
+              <div className="mt-8">
+                <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between mb-6">
+                  <BusinessCategoryFilter onCategoryChange={handleCategoryChange} />
                   <div className="w-full md:w-64">
                     <Select value={sortBy} onValueChange={setSortBy}>
                       <SelectTrigger>
@@ -146,58 +171,57 @@ const Business = () => {
                     </Select>
                   </div>
                 </div>
-                <BusinessCategoryFilter onCategoryChange={handleCategoryChange} />
-              </div>
 
-              {sortedBusinesses.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-muted-foreground">No businesses found. Be the first to register your business!</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {sortedBusinesses.map((business) => {
-                    const {
-                      id,
-                      name,
-                      category,
-                      description,
-                      image_url,
-                      location,
-                      contact,
-                      hours,
-                      verified,
-                      appointment_price,
-                      consultation_price,
-                      is_open,
-                      wait_time,
-                      closure_reason
-                    } = business;
-                    
-                    return (
-                      <div key={id} className="h-full">
-                        <BusinessCard 
-                          id={id}
-                          name={name}
-                          category={category}
-                          description={description}
-                          image={image_url || '/placeholder.svg'}
-                          rating={business.average_rating || 0}
-                          reviews={business.business_ratings?.length || 0}
-                          location={location || ''}
-                          contact={contact || ''}
-                          hours={hours || ''}
-                          verified={verified || false}
-                          appointment_price={appointment_price}
-                          consultation_price={consultation_price}
-                          is_open={is_open}
-                          wait_time={wait_time}
-                          closure_reason={closure_reason}
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+                {sortedBusinesses.length === 0 ? (
+                  <div className="text-center py-12">
+                    <p className="text-muted-foreground">No businesses found. Be the first to register your business!</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {sortedBusinesses.map((business) => {
+                      const {
+                        id,
+                        name,
+                        category,
+                        description,
+                        image_url,
+                        location,
+                        contact,
+                        hours,
+                        verified,
+                        appointment_price,
+                        consultation_price,
+                        is_open,
+                        wait_time,
+                        closure_reason
+                      } = business;
+                      
+                      return (
+                        <div key={id} className="h-full">
+                          <BusinessCard 
+                            id={id}
+                            name={name}
+                            category={category}
+                            description={description}
+                            image={image_url || '/placeholder.svg'}
+                            rating={business.average_rating || 0}
+                            reviews={business.business_ratings?.length || 0}
+                            location={location || ''}
+                            contact={contact || ''}
+                            hours={hours || ''}
+                            verified={verified || false}
+                            appointment_price={appointment_price}
+                            consultation_price={consultation_price}
+                            is_open={is_open}
+                            wait_time={wait_time}
+                            closure_reason={closure_reason}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             </>
           )}
         </div>
