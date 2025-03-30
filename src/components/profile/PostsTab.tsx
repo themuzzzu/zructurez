@@ -65,20 +65,16 @@ export const PostsTab = ({ profileId }: PostsTabProps) => {
       {posts.map((post) => (
         <EnhancedPostCard
           key={post.id}
-          post={{
-            id: post.id,
-            content: post.content,
-            timestamp: new Date(post.created_at).toISOString(),
-            author: {
-              name: "User",
-              avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix",
-            },
-            image: post.image_url,
-            likes: 0,
-            liked: false,
-            comments: 0,
-            shares: 0,
-          }}
+          id={post.id}
+          author="User"
+          avatar="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"
+          time={new Date(post.created_at).toISOString()}
+          content={post.content}
+          image={post.image_url}
+          likes={0}
+          comments={0}
+          views={0}
+          isLiked={false}
         />
       ))}
     </div>
