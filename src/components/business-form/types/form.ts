@@ -1,3 +1,4 @@
+
 import type { MembershipPlan } from "@/types/membership";
 import type { BusinessOwner, StaffMember } from "@/types/business";
 
@@ -11,6 +12,7 @@ interface BusinessProduct {
 export interface BusinessFormData {
   name: string;
   category: string;
+  otherCategory?: string;
   description: string;
   location: string;
   contact: string;

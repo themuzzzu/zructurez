@@ -1,3 +1,4 @@
+
 export interface Owner {
   name: string;
   role: string;
@@ -23,6 +24,7 @@ export interface BusinessProduct {
 export interface BusinessFormData {
   name: string;
   category: string;
+  otherCategory?: string;
   description: string;
   location: string;
   contact: string;
