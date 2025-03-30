@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { Heart } from "lucide-react";
 
 interface UserMenuProps {
   profile: {
@@ -34,6 +35,8 @@ export const UserMenu = ({ profile }: UserMenuProps) => {
       navigate("/profile");
     } else if (action === "Settings") {
       navigate("/settings");
+    } else if (action === "Wishlist") {
+      navigate("/wishlist");
     } else {
       toast.info(`${action} clicked - Feature coming soon!`);
     }
@@ -56,6 +59,10 @@ export const UserMenu = ({ profile }: UserMenuProps) => {
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => handleProfileAction("Profile")}>
           Profile
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleProfileAction("Wishlist")}>
+          <Heart className="h-4 w-4 mr-2" />
+          Wishlist
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => handleProfileAction("Settings")}>
           Settings

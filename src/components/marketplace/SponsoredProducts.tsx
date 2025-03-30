@@ -1,83 +1,107 @@
 
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Card } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { ProductCard } from "@/components/products/ProductCard";
-import { Badge } from "@/components/ui/badge";
-import { Megaphone } from "lucide-react";
-import { GridLayoutType } from "@/components/products/types/ProductTypes";
+import { Loader2 } from "lucide-react";
+import { GridLayoutType, ProductType } from "@/components/products/types/ProductTypes";
 
 interface SponsoredProductsProps {
   gridLayout?: GridLayoutType;
 }
 
 export const SponsoredProducts = ({ gridLayout = "grid4x4" }: SponsoredProductsProps) => {
-  const { data: products, isLoading } = useQuery({
-    queryKey: ['sponsored-products'],
-    queryFn: async () => {
-      // In a real application, you would fetch sponsored products
-      // This is a placeholder implementation
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .eq('is_featured', true)
-        .limit(4);
-      
-      if (error) throw error;
-      return data;
+  const [products, setProducts] = useState<ProductType[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Increment view counter for sponsored products
+  const { mutate: incrementAdView } = useMutation({
+    mutationFn: async (adId: string) => {
+      try {
+        // Call Supabase function to increment ad views
+        const { error } = await supabase.rpc('increment_ad_views', { ad_id: adId });
+        if (error) throw error;
+      } catch (error) {
+        console.error('Error incrementing ad view:', error);
+      }
     }
   });
-  
-  // Generate responsive grid classes based on layout
-  const getGridClasses = () => {
-    switch (gridLayout) {
-      case "grid4x4":
-        return "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4";
-      case "grid2x2":
-        return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-3 sm:gap-4";
-      case "grid1x1":
-        return "flex flex-col gap-3";
-      default:
-        return "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4";
-    }
-  };
-  
-  if (isLoading) {
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch sponsored products based on ads that reference products
+        const { data: ads, error: adsError } = await supabase
+          .from('advertisements')
+          .select('*')
+          .eq('type', 'product')
+          .eq('status', 'active')
+          .order('reach', { ascending: false })
+          .limit(4);
+          
+        if (adsError) throw adsError;
+        
+        if (ads && ads.length > 0) {
+          // Extract product IDs from ads
+          const productIds = ads.map(ad => ad.reference_id);
+          
+          // Fetch actual products
+          const { data: productData, error: productsError } = await supabase
+            .from('products')
+            .select('*')
+            .in('id', productIds);
+            
+          if (productsError) throw productsError;
+          
+          // Record view impressions for each ad
+          ads.forEach(ad => {
+            incrementAdView(ad.id);
+          });
+          
+          setProducts(productData || []);
+        }
+      } catch (error) {
+        console.error('Error loading sponsored products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchProducts();
+  }, [incrementAdView]);
+
+  if (loading) {
     return (
-      <div className={getGridClasses()}>
-        {[...Array(4)].map((_, i) => (
-          <Card key={i} className="overflow-hidden">
-            <Skeleton className={gridLayout === "grid1x1" ? "h-24 w-full" : "h-48 w-full"} />
-            <div className="p-3">
-              <Skeleton className="h-4 w-3/4 mb-2" />
-              <Skeleton className="h-4 w-1/2" />
-            </div>
-          </Card>
-        ))}
+      <div className="py-8">
+        <div className="flex justify-center items-center h-32">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
       </div>
     );
   }
-  
-  if (!products || products.length === 0) {
+
+  if (products.length === 0) {
     return null;
   }
-  
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 mb-2">
-        <Megaphone className="h-5 w-5 text-purple-500" />
-        <h3 className="text-lg font-semibold">Sponsored</h3>
-        <Badge variant="outline" className="ml-2 text-xs">Ad</Badge>
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">Sponsored Products</h2>
       </div>
       
-      <div className={getGridClasses()}>
+      <div className={`grid gap-4 ${
+        gridLayout === "grid4x4" ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4" :
+        gridLayout === "grid2x2" ? "grid-cols-1 sm:grid-cols-2" :
+        "grid-cols-1"
+      }`}>
         {products.map((product) => (
           <ProductCard 
             key={product.id} 
-            product={product} 
-            layout={gridLayout}
-            sponsored={true}
+            product={product}
+            isSponsored
           />
         ))}
       </div>
