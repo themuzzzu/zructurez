@@ -6,7 +6,7 @@ import { SearchInput } from "@/components/SearchInput";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Plus, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -22,52 +22,58 @@ const Services = () => {
     queryFn: async () => {
       console.log('Fetching services...');
       
-      // First, get all services
-      const { data: servicesData, error: servicesError } = await supabase
-        .from('services')
-        .select('*, views')
-        .order('created_at', { ascending: false });
+      try {
+        // First, get all services
+        const { data: servicesData, error: servicesError } = await supabase
+          .from('services')
+          .select('*, views')
+          .order('created_at', { ascending: false });
 
-      console.log('Services data:', servicesData);
-      console.log('Services error:', servicesError);
+        console.log('Services data:', servicesData);
+        console.log('Services error:', servicesError);
 
-      if (servicesError) {
-        toast.error("Failed to load services");
-        throw servicesError;
-      }
+        if (servicesError) {
+          toast.error("Failed to load services");
+          throw servicesError;
+        }
 
-      if (!servicesData || servicesData.length === 0) {
-        console.log('No services found');
+        if (!servicesData || servicesData.length === 0) {
+          console.log('No services found');
+          return [];
+        }
+
+        // Then, get the profiles for these services
+        const userIds = servicesData.map(service => service.user_id);
+        const { data: profilesData, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, username, avatar_url')
+          .in('id', userIds);
+
+        console.log('Profiles data:', profilesData);
+        console.log('Profiles error:', profilesError);
+
+        if (profilesError) {
+          toast.error("Failed to load profiles");
+          throw profilesError;
+        }
+
+        // Get current user
+        const { data: { user } } = await supabase.auth.getUser();
+        console.log('Current user:', user);
+
+        // Combine the data
+        const servicesWithProfiles = servicesData.map(service => ({
+          ...service,
+          profiles: profilesData?.find(profile => profile.id === service.user_id),
+          isOwner: service.user_id === user?.id
+        }));
+
+        console.log('Combined services with profiles:', servicesWithProfiles);
+        return servicesWithProfiles;
+      } catch (error) {
+        console.error("Error fetching services:", error);
         return [];
       }
-
-      // Then, get the profiles for these services
-      const { data: profilesData, error: profilesError } = await supabase
-        .from('profiles')
-        .select('id, username, avatar_url')
-        .in('id', servicesData.map(service => service.user_id));
-
-      console.log('Profiles data:', profilesData);
-      console.log('Profiles error:', profilesError);
-
-      if (profilesError) {
-        toast.error("Failed to load profiles");
-        throw profilesError;
-      }
-
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
-      console.log('Current user:', user);
-
-      // Combine the data
-      const servicesWithProfiles = servicesData.map(service => ({
-        ...service,
-        profiles: profilesData?.find(profile => profile.id === service.user_id),
-        isOwner: service.user_id === user?.id
-      }));
-
-      console.log('Combined services with profiles:', servicesWithProfiles);
-      return servicesWithProfiles;
     }
   });
 

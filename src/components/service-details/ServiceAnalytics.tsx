@@ -29,24 +29,24 @@ export const ServiceAnalytics = ({ serviceId, isOwner }: ServiceAnalyticsProps) 
         // Count contact clicks and bookings
         const { data: contactClicksData, error: contactClicksError } = await supabase
           .from('search_result_clicks')
-          .select('count(*)', { count: 'exact' })
+          .select('*', { count: 'exact' })
           .eq('result_id', serviceId);
           
         if (contactClicksError) throw contactClicksError;
         
-        const { count: contactClicks } = contactClicksData;
+        const contactClicks = contactClicksData ? contactClicksData.length : 0;
         
         const { data: bookingsData, error: bookingsError } = await supabase
           .from('appointments')
-          .select('count(*)', { count: 'exact' })
+          .select('*', { count: 'exact' })
           .eq('service_name', serviceId);
           
         if (bookingsError) throw bookingsError;
         
-        const { count: bookings } = bookingsData;
+        const bookings = bookingsData ? bookingsData.length : 0;
         
         setAnalytics({
-          views: serviceData.views || 0,
+          views: serviceData?.views || 0,
           contact_clicks: contactClicks || 0,
           bookings: bookings || 0,
           last_updated: new Date().toISOString()

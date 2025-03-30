@@ -30,10 +30,22 @@ export const incrementViewCount = async (
     localStorage.setItem(sessionKey, Date.now().toString());
     
     // Increment the view count based on entity type
-    let { error } = await supabase.rpc(
-      `increment_${entityType}_views`,
-      { [`${entityType}_id_param`]: entityId }
-    );
+    let error;
+    
+    // Use the appropriate function based on entity type
+    if (entityType === 'product') {
+      const result = await supabase.rpc('increment_product_views', { product_id_param: entityId });
+      error = result.error;
+    } else if (entityType === 'business') {
+      const result = await supabase.rpc('increment_business_views', { business_id_param: entityId });
+      error = result.error;
+    } else if (entityType === 'service') {
+      const result = await supabase.rpc('increment_service_views', { service_id_param: entityId });
+      error = result.error;
+    } else if (entityType === 'post') {
+      const result = await supabase.rpc('increment_post_views', { post_id_param: entityId });
+      error = result.error;
+    }
     
     if (error) {
       console.error(`Error incrementing ${entityType} views:`, error);
@@ -88,13 +100,22 @@ export const fetchBusinessAnalytics = async (userId: string | undefined) => {
       console.error('Error fetching product analytics:', productsError);
     }
     
-    // Fetch service view counts
-    const { data: services, error: servicesError } = await supabase
+    // Fetch service view counts - use proper error handling
+    const { data: servicesRaw, error: servicesError } = await supabase
       .from('services')
       .select('id, title, views')
       .eq('user_id', userId)
       .order('views', { ascending: false });
       
+    // Handle services data with proper default values when error or no data
+    const services = servicesError || !servicesRaw 
+      ? [] 
+      : servicesRaw.map(service => ({
+          id: service.id,
+          title: service.title,
+          views: service.views || 0
+        }));
+    
     if (servicesError) {
       console.error('Error fetching service analytics:', servicesError);
     }
@@ -133,7 +154,7 @@ export const trackEntityView = async (
   entityType: 'product' | 'business' | 'service' | 'post',
   entityId: string
 ): Promise<void> => {
-  // Don't track views if the user is not logged in or if entityId is not valid
+  // Don't track views if the entity ID is not valid
   if (!entityId) return;
   
   try {

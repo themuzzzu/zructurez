@@ -1,5 +1,5 @@
 
-import { Star, MapPin, Clock, Phone, Mail, Share2, Trash2 } from "lucide-react";
+import { Star, MapPin, Clock, Phone, Mail, Share2, Trash2, Eye } from "lucide-react";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { toast } from "sonner";
@@ -33,6 +33,8 @@ interface ServiceCardProps {
   availability: string;
   isOwner?: boolean;
   onDelete?: () => void;
+  onView?: () => void;
+  views?: number;
 }
 
 export const ServiceCard = ({
@@ -49,7 +51,9 @@ export const ServiceCard = ({
   location,
   availability,
   isOwner = false,
-  onDelete
+  onDelete,
+  onView,
+  views = 0
 }: ServiceCardProps) => {
   const navigate = useNavigate();
 
@@ -63,6 +67,14 @@ export const ServiceCard = ({
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
     toast.success("Service shared!");
+  };
+
+  const handleCardClick = () => {
+    // Call the onView callback if provided
+    if (onView) {
+      onView();
+    }
+    navigate(`/services/${id}`);
   };
 
   const handleDelete = async (e: React.MouseEvent) => {
@@ -86,7 +98,7 @@ export const ServiceCard = ({
   return (
     <Card 
       className="overflow-hidden hover:shadow-lg transition-all duration-300 animate-fade-up cursor-pointer"
-      onClick={() => navigate(`/services/${id}`)}
+      onClick={handleCardClick}
     >
       <div className="relative h-48">
         <img
@@ -97,6 +109,12 @@ export const ServiceCard = ({
         <div className="absolute top-4 right-4 bg-primary text-white px-3 py-1 rounded-full text-sm">
           ${hourlyRate}/hr
         </div>
+        {views > 0 && (
+          <div className="absolute bottom-4 left-4 bg-black/60 text-white px-2 py-1 rounded-md text-xs flex items-center">
+            <Eye className="h-3 w-3 mr-1" />
+            {views}
+          </div>
+        )}
       </div>
       
       <div className="p-4 space-y-4">
