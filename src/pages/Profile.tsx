@@ -1,12 +1,11 @@
 
 import { useEffect, useState } from "react";
-import { Navbar } from "@/components/Navbar";
-import { Sidebar } from "@/components/Sidebar";
 import { supabase } from "@/integrations/supabase/client";
 import { ProfileView } from "@/components/ProfileView";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { useParams } from "react-router-dom";
+import { Layout } from "@/components/layout/Layout";
 
 const Profile = () => {
   const [loading, setLoading] = useState(true);
@@ -45,17 +44,11 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <div className="container max-w-[1400px] pt-20 pb-16 px-4">
-        <div className="flex gap-6">
-          <Sidebar className="w-64 hidden lg:block sticky top-24 h-[calc(100vh-6rem)]" />
-          <main className="flex-1">
-            <ProfileView profileId={id} isOwnProfile={isOwnProfile} />
-          </main>
-        </div>
+    <Layout>
+      <div className="container max-w-[1000px] py-6 px-4">
+        <ProfileView profileId={id} isOwnProfile={isOwnProfile} />
       </div>
-    </div>
+    </Layout>
   );
 };
 

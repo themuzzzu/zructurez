@@ -62,7 +62,7 @@ export const ProfileView = ({ profileId, isOwnProfile = true }: ProfileViewProps
 
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className="overflow-hidden">
         <CardContent className="pt-6">
           {isEditing ? (
             <ProfileEditForm

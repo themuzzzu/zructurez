@@ -6,16 +6,20 @@ import { ServicesTab } from "./ServicesTab";
 import { LikedBusinessesTab } from "./LikedBusinessesTab";
 import { SubscribedBusinessesTab } from "./SubscribedBusinessesTab";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Card } from "@/components/ui/card";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 interface ProfileTabsProps {
   profileId?: string;
 }
 
 export const ProfileTabs = ({ profileId }: ProfileTabsProps) => {
+  const isMobile = useMediaQuery("(max-width: 768px)");
+
   return (
     <Tabs defaultValue="posts" className="space-y-4 animate-fade-in">
       <div className="relative overflow-hidden rounded-md">
-        <ScrollArea className="pb-1">
+        <ScrollArea className="pb-1 scrollbar-hide">
           <TabsList className="flex w-full min-w-fit">
             <TabsTrigger value="posts" className="animate-fade-in transition-all px-4 py-2">
               Posts
@@ -26,31 +30,50 @@ export const ProfileTabs = ({ profileId }: ProfileTabsProps) => {
             <TabsTrigger value="services" className="animate-fade-in transition-all px-4 py-2">
               Services
             </TabsTrigger>
-            <TabsTrigger value="liked" className="animate-fade-in transition-all px-4 py-2">
-              Liked
+            <TabsTrigger value="wishlist" className="animate-fade-in transition-all px-4 py-2">
+              Wishlist
             </TabsTrigger>
-            <TabsTrigger value="subscribed" className="animate-fade-in transition-all px-4 py-2">
-              Subscribed
+            <TabsTrigger value="reviews" className="animate-fade-in transition-all px-4 py-2">
+              Reviews
+            </TabsTrigger>
+            <TabsTrigger value="photos" className="animate-fade-in transition-all px-4 py-2">
+              Photos
             </TabsTrigger>
           </TabsList>
         </ScrollArea>
       </div>
       
-      <TabsContent value="posts" className="animate-scale-in">
-        <PostsTab />
-      </TabsContent>
-      <TabsContent value="businesses" className="animate-scale-in">
-        <BusinessesTab />
-      </TabsContent>
-      <TabsContent value="services" className="animate-scale-in">
-        <ServicesTab />
-      </TabsContent>
-      <TabsContent value="liked" className="animate-scale-in">
-        <LikedBusinessesTab />
-      </TabsContent>
-      <TabsContent value="subscribed" className="animate-scale-in">
-        <SubscribedBusinessesTab />
-      </TabsContent>
+      <Card className="overflow-hidden">
+        <TabsContent value="posts" className="p-4 animate-scale-in">
+          <PostsTab profileId={profileId} />
+        </TabsContent>
+        
+        <TabsContent value="businesses" className="p-4 animate-scale-in">
+          <BusinessesTab />
+        </TabsContent>
+        
+        <TabsContent value="services" className="p-4 animate-scale-in">
+          <ServicesTab />
+        </TabsContent>
+        
+        <TabsContent value="wishlist" className="p-4 animate-scale-in">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <LikedBusinessesTab />
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="reviews" className="p-4 animate-scale-in">
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">No reviews yet</p>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="photos" className="p-4 animate-scale-in">
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">No photos yet</p>
+          </div>
+        </TabsContent>
+      </Card>
     </Tabs>
   );
 };

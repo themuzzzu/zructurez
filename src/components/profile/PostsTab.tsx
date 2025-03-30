@@ -1,71 +1,86 @@
-import { useState } from "react";
-import { PostCard } from "@/components/PostCard";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { CreatePost } from "@/components/CreatePost";
+
+import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { EnhancedPostCard } from "@/components/EnhancedPostCard";
+import { CreatePost } from "@/components/CreatePost";
 
-export const PostsTab = () => {
-  const [isPostDialogOpen, setIsPostDialogOpen] = useState(false);
+interface PostsTabProps {
+  profileId?: string;
+}
 
-  const { data: posts, refetch: refetchPosts } = useQuery({
-    queryKey: ['user-posts'],
+export const PostsTab = ({ profileId }: PostsTabProps) => {
+  const { data: currentUser } = useQuery({
+    queryKey: ['current-user'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return [];
-
-      const { data } = await supabase
-        .from('posts')
-        .select(`
-          *,
-          profiles:profile_id (username, avatar_url)
-        `)
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      return data || [];
+      const { data } = await supabase.auth.getUser();
+      return data.user;
     },
   });
 
-  const handlePostSuccess = () => {
-    setIsPostDialogOpen(false);
-    refetchPosts();
-  };
+  const isCurrentUserProfile = !profileId || (currentUser && currentUser.id === profileId);
+
+  const { data: posts, isLoading } = useQuery({
+    queryKey: ['profile-posts', profileId || currentUser?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('posts')
+        .select('*')
+        .eq('profile_id', profileId || currentUser?.id)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!profileId || !!currentUser?.id,
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center p-6">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  if (!posts || posts.length === 0) {
+    return (
+      <div className="space-y-6">
+        {isCurrentUserProfile && <CreatePost onSuccess={() => window.location.reload()} />}
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">No posts yet</p>
+          {isCurrentUserProfile && (
+            <Button variant="outline" className="mt-4">Create your first post</Button>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-end mb-4">
-        <Button onClick={() => setIsPostDialogOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Create Post
-        </Button>
-      </div>
-      {posts?.map((post: any) => (
-        <PostCard
+    <div className="space-y-6">
+      {isCurrentUserProfile && <CreatePost onSuccess={() => window.location.reload()} />}
+      {posts.map((post) => (
+        <EnhancedPostCard
           key={post.id}
-          id={post.id}
-          author={post.profiles?.username || "Anonymous"}
-          avatar={post.profiles?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${post.user_id}`}
-          time={new Date(post.created_at).toLocaleString()}
-          content={post.content}
-          category={post.category || "General"}
-          likes={post.likes || 0}
-          comments={post.comments || 0}
-          image={post.image_url}
-          views={post.views || 0}
-          isLiked={post.user_has_liked}
+          post={{
+            id: post.id,
+            content: post.content,
+            timestamp: new Date(post.created_at).toISOString(),
+            author: {
+              name: "User",
+              avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix",
+            },
+            image: post.image_url,
+            likes: 0,
+            liked: false,
+            comments: 0,
+            shares: 0,
+          }}
         />
       ))}
-      <Dialog open={isPostDialogOpen} onOpenChange={setIsPostDialogOpen}>
-        <DialogContent className="sm:max-w-[600px] h-[90vh]">
-          <ScrollArea className="h-full pr-4">
-            <CreatePost onSuccess={handlePostSuccess} />
-          </ScrollArea>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
