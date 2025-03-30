@@ -56,8 +56,10 @@ function App() {
             <Route path="/businesses/:id" element={<BusinessDetails />} />
             <Route path="/register-business" element={<BusinessRegistrationForm />} />
             <Route path="/products/:id" element={<ProductDetails />} />
+            <Route path="/product/:id" element={<ProductDetails />} /> {/* Added correct product route */}
             <Route path="/services" element={<Services />} />
             <Route path="/services/:id" element={<ServiceDetails />} />
+            <Route path="/profile" element={<Profile />} /> {/* Fixed profile route to not require ID */}
             <Route path="/profile/:id" element={<Profile />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/wishlist" element={<Wishlist />} />

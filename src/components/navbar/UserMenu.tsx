@@ -32,7 +32,7 @@ export const UserMenu = ({ profile }: UserMenuProps) => {
         navigate("/auth");
       }
     } else if (action === "Profile") {
-      navigate("/profile");
+      navigate("/profile"); // Updated to use the correct profile route without ID
     } else if (action === "Settings") {
       navigate("/settings");
     } else if (action === "Wishlist") {

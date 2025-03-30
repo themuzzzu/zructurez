@@ -12,7 +12,12 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import type { Profile } from "@/types/profile";
 
-export const ProfileView = () => {
+interface ProfileViewProps {
+  profileId?: string;
+  isOwnProfile?: boolean;
+}
+
+export const ProfileView = ({ profileId, isOwnProfile = true }: ProfileViewProps) => {
   const navigate = useNavigate();
   const { 
     profile, 
@@ -70,21 +75,24 @@ export const ProfileView = () => {
           ) : (
             <ProfileDisplay 
               profile={profile} 
-              onEdit={() => setIsEditing(true)} 
+              onEdit={() => isOwnProfile && setIsEditing(true)} 
+              isOwnProfile={isOwnProfile}
             />
           )}
         </CardContent>
       </Card>
 
-      <ProfileTabs />
+      <ProfileTabs profileId={profileId} />
 
-      <Card>
-        <CardContent className="pt-6">
-          <Button variant="destructive" onClick={handleSignOut}>
-            Sign Out
-          </Button>
-        </CardContent>
-      </Card>
+      {isOwnProfile && (
+        <Card>
+          <CardContent className="pt-6">
+            <Button variant="destructive" onClick={handleSignOut}>
+              Sign Out
+            </Button>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

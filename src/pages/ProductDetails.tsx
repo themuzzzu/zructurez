@@ -36,7 +36,7 @@ import { Badge } from "@/components/ui/badge";
 import { Layout } from "@/components/layout/Layout";
 
 const ProductDetails = () => {
-  const { productId } = useParams();
+  const { id: productId } = useParams();
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
   const queryClient = useQueryClient();

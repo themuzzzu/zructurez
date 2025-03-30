@@ -6,9 +6,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { ProfileView } from "@/components/ProfileView";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { useParams } from "react-router-dom";
 
 const Profile = () => {
   const [loading, setLoading] = useState(true);
+  const { id } = useParams();
+  
+  // If there's an ID in the URL, we're viewing someone else's profile
+  // If not, we're viewing our own profile
+  const isOwnProfile = !id;
 
   useEffect(() => {
     const checkSession = async () => {
@@ -45,7 +51,7 @@ const Profile = () => {
         <div className="flex gap-6">
           <Sidebar className="w-64 hidden lg:block sticky top-24 h-[calc(100vh-6rem)]" />
           <main className="flex-1">
-            <ProfileView />
+            <ProfileView profileId={id} isOwnProfile={isOwnProfile} />
           </main>
         </div>
       </div>
