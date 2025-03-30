@@ -10,6 +10,7 @@ interface BusinessContentProps {
   business_products: Business['business_products'];
   business_portfolio: Business['business_portfolio'];
   onSuccess?: () => void;
+  activeCategory?: string;
 }
 
 export const BusinessContent = ({
@@ -17,7 +18,8 @@ export const BusinessContent = ({
   isOwner,
   business_products,
   business_portfolio,
-  onSuccess
+  onSuccess,
+  activeCategory
 }: BusinessContentProps) => {
   return (
     <div className="space-y-6">
@@ -28,7 +30,11 @@ export const BusinessContent = ({
         />
       )}
 
-      <BusinessProductsSection products={business_products} businessId={businessId} />
+      <BusinessProductsSection 
+        products={business_products} 
+        businessId={businessId} 
+        activeCategory={activeCategory} 
+      />
       <BusinessPortfolioSection portfolio={business_portfolio} />
     </div>
   );
