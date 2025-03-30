@@ -1,53 +1,95 @@
 
+import { useState } from "react";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  Smartphone,
-  Tv,
-  Shirt,
-  Laptop,
-  Baby,
-  Home,
+import { useNavigate } from "react-router-dom";
+import { 
+  Shirt, 
+  Home, 
+  Utensils, 
+  Smartphone, 
+  Laptop, 
+  HeartPulse, 
+  Baby, 
+  Car, 
   BookOpen,
-  Dumbbell,
-  Utensils
+  Gamepad2,
+  ShoppingBag,
+  Paintbrush
 } from "lucide-react";
-import { Dispatch, SetStateAction } from "react";
 
 interface CategoryTabContentProps {
   setSelectedCategory: (category: string) => void;
-  setActiveTab: Dispatch<SetStateAction<string>>;
+  setActiveTab: (tab: string) => void;
+  gridLayout?: "grid4x4" | "grid2x2" | "grid1x1";
 }
 
-export const CategoryTabContent = ({ setSelectedCategory, setActiveTab }: CategoryTabContentProps) => {
+export const CategoryTabContent = ({ 
+  setSelectedCategory, 
+  setActiveTab,
+  gridLayout = "grid4x4"
+}: CategoryTabContentProps) => {
+  const navigate = useNavigate();
+  
+  const categories = [
+    { name: "Fashion", icon: <Shirt className="h-5 w-5" /> },
+    { name: "Home", icon: <Home className="h-5 w-5" /> },
+    { name: "Kitchen", icon: <Utensils className="h-5 w-5" /> },
+    { name: "Phones", icon: <Smartphone className="h-5 w-5" /> },
+    { name: "Electronics", icon: <Laptop className="h-5 w-5" /> },
+    { name: "Health", icon: <HeartPulse className="h-5 w-5" /> },
+    { name: "Baby", icon: <Baby className="h-5 w-5" /> },
+    { name: "Automotive", icon: <Car className="h-5 w-5" /> },
+    { name: "Books", icon: <BookOpen className="h-5 w-5" /> },
+    { name: "Gaming", icon: <Gamepad2 className="h-5 w-5" /> },
+    { name: "Beauty", icon: <Paintbrush className="h-5 w-5" /> },
+    { name: "Groceries", icon: <ShoppingBag className="h-5 w-5" /> },
+  ];
+  
+  const handleCategoryClick = (category: string) => {
+    setSelectedCategory(category.toLowerCase());
+    setActiveTab("search");
+  };
+  
+  const getGridClasses = () => {
+    switch (gridLayout) {
+      case "grid4x4":
+        return "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4";
+      case "grid2x2":
+        return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-4";
+      case "grid1x1":
+        return "flex flex-col gap-4";
+      default:
+        return "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4";
+    }
+  };
+  
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-      {/* Individual category cards here */}
-      {[
-        { name: "Electronics", icon: <Smartphone className="h-8 w-8" />, count: 2345 },
-        { name: "Mobiles", icon: <Smartphone className="h-8 w-8" />, count: 1876 },
-        { name: "TVs & Appliances", icon: <Tv className="h-8 w-8" />, count: 932 },
-        { name: "Fashion", icon: <Shirt className="h-8 w-8" />, count: 4521 },
-        { name: "Computers", icon: <Laptop className="h-8 w-8" />, count: 753 },
-        { name: "Baby & Kids", icon: <Baby className="h-8 w-8" />, count: 621 },
-        { name: "Home & Furniture", icon: <Home className="h-8 w-8" />, count: 1423 },
-        { name: "Books & Education", icon: <BookOpen className="h-8 w-8" />, count: 532 },
-        { name: "Sports & Fitness", icon: <Dumbbell className="h-8 w-8" />, count: 345 },
-        { name: "Grocery", icon: <Utensils className="h-8 w-8" />, count: 986 },
-      ].map((cat, idx) => (
-        <div 
-          key={idx} 
-          className="bg-card border border-border rounded-lg p-4 flex flex-col items-center cursor-pointer hover:shadow-md transition-shadow"
-          onClick={() => {
-            setSelectedCategory(cat.name.toLowerCase().replace(/\s+/g, '-'));
-            setActiveTab("search");
-          }}
+    <div className={getGridClasses()}>
+      {categories.map((category) => (
+        <Card
+          key={category.name}
+          className={`transition-all hover:bg-slate-50 dark:hover:bg-zinc-800 cursor-pointer ${
+            gridLayout === "grid1x1" ? "flex items-center p-4" : "p-6 text-center"
+          }`}
+          onClick={() => handleCategoryClick(category.name)}
         >
-          <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-3">
-            {cat.icon}
-          </div>
-          <h3 className="font-medium text-foreground text-center">{cat.name}</h3>
-          <span className="text-sm text-muted-foreground">{cat.count} items</span>
-        </div>
+          {gridLayout === "grid1x1" ? (
+            <div className="flex items-center gap-4">
+              <div className="bg-primary/10 text-primary p-3 rounded-full">
+                {category.icon}
+              </div>
+              <h3 className="font-medium">{category.name}</h3>
+            </div>
+          ) : (
+            <>
+              <div className="mx-auto bg-primary/10 text-primary p-4 rounded-full w-16 h-16 flex items-center justify-center mb-4">
+                {category.icon}
+              </div>
+              <h3 className="font-medium">{category.name}</h3>
+            </>
+          )}
+        </Card>
       ))}
     </div>
   );

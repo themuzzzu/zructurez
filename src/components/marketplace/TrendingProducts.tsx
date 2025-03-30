@@ -7,7 +7,11 @@ import { ProductCard } from "@/components/products/ProductCard";
 import { useNavigate } from "react-router-dom";
 import { Flame } from "lucide-react";
 
-export const TrendingProducts = () => {
+interface TrendingProductsProps {
+  gridLayout?: "grid4x4" | "grid2x2" | "grid1x1";
+}
+
+export const TrendingProducts = ({ gridLayout = "grid4x4" }: TrendingProductsProps) => {
   const navigate = useNavigate();
   
   const { data: products, isLoading } = useQuery({
@@ -36,12 +40,26 @@ export const TrendingProducts = () => {
     }
   });
   
+  // Generate responsive grid classes based on layout
+  const getGridClasses = () => {
+    switch (gridLayout) {
+      case "grid4x4":
+        return "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4";
+      case "grid2x2":
+        return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-3 sm:gap-4";
+      case "grid1x1":
+        return "flex flex-col gap-3";
+      default:
+        return "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4";
+    }
+  };
+  
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className={getGridClasses()}>
         {[...Array(8)].map((_, i) => (
           <Card key={i} className="overflow-hidden">
-            <Skeleton className="h-48 w-full" />
+            <Skeleton className={gridLayout === "grid1x1" ? "h-24 w-full" : "h-48 w-full"} />
             <div className="p-3">
               <Skeleton className="h-4 w-3/4 mb-2" />
               <Skeleton className="h-4 w-1/2" />
@@ -63,9 +81,9 @@ export const TrendingProducts = () => {
         <h3 className="text-lg font-semibold">Trending Now</h3>
       </div>
       
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className={getGridClasses()}>
         {products.map((product) => (
-          <ProductCard key={product.id} product={product} />
+          <ProductCard key={product.id} product={product} layout={gridLayout} />
         ))}
       </div>
     </div>

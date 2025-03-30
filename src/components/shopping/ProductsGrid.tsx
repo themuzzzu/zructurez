@@ -9,15 +9,35 @@ interface ProductsGridProps {
   products: any[] | null;
   isLoading: boolean;
   onOpenAddProductDialog: () => void;
+  layout?: "grid4x4" | "grid2x2" | "grid1x1";
 }
 
-export const ProductsGrid = ({ products, isLoading, onOpenAddProductDialog }: ProductsGridProps) => {
+export const ProductsGrid = ({ 
+  products, 
+  isLoading, 
+  onOpenAddProductDialog,
+  layout = "grid4x4" 
+}: ProductsGridProps) => {
+  // Generate responsive grid classes based on layout
+  const getGridClasses = () => {
+    switch (layout) {
+      case "grid4x4":
+        return "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4";
+      case "grid2x2":
+        return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-3 sm:gap-4";
+      case "grid1x1":
+        return "flex flex-col gap-3";
+      default:
+        return "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4";
+    }
+  };
+  
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {[...Array(8)].map((_, i) => (
+      <div className={getGridClasses()}>
+        {[...Array(layout === "grid1x1" ? 4 : 8)].map((_, i) => (
           <Card key={i} className="overflow-hidden">
-            <Skeleton className="h-48 w-full" />
+            <Skeleton className={layout === "grid1x1" ? "h-24 w-full" : "h-48 w-full"} />
             <div className="p-3">
               <Skeleton className="h-4 w-3/4 mb-2" />
               <Skeleton className="h-4 w-1/2" />
@@ -41,10 +61,10 @@ export const ProductsGrid = ({ products, isLoading, onOpenAddProductDialog }: Pr
   }
   
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div className={getGridClasses()}>
       {products.map((product) => (
         <div key={product.id} className="h-full">
-          <ProductCard product={product} />
+          <ProductCard product={product} layout={layout} />
         </div>
       ))}
     </div>

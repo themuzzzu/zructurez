@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -5,6 +6,7 @@ import { ShoppingHeader } from "./shopping/ShoppingHeader";
 import { FilterPanel } from "./shopping/FilterPanel";
 import { ProductsGrid } from "./shopping/ProductsGrid";
 import { AddProductDialog } from "./shopping/AddProductDialog";
+import { GridLayoutSelector } from "./marketplace/GridLayoutSelector";
 
 interface ShoppingSectionProps {
   searchQuery?: string;
@@ -32,6 +34,7 @@ export const ShoppingSection = ({
   const [localShowUsed, setLocalShowUsed] = useState(showUsed);
   const [localShowBranded, setLocalShowBranded] = useState(showBranded);
   const [localPriceRange, setLocalPriceRange] = useState(priceRange);
+  const [gridLayout, setGridLayout] = useState<"grid4x4" | "grid2x2" | "grid1x1">("grid4x4");
 
   const { data: products, isLoading, refetch } = useQuery({
     queryKey: ['products', searchQuery, selectedCategory, localShowDiscounted, localShowUsed, localShowBranded, localSortOption, localPriceRange],
@@ -122,14 +125,23 @@ export const ShoppingSection = ({
 
   return (
     <div className="space-y-4">
-      <ShoppingHeader 
-        selectedCategory={selectedCategory}
-        onOpenAddProductDialog={() => setIsDialogOpen(true)}
-        onToggleMobileFilters={() => setIsFilterMobileOpen(!isFilterMobileOpen)}
-        sortOption={localSortOption}
-        onSortChange={(value) => setLocalSortOption(value)}
-        hasActiveFilters={hasActiveFilters}
-      />
+      <div className="flex justify-between items-center">
+        <ShoppingHeader 
+          selectedCategory={selectedCategory}
+          onOpenAddProductDialog={() => setIsDialogOpen(true)}
+          onToggleMobileFilters={() => setIsFilterMobileOpen(!isFilterMobileOpen)}
+          sortOption={localSortOption}
+          onSortChange={(value) => setLocalSortOption(value)}
+          hasActiveFilters={hasActiveFilters}
+        />
+        
+        <div className="hidden sm:block">
+          <GridLayoutSelector 
+            layout={gridLayout}
+            onChange={setGridLayout}
+          />
+        </div>
+      </div>
 
       <FilterPanel 
         selectedCategory={selectedCategory}
@@ -145,12 +157,20 @@ export const ShoppingSection = ({
         onPriceRangeChange={setLocalPriceRange}
         onCloseMobileFilter={() => setIsFilterMobileOpen(false)}
         isFilterMobileOpen={isFilterMobileOpen}
-      />
+      >
+        <div className="sm:hidden mt-4">
+          <GridLayoutSelector 
+            layout={gridLayout}
+            onChange={setGridLayout}
+          />
+        </div>
+      </FilterPanel>
 
       <ProductsGrid 
         products={products}
         isLoading={isLoading} 
         onOpenAddProductDialog={() => setIsDialogOpen(true)}
+        layout={gridLayout}
       />
 
       <AddProductDialog

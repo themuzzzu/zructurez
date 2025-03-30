@@ -7,6 +7,7 @@ import { CategoryTabContent } from "./CategoryTabContent";
 import { SearchTabContent } from "./SearchTabContent";
 import { BannerCarousel } from "@/components/marketplace/BannerCarousel";
 import { MarketplaceHero } from "@/components/marketplace/MarketplaceHero";
+import { GridLayoutSelector } from "@/components/marketplace/GridLayoutSelector";
 
 const OptimizedMarketplace = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -14,6 +15,7 @@ const OptimizedMarketplace = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [gridLayout, setGridLayout] = useState<"grid4x4" | "grid2x2" | "grid1x1">("grid4x4");
   
   // Filter states
   const [showDiscounted, setShowDiscounted] = useState(false);
@@ -62,11 +64,15 @@ const OptimizedMarketplace = () => {
         cartItemCount={0} // You can replace this with actual cart count
       />
 
+      <div className="flex justify-between items-center mt-6 mb-4">
+        <h2 className="text-xl font-semibold">Products</h2>
+        <GridLayoutSelector layout={gridLayout} onChange={setGridLayout} />
+      </div>
+
       <Tabs
         defaultValue="browse"
         value={activeTab}
         onValueChange={setActiveTab}
-        className="mt-6"
       >
         <TabsList className="w-full max-w-md grid grid-cols-3 mb-6">
           <TabsTrigger value="browse">Browse</TabsTrigger>
@@ -78,6 +84,7 @@ const OptimizedMarketplace = () => {
           <BrowseTabContent 
             handleCategorySelect={handleCategorySelect}
             handleSearchSelect={handleSearchSelect}
+            gridLayout={gridLayout}
           />
         </TabsContent>
 
@@ -85,6 +92,7 @@ const OptimizedMarketplace = () => {
           <CategoryTabContent 
             setSelectedCategory={setSelectedCategory}
             setActiveTab={setActiveTab}
+            gridLayout={gridLayout}
           />
         </TabsContent>
 
@@ -103,6 +111,7 @@ const OptimizedMarketplace = () => {
             priceRange={priceRange}
             setPriceRange={setPriceRange}
             resetFilters={resetFilters}
+            gridLayout={gridLayout}
           />
         </TabsContent>
       </Tabs>
