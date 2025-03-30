@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Construction } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-interface GenericPageProps {
+export interface GenericPageProps {
   title: string;
 }
 

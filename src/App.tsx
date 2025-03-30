@@ -1,5 +1,6 @@
+
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeProvider } from "./components/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/react-query";
@@ -18,15 +19,15 @@ import BusinessDetails from "@/pages/BusinessDetails";
 import Business from "@/pages/Business";
 import Events from "@/pages/Events";
 import Communities from "@/pages/Communities";
-import Messages from "@/pages/Messages";
-import OrdersPage from "@/pages/OrdersPage";
-import CheckoutPage from "@/pages/CheckoutPage";
-import SearchPage from "@/pages/SearchPage";
+import Messages from "@/pages/messages";
+import OrdersPage from "@/pages/orders";
+import CheckoutPage from "@/pages/checkout";
+import SearchPage from "@/pages/search";
 import Jobs from "@/pages/Jobs";
 import Maps from "@/pages/Maps";
 import GenericPage from "@/pages/GenericPage";
 import BusinessDashboard from "@/pages/BusinessDashboard";
-import NotFound from "@/pages/NotFound";
+import NotFound from "@/components/NotFound";
 
 export default function App() {
   return (
@@ -54,7 +55,7 @@ export default function App() {
             <Route path="/search" element={<SearchPage />} />
             <Route path="/jobs" element={<Jobs />} />
             <Route path="/maps" element={<Maps />} />
-            <Route path="/generic-page" element={<GenericPage />} />
+            <Route path="/generic-page" element={<GenericPage title="Page Under Construction" />} />
             <Route path="/business-dashboard" element={<BusinessDashboard />} />
             <Route path="/admin/*" element={<AdminRoutes />} />
             <Route path="*" element={<NotFound />} />
