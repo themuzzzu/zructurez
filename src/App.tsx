@@ -27,7 +27,7 @@ import Jobs from "@/pages/Jobs";
 import Maps from "@/pages/Maps";
 import GenericPage from "@/pages/GenericPage";
 import BusinessDashboard from "@/pages/BusinessDashboard";
-import NotFound from "@/components/NotFound";
+import NotFoundPage from "@/pages/NotFound";
 
 export default function App() {
   return (
@@ -58,7 +58,7 @@ export default function App() {
             <Route path="/generic-page" element={<GenericPage title="Page Under Construction" />} />
             <Route path="/business-dashboard" element={<BusinessDashboard />} />
             <Route path="/admin/*" element={<AdminRoutes />} />
-            <Route path="*" element={<NotFound />} />
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </BrowserRouter>
       </QueryClientProvider>

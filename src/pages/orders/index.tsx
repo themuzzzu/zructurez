@@ -1,5 +1,5 @@
 
-import OrdersPage from "../../components/layout/Layout";
+import { Layout } from "@/components/layout/Layout";
 import { Construction } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -8,7 +8,7 @@ export default function Orders() {
   const navigate = useNavigate();
   
   return (
-    <OrdersPage>
+    <Layout>
       <div className="container max-w-[1400px] pt-4 pb-16">
         <div className="flex flex-col items-center justify-center py-20 space-y-6 text-center">
           <Construction className="h-16 w-16 text-muted-foreground" />
@@ -21,6 +21,6 @@ export default function Orders() {
           </Button>
         </div>
       </div>
-    </OrdersPage>
+    </Layout>
   );
 }

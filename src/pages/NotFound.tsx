@@ -1,6 +1,6 @@
 
-import { NotFound as NotFoundComponent } from "@/components/NotFound";
+import { NotFound } from "@/components/NotFound";
 
-export default function NotFound() {
-  return <NotFoundComponent />;
+export default function NotFoundPage() {
+  return <NotFound />;
 }
