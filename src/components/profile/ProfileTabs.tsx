@@ -7,7 +7,11 @@ import { LikedBusinessesTab } from "./LikedBusinessesTab";
 import { SubscribedBusinessesTab } from "./SubscribedBusinessesTab";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-export const ProfileTabs = () => {
+interface ProfileTabsProps {
+  profileId?: string;
+}
+
+export const ProfileTabs = ({ profileId }: ProfileTabsProps) => {
   return (
     <Tabs defaultValue="posts" className="space-y-4 animate-fade-in">
       <div className="relative overflow-hidden rounded-md">

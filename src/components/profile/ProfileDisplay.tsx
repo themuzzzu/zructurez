@@ -7,9 +7,10 @@ import type { Profile } from "@/types/profile";
 interface ProfileDisplayProps {
   profile: Profile;
   onEdit: () => void;
+  isOwnProfile?: boolean;
 }
 
-export function ProfileDisplay({ profile, onEdit }: ProfileDisplayProps) {
+export function ProfileDisplay({ profile, onEdit, isOwnProfile = true }: ProfileDisplayProps) {
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between">
@@ -38,9 +39,11 @@ export function ProfileDisplay({ profile, onEdit }: ProfileDisplayProps) {
           </div>
         </div>
         
-        <Button onClick={onEdit} variant="outline" className="gap-2">
-          <Edit className="h-4 w-4" /> Edit Profile
-        </Button>
+        {isOwnProfile && (
+          <Button onClick={onEdit} variant="outline" className="gap-2">
+            <Edit className="h-4 w-4" /> Edit Profile
+          </Button>
+        )}
       </div>
       
       <div>
