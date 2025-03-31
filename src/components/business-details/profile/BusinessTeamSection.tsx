@@ -1,3 +1,4 @@
+
 import { Card } from "@/components/ui/card";
 import { Building, Users } from "lucide-react";
 import { BusinessOwnerCard } from "./BusinessOwnerCard";
@@ -22,7 +23,16 @@ export const BusinessTeamSection = ({ owners, staff_details }: BusinessTeamSecti
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {owners.map((owner, index) => (
-              <BusinessOwnerCard key={index} {...owner} />
+              <BusinessOwnerCard 
+                key={index} 
+                name={owner.name} 
+                role={owner.role} 
+                position={owner.position || ''} 
+                experience={owner.experience || ''}
+                bio={owner.bio}
+                image_url={owner.image_url}
+                qualifications={owner.qualifications}
+              />
             ))}
           </div>
         </Card>
@@ -36,7 +46,17 @@ export const BusinessTeamSection = ({ owners, staff_details }: BusinessTeamSecti
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {staff_details.map((staff, index) => (
-              staff.name && <BusinessStaffCard key={index} {...staff} />
+              staff.name && (
+                <BusinessStaffCard 
+                  key={index} 
+                  name={staff.name} 
+                  role={staff.role || ''} 
+                  position={staff.position || ''} 
+                  experience={staff.experience || ''}
+                  bio={staff.bio}
+                  image_url={staff.image_url}
+                />
+              )
             ))}
           </div>
         </Card>

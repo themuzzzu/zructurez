@@ -1,200 +1,180 @@
 
-import { useState } from "react";
-import { Business } from "@/types/business";
+import React, { useState } from "react";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { useBusiness } from "@/hooks/useBusiness";
-import { supabase } from "@/integrations/supabase/client";
-import { useParams } from "react-router-dom";
-import { useQueryClient } from "@tanstack/react-query";
+import { Camera, Edit, Upload } from "lucide-react";
+import { ImageUpload } from "@/components/ImageUpload";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Camera, Upload } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useBusiness } from "@/hooks/useBusiness";
 
 interface BusinessImageSectionProps {
-  business: Business;
+  business: string;
 }
 
 export const BusinessImageSection = ({ business }: BusinessImageSectionProps) => {
-  const { id } = useParams();
-  const queryClient = useQueryClient();
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [uploadType, setUploadType] = useState<"profile" | "cover">("profile");
+  const [pendingImage, setPendingImage] = useState<string | null>(null);
+  const [imageScale, setImageScale] = useState(1);
+  const [imagePosition, setImagePosition] = useState({ x: 50, y: 50 });
   const [isUploading, setIsUploading] = useState(false);
-  const [isCoverUploading, setIsCoverUploading] = useState(false);
-  const { refetchBusiness } = useBusiness(id as string);
-
-  // State for image upload
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
-  const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
-  const [coverUploadedUrl, setCoverUploadedUrl] = useState<string | null>(null);
-  const [positionValues, setPositionValues] = useState({ x: 50, y: 50 });
-  const [scaleValue, setScaleValue] = useState(1);
-
-  const handleProfileImageUpload = async (file: File) => {
-    if (!id) return;
-    setIsUploading(true);
+  const isMobile = useMediaQuery("(max-width: 768px)");
+  
+  const { business: businessData, isLoading, error, refetchBusiness } = useBusiness(business);
+  
+  const openUploadDialog = (type: "profile" | "cover") => {
+    setUploadType(type);
+    setPendingImage(null);
+    setIsUploadOpen(true);
+  };
+  
+  const handleImageSelect = (image: string | null) => {
+    setPendingImage(image);
+  };
+  
+  const saveImage = async () => {
+    if (!pendingImage) return;
     
+    setIsUploading(true);
     try {
-      const timestamp = Date.now();
-      const fileExt = file.name.split('.').pop();
-      const filePath = `business-profiles/${id}/${timestamp}.${fileExt}`;
+      // Convert base64 to blob
+      const base64Data = pendingImage.split(',')[1];
+      const byteCharacters = atob(base64Data);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'image/jpeg' });
       
-      const { error: uploadError } = await supabase.storage
+      // Generate filename
+      const fileName = `business-${business}-${uploadType}-${Date.now()}.jpg`;
+      
+      // Upload to storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
         .from('business-images')
-        .upload(filePath, file);
-        
+        .upload(fileName, blob);
+      
       if (uploadError) throw uploadError;
       
+      // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from('business-images')
-        .getPublicUrl(filePath);
+        .getPublicUrl(fileName);
+      
+      // Update business record
+      const updateData = uploadType === "profile" 
+        ? { 
+            image_url: publicUrl,
+            image_scale: imageScale,
+            image_position: imagePosition
+          } 
+        : { cover_url: publicUrl };
       
       const { error: updateError } = await supabase
         .from('businesses')
-        .update({ image_url: publicUrl })
-        .eq('id', id);
-        
+        .update(updateData)
+        .eq('id', business);
+      
       if (updateError) throw updateError;
       
-      toast.success("Profile image updated successfully");
+      toast.success(`Business ${uploadType} image updated`);
+      setIsUploadOpen(false);
       refetchBusiness();
-      queryClient.invalidateQueries({ queryKey: ['business', id] });
+      
     } catch (error) {
-      console.error('Error uploading business profile image:', error);
-      toast.error("Failed to update profile image");
+      console.error("Error saving image:", error);
+      toast.error("Failed to upload image");
     } finally {
       setIsUploading(false);
     }
   };
-
-  const handleCoverImageUpload = async (file: File) => {
-    if (!id) return;
-    setIsCoverUploading(true);
-    
-    try {
-      const timestamp = Date.now();
-      const fileExt = file.name.split('.').pop();
-      const filePath = `business-covers/${id}/${timestamp}.${fileExt}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from('business-images')
-        .upload(filePath, file);
-        
-      if (uploadError) throw uploadError;
-      
-      const { data: { publicUrl } } = supabase.storage
-        .from('business-images')
-        .getPublicUrl(filePath);
-      
-      const { error: updateError } = await supabase
-        .from('businesses')
-        .update({ 
-          cover_url: publicUrl,
-          image_position: { x: positionValues.x, y: positionValues.y },
-          // Custom fields should be added here as needed for the business table
-        })
-        .eq('id', id);
-        
-      if (updateError) throw updateError;
-      
-      toast.success("Cover image updated successfully");
-      refetchBusiness();
-      queryClient.invalidateQueries({ queryKey: ['business', id] });
-    } catch (error) {
-      console.error('Error uploading business cover image:', error);
-      toast.error("Failed to update cover image");
-    } finally {
-      setIsCoverUploading(false);
-    }
-  };
-
+  
+  if (isLoading) {
+    return <Card className="w-full h-48 animate-pulse bg-muted" />;
+  }
+  
   return (
-    <div className="space-y-6">
-      {/* Cover Image */}
-      <div className="relative rounded-xl overflow-hidden">
-        <AspectRatio ratio={3/1} className="bg-muted">
-          {business.cover_url ? (
-            <img 
-              src={business.cover_url} 
-              alt={`${business.name} cover`} 
-              className="object-cover w-full h-full"
+    <>
+      <Card className="overflow-hidden relative">
+        <div 
+          className="w-full h-48 bg-cover bg-center bg-no-repeat"
+          style={{ 
+            backgroundImage: businessData?.cover_url ? `url(${businessData.cover_url})` : "linear-gradient(to right, #4f46e5, #2563eb)"
+          }}
+        >
+          {!isMobile && (
+            <Button 
+              variant="secondary" 
+              size="sm" 
+              className="absolute top-2 right-2 opacity-80 hover:opacity-100"
+              onClick={() => openUploadDialog("cover")}
+            >
+              <Upload className="h-4 w-4 mr-1" />
+              Cover Photo
+            </Button>
+          )}
+        </div>
+        
+        <div className="p-4 flex items-end">
+          <div className="relative -mt-16">
+            <div 
+              className="w-20 h-20 rounded-full border-4 border-background overflow-hidden bg-primary"
               style={{ 
-                objectPosition: `${business.image_position?.x || 50}% ${business.image_position?.y || 50}%` 
+                backgroundImage: businessData?.image_url ? `url(${businessData.image_url})` : "none",
+                backgroundSize: "cover",
+                backgroundPosition: `${businessData?.image_position?.x || 50}% ${businessData?.image_position?.y || 50}%`
               }}
             />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-r from-blue-800 to-indigo-900 flex items-center justify-center">
-              <span className="text-white text-xl font-medium">{business.name}</span>
-            </div>
-          )}
-          
-          <div className="absolute bottom-4 right-4 flex space-x-2">
             <Button 
-              variant="outline" 
-              size="sm" 
-              className="bg-white/90 hover:bg-white"
-              onClick={() => {
-                const input = document.createElement('input');
-                input.type = 'file';
-                input.accept = 'image/*';
-                input.onchange = (e) => {
-                  const file = (e.target as HTMLInputElement).files?.[0];
-                  if (file) handleCoverImageUpload(file);
-                };
-                input.click();
-              }}
-              disabled={isCoverUploading}
+              variant="secondary" 
+              size="icon" 
+              className="absolute bottom-0 right-0 h-6 w-6 rounded-full"
+              onClick={() => openUploadDialog("profile")}
             >
-              <Upload className="h-3.5 w-3.5 mr-1" />
-              {isCoverUploading ? 'Uploading...' : 'Upload Cover'}
+              <Camera className="h-3 w-3" />
             </Button>
           </div>
-        </AspectRatio>
-      </div>
+          
+          <div className="ml-4 flex-1">
+            <h2 className="text-xl font-bold truncate">{businessData?.name}</h2>
+            <p className="text-sm text-muted-foreground truncate">
+              {businessData?.category}
+              {businessData?.verified && " • Verified"}
+            </p>
+          </div>
+        </div>
+      </Card>
       
-      {/* Profile Image */}
-      <div className="flex items-end space-x-4">
-        <div className="relative -mt-16 ml-6">
-          <div className="h-24 w-24 rounded-full border-4 border-background overflow-hidden bg-muted">
-            {business.image_url ? (
-              <img 
-                src={business.image_url} 
-                alt={`${business.name} profile`}
-                className="object-cover w-full h-full" 
-              />
-            ) : (
-              <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                <span className="text-gray-500 text-xl font-medium">
-                  {business.name?.charAt(0) || "B"}
-                </span>
-              </div>
-            )}
-            
-            <Button
-              variant="outline"
-              size="icon"
-              className="absolute bottom-0 right-0 h-8 w-8 rounded-full bg-white shadow-md"
-              onClick={() => {
-                const input = document.createElement('input');
-                input.type = 'file';
-                input.accept = 'image/*';
-                input.onchange = (e) => {
-                  const file = (e.target as HTMLInputElement).files?.[0];
-                  if (file) handleProfileImageUpload(file);
-                };
-                input.click();
-              }}
-              disabled={isUploading}
-            >
-              <Camera className="h-3.5 w-3.5" />
-            </Button>
+      <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
+        <DialogContent>
+          <DialogTitle>
+            {uploadType === "profile" ? "Update Business Logo" : "Update Cover Image"}
+          </DialogTitle>
+          <div className="space-y-4">
+            <Label>{uploadType === "profile" ? "Business Logo" : "Cover Image"}</Label>
+            <ImageUpload
+              selectedImage={pendingImage}
+              onImageSelect={handleImageSelect}
+              initialScale={imageScale}
+              initialPosition={imagePosition}
+              onScaleChange={setImageScale}
+              onPositionChange={setImagePosition}
+              skipAutoSave={true}
+            />
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setIsUploadOpen(false)}>Cancel</Button>
+              <Button onClick={saveImage} disabled={isUploading || !pendingImage}>
+                {isUploading ? "Saving..." : "Save Image"}
+              </Button>
+            </div>
           </div>
-        </div>
-        
-        <div className="pb-2">
-          <h1 className="text-2xl font-bold">{business.name}</h1>
-          <p className="text-muted-foreground text-sm">{business.category}</p>
-        </div>
-      </div>
-    </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };

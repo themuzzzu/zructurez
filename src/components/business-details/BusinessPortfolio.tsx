@@ -1,3 +1,4 @@
+
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
@@ -8,12 +9,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { ImageUpload } from "@/components/ImageUpload";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import type { Business } from "@/types/business";
+import type { Business, PortfolioItem } from "@/types/business";
 import { incrementViews } from "@/services/postService";
 import { Eye } from "lucide-react";
 
 interface BusinessPortfolioTabProps {
-  portfolio: Business['business_portfolio'];
+  portfolio: PortfolioItem[];
   businessId?: string;
 }
 
@@ -69,6 +70,7 @@ export const BusinessPortfolioTab = ({ portfolio, businessId }: BusinessPortfoli
           title,
           description: description.trim() || null,
           image_url: imageUrl,
+          views: 0
         });
 
       if (error) throw error;

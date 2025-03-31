@@ -17,7 +17,12 @@ export const BusinessAboutTab = ({ business }: BusinessAboutTabProps) => {
       
       // If it's an object, try to format it
       const formattedHours = Object.entries(hours)
-        .map(([day, { open, close }]) => `${day}: ${open} - ${close}`)
+        .map(([day, time]) => {
+          if (time && typeof time === 'object' && 'open' in time && 'close' in time) {
+            return `${day}: ${time.open} - ${time.close}`;
+          }
+          return `${day}: Closed`;
+        })
         .join(', ');
       
       return formattedHours || JSON.stringify(hours);
@@ -33,7 +38,7 @@ export const BusinessAboutTab = ({ business }: BusinessAboutTabProps) => {
       name={business.name}
       description={business.description}
       location={business.location}
-      hours={formatHours(business.hours)}
+      hours={formatHours(business.hours || business.business_hours)}
       contact={business.contact}
       verified={business.verified}
       image_url={business.image_url}

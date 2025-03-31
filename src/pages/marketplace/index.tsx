@@ -1,209 +1,183 @@
 
-import { useState, useEffect, Suspense } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { Layout } from "@/components/layout/Layout";
-import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { MarketplaceHeader } from "./MarketplaceHeader";
-import { MarketplaceTabs } from "./MarketplaceTabs";
-import { BrowseTabContent } from "./BrowseTabContent";
-import { CategoryTabContent } from "./CategoryTabContent";
-import { SearchTabContent } from "./SearchTabContent";
-import { MarketplaceFeatures } from "@/components/marketplace/MarketplaceFeatures";
-import { MarketplacePromotions } from "@/components/marketplace/MarketplacePromotions";
-import { MarketplaceHero } from "@/components/marketplace/MarketplaceHero";
-import { LocalBusinessSpotlight } from "@/components/marketplace/LocalBusinessSpotlight";
-import { BannerCarousel } from "@/components/marketplace/BannerCarousel";
-import { Skeleton } from "@/components/ui/skeleton";
-import { measureRenderTime } from "@/utils/performanceTracking";
-import { globalCache } from "@/utils/cacheUtils";
-import { useNavigate, useLocation } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import { Navbar } from '@/components/Navbar';
+import { MobileNav } from '@/components/navbar/MobileNav';
+import { Categories } from '@/components/marketplace/Categories';
+import { Tab, TabContent, TabList, TabTrigger } from '@/components/ui/tabs-alt';
+import { SponsoredProducts } from '@/components/marketplace/SponsoredProducts';
+import { TrendingProducts } from '@/components/marketplace/TrendingProducts';
+import { MarketplaceHeader } from './MarketplaceHeader';
+import { BrowseTabContent } from './BrowseTabContent';
+import { CategoryTabContent } from './CategoryTabContent';
+import { supabase } from '@/integrations/supabase/client';
+import { AnimatePresence, motion } from 'framer-motion';
 
-// Simple fallback components
-const FeaturesFallback = () => <Skeleton className="h-40 w-full" />;
-const PromotionsFallback = () => <Skeleton className="h-40 w-full" />;
-const BannerFallback = () => <Skeleton className="h-56 w-full rounded-lg mb-6" />;
+export default function MarketplaceIndex() {
+  const [activeTab, setActiveTab] = useState('browse');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [popularSearches, setPopularSearches] = useState([]);
+  const [trendingCategories, setTrendingCategories] = useState([]);
 
-const Marketplace = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const searchParams = new URLSearchParams(location.search);
-  
-  // Track initial render performance
   useEffect(() => {
-    const startTime = performance.now();
-    
-    return () => {
-      const endTime = performance.now();
-      console.debug(`Marketplace initial render time: ${(endTime - startTime).toFixed(2)}ms`);
+    const fetchPopularSearches = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('search_suggestions')
+          .select('*')
+          .order('frequency', { ascending: false })
+          .limit(6);
+        
+        if (error) throw error;
+        setPopularSearches(data || []);
+      } catch (err) {
+        console.error('Error fetching popular searches:', err);
+      }
     };
+
+    const fetchTrendingCategories = async () => {
+      try {
+        // Fetch categories with most products
+        const { data, error } = await supabase
+          .from('products')
+          .select('category, count')
+          .not('category', 'is', null)
+          .group('category')
+          .order('count', { ascending: false })
+          .limit(5);
+        
+        if (error) throw error;
+        setTrendingCategories(data?.map(item => item.category) || []);
+      } catch (err) {
+        console.error('Error fetching trending categories:', err);
+        // Fallback to preset categories
+        setTrendingCategories(['clothing', 'electronics', 'home', 'beauty', 'sports']);
+      }
+    };
+
+    fetchPopularSearches();
+    fetchTrendingCategories();
   }, []);
 
-  const [isCartOpen, setIsCartOpen] = useState(false);
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
-  const [selectedCategory, setSelectedCategory] = useState<string>(searchParams.get("category") || "all");
-  const [showDiscounted, setShowDiscounted] = useState(false);
-  const [showUsed, setShowUsed] = useState(false);
-  const [showBranded, setShowBranded] = useState(false);
-  const [sortOption, setSortOption] = useState("newest");
-  const [priceRange, setPriceRange] = useState("all");
-  const [activeTab, setActiveTab] = useState(searchQuery || selectedCategory !== "all" ? "search" : "browse");
+  const handleSearch = async (term) => {
+    if (!term.trim()) return;
 
-  // Update URL when search or category changes
-  useEffect(() => {
-    const params = new URLSearchParams();
-    if (searchQuery) params.set("search", searchQuery);
-    if (selectedCategory !== "all") params.set("category", selectedCategory);
+    setIsSearching(true);
+    setSearchTerm(term);
     
-    const newSearch = params.toString();
-    if (newSearch) {
-      navigate(`/marketplace?${newSearch}`, { replace: true });
-    } else {
-      navigate('/marketplace', { replace: true });
-    }
-  }, [searchQuery, selectedCategory, navigate]);
-  
-  // Optimized cart count query with caching
-  const { data: cartItemCount = 0 } = useQuery({
-    queryKey: ['cartCount'],
-    queryFn: async () => {
-      // Check cache first
-      const cacheKey = 'cart-count';
-      const cachedCount = globalCache.get<number>(cacheKey);
-      if (cachedCount !== null) {
-        return cachedCount;
-      }
+    try {
+      // Log search query for analytics
+      await supabase.from('search_queries').insert({
+        query: term,
+        model_used: 'marketplace-search',
+        results_count: 0, // Will be updated after results are fetched
+      });
 
-      const { data: session } = await supabase.auth.getSession();
-      if (!session?.session?.user) return 0;
-
-      const { count, error } = await supabase
-        .from('cart_items')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', session.session.user.id);
-
+      // Fetch search results
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .textSearch('title', term, {
+          type: 'websearch',
+          config: 'english'
+        })
+        .limit(20);
+      
       if (error) throw error;
       
-      // Cache the result for 30 seconds
-      const result = count || 0;
-      globalCache.set(cacheKey, result, 30 * 1000);
-      return result;
-    },
-    staleTime: 30 * 1000, // 30 seconds
-  });
+      // Update results count in analytics
+      await supabase.from('search_queries')
+        .update({ results_count: data.length })
+        .eq('query', term)
+        .is('user_id', null);
+      
+      setSearchResults(data || []);
+    } catch (err) {
+      console.error('Error performing search:', err);
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
 
-  const handleCategorySelect = (category: string) => {
-    console.log("Selected category:", category);
+  const handleCategorySelect = (category) => {
     setSelectedCategory(category);
-    if (activeTab !== "search") {
-      setActiveTab("search");
-    }
+    setActiveTab('category');
   };
 
-  const handleSearchSelect = (term: string) => {
-    setSearchQuery(term);
-    if (activeTab !== "search") {
-      setActiveTab("search");
-    }
+  const handleSearchSelect = (term) => {
+    setSearchTerm(term);
+    handleSearch(term);
   };
 
-  const resetFilters = () => {
-    setSelectedCategory("all");
-    setShowDiscounted(false);
-    setShowUsed(false);
-    setShowBranded(false);
-    setSortOption("newest");
-    setPriceRange("all");
-  };
-
-  useEffect(() => {
-    // Scroll to top when category changes
-    window.scrollTo(0, 0);
-  }, [selectedCategory]);
-
-  // Use the measureRenderTime utility for performance tracking
-  return measureRenderTime('MarketplacePage', () => (
-    <Layout hideSidebar>
-      <div className="min-h-screen bg-slate-50 dark:bg-zinc-900 pb-16">
-        {/* Header */}
+  return (
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      
+      <main className="container mx-auto px-4 pt-20 pb-16 max-w-7xl">
         <MarketplaceHeader 
-          isCartOpen={isCartOpen}
-          setIsCartOpen={setIsCartOpen}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          isFilterOpen={isFilterOpen}
-          setIsFilterOpen={setIsFilterOpen}
-          cartItemCount={cartItemCount}
+          onSearch={handleSearch} 
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          isSearching={isSearching}
+          popularSearches={popularSearches}
         />
-
-        <div className="max-w-[1400px] mx-auto px-4">
-          {/* Hero Section - Only visible on browse tab */}
-          {activeTab === "browse" && (
-            <>
-              <MarketplaceHero 
-                onCategorySelect={handleCategorySelect}
-                onSearch={handleSearchSelect}
-              />
-              
-              <Suspense fallback={<BannerFallback />}>
-                <BannerCarousel />
-              </Suspense>
-            </>
-          )}
-          
-          {activeTab === "browse" && (
-            <Suspense fallback={<FeaturesFallback />}>
-              <MarketplaceFeatures />
-            </Suspense>
-          )}
-          
-          <MarketplaceTabs activeTab={activeTab} setActiveTab={setActiveTab}>
-            <TabsContent value="browse" className="animate-in fade-in-50 duration-300">
-              <BrowseTabContent 
-                handleCategorySelect={handleCategorySelect}
-                handleSearchSelect={handleSearchSelect}
-              />
-            </TabsContent>
-            
-            <TabsContent value="categories" className="animate-in fade-in-50 duration-300">
-              <CategoryTabContent 
-                setSelectedCategory={setSelectedCategory}
-                setActiveTab={setActiveTab}
-              />
-            </TabsContent>
-            
-            <TabsContent value="search" className="animate-in fade-in-50 duration-300">
-              <SearchTabContent
-                searchQuery={searchQuery}
-                selectedCategory={selectedCategory}
-                showDiscounted={showDiscounted}
-                setShowDiscounted={setShowDiscounted}
-                showUsed={showUsed}
-                setShowUsed={setShowUsed}
-                showBranded={showBranded}
-                setShowBranded={setShowBranded}
-                sortOption={sortOption}
-                setSortOption={setSortOption}
-                priceRange={priceRange}
-                setPriceRange={setPriceRange}
-                resetFilters={resetFilters}
-              />
-            </TabsContent>
-          </MarketplaceTabs>
-          
-          {activeTab === "browse" && (
-            <>
-              <LocalBusinessSpotlight />
-              <Suspense fallback={<PromotionsFallback />}>
-                <MarketplacePromotions />
-              </Suspense>
-            </>
-          )}
+        
+        <div className="mt-2 mb-6 overflow-x-auto scrollbar-hide">
+          <Categories 
+            onCategorySelect={handleCategorySelect} 
+            selectedCategory={selectedCategory}
+            trendingCategories={trendingCategories}
+          />
         </div>
-      </div>
-    </Layout>
-  ));
-};
 
-export default Marketplace;
+        <Tab value={activeTab} onValueChange={setActiveTab}>
+          <TabList className="mb-4">
+            <TabTrigger value="browse">Browse</TabTrigger>
+            <TabTrigger value="category">Categories</TabTrigger>
+            <TabTrigger value="trending">Trending</TabTrigger>
+          </TabList>
+
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+            >
+              <TabContent value="browse">
+                <BrowseTabContent 
+                  searchResults={searchResults} 
+                  searchTerm={searchTerm} 
+                  isSearching={isSearching}
+                  onCategorySelect={handleCategorySelect}
+                  onSearchSelect={handleSearchSelect}
+                />
+              </TabContent>
+
+              <TabContent value="category">
+                <CategoryTabContent 
+                  selectedCategory={selectedCategory} 
+                  setSelectedCategory={setSelectedCategory}
+                  setActiveTab={setActiveTab}
+                />
+              </TabContent>
+
+              <TabContent value="trending">
+                <div className="space-y-8">
+                  <SponsoredProducts />
+                  <TrendingProducts />
+                </div>
+              </TabContent>
+            </motion.div>
+          </AnimatePresence>
+        </Tab>
+      </main>
+      
+      <MobileNav />
+    </div>
+  );
+}

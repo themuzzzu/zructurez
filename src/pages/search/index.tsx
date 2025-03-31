@@ -4,8 +4,9 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { EnhancedShoppingSection } from "@/components/EnhancedShoppingSection";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Filter, Heart, Search } from "lucide-react";
+import { ArrowLeft, Filter, Heart } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { SearchIcon } from "lucide-react";
 
 export default function Search() {
   const [searchParams] = useSearchParams();
@@ -83,7 +84,7 @@ export default function Search() {
               size="icon" 
               className="absolute right-0 top-0 h-full"
             >
-              <Search className="h-4 w-4" />
+              <SearchIcon className="h-4 w-4" />
             </Button>
           </form>
         </div>

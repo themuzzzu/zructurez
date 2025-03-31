@@ -54,7 +54,7 @@ export const BusinessProfile = ({
 
   return (
     <div className="space-y-4 sm:space-y-6 animate-fade-in">
-      <BusinessImageSection businessId={id} />
+      <BusinessImageSection business={id} />
       
       <BusinessActionButtons businessId={id} />
       

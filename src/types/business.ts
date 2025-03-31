@@ -28,22 +28,29 @@ export interface Business {
   created_at: string;
   updated_at?: string;
   owner_id?: string;
+  user_id?: string;
   business_hours?: BusinessHours;
   social_media?: SocialMedia;
   services?: BusinessService[];
   products?: BusinessProduct[];
   business_products?: BusinessProduct[];
   business_portfolio?: PortfolioItem[];
+  location?: string;
   contact?: string;
+  hours?: string;
+  wait_time?: string;
+  is_open?: boolean;
+  closure_reason?: string;
   bio?: string;
   aadhar_number?: string;
   appointment_price?: number;
   consultation_price?: number;
-  closure_reason?: string;
   verified_reason?: string;
   status?: string;
   image_position?: ImagePosition;
   posts?: UserPost[];
+  owners?: BusinessOwner[];
+  staff_details?: StaffMember[];
 }
 
 export interface BusinessHours {
@@ -80,6 +87,8 @@ export interface BusinessProduct {
   price: number;
   image_url?: string;
   business_id: string;
+  category?: string;
+  stock?: number;
 }
 
 export interface PortfolioItem {
@@ -88,6 +97,7 @@ export interface PortfolioItem {
   description?: string;
   image_url: string;
   business_id: string;
+  views?: number;
 }
 
 export interface BusinessOwner {
@@ -98,6 +108,9 @@ export interface BusinessOwner {
   image_url?: string;
   contact?: string;
   business_id?: string;
+  position?: string;
+  experience?: string;
+  qualifications?: string;
 }
 
 export interface StaffMember {
@@ -108,6 +121,8 @@ export interface StaffMember {
   image_url?: string;
   contact?: string;
   business_id?: string;
+  position?: string;
+  experience?: string;
 }
 
 export interface MembershipPlan {
@@ -129,6 +144,7 @@ export interface UserPost {
   likes_count?: number;
   comments_count?: number;
   reposts_count?: number;
+  category?: string;
   profile?: {
     id: string;
     username: string;

@@ -20,7 +20,8 @@ export const useFeed = () => {
           content,
           image_url,
           created_at,
-          profiles (id, username, avatar_url, full_name)
+          category,
+          profiles:profile_id (id, username, avatar_url, name)
         `)
         .order("created_at", { ascending: false })
         .limit(20);
@@ -36,18 +37,19 @@ export const useFeed = () => {
       const transformedPosts: UserPost[] = data.map(post => ({
         id: post.id,
         user_id: post.user_id,
-        profile_id: post.profiles?.id,
+        profile_id: post.profiles?.id || '',
         content: post.content,
         image_url: post.image_url,
         created_at: post.created_at,
+        category: post.category,
         likes_count: Math.floor(Math.random() * 50), // Mock data for demonstration
         comments_count: Math.floor(Math.random() * 20), // Mock data for demonstration
         reposts_count: Math.floor(Math.random() * 10), // Mock data for demonstration
         profile: {
-          id: post.profiles?.id,
+          id: post.profiles?.id || '',
           username: post.profiles?.username || 'user',
           avatar_url: post.profiles?.avatar_url,
-          full_name: post.profiles?.full_name || 'Anonymous User'
+          full_name: post.profiles?.name || 'Anonymous User'
         }
       }));
 

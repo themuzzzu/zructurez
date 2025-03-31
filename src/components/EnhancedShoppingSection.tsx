@@ -37,7 +37,8 @@ export const EnhancedShoppingSection = ({
         return [];
       }
       
-      return data as Business[];
+      // Cast the data to Business[] to satisfy TypeScript
+      return data as unknown as Business[];
     },
     enabled: !!searchQuery
   });

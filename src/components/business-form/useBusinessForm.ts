@@ -29,9 +29,7 @@ export const useBusinessForm = (initialData?: any, onSuccess?: () => void) => {
       name: "", 
       role: "Primary Owner", 
       position: "", 
-      experience: "", 
-      bio: "",
-      image_url: null 
+      experience: "" 
     }],
     staff_details: [],
     business_products: [],
@@ -57,9 +55,7 @@ export const useBusinessForm = (initialData?: any, onSuccess?: () => void) => {
           name: "", 
           role: "Primary Owner", 
           position: "", 
-          experience: "", 
-          bio: "",
-          image_url: null 
+          experience: "" 
         }],
         staff_details: initialData.staff_details || [],
         business_products: initialData.business_products || [],
