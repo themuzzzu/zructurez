@@ -1,4 +1,3 @@
-
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,9 +8,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatPrice } from "@/utils/productUtils";
 import { ProductType } from "./types/ProductTypes";
+import { Product } from "@/types/product";
 
 interface ProductCardCompactProps {
-  product: ProductType;
+  product: Product | ProductType;
   onClick: () => void;
   sponsored?: boolean;
 }

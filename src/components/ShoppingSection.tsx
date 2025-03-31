@@ -41,6 +41,16 @@ interface ShoppingSectionProps {
   gridLayout?: GridLayoutType;
 }
 
+interface ProductInput {
+  title: string;
+  description: string;
+  price: number;
+  image_url: string;
+  stock: number;
+  business_id: string;
+  category: string;
+}
+
 export const ShoppingSection = ({
   searchQuery = "",
   selectedCategory = "all",
@@ -56,8 +66,8 @@ export const ShoppingSection = ({
   const [isAddProductDialogOpen, setIsAddProductDialogOpen] = useState(false);
   const [isFilterMobileOpen, setIsFilterMobileOpen] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
-  const [newProduct, setNewProduct] = useState<Omit<Product, 'id' | 'created_at'>>({
-    name: '',
+  const [newProduct, setNewProduct] = useState<ProductInput>({
+    title: '',
     description: '',
     price: 0,
     image_url: '',
@@ -93,29 +103,26 @@ export const ShoppingSection = ({
     queryFn: async () => {
       let query = supabase
         .from('products')
-        .select('*')
-        .ilike('name', `%${searchQuery}%`);
+        .select('*');
+      
+      if (searchQuery) {
+        query = query.ilike('title', `%${searchQuery}%`);
+      }
 
       if (selectedCategory !== 'all') {
         query = query.eq('category', selectedCategory);
       }
 
       if (showDiscounted) {
-        // Assuming you have a 'discounted' column in your products table
-        // This is just a placeholder, adjust the query as needed
-        query = query.gt('discount', 0);
+        query = query.eq('is_discounted', true);
       }
 
       if (showUsed) {
-        // Assuming you have a 'condition' column in your products table
-        // This is just a placeholder, adjust the query as needed
-        query = query.eq('condition', 'used');
+        query = query.eq('is_used', true);
       }
 
       if (showBranded) {
-        // Assuming you have a 'brand' column in your products table
-        // This is just a placeholder, adjust the query as needed
-        query = query.not('brand', 'is', null);
+        query = query.eq('is_branded', true);
       }
 
       // Sorting options
@@ -183,16 +190,6 @@ export const ShoppingSection = ({
     setNewProduct(prev => ({ ...prev, price: parseFloat(value) }));
   };
 
-  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const { value } = e.target;
-    setNewProduct(prev => ({ ...prev, category: value }));
-  };
-
-  const handleBusinessChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const { value } = e.target;
-    setNewProduct(prev => ({ ...prev, business_id: value }));
-  };
-
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -235,7 +232,7 @@ export const ShoppingSection = ({
   };
 
   const handleAddProduct = async () => {
-    if (!newProduct.name || !newProduct.description || !newProduct.price || !newProduct.image_url || !newProduct.business_id || !newProduct.category) {
+    if (!newProduct.title || !newProduct.description || !newProduct.price || !newProduct.image_url || !newProduct.business_id || !newProduct.category) {
       toast({
         title: "Uh oh! Something went wrong.",
         description: "Please fill in all fields.",
@@ -261,7 +258,7 @@ export const ShoppingSection = ({
       refetch();
       handleCloseAddProductDialog();
       setNewProduct({
-        name: '',
+        title: '',
         description: '',
         price: 0,
         image_url: '',
@@ -443,9 +440,6 @@ export const ShoppingSection = ({
 
       {/* Add Product Dialog */}
       <Dialog open={isAddProductDialogOpen} onOpenChange={setIsAddProductDialogOpen}>
-        <DialogTrigger asChild>
-          <Button>Open</Button>
-        </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Add Product</DialogTitle>
@@ -455,14 +449,14 @@ export const ShoppingSection = ({
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right">
+              <Label htmlFor="title" className="text-right">
                 Name
               </Label>
               <Input
                 type="text"
-                id="name"
-                name="name"
-                value={newProduct.name}
+                id="title"
+                name="title"
+                value={newProduct.title}
                 onChange={handleInputChange}
                 className="col-span-3"
               />

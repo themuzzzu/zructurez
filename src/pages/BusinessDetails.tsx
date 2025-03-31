@@ -1,3 +1,4 @@
+
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,7 +12,7 @@ import { CreateBusinessForm } from "@/components/CreateBusinessForm";
 import { useState, useEffect } from "react";
 import { BusinessTabs } from "@/components/business-details/BusinessTabs";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import type { Business, StaffMember, BusinessOwner, MembershipPlan } from "@/types/business";
+import { Business } from "@/types/business";
 
 const BusinessDetails = () => {
   const { id } = useParams();
@@ -20,7 +21,7 @@ const BusinessDetails = () => {
 
   const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id || '');
 
-  const { data: business, isLoading, error, refetch } = useQuery({
+  const { data: businessData, isLoading, error, refetch } = useQuery({
     queryKey: ['business', id],
     queryFn: async () => {
       if (!isValidUUID) {
@@ -41,112 +42,53 @@ const BusinessDetails = () => {
       if (error) throw error;
       if (!data) throw new Error('Business not found');
       
-      const {
-        address = "",
-        city = "",
-        state = "",
-        zip = "",
-        phone = business?.contact || "",
-        email = "",
-        sub_category = business?.category || "",
-        logo_url = business?.image_url || "",
-        ratings = 0,
-        reviews_count = 0,
-        is_verified = business?.verified || false,
-        is_open = true,
-        is_featured = false,
-        latitude = null,
-        longitude = null,
-        tags = [],
-        social_media = {},
-        services = [],
-        products = [],
-        cover_url = "",
-        updated_at = business?.created_at
-      } = data || {};
-
-      const parsedData: Business = {
-        ...data,
-        id: data.id,
-        name: data.name,
-        description: data.description,
-        category: data.category,
-        user_id: data.user_id,
-        image_url: data.image_url || '',
-        is_open: data.is_open || false,
-        created_at: data.created_at,
-        address,
-        city,
-        state,
-        zip,
-        phone,
-        email,
-        sub_category,
-        logo_url,
-        ratings,
-        reviews_count,
-        is_verified,
-        verified: data.verified || false,
-        is_featured,
-        latitude,
-        longitude,
-        tags,
-        social_media,
-        services,
-        products,
-        location: data.location || null,
-        contact: data.contact || null,
-        bio: data.bio || null,
-        hours: data.hours || '',
-        appointment_price: data.appointment_price || null,
-        consultation_price: data.consultation_price || null,
-        staff_details: Array.isArray(data.staff_details) 
-          ? data.staff_details.map((staff: any): StaffMember => ({
-              name: staff.name || null,
-              position: staff.position || null,
-              experience: staff.experience || null,
-              image_url: staff.image_url || null
-            }))
-          : [],
-        owners: Array.isArray(data.owners)
-          ? data.owners.map((owner: any): BusinessOwner => ({
-              name: owner.name || null,
-              role: owner.role || 'Primary Owner',
-              position: owner.position || null,
-              experience: owner.experience || null,
-              image_url: owner.image_url || null
-            }))
-          : [],
-        image_position: typeof data.image_position === 'object' && data.image_position !== null && !Array.isArray(data.image_position)
-          ? {
-              x: Number(data.image_position.x) || 50,
-              y: Number(data.image_position.y) || 50
-            }
-          : { x: 50, y: 50 },
-        verification_documents: Array.isArray(data.verification_documents) 
-          ? data.verification_documents 
-          : [],
-        membership_plans: Array.isArray(data.membership_plans)
-          ? data.membership_plans.map((plan: any): MembershipPlan => ({
-              name: plan.name || '',
-              price: Number(plan.price) || 0,
-              features: Array.isArray(plan.features) ? plan.features : [],
-              description: plan.description || undefined
-            }))
-          : [],
-        business_portfolio: data.business_portfolio || [],
-        business_products: data.business_products || [],
-        posts: data.posts || [],
-        owner_id: data.user_id,
-        cover_url,
-        updated_at,
-        website: data.website || null
-      };
-
-      return parsedData;
+      return data;
     },
     enabled: isValidUUID
   });
+
+  // Convert database data to Business type
+  const business: Business = businessData ? {
+    id: businessData.id,
+    name: businessData.name,
+    description: businessData.description,
+    category: businessData.category,
+    location: businessData.location || '',
+    contact: businessData.contact || '',
+    user_id: businessData.user_id,
+    owner_id: businessData.user_id,
+    verified: businessData.verified || false,
+    image_url: businessData.image_url || '',
+    bio: businessData.bio || '',
+    created_at: businessData.created_at,
+    business_portfolio: businessData.business_portfolio || [],
+    business_products: businessData.business_products || [],
+    posts: businessData.posts || [],
+    is_open: businessData.is_open || false,
+    appointment_price: businessData.appointment_price,
+    consultation_price: businessData.consultation_price,
+    address: businessData.address || '',
+    city: businessData.city || '',
+    state: businessData.state || '',
+    zip: businessData.zip || '',
+    phone: businessData.phone || businessData.contact || '',
+    email: businessData.email || '',
+    sub_category: businessData.sub_category || businessData.category || '',
+    logo_url: businessData.logo_url || businessData.image_url || '',
+    ratings: businessData.ratings || 0,
+    reviews_count: businessData.reviews_count || 0,
+    is_verified: businessData.is_verified || businessData.verified || false,
+    is_featured: businessData.is_featured || false,
+    latitude: businessData.latitude || null,
+    longitude: businessData.longitude || null,
+    tags: businessData.tags || [],
+    social_media: businessData.social_media || {},
+    services: businessData.services || [],
+    products: businessData.products || [],
+    cover_url: businessData.cover_url || '',
+    updated_at: businessData.updated_at || businessData.created_at,
+    website: businessData.website || null
+  } : {} as Business;
 
   const { data: currentUser } = useQuery({
     queryKey: ['current-user'],
@@ -156,7 +98,7 @@ const BusinessDetails = () => {
     },
   });
 
-  const isOwner = currentUser?.id === business?.user_id;
+  const isOwner = currentUser?.id === business.user_id;
 
   useEffect(() => {
     if (id && !isLoading && business && currentUser?.id !== business.user_id) {
@@ -183,7 +125,7 @@ const BusinessDetails = () => {
     return <LoadingView />;
   }
 
-  if (!business) {
+  if (!business.id) {
     return <ErrorView message="Business not found" />;
   }
 

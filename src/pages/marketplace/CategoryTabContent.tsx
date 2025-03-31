@@ -1,121 +1,102 @@
 
-import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FilterCategories } from "@/components/marketplace/filters/FilterCategories";
-import { Skeleton } from "@/components/ui/skeleton";
-import { ProductCard } from "@/components/products/ProductCard";
+import { ShoppingSection } from "@/components/ShoppingSection";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
-import { SponsoredProducts } from "@/components/marketplace/SponsoredProducts";
 
 interface CategoryTabContentProps {
+  selectedCategory: string;
   setSelectedCategory: (category: string) => void;
-  setActiveTab: (tab: string) => void;
-  gridLayout?: GridLayoutType;
-  category?: string;
+  showDiscounted: boolean;
+  setShowDiscounted: (value: boolean) => void;
+  showUsed: boolean;
+  setShowUsed: (value: boolean) => void;
+  showBranded: boolean;
+  setShowBranded: (value: boolean) => void;
+  sortOption: string;
+  setSortOption: (value: string) => void;
+  priceRange: string;
+  setPriceRange: (value: string) => void;
+  resetFilters: () => void;
+  gridLayout: GridLayoutType;
 }
 
-export const CategoryTabContent = ({ 
-  setSelectedCategory, 
-  setActiveTab,
-  gridLayout = "grid4x4",
-  category = "all"
+// Sample categories data
+const categories = [
+  { id: "electronics", name: "Electronics", image: "https://images.unsplash.com/photo-1498049794561-7780e7231661?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8ZWxlY3Ryb25pY3N8ZW58MHx8MHx8fDA%3D" },
+  { id: "clothing", name: "Clothing", image: "https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fGNsb3RoaW5nfGVufDB8fDB8fHww" },
+  { id: "books", name: "Books", image: "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Ym9va3N8ZW58MHx8MHx8fDA%3D" },
+  { id: "home", name: "Home", image: "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8aG9tZSUyMGRlY29yfGVufDB8fDB8fHww" },
+  { id: "beauty", name: "Beauty", image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YmVhdXR5fGVufDB8fDB8fHww" },
+  { id: "sports", name: "Sports", image: "https://images.unsplash.com/photo-1517649763962-0c623066013b?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8c3BvcnRzfGVufDB8fDB8fHww" },
+  { id: "toys", name: "Toys", image: "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8dG95c3xlbnwwfHwwfHx8MA%3D%3D" },
+  { id: "food", name: "Food", image: "https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Zm9vZHxlbnwwfHwwfHx8MA%3D%3D" },
+];
+
+export const CategoryTabContent = ({
+  selectedCategory,
+  setSelectedCategory,
+  showDiscounted,
+  setShowDiscounted,
+  showUsed,
+  setShowUsed,
+  showBranded,
+  setShowBranded,
+  sortOption,
+  setSortOption,
+  priceRange,
+  setPriceRange,
+  resetFilters,
+  gridLayout
 }: CategoryTabContentProps) => {
-  const [activeCategory, setActiveCategory] = useState(category);
-  
-  // Update the active category when the prop changes
-  useEffect(() => {
-    setActiveCategory(category);
-  }, [category]);
-
-  // Fetch products by category
-  const { data: products, isLoading } = useQuery({
-    queryKey: ['category-products', activeCategory],
-    queryFn: async () => {
-      let query = supabase
-        .from('products')
-        .select('*');
-      
-      if (activeCategory && activeCategory !== 'all') {
-        query = query.eq('category', activeCategory);
-      }
-      
-      const { data, error } = await query.order('created_at', { ascending: false }).limit(12);
-      
-      if (error) throw error;
-      return data || [];
-    }
-  });
-
-  // Handle category selection
-  const handleCategoryChange = (category: string) => {
-    setActiveCategory(category);
-    setSelectedCategory(category);
-  };
-
-  // Generate responsive grid classes based on layout
-  const getGridClasses = () => {
-    switch (gridLayout) {
-      case "grid4x4":
-        return "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4";
-      case "grid2x2":
-        return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-3 sm:gap-4";
-      case "grid1x1":
-        return "flex flex-col gap-3";
-      default:
-        return "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4";
-    }
-  };
-
-  return (
-    <div className="space-y-6">
-      <div className="mb-4">
-        <FilterCategories 
-          selectedCategory={activeCategory} 
-          onCategorySelect={handleCategoryChange}
-        />
-      </div>
-      
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">
-          {activeCategory === 'all' ? 'All Categories' : 
-           activeCategory.charAt(0).toUpperCase() + activeCategory.slice(1).replace(/-/g, ' ')}
-        </h2>
-        
-        {isLoading ? (
-          <div className={getGridClasses()}>
-            {[...Array(8)].map((_, i) => (
-              <Card key={i} className="overflow-hidden">
-                <Skeleton className="h-48 w-full" />
-                <div className="p-3">
-                  <Skeleton className="h-4 w-3/4 mb-2" />
-                  <Skeleton className="h-4 w-1/2" />
-                </div>
-              </Card>
-            ))}
-          </div>
-        ) : products && products.length > 0 ? (
-          <div className={getGridClasses()}>
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} layout={gridLayout} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-8">
-            <p className="text-muted-foreground mb-4">No products found in this category.</p>
-            <Button 
-              variant="outline" 
-              onClick={() => handleCategoryChange('all')}
+  if (selectedCategory === "all") {
+    return (
+      <div>
+        <h2 className="text-xl font-bold mb-4">Browse By Category</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          {categories.map((category) => (
+            <Card 
+              key={category.id} 
+              className="overflow-hidden cursor-pointer hover:shadow-md transition-all"
+              onClick={() => setSelectedCategory(category.id)}
             >
-              View All Products
-            </Button>
-          </div>
-        )}
+              <div className="aspect-video relative">
+                <img 
+                  src={category.image} 
+                  alt={category.name}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
+                  <h3 className="text-white font-medium p-3">{category.name}</h3>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  const category = categories.find(cat => cat.id === selectedCategory);
+  
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-bold">{category?.name}</h2>
+        <Button variant="outline" onClick={() => setSelectedCategory("all")}>
+          All Categories
+        </Button>
       </div>
       
-      <SponsoredProducts gridLayout={gridLayout} />
+      <ShoppingSection
+        selectedCategory={selectedCategory}
+        showDiscounted={showDiscounted}
+        showUsed={showUsed}
+        showBranded={showBranded}
+        sortOption={sortOption}
+        priceRange={priceRange}
+        gridLayout={gridLayout}
+      />
     </div>
   );
 };

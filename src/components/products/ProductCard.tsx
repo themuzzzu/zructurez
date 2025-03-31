@@ -4,10 +4,11 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { ProductCardCompact } from "./ProductCardCompact";
 import { ProductCardStandard } from "./ProductCardStandard";
-import { ProductType, GridLayoutType } from "./types/ProductTypes";
+import { GridLayoutType, ProductType } from "./types/ProductTypes";
+import { Product } from "@/types/product";
 
 export interface ProductCardProps {
-  product: ProductType;
+  product: Product | ProductType;
   onClick?: () => void;
   layout?: GridLayoutType;
   sponsored?: boolean;
@@ -30,7 +31,7 @@ export const ProductCard = ({
   };
 
   // Use compact layout for list view
-  if (layout === "grid1x1") {
+  if (layout === "list") {
     return (
       <ProductCardCompact 
         product={product} 

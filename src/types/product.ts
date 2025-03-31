@@ -23,4 +23,7 @@ export interface Product {
   user_id?: string;
   service_product_id?: string;
   reach?: number;
+  // For ShoppingSection compatibility
+  name?: string;
+  business_id?: string;
 }

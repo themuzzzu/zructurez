@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -81,12 +82,9 @@ export const BusinessImageSection = ({ businessId }: BusinessImageSectionProps) 
       const { error: updateError } = await supabase
         .from('businesses')
         .update({
-          image_url: imageFile ? uploadedUrl : business.image_url,
-          image_position: positionValues,
-          image_scale: scaleValue,
-          cover_url: coverImageFile ? coverUploadedUrl : business.cover_url
+          cover_url: newCoverUrl
         })
-        .eq('id', business.id);
+        .eq('id', business?.id);
 
       if (updateError) {
         toast({

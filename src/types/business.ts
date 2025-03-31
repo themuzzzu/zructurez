@@ -1,4 +1,43 @@
 
+export interface BusinessHours {
+  open: string;
+  close: string;
+}
+
+export interface StaffMember {
+  name: string | null;
+  position: string | null;
+  experience: string | null;
+  image_url?: string | null;
+}
+
+export interface BusinessOwner {
+  name: string | null;
+  role: string;
+  position: string | null;
+  experience: string | null;
+  image_url?: string | null;
+}
+
+export interface MembershipPlan {
+  name: string;
+  price: number;
+  features: string[];
+  description?: string;
+}
+
+export interface BusinessProduct {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  stock?: number;
+  image_url?: string;
+  category?: string;
+  created_at?: string;
+  business_id?: string;
+}
+
 export interface Business {
   id: string;
   name: string;
@@ -31,12 +70,13 @@ export interface Business {
   created_at?: string;
   updated_at?: string;
   user_id?: string;
+  owner_id?: string;
   appointment_price?: number;
   consultation_price?: number;
   image_scale?: number;
   image_position?: { x: number; y: number };
-  staff_details?: any[];
-  owners?: any[];
+  staff_details?: StaffMember[];
+  owners?: BusinessOwner[];
   show_in_services?: boolean;
   aadhar_number?: string;
   gst_number?: string;
@@ -57,5 +97,8 @@ export interface Business {
   services?: any[];
   products?: any[];
   posts?: any[];
-  membership_plans?: any[];
+  membership_plans?: MembershipPlan[];
+  // Additional fields for business portfolio and products
+  business_portfolio?: any[];
+  business_products?: BusinessProduct[];
 }

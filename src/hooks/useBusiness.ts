@@ -1,8 +1,9 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export const useBusiness = (businessId: string) => {
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['business', businessId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -55,5 +56,6 @@ export const useBusiness = (businessId: string) => {
     business: formattedBusiness,
     isLoading,
     error,
+    refetchBusiness: refetch
   };
 };

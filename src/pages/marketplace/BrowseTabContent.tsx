@@ -1,31 +1,47 @@
 
-import { TrendingProducts } from "@/components/marketplace/TrendingProducts";
-import { RecommendedProducts } from "@/components/marketplace/RecommendedProducts";
-import { DiscountCollection } from "@/components/marketplace/DiscountCollection";
-import { CategoryAvatars } from "@/components/marketplace/CategoryAvatars";
-import { SponsoredProducts } from "@/components/marketplace/SponsoredProducts";
-import { TrendingSearches } from "@/components/marketplace/TrendingSearches";
+import { ShoppingSection } from "@/components/ShoppingSection";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
 
 interface BrowseTabContentProps {
-  handleCategorySelect: (category: string) => void;
-  handleSearchSelect: (term: string) => void;
-  gridLayout?: GridLayoutType;
+  selectedCategory: string;
+  showDiscounted: boolean;
+  setShowDiscounted: (value: boolean) => void;
+  showUsed: boolean;
+  setShowUsed: (value: boolean) => void;
+  showBranded: boolean;
+  setShowBranded: (value: boolean) => void;
+  sortOption: string;
+  setSortOption: (value: string) => void;
+  priceRange: string;
+  setPriceRange: (value: string) => void;
+  resetFilters: () => void;
+  gridLayout: GridLayoutType;
 }
 
 export const BrowseTabContent = ({ 
-  handleCategorySelect, 
-  handleSearchSelect,
-  gridLayout = "grid4x4"
+  selectedCategory,
+  showDiscounted,
+  setShowDiscounted,
+  showUsed,
+  setShowUsed,
+  showBranded,
+  setShowBranded,
+  sortOption,
+  setSortOption,
+  priceRange,
+  setPriceRange,
+  resetFilters,
+  gridLayout
 }: BrowseTabContentProps) => {
   return (
-    <div className="space-y-10">
-      <CategoryAvatars onCategorySelect={handleCategorySelect} />
-      <TrendingSearches onSearchSelect={handleSearchSelect} />
-      <TrendingProducts gridLayout={gridLayout} />
-      <DiscountCollection gridLayout={gridLayout} />
-      <RecommendedProducts gridLayout={gridLayout} />
-      <SponsoredProducts gridLayout={gridLayout} />
-    </div>
+    <ShoppingSection
+      selectedCategory={selectedCategory}
+      showDiscounted={showDiscounted}
+      showUsed={showUsed}
+      showBranded={showBranded}
+      sortOption={sortOption}
+      priceRange={priceRange}
+      gridLayout={gridLayout}
+    />
   );
 };

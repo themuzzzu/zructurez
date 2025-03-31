@@ -1,112 +1,43 @@
 
-import { useState } from "react";
-import { Card } from "@/components/ui/card";
 import { useFeed } from "@/hooks/useFeed";
 import { PostCard } from "./PostCard";
+import { Spinner } from "@/components/common/Spinner";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, Plus } from "lucide-react";
-import { CreatePost } from "@/components/CreatePost";
-import { useAuth } from "@/hooks/useAuth";
-import { toast } from "sonner";
+import { RefreshCw } from "lucide-react";
+import { EmptyFeed } from "./EmptyFeed";
+import { FeedError } from "./FeedError";
 
 export const FeedSection = () => {
-  const { user, loading: authLoading } = useAuth();
   const { posts, loading, error, refreshFeed } = useFeed();
-  const [refreshing, setRefreshing] = useState(false);
-  const [showCreatePost, setShowCreatePost] = useState(false);
 
-  const handleRefresh = () => {
-    setRefreshing(true);
-    refreshFeed();
-    toast.success("Refreshing feed...");
-    setTimeout(() => setRefreshing(false), 1000);
-  };
-
-  if (authLoading) {
+  if (loading) {
     return (
-      <div className="py-4 text-center">
-        <RefreshCw className="h-6 w-6 animate-spin mx-auto mb-2" />
-        <p className="text-muted-foreground">Loading your feed...</p>
+      <div className="flex justify-center p-8">
+        <Spinner size="lg" />
       </div>
     );
   }
 
+  if (error) {
+    return <FeedError onRetry={refreshFeed} />;
+  }
+
+  if (!posts || posts.length === 0) {
+    return <EmptyFeed />;
+  }
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-bold">Your Feed</h2>
-        <div className="flex space-x-2">
-          {user && (
-            <Button 
-              variant="outline" 
-              size="icon"
-              onClick={() => setShowCreatePost(!showCreatePost)}
-            >
-              <Plus className="h-5 w-5" />
-            </Button>
-          )}
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={handleRefresh}
-            disabled={refreshing}
-            className={refreshing ? "animate-spin" : ""}
-          >
-            <RefreshCw className="h-5 w-5" />
-          </Button>
-        </div>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold">Latest Updates</h2>
+        <Button variant="ghost" size="sm" onClick={refreshFeed} className="gap-2">
+          <RefreshCw className="h-4 w-4" />
+          Refresh
+        </Button>
       </div>
-
-      {showCreatePost && user && (
-        <CreatePost 
-          onSuccess={() => {
-            refreshFeed();
-            setShowCreatePost(false);
-            toast.success("Post created successfully!");
-          }} 
-        />
-      )}
-
-      {!loading && posts.length === 0 && (
-        <Card className="p-8 text-center">
-          <h3 className="text-xl font-medium mb-2">No posts yet</h3>
-          <p className="text-muted-foreground mb-4">
-            Be the first to post or follow some users to see their posts here
-          </p>
-          {user && (
-            <Button 
-              variant="default"
-              onClick={() => setShowCreatePost(true)}
-            >
-              Create Your First Post
-            </Button>
-          )}
-        </Card>
-      )}
-      
-      {loading && !refreshing ? (
-        <div className="py-8 text-center">
-          <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p>Loading posts...</p>
-        </div>
-      ) : error ? (
-        <Card className="p-4 text-center">
-          <p className="text-destructive">{error}</p>
-          <Button 
-            variant="outline" 
-            onClick={refreshFeed} 
-            className="mt-2"
-          >
-            Try Again
-          </Button>
-        </Card>
-      ) : (
-        <div className="space-y-1">
-          {posts.map((post) => (
-            <PostCard key={post.id} post={post} onRefresh={refreshFeed} />
-          ))}
-        </div>
-      )}
+      {posts.map((post) => (
+        <PostCard key={post.id} post={post} />
+      ))}
     </div>
   );
 };

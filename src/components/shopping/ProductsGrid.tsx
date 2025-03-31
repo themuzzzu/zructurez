@@ -26,8 +26,10 @@ export const ProductsGrid = ({
         return "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-3 md:gap-4";
       case "grid2x2":
         return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-3 sm:gap-4";
-      case "grid1x1":
+      case "list":
         return "flex flex-col gap-3";
+      case "grid3x3":
+        return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4";
       default:
         return "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4";
     }
@@ -36,12 +38,12 @@ export const ProductsGrid = ({
   if (isLoading) {
     return (
       <div className={getGridClasses()}>
-        {[...Array(layout === "grid1x1" ? 4 : 8)].map((_, i) => (
-          <Card key={i} className="overflow-hidden">
-            <Skeleton className={layout === "grid1x1" ? "h-24 w-full" : "h-48 w-full"} />
-            <div className="p-3">
-              <Skeleton className="h-4 w-3/4 mb-2" />
-              <Skeleton className="h-4 w-1/2" />
+        {[...Array(layout === "list" ? 4 : 8)].map((_, i) => (
+          <Card key={i} className="overflow-hidden animate-pulse">
+            <div className="w-full aspect-square bg-gray-200 dark:bg-gray-700"></div>
+            <div className="p-3 space-y-2">
+              <div className="h-4 w-3/4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+              <div className="h-4 w-1/2 bg-gray-200 dark:bg-gray-700 rounded"></div>
             </div>
           </Card>
         ))}
@@ -51,12 +53,12 @@ export const ProductsGrid = ({
   
   if (!products || products.length === 0) {
     return (
-      <div className="text-center py-12 bg-white rounded-lg shadow-sm dark:bg-zinc-800">
-        <ImageOff className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-        <p className="text-muted-foreground mb-4">No products found matching your filters.</p>
-        <Button variant="outline" onClick={onOpenAddProductDialog}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Your First Product
+      <div className="flex flex-col items-center justify-center py-10 text-center">
+        <ImageOff className="h-16 w-16 text-muted-foreground mb-4" />
+        <h3 className="text-lg font-medium">No products found</h3>
+        <p className="text-muted-foreground mt-1 mb-6">There are no products matching your criteria</p>
+        <Button onClick={onOpenAddProductDialog} className="gap-2">
+          <Plus className="h-4 w-4" /> Add Product
         </Button>
       </div>
     );
@@ -65,9 +67,11 @@ export const ProductsGrid = ({
   return (
     <div className={getGridClasses()}>
       {products.map((product) => (
-        <div key={product.id} className="h-full">
-          <ProductCard product={product} layout={layout} />
-        </div>
+        <ProductCard 
+          key={product.id} 
+          product={product} 
+          layout={layout}
+        />
       ))}
     </div>
   );
