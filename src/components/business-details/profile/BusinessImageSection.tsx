@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -18,6 +17,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
 import { useBusiness } from "@/hooks/useBusiness";
+import { Business } from "@/types/business";
 
 interface BusinessImageSectionProps {
   businessId: string;
@@ -74,16 +74,21 @@ export const BusinessImageSection = ({ businessId }: BusinessImageSectionProps) 
     }
   };
 
-  const handleSaveCover = async () => {
+  const saveChanges = async () => {
     if (!newCoverUrl) return;
 
     try {
-      const { error } = await supabase
+      const { error: updateError } = await supabase
         .from('businesses')
-        .update({ cover_url: newCoverUrl })
-        .eq('id', businessId);
+        .update({
+          image_url: imageFile ? uploadedUrl : business.image_url,
+          image_position: positionValues,
+          image_scale: scaleValue,
+          cover_url: coverImageFile ? coverUploadedUrl : business.cover_url
+        })
+        .eq('id', business.id);
 
-      if (error) {
+      if (updateError) {
         toast({
           title: "Uh oh! Something went wrong.",
           description: "Failed to update the cover image URL.",
@@ -152,7 +157,7 @@ export const BusinessImageSection = ({ businessId }: BusinessImageSectionProps) 
                   />
                 </div>
               </div>
-              <Button onClick={handleSaveCover}>Save changes</Button>
+              <Button onClick={saveChanges}>Save changes</Button>
             </DialogContent>
           </Dialog>
         </div>

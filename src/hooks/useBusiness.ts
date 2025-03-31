@@ -1,108 +1,59 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { Business } from "@/types/business";
 
 export const useBusiness = (businessId: string) => {
-  const {
-    data: business,
-    isLoading,
-    error,
-    refetch: refetchBusiness
-  } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ['business', businessId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('businesses')
-        .select(`
-          *,
-          business_portfolio (*),
-          business_products (*),
-          posts (*)
-        `)
+        .select('*')
         .eq('id', businessId)
-        .maybeSingle();
+        .single();
 
-      if (error) throw error;
-      if (!data) throw new Error('Business not found');
-      
-      // Type assertions to ensure proper type conversions
-      const parsedBusiness: Business = {
-        ...data,
-        // Ensure all required properties exist with defaults
-        id: data.id,
-        name: data.name,
-        description: data.description,
-        category: data.category,
-        user_id: data.user_id,
-        image_url: data.image_url || '',
-        is_open: data.is_open || false,
-        created_at: data.created_at,
-        address: data.address || '',
-        city: data.city || '',
-        state: data.state || '',
-        zip: data.zip || '',
-        phone: data.phone || '',
-        email: data.email || '',
-        sub_category: data.sub_category || '',
-        logo_url: data.logo_url || '',
-        ratings: data.ratings || 0,
-        reviews_count: data.reviews_count || 0,
-        is_verified: data.is_verified || false,
-        verified: data.verified || false,
-        is_featured: data.is_featured || false,
-        latitude: data.latitude || 0,
-        longitude: data.longitude || 0,
-        tags: Array.isArray(data.tags) ? data.tags : [],
-        social_media: data.social_media || { facebook: '', twitter: '', instagram: '', linkedin: '' },
-        services: Array.isArray(data.services) ? data.services : [],
-        products: Array.isArray(data.products) ? data.products : [],
-        location: data.location || null,
-        contact: data.contact || null,
-        bio: data.bio || null,
-        hours: data.hours || '',
-        appointment_price: data.appointment_price || null,
-        consultation_price: data.consultation_price || null,
-        staff_details: Array.isArray(data.staff_details) 
-          ? data.staff_details as any[] 
-          : [],
-        owners: Array.isArray(data.owners)
-          ? data.owners as any[]
-          : [],
-        image_position: typeof data.image_position === 'object' && data.image_position !== null
-          ? { 
-              x: typeof data.image_position === 'object' && 'x' in data.image_position 
-                ? Number(data.image_position.x) || 50 
-                : 50, 
-              y: typeof data.image_position === 'object' && 'y' in data.image_position 
-                ? Number(data.image_position.y) || 50 
-                : 50 
-            } 
-          : { x: 50, y: 50 },
-        verification_documents: Array.isArray(data.verification_documents) 
-          ? data.verification_documents 
-          : [],
-        membership_plans: Array.isArray(data.membership_plans)
-          ? data.membership_plans as any[]
-          : [],
-        business_portfolio: data.business_portfolio || [],
-        business_products: data.business_products || [],
-        posts: data.posts || [],
-        owner_id: data.user_id, // Map user_id as owner_id for permission checks
-        cover_url: data.cover_url || null,
-        updated_at: data.updated_at || data.created_at,
-        website: data.website || null
-      };
+      if (error) {
+        console.error('Error fetching business:', error);
+        throw error;
+      }
 
-      return parsedBusiness;
+      return data;
     },
-    enabled: !!businessId
   });
 
+  const formatBusinessData = (data: any) => {
+    if (!data) return null;
+    
+    return {
+      ...data,
+      address: data.address || "",
+      city: data.city || "",
+      state: data.state || "",
+      zip: data.zip || "",
+      phone: data.phone || data.contact || "",
+      email: data.email || "",
+      sub_category: data.sub_category || data.category || "",
+      logo_url: data.logo_url || data.image_url || "",
+      ratings: data.ratings || 0,
+      reviews_count: data.reviews_count || 0,
+      is_verified: data.is_verified || data.verified || false,
+      is_open: data.is_open ?? true,
+      is_featured: data.is_featured || false,
+      latitude: data.latitude || null,
+      longitude: data.longitude || null,
+      tags: data.tags || [],
+      social_media: data.social_media || {},
+      services: data.services || [],
+      products: data.products || [],
+      cover_url: data.cover_url || "",
+      updated_at: data.updated_at || data.created_at
+    };
+  };
+
+  const formattedBusiness = formatBusinessData(data);
+
   return {
-    business,
+    business: formattedBusiness,
     isLoading,
     error,
-    refetchBusiness
   };
 };

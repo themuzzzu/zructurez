@@ -4,6 +4,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Cart } from "@/components/cart/Cart";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
+import { Filter } from "lucide-react";
 
 interface MarketplaceHeaderProps {
   isCartOpen: boolean;

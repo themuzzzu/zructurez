@@ -1,4 +1,3 @@
-
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -42,10 +41,32 @@ const BusinessDetails = () => {
       if (error) throw error;
       if (!data) throw new Error('Business not found');
       
-      // Parse JSON fields with proper typing
+      const {
+        address = "",
+        city = "",
+        state = "",
+        zip = "",
+        phone = business?.contact || "",
+        email = "",
+        sub_category = business?.category || "",
+        logo_url = business?.image_url || "",
+        ratings = 0,
+        reviews_count = 0,
+        is_verified = business?.verified || false,
+        is_open = true,
+        is_featured = false,
+        latitude = null,
+        longitude = null,
+        tags = [],
+        social_media = {},
+        services = [],
+        products = [],
+        cover_url = "",
+        updated_at = business?.created_at
+      } = data || {};
+
       const parsedData: Business = {
         ...data,
-        // Ensure all required properties exist with defaults
         id: data.id,
         name: data.name,
         description: data.description,
@@ -54,25 +75,25 @@ const BusinessDetails = () => {
         image_url: data.image_url || '',
         is_open: data.is_open || false,
         created_at: data.created_at,
-        address: data.address || '',
-        city: data.city || '',
-        state: data.state || '',
-        zip: data.zip || '',
-        phone: data.phone || '',
-        email: data.email || '',
-        sub_category: data.sub_category || '',
-        logo_url: data.logo_url || '',
-        ratings: data.ratings || 0,
-        reviews_count: data.reviews_count || 0,
-        is_verified: data.is_verified || false,
+        address,
+        city,
+        state,
+        zip,
+        phone,
+        email,
+        sub_category,
+        logo_url,
+        ratings,
+        reviews_count,
+        is_verified,
         verified: data.verified || false,
-        is_featured: data.is_featured || false,
-        latitude: data.latitude || 0,
-        longitude: data.longitude || 0,
-        tags: Array.isArray(data.tags) ? data.tags : [],
-        social_media: data.social_media || { facebook: '', twitter: '', instagram: '', linkedin: '' },
-        services: Array.isArray(data.services) ? data.services : [],
-        products: Array.isArray(data.products) ? data.products : [],
+        is_featured,
+        latitude,
+        longitude,
+        tags,
+        social_media,
+        services,
+        products,
         location: data.location || null,
         contact: data.contact || null,
         bio: data.bio || null,
@@ -116,9 +137,9 @@ const BusinessDetails = () => {
         business_portfolio: data.business_portfolio || [],
         business_products: data.business_products || [],
         posts: data.posts || [],
-        owner_id: data.user_id, // Map user_id as owner_id for permission checks
-        cover_url: data.cover_url || null,
-        updated_at: data.updated_at || data.created_at,
+        owner_id: data.user_id,
+        cover_url,
+        updated_at,
         website: data.website || null
       };
 
@@ -139,7 +160,6 @@ const BusinessDetails = () => {
 
   useEffect(() => {
     if (id && !isLoading && business && currentUser?.id !== business.user_id) {
-      // Track business view
       const trackView = async () => {
         try {
           const { error } = await supabase.rpc('increment_business_views', { business_id_param: id });
@@ -169,7 +189,6 @@ const BusinessDetails = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Only show Navbar on desktop */}
       {!isMobile && <Navbar />}
       
       <div className={`max-w-[1400px] mx-auto ${isMobile ? 'pt-2' : 'pt-20'} pb-16 px-3 sm:px-6`}>

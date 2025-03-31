@@ -10,24 +10,26 @@ import { BusinessCardActions } from "./business/BusinessCardActions";
 import { useBusinessLikes } from "./business/hooks/useBusinessLikes";
 import { shareBusinessProfile, openWhatsAppChat } from "@/utils/businessCardUtils";
 import { BusinessCard as BusinessCardUI, BusinessCardImage, BusinessCardContent } from "./ui/business-card";
+import { Business } from "@/types/business";
 
 interface BusinessCardProps {
-  id: string;
-  name: string;
-  category: string;
-  description: string;
-  image: string;
-  rating: number;
-  reviews: number;
-  location: string;
-  contact: string;
-  hours: string;
-  verified: boolean;
+  id?: string;
+  name?: string;
+  category?: string;
+  description?: string;
+  image?: string;
+  rating?: number;
+  reviews?: number;
+  location?: string;
+  contact?: string;
+  hours?: string;
+  verified?: boolean;
   appointment_price?: number;
   consultation_price?: number;
   wait_time?: string;
   closure_reason?: string;
   is_open?: boolean;
+  business?: Business;
 }
 
 export const BusinessCard = ({
@@ -46,38 +48,57 @@ export const BusinessCard = ({
   consultation_price,
   wait_time,
   closure_reason,
-  is_open
+  is_open,
+  business
 }: BusinessCardProps) => {
   const navigate = useNavigate();
   const [showBooking, setShowBooking] = useState(false);
   
-  const { isLiked, likesCount, toggleLike } = useBusinessLikes(id);
+  // If business object is provided, use its properties instead of individual props
+  const businessId = business?.id || id || "";
+  const businessName = business?.name || name || "";
+  const businessCategory = business?.category || category || "";
+  const businessDescription = business?.description || description || "";
+  const businessImage = business?.image_url || image || "";
+  const businessRating = business?.ratings || rating || 0;
+  const businessReviews = business?.reviews_count || reviews || 0;
+  const businessLocation = business?.location || location || "";
+  const businessContact = business?.contact || contact || "";
+  const businessHours = business?.hours || hours || "";
+  const businessVerified = business?.verified || verified || false;
+  const businessAppointmentPrice = business?.appointment_price || appointment_price || 0;
+  const businessConsultationPrice = business?.consultation_price || consultation_price;
+  const businessWaitTime = business?.wait_time || wait_time;
+  const businessClosureReason = business?.closure_reason || closure_reason;
+  const businessIsOpen = business?.is_open ?? is_open ?? true;
+  
+  const { isLiked, likesCount, toggleLike } = useBusinessLikes(businessId);
 
   return (
     <>
       <BusinessCardUI 
-        onClick={() => navigate(`/businesses/${id}`)}
+        onClick={() => navigate(`/businesses/${businessId}`)}
         className="group w-full max-w-full"
       >
         <BusinessCardImage 
-          src={image} 
-          alt={name} 
+          src={businessImage} 
+          alt={businessName} 
           className="w-full aspect-video object-cover"
         />
         
         <BusinessCardContent>
           <BusinessCardHeader
-            name={name}
-            category={category}
-            is_open={is_open}
-            verified={verified}
-            wait_time={wait_time}
-            closure_reason={closure_reason}
+            name={businessName}
+            category={businessCategory}
+            is_open={businessIsOpen}
+            verified={businessVerified}
+            wait_time={businessWaitTime}
+            closure_reason={businessClosureReason}
           />
           
           <BusinessCardRating
-            rating={rating}
-            reviews={reviews}
+            rating={businessRating}
+            reviews={businessReviews}
             isLiked={isLiked || false}
             likesCount={likesCount}
             onLikeClick={(e) => {
@@ -86,37 +107,37 @@ export const BusinessCard = ({
             }}
           />
 
-          <BusinessCardDescription description={description} />
+          <BusinessCardDescription description={businessDescription} />
 
           <BusinessCardInfo
-            location={location}
-            hours={hours}
-            appointment_price={appointment_price}
-            consultation_price={consultation_price}
+            location={businessLocation}
+            hours={businessHours}
+            appointment_price={businessAppointmentPrice}
+            consultation_price={businessConsultationPrice}
           />
 
           <BusinessCardActions
-            appointment_price={appointment_price}
+            appointment_price={businessAppointmentPrice}
             onBookClick={(e) => {
               e.stopPropagation();
               setShowBooking(true);
             }}
-            onWhatsAppClick={(e) => openWhatsAppChat(e, name, contact)}
-            onShareClick={(e) => shareBusinessProfile(e, name, description, id)}
+            onWhatsAppClick={(e) => openWhatsAppChat(e, businessName, businessContact)}
+            onShareClick={(e) => shareBusinessProfile(e, businessName, businessDescription, businessId)}
             onCallClick={(e) => {
               e.stopPropagation();
-              window.location.href = `tel:${contact}`;
+              window.location.href = `tel:${businessContact}`;
             }}
-            is_open={is_open}
+            is_open={businessIsOpen}
           />
         </BusinessCardContent>
       </BusinessCardUI>
 
       <BookAppointmentDialog
-        businessId={id}
-        businessName={name}
+        businessId={businessId}
+        businessName={businessName}
         serviceName="General Appointment"
-        cost={appointment_price || 0}
+        cost={businessAppointmentPrice || 0}
         isOpen={showBooking}
         onClose={() => setShowBooking(false)}
       />

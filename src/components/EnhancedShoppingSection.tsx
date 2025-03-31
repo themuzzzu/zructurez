@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BusinessCard } from './BusinessCard';
+import { Business } from '@/types/business';
 
 interface EnhancedShoppingSectionProps {
   searchQuery: string;
@@ -36,7 +37,7 @@ export const EnhancedShoppingSection = ({
         return [];
       }
       
-      return data;
+      return data as Business[];
     },
     enabled: !!searchQuery
   });
