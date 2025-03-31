@@ -12,7 +12,7 @@ import { useTheme } from "../ThemeProvider";
 import { cn } from "@/lib/utils";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 
-// Create a filled icon component for mobile nav with dots and lines
+// Create a filled icon component for mobile nav with inner lines and dots
 const FilledIcon = ({ Icon }: { Icon: React.ElementType }) => {
   return (
     <div className="relative">
@@ -22,9 +22,20 @@ const FilledIcon = ({ Icon }: { Icon: React.ElementType }) => {
         stroke="currentColor" 
         strokeWidth={1.5} 
       />
-      {/* Add decorative dots */}
-      <div className="absolute -right-1 -top-1 h-1.5 w-1.5 rounded-full bg-current opacity-70"></div>
-      <div className="absolute -left-1 -bottom-1 h-1.5 w-1.5 rounded-full bg-current opacity-70"></div>
+      {/* Add inner decorative elements */}
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-background opacity-80"></div>
+      <div className="absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-2 h-0.5 bg-background opacity-70"></div>
+    </div>
+  );
+};
+
+// Regular icon with inner line
+const RegularIcon = ({ Icon }: { Icon: React.ElementType }) => {
+  return (
+    <div className="relative">
+      <Icon className="h-5 w-5" />
+      {/* Add inner decorative line */}
+      <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-0.5 bg-current opacity-40"></div>
     </div>
   );
 };
@@ -79,7 +90,7 @@ export const MobileNav = () => {
               size="icon"
               className={cn(
                 "flex flex-col items-center justify-center h-14 w-14 p-0 gap-1",
-                isActive ? "text-black dark:text-white" : "text-zinc-400 dark:text-zinc-500"
+                isActive ? "text-primary dark:text-primary" : "text-zinc-500 dark:text-zinc-500"
               )}
               onClick={() => navigate(item.path)}
               aria-label={item.label}
@@ -87,15 +98,11 @@ export const MobileNav = () => {
               {isActive ? (
                 <FilledIcon Icon={Icon} />
               ) : (
-                <div className="relative">
-                  <Icon className="h-5 w-5 stroke-black dark:stroke-white" />
-                  {/* Add decorative line */}
-                  <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 h-0.5 w-2 bg-zinc-300 dark:bg-zinc-600 rounded-full"></div>
-                </div>
+                <RegularIcon Icon={Icon} />
               )}
               <span className={cn(
                 "text-[10px] font-medium",
-                isActive ? "text-black dark:text-white" : "text-zinc-400 dark:text-zinc-500"
+                isActive ? "text-primary dark:text-primary" : "text-zinc-500 dark:text-zinc-500"
               )}>
                 {item.label}
               </span>
@@ -107,13 +114,13 @@ export const MobileNav = () => {
             <Button 
               variant="ghost" 
               size="icon"
-              className="flex flex-col items-center justify-center h-14 w-14 p-0 gap-1 text-zinc-400 dark:text-zinc-500"
+              className="flex flex-col items-center justify-center h-14 w-14 p-0 gap-1 text-zinc-500 dark:text-zinc-500"
               aria-label="More options"
             >
               <div className="relative">
-                <MoreVertical className="h-5 w-5 stroke-black dark:stroke-white" />
-                {/* Add decorative line */}
-                <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 h-0.5 w-2 bg-zinc-300 dark:bg-zinc-600 rounded-full"></div>
+                <MoreVertical className="h-5 w-5" />
+                {/* Add inner decorative line */}
+                <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-0.5 bg-current opacity-40"></div>
               </div>
               <span className="text-[10px] font-medium">More</span>
             </Button>
@@ -125,12 +132,12 @@ export const MobileNav = () => {
                 onClick={() => navigate(item.path)}
                 className="cursor-pointer text-zinc-800 dark:text-zinc-200"
               >
-                <item.icon className="mr-2 h-4 w-4 stroke-black dark:stroke-white" />
+                <item.icon className="mr-2 h-4 w-4" />
                 {item.label}
               </DropdownMenuItem>
             ))}
             <DropdownMenuItem onClick={toggleTheme} className="cursor-pointer text-zinc-800 dark:text-zinc-200">
-              <SunMoon className="mr-2 h-4 w-4 stroke-black dark:stroke-white" />
+              <SunMoon className="mr-2 h-4 w-4" />
               {isDarkMode ? "Light Mode" : "Dark Mode"}
             </DropdownMenuItem>
           </DropdownMenuContent>

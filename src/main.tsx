@@ -58,6 +58,18 @@ const addUiColorStyles = () => {
       --primary: 217 91.2% 59.8%;
       --primary-foreground: 0 0% 100%;
     }
+    .ui-pink {
+      --primary: 330 81% 65%;
+      --primary-foreground: 0 0% 100%;
+    }
+    .ui-orange {
+      --primary: 24 94% 58%;
+      --primary-foreground: 0 0% 100%;
+    }
+    .ui-teal {
+      --primary: 168 76% 42%;
+      --primary-foreground: 0 0% 100%;
+    }
     
     .dark {
       --primary: 217.2 91.2% 59.8%;
@@ -83,6 +95,28 @@ const addUiColorStyles = () => {
     .dark.ui-blue {
       --primary: 217 91.2% 54.8%;
       --primary-foreground: 0 0% 100%;
+    }
+    .dark.ui-pink {
+      --primary: 330 81% 55%;
+      --primary-foreground: 0 0% 100%;
+    }
+    .dark.ui-orange {
+      --primary: 24 94% 48%;
+      --primary-foreground: 0 0% 100%;
+    }
+    .dark.ui-teal {
+      --primary: 168 76% 32%;
+      --primary-foreground: 0 0% 100%;
+    }
+    
+    /* Image loading fade effect */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .image-fade-in {
+      animation: fadeIn 0.5s ease-in-out;
     }
   `;
   document.head.appendChild(style);

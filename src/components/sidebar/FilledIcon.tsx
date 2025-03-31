@@ -11,10 +11,12 @@ export const FilledIcon = ({ Icon }: FilledIconProps) => {
       <Icon 
         size={20} 
         fill="currentColor" 
-        stroke="black"
+        stroke="currentColor"
         strokeWidth={1.5}
         className="text-primary"
       />
+      {/* Inner dots */}
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-zinc-800 dark:bg-zinc-200 opacity-70"></div>
     </div>
   );
 };

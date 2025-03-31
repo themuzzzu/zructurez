@@ -15,7 +15,7 @@ import { AppointmentsTab } from "@/components/settings/AppointmentsTab";
 import { AnalyticsTab } from "@/components/settings/AnalyticsTab";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
-import { Home } from "lucide-react";
+import { Home, ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 
@@ -60,10 +60,10 @@ const Settings = () => {
           <Button 
             variant="outline" 
             size="sm" 
-            className="mb-4 flex items-center gap-2"
+            className="mb-4 flex items-center gap-2 text-sm hover:bg-muted"
             onClick={() => navigate("/")}
           >
-            <Home className="h-4 w-4" />
+            <ChevronLeft className="h-4 w-4" />
             Back to Home
           </Button>
         )}
