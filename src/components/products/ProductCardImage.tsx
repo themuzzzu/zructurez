@@ -5,6 +5,21 @@ import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { useWishlist } from "@/hooks/useWishlist";
 import { trackEntityView } from "@/utils/viewsTracking";
+import { ImageFallback } from "../ui/image-fallback";
+
+// Quotes for loading screens
+const loadingQuotes = [
+  "Quality takes time, just like a good cup of coffee",
+  "Good things come to those who wait",
+  "Preparing your experience with care...",
+  "This loading time is sponsored by patience",
+  "Taking a moment to gather the best for you",
+  "Excellence is worth the wait",
+  "Finding the perfect items just for you",
+  "Curating quality takes a moment",
+  "Your amazing products are on their way",
+  "Thanks for your patience, quality incoming!"
+];
 
 interface ProductCardImageProps {
   imageUrl: string | null;
@@ -25,6 +40,7 @@ export const ProductCardImage = ({
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [loadingQuote, setLoadingQuote] = useState("");
   const imageRef = useRef<HTMLDivElement>(null);
   
   // Optimized image URL with quality and sizing parameters
@@ -36,6 +52,11 @@ export const ProductCardImage = ({
   const thumbnailUrl = optimizedImageUrl
     ? optimizedImageUrl.replace('width=400', 'width=40&blur=10')
     : null;
+
+  // Random quote for loading
+  useEffect(() => {
+    setLoadingQuote(loadingQuotes[Math.floor(Math.random() * loadingQuotes.length)]);
+  }, []);
 
   // Use intersection observer for lazy loading
   useEffect(() => {
@@ -100,13 +121,20 @@ export const ProductCardImage = ({
           />
         )}
         
-        {/* Low quality placeholder */}
+        {/* Loading skeleton with quote */}
         {!imageLoaded && !imageFailed && (
-          <div className="absolute inset-0 bg-gray-200 dark:bg-zinc-800 animate-pulse" />
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <div className="absolute inset-0 bg-gray-200 dark:bg-zinc-800 animate-pulse"></div>
+            <div className="z-10 px-4 text-center">
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 max-w-[90%] mx-auto line-clamp-2">
+                {loadingQuote}
+              </p>
+            </div>
+          </div>
         )}
         
         {/* Main image - only load when in viewport */}
-        {optimizedImageUrl && isVisible && (
+        {optimizedImageUrl && isVisible ? (
           <img
             src={optimizedImageUrl}
             alt={title}
@@ -120,13 +148,15 @@ export const ProductCardImage = ({
             onLoad={() => setImageLoaded(true)}
             onError={() => setImageFailed(true)}
           />
-        )}
+        ) : null}
         
         {/* Fallback for failed images */}
         {imageFailed && (
-          <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-zinc-700">
-            <span className="text-gray-400 dark:text-gray-500 text-xs">Image not available</span>
-          </div>
+          <ImageFallback 
+            alt={title} 
+            className="w-full h-full" 
+            fallbackClassName="p-4"
+          />
         )}
       </AspectRatio>
       

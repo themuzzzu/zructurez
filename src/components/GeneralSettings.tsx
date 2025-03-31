@@ -10,7 +10,7 @@ import { useState, useEffect } from "react";
 import { useProfile } from "@/hooks/useProfile";
 import { useTheme } from "@/components/ThemeProvider";
 import { type Theme } from "@/components/ThemeProvider";
-import { Loader2 } from "lucide-react";
+import { Loader2, Check } from "lucide-react";
 
 export const GeneralSettings = () => {
   const { theme, setTheme } = useTheme();
@@ -32,6 +32,9 @@ export const GeneralSettings = () => {
     return savedColor || "default";
   });
 
+  // Preview color state
+  const [previewColor, setPreviewColor] = useState(uiColor);
+
   // Sync theme with profile preference on component mount
   useEffect(() => {
     if (profile?.theme_preference) {
@@ -48,7 +51,7 @@ export const GeneralSettings = () => {
   // Apply UI color changes
   useEffect(() => {
     // Remove existing color classes
-    document.documentElement.classList.remove("ui-purple", "ui-red", "ui-yellow");
+    document.documentElement.classList.remove("ui-purple", "ui-red", "ui-yellow", "ui-green", "ui-blue");
     
     // Add the selected color class if not default
     if (uiColor !== "default") {
@@ -104,8 +107,19 @@ export const GeneralSettings = () => {
   
   const handleUiColorChange = (value: string) => {
     if (!value) return;
-    setUiColor(value);
-    toast.success(`UI color set to ${value === "default" ? "default" : value}`);
+    
+    // Set preview color first
+    setPreviewColor(value);
+  };
+  
+  const applyPreviewColor = () => {
+    setUiColor(previewColor);
+    toast.success(
+      <div className="flex items-center gap-2">
+        <Check className="h-4 w-4" />
+        <span>UI color set to {previewColor === "default" ? "default" : previewColor}</span>
+      </div>
+    );
   };
 
   if (loading) {
@@ -172,25 +186,55 @@ export const GeneralSettings = () => {
         
         <div className="space-y-4">
           <h3 className="text-lg font-semibold">UI Color</h3>
-          <ToggleGroup 
-            type="single" 
-            value={uiColor}
-            onValueChange={handleUiColorChange}
-            className="justify-start"
-          >
-            <ToggleGroupItem value="default" className="px-3 py-2">
-              Default
-            </ToggleGroupItem>
-            <ToggleGroupItem value="purple" className="px-3 py-2 bg-purple-500 text-white hover:text-white hover:bg-purple-600 data-[state=on]:bg-purple-700">
-              Purple
-            </ToggleGroupItem>
-            <ToggleGroupItem value="red" className="px-3 py-2 bg-red-500 text-white hover:text-white hover:bg-red-600 data-[state=on]:bg-red-700">
-              Red
-            </ToggleGroupItem>
-            <ToggleGroupItem value="yellow" className="px-3 py-2 bg-amber-400 text-black hover:text-black hover:bg-amber-500 data-[state=on]:bg-amber-600">
-              Golden
-            </ToggleGroupItem>
-          </ToggleGroup>
+          <div className="space-y-4">
+            <ToggleGroup 
+              type="single" 
+              value={previewColor}
+              onValueChange={handleUiColorChange}
+              className="justify-start flex-wrap gap-2"
+            >
+              <ToggleGroupItem value="default" className="px-3 py-2">
+                Default
+              </ToggleGroupItem>
+              <ToggleGroupItem value="purple" className="px-3 py-2 bg-purple-500 text-white hover:text-white hover:bg-purple-600 data-[state=on]:bg-purple-700">
+                Purple
+              </ToggleGroupItem>
+              <ToggleGroupItem value="red" className="px-3 py-2 bg-red-500 text-white hover:text-white hover:bg-red-600 data-[state=on]:bg-red-700">
+                Red
+              </ToggleGroupItem>
+              <ToggleGroupItem value="yellow" className="px-3 py-2 bg-amber-400 text-black hover:text-black hover:bg-amber-500 data-[state=on]:bg-amber-600">
+                Golden
+              </ToggleGroupItem>
+              <ToggleGroupItem value="green" className="px-3 py-2 bg-green-500 text-white hover:text-white hover:bg-green-600 data-[state=on]:bg-green-700">
+                Green
+              </ToggleGroupItem>
+              <ToggleGroupItem value="blue" className="px-3 py-2 bg-blue-500 text-white hover:text-white hover:bg-blue-600 data-[state=on]:bg-blue-700">
+                Blue
+              </ToggleGroupItem>
+            </ToggleGroup>
+            
+            {/* Preview area */}
+            <div className="mt-4 p-4 rounded-lg border border-border">
+              <h4 className="font-medium mb-2">Preview</h4>
+              <div className={`p-4 rounded-lg ${
+                previewColor === "default" ? "bg-primary" : 
+                previewColor === "purple" ? "bg-purple-500" :
+                previewColor === "red" ? "bg-red-500" :
+                previewColor === "yellow" ? "bg-amber-400" :
+                previewColor === "green" ? "bg-green-500" :
+                "bg-blue-500"
+              } text-white`}>
+                <p>This is how buttons and accents will look</p>
+              </div>
+              
+              <button 
+                onClick={applyPreviewColor}
+                className="mt-3 px-4 py-2 bg-background border border-border rounded-md hover:bg-muted transition-colors"
+              >
+                Apply this color
+              </button>
+            </div>
+          </div>
         </div>
 
         <div className="space-y-4">

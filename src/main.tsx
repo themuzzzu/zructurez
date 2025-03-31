@@ -50,6 +50,14 @@ const addUiColorStyles = () => {
       --primary: 43 96% 58%;
       --primary-foreground: 0 0% 0%;
     }
+    .ui-green {
+      --primary: 142 76% 45%;
+      --primary-foreground: 0 0% 100%;
+    }
+    .ui-blue {
+      --primary: 217 91.2% 59.8%;
+      --primary-foreground: 0 0% 100%;
+    }
     
     .dark {
       --primary: 217.2 91.2% 59.8%;
@@ -67,6 +75,14 @@ const addUiColorStyles = () => {
     .dark.ui-yellow {
       --primary: 43 96% 53%;
       --primary-foreground: 0 0% 0%;
+    }
+    .dark.ui-green {
+      --primary: 142 76% 40%;
+      --primary-foreground: 0 0% 100%;
+    }
+    .dark.ui-blue {
+      --primary: 217 91.2% 54.8%;
+      --primary-foreground: 0 0% 100%;
     }
   `;
   document.head.appendChild(style);
