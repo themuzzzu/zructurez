@@ -1,3 +1,4 @@
+
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -80,7 +81,8 @@ const BusinessDetails = () => {
           : [],
         posts: data.posts || [],
         business_portfolio: data.business_portfolio || [],
-        business_products: data.business_products || []
+        business_products: data.business_products || [],
+        cover_url: data.cover_url || null
       };
 
       return parsedData;

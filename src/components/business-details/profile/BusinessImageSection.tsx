@@ -27,7 +27,7 @@ export const BusinessImageSection = ({ businessId }: BusinessImageSectionProps) 
   const { toast } = useToast();
   const { profile } = useProfile();
   const { business, refetchBusiness } = useBusiness(businessId);
-  const [coverUrl, setCoverUrl] = useState<string | null>(business?.cover_url || null);
+  const [coverUrl, setCoverUrl] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newCoverUrl, setNewCoverUrl] = useState<string | null>(null);
 
