@@ -13,7 +13,7 @@ export const BusinessAboutTab = ({ business }: BusinessAboutTabProps) => {
     
     try {
       // Simple formatting - this can be enhanced as needed
-      return JSON.stringify(hours);
+      return typeof hours === 'string' ? hours : JSON.stringify(hours);
     } catch (e) {
       return "";
     }

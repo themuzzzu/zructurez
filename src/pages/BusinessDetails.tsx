@@ -44,6 +44,24 @@ const BusinessDetails = () => {
       // Parse JSON fields with proper typing
       const parsedData: Business = {
         ...data,
+        address: data.address || '',
+        city: data.city || '',
+        state: data.state || '',
+        zip: data.zip || '',
+        phone: data.phone || '',
+        email: data.email || '',
+        sub_category: data.sub_category || '',
+        logo_url: data.logo_url || '',
+        ratings: data.ratings || 0,
+        reviews_count: data.reviews_count || 0,
+        is_verified: data.is_verified || false,
+        is_featured: data.is_featured || false,
+        latitude: data.latitude || 0,
+        longitude: data.longitude || 0,
+        tags: Array.isArray(data.tags) ? data.tags : [],
+        social_media: data.social_media || { facebook: '', twitter: '', instagram: '', linkedin: '' },
+        services: Array.isArray(data.services) ? data.services : [],
+        products: Array.isArray(data.products) ? data.products : [],
         staff_details: Array.isArray(data.staff_details) 
           ? data.staff_details.map((staff: any): StaffMember => ({
               name: staff.name || null,
@@ -81,7 +99,8 @@ const BusinessDetails = () => {
         posts: data.posts || [],
         business_portfolio: data.business_portfolio || [],
         business_products: data.business_products || [],
-        cover_url: data.cover_url || null
+        cover_url: data.cover_url || null,
+        updated_at: data.updated_at || data.created_at
       };
 
       return parsedData;

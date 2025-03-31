@@ -1,4 +1,3 @@
-
 export interface Business {
   id: string;
   name: string;
@@ -158,8 +157,6 @@ export interface SearchSuggestion {
 export interface SearchFilters {
   includeSponsored: boolean;
 }
-
-// Add new interfaces that were missing
 
 export interface BusinessProduct {
   id: string;
