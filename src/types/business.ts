@@ -1,4 +1,3 @@
-
 export interface StaffMember {
   name: string | null;
   position: string | null;
@@ -56,7 +55,7 @@ export interface Business {
   hours: string | null;
   image_url: string | null;
   video_url: string | null;
-  cover_url: string | null;  // Ensure this property is defined
+  cover_url: string | null;
   verified: boolean;
   created_at: string;
   appointment_price: number | null;
@@ -82,4 +81,19 @@ export interface Business {
   business_portfolio: BusinessPortfolio[];
   posts: any[];
   owner_id?: string;
+}
+
+export interface UserPost {
+  id: string;
+  user_id: string;
+  content: string;
+  image_url: string | null;
+  created_at: string;
+  likes_count: number;
+  comments_count: number;
+  reposts_count: number;
+  profile?: {
+    username: string;
+    avatar_url: string;
+  };
 }
