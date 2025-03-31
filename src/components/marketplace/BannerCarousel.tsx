@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { fetchActiveAds, incrementAdView, AdType, AdFormat, Advertisement } from "@/services/adService";
 import {
@@ -267,4 +266,3 @@ export const BannerCarousel = () => {
     </div>
   );
 };
-

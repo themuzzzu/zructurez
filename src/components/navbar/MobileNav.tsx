@@ -1,4 +1,3 @@
-
 import { Home, ShoppingBag, Wrench, Building, MessageSquare, MoreVertical, SunMoon, Users, Briefcase, Calendar, Map } from "lucide-react";
 import { Button } from "../ui/button";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -12,7 +11,7 @@ import { useTheme } from "../ThemeProvider";
 import { cn } from "@/lib/utils";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 
-// Create a filled icon component for mobile nav with appropriate theme-based highlights
+// Create a filled icon component for mobile nav with neutral colors instead of bright ones
 const FilledIcon = ({ Icon, isDarkMode }: { Icon: React.ElementType, isDarkMode: boolean }) => {
   return (
     <div className="relative">
@@ -22,7 +21,7 @@ const FilledIcon = ({ Icon, isDarkMode }: { Icon: React.ElementType, isDarkMode:
         stroke="currentColor" 
         strokeWidth={1.5} 
       />
-      {/* Theme-appropriate highlight */}
+      {/* Theme-appropriate highlight - using white/black instead of bright colors */}
       <div 
         className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full" 
         style={{ 
@@ -31,7 +30,7 @@ const FilledIcon = ({ Icon, isDarkMode }: { Icon: React.ElementType, isDarkMode:
         }}
       ></div>
       
-      {/* Inner lines - these will be the opposite color of the highlight */}
+      {/* Inner lines - black/white instead of colored */}
       <div 
         className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1 h-1 rounded-full" 
         style={{ 

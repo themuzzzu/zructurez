@@ -7,6 +7,14 @@ import { ProductCard } from "@/components/products/ProductCard";
 import { useNavigate } from "react-router-dom";
 import { Flame } from "lucide-react";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
+import { useState, useEffect } from "react";
+import { 
+  Carousel, 
+  CarouselContent, 
+  CarouselItem, 
+  CarouselNext, 
+  CarouselPrevious 
+} from "@/components/ui/carousel";
 
 interface TrendingProductsProps {
   gridLayout?: GridLayoutType;
@@ -14,6 +22,8 @@ interface TrendingProductsProps {
 
 export const TrendingProducts = ({ gridLayout = "grid4x4" }: TrendingProductsProps) => {
   const navigate = useNavigate();
+  const [api, setApi] = useState<any>(null);
+  const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
   
   const { data: products, isLoading } = useQuery({
     queryKey: ['trending-products'],
@@ -40,53 +50,70 @@ export const TrendingProducts = ({ gridLayout = "grid4x4" }: TrendingProductsPro
       }).sort((a, b) => b.trending_score - a.trending_score);
     }
   });
-  
-  // Generate responsive grid classes based on layout
-  const getGridClasses = () => {
-    switch (gridLayout) {
-      case "grid4x4":
-        return "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4";
-      case "grid2x2":
-        return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-3 sm:gap-4";
-      case "grid1x1":
-        return "flex flex-col gap-3";
-      default:
-        return "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4";
-    }
-  };
+
+  // Auto-scroll effect for carousel
+  useEffect(() => {
+    if (!api || !autoScrollEnabled || !products || products.length <= 1) return;
+    
+    const interval = setInterval(() => {
+      api.scrollNext();
+    }, 4500); // Different timing from sponsored products
+    
+    return () => clearInterval(interval);
+  }, [api, autoScrollEnabled, products]);
   
   if (isLoading) {
     return (
-      <div className={getGridClasses()}>
-        {[...Array(8)].map((_, i) => (
-          <Card key={i} className="overflow-hidden">
-            <Skeleton className={gridLayout === "grid1x1" ? "h-24 w-full" : "h-48 w-full"} />
-            <div className="p-3">
-              <Skeleton className="h-4 w-3/4 mb-2" />
-              <Skeleton className="h-4 w-1/2" />
-            </div>
-          </Card>
-        ))}
+      <div className="space-y-4 mb-8">
+        <h3 className="text-xl md:text-2xl font-bold flex items-center gap-2">
+          <Flame className="h-5 w-5 text-orange-500" />
+          Trending Now
+        </h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i} className="overflow-hidden">
+              <Skeleton className="h-48 w-full" />
+              <div className="p-3">
+                <Skeleton className="h-4 w-3/4 mb-2" />
+                <Skeleton className="h-4 w-1/2" />
+              </div>
+            </Card>
+          ))}
+        </div>
       </div>
     );
   }
   
   if (!products || products.length === 0) {
-    return <div className="text-center text-muted-foreground">No trending products found</div>;
+    return null;
   }
   
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2 mb-2">
+    <div className="space-y-4 mb-8">
+      <h3 className="text-xl md:text-2xl font-bold flex items-center gap-2">
         <Flame className="h-5 w-5 text-orange-500" />
-        <h3 className="text-lg font-semibold">Trending Now</h3>
-      </div>
+        Trending Now
+      </h3>
       
-      <div className={getGridClasses()}>
-        {products.map((product) => (
-          <ProductCard key={product.id} product={product} layout={gridLayout} />
-        ))}
-      </div>
+      <Carousel 
+        className="w-full" 
+        setApi={setApi}
+        onMouseEnter={() => setAutoScrollEnabled(false)}
+        onMouseLeave={() => setAutoScrollEnabled(true)}
+      >
+        <CarouselContent className="-ml-2 md:-ml-4">
+          {products.map((product) => (
+            <CarouselItem key={product.id} className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4">
+              <ProductCard 
+                product={product}
+                layout={gridLayout}
+              />
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <CarouselPrevious className="hidden md:flex left-0 bg-white/80 dark:bg-zinc-800/80 hover:bg-white dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-700" />
+        <CarouselNext className="hidden md:flex right-0 bg-white/80 dark:bg-zinc-800/80 hover:bg-white dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-700" />
+      </Carousel>
     </div>
   );
 };

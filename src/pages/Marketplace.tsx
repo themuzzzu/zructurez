@@ -3,6 +3,7 @@ import { Layout } from "@/components/layout/Layout";
 import { NotFound } from "@/components/NotFound";
 import { useParams } from "react-router-dom";
 import OptimizedMarketplace from "./marketplace/OptimizedMarketplace";
+import { BannerCarousel } from "@/components/marketplace/BannerCarousel";
 
 const Marketplace = () => {
   const params = useParams();
@@ -16,6 +17,9 @@ const Marketplace = () => {
   return (
     <Layout>
       <div className="overflow-x-hidden">
+        <div className="max-w-7xl mx-auto px-4 pt-6">
+          <BannerCarousel />
+        </div>
         <OptimizedMarketplace />
       </div>
     </Layout>
