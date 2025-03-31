@@ -1,25 +1,5 @@
 
-export interface Owner {
-  name: string;
-  role: string;
-  position: string;
-  experience: string;
-  image_url?: string | null;
-}
-
-export interface StaffMember {
-  name: string | null;
-  position: string | null;
-  experience: string | null;
-  image_url?: string | null;
-}
-
-export interface BusinessProduct {
-  name: string;
-  price: number;
-  description: string;
-  category: string;
-}
+import type { BusinessOwner, StaffMember, BusinessProduct } from "@/types/business";
 
 export interface BusinessFormData {
   name: string;
@@ -34,7 +14,7 @@ export interface BusinessFormData {
   consultation_price: string;
   bio: string;
   website: string;
-  owners: Owner[];
+  owners: BusinessOwner[];
   staff_details: StaffMember[];
   business_products: BusinessProduct[];
 }

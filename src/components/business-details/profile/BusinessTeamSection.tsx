@@ -26,7 +26,7 @@ export const BusinessTeamSection = ({ owners, staff_details }: BusinessTeamSecti
               <BusinessOwnerCard 
                 key={index} 
                 name={owner.name} 
-                role={owner.role} 
+                role={owner.role || ''} 
                 position={owner.position || ''} 
                 experience={owner.experience || ''}
                 bio={owner.bio}
@@ -50,7 +50,6 @@ export const BusinessTeamSection = ({ owners, staff_details }: BusinessTeamSecti
                 <BusinessStaffCard 
                   key={index} 
                   name={staff.name} 
-                  role={staff.role || ''} 
                   position={staff.position || ''} 
                   experience={staff.experience || ''}
                   bio={staff.bio}

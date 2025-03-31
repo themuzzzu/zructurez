@@ -1,5 +1,50 @@
 
-// This file defines the business-related types for the application
+export interface ImagePosition {
+  x: number;
+  y: number;
+}
+
+export interface BusinessOwner {
+  id?: string;
+  name: string;
+  role: string;
+  position?: string;
+  experience?: string;
+  qualifications?: string;
+  bio?: string;
+  image_url?: string | null;
+  contact?: string;
+  business_id?: string;
+}
+
+export interface StaffMember {
+  id?: string;
+  name: string | null;
+  position?: string | null;
+  experience?: string | null;
+  role?: string;
+  bio?: string;
+  image_url?: string | null;
+}
+
+export interface BusinessProduct {
+  id: string;
+  name: string;
+  price: number;
+  description?: string;
+  category?: string;
+  image_url?: string;
+  stock?: number;
+  created_at?: string;
+  business_id?: string;
+}
+
+export interface BusinessHours {
+  [day: string]: {
+    open: string;
+    close: string;
+  } | string;
+}
 
 export interface Business {
   id: string;
@@ -7,153 +52,61 @@ export interface Business {
   description: string;
   category: string;
   subcategory?: string;
-  image_url?: string;
-  cover_url?: string;
-  logo_url?: string;
-  tags?: string[];
-  address?: string;
-  city?: string;
-  state?: string;
-  zip?: string;
-  phone?: string;
-  email?: string;
-  website?: string;
-  ratings?: number;
-  reviews_count?: number;
-  is_verified?: boolean;
-  verified?: boolean;
-  is_featured?: boolean;
-  latitude?: number;
-  longitude?: number;
-  created_at: string;
-  updated_at?: string;
-  owner_id?: string;
-  user_id?: string;
-  business_hours?: BusinessHours;
-  social_media?: SocialMedia;
-  services?: BusinessService[];
-  products?: BusinessProduct[];
-  business_products?: BusinessProduct[];
-  business_portfolio?: PortfolioItem[];
   location?: string;
   contact?: string;
-  hours?: string;
-  wait_time?: string;
-  is_open?: boolean;
-  closure_reason?: string;
+  hours?: string | BusinessHours;
+  business_hours?: string | BusinessHours;
+  verified?: boolean;
+  image_url?: string;
+  image_scale?: number;
+  image_position?: ImagePosition;
   bio?: string;
-  aadhar_number?: string;
+  website?: string;
   appointment_price?: number;
   consultation_price?: number;
-  verified_reason?: string;
-  status?: string;
-  image_position?: ImagePosition;
-  posts?: UserPost[];
   owners?: BusinessOwner[];
   staff_details?: StaffMember[];
-}
-
-export interface BusinessHours {
-  monday?: { open: string; close: string };
-  tuesday?: { open: string; close: string };
-  wednesday?: { open: string; close: string };
-  thursday?: { open: string; close: string };
-  friday?: { open: string; close: string };
-  saturday?: { open: string; close: string };
-  sunday?: { open: string; close: string };
-}
-
-export interface SocialMedia {
-  facebook?: string;
-  twitter?: string;
-  instagram?: string;
-  linkedin?: string;
-  youtube?: string;
-}
-
-export interface BusinessService {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  duration: number;
-  business_id: string;
-}
-
-export interface BusinessProduct {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  image_url?: string;
-  business_id: string;
-  category?: string;
-  stock?: number;
+  business_products?: BusinessProduct[];
+  wait_time?: string;
+  is_open?: boolean;
+  user_id?: string;
+  created_at?: string;
+  updated_at?: string;
+  cover_url?: string;
+  ratings?: number;
+  reviews_count?: number;
+  is_featured?: boolean;
 }
 
 export interface PortfolioItem {
   id: string;
+  business_id: string;
   title: string;
-  description?: string;
+  description: string;
   image_url: string;
-  business_id: string;
-  views?: number;
-}
-
-export interface BusinessOwner {
-  id?: string;
-  name: string;
-  role: string;
-  bio?: string;
-  image_url?: string;
-  contact?: string;
-  business_id?: string;
-  position?: string;
-  experience?: string;
-  qualifications?: string;
-}
-
-export interface StaffMember {
-  id?: string;
-  name: string;
-  role: string;
-  bio?: string;
-  image_url?: string;
-  contact?: string;
-  business_id?: string;
-  position?: string;
-  experience?: string;
-}
-
-export interface MembershipPlan {
-  id: string;
-  name: string;
-  price: number;
-  duration: string;
-  features: string[];
-  business_id: string;
+  created_at: string;
+  views?: number | null;
 }
 
 export interface UserPost {
   id: string;
   user_id: string;
-  profile_id: string;
+  profile_id?: string;
   content: string;
   image_url?: string;
   created_at: string;
+  category?: string;
   likes_count?: number;
   comments_count?: number;
   reposts_count?: number;
-  category?: string;
   profile?: {
-    id: string;
-    username: string;
-    avatar_url?: string;
+    id?: string;
+    username?: string;
+    avatar_url?: string | null;
     full_name?: string;
+    name?: string;
   };
-}
-
-export interface ImagePosition {
-  x: number;
-  y: number;
+  location?: string;
+  business_id?: string;
+  views?: number;
 }

@@ -1,160 +1,163 @@
 
-import { useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { Navbar } from "@/components/Navbar";
-import { ErrorView } from "@/components/ErrorView";
-import { LoadingView } from "@/components/LoadingView";
-import { BusinessHeader } from "@/components/business-details/BusinessHeader";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { CreateBusinessForm } from "@/components/CreateBusinessForm";
 import { useState, useEffect } from "react";
-import { BusinessTabs } from "@/components/business-details/BusinessTabs";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { Business } from "@/types/business";
+import { useParams, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/common/Spinner";
+import { BusinessProfile } from "@/components/business-details/BusinessProfile";
+import { NotFound } from "@/components/NotFound";
+import { toast } from "sonner";
+import { Tabs, TabsList, TabsContent, TabsTrigger } from "@/components/ui/tabs";
+import { BusinessAboutTab } from "@/components/business-details/tabs/BusinessAboutTab";
+import { BusinessPostsTab } from "@/components/business-details/tabs/BusinessPostsTab";
+import { BusinessProductsTab } from "@/components/business-details/tabs/BusinessProductsTab";
+import { BusinessPortfolioTab } from "@/components/business-details/tabs/BusinessPortfolioTab";
+import { cn } from "@/lib/utils";
+import { ArrowLeft, Edit } from "lucide-react";
+import type { Business } from "@/types/business";
 
 const BusinessDetails = () => {
-  const { id } = useParams();
-  const [isEditing, setIsEditing] = useState(false);
-  const isMobile = useMediaQuery("(max-width: 768px)");
-
-  const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id || '');
-
-  const { data: businessData, isLoading, error, refetch } = useQuery({
-    queryKey: ['business', id],
-    queryFn: async () => {
-      if (!isValidUUID) {
-        throw new Error('Invalid business ID format');
-      }
-
-      const { data, error } = await supabase
-        .from('businesses')
-        .select(`
-          *,
-          business_portfolio (*),
-          business_products (*),
-          posts (*)
-        `)
-        .eq('id', id)
-        .maybeSingle();
-
-      if (error) throw error;
-      if (!data) throw new Error('Business not found');
-      
-      return data;
-    },
-    enabled: isValidUUID
-  });
-
-  // Convert database data to Business type
-  const business = businessData ? {
-    id: businessData.id,
-    name: businessData.name,
-    description: businessData.description,
-    category: businessData.category,
-    subcategory: businessData.subcategory,
-    image_url: businessData.image_url || '',
-    bio: businessData.bio || '',
-    created_at: businessData.created_at,
-    business_portfolio: businessData.business_portfolio || [],
-    business_products: businessData.business_products || [],
-    posts: businessData.posts || [],
-    appointment_price: businessData.appointment_price,
-    consultation_price: businessData.consultation_price,
-    verified: businessData.verified || false,
-    location: businessData.location || '',
-    contact: businessData.contact || '',
-    hours: businessData.hours || '',
-    user_id: businessData.user_id,
-    owner_id: businessData.user_id,
-    is_open: businessData.is_open ?? true,
-    closure_reason: businessData.closure_reason,
-    wait_time: businessData.wait_time,
-    website: businessData.website || '',
-    owners: businessData.owners || [],
-    staff_details: businessData.staff_details || [],
-    image_position: businessData.image_position || { x: 50, y: 50 },
-    cover_url: businessData.cover_url || ''
-  } as Business : {} as Business;
-
-  const { data: currentUser } = useQuery({
-    queryKey: ['current-user'],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      return user;
-    },
-  });
-
-  const isOwner = currentUser?.id === business.user_id;
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const [business, setBusiness] = useState<Business | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("about");
+  const [isOwner, setIsOwner] = useState(false);
 
   useEffect(() => {
-    if (id && !isLoading && business && currentUser?.id !== business.user_id) {
-      const trackView = async () => {
-        try {
-          const { error } = await supabase.rpc('increment_business_views', { business_id_param: id });
-          if (error) {
-            console.error('Error tracking business view:', error);
-          }
-        } catch (err) {
-          console.error('Error calling business view function:', err);
+    const fetchBusinessDetails = async () => {
+      if (!id) {
+        setError("Business ID is missing");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        // Get current user
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        // Fetch business data
+        const { data: businessData, error: businessError } = await supabase
+          .from("businesses")
+          .select(`
+            *,
+            business_portfolio (*),
+            business_products (*),
+            posts (*)
+          `)
+          .eq("id", id)
+          .single();
+
+        if (businessError) throw businessError;
+        if (!businessData) throw new Error("Business not found");
+
+        // Convert to Business type
+        const businessWithTypes = businessData as unknown as Business;
+        
+        setBusiness(businessWithTypes);
+        
+        // Check if current user is the owner
+        if (user && businessData.user_id === user.id) {
+          setIsOwner(true);
         }
-      };
-      
-      trackView();
-    }
-  }, [id, isLoading, business, currentUser]);
+      } catch (err) {
+        console.error("Error fetching business details:", err);
+        setError(err instanceof Error ? err.message : "Failed to load business details");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  if (!isValidUUID || error) {
-    return <ErrorView message={!isValidUUID ? "Invalid business ID format" : undefined} />;
+    fetchBusinessDetails();
+  }, [id]);
+
+  const handleEditBusiness = () => {
+    navigate(`/business-edit/${id}`);
+  };
+
+  const handleBackClick = () => {
+    navigate(-1);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <Spinner size="lg" />
+      </div>
+    );
   }
 
-  if (isLoading) {
-    return <LoadingView />;
-  }
-
-  if (!business.id) {
-    return <ErrorView message="Business not found" />;
+  if (error || !business) {
+    return <NotFound message={error || "Business not found"} />;
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {!isMobile && <Navbar />}
-      
-      <div className={`max-w-[1400px] mx-auto ${isMobile ? 'pt-2' : 'pt-20'} pb-16 px-3 sm:px-6`}>
-        <div className="space-y-4 animate-fade-in">
-          <BusinessHeader
-            id={business.id}
-            name={business.name}
-            category={business.category}
-            isOwner={isOwner}
-            isOpen={business.is_open}
-            onEdit={() => setIsEditing(true)}
-          />
+    <div className="container max-w-7xl mx-auto px-4 py-8">
+      <div className="mb-6">
+        <Button
+          variant="ghost"
+          className="mb-4"
+          onClick={handleBackClick}
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back
+        </Button>
 
-          <BusinessTabs
-            business={business}
-            isOwner={isOwner}
-            onRefetch={refetch}
-          />
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold">{business.name}</h1>
+          {isOwner && (
+            <Button onClick={handleEditBusiness} className="flex items-center gap-2">
+              <Edit className="h-4 w-4" />
+              Edit Business
+            </Button>
+          )}
         </div>
       </div>
 
-      <Dialog open={isEditing} onOpenChange={setIsEditing}>
-        <DialogContent className="sm:max-w-[600px] h-[90vh]">
-          <DialogTitle>Edit Business</DialogTitle>
-          <ScrollArea className="h-full pr-4">
-            <CreateBusinessForm
-              initialData={business}
-              onSuccess={() => {
-                setIsEditing(false);
-                refetch();
-              }}
-              onCancel={() => setIsEditing(false)}
+      <Tabs
+        defaultValue="about"
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="mt-6"
+      >
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="about">About</TabsTrigger>
+          <TabsTrigger value="posts">Posts</TabsTrigger>
+          <TabsTrigger value="products">Products</TabsTrigger>
+          <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
+        </TabsList>
+
+        <div className={cn("mt-6", business.is_open === false && "opacity-60")}>
+          {!business.is_open && (
+            <div className="mb-4 p-3 bg-destructive/10 border border-destructive/30 rounded-md text-destructive">
+              This business is currently closed.
+            </div>
+          )}
+
+          <TabsContent value="about" className="m-0">
+            <BusinessAboutTab business={business} />
+          </TabsContent>
+
+          <TabsContent value="posts" className="m-0">
+            <BusinessPostsTab businessId={id || ""} />
+          </TabsContent>
+
+          <TabsContent value="products" className="m-0">
+            <BusinessProductsTab 
+              businessId={id || ""} 
+              products={business.business_products || []}
             />
-          </ScrollArea>
-        </DialogContent>
-      </Dialog>
+          </TabsContent>
+
+          <TabsContent value="portfolio" className="m-0">
+            <BusinessPortfolioTab 
+              businessId={id || ""} 
+              portfolio={business.business_portfolio || []}
+            />
+          </TabsContent>
+        </div>
+      </Tabs>
     </div>
   );
 };

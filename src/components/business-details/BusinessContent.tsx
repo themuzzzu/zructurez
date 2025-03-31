@@ -1,41 +1,58 @@
 
-import { BusinessOfferings } from "./BusinessOfferings";
+import { useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BusinessAboutSection } from "./content/BusinessAboutSection";
 import { BusinessProductsSection } from "./content/BusinessProductsSection";
-import { BusinessPortfolioSection } from "./content/BusinessPortfolioSection";
-import type { Business } from "@/types/business";
+import { BusinessServicesSection } from "./content/BusinessServicesSection";
+import { BusinessReviewsSection } from "./content/BusinessReviewsSection";
+import { BusinessLocationSection } from "./content/BusinessLocationSection";
+import type { Business, BusinessProduct } from "@/types/business";
 
 interface BusinessContentProps {
-  businessId: string;
-  isOwner: boolean;
-  business_products: Business['business_products'];
-  business_portfolio: Business['business_portfolio'];
-  onSuccess?: () => void;
-  activeCategory?: string;
+  business: Business;
+  products?: BusinessProduct[];
 }
 
-export const BusinessContent = ({
-  businessId,
-  isOwner,
-  business_products,
-  business_portfolio,
-  onSuccess,
-  activeCategory
-}: BusinessContentProps) => {
-  return (
-    <div className="space-y-6">
-      {isOwner && (
-        <BusinessOfferings 
-          businessId={businessId} 
-          onSuccess={onSuccess}
-        />
-      )}
+export const BusinessContent = ({ business, products = [] }: BusinessContentProps) => {
+  const [activeTab, setActiveTab] = useState("about");
 
-      <BusinessProductsSection 
-        products={business_products} 
-        businessId={businessId} 
-        activeCategory={activeCategory} 
-      />
-      <BusinessPortfolioSection portfolio={business_portfolio} />
-    </div>
+  return (
+    <Tabs defaultValue="about" className="w-full" onValueChange={setActiveTab}>
+      <TabsList className="grid grid-cols-5 w-full">
+        <TabsTrigger value="about">About</TabsTrigger>
+        <TabsTrigger value="products">Products</TabsTrigger>
+        <TabsTrigger value="services">Services</TabsTrigger>
+        <TabsTrigger value="reviews">Reviews</TabsTrigger>
+        <TabsTrigger value="location">Location</TabsTrigger>
+      </TabsList>
+
+      <div className="mt-6">
+        <TabsContent value="about" className="m-0">
+          <BusinessAboutSection business={business} />
+        </TabsContent>
+
+        <TabsContent value="products" className="m-0">
+          <BusinessProductsSection 
+            products={products || []} 
+            businessId={business.id} 
+          />
+        </TabsContent>
+
+        <TabsContent value="services" className="m-0">
+          <BusinessServicesSection business={business} />
+        </TabsContent>
+
+        <TabsContent value="reviews" className="m-0">
+          <BusinessReviewsSection businessId={business.id} />
+        </TabsContent>
+
+        <TabsContent value="location" className="m-0">
+          <BusinessLocationSection 
+            businessName={business.name} 
+            location={business.location || ""}
+          />
+        </TabsContent>
+      </div>
+    </Tabs>
   );
 };
