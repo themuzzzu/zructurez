@@ -1,5 +1,5 @@
 
-export type GridLayoutType = "grid4x4" | "grid3x3" | "grid2x2" | "list";
+export type GridLayoutType = "grid4x4" | "grid3x3" | "grid2x2" | "list" | "grid1x1";
 
 export interface ProductType {
   id: string;
@@ -20,4 +20,6 @@ export interface ProductType {
   created_at?: string;
   updated_at?: string;
   views?: number;
+  name?: string;
+  business_id?: string;
 }

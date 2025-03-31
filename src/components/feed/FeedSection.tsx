@@ -36,7 +36,11 @@ export const FeedSection = () => {
         </Button>
       </div>
       {posts.map((post) => (
-        <PostCard key={post.id} post={post} />
+        <PostCard 
+          key={post.id} 
+          post={post} 
+          onRefresh={refreshFeed}
+        />
       ))}
     </div>
   );

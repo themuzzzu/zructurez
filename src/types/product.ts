@@ -11,6 +11,7 @@ export interface Product {
   created_at?: string;
   updated_at?: string;
   brand_name?: string;
+  brand?: string;
   model?: string;
   condition?: string;
   size?: string;
