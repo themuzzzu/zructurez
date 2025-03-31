@@ -59,7 +59,7 @@ export const BusinessImageSection = ({ businessId }: BusinessImageSectionProps) 
       }
 
       const coverPath = data.path;
-      // Fix: Get public URL correctly from Supabase storage
+      // Get public URL correctly from Supabase storage
       const { data: { publicUrl } } = supabase.storage
         .from('business-covers')
         .getPublicUrl(coverPath);
