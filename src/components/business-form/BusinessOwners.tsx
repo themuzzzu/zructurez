@@ -107,6 +107,7 @@ export const BusinessOwners = ({ owners = [], onChange }: BusinessOwnersProps) =
           <div className="flex justify-between items-start">
             <OwnerFormFields
               {...owner}
+              position={owner.position || ""}
               onUpdate={(field, value) => handleUpdateOwner(index, field as keyof Owner, value)}
             />
             <Button
@@ -125,6 +126,7 @@ export const BusinessOwners = ({ owners = [], onChange }: BusinessOwnersProps) =
         <div className="p-4 border rounded-lg bg-muted/50">
           <OwnerFormFields
             {...newOwner}
+            position={newOwner.position || ""}
             onUpdate={(field, value) => 
               setNewOwner({ ...newOwner, [field]: value })
             }

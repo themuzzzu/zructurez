@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -140,13 +139,17 @@ const BusinessDetails = () => {
           </TabsContent>
 
           <TabsContent value="posts" className="m-0">
-            <BusinessPostsTab businessId={id || ""} />
+            <BusinessPostsTab 
+              business={businessId || ""}
+            />
           </TabsContent>
 
           <TabsContent value="products" className="m-0">
             <BusinessProductsTab 
               businessId={id || ""} 
+              isOwner={isOwner}
               products={business.business_products || []}
+              onSuccess={() => {}}
             />
           </TabsContent>
 

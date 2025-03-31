@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -83,13 +82,8 @@ const OptimizedMarketplace = () => {
   return (
     <div className="container max-w-[1400px] mx-auto px-4 py-6">
       <MarketplaceHeader
-        isCartOpen={isCartOpen}
-        setIsCartOpen={setIsCartOpen}
         searchQuery={searchQuery}
         setSearchQuery={handleSearchChange}
-        isFilterOpen={isFilterOpen}
-        setIsFilterOpen={setIsFilterOpen}
-        cartItemCount={cartItemCount}
       />
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
@@ -101,19 +95,6 @@ const OptimizedMarketplace = () => {
         
         <TabsContent value="browse" className="mt-6">
           <BrowseTabContent 
-            selectedCategory={selectedCategory}
-            showDiscounted={showDiscounted}
-            setShowDiscounted={setShowDiscounted}
-            showUsed={showUsed}
-            setShowUsed={setShowUsed}
-            showBranded={showBranded}
-            setShowBranded={setShowBranded}
-            sortOption={sortOption}
-            setSortOption={setSortOption}
-            priceRange={priceRange}
-            setPriceRange={setPriceRange}
-            resetFilters={resetFilters}
-            gridLayout={gridLayout}
           />
         </TabsContent>
         
@@ -121,18 +102,7 @@ const OptimizedMarketplace = () => {
           <CategoryTabContent 
             selectedCategory={selectedCategory}
             setSelectedCategory={handleCategoryChange}
-            showDiscounted={showDiscounted}
-            setShowDiscounted={setShowDiscounted}
-            showUsed={showUsed}
-            setShowUsed={setShowUsed}
-            showBranded={showBranded}
-            setShowBranded={setShowBranded}
-            sortOption={sortOption}
-            setSortOption={setSortOption}
-            priceRange={priceRange}
-            setPriceRange={setPriceRange}
-            resetFilters={resetFilters}
-            gridLayout={gridLayout}
+            setActiveTab={setActiveTab}
           />
         </TabsContent>
         
@@ -141,17 +111,10 @@ const OptimizedMarketplace = () => {
             searchQuery={searchQuery}
             selectedCategory={selectedCategory}
             showDiscounted={showDiscounted}
-            setShowDiscounted={setShowDiscounted}
             showUsed={showUsed}
-            setShowUsed={setShowUsed}
             showBranded={showBranded}
-            setShowBranded={setShowBranded}
             sortOption={sortOption}
-            setSortOption={setSortOption}
             priceRange={priceRange}
-            setPriceRange={setPriceRange}
-            resetFilters={resetFilters}
-            gridLayout={gridLayout}
           />
         </TabsContent>
       </Tabs>

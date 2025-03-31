@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Navbar } from '@/components/Navbar';
 import { MobileNav } from '@/components/navbar/MobileNav';
@@ -159,6 +158,7 @@ export default function MarketplaceIndex() {
                 <CategoryTabContent 
                   selectedCategory={selectedCategory} 
                   setSelectedCategory={setSelectedCategory}
+                  setActiveTab={setActiveTab}
                 />
               </TabsContent>
 

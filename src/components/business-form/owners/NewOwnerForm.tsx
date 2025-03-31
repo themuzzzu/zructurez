@@ -23,6 +23,7 @@ export const NewOwnerForm = ({ onAdd, onCancel }: NewOwnerFormProps) => {
     <Card className="p-4 space-y-4">
       <OwnerFormFields
         {...newOwner}
+        position={newOwner.position || ""}
         onUpdate={handleUpdate}
       />
 

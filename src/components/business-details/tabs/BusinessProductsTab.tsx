@@ -1,11 +1,10 @@
 
 import { BusinessContent } from "@/components/business-details/BusinessContent";
-import { BusinessProductsSection } from "@/components/business-details/content/BusinessProductsSection";
 import { Card } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState, useMemo } from "react";
-import type { Business } from "@/types/business";
+import type { Business, BusinessProduct } from "@/types/business";
 
 interface BusinessProductsTabProps {
   businessId: string;
@@ -72,7 +71,7 @@ export const BusinessProductsTab = ({ businessId, isOwner, products, onSuccess }
       )}
       
       <BusinessContent
-        businessId={businessId}
+        business={businessId}
         isOwner={isOwner}
         business_products={filteredProducts}
         business_portfolio={[]}

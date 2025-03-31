@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -146,7 +145,7 @@ export const BusinessReviewsSection = ({ businessId }: BusinessReviewsSectionPro
           <p>Loading reviews...</p>
         ) : reviews.length > 0 ? (
           <div className="space-y-6">
-            {reviews.map((review) => (
+            {reviews && reviews.map((review, index) => (
               <div key={review.id} className="border-b pb-4 last:border-0">
                 <div className="flex items-start gap-3">
                   <Avatar className="h-10 w-10">

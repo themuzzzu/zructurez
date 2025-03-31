@@ -13,7 +13,11 @@ export const StaffMemberCard = ({ member, onUpdate, onRemove }: StaffMemberCardP
   return (
     <div className="grid gap-2 p-4 border rounded-lg bg-muted/50">
       <div className="flex justify-between items-start">
-        <StaffFormFields {...member} onUpdate={onUpdate} />
+        <StaffFormFields 
+          {...member} 
+          position={member.position || ""}  // Ensure position is always provided
+          onUpdate={onUpdate} 
+        />
         <Button
           type="button"
           variant="ghost"

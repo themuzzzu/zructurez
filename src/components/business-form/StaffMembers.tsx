@@ -93,6 +93,7 @@ export const StaffMembers = ({ staff = [], onChange }: StaffMembersProps) => {
       <div className="grid gap-2">
         <StaffFormFields
           {...newStaff}
+          position={newStaff.position || ""}
           onUpdate={(field, value) => 
             setNewStaff({ ...newStaff, [field]: value })
           }

@@ -3,10 +3,11 @@ import type { MembershipPlan } from "@/types/membership";
 import type { BusinessOwner, StaffMember } from "@/types/business";
 
 interface BusinessProduct {
+  id?: string;
   name: string;
   price: number;
   description: string;
-  category: string;
+  category?: string;
 }
 
 export interface BusinessFormData {

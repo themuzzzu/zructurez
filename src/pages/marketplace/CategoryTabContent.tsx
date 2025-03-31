@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -70,7 +69,6 @@ export const CategoryTabContent: React.FC<CategoryTabContentProps> = ({
         <h2 className="text-xl font-bold">Select a Category</h2>
         <Categories 
           onCategorySelect={setSelectedCategory} 
-          selectedCategory={selectedCategory}
           trendingCategories={[]}
           showAllCategories
         />
@@ -118,7 +116,6 @@ export const CategoryTabContent: React.FC<CategoryTabContentProps> = ({
         <ProductsGrid 
           products={products} 
           layout={layout} 
-          setLayout={setLayout} 
         />
       ) : (
         <div className="text-center py-12">
