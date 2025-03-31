@@ -129,7 +129,7 @@ export const BusinessImageSection = ({ businessId }: BusinessImageSectionProps) 
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button variant="secondary" size="icon">
-                <Upload className="h-4 w-4 mr-2" />
+                <Upload className="h-4 w-4" />
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
