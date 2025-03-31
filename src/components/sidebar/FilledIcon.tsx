@@ -11,7 +11,7 @@ export const FilledIcon = ({ Icon }: FilledIconProps) => {
       <Icon 
         size={20} 
         fill="currentColor" 
-        stroke="currentColor" 
+        stroke="black"
         strokeWidth={1.5}
         className="text-primary"
       />

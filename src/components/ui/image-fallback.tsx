@@ -23,7 +23,7 @@ export function ImageFallback({
         className,
         fallbackClassName
       )}>
-        <ImageOff className="h-8 w-8 text-muted-foreground" />
+        <ImageOff className="h-8 w-8 text-muted-foreground stroke-black dark:stroke-white" />
         <p className="text-xs text-muted-foreground mt-2">{alt || "Image not available"}</p>
       </div>
     );

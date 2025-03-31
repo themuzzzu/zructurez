@@ -44,7 +44,7 @@ export const CategoryIconGrid = () => {
               onClick={() => handleCategoryClick(category.name)}
             >
               <div className="w-12 h-12 rounded-full flex items-center justify-center bg-primary/10 mb-2 transition-transform group-hover:scale-110">
-                <FilledIcon Icon={Icon} />
+                <Icon size={20} fill="currentColor" stroke="black" strokeWidth={1.5} className="text-primary" />
               </div>
               <span className="text-xs text-center">{category.name}</span>
             </div>

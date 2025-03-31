@@ -1,64 +1,152 @@
-
-import { Card } from "@/components/ui/card";
-import { ImageOff } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Edit, Upload } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useProfile } from "@/hooks/useProfile";
+import { useBusiness } from "@/hooks/useBusiness";
 
 interface BusinessImageSectionProps {
-  image_url?: string;
+  businessId: string;
 }
 
-export const BusinessImageSection = ({ image_url }: BusinessImageSectionProps) => {
-  if (!image_url) {
-    return (
-      <div className="w-full rounded-lg overflow-hidden bg-muted flex items-center justify-center" style={{ height: '300px' }}>
-        <div className="text-center p-4">
-          <ImageOff className="h-12 w-12 mx-auto mb-2 text-muted-foreground" />
-          <p className="text-muted-foreground">No image available</p>
-        </div>
-      </div>
-    );
-  }
+export const BusinessImageSection = ({ businessId }: BusinessImageSectionProps) => {
+  const { toast } = useToast();
+  const { profile } = useProfile();
+  const { business, refetchBusiness } = useBusiness(businessId);
+  const [coverUrl, setCoverUrl] = useState<string | null>(business?.cover_url || null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [newCoverUrl, setNewCoverUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (business) {
+      setCoverUrl(business.cover_url || null);
+    }
+  }, [business]);
+
+  const handleCoverChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const { data, error } = await supabase.storage
+        .from('business-covers')
+        .upload(`${businessId}/${file.name}`, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (error) {
+        toast({
+          title: "Uh oh! Something went wrong.",
+          description: "Failed to upload the cover image.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const coverPath = data.path;
+      const publicUrl = `${supabase.storageUrl}/business-covers/${coverPath}`;
+      setNewCoverUrl(publicUrl);
+    } catch (error) {
+      toast({
+        title: "Uh oh! Something went wrong.",
+        description: "Failed to upload the cover image.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSaveCover = async () => {
+    if (!newCoverUrl) return;
+
+    const { error } = await supabase
+      .from('businesses')
+      .update({ cover_url: newCoverUrl })
+      .eq('id', businessId);
+
+    if (error) {
+      toast({
+        title: "Uh oh! Something went wrong.",
+        description: "Failed to update the cover image URL.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (business) {
+      business.cover_url = newCoverUrl;
+    }
+
+    setCoverUrl(newCoverUrl);
+    setNewCoverUrl(null);
+    setIsDialogOpen(false);
+    refetchBusiness();
+
+    toast({
+      title: "Success!",
+      description: "Cover image updated successfully.",
+    });
+  };
 
   return (
-    <div className="w-full rounded-lg overflow-hidden">
-      <div className="relative w-full" style={{ maxHeight: '600px' }}>
+    <div className="relative w-full h-64 rounded-md overflow-hidden">
+      {coverUrl ? (
         <img
-          src={image_url}
-          alt="Business"
-          className="w-full h-auto object-contain rounded-lg"
-          style={{ maxHeight: '600px' }}
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.parentElement?.classList.add('bg-muted');
-            target.parentElement?.classList.add('flex');
-            target.parentElement?.classList.add('items-center');
-            target.parentElement?.classList.add('justify-center');
-            target.parentElement?.style.height = '300px';
-            target.style.display = 'none';
-            
-            // Create fallback content
-            const fallback = document.createElement('div');
-            fallback.className = 'text-center p-4';
-            fallback.innerHTML = `
-              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-12 w-12 mx-auto mb-2 text-muted-foreground">
-                <line x1="2" x2="22" y1="2" y2="22"></line>
-                <path d="M10.41 10.41a2 2 0 1 1-2.83-2.83"></path>
-                <line x1="13.5" x2="6.5" y1="13.5" y2="20.5"></line>
-                <line x1="2" x2="22" y1="2" y2="22"></line>
-                <path d="M21 15.3a2 2 0 0 0-1.3-1.3"></path>
-                <path d="M15.3 21a2 2 0 0 0 1.3-1.3"></path>
-                <path d="M21 8.7a2 2 0 0 0-1.3-1.3"></path>
-                <path d="M15.3 2.7a2 2 0 0 1 1.3 1.3"></path>
-                <path d="M8.7 21a2 2 0 0 1-1.3-1.3"></path>
-                <path d="M2.7 15.3a2 2 0 0 1 1.3-1.3"></path>
-                <path d="M2.7 8.7a2 2 0 0 1 1.3-1.3"></path>
-                <path d="M8.7 2.7a2 2 0 0 0-1.3 1.3"></path>
-              </svg>
-              <p class="text-muted-foreground">Image failed to load</p>
-            `;
-            target.parentElement?.appendChild(fallback);
-          }}
+          src={coverUrl}
+          alt="Business Cover"
+          className="w-full h-full object-cover"
         />
-      </div>
+      ) : (
+        <div className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground">
+          No Cover Image
+        </div>
+      )}
+      {profile?.id === business?.owner_id && (
+        <div className="absolute top-2 right-2">
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="secondary" size="icon">
+                <Upload className="h-4 w-4 mr-2" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Update Cover Image</DialogTitle>
+                <DialogDescription>
+                  Upload a new cover image for your business.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="cover" className="text-right">
+                    Cover Image
+                  </Label>
+                  <Input
+                    type="file"
+                    id="cover"
+                    className="col-span-3"
+                    onChange={handleCoverChange}
+                  />
+                </div>
+              </div>
+              <Button onClick={handleSaveCover}>Save changes</Button>
+            </DialogContent>
+          </Dialog>
+        </div>
+      )}
     </div>
   );
 };

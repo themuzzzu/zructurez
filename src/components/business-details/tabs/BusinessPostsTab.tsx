@@ -4,6 +4,7 @@ import { PostCard } from "@/components/PostCard";
 import { CreatePost } from "@/components/CreatePost";
 import { ImageOff } from "lucide-react";
 import type { Business } from "@/types/business";
+import { ImageFallback } from "@/components/ui/image-fallback";
 
 interface BusinessPostsTabProps {
   business: Business;
@@ -33,7 +34,7 @@ export const BusinessPostsTab = ({ business }: BusinessPostsTabProps) => {
           ))
         ) : (
           <div className="text-center py-8 border rounded-lg">
-            <ImageOff className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+            <ImageOff className="h-12 w-12 mx-auto mb-4 text-muted-foreground stroke-black dark:stroke-white" />
             <p className="text-muted-foreground">No posts available</p>
           </div>
         )}
