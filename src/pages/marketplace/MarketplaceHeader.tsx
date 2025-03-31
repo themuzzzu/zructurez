@@ -4,18 +4,25 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 
-interface MarketplaceHeaderProps {
+export interface MarketplaceHeaderProps {
   onSearch?: (query: string) => void;
   searchTerm?: string;
   setSearchTerm?: (term: string) => void;
   popularSearches?: any[];
+  isSearching?: boolean;
+  isCartOpen?: boolean;
+  setIsCartOpen?: (open: boolean) => void;
+  isFilterOpen?: boolean;
+  setIsFilterOpen?: (open: boolean) => void;
+  cartItemCount?: number;
 }
 
 export const MarketplaceHeader = ({ 
   onSearch, 
   searchTerm = "",
   setSearchTerm,
-  popularSearches = []
+  popularSearches = [],
+  isSearching = false,
 }: MarketplaceHeaderProps) => {
   const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm);
   const [showSuggestions, setShowSuggestions] = useState(false);

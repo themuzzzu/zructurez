@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Navbar } from '@/components/Navbar';
 import { MobileNav } from '@/components/navbar/MobileNav';
@@ -11,9 +10,6 @@ import { BrowseTabContent } from './BrowseTabContent';
 import { CategoryTabContent } from './CategoryTabContent';
 import { supabase } from '@/integrations/supabase/client';
 import { motion } from 'framer-motion';
-
-// Add framer-motion dependency
-<lov-add-dependency>framer-motion@latest</lov-add-dependency>
 
 export default function MarketplaceIndex() {
   const [activeTab, setActiveTab] = useState('browse');
@@ -42,7 +38,6 @@ export default function MarketplaceIndex() {
 
     const fetchTrendingCategories = async () => {
       try {
-        // Fetch categories with most products
         const { data, error } = await supabase
           .from('products')
           .select('category')
@@ -51,12 +46,10 @@ export default function MarketplaceIndex() {
         
         if (error) throw error;
         
-        // Extract unique categories
         const uniqueCategories = [...new Set(data?.map(item => item.category))];
         setTrendingCategories(uniqueCategories || []);
       } catch (err) {
         console.error('Error fetching trending categories:', err);
-        // Fallback to preset categories
         setTrendingCategories(['clothing', 'electronics', 'home', 'beauty', 'sports']);
       }
     };
@@ -72,14 +65,12 @@ export default function MarketplaceIndex() {
     setSearchTerm(term);
     
     try {
-      // Log search query for analytics
       await supabase.from('search_queries').insert({
         query: term,
         model_used: 'marketplace-search',
-        results_count: 0, // Will be updated after results are fetched
+        results_count: 0,
       });
 
-      // Fetch search results
       const { data, error } = await supabase
         .from('products')
         .select('*')
@@ -88,7 +79,6 @@ export default function MarketplaceIndex() {
       
       if (error) throw error;
       
-      // Update results count in analytics
       await supabase.from('search_queries')
         .update({ results_count: data.length })
         .eq('query', term);

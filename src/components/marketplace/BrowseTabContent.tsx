@@ -1,123 +1,98 @@
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { SponsoredProducts } from '@/components/marketplace/SponsoredProducts';
+import { TrendingProducts } from '@/components/marketplace/TrendingProducts';
+import { ProductsGrid } from '@/components/products/ProductsGrid';
+import { GridLayoutType } from '@/components/products/types/layouts';
+import { Skeleton } from '@/components/ui/skeleton';
+import { EmptySearchResults } from '@/components/marketplace/EmptySearchResults';
+import { RecommendedProducts } from '@/components/marketplace/RecommendedProducts';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { supabase } from "@/integrations/supabase/client";
-import { ProductsGrid } from "@/components/products/ProductsGrid";
-import { Spinner } from "@/components/common/Spinner";
-import { GridLayoutType } from "@/components/products/types/layouts";
-import { EmptySearchResults } from "@/components/marketplace/EmptySearchResults";
-
-export interface BrowseTabContentProps {
-  selectedCategory?: string;
-  showDiscounted?: boolean;
-  setShowDiscounted?: (show: boolean) => void;
-  showUsed?: boolean;
-  setShowUsed?: (show: boolean) => void;
-  showBranded?: boolean;
-  setShowBranded?: (show: boolean) => void;
-  sortOption?: string;
-  setSortOption?: (option: string) => void;
-  priceRange?: string;
-  setPriceRange?: (range: string) => void;
-  resetFilters?: () => void;
-  gridLayout?: GridLayoutType;
-  handleCategorySelect?: (category: string) => void;
-  handleSearchSelect?: (term: string) => void;
+interface BrowseTabContentProps {
+  searchResults?: any[];
+  searchTerm?: string;
+  isSearching?: boolean;
+  onCategorySelect?: (category: string) => void;
+  onSearchSelect?: (term: string) => void;
 }
 
-export const BrowseTabContent = ({
-  selectedCategory = "all",
-  showDiscounted = false,
-  showBranded = false,
-  showUsed = false,
-  sortOption = "newest",
-  priceRange = "all",
-  gridLayout = "grid4x4",
-}: BrowseTabContentProps) => {
-  const [products, setProducts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+export const BrowseTabContent: React.FC<BrowseTabContentProps> = ({ 
+  searchResults = [],
+  searchTerm = '',
+  isSearching = false,
+  onCategorySelect,
+  onSearchSelect
+}) => {
+  const [layout, setLayout] = useState<GridLayoutType>('grid3x3');
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true);
-      try {
-        let query = supabase.from("products").select("*");
+  const { data: trendingSearches, isLoading: loadingTrending } = useQuery({
+    queryKey: ['trending-searches'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('search_suggestions')
+        .select('*')
+        .order('frequency', { ascending: false })
+        .limit(5);
+      
+      if (error) throw error;
+      return data;
+    },
+    staleTime: 5 * 60 * 1000
+  });
 
-        // Apply category filter
-        if (selectedCategory && selectedCategory !== "all") {
-          query = query.eq("category", selectedCategory);
-        }
+  // Show search results if there's a search term
+  if (searchTerm) {
+    if (isSearching) {
+      return (
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold">Searching for "{searchTerm}"...</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+              <Card key={i}>
+                <Skeleton className="h-[200px] w-full rounded-t-lg" />
+                <CardContent className="p-4 space-y-2">
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                  <Skeleton className="h-4 w-1/4" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      );
+    }
 
-        // Apply discounted filter
-        if (showDiscounted) {
-          query = query.eq("is_discounted", true);
-        }
-
-        // Apply used filter
-        if (showUsed) {
-          query = query.eq("is_used", true);
-        }
-
-        // Apply branded filter
-        if (showBranded) {
-          query = query.eq("is_branded", true);
-        }
-
-        // Apply sorting
-        switch (sortOption) {
-          case "priceAsc":
-            query = query.order("price", { ascending: true });
-            break;
-          case "priceDesc":
-            query = query.order("price", { ascending: false });
-            break;
-          case "newest":
-            query = query.order("created_at", { ascending: false });
-            break;
-          default:
-            query = query.order("created_at", { ascending: false });
-        }
-
-        const { data, error } = await query;
-
-        if (error) throw error;
-
-        setProducts(data || []);
-      } catch (err) {
-        console.error("Error fetching products:", err);
-        setError(err instanceof Error ? err.message : "Failed to load products");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, [selectedCategory, showDiscounted, showUsed, showBranded, sortOption, priceRange]);
-
-  if (loading) {
     return (
-      <div className="flex justify-center items-center py-12">
-        <Spinner size="lg" />
+      <div className="space-y-6">
+        <h2 className="text-lg font-semibold">Search Results for "{searchTerm}"</h2>
+        
+        {searchResults.length > 0 ? (
+          <ProductsGrid 
+            products={searchResults} 
+            layout={layout}
+            isLoading={false}
+            onOpenAddProductDialog={() => {}}
+          />
+        ) : (
+          <EmptySearchResults 
+            searchTerm={searchTerm}
+          />
+        )}
       </div>
     );
   }
 
-  if (error) {
-    return <div className="text-center py-8 text-red-500">{error}</div>;
-  }
-
-  if (products.length === 0) {
-    return <EmptySearchResults />;
-  }
-
+  // Default browse content
   return (
-    <div className="space-y-6">
-      <ProductsGrid 
-        products={products} 
-        layout={gridLayout}
-      />
+    <div className="space-y-8 animate-fade-in">
+      <SponsoredProducts />
+      
+      <TrendingProducts />
+      
+      <RecommendedProducts />
     </div>
   );
 };

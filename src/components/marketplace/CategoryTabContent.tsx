@@ -133,11 +133,13 @@ export const CategoryTabContent = ({
       </div>
       
       {products.length === 0 ? (
-        <EmptySearchResults />
+        <EmptySearchResults searchTerm={selectedCategory !== "all" ? selectedCategory : ""} />
       ) : (
         <ProductsGrid 
           products={products} 
           layout={gridLayout}
+          isLoading={false}
+          onOpenAddProductDialog={() => {}}
         />
       )}
     </div>

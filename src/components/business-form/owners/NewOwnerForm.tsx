@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "../../ui/button";
 import { Card } from "../../ui/card";
@@ -22,8 +23,12 @@ export const NewOwnerForm = ({ onAdd, onCancel }: NewOwnerFormProps) => {
   return (
     <Card className="p-4 space-y-4">
       <OwnerFormFields
-        {...newOwner}
-        position={newOwner.position || ""}
+        name={newOwner.name}
+        role={newOwner.role}
+        position={newOwner.position}
+        experience={newOwner.experience}
+        qualifications={newOwner.qualifications || ""}
+        bio={newOwner.bio || ""}
         onUpdate={handleUpdate}
       />
 

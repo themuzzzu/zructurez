@@ -3,12 +3,16 @@ import type { MembershipPlan } from "@/types/membership";
 import type { Owner } from "./owner";
 import type { StaffMember } from "./staff";
 
-interface BusinessProduct {
-  id?: string; // Make id optional to match the form data structure
+export interface BusinessProduct {
+  id?: string;
   name: string;
   price: number;
   description: string;
   category?: string;
+  image_url?: string;
+  stock?: number;
+  created_at?: string;
+  business_id?: string;
 }
 
 export interface BusinessFormData {

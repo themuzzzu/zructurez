@@ -198,7 +198,7 @@ export const ShoppingSection = ({
   const isSearchResults = !!searchQuery;
 
   if (isSearchResults && products.length === 0) {
-    return <EmptySearchResults query={searchQuery} />;
+    return <EmptySearchResults searchTerm={searchQuery} />;
   }
 
   return (

@@ -12,9 +12,11 @@ export interface Product {
   is_used?: boolean;
   is_branded?: boolean;
   brand_name?: string;
+  brand?: string;
   condition?: string;
   stock?: number;
   views?: number;
   created_at?: string;
   user_id?: string;
+  discount_percentage?: number;
 }

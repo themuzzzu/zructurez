@@ -1,201 +1,113 @@
-import { useState, useEffect } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { supabase } from '@/integrations/supabase/client';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Star, StarIcon } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Star } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+
+interface Review {
+  id: string;
+  created_at: string;
+  business_id: string;
+  profile_id: string;
+  rating: number;
+  comment: string;
+  profile: {
+    id: string;
+    username: string;
+    avatar_url: string | null;
+    full_name: string;
+  };
+}
 
 interface BusinessReviewsSectionProps {
   businessId: string;
 }
 
 export const BusinessReviewsSection = ({ businessId }: BusinessReviewsSectionProps) => {
-  const [reviews, setReviews] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [newReview, setNewReview] = useState('');
-  const [rating, setRating] = useState(5);
-  const [submitting, setSubmitting] = useState(false);
-  const [user, setUser] = useState<any>(null);
-
-  useEffect(() => {
-    const fetchReviews = async () => {
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const { data, error, isLoading } = useQuery({
+    queryKey: ['business-reviews', businessId],
+    queryFn: async () => {
       const { data, error } = await supabase
-        .from('business_comments')
-        .select(`
-          *,
-          profiles(id, username, avatar_url, name)
-        `)
+        .from('reviews')
+        .select('*, profile:profiles(*)')
         .eq('business_id', businessId)
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching reviews:', error);
-      } else {
-        setReviews(data || []);
-      }
-      setLoading(false);
-    };
-
-    const fetchUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      setUser(data.user);
-    };
-
-    fetchReviews();
-    fetchUser();
-  }, [businessId]);
-
-  const handleSubmitReview = async () => {
-    if (!user) {
-      alert('Please log in to leave a review');
-      return;
-    }
-
-    if (!newReview.trim()) {
-      return;
-    }
-
-    setSubmitting(true);
-
-    try {
-      // Get user's profile ID
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('id', user.id)
-        .single();
-
-      const profileId = profileData?.id;
-
-      if (!profileId) {
-        throw new Error('Profile not found');
+        console.error("Error fetching reviews:", error);
+        throw error;
       }
 
-      // Submit review
-      const { data, error } = await supabase
-        .from('business_comments')
-        .insert({
-          business_id: businessId,
-          user_id: user.id,
-          profile_id: profileId,
-          content: newReview,
-          rating
-        });
+      return data as Review[];
+    },
+  });
 
-      if (error) throw error;
-
-      // Fetch the newly added review with profile info
-      const { data: newReviewData, error: fetchError } = await supabase
-        .from('business_comments')
-        .select(`
-          *,
-          profiles(id, username, avatar_url, name)
-        `)
-        .eq('id', data?.[0]?.id)
-        .single();
-
-      if (fetchError) throw fetchError;
-
-      setReviews([newReviewData, ...reviews]);
-      setNewReview('');
-      setRating(5);
-    } catch (error) {
-      console.error('Error submitting review:', error);
-    } finally {
-      setSubmitting(false);
+  useEffect(() => {
+    if (data) {
+      setReviews(data);
     }
-  };
+  }, [data]);
+
+  // Add a null check for the data
+  const averageRating = data && data.length > 0
+    ? (data.reduce((sum, review) => sum + (review.rating || 0), 0) / data.length).toFixed(1)
+    : "0.0";
+
+  if (isLoading) {
+    return <p>Loading reviews...</p>;
+  }
+
+  if (error) {
+    return <p>Error loading reviews.</p>;
+  }
 
   return (
-    <Card>
-      <CardContent className="p-6">
-        <h3 className="text-xl font-semibold mb-6">Reviews & Ratings</h3>
-
-        {user && (
-          <div className="mb-6 space-y-4 border-b pb-6">
-            <div className="flex items-center gap-2 mb-2">
-              <p className="text-sm font-medium">Your Rating:</p>
-              <div className="flex">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <StarIcon
-                    key={star}
-                    className={`h-5 w-5 cursor-pointer ${
-                      star <= rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'
-                    }`}
-                    onClick={() => setRating(star)}
-                  />
-                ))}
-              </div>
-            </div>
-            <Textarea
-              placeholder="Write your review..."
-              value={newReview}
-              onChange={(e) => setNewReview(e.target.value)}
-              className="min-h-[100px]"
-            />
-            <Button onClick={handleSubmitReview} disabled={submitting || !newReview.trim()}>
-              {submitting ? 'Submitting...' : 'Submit Review'}
-            </Button>
-          </div>
-        )}
-
-        {loading ? (
-          <p>Loading reviews...</p>
-        ) : reviews.length > 0 ? (
-          <div className="space-y-6">
-            {reviews && reviews.map((review) => (
-              <ReviewCard key={review.id} review={review} />
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle className="flex items-center space-x-2">
+          <span>Customer Reviews</span>
+          <span className="text-sm text-muted-foreground">({reviews.length} reviews)</span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="h-[400px]">
+        <ScrollArea className="h-full">
+          <div className="space-y-4">
+            {reviews.map((review) => (
+              <Card key={review.id}>
+                <CardHeader>
+                  <div className="flex items-center space-x-4">
+                    <Avatar>
+                      <AvatarImage src={review.profile.avatar_url || ""} />
+                      <AvatarFallback>{review.profile.full_name?.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <CardTitle>{review.profile.full_name}</CardTitle>
+                      <div className="flex items-center space-x-1">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`h-4 w-4 ${i < review.rating ? "fill-yellow-500 text-yellow-500" : "fill-gray-200 text-gray-200"
+                              }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p>{review.comment}</p>
+                </CardContent>
+                <CardFooter className="text-xs text-muted-foreground">
+                  {new Date(review.created_at).toLocaleDateString()}
+                </CardFooter>
+              </Card>
             ))}
           </div>
-        ) : (
-          <p className="text-center py-6 text-muted-foreground">
-            No reviews yet. Be the first to leave a review!
-          </p>
-        )}
+        </ScrollArea>
       </CardContent>
     </Card>
-  );
-};
-
-// Define ReviewCard component
-const ReviewCard = ({ review }) => {
-  return (
-    <div key={review.id} className="border-b pb-4 last:border-0">
-      <div className="flex items-start gap-3">
-        <Avatar className="h-10 w-10">
-          <AvatarImage src={review.profiles?.avatar_url} />
-          <AvatarFallback>
-            {review.profiles?.name?.charAt(0) || review.profiles?.username?.charAt(0) || 'U'}
-          </AvatarFallback>
-        </Avatar>
-        <div className="flex-1">
-          <div className="flex items-center justify-between">
-            <p className="font-medium">
-              {review.profiles?.name || review.profiles?.username || 'Anonymous'}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {new Date(review.created_at).toLocaleDateString()}
-            </p>
-          </div>
-          {review.rating && (
-            <div className="flex text-yellow-400 mt-1">
-              {Array(5)
-                .fill(0)
-                .map((_, i) => (
-                  <StarIcon
-                    key={i}
-                    className={`h-4 w-4 ${
-                      i < review.rating ? 'fill-current' : 'text-gray-300'
-                    }`}
-                  />
-                ))}
-            </div>
-          )}
-          <p className="mt-2 text-sm">{review.content}</p>
-        </div>
-      </div>
-    </div>
   );
 };

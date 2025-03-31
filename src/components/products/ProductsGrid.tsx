@@ -1,32 +1,39 @@
 
 import { ProductCard } from "./ProductCard";
 import { GridLayoutType } from "./types/layouts";
+import { Product } from "@/types/product";
+import { Spinner } from "@/components/common/Spinner";
 
 export interface ProductsGridProps {
-  products: any[];
-  layout: GridLayoutType;
-  setLayout?: (layout: GridLayoutType) => void;
+  products: Product[] | any[];
+  layout?: GridLayoutType;
+  isLoading?: boolean;
+  onOpenAddProductDialog?: () => void;
 }
 
-export const ProductsGrid = ({ products, layout, setLayout }: ProductsGridProps) => {
-  // Get grid classes based on layout
-  const getGridClasses = () => {
-    switch (layout) {
-      case "grid2x2":
-        return "grid grid-cols-1 sm:grid-cols-2 gap-4";
-      case "grid3x3":
-        return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4";
-      case "grid4x4":
-        return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4";
-      case "list":
-        return "flex flex-col gap-4";
-      default:
-        return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4";
-    }
+export const ProductsGrid = ({ 
+  products, 
+  layout = "grid3x3",
+  isLoading = false,
+  onOpenAddProductDialog
+}: ProductsGridProps) => {
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center py-12">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  const gridLayoutClass = {
+    grid2x2: "grid-cols-1 sm:grid-cols-2 gap-4",
+    grid3x3: "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4",
+    grid4x4: "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4",
+    list: "flex flex-col gap-3"
   };
 
   return (
-    <div className={getGridClasses()}>
+    <div className={`grid ${gridLayoutClass[layout]}`}>
       {products.map((product) => (
         <ProductCard 
           key={product.id} 

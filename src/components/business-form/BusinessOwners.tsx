@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "../ui/button";
 import { Plus, X } from "lucide-react";
@@ -106,8 +107,13 @@ export const BusinessOwners = ({ owners = [], onChange }: BusinessOwnersProps) =
         <div key={index} className="grid gap-2 p-4 border rounded-lg bg-muted/50">
           <div className="flex justify-between items-start">
             <OwnerFormFields
-              {...owner}
-              position={owner.position || ""}
+              name={owner.name}
+              role={owner.role}
+              position={owner.position}
+              experience={owner.experience || ""}
+              qualifications={owner.qualifications}
+              bio={owner.bio}
+              image_url={owner.image_url}
               onUpdate={(field, value) => handleUpdateOwner(index, field as keyof Owner, value)}
             />
             <Button
@@ -125,8 +131,13 @@ export const BusinessOwners = ({ owners = [], onChange }: BusinessOwnersProps) =
       <div className="grid gap-2">
         <div className="p-4 border rounded-lg bg-muted/50">
           <OwnerFormFields
-            {...newOwner}
-            position={newOwner.position || ""}
+            name={newOwner.name}
+            role={newOwner.role}
+            position={newOwner.position}
+            experience={newOwner.experience}
+            qualifications={newOwner.qualifications}
+            bio={newOwner.bio}
+            image_url={newOwner.image_url}
             onUpdate={(field, value) => 
               setNewOwner({ ...newOwner, [field]: value })
             }
