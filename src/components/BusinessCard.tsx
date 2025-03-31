@@ -57,7 +57,7 @@ export const BusinessCard = ({
     <>
       <BusinessCardUI 
         onClick={() => navigate(`/businesses/${id}`)}
-        className="group w-full"
+        className="group w-full max-w-full"
       >
         <BusinessCardImage 
           src={image} 

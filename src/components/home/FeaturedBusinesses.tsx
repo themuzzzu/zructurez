@@ -121,7 +121,7 @@ export const FeaturedBusinesses = () => {
   };
 
   return (
-    <section>
+    <section className="px-4 sm:px-0">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl md:text-2xl font-bold flex items-center">
           <Award className="h-5 w-5 mr-2 text-zinc-700 dark:text-zinc-300" />
@@ -149,7 +149,7 @@ export const FeaturedBusinesses = () => {
         <div 
           ref={scrollRef}
           className="flex overflow-x-auto gap-4 py-2 scrollbar-none snap-x snap-mandatory scroll-smooth"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', paddingLeft: 0, paddingRight: 0 }}
         >
           {featuredBusinesses.map((business) => (
             <div 

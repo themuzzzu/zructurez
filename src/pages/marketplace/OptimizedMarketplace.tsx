@@ -50,17 +50,7 @@ const OptimizedMarketplace = () => {
   };
 
   return (
-    <div className="container px-2 sm:px-4 mx-auto max-w-screen-xl py-4 pb-16">
-      <MarketplaceHeader 
-        isCartOpen={isCartOpen}
-        setIsCartOpen={setIsCartOpen}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        isFilterOpen={isFilterOpen}
-        setIsFilterOpen={setIsFilterOpen}
-        cartItemCount={0} // You can replace this with actual cart count
-      />
-
+    <div className="container px-4 sm:px-4 mx-auto max-w-screen-xl py-4 pb-16 overflow-x-hidden">
       {/* Main Search bar at the top */}
       <div className="mb-6 mt-4">
         <SearchBar 
@@ -71,6 +61,16 @@ const OptimizedMarketplace = () => {
           className="w-full"
         />
       </div>
+
+      <MarketplaceHeader 
+        isCartOpen={isCartOpen}
+        setIsCartOpen={setIsCartOpen}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        isFilterOpen={isFilterOpen}
+        setIsFilterOpen={setIsFilterOpen}
+        cartItemCount={0} // You can replace this with actual cart count
+      />
 
       {/* Display the banner carousel below the search bar */}
       <div className="mb-6">

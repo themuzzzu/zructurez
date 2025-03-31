@@ -36,7 +36,7 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       <Navbar />
       <div className="flex pt-16 w-full">
         {!hideSidebar && !isMobile && (
@@ -48,13 +48,13 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
           </div>
         )}
         <main 
-          className={`flex-1 transition-all duration-300 w-full overflow-y-auto scrollbar-hide ${hideSidebar || isMobile ? 'mobile-container' : ''}`}
+          className={`flex-1 transition-all duration-300 w-full overflow-y-auto scrollbar-hide overflow-x-hidden ${hideSidebar || isMobile ? 'mobile-container' : ''}`}
           style={{ 
             marginLeft: hideSidebar || isMobile ? 0 : sidebarWidth + 'px', 
             paddingBottom: isMobile ? '5rem' : '',
             // Add small padding on mobile
-            paddingLeft: isMobile ? '0' : (!hideSidebar && !isMobile) ? '0.25rem' : '',
-            paddingRight: isMobile ? '0' : '',
+            paddingLeft: isMobile ? '16px' : (!hideSidebar && !isMobile) ? '0.25rem' : '',
+            paddingRight: isMobile ? '16px' : '',
             maxHeight: 'calc(100vh - 64px)',
           }}
         >

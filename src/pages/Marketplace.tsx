@@ -13,10 +13,11 @@ const Marketplace = () => {
   }
   
   // Render the marketplace with the proper layout
-  // Important: We're NOT hiding the sidebar in desktop view anymore
   return (
     <Layout>
-      <OptimizedMarketplace />
+      <div className="overflow-x-hidden">
+        <OptimizedMarketplace />
+      </div>
     </Layout>
   );
 };

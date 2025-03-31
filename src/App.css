@@ -62,23 +62,28 @@
   }
   
   .container {
-    padding-left: 12px !important;
-    padding-right: 12px !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
     max-width: 100% !important;
   }
   
-  /* Make all full-width elements have side gaps */
+  /* Make all full-width elements have consistent side gaps */
   .full-width-section {
-    width: calc(100% - 24px) !important;
-    max-width: calc(100% - 24px) !important;
-    margin-left: 12px !important;
-    margin-right: 12px !important;
+    width: calc(100% - 32px) !important;
+    max-width: calc(100% - 32px) !important;
+    margin-left: 16px !important;
+    margin-right: 16px !important;
   }
   
   /* Side gap for section containers on mobile */
   .section-container {
-    padding-left: 12px !important;
-    padding-right: 12px !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  /* Prevent horizontal overflow */
+  .overflow-x-hidden {
+    overflow-x: hidden;
   }
 }
 
@@ -111,8 +116,8 @@
 
 /* Add mobile spacing utility class */
 .mobile-container {
-  padding-left: 12px;
-  padding-right: 12px;
+  padding-left: 16px;
+  padding-right: 16px;
 }
 
 /* Top gap for services section */

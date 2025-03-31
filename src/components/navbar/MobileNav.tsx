@@ -64,7 +64,10 @@ export const MobileNav = () => {
         {mobileNavItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path || 
-                          (item.path === "/businesses" && location.pathname.startsWith("/businesses/"));
+                          (item.path === "/businesses" && location.pathname.startsWith("/businesses/")) ||
+                          (item.path === "/marketplace" && location.pathname.startsWith("/marketplace/")) ||
+                          (item.path === "/services" && location.pathname.startsWith("/services/")) ||
+                          (item.path === "/messages" && location.pathname.startsWith("/messages/"));
           
           return (
             <Button
