@@ -2,6 +2,7 @@
 import { Button } from "./ui/button";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { useNavigate, useLocation } from "react-router-dom";
 import { 
   Hospital, 
   Car, 
@@ -38,22 +39,38 @@ interface BusinessCategoryFilterProps {
 }
 
 export const BusinessCategoryFilter = ({ onCategoryChange }: BusinessCategoryFilterProps = {}) => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [selectedCategory, setSelectedCategory] = useState("all");
+
+  // Extract category from URL on initial load
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const categoryParam = params.get('category');
+    if (categoryParam) {
+      setSelectedCategory(categoryParam);
+      if (onCategoryChange) {
+        onCategoryChange(categoryParam);
+      }
+    }
+  }, [location.search]);
 
   const handleCategoryClick = (categoryId: string) => {
     setSelectedCategory(categoryId);
+    
+    // Update URL with selected category
+    const currentPath = location.pathname;
+    if (categoryId === "all") {
+      navigate(currentPath);
+    } else {
+      navigate(`${currentPath}?category=${categoryId}`);
+    }
+    
     if (onCategoryChange) {
       onCategoryChange(categoryId);
     }
     toast.success(`Filtered by ${categories.find(c => c.id === categoryId)?.name}`);
   };
-
-  useEffect(() => {
-    // Initialize with "all" category if there's a change handler
-    if (onCategoryChange) {
-      onCategoryChange(selectedCategory);
-    }
-  }, []);
 
   return (
     <div className="flex gap-3 overflow-x-auto pb-4 px-2 scrollbar-hide animate-fade-up">
@@ -64,7 +81,7 @@ export const BusinessCategoryFilter = ({ onCategoryChange }: BusinessCategoryFil
           className="whitespace-nowrap min-w-[120px] justify-center transition-colors duration-300 hover:bg-accent/80"
           onClick={() => handleCategoryClick(id)}
         >
-          {Icon && <Icon className="h-4 w-4 mr-2 shrink-0" />}
+          {Icon && <Icon className="h-4 w-4 mr-2 shrink-0 stroke-black dark:stroke-white" />}
           <span className="truncate">{name}</span>
         </Button>
       ))}

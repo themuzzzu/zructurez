@@ -40,7 +40,7 @@ export const BusinessCardActions = ({
         className={`w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 transition-colors ${!appointment_price ? 'col-span-2' : ''}`} 
         variant="default"
       >
-        <MessageSquare className="h-4 w-4" />
+        <MessageSquare className="h-4 w-4 stroke-black" />
         Message
       </Button>
       <Button 
@@ -52,7 +52,7 @@ export const BusinessCardActions = ({
             : "border-gray-300 hover:bg-gray-100 text-gray-800"} 
           font-light`}
       >
-        <Share2 className="h-4 w-4" />
+        <Share2 className="h-4 w-4 stroke-black dark:stroke-white" />
         Share
       </Button>
       <Button 
@@ -63,7 +63,7 @@ export const BusinessCardActions = ({
             ? "border-gray-700 hover:bg-gray-800 text-white" 
             : "border-gray-300 hover:bg-gray-100 text-gray-800"}`}
       >
-        <Phone className="h-4 w-4" />
+        <Phone className="h-4 w-4 stroke-black dark:stroke-white" />
         Call
       </Button>
     </div>

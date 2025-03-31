@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { 
   Smartphone, Laptop, Headphones, Watch, Camera, 
@@ -11,20 +12,26 @@ interface CategoryAvatarsProps {
 }
 
 export const CategoryAvatars = ({ onCategorySelect }: CategoryAvatarsProps) => {
+  const navigate = useNavigate();
   const [categories] = useState([
-    { name: "Electronics", icon: <Smartphone size={24} /> },
-    { name: "Computers", icon: <Laptop size={24} /> },
-    { name: "Audio", icon: <Headphones size={24} /> },
-    { name: "Wearables", icon: <Watch size={24} /> },
-    { name: "Cameras", icon: <Camera size={24} /> },
-    { name: "Fashion", icon: <Shirt size={24} /> },
-    { name: "Books", icon: <Bookmark size={24} /> },
-    { name: "Gifts", icon: <Gift size={24} /> },
-    { name: "Home", icon: <Home size={24} /> },
-    { name: "Kitchen", icon: <Coffee size={24} /> },
-    { name: "Automotive", icon: <Car size={24} /> },
-    { name: "Baby", icon: <Baby size={24} /> }
+    { name: "Electronics", icon: <Smartphone size={24} className="stroke-black dark:stroke-white" /> },
+    { name: "Computers", icon: <Laptop size={24} className="stroke-black dark:stroke-white" /> },
+    { name: "Audio", icon: <Headphones size={24} className="stroke-black dark:stroke-white" /> },
+    { name: "Wearables", icon: <Watch size={24} className="stroke-black dark:stroke-white" /> },
+    { name: "Cameras", icon: <Camera size={24} className="stroke-black dark:stroke-white" /> },
+    { name: "Fashion", icon: <Shirt size={24} className="stroke-black dark:stroke-white" /> },
+    { name: "Books", icon: <Bookmark size={24} className="stroke-black dark:stroke-white" /> },
+    { name: "Gifts", icon: <Gift size={24} className="stroke-black dark:stroke-white" /> },
+    { name: "Home", icon: <Home size={24} className="stroke-black dark:stroke-white" /> },
+    { name: "Kitchen", icon: <Coffee size={24} className="stroke-black dark:stroke-white" /> },
+    { name: "Automotive", icon: <Car size={24} className="stroke-black dark:stroke-white" /> },
+    { name: "Baby", icon: <Baby size={24} className="stroke-black dark:stroke-white" /> }
   ]);
+  
+  const handleCategoryClick = (category: string) => {
+    onCategorySelect(category.toLowerCase());
+    navigate(`/marketplace?category=${category.toLowerCase()}`);
+  };
   
   return (
     <Card className="bg-white dark:bg-zinc-800 p-4 border border-gray-200 dark:border-zinc-700 shadow-sm">
@@ -33,7 +40,7 @@ export const CategoryAvatars = ({ onCategorySelect }: CategoryAvatarsProps) => {
         {categories.map((category, index) => (
           <button
             key={index}
-            onClick={() => onCategorySelect(category.name.toLowerCase())}
+            onClick={() => handleCategoryClick(category.name.toLowerCase())}
             className="flex flex-col items-center gap-2 p-3 rounded-lg transition-all hover:bg-blue-50 dark:hover:bg-blue-900/20 group"
           >
             <div className="h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform">

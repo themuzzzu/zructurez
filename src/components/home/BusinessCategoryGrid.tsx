@@ -23,84 +23,84 @@ export const BusinessCategoryGrid = () => {
     { 
       id: "home-services", 
       name: "Home Services", 
-      icon: <Wrench className="h-6 w-6 mb-2" />, 
+      icon: <Wrench className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
       subcategories: ["Plumbers", "Electricians", "Cleaners", "Painters"],
       color: "from-blue-500 to-blue-600"
     },
     { 
       id: "education", 
       name: "Education", 
-      icon: <GraduationCap className="h-6 w-6 mb-2" />, 
+      icon: <GraduationCap className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
       subcategories: ["Schools", "Colleges", "Coaching", "Online Courses"],
       color: "from-purple-500 to-purple-600" 
     },
     { 
       id: "health", 
       name: "Health & Fitness", 
-      icon: <Heart className="h-6 w-6 mb-2" />, 
+      icon: <Heart className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
       subcategories: ["Doctors", "Gyms", "Yoga Centers", "Dietitians"],
       color: "from-red-500 to-red-600" 
     },
     { 
       id: "beauty", 
       name: "Beauty & Grooming", 
-      icon: <Scissors className="h-6 w-6 mb-2" />, 
+      icon: <Scissors className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
       subcategories: ["Salons", "Spas", "Makeup Artists", "Barbers"],
       color: "from-pink-500 to-pink-600" 
     },
     { 
       id: "rental", 
       name: "Rent & Hire", 
-      icon: <Car className="h-6 w-6 mb-2" />, 
+      icon: <Car className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
       subcategories: ["Car Rentals", "Equipment", "Party Space", "Electronics"],
       color: "from-yellow-500 to-yellow-600" 
     },
     { 
       id: "b2b", 
       name: "B2B Services", 
-      icon: <Briefcase className="h-6 w-6 mb-2" />, 
+      icon: <Briefcase className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
       subcategories: ["Supply Chain", "Manufacturing", "Wholesale", "Consultancy"],
       color: "from-green-500 to-green-600" 
     },
     { 
       id: "events", 
       name: "Event Services", 
-      icon: <PartyPopper className="h-6 w-6 mb-2" />, 
+      icon: <PartyPopper className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
       subcategories: ["Wedding", "Birthday", "Corporate", "Photography"],
       color: "from-indigo-500 to-indigo-600" 
     },
     { 
       id: "food", 
       name: "Food & Dining", 
-      icon: <Utensils className="h-6 w-6 mb-2" />, 
+      icon: <Utensils className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
       subcategories: ["Restaurants", "Catering", "Cloud Kitchens", "Bakeries"],
       color: "from-orange-500 to-orange-600" 
     },
     { 
       id: "real-estate", 
       name: "Real Estate", 
-      icon: <Home className="h-6 w-6 mb-2" />, 
+      icon: <Home className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
       subcategories: ["Buy", "Rent", "PG/Hostels", "Commercial"],
       color: "from-cyan-500 to-cyan-600" 
     },
     { 
       id: "hotels", 
       name: "Hotels & Travel", 
-      icon: <Building className="h-6 w-6 mb-2" />, 
+      icon: <Building className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
       subcategories: ["Hotels", "Travel Agents", "Tour Packages", "Homestays"],
       color: "from-teal-500 to-teal-600" 
     },
     { 
       id: "shopping", 
       name: "Shopping", 
-      icon: <ShoppingBag className="h-6 w-6 mb-2" />, 
+      icon: <ShoppingBag className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
       subcategories: ["Electronics", "Fashion", "Groceries", "Home Decor"],
       color: "from-rose-500 to-rose-600" 
     },
     { 
       id: "services", 
       name: "Other Services", 
-      icon: <Phone className="h-6 w-6 mb-2" />, 
+      icon: <Phone className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
       subcategories: ["Legal", "Financial", "IT Services", "Security"],
       color: "from-gray-500 to-gray-600" 
     }

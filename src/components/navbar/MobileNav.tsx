@@ -84,7 +84,7 @@ export const MobileNav = () => {
               {isActive ? (
                 <FilledIcon Icon={Icon} />
               ) : (
-                <Icon className="h-5 w-5" />
+                <Icon className="h-5 w-5 stroke-black dark:stroke-white" />
               )}
               <span className={cn(
                 "text-[10px] font-medium",
@@ -103,7 +103,7 @@ export const MobileNav = () => {
               className="flex flex-col items-center justify-center h-14 w-14 p-0 gap-1 text-zinc-400 dark:text-zinc-500"
               aria-label="More options"
             >
-              <MoreVertical className="h-5 w-5" />
+              <MoreVertical className="h-5 w-5 stroke-black dark:stroke-white" />
               <span className="text-[10px] font-medium">More</span>
             </Button>
           </DropdownMenuTrigger>
@@ -114,12 +114,12 @@ export const MobileNav = () => {
                 onClick={() => navigate(item.path)}
                 className="cursor-pointer text-zinc-800 dark:text-zinc-200"
               >
-                <item.icon className="mr-2 h-4 w-4" />
+                <item.icon className="mr-2 h-4 w-4 stroke-black dark:stroke-white" />
                 {item.label}
               </DropdownMenuItem>
             ))}
             <DropdownMenuItem onClick={toggleTheme} className="cursor-pointer text-zinc-800 dark:text-zinc-200">
-              <SunMoon className="mr-2 h-4 w-4" />
+              <SunMoon className="mr-2 h-4 w-4 stroke-black dark:stroke-white" />
               {isDarkMode ? "Light Mode" : "Dark Mode"}
             </DropdownMenuItem>
           </DropdownMenuContent>

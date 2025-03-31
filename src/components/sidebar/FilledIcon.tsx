@@ -10,9 +10,10 @@ export const FilledIcon = ({ Icon }: FilledIconProps) => {
     <div className="relative">
       <Icon 
         size={20} 
-        fill="white" 
+        fill="currentColor" 
         stroke="black" 
         strokeWidth={1.5}
+        className="dark:stroke-white"
       />
     </div>
   );

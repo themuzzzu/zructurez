@@ -33,23 +33,24 @@ export const CategoryTabContent = ({
   const navigate = useNavigate();
   
   const categories = [
-    { name: "Fashion", icon: <Shirt className="h-5 w-5" /> },
-    { name: "Home", icon: <Home className="h-5 w-5" /> },
-    { name: "Kitchen", icon: <Utensils className="h-5 w-5" /> },
-    { name: "Phones", icon: <Smartphone className="h-5 w-5" /> },
-    { name: "Electronics", icon: <Laptop className="h-5 w-5" /> },
-    { name: "Health", icon: <HeartPulse className="h-5 w-5" /> },
-    { name: "Baby", icon: <Baby className="h-5 w-5" /> },
-    { name: "Automotive", icon: <Car className="h-5 w-5" /> },
-    { name: "Books", icon: <BookOpen className="h-5 w-5" /> },
-    { name: "Gaming", icon: <Gamepad2 className="h-5 w-5" /> },
-    { name: "Beauty", icon: <Paintbrush className="h-5 w-5" /> },
-    { name: "Groceries", icon: <ShoppingBag className="h-5 w-5" /> },
+    { name: "Fashion", icon: <Shirt className="h-5 w-5 stroke-black dark:stroke-white" /> },
+    { name: "Home", icon: <Home className="h-5 w-5 stroke-black dark:stroke-white" /> },
+    { name: "Kitchen", icon: <Utensils className="h-5 w-5 stroke-black dark:stroke-white" /> },
+    { name: "Phones", icon: <Smartphone className="h-5 w-5 stroke-black dark:stroke-white" /> },
+    { name: "Electronics", icon: <Laptop className="h-5 w-5 stroke-black dark:stroke-white" /> },
+    { name: "Health", icon: <HeartPulse className="h-5 w-5 stroke-black dark:stroke-white" /> },
+    { name: "Baby", icon: <Baby className="h-5 w-5 stroke-black dark:stroke-white" /> },
+    { name: "Automotive", icon: <Car className="h-5 w-5 stroke-black dark:stroke-white" /> },
+    { name: "Books", icon: <BookOpen className="h-5 w-5 stroke-black dark:stroke-white" /> },
+    { name: "Gaming", icon: <Gamepad2 className="h-5 w-5 stroke-black dark:stroke-white" /> },
+    { name: "Beauty", icon: <Paintbrush className="h-5 w-5 stroke-black dark:stroke-white" /> },
+    { name: "Groceries", icon: <ShoppingBag className="h-5 w-5 stroke-black dark:stroke-white" /> },
   ];
   
   const handleCategoryClick = (category: string) => {
     setSelectedCategory(category.toLowerCase());
     setActiveTab("search");
+    navigate(`/marketplace?category=${category.toLowerCase()}`);
   };
   
   const getGridClasses = () => {
