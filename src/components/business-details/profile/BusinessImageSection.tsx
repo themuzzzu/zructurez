@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -58,7 +59,11 @@ export const BusinessImageSection = ({ businessId }: BusinessImageSectionProps) 
       }
 
       const coverPath = data.path;
-      const publicUrl = `${supabase.storageUrl}/business-covers/${coverPath}`;
+      // Fix: Use the correct way to get storage URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('business-covers')
+        .getPublicUrl(coverPath);
+        
       setNewCoverUrl(publicUrl);
     } catch (error) {
       toast({
@@ -84,10 +89,6 @@ export const BusinessImageSection = ({ businessId }: BusinessImageSectionProps) 
         variant: "destructive",
       });
       return;
-    }
-
-    if (business) {
-      business.cover_url = newCoverUrl;
     }
 
     setCoverUrl(newCoverUrl);
