@@ -78,7 +78,6 @@ export const BusinessProductsTab = ({ businessId, isOwner, products, onSuccess }
           description: "",
           category: ""
         }}
-        isOwner={isOwner}
         business_products={filteredProducts}
         business_portfolio={[]}
         onSuccess={onSuccess}
