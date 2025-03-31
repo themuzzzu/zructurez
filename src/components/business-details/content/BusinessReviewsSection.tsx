@@ -13,7 +13,7 @@ interface Review {
   business_id: string;
   profile_id: string;
   rating: number;
-  comment: string;
+  comment: string;  // This should match what we transform content to
   profile: {
     id: string;
     username: string;
@@ -43,7 +43,15 @@ export const BusinessReviewsSection = ({ businessId }: BusinessReviewsSectionPro
         throw error;
       }
 
-      return data as Review[];
+      // Transform the data to match the Review interface
+      return data?.map(item => ({
+        ...item,
+        comment: item.content, // Map content to comment
+        profile: {
+          ...item.profile,
+          full_name: item.profile.name || item.profile.username || '',
+        }
+      })) as Review[];
     },
   });
 

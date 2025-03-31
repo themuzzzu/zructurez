@@ -71,7 +71,8 @@ export const BusinessProductsTab = ({ businessId, isOwner, products, onSuccess }
       )}
       
       <BusinessContent
-        business={businessId}
+        // Pass an object with id instead of just the ID string for business
+        business={{ id: businessId }}
         isOwner={isOwner}
         business_products={filteredProducts}
         business_portfolio={[]}
