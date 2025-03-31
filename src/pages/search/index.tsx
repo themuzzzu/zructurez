@@ -1,11 +1,11 @@
 
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { EnhancedShoppingSection } from "@/components/EnhancedShoppingSection";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Filter } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { ArrowLeft, Filter, Heart, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 export default function Search() {
   const [searchParams] = useSearchParams();
@@ -17,6 +17,13 @@ export default function Search() {
   useEffect(() => {
     setSearchTerm(query);
   }, [query]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchTerm.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchTerm)}`);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -38,15 +45,47 @@ export default function Search() {
             </h1>
           </div>
           
-          <Button 
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-2"
-            onClick={() => setShowFilters(!showFilters)}
-          >
-            <Filter className="h-4 w-4" />
-            Filters
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => navigate('/wishlist')}
+              aria-label="View wishlist"
+            >
+              <Heart className="h-5 w-5" />
+            </Button>
+            
+            <Button 
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2"
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <Filter className="h-4 w-4" />
+              Filters
+            </Button>
+          </div>
+        </div>
+        
+        {/* Search bar */}
+        <div className="mb-6">
+          <form onSubmit={handleSearch} className="relative max-w-xl">
+            <Input
+              type="text"
+              placeholder="Search products..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pr-10"
+            />
+            <Button 
+              type="submit" 
+              variant="ghost" 
+              size="icon" 
+              className="absolute right-0 top-0 h-full"
+            >
+              <Search className="h-4 w-4" />
+            </Button>
+          </form>
         </div>
         
         {/* Enhanced shopping section with tabbed interface for products, businesses and services */}

@@ -23,8 +23,21 @@ const FilledIcon = ({ Icon, isDarkMode }: { Icon: React.ElementType, isDarkMode:
         strokeWidth={1.5} 
       />
       {/* Theme-appropriate highlight */}
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-background opacity-80"
-        style={{ backgroundColor: isDarkMode ? '#ffffff' : '#000000' }}
+      <div 
+        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full" 
+        style={{ 
+          backgroundColor: isDarkMode ? 'white' : 'black',
+          opacity: 0.85
+        }}
+      ></div>
+      
+      {/* Inner lines - these will be the opposite color of the highlight */}
+      <div 
+        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1 h-1 rounded-full" 
+        style={{ 
+          backgroundColor: isDarkMode ? 'black' : 'white',
+          opacity: 0.9
+        }}
       ></div>
     </div>
   );

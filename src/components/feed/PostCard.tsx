@@ -1,173 +1,98 @@
-import { useState } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { usePostLike } from "@/hooks/usePostLike";
-import { usePostRepost } from "@/hooks/usePostRepost";
-import { MessageCircle, Heart, Repeat2, Share2, MoreHorizontal } from "lucide-react";
-import { UserPost } from "@/types/business";
-import { format } from "date-fns";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu";
-import { useAuth } from "@/hooks/useAuth";
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+
+import React from 'react';
+import { Card } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Heart, MessageCircle, Repeat, Share } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import { UserPost } from '@/types/business';
 
 interface PostCardProps {
   post: UserPost;
-  onRefresh: () => void;
+  onRefresh?: () => void;
 }
 
-export const PostCard = ({ post, onRefresh }: PostCardProps) => {
-  const { user } = useAuth();
-  const [showComments, setShowComments] = useState(false);
-  const { currentLikeStatus, toggleLike } = usePostLike(post.id);
-  const { hasReposted, toggleRepost } = usePostRepost(post.id);
-  
-  const formatDate = (dateString: string) => {
-    try {
-      return format(new Date(dateString), 'MMM d, yyyy · h:mm a');
-    } catch (e) {
-      return dateString;
+export const PostCard: React.FC<PostCardProps> = ({ post, onRefresh }) => {
+  const handleLike = () => {
+    // Like functionality
+    console.log('Like post:', post.id);
+    if (onRefresh) {
+      onRefresh();
     }
   };
 
   const handleComment = () => {
-    setShowComments(!showComments);
+    // Comment functionality
+    console.log('Comment on post:', post.id);
+  };
+
+  const handleRepost = () => {
+    // Repost functionality
+    console.log('Repost:', post.id);
+    if (onRefresh) {
+      onRefresh();
+    }
   };
 
   const handleShare = () => {
-    navigator.clipboard.writeText(`Check out this post: ${window.location.origin}/post/${post.id}`);
-    toast.success("Link copied to clipboard");
+    // Share functionality
+    console.log('Share post:', post.id);
   };
 
-  const handleDelete = async () => {
-    if (!user || user.id !== post.user_id) {
-      toast.error("You can only delete your own posts");
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from('posts')
-        .delete()
-        .eq('id', post.id);
-
-      if (error) throw error;
-      
-      toast.success("Post deleted successfully");
-      onRefresh();
-    } catch (error) {
-      console.error('Error deleting post:', error);
-      toast.error("Failed to delete post");
-    }
-  };
+  // Default values for profile if not available
+  const username = post.profile?.username || 'Anonymous';
+  const fullName = post.profile?.full_name || 'User';
+  const avatarUrl = post.profile?.avatar_url;
+  // Get initials for avatar fallback
+  const initials = fullName.split(' ').map(name => name[0]).join('').toUpperCase();
 
   return (
-    <Card className="p-4 mb-4 hover:bg-accent/10 transition-colors">
-      <div className="flex">
-        <Avatar className="h-10 w-10 mr-3">
-          <AvatarImage 
-            src={post.profile?.avatar_url} 
-            alt={post.profile?.username || "Anonymous"} 
-          />
-          <AvatarFallback>
-            {(post.profile?.username || "A").charAt(0).toUpperCase()}
-          </AvatarFallback>
+    <Card className="p-4 mb-4">
+      <div className="flex items-start space-x-3">
+        <Avatar className="h-10 w-10">
+          <AvatarImage src={avatarUrl} alt={username} />
+          <AvatarFallback>{initials}</AvatarFallback>
         </Avatar>
-        
         <div className="flex-1">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center space-x-1">
-              <span className="font-semibold">{post.profile?.username || "Anonymous"}</span>
-              <span className="text-muted-foreground text-sm">·</span>
-              <span className="text-muted-foreground text-sm">{formatDate(post.created_at)}</span>
-            </div>
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {user && user.id === post.user_id && (
-                  <DropdownMenuItem 
-                    className="text-destructive focus:text-destructive" 
-                    onClick={handleDelete}
-                  >
-                    Delete Post
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuItem onClick={handleShare}>
-                  Share
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+          <div className="flex items-center">
+            <h3 className="font-semibold">{fullName}</h3>
+            <span className="ml-2 text-sm text-muted-foreground">@{username}</span>
+            <span className="ml-2 text-xs text-muted-foreground">
+              {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
+            </span>
           </div>
-          
-          <div className="mt-1 mb-3 whitespace-pre-wrap">{post.content}</div>
+          <p className="mt-1">{post.content}</p>
           
           {post.image_url && (
-            <div className="mb-3 rounded-md overflow-hidden border">
+            <div className="mt-3">
               <img 
                 src={post.image_url} 
-                alt="Post attachment" 
-                className="w-full h-auto max-h-80 object-cover" 
+                alt="Post" 
+                className="rounded-md max-h-80 object-cover w-full" 
               />
             </div>
           )}
           
-          <div className="flex justify-between mt-2">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="flex items-center space-x-1" 
-              onClick={handleComment}
-            >
-              <MessageCircle className="h-4 w-4" />
-              <span>{post.comments_count || 0}</span>
+          <div className="mt-4 flex justify-between">
+            <Button variant="ghost" size="sm" onClick={handleComment} className="text-muted-foreground">
+              <MessageCircle className="h-4 w-4 mr-1" />
+              {post.comments_count || 0}
             </Button>
             
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className={`flex items-center space-x-1 ${hasReposted ? "text-green-500" : ""}`} 
-              onClick={() => toggleRepost()}
-            >
-              <Repeat2 className="h-4 w-4" />
-              <span>{post.reposts_count || 0}</span>
+            <Button variant="ghost" size="sm" onClick={handleRepost} className="text-muted-foreground">
+              <Repeat className="h-4 w-4 mr-1" />
+              {post.reposts_count || 0}
             </Button>
             
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className={`flex items-center space-x-1 ${currentLikeStatus ? "text-red-500" : ""}`}
-              onClick={() => toggleLike()}
-            >
-              <Heart className={`h-4 w-4 ${currentLikeStatus ? "fill-current" : ""}`} />
-              <span>{post.likes_count || 0}</span>
+            <Button variant="ghost" size="sm" onClick={handleLike} className="text-muted-foreground">
+              <Heart className="h-4 w-4 mr-1" />
+              {post.likes_count || 0}
             </Button>
             
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="flex items-center space-x-1"
-              onClick={handleShare}
-            >
-              <Share2 className="h-4 w-4" />
+            <Button variant="ghost" size="sm" onClick={handleShare} className="text-muted-foreground">
+              <Share className="h-4 w-4" />
             </Button>
           </div>
-          
-          {showComments && (
-            <div className="mt-3 pt-3 border-t">
-              <p className="text-sm text-muted-foreground text-center">Comments will be displayed here</p>
-            </div>
-          )}
         </div>
       </div>
     </Card>

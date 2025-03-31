@@ -1,3 +1,4 @@
+
 import { Menu } from "lucide-react";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
@@ -6,7 +7,7 @@ import {
   SheetContent,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 import { CartButton } from "./navbar/CartButton";
 import { UserMenu } from "./navbar/UserMenu";
@@ -19,6 +20,7 @@ import { Heart } from "lucide-react";
 
 export const Navbar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const isHomePage = location.pathname === "/";
   const { theme } = useTheme();
 
@@ -41,7 +43,8 @@ export const Navbar = () => {
 
   const isBusinessOrServices = () => {
     return location.pathname.includes('/business') || 
-           location.pathname.includes('/services');
+           location.pathname.includes('/services') ||
+           location.pathname.includes('/marketplace');
   };
 
   return (
@@ -69,13 +72,17 @@ export const Navbar = () => {
           )}
 
           <div className="flex items-center gap-2">
-            {isBusinessOrServices() ? (
-              <Button variant="ghost" size="icon" onClick={() => window.location.href = "/wishlist"}>
+            {isBusinessOrServices() && (
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => navigate("/wishlist")}
+                aria-label="View wishlist"
+              >
                 <Heart className="h-5 w-5" />
               </Button>
-            ) : (
-              <CartButton />
             )}
+            <CartButton />
             <Separator orientation="vertical" className="h-6 hidden sm:block" />
             <UserMenu profile={profile} />
           </div>
