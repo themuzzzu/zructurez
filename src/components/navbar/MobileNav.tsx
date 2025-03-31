@@ -18,8 +18,8 @@ const FilledIcon = ({ Icon }: { Icon: React.ElementType }) => {
     <div className="relative">
       <Icon 
         className="h-5 w-5" 
-        fill="white" 
-        stroke="black" 
+        fill="currentColor" 
+        stroke="currentColor" 
         strokeWidth={1.5} 
       />
     </div>
@@ -59,11 +59,12 @@ export const MobileNav = () => {
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border py-2 px-1 sm:px-2 z-50 animate-slide-up backdrop-blur-sm">
+    <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 py-2 px-1 sm:px-2 z-50 animate-fade-in">
       <div className="flex justify-between items-center max-w-md mx-auto">
         {mobileNavItems.map((item) => {
           const Icon = item.icon;
-          const isActive = location.pathname === item.path;
+          const isActive = location.pathname === item.path || 
+                          (item.path === "/businesses" && location.pathname.startsWith("/businesses/"));
           
           return (
             <Button
@@ -72,7 +73,7 @@ export const MobileNav = () => {
               size="icon"
               className={cn(
                 "flex flex-col items-center justify-center h-14 w-14 p-0 gap-1",
-                isActive ? "bg-zinc-800 text-white" : ""
+                isActive ? "text-black dark:text-white" : "text-zinc-400 dark:text-zinc-500"
               )}
               onClick={() => navigate(item.path)}
               aria-label={item.label}
@@ -80,11 +81,11 @@ export const MobileNav = () => {
               {isActive ? (
                 <FilledIcon Icon={Icon} />
               ) : (
-                <Icon className="h-5 w-5 text-muted-foreground" />
+                <Icon className="h-5 w-5" />
               )}
               <span className={cn(
-                "text-[10px] font-medium", // Decreased from text-xs (12px) to text-[10px]
-                isActive ? "text-white" : ""
+                "text-[10px] font-medium",
+                isActive ? "text-black dark:text-white" : "text-zinc-400 dark:text-zinc-500"
               )}>
                 {item.label}
               </span>
@@ -96,25 +97,25 @@ export const MobileNav = () => {
             <Button 
               variant="ghost" 
               size="icon"
-              className="flex flex-col items-center justify-center h-14 w-14 p-0 gap-1"
+              className="flex flex-col items-center justify-center h-14 w-14 p-0 gap-1 text-zinc-400 dark:text-zinc-500"
               aria-label="More options"
             >
-              <MoreVertical className="h-5 w-5 text-muted-foreground" />
+              <MoreVertical className="h-5 w-5" />
               <span className="text-[10px] font-medium">More</span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuContent align="end" className="w-56 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800">
             {dropdownItems.map((item) => (
               <DropdownMenuItem 
                 key={item.path}
                 onClick={() => navigate(item.path)}
-                className="cursor-pointer"
+                className="cursor-pointer text-zinc-800 dark:text-zinc-200"
               >
                 <item.icon className="mr-2 h-4 w-4" />
                 {item.label}
               </DropdownMenuItem>
             ))}
-            <DropdownMenuItem onClick={toggleTheme} className="cursor-pointer">
+            <DropdownMenuItem onClick={toggleTheme} className="cursor-pointer text-zinc-800 dark:text-zinc-200">
               <SunMoon className="mr-2 h-4 w-4" />
               {isDarkMode ? "Light Mode" : "Dark Mode"}
             </DropdownMenuItem>

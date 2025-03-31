@@ -57,11 +57,12 @@ export const BusinessCard = ({
     <>
       <BusinessCardUI 
         onClick={() => navigate(`/businesses/${id}`)}
-        className="group"
+        className="group w-full"
       >
         <BusinessCardImage 
           src={image} 
           alt={name} 
+          className="w-full aspect-video object-cover"
         />
         
         <BusinessCardContent>

@@ -1,5 +1,5 @@
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Award, Star, MapPin, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +8,7 @@ export const FeaturedBusinesses = () => {
   const navigate = useNavigate();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showLeftScroll, setShowLeftScroll] = useState(false);
+  const [showRightScroll, setShowRightScroll] = useState(true);
   
   const featuredBusinesses = [
     { 
@@ -72,24 +73,46 @@ export const FeaturedBusinesses = () => {
     }
   ];
 
-  const scroll = (direction: 'left' | 'right') => {
+  const checkScrollPosition = () => {
     if (scrollRef.current) {
-      const { current } = scrollRef;
-      const scrollAmount = 300;
-      
-      if (direction === 'left') {
-        current.scrollLeft -= scrollAmount;
-      } else {
-        current.scrollLeft += scrollAmount;
-      }
-      
-      setShowLeftScroll(current.scrollLeft > 0);
+      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+      setShowLeftScroll(scrollLeft > 0);
+      setShowRightScroll(scrollLeft < scrollWidth - clientWidth - 10);
     }
   };
 
-  const handleScroll = () => {
+  useEffect(() => {
+    const scrollEl = scrollRef.current;
+    if (scrollEl) {
+      scrollEl.addEventListener('scroll', checkScrollPosition);
+      // Initial check
+      checkScrollPosition();
+      // Check after images might have loaded
+      window.addEventListener('load', checkScrollPosition);
+      
+      return () => {
+        scrollEl.removeEventListener('scroll', checkScrollPosition);
+        window.removeEventListener('load', checkScrollPosition);
+      };
+    }
+  }, []);
+
+  const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
-      setShowLeftScroll(scrollRef.current.scrollLeft > 0);
+      const { current } = scrollRef;
+      const scrollAmount = current.clientWidth / 2;
+      
+      if (direction === 'left') {
+        current.scrollTo({
+          left: current.scrollLeft - scrollAmount,
+          behavior: 'smooth'
+        });
+      } else {
+        current.scrollTo({
+          left: current.scrollLeft + scrollAmount,
+          behavior: 'smooth'
+        });
+      }
     }
   };
 
@@ -117,6 +140,7 @@ export const FeaturedBusinesses = () => {
           <button 
             onClick={() => scroll('left')}
             className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-white dark:bg-zinc-800 rounded-full shadow-md p-2 border border-zinc-200 dark:border-zinc-700"
+            aria-label="Scroll left"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
@@ -124,20 +148,21 @@ export const FeaturedBusinesses = () => {
         
         <div 
           ref={scrollRef}
-          onScroll={handleScroll}
-          className="flex overflow-x-auto space-x-4 py-2 scrollbar-none scroll-smooth"
+          className="flex overflow-x-auto gap-4 py-2 scrollbar-none snap-x snap-mandatory scroll-smooth"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {featuredBusinesses.map((business) => (
             <div 
               key={business.id}
               onClick={() => handleBusinessClick(business.id)}
-              className="flex-shrink-0 w-64 sm:w-72 bg-white dark:bg-zinc-800 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer overflow-hidden border border-zinc-200 dark:border-zinc-700"
+              className="flex-shrink-0 w-[85%] sm:w-[250px] snap-start bg-white dark:bg-zinc-800 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer overflow-hidden border border-zinc-200 dark:border-zinc-700"
             >
               <div className="relative">
                 <img 
                   src={business.image} 
                   alt={business.name} 
                   className="w-full h-32 sm:h-40 object-cover"
+                  loading="lazy"
                 />
                 {business.isSponsored && (
                   <Badge 
@@ -159,7 +184,7 @@ export const FeaturedBusinesses = () => {
               <div className="p-4">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="font-medium text-sm sm:text-base">{business.name}</h3>
+                    <h3 className="font-medium text-sm sm:text-base line-clamp-1">{business.name}</h3>
                     <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">{business.category}</p>
                   </div>
                   <div className="flex items-center gap-1 text-zinc-800 dark:text-zinc-200">
@@ -170,11 +195,11 @@ export const FeaturedBusinesses = () => {
                 
                 <div className="mt-3 text-xs flex flex-col gap-1">
                   <div className="flex items-center">
-                    <MapPin className="h-3 w-3 mr-1 text-zinc-500" />
+                    <MapPin className="h-3 w-3 mr-1 text-zinc-500 flex-shrink-0" />
                     <span className="text-zinc-500 dark:text-zinc-400 truncate text-xs">{business.location}</span>
                   </div>
                   <div className="flex items-center">
-                    <Clock className="h-3 w-3 mr-1 text-zinc-500" />
+                    <Clock className="h-3 w-3 mr-1 text-zinc-500 flex-shrink-0" />
                     <span className={`text-xs ${business.isOpen ? 'text-zinc-800 dark:text-zinc-200' : 'text-zinc-500 dark:text-zinc-400'}`}>
                       {business.isOpen ? 'Open Now' : 'Closed'}
                     </span>
@@ -185,12 +210,15 @@ export const FeaturedBusinesses = () => {
           ))}
         </div>
         
-        <button 
-          onClick={() => scroll('right')}
-          className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-white dark:bg-zinc-800 rounded-full shadow-md p-2 border border-zinc-200 dark:border-zinc-700"
-        >
-          <ChevronRight className="h-5 w-5" />
-        </button>
+        {showRightScroll && (
+          <button 
+            onClick={() => scroll('right')}
+            className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-white dark:bg-zinc-800 rounded-full shadow-md p-2 border border-zinc-200 dark:border-zinc-700"
+            aria-label="Scroll right"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+        )}
       </div>
     </section>
   );

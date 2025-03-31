@@ -53,8 +53,8 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
             marginLeft: hideSidebar || isMobile ? 0 : sidebarWidth + 'px', 
             paddingBottom: isMobile ? '5rem' : '',
             // Add small padding on mobile
-            paddingLeft: isMobile ? '12px' : (!hideSidebar && !isMobile) ? '0.25rem' : '',
-            paddingRight: isMobile ? '12px' : '',
+            paddingLeft: isMobile ? '0' : (!hideSidebar && !isMobile) ? '0.25rem' : '',
+            paddingRight: isMobile ? '0' : '',
             maxHeight: 'calc(100vh - 64px)',
           }}
         >
@@ -65,7 +65,7 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
       {/* AI Components */}
       <AIAssistant />
       
-      {/* Mobile Navigation - Make sure this is always rendered regardless of hideSidebar */}
+      {/* Mobile Navigation */}
       <MobileNav />
     </div>
   );
