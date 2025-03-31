@@ -62,19 +62,25 @@ export const Sidebar = ({ className }: React.HTMLAttributes<HTMLDivElement>) => 
   const handleItemClick = (path: string) => {
     setActiveItem(path);
     navigate(path);
+    
+    // Auto-collapse sidebar on mobile after navigation
+    if (isMobile) {
+      setIsCollapsed(true);
+    }
   };
 
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark");
   };
 
+  // Don't render sidebar on mobile - mobile navigation is handled separately
   if (isMobile) {
-    return null; // Don't render sidebar on mobile
+    return null;
   }
 
   return (
     <div className={cn(
-      "h-full overflow-y-auto transition-all duration-300 fixed left-0 top-16 z-30", 
+      "h-full overflow-y-auto transition-all duration-300 fixed left-0 top-16 z-30 scrollbar-hide", 
       isDarkMode ? "bg-background dark:bg-background" : "bg-background",
       isCollapsed ? "w-12" : "w-44", 
       className
@@ -94,7 +100,8 @@ export const Sidebar = ({ className }: React.HTMLAttributes<HTMLDivElement>) => 
             name={route.name}
             path={route.path}
             icon={route.icon}
-            isActive={activeItem === route.path}
+            isActive={activeItem === route.path || 
+                      (route.path !== "/" && activeItem.startsWith(route.path))}
             isCollapsed={isCollapsed}
             isDarkMode={isDarkMode}
             onClick={handleItemClick}

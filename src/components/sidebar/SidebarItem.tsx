@@ -23,7 +23,16 @@ export const SidebarItem = ({
   isDarkMode,
   onClick 
 }: SidebarItemProps) => {
-  const activeBackground = "bg-zinc-800";
+  // Regular icon with inner line for inactive state
+  const RegularIcon = () => (
+    <div className="relative">
+      <Icon size={20} className="text-muted-foreground" />
+      {/* Inner decorative line */}
+      <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-0.5 bg-current opacity-40"></div>
+    </div>
+  );
+
+  const activeBackground = isDarkMode ? "bg-zinc-800" : "bg-zinc-200";
 
   if (isCollapsed) {
     return (
@@ -42,11 +51,7 @@ export const SidebarItem = ({
         {isActive ? (
           <FilledIcon Icon={Icon} />
         ) : (
-          <Icon className={cn("h-5 w-5", 
-            isDarkMode 
-              ? "text-muted-foreground" 
-              : "text-muted-foreground"
-          )} />
+          <RegularIcon />
         )}
       </Button>
     );
@@ -69,15 +74,13 @@ export const SidebarItem = ({
         {isActive ? (
           <FilledIcon Icon={Icon} />
         ) : (
-          <Icon size={20} className={cn(
-            "text-muted-foreground"
-          )} />
+          <RegularIcon />
         )}
       </div>
       <span className={cn(
         "text-sm",
         isActive 
-          ? "font-bold text-white" 
+          ? "font-bold " + (isDarkMode ? "text-white" : "text-black") 
           : "text-muted-foreground"
       )}>
         {name}

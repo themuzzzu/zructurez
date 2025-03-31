@@ -12,7 +12,7 @@ import { useTheme } from "../ThemeProvider";
 import { cn } from "@/lib/utils";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 
-// Create a filled icon component for mobile nav with inner lines and dots
+// Create a filled icon component for mobile nav with inner highlights
 const FilledIcon = ({ Icon }: { Icon: React.ElementType }) => {
   return (
     <div className="relative">
@@ -22,19 +22,20 @@ const FilledIcon = ({ Icon }: { Icon: React.ElementType }) => {
         stroke="currentColor" 
         strokeWidth={1.5} 
       />
-      {/* Add inner decorative elements */}
+      {/* Inner dot for highlight */}
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-background opacity-80"></div>
+      {/* Inner line for additional detail */}
       <div className="absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-2 h-0.5 bg-background opacity-70"></div>
     </div>
   );
 };
 
-// Regular icon with inner line
+// Regular icon with inner line for inactive state
 const RegularIcon = ({ Icon }: { Icon: React.ElementType }) => {
   return (
     <div className="relative">
       <Icon className="h-5 w-5" />
-      {/* Add inner decorative line */}
+      {/* Inner decorative line */}
       <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-0.5 bg-current opacity-40"></div>
     </div>
   );
@@ -119,7 +120,7 @@ export const MobileNav = () => {
             >
               <div className="relative">
                 <MoreVertical className="h-5 w-5" />
-                {/* Add inner decorative line */}
+                {/* Inner decorative line */}
                 <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-0.5 bg-current opacity-40"></div>
               </div>
               <span className="text-[10px] font-medium">More</span>

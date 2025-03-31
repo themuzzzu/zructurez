@@ -58,13 +58,14 @@
 /* Add proper padding to mobile views */
 @media (max-width: 768px) {
   main {
-    padding-bottom: 80px !important;
+    padding-bottom: 80px !important; /* Space for bottom navigation */
   }
   
   .container {
     padding-left: 16px !important;
     padding-right: 16px !important;
     max-width: 100% !important;
+    width: 100% !important;
   }
   
   /* Make all full-width elements have consistent side gaps */
@@ -114,13 +115,31 @@
   padding-right: 0;
 }
 
-/* Add mobile spacing utility class */
+/* Mobile spacing utility classes */
 .mobile-container {
   padding-left: 16px;
   padding-right: 16px;
 }
 
+.mobile-bottom-padding {
+  padding-bottom: 70px; /* Space for mobile navigation */
+}
+
 /* Top gap for services section */
 .services-top-gap {
   margin-top: 24px;
+}
+
+/* Animation for mobile navigation */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
 }

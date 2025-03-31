@@ -13,9 +13,9 @@ interface LayoutProps {
 }
 
 export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
-  // Reduce sidebar width by approximately 30% of original values
+  // Sidebar width values for desktop
   const [sidebarWidth, setSidebarWidth] = useState(() => {
-    return localStorage.getItem("sidebarCollapsed") === "true" ? 45 : 180; // Reduced from 64 : 256
+    return localStorage.getItem("sidebarCollapsed") === "true" ? 45 : 180;
   });
   
   const isMobile = useMediaQuery("(max-width: 768px)");
@@ -48,11 +48,12 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
           </div>
         )}
         <main 
-          className={`flex-1 transition-all duration-300 w-full overflow-y-auto scrollbar-hide overflow-x-hidden ${hideSidebar || isMobile ? 'px-4 sm:px-6' : ''}`}
+          className={`flex-1 transition-all duration-300 w-full overflow-y-auto scrollbar-hide overflow-x-hidden`}
           style={{ 
             marginLeft: hideSidebar || isMobile ? 0 : sidebarWidth + 'px', 
-            paddingBottom: isMobile ? '5rem' : '',
+            paddingBottom: isMobile ? '5rem' : '', // Add extra padding at the bottom on mobile for the navigation bar
             maxHeight: 'calc(100vh - 64px)',
+            padding: isMobile ? '0 16px' : (hideSidebar ? '0 24px' : '0 24px'), 
           }}
         >
           {children}
@@ -62,7 +63,7 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
       {/* AI Components */}
       <AIAssistant />
       
-      {/* Mobile Navigation */}
+      {/* Mobile Navigation - only renders on mobile */}
       <MobileNav />
     </div>
   );
