@@ -1,3 +1,4 @@
+
 export interface Business {
   id: string;
   name: string;
@@ -8,11 +9,11 @@ export interface Business {
   zip: string;
   phone: string;
   email: string;
-  website: string;
+  website: string | null;
   category: string;
   sub_category: string;
   logo_url: string;
-  cover_url: string | null; // Added this property
+  cover_url: string | null;
   hours: BusinessHours;
   ratings: number;
   reviews_count: number;
@@ -22,12 +23,28 @@ export interface Business {
   latitude: number;
   longitude: number;
   owner_id: string;
+  user_id: string;
   created_at: string;
   updated_at: string;
   tags: string[];
   social_media: SocialMedia;
   services: Service[];
   products: Product[];
+  image_url: string;
+  bio: string | null;
+  location: string | null;
+  contact: string | null;
+  verified: boolean;
+  appointment_price: number | null;
+  consultation_price: number | null;
+  business_products: BusinessProduct[];
+  business_portfolio: BusinessPortfolioItem[];
+  posts: BusinessPost[];
+  staff_details: StaffMember[];
+  owners: BusinessOwner[];
+  image_position: ImagePosition;
+  verification_documents: any[];
+  membership_plans: MembershipPlan[];
 }
 
 export interface BusinessHours {
@@ -140,4 +157,68 @@ export interface SearchSuggestion {
 
 export interface SearchFilters {
   includeSponsored: boolean;
+}
+
+// Add new interfaces that were missing
+
+export interface BusinessProduct {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  image_url?: string;
+  business_id: string;
+  created_at: string;
+  stock?: number;
+  category?: string;
+}
+
+export interface BusinessPortfolioItem {
+  id: string;
+  title: string;
+  description?: string;
+  image_url?: string;
+  business_id: string;
+  created_at: string;
+  views?: number;
+}
+
+export interface BusinessPost {
+  id: string;
+  content: string;
+  image_url?: string;
+  created_at: string;
+  business_id: string;
+  user_id: string;
+  category?: string;
+}
+
+export interface StaffMember {
+  name: string | null;
+  position: string | null;
+  experience: string | null;
+  image_url?: string | null;
+  bio?: string;
+}
+
+export interface BusinessOwner {
+  name: string | null;
+  role: string;
+  position: string | null;
+  experience: string | null;
+  image_url?: string | null;
+  qualifications?: string;
+  bio?: string;
+}
+
+export interface ImagePosition {
+  x: number;
+  y: number;
+}
+
+export interface MembershipPlan {
+  name: string;
+  price: number;
+  features: string[];
+  description?: string;
 }

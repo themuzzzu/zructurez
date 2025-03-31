@@ -1,3 +1,4 @@
+
 import { BusinessProfile } from "@/components/business-details/BusinessProfile";
 import type { Business } from "@/types/business";
 
@@ -6,13 +7,25 @@ interface BusinessAboutTabProps {
 }
 
 export const BusinessAboutTab = ({ business }: BusinessAboutTabProps) => {
+  // Convert BusinessHours object to string representation for display
+  const formatHours = (hours: any) => {
+    if (!hours) return "";
+    
+    try {
+      // Simple formatting - this can be enhanced as needed
+      return JSON.stringify(hours);
+    } catch (e) {
+      return "";
+    }
+  };
+  
   return (
     <BusinessProfile
       id={business.id}
       name={business.name}
       description={business.description}
       location={business.location}
-      hours={business.hours}
+      hours={formatHours(business.hours)}
       contact={business.contact}
       verified={business.verified}
       image_url={business.image_url}

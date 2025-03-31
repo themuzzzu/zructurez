@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MarketplaceHeader } from "./MarketplaceHeader";
@@ -71,7 +70,6 @@ const OptimizedMarketplace = () => {
           onSearch={handleSearch}
           placeholder="Search products, brands and more..."
           showVoiceSearch={true}
-          showImageSearch={true}
           className="w-full"
         />
       </div>

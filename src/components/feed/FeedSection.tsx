@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { useFeed } from "@/hooks/useFeed";
 import { PostCard } from "./PostCard";
 import { Button } from "@/components/ui/button";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, Plus } from "lucide-react";
 import { CreatePost } from "@/components/CreatePost";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -13,6 +13,7 @@ export const FeedSection = () => {
   const { user, loading: authLoading } = useAuth();
   const { posts, loading, error, refreshFeed } = useFeed();
   const [refreshing, setRefreshing] = useState(false);
+  const [showCreatePost, setShowCreatePost] = useState(false);
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -34,26 +35,55 @@ export const FeedSection = () => {
     <div className="space-y-4">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-bold">Your Feed</h2>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={handleRefresh}
-          disabled={refreshing}
-          className={refreshing ? "animate-spin" : ""}
-        >
-          <RefreshCw className="h-5 w-5" />
-        </Button>
+        <div className="flex space-x-2">
+          {user && (
+            <Button 
+              variant="outline" 
+              size="icon"
+              onClick={() => setShowCreatePost(!showCreatePost)}
+            >
+              <Plus className="h-5 w-5" />
+            </Button>
+          )}
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className={refreshing ? "animate-spin" : ""}
+          >
+            <RefreshCw className="h-5 w-5" />
+          </Button>
+        </div>
       </div>
 
-      {user && (
+      {showCreatePost && user && (
         <CreatePost 
           onSuccess={() => {
             refreshFeed();
+            setShowCreatePost(false);
             toast.success("Post created successfully!");
           }} 
         />
       )}
 
+      {!loading && posts.length === 0 && (
+        <Card className="p-8 text-center">
+          <h3 className="text-xl font-medium mb-2">No posts yet</h3>
+          <p className="text-muted-foreground mb-4">
+            Be the first to post or follow some users to see their posts here
+          </p>
+          {user && (
+            <Button 
+              variant="default"
+              onClick={() => setShowCreatePost(true)}
+            >
+              Create Your First Post
+            </Button>
+          )}
+        </Card>
+      )}
+      
       {loading && !refreshing ? (
         <div className="py-8 text-center">
           <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4" />
@@ -69,24 +99,6 @@ export const FeedSection = () => {
           >
             Try Again
           </Button>
-        </Card>
-      ) : posts.length === 0 ? (
-        <Card className="p-8 text-center">
-          <h3 className="text-xl font-medium mb-2">No posts yet</h3>
-          <p className="text-muted-foreground mb-4">
-            Be the first to post or follow some users to see their posts here
-          </p>
-          {user && (
-            <Button 
-              variant="default"
-              onClick={() => {
-                // When focused on creating a new post
-                document.getElementById('create-post-input')?.focus();
-              }}
-            >
-              Create Your First Post
-            </Button>
-          )}
         </Card>
       ) : (
         <div className="space-y-1">

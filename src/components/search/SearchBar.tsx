@@ -1,7 +1,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useSearch } from "@/hooks/useSearch";
-import { Search as SearchIcon, X, Mic } from "lucide-react";
+import { Search as SearchIcon, X, Mic, Image } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +17,7 @@ interface SearchBarProps {
   autoFocus?: boolean;
   className?: string;
   showVoiceSearch?: boolean;
+  showImageSearch?: boolean;
 }
 
 export function SearchBar({
@@ -26,6 +27,7 @@ export function SearchBar({
   autoFocus = false,
   className = "",
   showVoiceSearch = false,
+  showImageSearch = false,
 }: SearchBarProps) {
   const navigate = useNavigate();
   const searchRef = useRef<HTMLDivElement>(null);
@@ -80,6 +82,12 @@ export function SearchBar({
       navigate(`/search?q=${encodeURIComponent(transcript)}`);
     }
   };
+
+  // Handle image search click
+  const handleImageSearchClick = () => {
+    // This is a placeholder - in a real app this would open an image upload dialog
+    console.log("Image search clicked - functionality to be implemented");
+  };
   
   return (
     <div ref={searchRef} className={`relative ${className}`}>
@@ -105,6 +113,18 @@ export function SearchBar({
               onClick={() => setQuery("")}
             >
               <X className="h-4 w-4" />
+            </Button>
+          )}
+          
+          {showImageSearch && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
+              onClick={handleImageSearchClick}
+            >
+              <Image className="h-4 w-4" />
             </Button>
           )}
           
@@ -153,4 +173,4 @@ export function SearchBar({
       )}
     </div>
   );
-};
+}

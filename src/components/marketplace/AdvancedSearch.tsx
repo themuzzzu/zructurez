@@ -45,7 +45,6 @@ export function AdvancedSearch({ className, onSearch }: AdvancedSearchProps) {
             onSearch={handleSearch}
             placeholder="What are you looking for today?"
             showVoiceSearch={false}
-            showImageSearch={false}
             autoFocus={false}
           />
           
