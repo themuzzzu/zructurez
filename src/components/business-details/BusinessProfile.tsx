@@ -10,7 +10,7 @@ import { BusinessTeamSection } from "./profile/BusinessTeamSection";
 import { BusinessCommentSection } from "./comments/BusinessCommentSection";
 import { BookAppointmentDialog } from "@/components/BookAppointmentDialog";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import type { Business } from "@/types/business";
+import type { Business, BusinessProduct } from "@/types/business";
 
 interface BusinessProfileProps {
   id: string;
@@ -28,7 +28,7 @@ interface BusinessProfileProps {
   category?: string;
   appointment_price?: number;
   consultation_price?: number;
-  business_products?: Business['business_products'];
+  business_products?: BusinessProduct[];
 }
 
 export const BusinessProfile = ({
@@ -51,6 +51,13 @@ export const BusinessProfile = ({
 }: BusinessProfileProps) => {
   const [showBooking, setShowBooking] = useState(false);
   const isMobile = useMediaQuery("(max-width: 768px)");
+
+  const formattedBusinessProducts = business_products?.map(product => ({
+    ...product,
+    name: product.name,
+    price: product.price,
+    description: product.description || ""
+  }));
 
   return (
     <div className="space-y-4 sm:space-y-6 animate-fade-in">
@@ -77,7 +84,7 @@ export const BusinessProfile = ({
           category={category}
           appointment_price={appointment_price}
           consultation_price={consultation_price}
-          business_products={business_products}
+          business_products={formattedBusinessProducts}
         />
       )}
 

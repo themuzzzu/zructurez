@@ -8,7 +8,7 @@ export interface ProductsGridProps {
   setLayout?: (layout: GridLayoutType) => void;
 }
 
-export const ProductsGrid = ({ products, layout }: ProductsGridProps) => {
+export const ProductsGrid = ({ products, layout, setLayout }: ProductsGridProps) => {
   // Get grid classes based on layout
   const getGridClasses = () => {
     switch (layout) {

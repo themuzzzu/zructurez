@@ -1,7 +1,17 @@
 
 import { Search } from "lucide-react";
 
-export const EmptySearchResults = ({ query }: { query?: string }) => {
+interface EmptySearchResultsProps {
+  query?: string;
+  onCategorySelect?: (category: string) => void;
+  onSearchSelect?: (term: string) => void;
+}
+
+export const EmptySearchResults = ({ 
+  query, 
+  onCategorySelect, 
+  onSearchSelect 
+}: EmptySearchResultsProps) => {
   return (
     <div className="flex flex-col items-center justify-center p-8 text-center">
       <div className="bg-muted/30 p-4 rounded-full mb-4">

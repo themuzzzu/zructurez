@@ -111,7 +111,7 @@ export const BusinessCard = ({
 
           <BusinessCardInfo
             location={businessLocation}
-            hours={businessHours}
+            hours={typeof businessHours === 'string' ? businessHours : JSON.stringify(businessHours)}
             appointment_price={businessAppointmentPrice}
             consultation_price={businessConsultationPrice}
           />

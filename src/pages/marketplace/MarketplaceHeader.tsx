@@ -1,170 +1,166 @@
 
-import React, { useState } from 'react';
-import { Search, X, MapPin, Heart } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { useNavigate } from 'react-router-dom';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Label } from '@/components/ui/label';
-import { Skeleton } from '@/components/ui/skeleton';
+import { useState, useEffect, useRef } from "react";
+import { Search, X, Bell, ShoppingBag, ShoppingCart } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useNavigate } from "react-router-dom";
 
 interface MarketplaceHeaderProps {
-  onSearch: (term: string) => void;
+  onSearch: (query: string) => void;
   searchTerm: string;
   setSearchTerm: (term: string) => void;
-  isSearching: boolean;
-  popularSearches: Array<{term: string; frequency: number}>;
+  isSearching?: boolean;
+  popularSearches?: { term: string; frequency: number }[];
 }
 
-export const MarketplaceHeader = ({ 
-  onSearch, 
-  searchTerm, 
-  setSearchTerm, 
-  isSearching,
-  popularSearches 
+export const MarketplaceHeader = ({
+  onSearch,
+  searchTerm,
+  setSearchTerm,
+  isSearching = false,
+  popularSearches = []
 }: MarketplaceHeaderProps) => {
+  const [showSearchSuggestions, setShowSearchSuggestions] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-  const [showSearchDialog, setShowSearchDialog] = useState(false);
-  
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowSearchSuggestions(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const handleSearch = () => {
     if (searchTerm.trim()) {
       onSearch(searchTerm);
-      setShowSearchDialog(false);
+      setShowSearchSuggestions(false);
     }
   };
-  
-  const clearSearch = () => {
-    setSearchTerm('');
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
   };
-  
-  // Simplified location example - in a real app, would use geolocation
-  const userLocation = 'New Delhi, India';
-  
+
+  const handleClearSearch = () => {
+    setSearchTerm("");
+    setShowSearchSuggestions(false);
+  };
+
   return (
-    <>
-      <div className="flex flex-col space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">Marketplace</h1>
-            <div className="flex items-center text-muted-foreground text-sm mt-1">
-              <MapPin className="h-3 w-3 mr-1" />
-              <span>{userLocation}</span>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={() => navigate('/wishlist')}
-              aria-label="View wishlist"
-            >
-              <Heart className="h-5 w-5" />
-            </Button>
-          </div>
-        </div>
-        
-        <div className="relative">
-          <Button 
-            variant="outline" 
-            className="w-full justify-start text-muted-foreground h-10 font-normal relative pl-9"
-            onClick={() => setShowSearchDialog(true)}
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Marketplace</h1>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative"
+            onClick={() => navigate("/notifications")}
           >
-            <Search className="h-4 w-4 absolute left-3" />
-            {searchTerm || "Search products, categories..."}
-            {searchTerm && (
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  clearSearch();
-                }}
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            )}
+            <Bell className="h-5 w-5" />
+            <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+          </Button>
+          
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate("/wishlist")}
+          >
+            <ShoppingBag className="h-5 w-5" />
+          </Button>
+          
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative"
+            onClick={() => navigate("/cart")}
+          >
+            <ShoppingCart className="h-5 w-5" />
+            <span className="absolute -top-1 -right-1 flex items-center justify-center bg-primary text-primary-foreground rounded-full text-xs w-5 h-5">
+              0
+            </span>
           </Button>
         </div>
       </div>
-      
-      <Dialog open={showSearchDialog} onOpenChange={setShowSearchDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Search Marketplace</DialogTitle>
-          </DialogHeader>
-          
-          <div className="space-y-4 py-2">
-            <form onSubmit={handleSubmit} className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                className="pl-9 pr-12"
-                placeholder="Search products, categories..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                autoFocus
-              />
-              {searchTerm && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-8 top-1/2 h-7 w-7 -translate-y-1/2"
-                  onClick={clearSearch}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              )}
-              <Button 
-                type="submit" 
-                size="icon" 
-                variant="ghost" 
-                className="absolute right-0 top-0 h-full px-3"
-                disabled={isSearching}
+
+      <div className="relative" ref={searchRef}>
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search products, businesses, services..."
+              className="pl-10 pr-10"
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setShowSearchSuggestions(true);
+              }}
+              onFocus={() => setShowSearchSuggestions(true)}
+              onKeyDown={handleKeyDown}
+            />
+            {searchTerm && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
+                onClick={handleClearSearch}
               >
-                <Search className="h-4 w-4" />
+                <X className="h-4 w-4" />
               </Button>
-            </form>
-            
-            {isSearching ? (
-              <div className="space-y-2">
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-10 w-3/4" />
-                <Skeleton className="h-10 w-5/6" />
-              </div>
-            ) : (
-              <>
-                {popularSearches.length > 0 && (
-                  <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground">Popular Searches</Label>
-                    <div className="flex flex-wrap gap-2">
-                      {popularSearches.map((search, index) => (
-                        <Badge 
-                          key={index} 
-                          variant="outline" 
-                          className="cursor-pointer hover:bg-secondary"
-                          onClick={() => {
-                            setSearchTerm(search.term);
-                            onSearch(search.term);
-                            setShowSearchDialog(false);
-                          }}
-                        >
-                          {search.term}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </>
             )}
           </div>
-        </DialogContent>
-      </Dialog>
-    </>
+          <Button onClick={handleSearch} disabled={!searchTerm.trim() || isSearching}>
+            {isSearching ? "Searching..." : "Search"}
+          </Button>
+        </div>
+
+        {showSearchSuggestions && (searchTerm || popularSearches.length > 0) && (
+          <div className="absolute top-full left-0 right-0 mt-1 p-3 bg-background border rounded-md shadow-md z-10">
+            <div className="space-y-2">
+              <p className="text-xs font-semibold text-muted-foreground">
+                {searchTerm ? "Suggestions" : "Popular Searches"}
+              </p>
+              {isSearching ? (
+                Array(3)
+                  .fill(0)
+                  .map((_, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <Search className="h-3 w-3 text-muted-foreground" />
+                      <Skeleton className="h-4 w-full" />
+                    </div>
+                  ))
+              ) : popularSearches.length > 0 ? (
+                popularSearches.map((item, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center gap-2 p-1.5 hover:bg-muted rounded-md cursor-pointer"
+                    onClick={() => {
+                      setSearchTerm(item.term);
+                      onSearch(item.term);
+                      setShowSearchSuggestions(false);
+                    }}
+                  >
+                    <Search className="h-3 w-3 text-muted-foreground" />
+                    <span className="text-sm">{item.term}</span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground">No suggestions found</p>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 };

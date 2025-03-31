@@ -76,6 +76,9 @@ export interface Business {
   ratings?: number;
   reviews_count?: number;
   is_featured?: boolean;
+  closure_reason?: string;
+  business_portfolio?: PortfolioItem[];
+  posts?: UserPost[];
 }
 
 export interface PortfolioItem {

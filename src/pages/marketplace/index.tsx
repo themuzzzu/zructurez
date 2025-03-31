@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Navbar } from '@/components/Navbar';
 import { MobileNav } from '@/components/navbar/MobileNav';
 import { Categories } from '@/components/marketplace/Categories';
-import { Tab, TabContent, TabList, TabTrigger } from '@/components/ui/tabs-alt';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs-alt';
 import { SponsoredProducts } from '@/components/marketplace/SponsoredProducts';
 import { TrendingProducts } from '@/components/marketplace/TrendingProducts';
 import { MarketplaceHeader } from './MarketplaceHeader';
@@ -42,14 +42,15 @@ export default function MarketplaceIndex() {
         // Fetch categories with most products
         const { data, error } = await supabase
           .from('products')
-          .select('category, count')
+          .select('category')
           .not('category', 'is', null)
-          .group('category')
-          .order('count', { ascending: false })
           .limit(5);
         
         if (error) throw error;
-        setTrendingCategories(data?.map(item => item.category) || []);
+        
+        // Extract unique categories
+        const uniqueCategories = [...new Set(data?.map(item => item.category))];
+        setTrendingCategories(uniqueCategories || []);
       } catch (err) {
         console.error('Error fetching trending categories:', err);
         // Fallback to preset categories
@@ -79,10 +80,7 @@ export default function MarketplaceIndex() {
       const { data, error } = await supabase
         .from('products')
         .select('*')
-        .textSearch('title', term, {
-          type: 'websearch',
-          config: 'english'
-        })
+        .or(`title.ilike.%${term}%,description.ilike.%${term}%,category.ilike.%${term}%`)
         .limit(20);
       
       if (error) throw error;
@@ -127,18 +125,17 @@ export default function MarketplaceIndex() {
         
         <div className="mt-2 mb-6 overflow-x-auto scrollbar-hide">
           <Categories 
-            onCategorySelect={handleCategorySelect} 
-            selectedCategory={selectedCategory}
+            onCategorySelect={handleCategorySelect}
             trendingCategories={trendingCategories}
           />
         </div>
 
-        <Tab value={activeTab} onValueChange={setActiveTab}>
-          <TabList className="mb-4">
-            <TabTrigger value="browse">Browse</TabTrigger>
-            <TabTrigger value="category">Categories</TabTrigger>
-            <TabTrigger value="trending">Trending</TabTrigger>
-          </TabList>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="mb-4">
+            <TabsTrigger value="browse">Browse</TabsTrigger>
+            <TabsTrigger value="category">Categories</TabsTrigger>
+            <TabsTrigger value="trending">Trending</TabsTrigger>
+          </TabsList>
 
           <AnimatePresence mode="wait">
             <motion.div
@@ -148,7 +145,7 @@ export default function MarketplaceIndex() {
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
             >
-              <TabContent value="browse">
+              <TabsContent value="browse">
                 <BrowseTabContent 
                   searchResults={searchResults} 
                   searchTerm={searchTerm} 
@@ -156,25 +153,24 @@ export default function MarketplaceIndex() {
                   onCategorySelect={handleCategorySelect}
                   onSearchSelect={handleSearchSelect}
                 />
-              </TabContent>
+              </TabsContent>
 
-              <TabContent value="category">
+              <TabsContent value="category">
                 <CategoryTabContent 
                   selectedCategory={selectedCategory} 
                   setSelectedCategory={setSelectedCategory}
-                  setActiveTab={setActiveTab}
                 />
-              </TabContent>
+              </TabsContent>
 
-              <TabContent value="trending">
+              <TabsContent value="trending">
                 <div className="space-y-8">
                   <SponsoredProducts />
                   <TrendingProducts />
                 </div>
-              </TabContent>
+              </TabsContent>
             </motion.div>
           </AnimatePresence>
-        </Tab>
+        </Tabs>
       </main>
       
       <MobileNav />

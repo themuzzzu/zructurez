@@ -1,7 +1,8 @@
+
 export interface StaffMember {
   name: string;
-  position: string;
-  experience: string;
+  position?: string;
+  experience?: string;
   bio?: string;
   image_url?: string | null;
 }
@@ -13,8 +14,8 @@ export interface StaffMembersProps {
 
 export interface StaffFormFieldsProps {
   name: string;
-  position: string;
-  experience: string;
+  position?: string;
+  experience?: string;
   bio?: string;
   image_url?: string | null;
   onUpdate: (field: keyof StaffMember, value: string) => void;

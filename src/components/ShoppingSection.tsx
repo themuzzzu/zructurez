@@ -12,6 +12,7 @@ import { ShoppingCardSkeleton } from "./ShoppingCardSkeleton";
 import { Spinner } from "./common/Spinner";
 import { formatPrice } from "@/utils/productUtils";
 import { ArrowRight, ShoppingBag } from "lucide-react";
+import { EmptySearchResults } from "./marketplace/EmptySearchResults";
 
 interface Product {
   id: string;
@@ -43,7 +44,25 @@ interface Service {
   provider_name: string;
 }
 
-export const ShoppingSection = () => {
+interface ShoppingSectionProps {
+  searchQuery?: string;
+  selectedCategory?: string;
+  showDiscounted?: boolean;
+  showUsed?: boolean;
+  showBranded?: boolean;
+  sortOption?: string;
+  priceRange?: string;
+}
+
+export const ShoppingSection = ({
+  searchQuery = "",
+  selectedCategory = "",
+  showDiscounted = false,
+  showUsed = false,
+  showBranded = false,
+  sortOption = "newest",
+  priceRange = "all"
+}: ShoppingSectionProps) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [services, setServices] = useState<Service[]>([]);
@@ -55,11 +74,83 @@ export const ShoppingSection = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Fetch products
-        const { data: productsData } = await supabase
-          .from("products")
-          .select("*")
-          .limit(10);
+        let query = supabase.from("products").select("*");
+
+        // Apply search filter
+        if (searchQuery) {
+          query = query.or(
+            `title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,category.ilike.%${searchQuery}%`
+          );
+        }
+
+        // Apply category filter
+        if (selectedCategory) {
+          query = query.eq("category", selectedCategory.toLowerCase());
+        }
+
+        // Apply discount filter
+        if (showDiscounted) {
+          query = query.eq("is_discounted", true);
+        }
+
+        // Apply used product filter
+        if (showUsed) {
+          query = query.eq("is_used", true);
+        }
+
+        // Apply branded product filter
+        if (showBranded) {
+          query = query.eq("is_branded", true);
+        }
+
+        // Apply price range filter
+        if (priceRange !== "all") {
+          const [min, max] = priceRange.split("-").map(Number);
+          if (min && max) {
+            query = query.gte("price", min).lte("price", max);
+          } else if (min) {
+            query = query.gte("price", min);
+          }
+        }
+
+        // Apply sorting
+        switch (sortOption) {
+          case "price-low":
+            query = query.order("price", { ascending: true });
+            break;
+          case "price-high":
+            query = query.order("price", { ascending: false });
+            break;
+          case "popular":
+            query = query.order("views", { ascending: false });
+            break;
+          case "newest":
+          default:
+            query = query.order("created_at", { ascending: false });
+            break;
+        }
+
+        // Limit results
+        query = query.limit(10);
+
+        const { data: productsData, error: productsError } = await query;
+
+        if (productsError) {
+          console.error("Error fetching products:", productsError);
+        } else {
+          // Transform the result to match the Product interface
+          const transformedProducts = productsData.map(item => ({
+            id: item.id,
+            name: item.title || "",
+            description: item.description || "",
+            price: item.price || 0,
+            image_url: item.image_url || "",
+            discount_percentage: item.discount_percentage,
+            original_price: item.original_price,
+            is_discounted: item.is_discounted
+          }));
+          setProducts(transformedProducts);
+        }
 
         // Fetch services
         const { data: servicesData } = await supabase
@@ -67,21 +158,26 @@ export const ShoppingSection = () => {
           .select("*, providers(name)")
           .limit(10);
 
+        if (servicesData) {
+          const formattedServices = servicesData.map((service: any) => ({
+            id: service.id,
+            name: service.title || "",
+            description: service.description || "",
+            price: service.price || 0,
+            image_url: service.image_url || "",
+            provider_id: service.provider_id || "",
+            provider_name: service.providers?.name || "Unknown Provider"
+          }));
+          setServices(formattedServices as Service[]);
+        }
+
         // Fetch businesses
         const { data: businessesData } = await supabase
           .from("businesses")
           .select("id, name, category, description, image_url")
           .limit(10);
 
-        if (productsData) setProducts(productsData as Product[]);
         if (businessesData) setBusinesses(businessesData as Business[]);
-        if (servicesData) {
-          const formattedServices = servicesData.map((service: any) => ({
-            ...service,
-            provider_name: service.providers?.name || "Unknown Provider"
-          }));
-          setServices(formattedServices as Service[]);
-        }
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -90,7 +186,7 @@ export const ShoppingSection = () => {
     };
 
     fetchData();
-  }, []);
+  }, [searchQuery, selectedCategory, showDiscounted, showUsed, showBranded, sortOption, priceRange]);
 
   if (loading) {
     return (
@@ -111,18 +207,27 @@ export const ShoppingSection = () => {
     return products.filter((product) => product.is_discounted).slice(0, 8);
   };
 
+  // Check if we're showing search results
+  const isSearchResults = !!searchQuery;
+
+  if (isSearchResults && products.length === 0) {
+    return <EmptySearchResults query={searchQuery} />;
+  }
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Discover</h2>
-        <Button
-          variant="ghost"
-          className="flex items-center text-primary"
-          onClick={() => navigate("/marketplace")}
-        >
-          View all <ArrowRight className="ml-1 h-4 w-4" />
-        </Button>
-      </div>
+      {!isSearchResults && (
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold">Discover</h2>
+          <Button
+            variant="ghost"
+            className="flex items-center text-primary"
+            onClick={() => navigate("/marketplace")}
+          >
+            View all <ArrowRight className="ml-1 h-4 w-4" />
+          </Button>
+        </div>
+      )}
 
       <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3">
@@ -140,7 +245,7 @@ export const ShoppingSection = () => {
             </div>
           ) : (
             <>
-              {getFeaturedProducts().length > 0 && (
+              {!isSearchResults && getFeaturedProducts().length > 0 && (
                 <div className="mb-8">
                   <h3 className="text-lg font-semibold mb-4">Featured Products</h3>
                   <ProductsCarousel products={getFeaturedProducts()} />
@@ -180,7 +285,7 @@ export const ShoppingSection = () => {
                 <ServiceCard
                   key={service.id}
                   id={service.id}
-                  title={service.name}
+                  name={service.name}
                   description={service.description || ""}
                   image={service.image_url}
                   price={formatPrice(service.price)}
@@ -216,13 +321,15 @@ export const ShoppingSection = () => {
         </TabsContent>
       </Tabs>
 
-      <Button
-        onClick={() => navigate("/marketplace")}
-        className="w-full mt-4"
-        variant="outline"
-      >
-        View All Items
-      </Button>
+      {!isSearchResults && (
+        <Button
+          onClick={() => navigate("/marketplace")}
+          className="w-full mt-4"
+          variant="outline"
+        >
+          View All Items
+        </Button>
+      )}
     </div>
   );
 };

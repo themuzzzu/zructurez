@@ -11,12 +11,22 @@ interface EnhancedShoppingSectionProps {
   searchQuery: string;
   showFilters?: boolean;
   selectedCategory?: string;
+  showDiscounted?: boolean;
+  showUsed?: boolean;
+  showBranded?: boolean;
+  sortOption?: string;
+  priceRange?: string;
 }
 
 export const EnhancedShoppingSection = ({
   searchQuery,
   showFilters = false,
-  selectedCategory = ''
+  selectedCategory = '',
+  showDiscounted = false,
+  showUsed = false,
+  showBranded = false,
+  sortOption = 'newest',
+  priceRange = 'all'
 }: EnhancedShoppingSectionProps) => {
   const [activeTab, setActiveTab] = useState("products");
   
@@ -37,7 +47,6 @@ export const EnhancedShoppingSection = ({
         return [];
       }
       
-      // Cast the data to Business[] to satisfy TypeScript
       return data as unknown as Business[];
     },
     enabled: !!searchQuery
@@ -53,14 +62,14 @@ export const EnhancedShoppingSection = ({
         </TabsList>
         
         <TabsContent value="products">
-          <ShoppingSection 
-            searchQuery={searchQuery} 
+          <ShoppingSection
+            searchQuery={searchQuery}
             selectedCategory={selectedCategory}
-            showDiscounted={false}
-            showUsed={false}
-            showBranded={false}
-            sortOption="newest"
-            priceRange="all"
+            showDiscounted={showDiscounted}
+            showUsed={showUsed}
+            showBranded={showBranded}
+            sortOption={sortOption}
+            priceRange={priceRange}
           />
         </TabsContent>
         

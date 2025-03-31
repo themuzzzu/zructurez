@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { SponsoredProducts } from '@/components/marketplace/SponsoredProducts';
 import { TrendingProducts } from '@/components/marketplace/TrendingProducts';
-import { ProductsGrid } from '@/components/shopping/ProductsGrid';
+import { ProductsGrid } from '@/components/products/ProductsGrid';
 import { GridLayoutType } from '@/components/products/types/layouts';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptySearchResults } from '@/components/marketplace/EmptySearchResults';
@@ -73,14 +73,11 @@ export const BrowseTabContent: React.FC<BrowseTabContentProps> = ({
         {searchResults.length > 0 ? (
           <ProductsGrid 
             products={searchResults} 
-            layout={layout as any} 
-            setLayout={setLayout as any}
+            layout={layout}
           />
         ) : (
           <EmptySearchResults 
-            searchTerm={searchTerm} 
-            onCategorySelect={onCategorySelect}
-            onSearchSelect={onSearchSelect}
+            query={searchTerm}
           />
         )}
       </div>
