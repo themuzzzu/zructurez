@@ -1,4 +1,3 @@
-
 import { Menu } from "lucide-react";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
@@ -9,7 +8,6 @@ import {
 } from "@/components/ui/sheet";
 import { useLocation } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
-import { NotificationButton } from "./navbar/NotificationButton";
 import { CartButton } from "./navbar/CartButton";
 import { UserMenu } from "./navbar/UserMenu";
 import { MobileNav } from "./navbar/MobileNav";
@@ -17,6 +15,7 @@ import { SearchBox } from "./search/SearchBox";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTheme } from "./ThemeProvider";
+import { Heart } from "lucide-react";
 
 export const Navbar = () => {
   const location = useLocation();
@@ -39,6 +38,11 @@ export const Navbar = () => {
       return data;
     },
   });
+
+  const isBusinessOrServices = () => {
+    return location.pathname.includes('/business') || 
+           location.pathname.includes('/services');
+  };
 
   return (
     <>
@@ -65,8 +69,13 @@ export const Navbar = () => {
           )}
 
           <div className="flex items-center gap-2">
-            <NotificationButton />
-            <CartButton />
+            {isBusinessOrServices() ? (
+              <Button variant="ghost" size="icon" onClick={() => window.location.href = "/wishlist"}>
+                <Heart className="h-5 w-5" />
+              </Button>
+            ) : (
+              <CartButton />
+            )}
             <Separator orientation="vertical" className="h-6 hidden sm:block" />
             <UserMenu profile={profile} />
           </div>
