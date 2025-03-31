@@ -1,3 +1,4 @@
+
 import { ShoppingSection } from "@/components/ShoppingSection";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
 
@@ -36,8 +37,8 @@ export const SearchTabContent = ({
 }: SearchTabContentProps) => {
   return (
     <ShoppingSection
-      query={searchQuery}
-      category={selectedCategory}
+      searchQuery={searchQuery}
+      selectedCategory={selectedCategory}
       showDiscounted={showDiscounted}
       showUsed={showUsed}
       showBranded={showBranded}

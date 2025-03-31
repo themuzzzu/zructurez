@@ -145,42 +145,8 @@ export const BusinessReviewsSection = ({ businessId }: BusinessReviewsSectionPro
           <p>Loading reviews...</p>
         ) : reviews.length > 0 ? (
           <div className="space-y-6">
-            {reviews && reviews.map((review, index) => (
-              <div key={review.id} className="border-b pb-4 last:border-0">
-                <div className="flex items-start gap-3">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src={review.profiles?.avatar_url} />
-                    <AvatarFallback>
-                      {review.profiles?.name?.charAt(0) || review.profiles?.username?.charAt(0) || 'U'}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <p className="font-medium">
-                        {review.profiles?.name || review.profiles?.username || 'Anonymous'}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(review.created_at).toLocaleDateString()}
-                      </p>
-                    </div>
-                    {review.rating && (
-                      <div className="flex text-yellow-400 mt-1">
-                        {Array(5)
-                          .fill(0)
-                          .map((_, i) => (
-                            <StarIcon
-                              key={i}
-                              className={`h-4 w-4 ${
-                                i < review.rating ? 'fill-current' : 'text-gray-300'
-                              }`}
-                            />
-                          ))}
-                      </div>
-                    )}
-                    <p className="mt-2 text-sm">{review.content}</p>
-                  </div>
-                </div>
-              </div>
+            {reviews && reviews.map((review) => (
+              <ReviewCard key={review.id} review={review} />
             ))}
           </div>
         ) : (
@@ -190,5 +156,46 @@ export const BusinessReviewsSection = ({ businessId }: BusinessReviewsSectionPro
         )}
       </CardContent>
     </Card>
+  );
+};
+
+// Define ReviewCard component
+const ReviewCard = ({ review }) => {
+  return (
+    <div key={review.id} className="border-b pb-4 last:border-0">
+      <div className="flex items-start gap-3">
+        <Avatar className="h-10 w-10">
+          <AvatarImage src={review.profiles?.avatar_url} />
+          <AvatarFallback>
+            {review.profiles?.name?.charAt(0) || review.profiles?.username?.charAt(0) || 'U'}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex-1">
+          <div className="flex items-center justify-between">
+            <p className="font-medium">
+              {review.profiles?.name || review.profiles?.username || 'Anonymous'}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {new Date(review.created_at).toLocaleDateString()}
+            </p>
+          </div>
+          {review.rating && (
+            <div className="flex text-yellow-400 mt-1">
+              {Array(5)
+                .fill(0)
+                .map((_, i) => (
+                  <StarIcon
+                    key={i}
+                    className={`h-4 w-4 ${
+                      i < review.rating ? 'fill-current' : 'text-gray-300'
+                    }`}
+                  />
+                ))}
+            </div>
+          )}
+          <p className="mt-2 text-sm">{review.content}</p>
+        </div>
+      </div>
+    </div>
   );
 };

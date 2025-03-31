@@ -16,7 +16,7 @@ const TEST_STAFF = [
   },
   {
     name: "Emily Davis",
-    position: "Skincare Specialist",
+    position: "Skincare Specialist", 
     experience: "8 years",
     bio: "Expert in advanced facial treatments and chemical peels."
   },
@@ -92,8 +92,11 @@ export const StaffMembers = ({ staff = [], onChange }: StaffMembersProps) => {
 
       <div className="grid gap-2">
         <StaffFormFields
-          {...newStaff}
-          position={newStaff.position || ""}
+          name={newStaff.name}
+          position={newStaff.position}
+          experience={newStaff.experience}
+          bio={newStaff.bio}
+          image_url={newStaff.image_url}
           onUpdate={(field, value) => 
             setNewStaff({ ...newStaff, [field]: value })
           }

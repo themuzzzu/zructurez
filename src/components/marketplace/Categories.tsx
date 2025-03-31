@@ -1,28 +1,9 @@
 
+import { useEffect, useState } from "react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Button } from "@/components/ui/button";
-import {
-  ShoppingBag,
-  ShoppingCart,
-  Home,
-  Shirt,
-  Gift,
-  Phone,
-  Utensils,
-  Scissors,
-  Car,
-  BookOpen,
-  Music,
-  Gamepad2,
-  Watch,
-  Baby,
-  Dumbbell
-} from "lucide-react";
-
-interface CategoryItem {
-  name: string;
-  icon: React.ReactNode;
-}
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { Shirt, Home, ShoppingBag, Utensils, Gift, Car, Camera, Heart, Paintbrush, Leaf } from "lucide-react";
 
 interface CategoriesProps {
   onCategorySelect: (category: string) => void;
@@ -30,55 +11,77 @@ interface CategoriesProps {
   showAllCategories?: boolean;
 }
 
-export const Categories = ({
-  onCategorySelect,
-  trendingCategories = [],
-  showAllCategories = false
-}: CategoriesProps) => {
-  const categories: CategoryItem[] = [
-    { name: "All", icon: <ShoppingBag className="h-4 w-4" /> },
-    { name: "Electronics", icon: <Phone className="h-4 w-4" /> },
-    { name: "Fashion", icon: <Shirt className="h-4 w-4" /> },
-    { name: "Home", icon: <Home className="h-4 w-4" /> },
-    { name: "Beauty", icon: <Scissors className="h-4 w-4" /> },
-    { name: "Grocery", icon: <ShoppingCart className="h-4 w-4" /> },
-    { name: "Food", icon: <Utensils className="h-4 w-4" /> },
-    { name: "Automotive", icon: <Car className="h-4 w-4" /> },
-    { name: "Books", icon: <BookOpen className="h-4 w-4" /> },
-    { name: "Music", icon: <Music className="h-4 w-4" /> },
-    { name: "Gaming", icon: <Gamepad2 className="h-4 w-4" /> },
-    { name: "Watches", icon: <Watch className="h-4 w-4" /> },
-    { name: "Baby", icon: <Baby className="h-4 w-4" /> },
-    { name: "Sports", icon: <Dumbbell className="h-4 w-4" /> },
-    { name: "Gifts", icon: <Gift className="h-4 w-4" /> },
-  ];
+const categoryIcons: Record<string, React.ReactNode> = {
+  clothing: <Shirt className="h-4 w-4" />,
+  home: <Home className="h-4 w-4" />,
+  electronics: <ShoppingBag className="h-4 w-4" />,
+  food: <Utensils className="h-4 w-4" />,
+  gifts: <Gift className="h-4 w-4" />,
+  automotive: <Car className="h-4 w-4" />,
+  photography: <Camera className="h-4 w-4" />,
+  health: <Heart className="h-4 w-4" />,
+  art: <Paintbrush className="h-4 w-4" />,
+  beauty: <Leaf className="h-4 w-4" />,
+};
 
-  // Filter to just trending categories if provided and not showing all
-  const displayCategories = showAllCategories 
-    ? categories 
-    : trendingCategories?.length 
-      ? categories.filter(cat => 
-          cat.name === "All" || 
-          trendingCategories.some(trend => 
-            trend.toLowerCase() === cat.name.toLowerCase()
-          )
-        )
-      : categories.slice(0, 7); // Show first 7 if no trending categories
+const categoryNames: Record<string, string> = {
+  all: "All Categories",
+  clothing: "Clothing & Fashion",
+  electronics: "Electronics",
+  home: "Home & Garden",
+  beauty: "Beauty & Personal Care",
+  sports: "Sports & Outdoors",
+  toys: "Toys & Games",
+  books: "Books & Media",
+  health: "Health & Wellness",
+  jewelry: "Jewelry & Accessories",
+  automotive: "Automotive",
+  pet: "Pet Supplies",
+  grocery: "Grocery & Food",
+  furniture: "Furniture",
+  art: "Art & Collectibles",
+};
+
+export const Categories = ({ 
+  onCategorySelect, 
+  trendingCategories = [],
+  showAllCategories = false 
+}: CategoriesProps) => {
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  
+  const handleCategoryClick = (category: string) => {
+    setSelectedCategory(category);
+    onCategorySelect(category);
+  };
+  
+  // If trending categories are empty, use the predefined list
+  const categories = trendingCategories.length > 0 
+    ? ["all", ...trendingCategories] 
+    : ["all", "clothing", "electronics", "home", "beauty", "sports", "toys", "books", "health"];
+  
+  // For showing all categories
+  const allCategories = showAllCategories 
+    ? Object.keys(categoryNames) 
+    : categories;
 
   return (
-    <ScrollArea className="w-full pb-2">
-      <div className="flex space-x-2 pb-1">
-        {displayCategories.map((category) => (
-          <Button
-            key={category.name}
+    <ScrollArea className="w-full">
+      <div className="flex space-x-2 pb-4">
+        {allCategories.map((category) => (
+          <Badge
+            key={category}
             variant="outline"
-            size="sm"
-            className="flex items-center gap-1.5 whitespace-nowrap"
-            onClick={() => onCategorySelect(category.name === "All" ? "" : category.name.toLowerCase())}
+            className={cn(
+              "h-9 px-4 py-2 cursor-pointer whitespace-nowrap",
+              selectedCategory === category && "bg-primary text-primary-foreground"
+            )}
+            onClick={() => handleCategoryClick(category)}
           >
-            {category.icon}
-            <span>{category.name}</span>
-          </Button>
+            {categoryIcons[category] && (
+              <span className="mr-2">{categoryIcons[category]}</span>
+            )}
+            {categoryNames[category] || category.charAt(0).toUpperCase() + category.slice(1)}
+          </Badge>
         ))}
       </div>
       <ScrollBar orientation="horizontal" />

@@ -2,9 +2,11 @@
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Label } from "../ui/label";
-import { BusinessFormData } from "./types";
+import { BusinessFormData } from "./types/form";
 import { BusinessOwners } from "./BusinessOwners";
 import { StaffMembers } from "./StaffMembers";
+import { Owner } from "./types/owner";
+import { StaffMember } from "./types/staff";
 
 interface BusinessProfileInfoProps {
   formData: BusinessFormData;
@@ -12,6 +14,30 @@ interface BusinessProfileInfoProps {
 }
 
 export const BusinessProfileInfo = ({ formData, onChange }: BusinessProfileInfoProps) => {
+  // Helper function to convert BusinessOwner[] to Owner[]
+  const convertOwners = (owners: any[]): Owner[] => {
+    return owners.map(owner => ({
+      name: owner.name || "",
+      role: owner.role || "",
+      position: owner.position || "",
+      experience: owner.experience || "",
+      qualifications: owner.qualifications || "",
+      bio: owner.bio || "",
+      image_url: owner.image_url || null
+    }));
+  };
+
+  // Helper function to convert StaffMember[] to the correct type
+  const convertStaff = (staff: any[]): StaffMember[] => {
+    return staff.map(member => ({
+      name: member.name || "",
+      position: member.position || "",
+      experience: member.experience || "",
+      bio: member.bio || "",
+      image_url: member.image_url || null
+    }));
+  };
+
   return (
     <>
       <div className="space-y-2">
@@ -37,12 +63,12 @@ export const BusinessProfileInfo = ({ formData, onChange }: BusinessProfileInfoP
       </div>
 
       <BusinessOwners
-        owners={formData.owners}
+        owners={convertOwners(formData.owners)}
         onChange={(owners) => onChange("owners", owners)}
       />
 
       <StaffMembers
-        staff={formData.staff_details}
+        staff={convertStaff(formData.staff_details)}
         onChange={(staff) => onChange("staff_details", staff)}
       />
     </>

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -5,7 +6,7 @@ import { MarketplaceHeader } from "./MarketplaceHeader";
 import { BrowseTabContent } from "./BrowseTabContent";
 import { SearchTabContent } from "./SearchTabContent";
 import { CategoryTabContent } from "./CategoryTabContent";
-import { GridLayoutType } from "@/components/products/types/ProductTypes";
+import { GridLayoutType } from "@/components/products/types/layouts";
 
 const OptimizedMarketplace = () => {
   const navigate = useNavigate();
@@ -82,8 +83,9 @@ const OptimizedMarketplace = () => {
   return (
     <div className="container max-w-[1400px] mx-auto px-4 py-6">
       <MarketplaceHeader
-        searchQuery={searchQuery}
-        setSearchQuery={handleSearchChange}
+        searchTerm={searchQuery}
+        setSearchTerm={setSearchQuery}
+        onSearch={handleSearchChange}
       />
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
@@ -94,8 +96,7 @@ const OptimizedMarketplace = () => {
         </TabsList>
         
         <TabsContent value="browse" className="mt-6">
-          <BrowseTabContent 
-          />
+          <BrowseTabContent />
         </TabsContent>
         
         <TabsContent value="category" className="mt-6">
@@ -111,10 +112,16 @@ const OptimizedMarketplace = () => {
             searchQuery={searchQuery}
             selectedCategory={selectedCategory}
             showDiscounted={showDiscounted}
+            setShowDiscounted={setShowDiscounted}
             showUsed={showUsed}
+            setShowUsed={setShowUsed}
             showBranded={showBranded}
+            setShowBranded={setShowBranded}
             sortOption={sortOption}
+            setSortOption={setSortOption}
             priceRange={priceRange}
+            setPriceRange={setPriceRange}
+            resetFilters={resetFilters}
           />
         </TabsContent>
       </Tabs>

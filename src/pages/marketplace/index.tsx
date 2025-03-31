@@ -1,15 +1,19 @@
+
 import React, { useState, useEffect } from 'react';
 import { Navbar } from '@/components/Navbar';
 import { MobileNav } from '@/components/navbar/MobileNav';
 import { Categories } from '@/components/marketplace/Categories';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs-alt';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SponsoredProducts } from '@/components/marketplace/SponsoredProducts';
 import { TrendingProducts } from '@/components/marketplace/TrendingProducts';
 import { MarketplaceHeader } from './MarketplaceHeader';
 import { BrowseTabContent } from './BrowseTabContent';
 import { CategoryTabContent } from './CategoryTabContent';
 import { supabase } from '@/integrations/supabase/client';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
+
+// Add framer-motion dependency
+<lov-add-dependency>framer-motion@latest</lov-add-dependency>
 
 export default function MarketplaceIndex() {
   const [activeTab, setActiveTab] = useState('browse');
@@ -87,8 +91,7 @@ export default function MarketplaceIndex() {
       // Update results count in analytics
       await supabase.from('search_queries')
         .update({ results_count: data.length })
-        .eq('query', term)
-        .is('user_id', null);
+        .eq('query', term);
       
       setSearchResults(data || []);
     } catch (err) {
@@ -136,40 +139,38 @@ export default function MarketplaceIndex() {
             <TabsTrigger value="trending">Trending</TabsTrigger>
           </TabsList>
 
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeTab}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-            >
-              <TabsContent value="browse">
-                <BrowseTabContent 
-                  searchResults={searchResults} 
-                  searchTerm={searchTerm} 
-                  isSearching={isSearching}
-                  onCategorySelect={handleCategorySelect}
-                  onSearchSelect={handleSearchSelect}
-                />
-              </TabsContent>
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            <TabsContent value="browse">
+              <BrowseTabContent 
+                searchResults={searchResults} 
+                searchTerm={searchTerm} 
+                isSearching={isSearching}
+                onCategorySelect={handleCategorySelect}
+                onSearchSelect={handleSearchSelect}
+              />
+            </TabsContent>
 
-              <TabsContent value="category">
-                <CategoryTabContent 
-                  selectedCategory={selectedCategory} 
-                  setSelectedCategory={setSelectedCategory}
-                  setActiveTab={setActiveTab}
-                />
-              </TabsContent>
+            <TabsContent value="category">
+              <CategoryTabContent 
+                selectedCategory={selectedCategory} 
+                setSelectedCategory={setSelectedCategory}
+                setActiveTab={setActiveTab}
+              />
+            </TabsContent>
 
-              <TabsContent value="trending">
-                <div className="space-y-8">
-                  <SponsoredProducts />
-                  <TrendingProducts />
-                </div>
-              </TabsContent>
-            </motion.div>
-          </AnimatePresence>
+            <TabsContent value="trending">
+              <div className="space-y-8">
+                <SponsoredProducts />
+                <TrendingProducts />
+              </div>
+            </TabsContent>
+          </motion.div>
         </Tabs>
       </main>
       

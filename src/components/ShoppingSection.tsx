@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
@@ -44,7 +43,7 @@ interface Service {
   provider_name: string;
 }
 
-interface ShoppingSectionProps {
+export interface ShoppingSectionProps {
   searchQuery?: string;
   selectedCategory?: string;
   showDiscounted?: boolean;
@@ -76,34 +75,28 @@ export const ShoppingSection = ({
       try {
         let query = supabase.from("products").select("*");
 
-        // Apply search filter
         if (searchQuery) {
           query = query.or(
             `title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,category.ilike.%${searchQuery}%`
           );
         }
 
-        // Apply category filter
         if (selectedCategory) {
           query = query.eq("category", selectedCategory.toLowerCase());
         }
 
-        // Apply discount filter
         if (showDiscounted) {
           query = query.eq("is_discounted", true);
         }
 
-        // Apply used product filter
         if (showUsed) {
           query = query.eq("is_used", true);
         }
 
-        // Apply branded product filter
         if (showBranded) {
           query = query.eq("is_branded", true);
         }
 
-        // Apply price range filter
         if (priceRange !== "all") {
           const [min, max] = priceRange.split("-").map(Number);
           if (min && max) {
@@ -113,7 +106,6 @@ export const ShoppingSection = ({
           }
         }
 
-        // Apply sorting
         switch (sortOption) {
           case "price-low":
             query = query.order("price", { ascending: true });
@@ -130,7 +122,6 @@ export const ShoppingSection = ({
             break;
         }
 
-        // Limit results
         query = query.limit(10);
 
         const { data: productsData, error: productsError } = await query;
@@ -138,7 +129,6 @@ export const ShoppingSection = ({
         if (productsError) {
           console.error("Error fetching products:", productsError);
         } else {
-          // Transform the result to match the Product interface
           const transformedProducts = productsData.map(item => ({
             id: item.id,
             name: item.title || "",
@@ -152,7 +142,6 @@ export const ShoppingSection = ({
           setProducts(transformedProducts);
         }
 
-        // Fetch services
         const { data: servicesData } = await supabase
           .from("services")
           .select("*, providers(name)")
@@ -171,7 +160,6 @@ export const ShoppingSection = ({
           setServices(formattedServices as Service[]);
         }
 
-        // Fetch businesses
         const { data: businessesData } = await supabase
           .from("businesses")
           .select("id, name, category, description, image_url")
@@ -207,7 +195,6 @@ export const ShoppingSection = ({
     return products.filter((product) => product.is_discounted).slice(0, 8);
   };
 
-  // Check if we're showing search results
   const isSearchResults = !!searchQuery;
 
   if (isSearchResults && products.length === 0) {

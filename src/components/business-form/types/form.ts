@@ -1,9 +1,10 @@
 
 import type { MembershipPlan } from "@/types/membership";
-import type { BusinessOwner, StaffMember } from "@/types/business";
+import type { Owner } from "./owner";
+import type { StaffMember } from "./staff";
 
 interface BusinessProduct {
-  id?: string;
+  id?: string; // Make id optional to match the form data structure
   name: string;
   price: number;
   description: string;
@@ -23,7 +24,7 @@ export interface BusinessFormData {
   consultation_price: string;
   bio: string;
   website: string;
-  owners: BusinessOwner[];
+  owners: Owner[];
   staff_details: StaffMember[];
   business_products: BusinessProduct[];
   membership_plans: MembershipPlan[];

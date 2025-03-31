@@ -1,30 +1,20 @@
 
 export interface Product {
   id: string;
-  title: string;
+  title?: string;
+  name?: string;
   description: string;
   price: number;
-  category: string;
-  subcategory?: string;
-  image_url?: string;
-  stock: number;
-  created_at?: string;
-  updated_at?: string;
-  brand_name?: string;
-  brand?: string;
-  model?: string;
-  condition?: string;
-  size?: string;
-  is_branded?: boolean;
-  is_used?: boolean;
-  is_discounted?: boolean;
-  discount_percentage?: number;
   original_price?: number;
+  category?: string;
+  image_url?: string;
+  is_discounted?: boolean;
+  is_used?: boolean;
+  is_branded?: boolean;
+  brand_name?: string;
+  condition?: string;
+  stock?: number;
   views?: number;
+  created_at?: string;
   user_id?: string;
-  service_product_id?: string;
-  reach?: number;
-  // For ShoppingSection compatibility
-  name?: string;
-  business_id?: string;
 }

@@ -1,43 +1,89 @@
 
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
-import { PostCard } from "@/components/PostCard";
-import { CreatePost } from "@/components/CreatePost";
-import { ImageOff } from "lucide-react";
-import type { Business } from "@/types/business";
-import { ImageFallback } from "@/components/ui/image-fallback";
+import { Skeleton } from "@/components/ui/skeleton";
+import { supabase } from "@/integrations/supabase/client";
+import type { Business, UserPost } from "@/types/business";
 
 interface BusinessPostsTabProps {
-  business: Business;
+  business: Business | string;
 }
 
 export const BusinessPostsTab = ({ business }: BusinessPostsTabProps) => {
+  const [posts, setPosts] = useState<UserPost[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  const businessId = typeof business === 'string' ? business : business.id;
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      setLoading(true);
+      
+      try {
+        const { data, error } = await supabase
+          .from('posts')
+          .select('*')
+          .eq('business_id', businessId)
+          .order('created_at', { ascending: false });
+          
+        if (error) throw error;
+        setPosts(data || []);
+      } catch (err) {
+        console.error('Error fetching business posts:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    if (businessId) {
+      fetchPosts();
+    }
+  }, [businessId]);
+  
+  if (loading) {
+    return (
+      <Card className="p-4">
+        <Skeleton className="h-8 w-1/3 mb-4" />
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="space-y-2">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-4 w-1/2" />
+            </div>
+          ))}
+        </div>
+      </Card>
+    );
+  }
+  
+  if (posts.length === 0) {
+    return (
+      <Card className="p-4 text-center">
+        <p className="py-8 text-muted-foreground">No posts have been shared by this business yet.</p>
+      </Card>
+    );
+  }
+  
   return (
-    <Card className="p-6">
+    <Card className="p-4">
       <h2 className="text-2xl font-semibold mb-4">Posts</h2>
       <div className="space-y-4">
-        <CreatePost onSuccess={() => window.location.reload()} />
-        
-        {business.posts && business.posts.length > 0 ? (
-          business.posts.map((post) => (
-            <PostCard
-              key={post.id}
-              id={post.id}
-              author={business.name}
-              avatar={business.image_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${business.id}`}
-              time={new Date(post.created_at).toLocaleDateString()}
-              content={post.content}
-              category={post.category}
-              image={post.image_url}
-              likes={0}
-              comments={0}
-            />
-          ))
-        ) : (
-          <div className="text-center py-8 border rounded-lg">
-            <ImageOff className="h-12 w-12 mx-auto mb-4 text-muted-foreground stroke-black dark:stroke-white" />
-            <p className="text-muted-foreground">No posts available</p>
+        {posts.map((post) => (
+          <div key={post.id} className="border-b pb-4">
+            <p className="text-sm text-muted-foreground mb-2">
+              {new Date(post.created_at).toLocaleDateString()}
+            </p>
+            <p>{post.content}</p>
+            {post.image_url && (
+              <img 
+                src={post.image_url} 
+                alt="Post" 
+                className="mt-2 rounded-md max-h-[300px] object-cover"
+              />
+            )}
           </div>
-        )}
+        ))}
       </div>
     </Card>
   );

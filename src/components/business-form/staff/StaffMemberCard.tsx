@@ -1,3 +1,4 @@
+
 import { Button } from "../../ui/button";
 import { X } from "lucide-react";
 import { StaffFormFields } from "./StaffFormFields";
@@ -14,8 +15,11 @@ export const StaffMemberCard = ({ member, onUpdate, onRemove }: StaffMemberCardP
     <div className="grid gap-2 p-4 border rounded-lg bg-muted/50">
       <div className="flex justify-between items-start">
         <StaffFormFields 
-          {...member} 
+          name={member.name}
           position={member.position || ""}  // Ensure position is always provided
+          experience={member.experience || ""} // Ensure experience is provided
+          bio={member.bio}
+          image_url={member.image_url}
           onUpdate={onUpdate} 
         />
         <Button
