@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ProductCard } from "@/components/products/ProductCard";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, ImageOff } from "lucide-react";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
 
 interface ProductsGridProps {
@@ -52,8 +52,9 @@ export const ProductsGrid = ({
   if (!products || products.length === 0) {
     return (
       <div className="text-center py-12 bg-white rounded-lg shadow-sm dark:bg-zinc-800">
-        <p className="text-muted-foreground">No products found matching your filters.</p>
-        <Button variant="outline" className="mt-4" onClick={onOpenAddProductDialog}>
+        <ImageOff className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+        <p className="text-muted-foreground mb-4">No products found matching your filters.</p>
+        <Button variant="outline" onClick={onOpenAddProductDialog}>
           <Plus className="h-4 w-4 mr-2" />
           Add Your First Product
         </Button>

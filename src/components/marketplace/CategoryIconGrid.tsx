@@ -11,6 +11,7 @@ import {
   Utensils,
   BookOpen
 } from "lucide-react";
+import { FilledIcon } from "../sidebar/FilledIcon";
 
 export const CategoryIconGrid = () => {
   const navigate = useNavigate();
@@ -43,7 +44,7 @@ export const CategoryIconGrid = () => {
               onClick={() => handleCategoryClick(category.name)}
             >
               <div className="w-12 h-12 rounded-full flex items-center justify-center bg-primary/10 mb-2 transition-transform group-hover:scale-110">
-                <Icon className="h-6 w-6 text-primary stroke-black dark:stroke-white" />
+                <FilledIcon Icon={Icon} />
               </div>
               <span className="text-xs text-center">{category.name}</span>
             </div>

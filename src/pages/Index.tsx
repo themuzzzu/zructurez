@@ -7,8 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePostsData } from "@/components/communities/hooks/usePostsData";
 import { Avatar } from "@/components/ui/avatar";
-import { MoreHorizontal, RefreshCw, MessageCircle, Heart, Share2 } from "lucide-react";
+import { MoreHorizontal, RefreshCw, MessageCircle, Heart, Share2, Image as ImageIcon } from "lucide-react";
 import { CreatePost } from "@/components/CreatePost";
+import { PostItem } from "@/components/communities/PostItem"; 
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -50,7 +51,7 @@ export default function Index() {
       <Navbar />
       <main className="w-full">
         <HomeLayout>
-          <div className="py-4 mobile-container">
+          <div className="py-4 mobile-container px-4 sm:px-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-2xl font-bold">Home</h2>
               <Button 
@@ -93,68 +94,7 @@ export default function Index() {
                   </div>
                 ) : posts && posts.length > 0 ? (
                   posts.map((post) => (
-                    <div key={post.id} className="border border-border rounded-md p-4 space-y-3">
-                      <div className="flex justify-between items-start">
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-10 w-10">
-                            <img 
-                              src={post.profile?.avatar_url || "/placeholder.svg"} 
-                              alt={post.profile?.username || "User"} 
-                              loading="lazy"
-                            />
-                          </Avatar>
-                          <div>
-                            <div className="font-medium">{post.profile?.username || "Anonymous"}</div>
-                            <div className="text-sm text-muted-foreground">
-                              {new Date(post.created_at).toLocaleDateString()}
-                            </div>
-                          </div>
-                        </div>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-5 w-5" />
-                        </Button>
-                      </div>
-                      <div>{post.content}</div>
-                      {post.image_url && (
-                        <div className="rounded-md overflow-hidden mt-2">
-                          <img 
-                            src={post.image_url} 
-                            alt="Post image" 
-                            className="w-full object-cover max-h-[400px]"
-                            loading="lazy"
-                          />
-                        </div>
-                      )}
-                      <div className="flex items-center justify-between pt-2">
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="flex items-center gap-1 text-muted-foreground hover:text-primary"
-                          onClick={() => handleLike(post.id)}
-                        >
-                          <Heart className="h-4 w-4" />
-                          <span>Like</span>
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="flex items-center gap-1 text-muted-foreground hover:text-primary"
-                          onClick={() => handleComment(post.id)}
-                        >
-                          <MessageCircle className="h-4 w-4" />
-                          <span>Comment</span>
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="flex items-center gap-1 text-muted-foreground hover:text-primary"
-                          onClick={() => handleShare(post.id)}
-                        >
-                          <Share2 className="h-4 w-4" />
-                          <span>Share</span>
-                        </Button>
-                      </div>
-                    </div>
+                    <PostItem key={post.id} post={post} onVote={() => setRefreshTrigger(prev => prev + 1)} />
                   ))
                 ) : (
                   <div className="py-8 text-center">
