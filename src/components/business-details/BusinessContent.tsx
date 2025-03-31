@@ -10,10 +10,21 @@ import type { Business, BusinessProduct } from "@/types/business";
 
 interface BusinessContentProps {
   business: Business;
-  products?: BusinessProduct[];
+  business_products?: BusinessProduct[];
+  business_portfolio?: any[];
+  onSuccess?: () => void;
+  activeCategory?: string;
+  isOwner?: boolean;
 }
 
-export const BusinessContent = ({ business, products = [] }: BusinessContentProps) => {
+export const BusinessContent = ({ 
+  business, 
+  business_products = [], 
+  business_portfolio = [],
+  onSuccess,
+  activeCategory,
+  isOwner = false
+}: BusinessContentProps) => {
   const [activeTab, setActiveTab] = useState("about");
 
   return (
@@ -33,7 +44,7 @@ export const BusinessContent = ({ business, products = [] }: BusinessContentProp
 
         <TabsContent value="products" className="m-0">
           <BusinessProductsSection 
-            products={products || []} 
+            products={business_products || []} 
             businessId={business.id} 
           />
         </TabsContent>
