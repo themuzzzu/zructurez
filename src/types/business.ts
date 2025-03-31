@@ -56,7 +56,7 @@ export interface Business {
   hours: string | null;
   image_url: string | null;
   video_url: string | null;
-  cover_url: string | null;
+  cover_url: string | null;  // Added this property
   verified: boolean;
   created_at: string;
   appointment_price: number | null;
