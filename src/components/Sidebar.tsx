@@ -13,6 +13,7 @@ import {
   Briefcase,
   Map,
   Building,
+  ShoppingBag,
 } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
@@ -47,7 +48,7 @@ export const Sidebar = ({ className }: React.HTMLAttributes<HTMLDivElement>) => 
 
   const routes = [
     { name: "Home", path: "/", icon: Home },
-    { name: "Marketplace", path: "/marketplace", icon: Store },
+    { name: "Marketplace", path: "/marketplace", icon: ShoppingBag },
     { name: "Services", path: "/services", icon: Wrench },
     { name: "Business", path: "/businesses", icon: Building },
     { name: "Jobs", path: "/jobs", icon: Briefcase },

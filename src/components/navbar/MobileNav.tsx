@@ -1,4 +1,5 @@
-import { Home, Store, Wrench, Building, MessageSquare, MoreVertical, SunMoon, Users, Briefcase, Calendar, Map } from "lucide-react";
+
+import { Home, ShoppingBag, Wrench, Building, MessageSquare, MoreVertical, SunMoon, Users, Briefcase, Calendar, Map } from "lucide-react";
 import { Button } from "../ui/button";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
@@ -49,7 +50,7 @@ export const MobileNav = () => {
   // Main navigation items - match what's in Sidebar.tsx
   const mobileNavItems = [
     { icon: Home, label: "Home", path: "/" },
-    { icon: Store, label: "Zructs", path: "/marketplace" },
+    { icon: ShoppingBag, label: "Zructs", path: "/marketplace" },
     { icon: Wrench, label: "Services", path: "/services" },
     { icon: Building, label: "Business", path: "/businesses" },
     { icon: MessageSquare, label: "Messages", path: "/messages" },

@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MarketplaceHeader } from "./MarketplaceHeader";
 import { BrowseTabContent } from "./BrowseTabContent";
@@ -10,6 +10,11 @@ import { MarketplaceHero } from "@/components/marketplace/MarketplaceHero";
 import { GridLayoutSelector } from "@/components/marketplace/GridLayoutSelector";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
 import { SearchBar } from "@/components/search/SearchBar";
+import { DealsSection } from "@/components/marketplace/DealsSection";
+import { SponsoredProducts } from "@/components/marketplace/SponsoredProducts";
+import { RecommendedProducts } from "@/components/marketplace/RecommendedProducts";
+import { Button } from "@/components/ui/button";
+import { ShoppingBag, Zap } from "lucide-react";
 
 const OptimizedMarketplace = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -26,6 +31,14 @@ const OptimizedMarketplace = () => {
   const [sortOption, setSortOption] = useState("newest");
   const [priceRange, setPriceRange] = useState("all");
 
+  // Track if user arrived from a category selection
+  const [fromCategorySelect, setFromCategorySelect] = useState(false);
+  
+  useEffect(() => {
+    // Scroll to top when tab changes
+    window.scrollTo(0, 0);
+  }, [activeTab]);
+  
   const handleSearch = (query: string) => {
     setSearchQuery(query);
     setActiveTab("search");
@@ -34,6 +47,7 @@ const OptimizedMarketplace = () => {
   const handleCategorySelect = (category: string) => {
     setSelectedCategory(category);
     setActiveTab("category");
+    setFromCategorySelect(true);
   };
 
   const handleSearchSelect = (term: string) => {
@@ -72,9 +86,57 @@ const OptimizedMarketplace = () => {
         cartItemCount={0} // You can replace this with actual cart count
       />
 
+      {/* Flash Sale Banner */}
+      <div className="mb-8 mt-6 bg-gradient-to-r from-orange-500 to-pink-500 rounded-xl overflow-hidden shadow-md">
+        <div className="p-6 flex flex-col md:flex-row items-center justify-between">
+          <div className="mb-4 md:mb-0">
+            <div className="flex items-center mb-2">
+              <Zap className="h-6 w-6 text-white mr-2 animate-pulse" />
+              <h2 className="text-2xl font-bold text-white">FLASH SALE</h2>
+            </div>
+            <p className="text-white text-opacity-90 mb-3">Limited time offers. Up to 70% off!</p>
+            <div className="flex space-x-4 text-xl font-bold text-white">
+              <div className="bg-black bg-opacity-30 p-2 rounded">08</div>
+              <div>:</div>
+              <div className="bg-black bg-opacity-30 p-2 rounded">24</div>
+              <div>:</div>
+              <div className="bg-black bg-opacity-30 p-2 rounded">36</div>
+            </div>
+          </div>
+          <Button 
+            className="bg-white text-pink-600 hover:bg-gray-100 flex items-center"
+            onClick={() => {
+              setShowDiscounted(true);
+              setActiveTab("search");
+            }}
+          >
+            <ShoppingBag className="h-4 w-4 mr-2" />
+            Shop Now
+          </Button>
+        </div>
+      </div>
+
       {/* Display the banner carousel below the search bar */}
       <div className="mb-6">
         <BannerCarousel />
+      </div>
+
+      {/* Flash Deals Section */}
+      <div className="mb-8">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold text-zinc-900 dark:text-white">Today's Deals</h2>
+          <Button 
+            variant="link" 
+            className="text-blue-600 dark:text-blue-400"
+            onClick={() => {
+              setShowDiscounted(true);
+              setActiveTab("search");
+            }}
+          >
+            See All
+          </Button>
+        </div>
+        <DealsSection />
       </div>
 
       <div className="flex justify-between items-center mt-6 mb-4">
@@ -121,6 +183,7 @@ const OptimizedMarketplace = () => {
             setSelectedCategory={setSelectedCategory}
             setActiveTab={setActiveTab}
             gridLayout={gridLayout}
+            category={selectedCategory}
           />
         </TabsContent>
 
@@ -143,6 +206,37 @@ const OptimizedMarketplace = () => {
           />
         </TabsContent>
       </Tabs>
+      
+      {/* Essentials Section - Always visible */}
+      <div className="mt-10 mb-6">
+        <h2 className="text-xl font-semibold mb-4 text-zinc-900 dark:text-white">Daily Essentials</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          {["Groceries", "Health & Personal Care", "Home Essentials", "Cleaning Supplies", "Baby Products", "Pet Supplies", "Packaged Foods", "Beverages"].map((category, index) => (
+            <div 
+              key={index}
+              className="bg-white dark:bg-zinc-800 rounded-lg p-4 text-center shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-100 dark:border-zinc-700"
+              onClick={() => handleCategorySelect(category.toLowerCase().replace(/\s+/g, '-'))}
+            >
+              <div className="flex justify-center mb-2">
+                <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                  <span className="text-blue-500 dark:text-blue-300 font-bold">{category[0]}</span>
+                </div>
+              </div>
+              <p className="text-sm font-medium">{category}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+      
+      {/* Sponsored Products */}
+      <div className="mt-10 mb-8">
+        <SponsoredProducts gridLayout={gridLayout} />
+      </div>
+      
+      {/* Product Recommendations */}
+      <div className="mt-10">
+        <RecommendedProducts gridLayout={gridLayout} />
+      </div>
     </div>
   );
 };
