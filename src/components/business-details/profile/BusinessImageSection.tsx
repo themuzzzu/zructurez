@@ -59,7 +59,7 @@ export const BusinessImageSection = ({ businessId }: BusinessImageSectionProps) 
       }
 
       const coverPath = data.path;
-      // Fix: Use the correct way to get storage URL
+      // Fix: Get public URL correctly from Supabase storage
       const { data: { publicUrl } } = supabase.storage
         .from('business-covers')
         .getPublicUrl(coverPath);
@@ -91,6 +91,7 @@ export const BusinessImageSection = ({ businessId }: BusinessImageSectionProps) 
       return;
     }
 
+    // Don't modify business directly, use setCoverUrl and refetchBusiness
     setCoverUrl(newCoverUrl);
     setNewCoverUrl(null);
     setIsDialogOpen(false);

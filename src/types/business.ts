@@ -56,6 +56,7 @@ export interface Business {
   hours: string | null;
   image_url: string | null;
   video_url: string | null;
+  cover_url: string | null;
   verified: boolean;
   created_at: string;
   appointment_price: number | null;
@@ -80,4 +81,5 @@ export interface Business {
   business_products: BusinessProduct[];
   business_portfolio: BusinessPortfolio[];
   posts: any[];
+  owner_id?: string;
 }
