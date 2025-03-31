@@ -1,58 +1,56 @@
 
 import React from "react";
 import { cn } from "@/lib/utils";
+import { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { FilledIcon } from "./FilledIcon";
 
 interface SidebarItemProps {
   name: string;
   path: string;
-  icon: React.ElementType;
+  icon: LucideIcon;
   isActive: boolean;
   isCollapsed: boolean;
   isDarkMode: boolean;
   onClick: (path: string) => void;
 }
 
-export const SidebarItem = ({ 
-  name, 
-  path, 
-  icon: Icon, 
-  isActive, 
-  isCollapsed, 
+export const SidebarItem = ({
+  name,
+  path,
+  icon: Icon,
+  isActive,
+  isCollapsed,
   isDarkMode,
-  onClick 
+  onClick,
 }: SidebarItemProps) => {
-  // Regular icon with inner line for inactive state
-  const RegularIcon = () => (
-    <div className="relative">
-      <Icon size={20} className="text-muted-foreground" />
-      {/* Inner decorative line */}
-      <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-0.5 bg-current opacity-40"></div>
-    </div>
-  );
-
-  const activeBackground = isDarkMode ? "bg-zinc-800" : "bg-zinc-200";
-
   if (isCollapsed) {
     return (
       <Button
         variant="ghost"
         className={cn(
-          "w-full p-2 justify-center transition-all duration-200",
-          isActive 
-            ? activeBackground + " rounded-lg" 
-            : isDarkMode
-              ? "hover:bg-zinc-800 rounded-lg"
-              : "hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-lg"
+          "w-full p-2 justify-center rounded-lg transition-all duration-200",
+          isActive
+            ? "bg-zinc-200 dark:bg-zinc-800 text-primary dark:text-primary"
+            : "text-muted-foreground hover:bg-zinc-100 dark:hover:bg-zinc-800"
         )}
         onClick={() => onClick(path)}
       >
-        {isActive ? (
-          <FilledIcon Icon={Icon} />
-        ) : (
-          <RegularIcon />
-        )}
+        <div className="relative">
+          <Icon 
+            className={cn(
+              "h-5 w-5",
+              isActive ? "text-primary dark:text-primary" : "text-muted-foreground"
+            )} 
+          />
+          {isActive && (
+            <div 
+              className="absolute inset-0 flex items-center justify-center"
+              style={{ 
+                backgroundColor: isDarkMode ? 'rgba(0, 0, 0, 0)' : 'rgba(255, 255, 255, 0)' 
+              }}
+            />
+          )}
+        </div>
       </Button>
     );
   }
@@ -61,27 +59,32 @@ export const SidebarItem = ({
     <Button
       variant="ghost"
       className={cn(
-        "w-full justify-start gap-3 px-3 py-2 text-sm transition-all duration-200",
-        isActive 
-          ? activeBackground + " rounded-lg" 
-          : isDarkMode
-            ? "hover:bg-zinc-800 rounded-lg"
-            : "hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-lg"
+        "w-full justify-start gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200",
+        isActive
+          ? "bg-zinc-200 dark:bg-zinc-800 text-primary dark:text-primary"
+          : "text-muted-foreground hover:bg-zinc-100 dark:hover:bg-zinc-800"
       )}
       onClick={() => onClick(path)}
     >
-      <div className="flex items-center justify-center">
-        {isActive ? (
-          <FilledIcon Icon={Icon} />
-        ) : (
-          <RegularIcon />
+      <div className="relative">
+        <Icon 
+          className={cn(
+            "h-5 w-5",
+            isActive ? "text-primary dark:text-primary" : "text-muted-foreground"
+          )} 
+        />
+        {isActive && (
+          <div 
+            className="absolute inset-0 flex items-center justify-center"
+            style={{ 
+              backgroundColor: isDarkMode ? 'rgba(0, 0, 0, 0)' : 'rgba(255, 255, 255, 0)' 
+            }}
+          />
         )}
       </div>
       <span className={cn(
         "text-sm",
-        isActive 
-          ? "font-bold " + (isDarkMode ? "text-white" : "text-black") 
-          : "text-muted-foreground"
+        isActive ? "font-medium text-primary dark:text-primary" : "text-muted-foreground"
       )}>
         {name}
       </span>

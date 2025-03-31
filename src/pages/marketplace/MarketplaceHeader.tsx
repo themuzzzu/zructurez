@@ -1,8 +1,7 @@
 
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ShoppingCart, Filter, Search, Bell } from "lucide-react";
+import { ArrowLeft, ShoppingCart, Filter, Bell } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { AutocompleteSearch } from "@/components/marketplace/AutocompleteSearch";
 import { Cart } from "@/components/cart/Cart";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
@@ -28,13 +27,7 @@ export const MarketplaceHeader = ({
 }: MarketplaceHeaderProps) => {
   const navigate = useNavigate();
   // For demonstration, we'll use a static notification count
-  // In a real app, this would come from a prop or hook
   const notificationCount = 2;
-
-  const handleSearchSelect = (term: string) => {
-    setSearchQuery(term);
-    navigate(`/search?q=${encodeURIComponent(term)}`);
-  };
 
   return (
     <div className="bg-white dark:bg-zinc-900 px-2 sm:px-4 py-3 sm:py-4 mb-4 shadow-md sticky top-0 z-10 transition-all border-b border-zinc-200 dark:border-zinc-800">
@@ -49,19 +42,6 @@ export const MarketplaceHeader = ({
             >
               <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
-          </div>
-          
-          <div className="flex items-center flex-1 max-w-2xl mx-4">
-            <div className="relative w-full flex items-center">
-              <Search className="absolute left-2 h-4 w-4 text-zinc-400 z-10" />
-              <AutocompleteSearch 
-                placeholder="Search for products, brands and more..."
-                value={searchQuery}
-                onChange={setSearchQuery}
-                className="w-full bg-white dark:bg-zinc-800 rounded-md pl-9 border-zinc-300 dark:border-zinc-700"
-                onSearchSelect={handleSearchSelect}
-              />
-            </div>
           </div>
           
           <div className="flex items-center gap-1 sm:gap-3">
@@ -117,18 +97,6 @@ export const MarketplaceHeader = ({
               </SheetContent>
             </Sheet>
           </div>
-        </div>
-        
-        {/* Mobile Search */}
-        <div className="mt-2 md:hidden relative">
-          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-zinc-400 z-10" />
-          <AutocompleteSearch 
-            placeholder="Search products..."
-            value={searchQuery}
-            onChange={setSearchQuery}
-            className="w-full bg-white dark:bg-zinc-800 pl-9 border-zinc-300 dark:border-zinc-700"
-            onSearchSelect={handleSearchSelect}
-          />
         </div>
       </div>
     </div>

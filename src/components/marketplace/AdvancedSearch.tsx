@@ -44,7 +44,7 @@ export function AdvancedSearch({ className, onSearch }: AdvancedSearchProps) {
           <SearchBar
             onSearch={handleSearch}
             placeholder="What are you looking for today?"
-            showVoiceSearch={false}
+            showVoiceSearch={true}
             autoFocus={false}
           />
           

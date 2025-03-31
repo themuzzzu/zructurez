@@ -1,3 +1,4 @@
+
 import { Home, ShoppingBag, Wrench, Building, MessageSquare, MoreVertical, SunMoon, Users, Briefcase, Calendar, Map } from "lucide-react";
 import { Button } from "../ui/button";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -11,8 +12,8 @@ import { useTheme } from "../ThemeProvider";
 import { cn } from "@/lib/utils";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 
-// Create a filled icon component for mobile nav with inner highlights (black/white)
-const FilledIcon = ({ Icon }: { Icon: React.ElementType }) => {
+// Create a filled icon component for mobile nav with appropriate theme-based highlights
+const FilledIcon = ({ Icon, isDarkMode }: { Icon: React.ElementType, isDarkMode: boolean }) => {
   return (
     <div className="relative">
       <Icon 
@@ -21,19 +22,19 @@ const FilledIcon = ({ Icon }: { Icon: React.ElementType }) => {
         stroke="currentColor" 
         strokeWidth={1.5} 
       />
-      {/* Inner highlight - will be white in dark mode and black in light mode */}
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-background opacity-80"></div>
+      {/* Theme-appropriate highlight */}
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-background opacity-80"
+        style={{ backgroundColor: isDarkMode ? '#ffffff' : '#000000' }}
+      ></div>
     </div>
   );
 };
 
-// Regular icon with inner line for inactive state
+// Regular icon with no inner decorations
 const RegularIcon = ({ Icon }: { Icon: React.ElementType }) => {
   return (
     <div className="relative">
       <Icon className="h-5 w-5" />
-      {/* Inner decorative line */}
-      <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-0.5 bg-current opacity-40"></div>
     </div>
   );
 };
@@ -94,7 +95,7 @@ export const MobileNav = () => {
               aria-label={item.label}
             >
               {isActive ? (
-                <FilledIcon Icon={Icon} />
+                <FilledIcon Icon={Icon} isDarkMode={isDarkMode} />
               ) : (
                 <RegularIcon Icon={Icon} />
               )}
@@ -117,8 +118,6 @@ export const MobileNav = () => {
             >
               <div className="relative">
                 <MoreVertical className="h-5 w-5" />
-                {/* Inner decorative line */}
-                <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-0.5 bg-current opacity-40"></div>
               </div>
               <span className="text-[10px] font-medium">More</span>
             </Button>

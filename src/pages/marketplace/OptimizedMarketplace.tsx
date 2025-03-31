@@ -64,7 +64,7 @@ const OptimizedMarketplace = () => {
 
   return (
     <div className="container px-4 sm:px-4 mx-auto max-w-screen-xl py-4 pb-16 overflow-x-hidden">
-      {/* Main Search bar at the top */}
+      {/* Single enhanced search bar at the top */}
       <div className="mb-6 mt-4">
         <SearchBar 
           onSearch={handleSearch}
@@ -81,11 +81,16 @@ const OptimizedMarketplace = () => {
         setSearchQuery={setSearchQuery}
         isFilterOpen={isFilterOpen}
         setIsFilterOpen={setIsFilterOpen}
-        cartItemCount={0} // You can replace this with actual cart count
+        cartItemCount={0}
       />
 
-      {/* Flash Sale Banner */}
-      <div className="mb-8 mt-6 bg-gradient-to-r from-orange-500 to-pink-500 rounded-xl overflow-hidden shadow-md">
+      {/* Display the banner carousel */}
+      <div className="mb-6">
+        <BannerCarousel />
+      </div>
+
+      {/* Flash Sale Banner - moved below the banner carousel */}
+      <div className="mb-8 bg-gradient-to-r from-orange-500 to-pink-500 rounded-xl overflow-hidden shadow-md">
         <div className="p-6 flex flex-col md:flex-row items-center justify-between">
           <div className="mb-4 md:mb-0">
             <div className="flex items-center mb-2">
@@ -112,11 +117,6 @@ const OptimizedMarketplace = () => {
             Shop Now
           </Button>
         </div>
-      </div>
-
-      {/* Display the banner carousel below the search bar */}
-      <div className="mb-6">
-        <BannerCarousel />
       </div>
 
       {/* Flash Deals Section */}

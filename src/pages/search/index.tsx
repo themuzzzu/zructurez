@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { SearchBar } from "@/components/search/SearchBar";
@@ -42,7 +43,7 @@ export default function Search() {
           <h1 className="text-2xl font-bold">Search Results</h1>
         </div>
         
-        {/* Redesigned search bar in black and white, positioned above banner ads */}
+        {/* Redesigned search bar in black and white */}
         <div className="mb-6">
           <SearchBar 
             autoFocus={false}
