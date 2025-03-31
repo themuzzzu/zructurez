@@ -12,33 +12,15 @@ import { useTheme } from "../ThemeProvider";
 import { cn } from "@/lib/utils";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 
-// Create a filled icon component for mobile nav with neutral colors instead of bright ones
-const FilledIcon = ({ Icon, isDarkMode }: { Icon: React.ElementType, isDarkMode: boolean }) => {
+// Create a simplified icon component for mobile nav without dots/circles
+const FilledIcon = ({ Icon }: { Icon: React.ElementType }) => {
   return (
     <div className="relative">
       <Icon 
-        className="h-5 w-5" 
-        fill="currentColor" 
-        stroke="currentColor" 
-        strokeWidth={1.5} 
+        className="h-5 w-5 text-primary" 
+        fill="none" 
+        strokeWidth={2.5}
       />
-      {/* Theme-appropriate highlight - using white/black instead of bright colors */}
-      <div 
-        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full" 
-        style={{ 
-          backgroundColor: isDarkMode ? 'white' : 'black',
-          opacity: 0.85
-        }}
-      ></div>
-      
-      {/* Inner lines - black/white instead of colored */}
-      <div 
-        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1 h-1 rounded-full" 
-        style={{ 
-          backgroundColor: isDarkMode ? 'black' : 'white',
-          opacity: 0.9
-        }}
-      ></div>
     </div>
   );
 };
@@ -47,7 +29,7 @@ const FilledIcon = ({ Icon, isDarkMode }: { Icon: React.ElementType, isDarkMode:
 const RegularIcon = ({ Icon }: { Icon: React.ElementType }) => {
   return (
     <div className="relative">
-      <Icon className="h-5 w-5" />
+      <Icon className="h-5 w-5" strokeWidth={1.5} />
     </div>
   );
 };
@@ -84,16 +66,20 @@ export const MobileNav = () => {
     return null; // Don't render on non-mobile devices
   }
 
+  // Check if the current path starts with any of our main paths
+  const checkActivePath = (itemPath: string) => {
+    if (itemPath === "/") {
+      return location.pathname === "/";
+    }
+    return location.pathname.startsWith(itemPath);
+  };
+
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 py-2 px-1 sm:px-2 z-50 animate-fade-in">
       <div className="flex justify-between items-center max-w-md mx-auto">
         {mobileNavItems.map((item) => {
           const Icon = item.icon;
-          const isActive = location.pathname === item.path || 
-                          (item.path === "/businesses" && location.pathname.startsWith("/businesses/")) ||
-                          (item.path === "/marketplace" && location.pathname.startsWith("/marketplace/")) ||
-                          (item.path === "/services" && location.pathname.startsWith("/services/")) ||
-                          (item.path === "/messages" && location.pathname.startsWith("/messages/"));
+          const isActive = checkActivePath(item.path);
           
           return (
             <Button
@@ -108,7 +94,7 @@ export const MobileNav = () => {
               aria-label={item.label}
             >
               {isActive ? (
-                <FilledIcon Icon={Icon} isDarkMode={isDarkMode} />
+                <FilledIcon Icon={Icon} />
               ) : (
                 <RegularIcon Icon={Icon} />
               )}

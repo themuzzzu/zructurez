@@ -17,7 +17,7 @@ const Marketplace = () => {
   return (
     <Layout>
       <div className="overflow-x-hidden">
-        <div className="max-w-7xl mx-auto px-4 pt-6">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 pt-4 sm:pt-6">
           <BannerCarousel />
         </div>
         <OptimizedMarketplace />

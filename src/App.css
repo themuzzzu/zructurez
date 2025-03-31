@@ -62,29 +62,55 @@
   }
   
   .container {
-    padding-left: 16px !important;
-    padding-right: 16px !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
     max-width: 100% !important;
     width: 100% !important;
   }
   
   /* Make all full-width elements have consistent side gaps */
   .full-width-section {
-    width: calc(100% - 32px) !important;
-    max-width: calc(100% - 32px) !important;
-    margin-left: 16px !important;
-    margin-right: 16px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
   }
   
   /* Side gap for section containers on mobile */
   .section-container {
-    padding-left: 16px !important;
-    padding-right: 16px !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
   }
 
   /* Prevent horizontal overflow */
   .overflow-x-hidden {
     overflow-x: hidden;
+  }
+  
+  /* Reduce gap in grids on mobile */
+  .grid {
+    gap: 8px !important;
+  }
+  
+  /* Make cards take up less vertical space */
+  .card-content {
+    padding: 8px !important;
+  }
+  
+  /* Adjust font sizes on mobile */
+  h1 {
+    font-size: 1.5rem !important;
+  }
+  
+  h2 {
+    font-size: 1.25rem !important;
+  }
+  
+  /* Ensure mobile navigation is always visible */
+  .mobile-nav {
+    display: flex !important;
   }
 }
 
@@ -117,8 +143,8 @@
 
 /* Mobile spacing utility classes */
 .mobile-container {
-  padding-left: 16px;
-  padding-right: 16px;
+  padding-left: 12px;
+  padding-right: 12px;
 }
 
 .mobile-bottom-padding {
@@ -142,4 +168,31 @@
 
 .animate-fade-in {
   animation: fade-in 0.3s ease-out;
+}
+
+/* Improved button animations */
+.btn-hover-effect {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-hover-effect:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Like animation */
+@keyframes like-pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.like-animation {
+  animation: like-pulse 0.5s ease;
 }

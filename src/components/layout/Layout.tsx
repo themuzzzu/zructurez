@@ -48,12 +48,12 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
           </div>
         )}
         <main 
-          className={`flex-1 transition-all duration-300 w-full overflow-y-auto scrollbar-hide overflow-x-hidden`}
+          className={`flex-1 transition-all duration-300 w-full overflow-y-auto scrollbar-hide overflow-x-hidden pb-16 sm:pb-6`}
           style={{ 
             marginLeft: hideSidebar || isMobile ? 0 : sidebarWidth + 'px', 
-            paddingBottom: isMobile ? '5rem' : '', // Add extra padding at the bottom on mobile for the navigation bar
+            paddingBottom: isMobile ? '5rem' : '', 
             maxHeight: 'calc(100vh - 64px)',
-            padding: isMobile ? '0 16px' : (hideSidebar ? '0 24px' : '0 24px'), 
+            padding: isMobile ? '' : (hideSidebar ? '0 24px' : '0 24px'), 
           }}
         >
           {children}
@@ -63,7 +63,7 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
       {/* AI Components */}
       <AIAssistant />
       
-      {/* Mobile Navigation - only renders on mobile */}
+      {/* Mobile Navigation - should render on ALL mobile device views */}
       <MobileNav />
     </div>
   );

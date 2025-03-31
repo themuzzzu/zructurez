@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Filter, Heart } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { SearchIcon } from "lucide-react";
+import { GridLayoutSelector } from "@/components/marketplace/GridLayoutSelector";
+import { GridLayoutType } from "@/components/products/types/ProductTypes";
 
 export default function Search() {
   const [searchParams] = useSearchParams();
@@ -14,6 +16,7 @@ export default function Search() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState(query);
   const [showFilters, setShowFilters] = useState(false);
+  const [gridLayout, setGridLayout] = useState<GridLayoutType>("grid4x4");
 
   useEffect(() => {
     setSearchTerm(query);
@@ -30,8 +33,8 @@ export default function Search() {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <main className="container mx-auto px-4 pt-20 pb-16 max-w-7xl">
-        <div className="flex items-center justify-between mb-6 mt-4">
+      <main className="container mx-auto px-2 sm:px-4 pt-20 pb-16 max-w-7xl">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 mt-4 gap-4">
           <div className="flex items-center">
             <Button 
               variant="ghost" 
@@ -46,7 +49,12 @@ export default function Search() {
             </h1>
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <GridLayoutSelector 
+              layout={gridLayout} 
+              onChange={(layout) => setGridLayout(layout)} 
+            />
+            
             <Button 
               variant="ghost" 
               size="icon" 
@@ -59,7 +67,7 @@ export default function Search() {
             <Button 
               variant="outline"
               size="sm"
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 ml-auto sm:ml-0"
               onClick={() => setShowFilters(!showFilters)}
             >
               <Filter className="h-4 w-4" />
@@ -93,6 +101,7 @@ export default function Search() {
         <EnhancedShoppingSection 
           searchQuery={searchTerm} 
           showFilters={showFilters}
+          gridLayout={gridLayout}
         />
       </main>
     </div>
