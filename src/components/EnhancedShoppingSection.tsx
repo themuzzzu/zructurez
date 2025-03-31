@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BusinessCard } from './BusinessCard';
 import { Business } from '@/types/business';
+import { GridLayoutType } from './products/types/ProductTypes';
 
 interface EnhancedShoppingSectionProps {
   searchQuery: string;
@@ -16,6 +17,7 @@ interface EnhancedShoppingSectionProps {
   showBranded?: boolean;
   sortOption?: string;
   priceRange?: string;
+  gridLayout?: GridLayoutType;
 }
 
 export const EnhancedShoppingSection = ({
@@ -26,7 +28,8 @@ export const EnhancedShoppingSection = ({
   showUsed = false,
   showBranded = false,
   sortOption = 'newest',
-  priceRange = 'all'
+  priceRange = 'all',
+  gridLayout = 'grid4x4'
 }: EnhancedShoppingSectionProps) => {
   const [activeTab, setActiveTab] = useState("products");
   

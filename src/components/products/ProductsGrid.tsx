@@ -4,6 +4,7 @@ import { GridLayoutType } from "./types/layouts";
 import { Product } from "@/types/product";
 import { Spinner } from "@/components/common/Spinner";
 import { EmptySearchResults } from "@/components/marketplace/EmptySearchResults";
+import { Button } from "@/components/ui/button";
 
 export interface ProductsGridProps {
   products: Product[] | any[];
