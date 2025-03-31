@@ -1,5 +1,6 @@
+
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ShoppingCart, Bell } from "lucide-react";
+import { ArrowLeft, ShoppingCart, Bell, Filter } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Cart } from "@/components/cart/Cart";
 import { useNavigate } from "react-router-dom";
