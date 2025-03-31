@@ -1,3 +1,4 @@
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -30,8 +31,9 @@ export const BusinessReviewsSection = ({ businessId }: BusinessReviewsSectionPro
   const { data, error, isLoading } = useQuery({
     queryKey: ['business-reviews', businessId],
     queryFn: async () => {
+      // Modified this query to use business_comments instead of reviews
       const { data, error } = await supabase
-        .from('reviews')
+        .from('business_comments')
         .select('*, profile:profiles(*)')
         .eq('business_id', businessId)
         .order('created_at', { ascending: false });

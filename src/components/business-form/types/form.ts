@@ -4,7 +4,7 @@ import type { Owner } from "./owner";
 import type { StaffMember } from "./staff";
 
 export interface BusinessProduct {
-  id?: string;
+  id: string; // Changed from optional to required
   name: string;
   price: number;
   description: string;
