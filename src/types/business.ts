@@ -1,3 +1,4 @@
+
 export interface Business {
   id: string;
   name: string;
@@ -13,7 +14,7 @@ export interface Business {
   sub_category: string;
   logo_url: string;
   cover_url: string | null;
-  hours: BusinessHours;
+  hours: BusinessHours | string;
   ratings: number;
   reviews_count: number;
   is_verified: boolean;

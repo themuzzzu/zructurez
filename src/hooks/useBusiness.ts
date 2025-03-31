@@ -29,6 +29,15 @@ export const useBusiness = (businessId: string) => {
       // Type assertions to ensure proper type conversions
       const parsedBusiness: Business = {
         ...data,
+        // Ensure all required properties exist with defaults
+        id: data.id,
+        name: data.name,
+        description: data.description,
+        category: data.category,
+        user_id: data.user_id,
+        image_url: data.image_url || '',
+        is_open: data.is_open || false,
+        created_at: data.created_at,
         address: data.address || '',
         city: data.city || '',
         state: data.state || '',
@@ -40,6 +49,7 @@ export const useBusiness = (businessId: string) => {
         ratings: data.ratings || 0,
         reviews_count: data.reviews_count || 0,
         is_verified: data.is_verified || false,
+        verified: data.verified || false,
         is_featured: data.is_featured || false,
         latitude: data.latitude || 0,
         longitude: data.longitude || 0,
@@ -47,6 +57,12 @@ export const useBusiness = (businessId: string) => {
         social_media: data.social_media || { facebook: '', twitter: '', instagram: '', linkedin: '' },
         services: Array.isArray(data.services) ? data.services : [],
         products: Array.isArray(data.products) ? data.products : [],
+        location: data.location || null,
+        contact: data.contact || null,
+        bio: data.bio || null,
+        hours: data.hours || '',
+        appointment_price: data.appointment_price || null,
+        consultation_price: data.consultation_price || null,
         staff_details: Array.isArray(data.staff_details) 
           ? data.staff_details as any[] 
           : [],
@@ -74,7 +90,8 @@ export const useBusiness = (businessId: string) => {
         posts: data.posts || [],
         owner_id: data.user_id, // Map user_id as owner_id for permission checks
         cover_url: data.cover_url || null,
-        updated_at: data.updated_at || data.created_at
+        updated_at: data.updated_at || data.created_at,
+        website: data.website || null
       };
 
       return parsedBusiness;

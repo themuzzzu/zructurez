@@ -1,21 +1,29 @@
 
 import { BusinessProfile } from "@/components/business-details/BusinessProfile";
-import type { Business } from "@/types/business";
+import type { Business, BusinessHours } from "@/types/business";
 
 interface BusinessAboutTabProps {
   business: Business;
 }
 
 export const BusinessAboutTab = ({ business }: BusinessAboutTabProps) => {
-  // Convert BusinessHours object to string representation for display
-  const formatHours = (hours: any) => {
+  // Convert BusinessHours object or string to string representation for display
+  const formatHours = (hours: BusinessHours | string | undefined) => {
     if (!hours) return "";
     
     try {
-      // Simple formatting - this can be enhanced as needed
-      return typeof hours === 'string' ? hours : JSON.stringify(hours);
+      // If hours is already a string, return it
+      if (typeof hours === 'string') return hours;
+      
+      // If it's an object, try to format it
+      const formattedHours = Object.entries(hours)
+        .map(([day, { open, close }]) => `${day}: ${open} - ${close}`)
+        .join(', ');
+      
+      return formattedHours || JSON.stringify(hours);
     } catch (e) {
-      return "";
+      console.error("Error formatting hours:", e);
+      return typeof hours === 'string' ? hours : "";
     }
   };
   

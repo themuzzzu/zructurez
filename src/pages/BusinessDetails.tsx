@@ -1,3 +1,4 @@
+
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -44,6 +45,15 @@ const BusinessDetails = () => {
       // Parse JSON fields with proper typing
       const parsedData: Business = {
         ...data,
+        // Ensure all required properties exist with defaults
+        id: data.id,
+        name: data.name,
+        description: data.description,
+        category: data.category,
+        user_id: data.user_id,
+        image_url: data.image_url || '',
+        is_open: data.is_open || false,
+        created_at: data.created_at,
         address: data.address || '',
         city: data.city || '',
         state: data.state || '',
@@ -55,6 +65,7 @@ const BusinessDetails = () => {
         ratings: data.ratings || 0,
         reviews_count: data.reviews_count || 0,
         is_verified: data.is_verified || false,
+        verified: data.verified || false,
         is_featured: data.is_featured || false,
         latitude: data.latitude || 0,
         longitude: data.longitude || 0,
@@ -62,6 +73,12 @@ const BusinessDetails = () => {
         social_media: data.social_media || { facebook: '', twitter: '', instagram: '', linkedin: '' },
         services: Array.isArray(data.services) ? data.services : [],
         products: Array.isArray(data.products) ? data.products : [],
+        location: data.location || null,
+        contact: data.contact || null,
+        bio: data.bio || null,
+        hours: data.hours || '',
+        appointment_price: data.appointment_price || null,
+        consultation_price: data.consultation_price || null,
         staff_details: Array.isArray(data.staff_details) 
           ? data.staff_details.map((staff: any): StaffMember => ({
               name: staff.name || null,
@@ -96,11 +113,13 @@ const BusinessDetails = () => {
               description: plan.description || undefined
             }))
           : [],
-        posts: data.posts || [],
         business_portfolio: data.business_portfolio || [],
         business_products: data.business_products || [],
+        posts: data.posts || [],
+        owner_id: data.user_id, // Map user_id as owner_id for permission checks
         cover_url: data.cover_url || null,
-        updated_at: data.updated_at || data.created_at
+        updated_at: data.updated_at || data.created_at,
+        website: data.website || null
       };
 
       return parsedData;
