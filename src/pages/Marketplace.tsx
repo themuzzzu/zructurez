@@ -8,7 +8,7 @@ import { BannerCarousel } from "@/components/marketplace/BannerCarousel";
 const Marketplace = () => {
   const params = useParams();
   
-  // If we have a productId parameter, show 404 since the route should be /product/:productId
+  // If we have a productId parameter, show a 404 since the route should be /product/:productId
   if (params.productId) {
     return <NotFound />;
   }
