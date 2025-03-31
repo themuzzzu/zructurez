@@ -9,6 +9,7 @@ import { BannerCarousel } from "@/components/marketplace/BannerCarousel";
 import { MarketplaceHero } from "@/components/marketplace/MarketplaceHero";
 import { GridLayoutSelector } from "@/components/marketplace/GridLayoutSelector";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
+import { SearchBar } from "@/components/search/SearchBar";
 
 const OptimizedMarketplace = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -50,11 +51,6 @@ const OptimizedMarketplace = () => {
 
   return (
     <div className="container px-2 sm:px-4 mx-auto max-w-screen-xl py-4 pb-16">
-      {/* Display the banner carousel at the top of the page */}
-      <div className="mb-6">
-        <BannerCarousel />
-      </div>
-
       <MarketplaceHeader 
         isCartOpen={isCartOpen}
         setIsCartOpen={setIsCartOpen}
@@ -65,8 +61,24 @@ const OptimizedMarketplace = () => {
         cartItemCount={0} // You can replace this with actual cart count
       />
 
+      {/* Main Search bar at the top */}
+      <div className="mb-6 mt-4">
+        <SearchBar 
+          onSearch={handleSearch}
+          placeholder="Search products, brands and more..."
+          showVoiceSearch={true}
+          showImageSearch={true}
+          className="w-full"
+        />
+      </div>
+
+      {/* Display the banner carousel below the search bar */}
+      <div className="mb-6">
+        <BannerCarousel />
+      </div>
+
       <div className="flex justify-between items-center mt-6 mb-4">
-        <h2 className="text-xl font-semibold">Products</h2>
+        <h2 className="text-xl font-semibold text-zinc-900 dark:text-white">Products</h2>
         <GridLayoutSelector layout={gridLayout} onChange={setGridLayout} />
       </div>
 
@@ -75,10 +87,25 @@ const OptimizedMarketplace = () => {
         value={activeTab}
         onValueChange={setActiveTab}
       >
-        <TabsList className="w-full max-w-md grid grid-cols-3 mb-6">
-          <TabsTrigger value="browse">Browse</TabsTrigger>
-          <TabsTrigger value="category">Categories</TabsTrigger>
-          <TabsTrigger value="search">Search Results</TabsTrigger>
+        <TabsList className="w-full max-w-md grid grid-cols-3 mb-6 bg-zinc-100 dark:bg-zinc-800">
+          <TabsTrigger 
+            value="browse"
+            className="data-[state=active]:bg-zinc-900 data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-zinc-900"
+          >
+            Browse
+          </TabsTrigger>
+          <TabsTrigger 
+            value="category"
+            className="data-[state=active]:bg-zinc-900 data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-zinc-900"
+          >
+            Categories
+          </TabsTrigger>
+          <TabsTrigger 
+            value="search"
+            className="data-[state=active]:bg-zinc-900 data-[state=active]:text-white dark:data-[state=active]:bg-white dark:data-[state=active]:text-zinc-900"
+          >
+            Search Results
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="browse" className="mt-0">

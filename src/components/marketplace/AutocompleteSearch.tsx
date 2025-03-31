@@ -126,7 +126,7 @@ export const AutocompleteSearch = ({
           placeholder={placeholder}
           value={value}
           onChange={handleInputChange}
-          className="w-full pl-3"
+          className="w-full border-zinc-300 dark:border-zinc-700 focus:border-zinc-900 dark:focus:border-zinc-100 pl-3"
           onFocus={() => {
             setIsFocused(true);
             setShowSuggestions(value.length >= 2);
@@ -139,7 +139,7 @@ export const AutocompleteSearch = ({
          (isFocused && !value && popularSearches && popularSearches.length > 0)) && (
         <div 
           ref={suggestionsRef}
-          className="absolute z-50 mt-1 w-full bg-white dark:bg-zinc-800 shadow-lg rounded-md border border-border overflow-hidden"
+          className="absolute z-50 mt-1 w-full bg-white dark:bg-zinc-900 shadow-lg rounded-md border border-zinc-300 dark:border-zinc-700 overflow-hidden"
         >
           <div className="p-2">
             <h4 className="text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
@@ -151,7 +151,7 @@ export const AutocompleteSearch = ({
               suggestions.map((item, index) => (
                 <div
                   key={index}
-                  className="text-sm py-1 px-2 hover:bg-gray-100 dark:hover:bg-zinc-700 cursor-pointer rounded"
+                  className="text-sm py-1 px-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer rounded"
                   onClick={() => handleSuggestionClick(item.title)}
                 >
                   {item.title}
@@ -161,7 +161,7 @@ export const AutocompleteSearch = ({
               popularSearches.map((item, index) => (
                 <div
                   key={index}
-                  className="text-sm py-1 px-2 hover:bg-gray-100 dark:hover:bg-zinc-700 cursor-pointer rounded flex justify-between items-center"
+                  className="text-sm py-1 px-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer rounded flex justify-between items-center"
                   onClick={() => handleSuggestionClick(item.title)}
                 >
                   <span>{item.title}</span>
@@ -174,4 +174,4 @@ export const AutocompleteSearch = ({
       )}
     </div>
   );
-};
+}

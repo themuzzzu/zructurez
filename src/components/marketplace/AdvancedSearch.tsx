@@ -3,7 +3,7 @@ import { SearchBar } from "@/components/search/SearchBar";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Search } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useState } from "react";
 
 interface AdvancedSearchProps {
@@ -20,7 +20,6 @@ export function AdvancedSearch({ className, onSearch }: AdvancedSearchProps) {
       if (onSearch) {
         onSearch(query);
       } else {
-        // Ensure we're navigating to the correct marketplace search URL
         navigate(`/marketplace?search=${encodeURIComponent(query)}`);
       }
     }
@@ -53,7 +52,7 @@ export function AdvancedSearch({ className, onSearch }: AdvancedSearchProps) {
           <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
             <Button
               size="sm"
-              className="h-8 gap-1 px-3 rounded-full hidden sm:flex"
+              className="h-8 gap-1 px-3 rounded-full hidden sm:flex bg-black text-white hover:bg-zinc-800"
               onClick={() => handleSearch(searchValue)}
             >
               Search
@@ -63,12 +62,12 @@ export function AdvancedSearch({ className, onSearch }: AdvancedSearchProps) {
         </div>
         
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-sm text-muted-foreground">Popular:</span>
+          <span className="text-sm text-zinc-500">Popular:</span>
           {popularSearches.map((term) => (
             <Badge
               key={term}
               variant="outline"
-              className="cursor-pointer hover:bg-accent transition-colors"
+              className="cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 border-zinc-300 dark:border-zinc-600"
               onClick={() => handleSearch(term)}
             >
               {term}

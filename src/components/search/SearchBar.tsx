@@ -96,7 +96,7 @@ export function SearchBar({
   return (
     <div ref={searchRef} className={`relative ${className}`}>
       <form onSubmit={handleSubmit} className="relative">
-        <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+        <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-zinc-500 dark:text-zinc-400 z-10" />
         <Input
           ref={inputRef}
           type="text"
@@ -104,7 +104,7 @@ export function SearchBar({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => showSuggestions && setShowSuggestions(true)}
-          className="pl-10 pr-16 h-11 w-full bg-white dark:bg-zinc-800"
+          className="pl-10 pr-16 h-12 w-full bg-white dark:bg-zinc-900 border-zinc-300 dark:border-zinc-700 focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white"
         />
         
         <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
@@ -113,7 +113,7 @@ export function SearchBar({
               type="button"
               variant="ghost"
               size="icon"
-              className="h-6 w-6"
+              className="h-7 w-7 text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
               onClick={() => setQuery("")}
             >
               <X className="h-4 w-4" />
@@ -125,10 +125,10 @@ export function SearchBar({
               type="button"
               variant="ghost"
               size="icon"
-              className="h-7 w-7"
+              className="h-7 w-7 text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
               onClick={() => setIsVoiceSearchOpen(true)}
             >
-              <Mic className="h-4 w-4 text-muted-foreground" />
+              <Mic className="h-4 w-4" />
             </Button>
           )}
           
@@ -137,10 +137,10 @@ export function SearchBar({
               type="button"
               variant="ghost"
               size="icon"
-              className="h-7 w-7"
+              className="h-7 w-7 text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
               onClick={() => setIsImageSearchOpen(true)}
             >
-              <Image className="h-4 w-4 text-muted-foreground" />
+              <Image className="h-4 w-4" />
             </Button>
           )}
         </div>
@@ -148,17 +148,17 @@ export function SearchBar({
       
       {/* Suggestions dropdown */}
       {showSuggestionsState && suggestions.length > 0 && (
-        <Card className="absolute z-50 w-full mt-1 shadow-lg overflow-hidden">
+        <Card className="absolute z-50 w-full mt-1 shadow-lg overflow-hidden border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900">
           <ul className="py-1">
             {suggestions.map((suggestion) => (
               <li 
                 key={suggestion.id}
-                className="px-4 py-2 cursor-pointer hover:bg-accent flex items-center justify-between"
+                className="px-4 py-2 cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center justify-between"
                 onClick={() => applySuggestion(suggestion)}
               >
                 <span>{suggestion.term}</span>
                 {suggestion.isSponsored && (
-                  <Badge variant="outline" className="text-xs">
+                  <Badge variant="outline" className="text-xs border-zinc-300 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400">
                     Sponsored
                   </Badge>
                 )}
