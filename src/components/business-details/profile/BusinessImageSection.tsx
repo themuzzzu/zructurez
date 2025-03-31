@@ -77,30 +77,38 @@ export const BusinessImageSection = ({ businessId }: BusinessImageSectionProps) 
   const handleSaveCover = async () => {
     if (!newCoverUrl) return;
 
-    const { error } = await supabase
-      .from('businesses')
-      .update({ cover_url: newCoverUrl })
-      .eq('id', businessId);
+    try {
+      const { error } = await supabase
+        .from('businesses')
+        .update({ cover_url: newCoverUrl })
+        .eq('id', businessId);
 
-    if (error) {
+      if (error) {
+        toast({
+          title: "Uh oh! Something went wrong.",
+          description: "Failed to update the cover image URL.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Don't modify business directly, use setCoverUrl and refetchBusiness
+      setCoverUrl(newCoverUrl);
+      setNewCoverUrl(null);
+      setIsDialogOpen(false);
+      refetchBusiness();
+
+      toast({
+        title: "Success!",
+        description: "Cover image updated successfully.",
+      });
+    } catch (error) {
       toast({
         title: "Uh oh! Something went wrong.",
-        description: "Failed to update the cover image URL.",
+        description: "An unexpected error occurred.",
         variant: "destructive",
       });
-      return;
     }
-
-    // Don't modify business directly, use setCoverUrl and refetchBusiness
-    setCoverUrl(newCoverUrl);
-    setNewCoverUrl(null);
-    setIsDialogOpen(false);
-    refetchBusiness();
-
-    toast({
-      title: "Success!",
-      description: "Cover image updated successfully.",
-    });
   };
 
   return (
