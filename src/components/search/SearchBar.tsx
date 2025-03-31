@@ -1,7 +1,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useSearch } from "@/hooks/useSearch";
-import { Search as SearchIcon, X, Mic, Image } from "lucide-react";
+import { Search as SearchIcon, X, Mic } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +9,6 @@ import { Card } from "@/components/ui/card";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useNavigate } from "react-router-dom";
 import { VoiceSearchRecorder } from "./VoiceSearchRecorder";
-import { ImageSearchUploader } from "./ImageSearchUploader";
 
 interface SearchBarProps {
   placeholder?: string;
@@ -18,7 +17,6 @@ interface SearchBarProps {
   autoFocus?: boolean;
   className?: string;
   showVoiceSearch?: boolean;
-  showImageSearch?: boolean;
 }
 
 export function SearchBar({
@@ -28,13 +26,11 @@ export function SearchBar({
   autoFocus = false,
   className = "",
   showVoiceSearch = false,
-  showImageSearch = false,
 }: SearchBarProps) {
   const navigate = useNavigate();
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [isVoiceSearchOpen, setIsVoiceSearchOpen] = useState(false);
-  const [isImageSearchOpen, setIsImageSearchOpen] = useState(false);
   
   const {
     query,
@@ -80,16 +76,8 @@ export function SearchBar({
     
     if (transcript.trim() && onSearch) {
       onSearch(transcript);
-    }
-  };
-  
-  // Handle image search result
-  const handleImageSearchResult = (description: string) => {
-    setQuery(description);
-    setIsImageSearchOpen(false);
-    
-    if (description.trim() && onSearch) {
-      onSearch(description);
+    } else if (transcript.trim()) {
+      navigate(`/search?q=${encodeURIComponent(transcript)}`);
     }
   };
   
@@ -131,18 +119,6 @@ export function SearchBar({
               <Mic className="h-4 w-4" />
             </Button>
           )}
-          
-          {showImageSearch && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
-              onClick={() => setIsImageSearchOpen(true)}
-            >
-              <Image className="h-4 w-4" />
-            </Button>
-          )}
         </div>
       </form>
       
@@ -175,14 +151,6 @@ export function SearchBar({
           onTranscriptionComplete={handleVoiceSearchResult}
         />
       )}
-      
-      {/* Image search modal */}
-      {isImageSearchOpen && (
-        <ImageSearchUploader
-          onClose={() => setIsImageSearchOpen(false)}
-          onProcessingComplete={handleImageSearchResult}
-        />
-      )}
     </div>
   );
-}
+};

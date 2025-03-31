@@ -49,10 +49,9 @@ export const MarketplaceHeader = ({
             >
               <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-zinc-900 dark:text-white truncate">Zructs</h1>
           </div>
           
-          <div className="hidden md:flex items-center flex-1 max-w-2xl mx-4">
+          <div className="flex items-center flex-1 max-w-2xl mx-4">
             <div className="relative w-full flex items-center">
               <Search className="absolute left-2 h-4 w-4 text-zinc-400 z-10" />
               <AutocompleteSearch 

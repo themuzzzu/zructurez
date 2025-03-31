@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { useFeed } from "@/hooks/useFeed";
 import { PostCard } from "./PostCard";
@@ -20,11 +20,6 @@ export const FeedSection = () => {
     toast.success("Refreshing feed...");
     setTimeout(() => setRefreshing(false), 1000);
   };
-
-  useEffect(() => {
-    // Auto-refresh feed on mount
-    refreshFeed();
-  }, []);
 
   if (authLoading) {
     return (
@@ -50,17 +45,13 @@ export const FeedSection = () => {
         </Button>
       </div>
 
-      {user ? (
+      {user && (
         <CreatePost 
           onSuccess={() => {
             refreshFeed();
             toast.success("Post created successfully!");
           }} 
         />
-      ) : (
-        <Card className="p-4 text-center">
-          <p>Sign in to create posts and interact with your community</p>
-        </Card>
       )}
 
       {loading && !refreshing ? (
@@ -85,6 +76,17 @@ export const FeedSection = () => {
           <p className="text-muted-foreground mb-4">
             Be the first to post or follow some users to see their posts here
           </p>
+          {user && (
+            <Button 
+              variant="default"
+              onClick={() => {
+                // When focused on creating a new post
+                document.getElementById('create-post-input')?.focus();
+              }}
+            >
+              Create Your First Post
+            </Button>
+          )}
         </Card>
       ) : (
         <div className="space-y-1">

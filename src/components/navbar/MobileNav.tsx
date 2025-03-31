@@ -1,4 +1,3 @@
-
 import { Home, ShoppingBag, Wrench, Building, MessageSquare, MoreVertical, SunMoon, Users, Briefcase, Calendar, Map } from "lucide-react";
 import { Button } from "../ui/button";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -12,7 +11,7 @@ import { useTheme } from "../ThemeProvider";
 import { cn } from "@/lib/utils";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 
-// Create a filled icon component for mobile nav with inner highlights
+// Create a filled icon component for mobile nav with inner highlights (black/white)
 const FilledIcon = ({ Icon }: { Icon: React.ElementType }) => {
   return (
     <div className="relative">
@@ -22,10 +21,8 @@ const FilledIcon = ({ Icon }: { Icon: React.ElementType }) => {
         stroke="currentColor" 
         strokeWidth={1.5} 
       />
-      {/* Inner dot for highlight */}
+      {/* Inner highlight - will be white in dark mode and black in light mode */}
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-background opacity-80"></div>
-      {/* Inner line for additional detail */}
-      <div className="absolute bottom-0.5 left-1/2 transform -translate-x-1/2 w-2 h-0.5 bg-background opacity-70"></div>
     </div>
   );
 };
