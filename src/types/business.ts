@@ -1,3 +1,4 @@
+
 export interface BusinessHours {
   [day: string]: {
     open: string;
@@ -11,6 +12,7 @@ export interface BusinessOwner {
   position: string | null;
   experience: string | null;
   image_url: string | null;
+  bio?: string; // Added bio property
 }
 
 export interface StaffMember {
@@ -25,6 +27,32 @@ export interface MembershipPlan {
   price: number;
   features: string[];
   description?: string;
+}
+
+// Added BusinessProduct interface
+export interface BusinessProduct {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  image_url?: string;
+  stock?: number;
+  business_id: string;
+  created_at: string;
+}
+
+// Added UserPost interface
+export interface UserPost {
+  id: string;
+  content: string;
+  user_id: string;
+  profile_id: string;
+  created_at: string;
+  image_url?: string;
+  category?: string;
+  location?: string;
+  business_id?: string;
+  views?: number;
 }
 
 export interface Business {
@@ -81,4 +109,16 @@ export interface Business {
   cover_url: string | null;
   updated_at: string;
   website: string | null;
+  
+  // Additional database fields
+  aadhar_number?: string;
+  pan_number?: string;
+  gst_number?: string;
+  verification_status?: string;
+  closure_reason?: string;
+  wait_time?: string;
+  video_url?: string;
+  image_scale?: number;
+  show_in_services?: boolean;
+  verification_submitted_at?: string;
 }
