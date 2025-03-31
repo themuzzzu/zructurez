@@ -17,10 +17,12 @@ export function AdvancedSearch({ className, onSearch }: AdvancedSearchProps) {
   
   const handleSearch = (query: string) => {
     if (query.trim()) {
+      // Always redirect to the search page
+      navigate(`/search?q=${encodeURIComponent(query)}`);
+      
+      // Also call the onSearch callback if provided
       if (onSearch) {
         onSearch(query);
-      } else {
-        navigate(`/marketplace?search=${encodeURIComponent(query)}`);
       }
     }
   };
@@ -44,7 +46,6 @@ export function AdvancedSearch({ className, onSearch }: AdvancedSearchProps) {
           <SearchBar
             onSearch={handleSearch}
             placeholder="What are you looking for today?"
-            showVoiceSearch={true}
             autoFocus={false}
           />
           

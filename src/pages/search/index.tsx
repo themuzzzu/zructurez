@@ -6,7 +6,7 @@ import { Navbar } from "@/components/Navbar";
 import { ShoppingSection } from "@/components/ShoppingSection";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowUpRight } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { trackEntityView } from "@/utils/viewsTracking";
 
@@ -49,7 +49,6 @@ export default function Search() {
             autoFocus={false}
             placeholder="Search products, businesses, services..."
             onSearch={handleSearch}
-            showVoiceSearch={true}
             className="max-w-full"
           />
         </div>

@@ -1,14 +1,13 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useSearch } from "@/hooks/useSearch";
-import { Search as SearchIcon, X, Mic } from "lucide-react";
+import { Search as SearchIcon, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useNavigate } from "react-router-dom";
-import { VoiceSearchRecorder } from "./VoiceSearchRecorder";
 
 interface SearchBarProps {
   placeholder?: string;
@@ -25,12 +24,10 @@ export function SearchBar({
   showSuggestions = true,
   autoFocus = false,
   className = "",
-  showVoiceSearch = false,
 }: SearchBarProps) {
   const navigate = useNavigate();
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [isVoiceSearchOpen, setIsVoiceSearchOpen] = useState(false);
   
   const {
     query,
@@ -60,24 +57,15 @@ export function SearchBar({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
+      // Redirect to search page with query parameter
+      navigate(`/search?q=${encodeURIComponent(query)}`);
+      
+      // Also call onSearch if provided
       if (onSearch) {
         onSearch(query);
-      } else {
-        navigate(`/search?q=${encodeURIComponent(query)}`);
       }
+      
       setShowSuggestions(false);
-    }
-  };
-  
-  // Handle voice search result
-  const handleVoiceSearchResult = (transcript: string) => {
-    setQuery(transcript);
-    setIsVoiceSearchOpen(false);
-    
-    if (transcript.trim() && onSearch) {
-      onSearch(transcript);
-    } else if (transcript.trim()) {
-      navigate(`/search?q=${encodeURIComponent(transcript)}`);
     }
   };
 
@@ -107,18 +95,6 @@ export function SearchBar({
               <X className="h-4 w-4" />
             </Button>
           )}
-          
-          {showVoiceSearch && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
-              onClick={() => setIsVoiceSearchOpen(true)}
-            >
-              <Mic className="h-4 w-4" />
-            </Button>
-          )}
         </div>
       </form>
       
@@ -130,7 +106,10 @@ export function SearchBar({
               <li 
                 key={suggestion.id}
                 className="px-4 py-2 cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center justify-between"
-                onClick={() => applySuggestion(suggestion)}
+                onClick={() => {
+                  applySuggestion(suggestion);
+                  navigate(`/search?q=${encodeURIComponent(suggestion.term)}`);
+                }}
               >
                 <span>{suggestion.term}</span>
                 {suggestion.isSponsored && (
@@ -142,14 +121,6 @@ export function SearchBar({
             ))}
           </ul>
         </Card>
-      )}
-      
-      {/* Voice search modal */}
-      {isVoiceSearchOpen && (
-        <VoiceSearchRecorder 
-          onClose={() => setIsVoiceSearchOpen(false)}
-          onTranscriptionComplete={handleVoiceSearchResult}
-        />
       )}
     </div>
   );
