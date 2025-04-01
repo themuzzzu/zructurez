@@ -48,11 +48,11 @@ export const TrendingProducts = ({ gridLayout = "grid4x4" }: TrendingProductsPro
   if (isLoading) {
     return (
       <div className="space-y-4 mb-8">
-        <h3 className="text-xl md:text-2xl font-bold flex items-center gap-2">
+        <h3 className="text-xl md:text-2xl font-bold flex items-center gap-2 px-1">
           <TrendingUp className="h-5 w-5 text-red-500" />
           Trending Products
         </h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-1">
           {[1, 2, 3, 4].map((i) => (
             <Card key={i} className="overflow-hidden">
               <Skeleton className="h-48 w-full" />
@@ -73,7 +73,7 @@ export const TrendingProducts = ({ gridLayout = "grid4x4" }: TrendingProductsPro
   
   return (
     <div className="space-y-4 mb-8 relative">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center px-1">
         <h3 className="text-xl md:text-2xl font-bold flex items-center gap-2">
           <TrendingUp className="h-5 w-5 text-red-500" />
           Trending Products

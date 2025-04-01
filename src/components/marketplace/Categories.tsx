@@ -8,7 +8,6 @@ import {
   Paintbrush, Leaf, Laptop, BookOpen, Dumbbell, Music, Baby, Sofa,
   Smartphone, Headphones, Tv, Watch, Tablet
 } from "lucide-react";
-import { motion } from "framer-motion";
 import { toast } from "sonner";
 
 interface CategoriesProps {
@@ -18,7 +17,7 @@ interface CategoriesProps {
 }
 
 const categoryIcons: Record<string, React.ReactNode> = {
-  clothing: <Shirt className="h-5 w-5" />, // Increased from h-4 w-4
+  clothing: <Shirt className="h-5 w-5" />,
   home: <Home className="h-5 w-5" />,
   electronics: <Laptop className="h-5 w-5" />,
   mobiles: <Smartphone className="h-5 w-5" />,
@@ -117,15 +116,14 @@ export const Categories = ({
     : categories;
 
   return (
-    <div className="py-3">
-      <h2 className="text-lg font-semibold mb-3 px-1">Browse by Category</h2>
+    <div className="py-3 px-1">
+      <h2 className="text-lg font-semibold mb-3">Browse by Category</h2>
       <ScrollArea className="w-full">
         <div className="flex space-x-2 pb-4">
           {allCategories.map((category) => (
-            <motion.div
+            <div
               key={category}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              className="transition-transform"
             >
               <Badge
                 variant="outline"
@@ -142,7 +140,7 @@ export const Categories = ({
                 )}
                 {categoryNames[category] || category.charAt(0).toUpperCase() + category.slice(1)}
               </Badge>
-            </motion.div>
+            </div>
           ))}
         </div>
         <ScrollBar orientation="horizontal" />
@@ -154,10 +152,9 @@ export const Categories = ({
           <ScrollArea className="w-full">
             <div className="flex space-x-2 pb-4">
               {subCategories[currentCategory].map((subcategory) => (
-                <motion.div
+                <div
                   key={subcategory}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  className="transition-transform"
                 >
                   <Badge
                     variant="outline"
@@ -166,7 +163,7 @@ export const Categories = ({
                   >
                     {subcategory}
                   </Badge>
-                </motion.div>
+                </div>
               ))}
             </div>
             <ScrollBar orientation="horizontal" />

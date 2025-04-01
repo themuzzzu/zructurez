@@ -13,6 +13,7 @@ import { TrendingProducts } from "@/components/marketplace/TrendingProducts";
 import { RecommendedProducts } from "@/components/marketplace/RecommendedProducts";
 import { PersonalizedRecommendations } from "@/components/marketplace/PersonalizedRecommendations";
 import { TopProducts } from "@/components/recommendations/TopProducts";
+import { CategoryIconGrid } from "@/components/marketplace/CategoryIconGrid";
 
 const OptimizedMarketplace = () => {
   const navigate = useNavigate();
@@ -98,7 +99,7 @@ const OptimizedMarketplace = () => {
   };
   
   return (
-    <div className="container max-w-[1400px] mx-auto px-4 sm:px-6 py-6">
+    <div className="container max-w-[1400px] mx-auto px-3 sm:px-4 py-6">
       {/* Single Search Bar at the top with improved design */}
       <div className="mb-6">
         <AutocompleteSearch 
@@ -111,13 +112,18 @@ const OptimizedMarketplace = () => {
       </div>
       
       {/* Banner carousel below search */}
-      <div className="mb-6 px-1 sm:px-2">
+      <div className="mb-6">
         <BannerCarousel />
       </div>
       
-      {/* Category with Subcategories */}
+      {/* Moved: Category Icon Grid */}
+      <div className="mb-6">
+        <CategoryIconGrid onCategorySelect={handleCategoryChange} />
+      </div>
+      
+      {/* Category with Subcategories - Renamed to "Shop by Category" */}
       <div className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">Shop by Category</h2>
+        <h2 className="text-2xl font-bold mb-4 px-1">Shop by Category</h2>
         <CategorySubcategoryGrid onCategorySelect={handleCategoryChange} />
       </div>
       

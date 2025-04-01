@@ -59,7 +59,7 @@ export const BrowseTabContent = ({
   const popularCategories = ["Electronics", "Fashion", "Home"];
   
   return (
-    <div className="space-y-6 px-1 sm:px-2">
+    <div className="space-y-6">
       {/* Banner at the top */}
       <MarketplaceBanner />
       
@@ -98,7 +98,7 @@ export const BrowseTabContent = ({
       
       {/* Main Shopping Section */}
       <div className="mt-8">
-        <h2 className="text-2xl font-bold mb-6">All Products</h2>
+        <h2 className="text-2xl font-bold mb-6 px-1">All Products</h2>
         <ShoppingSection 
           searchQuery={searchTerm || ""}
           selectedCategory={selectedCategory === "all" ? "" : selectedCategory}
