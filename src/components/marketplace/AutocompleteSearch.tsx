@@ -15,6 +15,13 @@ interface AutocompleteSearchProps {
   onSearchSelect?: (search: string) => void;
 }
 
+interface Suggestion {
+  id?: string;
+  title: string;
+  type?: string;
+  category?: string;
+}
+
 export const AutocompleteSearch = ({
   placeholder = "Search...",
   value,
@@ -81,8 +88,8 @@ export const AutocompleteSearch = ({
       
       // Combine and return all suggestions
       return [
-        ...(productData || []).map(item => ({ ...item, type: 'product' })),
-        ...(businessData || []).map(item => ({ ...item, type: 'business' }))
+        ...(productData || []).map(item => ({ ...item, type: 'product' } as Suggestion)),
+        ...(businessData || []).map(item => ({ ...item, type: 'business' } as Suggestion))
       ];
     },
     enabled: debouncedValue.length >= 2,
