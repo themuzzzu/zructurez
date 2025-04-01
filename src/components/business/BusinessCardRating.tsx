@@ -1,21 +1,17 @@
 
-import { Star, Heart } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Star } from "lucide-react";
+import { BusinessLikeButton } from "./BusinessLikeButton";
 
 interface BusinessCardRatingProps {
   rating: number;
   reviews: number;
-  isLiked: boolean;
-  likesCount: number;
-  onLikeClick: (e: React.MouseEvent) => void;
+  businessId: string;
 }
 
 export const BusinessCardRating = ({
   rating,
   reviews,
-  isLiked,
-  likesCount,
-  onLikeClick
+  businessId
 }: BusinessCardRatingProps) => {
   return (
     <div className="flex items-center justify-between">
@@ -24,15 +20,11 @@ export const BusinessCardRating = ({
         <span>{rating}</span>
         <span className="text-gray-400">({reviews} reviews)</span>
       </div>
-      <Button
-        variant="ghost"
+      <BusinessLikeButton 
+        businessId={businessId}
         size="sm"
-        className={`p-0 hover:bg-transparent ${isLiked ? 'text-red-500' : 'text-gray-400'}`}
-        onClick={onLikeClick}
-      >
-        <Heart className={`h-5 w-5 ${isLiked ? 'fill-current' : ''}`} />
-        <span className="ml-1 text-sm">{likesCount}</span>
-      </Button>
+        variant="ghost"
+      />
     </div>
   );
 };

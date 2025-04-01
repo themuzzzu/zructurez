@@ -1,11 +1,15 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { BrowseTabContent } from "./BrowseTabContent";
 import { SearchTabContent } from "./SearchTabContent";
 import { GridLayoutType } from "@/components/products/types/layouts";
 import { AutocompleteSearch } from "@/components/marketplace/AutocompleteSearch";
 import { BannerCarousel } from "@/components/marketplace/BannerCarousel";
+import { TopRatedBusinesses } from "@/components/home/TopRatedBusinesses";
+import { CrazyDeals } from "@/components/marketplace/CrazyDeals";
+import { SponsoredProducts } from "@/components/marketplace/SponsoredProducts";
+import { CategorySubcategoryGrid } from "@/components/marketplace/CategorySubcategoryGrid";
 
 const OptimizedMarketplace = () => {
   const navigate = useNavigate();
@@ -13,6 +17,7 @@ const OptimizedMarketplace = () => {
   const searchParams = new URLSearchParams(location.search);
   const queryParam = searchParams.get("q") || "";
   const categoryParam = searchParams.get("category") || "all";
+  const subcategoryParam = searchParams.get("subcategory") || "";
   
   // State for search and cart
   const [searchQuery, setSearchQuery] = useState(queryParam);
@@ -22,6 +27,7 @@ const OptimizedMarketplace = () => {
   // State for filters and layout
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(categoryParam);
+  const [selectedSubcategory, setSelectedSubcategory] = useState(subcategoryParam);
   const [showDiscounted, setShowDiscounted] = useState(false);
   const [showUsed, setShowUsed] = useState(false);
   const [showBranded, setShowBranded] = useState(false);
@@ -29,8 +35,24 @@ const OptimizedMarketplace = () => {
   const [priceRange, setPriceRange] = useState("all");
   const [gridLayout, setGridLayout] = useState<GridLayoutType>("grid4x4");
   
+  // Update state when URL parameters change
+  useEffect(() => {
+    if (categoryParam) {
+      setSelectedCategory(categoryParam);
+    }
+    
+    if (subcategoryParam) {
+      setSelectedSubcategory(subcategoryParam);
+    }
+    
+    if (queryParam) {
+      setSearchQuery(queryParam);
+    }
+  }, [categoryParam, subcategoryParam, queryParam]);
+  
   const resetFilters = () => {
     setSelectedCategory("all");
+    setSelectedSubcategory("");
     setShowDiscounted(false);
     setShowUsed(false);
     setShowBranded(false);
@@ -45,15 +67,25 @@ const OptimizedMarketplace = () => {
   };
   
   // Update URL when category changes
-  const handleCategoryChange = (category: string) => {
+  const handleCategoryChange = (category: string, subcategory?: string) => {
     setSelectedCategory(category);
+    if (subcategory) {
+      setSelectedSubcategory(subcategory);
+    } else {
+      setSelectedSubcategory("");
+    }
     
     const newSearchParams = new URLSearchParams();
     if (searchQuery) {
       newSearchParams.set("q", searchQuery);
     }
+    
     if (category !== "all") {
       newSearchParams.set("category", category);
+      
+      if (subcategory) {
+        newSearchParams.set("subcategory", subcategory);
+      }
     }
     
     navigate({
@@ -80,8 +112,29 @@ const OptimizedMarketplace = () => {
         <BannerCarousel />
       </div>
       
-      {/* Main content - Browse All by default */}
-      <div className="mt-4">
+      {/* Sponsored Products Section */}
+      <div className="mb-8">
+        <SponsoredProducts />
+      </div>
+      
+      {/* Top Rated Businesses */}
+      <div className="mb-8">
+        <TopRatedBusinesses />
+      </div>
+      
+      {/* Crazy Deals Section */}
+      <div className="mb-8">
+        <CrazyDeals />
+      </div>
+      
+      {/* Category with Subcategories */}
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold mb-4">Shop by Category</h2>
+        <CategorySubcategoryGrid onCategorySelect={handleCategoryChange} />
+      </div>
+      
+      {/* Main content - Browse All */}
+      <div className="mt-8">
         <BrowseTabContent 
           searchTerm={searchQuery}
           onCategorySelect={handleCategoryChange}

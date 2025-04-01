@@ -22,6 +22,10 @@ import { PopularCategories } from "@/components/home/PopularCategories";
 import { FeaturedBusinesses } from "@/components/home/FeaturedBusinesses";
 import { DealsSection } from "@/components/home/DealsSection";
 import { BusinessCategoryNavBar } from "@/components/business/BusinessCategoryNavBar";
+import { TopRatedBusinesses } from "@/components/home/TopRatedBusinesses";
+import { CrazyDeals } from "@/components/marketplace/CrazyDeals";
+import { SponsoredProducts } from "@/components/marketplace/SponsoredProducts";
+import { CategorySubcategoryGrid } from "@/components/marketplace/CategorySubcategoryGrid";
 import type { BusinessHours } from "@/types/business";
 
 // Define a completely flat type for business with ratings data to avoid recursion
@@ -175,6 +179,17 @@ const Business = () => {
     }
   };
 
+  const handleSubcategorySelect = (category: string, subcategory?: string) => {
+    const newCategory = subcategory ? `${category}-${subcategory}` : category;
+    setSelectedCategory(newCategory);
+    
+    if (subcategory) {
+      navigate(`/businesses?category=${category}&subcategory=${subcategory}`);
+    } else {
+      navigate(`/businesses?category=${category}`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
       <Navbar />
@@ -209,6 +224,19 @@ const Business = () => {
               <BusinessCategoryNavBar />
               
               <div className="space-y-8 mt-8">
+                {/* New Sections */}
+                <TopRatedBusinesses />
+                
+                <CrazyDeals />
+                
+                <SponsoredProducts />
+                
+                {/* Category with subcategories grid */}
+                <div className="mt-8">
+                  <h2 className="text-2xl font-bold mb-4">Browse by Category</h2>
+                  <CategorySubcategoryGrid onCategorySelect={handleSubcategorySelect} />
+                </div>
+                
                 <BusinessCategoryGrid />
                 
                 <div className="block sm:hidden">
