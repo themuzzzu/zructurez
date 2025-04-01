@@ -3,6 +3,7 @@ import { Layout } from "@/components/layout/Layout";
 import { NotFound } from "@/components/NotFound";
 import { useParams } from "react-router-dom";
 import OptimizedMarketplace from "./marketplace/OptimizedMarketplace";
+import { LikeProvider } from "@/components/products/LikeContext";
 
 const Marketplace = () => {
   const params = useParams();
@@ -12,11 +13,13 @@ const Marketplace = () => {
     return <NotFound />;
   }
   
-  // Render the marketplace with the proper layout
+  // Render the marketplace with the proper layout and LikeProvider
   return (
     <Layout>
       <div className="overflow-x-hidden">
-        <OptimizedMarketplace />
+        <LikeProvider>
+          <OptimizedMarketplace />
+        </LikeProvider>
       </div>
     </Layout>
   );

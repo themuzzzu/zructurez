@@ -6,6 +6,7 @@ import { ProductCardCompact } from "./ProductCardCompact";
 import { ProductCardStandard } from "./ProductCardStandard";
 import { GridLayoutType, ProductType } from "./types/ProductTypes";
 import { Product } from "@/types/product";
+import { ProductLikeButton } from "./ProductLikeButton";
 
 export interface ProductCardProps {
   product: Product | ProductType;

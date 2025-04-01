@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MarketplaceHeader } from "./MarketplaceHeader";
 import { BrowseTabContent } from "./BrowseTabContent";
 import { SearchTabContent } from "./SearchTabContent";
 import { CategoryTabContent } from "./CategoryTabContent";
@@ -44,14 +43,6 @@ const OptimizedMarketplace = () => {
     setPriceRange("all");
   };
   
-  // Update URL when search query changes
-  const handleSearchChange = (query: string) => {
-    setSearchQuery(query);
-    
-    // Redirect to the search results page instead of changing tab
-    navigate(`/search?q=${encodeURIComponent(query)}`);
-  };
-  
   // Handle search selection from autocomplete
   const handleSearchSelect = (query: string) => {
     setSearchQuery(query);
@@ -79,7 +70,7 @@ const OptimizedMarketplace = () => {
   
   return (
     <div className="container max-w-[1400px] mx-auto px-4 py-6">
-      {/* Search Bar moved to the top */}
+      {/* Single Search Bar at the top */}
       <div className="mb-6">
         <AutocompleteSearch 
           value={searchQuery}
@@ -95,17 +86,10 @@ const OptimizedMarketplace = () => {
         <BannerCarousel />
       </div>
       
-      <MarketplaceHeader
-        searchTerm={searchQuery}
-        setSearchTerm={setSearchQuery}
-        onSearch={handleSearchChange}
-      />
-      
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="browse">Browse All</TabsTrigger>
           <TabsTrigger value="category">Categories</TabsTrigger>
-          <TabsTrigger value="search" disabled={!searchQuery}>Search Results</TabsTrigger>
         </TabsList>
         
         <TabsContent value="browse" className="mt-6">
@@ -117,24 +101,6 @@ const OptimizedMarketplace = () => {
             selectedCategory={selectedCategory}
             setSelectedCategory={handleCategoryChange}
             setActiveTab={setActiveTab}
-          />
-        </TabsContent>
-        
-        <TabsContent value="search" className="mt-6">
-          <SearchTabContent 
-            searchQuery={searchQuery}
-            selectedCategory={selectedCategory}
-            showDiscounted={showDiscounted}
-            setShowDiscounted={setShowDiscounted}
-            showUsed={showUsed}
-            setShowUsed={setShowUsed}
-            showBranded={showBranded}
-            setShowBranded={setShowBranded}
-            sortOption={sortOption}
-            setSortOption={setSortOption}
-            priceRange={priceRange}
-            setPriceRange={setPriceRange}
-            resetFilters={resetFilters}
           />
         </TabsContent>
       </Tabs>

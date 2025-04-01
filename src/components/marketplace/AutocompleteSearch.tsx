@@ -148,6 +148,7 @@ export const AutocompleteSearch = ({
     }
   };
 
+  // Modified to work on single click (form submit) instead of double
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (value.trim() && onSearchSelect) {

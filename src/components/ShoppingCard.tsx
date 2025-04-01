@@ -3,8 +3,9 @@ import React from 'react';
 import { Card, CardContent, CardFooter } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
-import { ShoppingBag, Heart } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { ProductLikeButton } from "./products/ProductLikeButton";
 
 interface ShoppingCardProps {
   id: string;
@@ -59,9 +60,9 @@ export const ShoppingCard = ({
       <CardContent className="flex-1 p-4 space-y-2" onClick={handleClick}>
         <div className="flex justify-between items-start">
           <h3 className="font-semibold line-clamp-1">{title}</h3>
-          <Button variant="ghost" size="icon" className="h-8 w-8">
-            <Heart className="h-4 w-4" />
-          </Button>
+          {type === 'product' && (
+            <ProductLikeButton productId={id} />
+          )}
         </div>
         
         {category && (

@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
@@ -36,6 +35,13 @@ import { BusinessRegistrationForm } from "@/components/business-registration/Bus
 function App() {
   const [isLoading, setIsLoading] = useState(true);
   const queryClient = new QueryClient();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (!location.pathname.includes('/auth') && !location.pathname.includes('/wishlist')) {
+      sessionStorage.setItem('previousPath', location.pathname + location.search);
+    }
+  }, [location]);
 
   setTimeout(() => {
     setIsLoading(false);
@@ -56,10 +62,10 @@ function App() {
             <Route path="/businesses/:id" element={<BusinessDetails />} />
             <Route path="/register-business" element={<BusinessRegistrationForm />} />
             <Route path="/products/:id" element={<ProductDetails />} />
-            <Route path="/product/:id" element={<ProductDetails />} /> {/* Added correct product route */}
+            <Route path="/product/:id" element={<ProductDetails />} />
             <Route path="/services" element={<Services />} />
             <Route path="/services/:id" element={<ServiceDetails />} />
-            <Route path="/profile" element={<Profile />} /> {/* Fixed profile route to not require ID */}
+            <Route path="/profile" element={<Profile />} />
             <Route path="/profile/:id" element={<Profile />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/wishlist" element={<Wishlist />} />
