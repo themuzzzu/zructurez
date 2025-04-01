@@ -57,6 +57,20 @@ export const EnhancedShoppingSection = ({
     enabled: !!searchQuery
   });
 
+  // Format business hours for display
+  const formatHours = (hours: string | any): string => {
+    if (!hours) return '';
+    
+    if (typeof hours === 'string') return hours;
+    
+    try {
+      return JSON.stringify(hours);
+    } catch (e) {
+      console.error("Error formatting hours:", e);
+      return '';
+    }
+  };
+
   // Handle tab change - for services redirect to search results
   const handleTabChange = (value: string) => {
     if (value === "services") {
@@ -105,7 +119,7 @@ export const EnhancedShoppingSection = ({
                   reviews={business.reviews_count || 0}
                   location={business.location || ''}
                   contact={business.contact || ''}
-                  hours={business.hours || ''}
+                  hours={formatHours(business.hours)}
                   verified={business.verified || false}
                   appointment_price={business.appointment_price}
                   consultation_price={business.consultation_price}

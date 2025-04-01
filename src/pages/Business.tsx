@@ -25,18 +25,16 @@ import { TopRatedBusinesses } from "@/components/home/TopRatedBusinesses";
 import { CrazyDeals } from "@/components/marketplace/CrazyDeals";
 import { SponsoredProducts } from "@/components/marketplace/SponsoredProducts";
 import { CategorySubcategoryGrid } from "@/components/marketplace/CategorySubcategoryGrid";
-import type { BusinessHours } from "@/types/business";
+import type { Business, BusinessHours } from "@/types/business";
 
 interface BusinessWithRating {
   id: string;
   name: string;
   description: string;
   category: string;
-  subcategory?: string;
   location?: string;
   contact?: string;
   hours?: string;
-  business_hours?: string;
   verified?: boolean;
   image_url?: string;
   is_open?: boolean;
@@ -79,7 +77,7 @@ const Business = () => {
     if (selectedCategory !== "all") {
       if (selectedCategory.includes('-')) {
         const [category, subcategory] = selectedCategory.split('-');
-        query = query.eq('category', category).eq('subcategory', subcategory);
+        query = query.eq('category', category);
       } else {
         query = query.eq('category', selectedCategory);
       }
@@ -99,11 +97,9 @@ const Business = () => {
         name: business.name,
         description: business.description,
         category: business.category,
-        subcategory: business.subcategory,
         location: business.location,
         contact: business.contact,
         hours: business.hours,
-        business_hours: business.business_hours,
         verified: business.verified,
         image_url: business.image_url,
         is_open: business.is_open,
@@ -161,16 +157,9 @@ const Business = () => {
     }
   };
 
-  const formatHours = (hours: string | BusinessHours | undefined): string => {
+  const formatHours = (hours: string | undefined): string => {
     if (!hours) return '';
-    if (typeof hours === 'string') return hours;
-    
-    try {
-      return JSON.stringify(hours);
-    } catch (e) {
-      console.error("Error formatting hours:", e);
-      return '';
-    }
+    return hours;
   };
 
   const handleSubcategorySelect = (category: string, subcategory?: string) => {
@@ -295,7 +284,7 @@ const Business = () => {
                               reviews={business.reviews_count || 0}
                               location={business.location || ''}
                               contact={business.contact || ''}
-                              hours={formatHours(business.hours || business.business_hours)}
+                              hours={formatHours(business.hours)}
                               verified={business.verified || false}
                               appointment_price={business.appointment_price}
                               consultation_price={business.consultation_price}
