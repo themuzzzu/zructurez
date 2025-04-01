@@ -52,7 +52,7 @@ export const RecommendedProducts = ({ gridLayout = "grid4x4" }: RecommendedProdu
       <div className="space-y-4 mb-8">
         <h3 className="text-xl md:text-2xl font-bold flex items-center gap-2">
           <ThumbsUp className="h-5 w-5 text-green-500" />
-          Recommended For You
+          Trending
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
@@ -70,14 +70,14 @@ export const RecommendedProducts = ({ gridLayout = "grid4x4" }: RecommendedProdu
   }
   
   if (!products || products.length === 0) {
-    return <div className="text-center text-muted-foreground">No recommended products found</div>;
+    return <div className="text-center text-muted-foreground">No trending products found</div>;
   }
   
   return (
     <div className="space-y-4 mb-8">
       <h3 className="text-xl md:text-2xl font-bold flex items-center gap-2">
         <ThumbsUp className="h-5 w-5 text-green-500" />
-        Recommended For You
+        Trending
       </h3>
       
       <Carousel 

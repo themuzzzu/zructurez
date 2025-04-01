@@ -67,7 +67,7 @@ export const TrendingProducts = ({ gridLayout = "grid4x4" }: TrendingProductsPro
       <div className="space-y-4 mb-8">
         <h3 className="text-xl md:text-2xl font-bold flex items-center gap-2">
           <Flame className="h-5 w-5 text-orange-500" />
-          Trending Now
+          Sponsored Products
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
@@ -92,7 +92,7 @@ export const TrendingProducts = ({ gridLayout = "grid4x4" }: TrendingProductsPro
     <div className="space-y-4 mb-8">
       <h3 className="text-xl md:text-2xl font-bold flex items-center gap-2">
         <Flame className="h-5 w-5 text-orange-500" />
-        Trending Now
+        Sponsored Products
       </h3>
       
       <Carousel 

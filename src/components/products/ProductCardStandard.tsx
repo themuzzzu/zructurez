@@ -11,6 +11,7 @@ import { formatPrice } from "@/utils/productUtils";
 import { ProductType } from "./types/ProductTypes";
 import { Product } from "@/types/product";
 import { ProductCardRating } from "./ProductCardRating";
+import { ProductLikeButton } from "./ProductLikeButton";
 
 interface ProductCardStandardProps {
   product: Product | ProductType;
@@ -56,8 +57,8 @@ export const ProductCardStandard = ({
     }
   };
 
-  // Generate random rating for display
-  const rating = (Math.floor(Math.random() * 15) + 35) / 10;
+  // Generate random rating for display - don't change on hover
+  const rating = useState((Math.floor(Math.random() * 15) + 35) / 10)[0];
   
   return (
     <Card className="overflow-hidden hover:shadow-md transition-all h-full">
@@ -90,6 +91,14 @@ export const ProductCardStandard = ({
             Ad
           </Badge>
         )}
+        
+        <div className="absolute top-2 right-2">
+          <ProductLikeButton 
+            productId={product.id} 
+            size="sm" 
+            variant="ghost"
+          />
+        </div>
       </div>
       
       <div className={`p-3 ${isGrid2x2 ? 'p-4' : ''}`} onClick={onClick}>
@@ -116,7 +125,7 @@ export const ProductCardStandard = ({
         </div>
         
         <Button 
-          className="w-full mt-1"
+          className="w-full mt-1 text-white"
           size="sm"
           onClick={addToCart}
           disabled={isAddingToCart}

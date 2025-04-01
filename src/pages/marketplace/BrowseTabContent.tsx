@@ -4,7 +4,6 @@ import { ShoppingSection } from "@/components/ShoppingSection";
 import { Categories } from "@/components/marketplace/Categories";
 import { useNavigate } from "react-router-dom";
 import { SponsoredProducts } from "@/components/marketplace/SponsoredProducts";
-import { TopDeals } from "@/components/marketplace/TopDeals";
 import { TrendingProducts } from "@/components/marketplace/TrendingProducts";
 
 interface BrowseTabContentProps {

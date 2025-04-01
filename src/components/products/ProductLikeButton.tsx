@@ -40,17 +40,18 @@ export const ProductLikeButton = ({
     <Button
       variant={variant}
       size={size}
-      className={`relative group ${className}`}
+      className={`relative group border border-red-500 bg-white dark:bg-zinc-800 hover:bg-white dark:hover:bg-zinc-800 ${className}`}
       onClick={handleClick}
       disabled={isLoading}
       aria-label={liked ? "Unlike product" : "Like product"}
     >
       <div className="relative z-10">
         {isLoading ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
+          <Loader2 className="h-4 w-4 animate-spin text-red-500" />
         ) : (
           <Heart 
-            className={`h-4 w-4 transition-all duration-300 ${liked ? 'fill-red-500 text-red-500' : ''} 
+            className={`h-4 w-4 transition-all duration-300 
+            ${liked ? 'fill-red-500 text-red-500' : 'text-red-500'} 
             ${liked && animating ? 'scale-110' : ''}`} 
           />
         )}

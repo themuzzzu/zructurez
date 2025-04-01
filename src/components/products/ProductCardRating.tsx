@@ -1,11 +1,12 @@
 
 import { Star } from "lucide-react";
+import { memo } from "react";
 
 interface ProductCardRatingProps {
   rating: number;
 }
 
-export const ProductCardRating = ({ rating }: ProductCardRatingProps) => {
+export const ProductCardRating = memo(({ rating }: ProductCardRatingProps) => {
   return (
     <div className="flex items-center mt-1 mb-1.5">
       <div className="flex">
@@ -19,4 +20,6 @@ export const ProductCardRating = ({ rating }: ProductCardRatingProps) => {
       <span className="text-xs text-muted-foreground ml-1">({rating.toFixed(1)})</span>
     </div>
   );
-};
+});
+
+ProductCardRating.displayName = "ProductCardRating";

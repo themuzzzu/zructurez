@@ -123,19 +123,6 @@ export const ProductCard = ({
             isGrid2x2={layout === "grid2x2"}
             sponsored={sponsored}
           />
-          <motion.div 
-            className="absolute top-2 right-2 z-10"
-            initial={{ opacity: isHovered ? 1 : 0 }}
-            animate={{ opacity: isHovered ? 1 : 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <ProductLikeButton 
-              productId={product.id} 
-              variant="ghost" 
-              size="sm"
-              className="bg-white/80 dark:bg-black/50 backdrop-blur-sm hover:bg-white/90 dark:hover:bg-black/60"
-            />
-          </motion.div>
         </motion.div>
       )}
       {!isVisible && (
