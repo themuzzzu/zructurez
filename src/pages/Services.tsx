@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
@@ -9,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Spinner } from "@/components/common/Spinner";
 import { Layout } from "@/components/layout/Layout";
 import { GridLayoutSelector } from "@/components/marketplace/GridLayoutSelector";
-import { GridLayoutType } from "@/components/products/types/ProductTypes";
+import { GridLayoutType } from "@/components/products/types/layouts";
 
 export default function Services() {
   const [services, setServices] = useState([]);
@@ -20,7 +19,6 @@ export default function Services() {
   const [gridLayout, setGridLayout] = useState<GridLayoutType>("grid3x3");
 
   useEffect(() => {
-    // Check if user is logged in
     const checkUserAuth = async () => {
       const { data } = await supabase.auth.getUser();
       setIsUserLoggedIn(!!data.user);
@@ -69,10 +67,9 @@ export default function Services() {
   
   const handleCreateSuccess = () => {
     setIsDialogOpen(false);
-    window.location.reload(); // Refresh to see new service
+    window.location.reload();
   };
 
-  // Get grid classes based on selected layout
   const getGridClasses = () => {
     switch (gridLayout) {
       case "grid4x4":
@@ -81,6 +78,8 @@ export default function Services() {
         return "grid grid-cols-1 sm:grid-cols-2 gap-4";
       case "list":
         return "flex flex-col gap-4";
+      case "grid1x1":
+        return "grid grid-cols-1 gap-4";
       case "grid3x3":
       default:
         return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4";

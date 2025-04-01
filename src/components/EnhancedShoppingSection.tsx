@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BusinessCard } from './BusinessCard';
 import { Business } from '@/types/business';
-import { GridLayoutType } from './products/types/ProductTypes';
+import { GridLayoutType } from './products/types/layouts';
 
 interface EnhancedShoppingSectionProps {
   searchQuery: string;
@@ -73,6 +73,7 @@ export const EnhancedShoppingSection = ({
             showBranded={showBranded}
             sortOption={sortOption}
             priceRange={priceRange}
+            gridLayout={gridLayout}
           />
         </TabsContent>
         

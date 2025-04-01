@@ -1,11 +1,12 @@
 
-import { LayoutGrid, Grid2X2, Grip } from "lucide-react";
+import { LayoutGrid, Grid2X2, Grip, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { GridLayoutType } from "@/components/products/types/layouts";
 
 interface GridLayoutSelectorProps {
-  layout: "grid4x4" | "grid2x2" | "grid1x1";
-  onChange: (layout: "grid4x4" | "grid2x2" | "grid1x1") => void;
+  layout: GridLayoutType;
+  onChange: (layout: GridLayoutType) => void;
 }
 
 export const GridLayoutSelector = ({ layout, onChange }: GridLayoutSelectorProps) => {
@@ -23,6 +24,16 @@ export const GridLayoutSelector = ({ layout, onChange }: GridLayoutSelectorProps
       
       <Button
         size="icon"
+        variant={layout === "grid3x3" ? "default" : "outline"}
+        className="h-8 w-8"
+        onClick={() => onChange("grid3x3")}
+        title="3×3 Grid"
+      >
+        <LayoutGrid className="h-4 w-4" />
+      </Button>
+      
+      <Button
+        size="icon"
         variant={layout === "grid2x2" ? "default" : "outline"}
         className="h-8 w-8"
         onClick={() => onChange("grid2x2")}
@@ -33,10 +44,20 @@ export const GridLayoutSelector = ({ layout, onChange }: GridLayoutSelectorProps
       
       <Button
         size="icon"
+        variant={layout === "list" ? "default" : "outline"}
+        className="h-8 w-8"
+        onClick={() => onChange("list")}
+        title="List View"
+      >
+        <List className="h-4 w-4" />
+      </Button>
+      
+      <Button
+        size="icon"
         variant={layout === "grid1x1" ? "default" : "outline"}
         className="h-8 w-8"
         onClick={() => onChange("grid1x1")}
-        title="List View"
+        title="1×1 Grid"
       >
         <Grip className="h-4 w-4" />
       </Button>

@@ -8,7 +8,7 @@ import { ArrowLeft, Filter, Heart } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { SearchIcon } from "lucide-react";
 import { GridLayoutSelector } from "@/components/marketplace/GridLayoutSelector";
-import { GridLayoutType } from "@/components/products/types/ProductTypes";
+import { GridLayoutType } from "@/components/products/types/layouts";
 
 export default function Search() {
   const [searchParams] = useSearchParams();
