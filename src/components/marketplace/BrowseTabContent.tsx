@@ -9,6 +9,7 @@ import { TrendingProducts } from "@/components/marketplace/TrendingProducts";
 import { PersonalizedRecommendations } from "@/components/marketplace/PersonalizedRecommendations";
 import { FlashSale } from "@/components/marketplace/FlashSale";
 import { CategoryFeatured } from "@/components/marketplace/CategoryFeatured";
+import { CategoryNavigationBar } from "@/components/marketplace/CategoryNavigationBar";
 
 interface BrowseTabContentProps {
   searchResults?: any[];
@@ -46,7 +47,12 @@ export const BrowseTabContent = ({
   
   return (
     <div className="space-y-6 px-1 sm:px-2">
-      {/* Banner and Categories moved below banner */}
+      {/* Main Category Navigation Bar */}
+      <div className="mb-6">
+        <CategoryNavigationBar />
+      </div>
+      
+      {/* Secondary Categories */}
       <div className="mb-6">
         <Categories 
           onCategorySelect={handleCategorySelect} 
