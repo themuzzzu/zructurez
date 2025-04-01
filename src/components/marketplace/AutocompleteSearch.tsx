@@ -22,6 +22,19 @@ interface Suggestion {
   category?: string;
 }
 
+// Database types to match Supabase schema
+interface ProductData {
+  title: string;
+  category?: string;
+  [key: string]: any;
+}
+
+interface BusinessData {
+  name: string;
+  category?: string;
+  [key: string]: any;
+}
+
 export const AutocompleteSearch = ({
   placeholder = "Search...",
   value,
@@ -86,11 +99,20 @@ export const AutocompleteSearch = ({
       
       if (businessError) throw businessError;
       
-      // Combine and return all suggestions
-      return [
-        ...(productData || []).map(item => ({ ...item, type: 'product' } as Suggestion)),
-        ...(businessData || []).map(item => ({ ...item, type: 'business' } as Suggestion))
-      ];
+      // Combine and return all suggestions with proper typing
+      const productSuggestions: Suggestion[] = (productData || []).map((item: ProductData) => ({ 
+        title: item.title, 
+        category: item.category,
+        type: 'product' 
+      }));
+      
+      const businessSuggestions: Suggestion[] = (businessData || []).map((item: BusinessData) => ({ 
+        title: item.title, 
+        category: item.category,
+        type: 'business' 
+      }));
+      
+      return [...productSuggestions, ...businessSuggestions];
     },
     enabled: debouncedValue.length >= 2,
   });
@@ -225,4 +247,4 @@ export const AutocompleteSearch = ({
       )}
     </div>
   );
-}
+};
