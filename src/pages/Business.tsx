@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
@@ -21,6 +22,12 @@ import { PopularCategories } from "@/components/home/PopularCategories";
 import { FeaturedBusinesses } from "@/components/home/FeaturedBusinesses";
 import { DealsSection } from "@/components/home/DealsSection";
 import { BusinessCategoryNavBar } from "@/components/business/BusinessCategoryNavBar";
+import type { Business } from "@/types/business";
+
+type BusinessWithRating = Business & {
+  average_rating: number;
+  business_ratings?: { rating: number }[];
+};
 
 const Business = () => {
   const navigate = useNavigate();
@@ -49,8 +56,7 @@ const Business = () => {
           *,
           business_products (*),
           business_ratings (*)
-        `)
-        .order('created_at', { ascending: false });
+        `);
       
       if (selectedCategory !== "all") {
         if (selectedCategory.includes('-')) {
@@ -65,7 +71,8 @@ const Business = () => {
       
       if (error) throw error;
       
-      return (data || []).map(business => {
+      // Transform data to include average_rating
+      return (data || []).map((business: any) => {
         const ratings = business.business_ratings || [];
         const totalRating = ratings.reduce((sum: number, rating: any) => sum + rating.rating, 0);
         const averageRating = ratings.length > 0 ? totalRating / ratings.length : 0;
@@ -73,7 +80,7 @@ const Business = () => {
         return {
           ...business,
           average_rating: averageRating
-        };
+        } as BusinessWithRating;
       });
     }
   });
@@ -81,27 +88,27 @@ const Business = () => {
   if (isLoading) return <LoadingView />;
   if (error) return <ErrorView />;
 
-  const filteredBusinesses = businesses?.filter(business => 
-    (
-      business.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      business.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      business.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (business.location && business.location.toLowerCase().includes(searchQuery.toLowerCase()))
-    )
-  ) || [];
+  // Filter businesses based on search query
+  const filteredBusinesses = (businesses || []).filter(business => 
+    business.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    business.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    business.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (business.location && business.location.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
 
+  // Sort businesses based on sort criteria
   const sortedBusinesses = [...filteredBusinesses].sort((a, b) => {
     switch (sortBy) {
       case "newest":
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        return new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime();
       case "oldest":
-        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        return new Date(a.created_at || '').getTime() - new Date(b.created_at || '').getTime();
       case "rating":
         return (b.average_rating || 0) - (a.average_rating || 0);
       case "name_asc":
-        return a.name.localeCompare(b.name);
+        return (a.name || '').localeCompare(b.name || '');
       case "name_desc":
-        return b.name.localeCompare(a.name);
+        return (b.name || '').localeCompare(a.name || '');
       default:
         return 0;
     }
@@ -180,58 +187,30 @@ const Business = () => {
                     </div>
                   </div>
 
-                  {isLoading ? (
-                    <LoadingView />
-                  ) : error ? (
-                    <ErrorView />
-                  ) : businesses && businesses.length > 0 ? (
+                  {businesses && businesses.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {businesses
-                        .filter(business => 
-                          business.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          business.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          business.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          (business.location && business.location.toLowerCase().includes(searchQuery.toLowerCase()))
-                        )
-                        .sort((a, b) => {
-                          switch (sortBy) {
-                            case "newest":
-                              return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-                            case "oldest":
-                              return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-                            case "rating":
-                              return (b.average_rating || 0) - (a.average_rating || 0);
-                            case "name_asc":
-                              return a.name.localeCompare(b.name);
-                            case "name_desc":
-                              return b.name.localeCompare(a.name);
-                            default:
-                              return 0;
-                          }
-                        })
-                        .map((business) => (
-                          <div key={business.id} className="h-full">
-                            <BusinessCard 
-                              id={business.id}
-                              name={business.name}
-                              category={business.category}
-                              description={business.description}
-                              image={business.image_url || '/placeholder.svg'}
-                              rating={business.average_rating || 0}
-                              reviews={business.business_ratings?.length || 0}
-                              location={business.location || ''}
-                              contact={business.contact || ''}
-                              hours={business.hours || ''}
-                              verified={business.verified || false}
-                              appointment_price={business.appointment_price}
-                              consultation_price={business.consultation_price}
-                              is_open={business.is_open}
-                              wait_time={business.wait_time}
-                              closure_reason={business.closure_reason}
-                            />
-                          </div>
-                        ))
-                      }
+                      {sortedBusinesses.map((business) => (
+                        <div key={business.id} className="h-full">
+                          <BusinessCard 
+                            id={business.id}
+                            name={business.name}
+                            category={business.category}
+                            description={business.description}
+                            image={business.image_url || '/placeholder.svg'}
+                            rating={business.average_rating || 0}
+                            reviews={business.business_ratings?.length || 0}
+                            location={business.location || ''}
+                            contact={business.contact || ''}
+                            hours={business.hours || ''}
+                            verified={business.verified || false}
+                            appointment_price={business.appointment_price}
+                            consultation_price={business.consultation_price}
+                            is_open={business.is_open}
+                            wait_time={business.wait_time}
+                            closure_reason={business.closure_reason}
+                          />
+                        </div>
+                      ))}
                     </div>
                   ) : (
                     <div className="text-center py-12">
