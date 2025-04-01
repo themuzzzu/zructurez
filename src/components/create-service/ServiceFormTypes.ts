@@ -1,3 +1,4 @@
+
 export interface WorkItem {
   id: string;
   description: string;
@@ -18,5 +19,5 @@ export interface ServiceFormData {
 
 export interface CreateServiceFormProps {
   onSuccess?: () => void;
-  onClose?: () => void;
+  onCancel?: () => void;
 }
