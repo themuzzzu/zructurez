@@ -104,10 +104,17 @@ export const TrendingProducts = ({ gridLayout = "grid4x4" }: TrendingProductsPro
         <CarouselContent className="-ml-2 md:-ml-4">
           {products.map((product) => (
             <CarouselItem key={product.id} className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4">
-              <ProductCard 
-                product={product}
-                layout={gridLayout}
-              />
+              <div className="relative">
+                <ProductCard 
+                  product={product}
+                  layout={gridLayout}
+                />
+                {product.sales_count > 0 && (
+                  <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full">
+                    {product.sales_count}+ bought
+                  </div>
+                )}
+              </div>
             </CarouselItem>
           ))}
         </CarouselContent>

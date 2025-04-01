@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductCard } from "@/components/products/ProductCard";
 import { Loader2, Sparkles } from "lucide-react";
@@ -12,6 +12,7 @@ import {
   CarouselNext, 
   CarouselPrevious 
 } from "@/components/ui/carousel";
+import { Badge } from "@/components/ui/badge";
 
 interface SponsoredProductsProps {
   gridLayout?: GridLayoutType;
@@ -70,9 +71,33 @@ export const SponsoredProducts = ({ gridLayout = "grid4x4" }: SponsoredProductsP
           });
           
           setProducts(productData || []);
+        } else {
+          // Fallback to fetch branded products in case no ads are available
+          const { data: fallbackProducts, error: fallbackError } = await supabase
+            .from('products')
+            .select('*')
+            .eq('is_branded', true)
+            .order('created_at', { ascending: false })
+            .limit(8);
+            
+          if (fallbackError) throw fallbackError;
+          setProducts(fallbackProducts || []);
         }
       } catch (error) {
         console.error('Error loading sponsored products:', error);
+        
+        // Fetch some default products as a fallback
+        try {
+          const { data: defaultProducts } = await supabase
+            .from('products')
+            .select('*')
+            .order('views', { ascending: false })
+            .limit(6);
+            
+          setProducts(defaultProducts || []);
+        } catch (e) {
+          console.error('Error loading fallback products:', e);
+        }
       } finally {
         setLoading(false);
       }
@@ -107,7 +132,7 @@ export const SponsoredProducts = ({ gridLayout = "grid4x4" }: SponsoredProductsP
   }
 
   return (
-    <div className="space-y-4 mb-8">
+    <div className="space-y-4 mb-8 mt-4">
       <div className="flex justify-between items-center">
         <h2 className="text-xl md:text-2xl font-bold flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-yellow-500" />
@@ -124,10 +149,18 @@ export const SponsoredProducts = ({ gridLayout = "grid4x4" }: SponsoredProductsP
         <CarouselContent className="-ml-2 md:-ml-4">
           {products.map((product) => (
             <CarouselItem key={product.id} className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4">
-              <ProductCard 
-                product={product}
-                sponsored={true}
-              />
+              <div className="relative">
+                <ProductCard 
+                  product={product}
+                  sponsored={true}
+                />
+                <Badge 
+                  className="absolute top-2 right-2 bg-yellow-500/90 text-xs"
+                  variant="secondary"
+                >
+                  Sponsored
+                </Badge>
+              </div>
             </CarouselItem>
           ))}
         </CarouselContent>

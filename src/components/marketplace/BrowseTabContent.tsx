@@ -3,6 +3,12 @@ import { useState } from "react";
 import { ShoppingSection } from "@/components/ShoppingSection";
 import { Categories } from "@/components/marketplace/Categories";
 import { useNavigate } from "react-router-dom";
+import { SponsoredProducts } from "@/components/marketplace/SponsoredProducts";
+import { TopDeals } from "@/components/marketplace/TopDeals";
+import { TrendingProducts } from "@/components/marketplace/TrendingProducts";
+import { PersonalizedRecommendations } from "@/components/marketplace/PersonalizedRecommendations";
+import { FlashSale } from "@/components/marketplace/FlashSale";
+import { CategoryFeatured } from "@/components/marketplace/CategoryFeatured";
 
 interface BrowseTabContentProps {
   searchResults?: any[];
@@ -35,20 +41,47 @@ export const BrowseTabContent = ({
     }
   };
   
+  // Popular categories for featured sections
+  const popularCategories = ["Electronics", "Fashion", "Home"];
+  
   return (
-    <div className="space-y-6">
-      {/* Categories moved below banner */}
-      <div className="mb-6 px-1 sm:px-2">
+    <div className="space-y-6 px-1 sm:px-2">
+      {/* Banner and Categories moved below banner */}
+      <div className="mb-6">
         <Categories 
           onCategorySelect={handleCategorySelect} 
           showAllCategories={true}
         />
       </div>
       
-      <ShoppingSection 
-        searchQuery={searchTerm || ""}
-        selectedCategory={selectedCategory === "all" ? "" : selectedCategory}
-      />
+      {/* Sponsored Products */}
+      <SponsoredProducts />
+      
+      {/* Top Deals */}
+      <TopDeals />
+      
+      {/* Flash Sale */}
+      <FlashSale />
+      
+      {/* Trending Products */}
+      <TrendingProducts />
+      
+      {/* Personalized Recommendations */}
+      <PersonalizedRecommendations />
+      
+      {/* Category Featured Products */}
+      {popularCategories.map(category => (
+        <CategoryFeatured key={category} categoryName={category} />
+      ))}
+      
+      {/* Main Shopping Section */}
+      <div className="mt-8">
+        <h2 className="text-2xl font-bold mb-6">All Products</h2>
+        <ShoppingSection 
+          searchQuery={searchTerm || ""}
+          selectedCategory={selectedCategory === "all" ? "" : selectedCategory}
+        />
+      </div>
     </div>
   );
 };
