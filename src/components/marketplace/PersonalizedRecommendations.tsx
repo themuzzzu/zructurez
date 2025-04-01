@@ -5,24 +5,31 @@ import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ProductCard } from '@/components/products/ProductCard';
-import { useEffect, useState } from 'react';
-import { LightbulbIcon } from 'lucide-react';
+import { useEffect, useState, useRef } from 'react';
+import { LightbulbIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
-import { 
-  Carousel, 
-  CarouselContent, 
-  CarouselItem, 
-  CarouselNext, 
-  CarouselPrevious 
-} from '@/components/ui/carousel';
+import { Button } from '@/components/ui/button';
 
 export const PersonalizedRecommendations = () => {
   const navigate = useNavigate();
-  const [api, setApi] = useState<any>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
   
   // Fix: The useCurrentUser hook returns a query result, so we need to access data
   const { data: profile, isLoading: authLoading } = useCurrentUser();
+  
+  // Handle horizontal scroll with buttons
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = 300;
+      const currentScroll = scrollContainerRef.current.scrollLeft;
+      
+      scrollContainerRef.current.scrollTo({
+        left: direction === 'left' ? currentScroll - scrollAmount : currentScroll + scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
   
   const { data: products, isLoading } = useQuery({
     queryKey: ['personalized-recommendations', profile?.id],
@@ -101,17 +108,6 @@ export const PersonalizedRecommendations = () => {
     enabled: !authLoading // Only run when auth state is known
   });
   
-  // Auto-scroll effect for carousel
-  useEffect(() => {
-    if (!api || !autoScrollEnabled || !products || products.length <= 1) return;
-    
-    const interval = setInterval(() => {
-      api.scrollNext();
-    }, 5500); // Different timing from other carousels
-    
-    return () => clearInterval(interval);
-  }, [api, autoScrollEnabled, products]);
-  
   if (isLoading) {
     return (
       <div className="space-y-4 mb-8">
@@ -145,22 +141,44 @@ export const PersonalizedRecommendations = () => {
         Suggested for You
       </h3>
       
-      <Carousel 
-        className="w-full" 
-        setApi={setApi}
-        onMouseEnter={() => setAutoScrollEnabled(false)}
-        onMouseLeave={() => setAutoScrollEnabled(true)}
-      >
-        <CarouselContent className="-ml-2 md:-ml-4">
+      <div className="relative group">
+        {/* Left scroll button */}
+        <Button 
+          onClick={() => scroll('left')}
+          size="icon"
+          variant="ghost" 
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 dark:bg-black/50 rounded-full opacity-70 hover:opacity-100 shadow-md hidden md:flex"
+        >
+          <ChevronLeft />
+        </Button>
+        
+        {/* Scrollable container */}
+        <div 
+          ref={scrollContainerRef}
+          className="flex overflow-x-auto gap-3 pb-2 pt-1 px-1 no-scrollbar snap-x snap-mandatory scroll-smooth"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          onMouseEnter={() => setAutoScrollEnabled(false)}
+          onMouseLeave={() => setAutoScrollEnabled(true)}
+        >
           {products.map((product) => (
-            <CarouselItem key={product.id} className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4">
-              <ProductCard product={product} />
-            </CarouselItem>
+            <div key={product.id} className="min-w-[250px] sm:min-w-[280px] w-[70vw] max-w-[320px] flex-shrink-0 snap-start">
+              <div className="relative h-full">
+                <ProductCard product={product} />
+              </div>
+            </div>
           ))}
-        </CarouselContent>
-        <CarouselPrevious className="hidden md:flex left-0 bg-white/80 dark:bg-zinc-800/80 hover:bg-white dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-700" />
-        <CarouselNext className="hidden md:flex right-0 bg-white/80 dark:bg-zinc-800/80 hover:bg-white dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-700" />
-      </Carousel>
+        </div>
+        
+        {/* Right scroll button */}
+        <Button 
+          onClick={() => scroll('right')}
+          size="icon"
+          variant="ghost" 
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 dark:bg-black/50 rounded-full opacity-70 hover:opacity-100 shadow-md hidden md:flex"
+        >
+          <ChevronRight />
+        </Button>
+      </div>
     </div>
   );
 };

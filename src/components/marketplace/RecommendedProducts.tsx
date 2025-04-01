@@ -95,7 +95,7 @@ export const RecommendedProducts = ({ gridLayout = "grid4x4" }: RecommendedProdu
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {products.map((product) => (
-            <div key={product.id} className="min-w-[220px] flex-shrink-0 snap-start">
+            <div key={product.id} className="min-w-[250px] sm:min-w-[280px] w-[70vw] max-w-[320px] flex-shrink-0 snap-start">
               <div className="relative h-full">
                 <ProductCard 
                   product={product}

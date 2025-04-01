@@ -99,18 +99,13 @@ export const SponsoredProducts = ({ gridLayout = "grid4x4" }: SponsoredProductsP
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {products.map((product) => (
-            <div key={product.id} className="min-w-[220px] flex-shrink-0 snap-start">
+            <div key={product.id} className="min-w-[250px] sm:min-w-[280px] w-[70vw] max-w-[320px] flex-shrink-0 snap-start">
               <div className="relative h-full">
                 <ProductCard 
                   product={product}
                   layout={gridLayout}
+                  sponsored={true}
                 />
-                <Badge 
-                  className="absolute top-2 right-2 bg-yellow-500/90 text-xs"
-                  variant="secondary"
-                >
-                  Sponsored
-                </Badge>
               </div>
             </div>
           ))}

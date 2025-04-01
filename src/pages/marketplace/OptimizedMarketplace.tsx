@@ -12,6 +12,7 @@ import { CategorySubcategoryGrid } from "@/components/marketplace/CategorySubcat
 import { TrendingProducts } from "@/components/marketplace/TrendingProducts"; 
 import { RecommendedProducts } from "@/components/marketplace/RecommendedProducts";
 import { PersonalizedRecommendations } from "@/components/marketplace/PersonalizedRecommendations";
+import { TopProducts } from "@/components/recommendations/TopProducts";
 
 const OptimizedMarketplace = () => {
   const navigate = useNavigate();
@@ -114,6 +115,12 @@ const OptimizedMarketplace = () => {
         <BannerCarousel />
       </div>
       
+      {/* Category with Subcategories */}
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold mb-4">Shop by Category</h2>
+        <CategorySubcategoryGrid onCategorySelect={handleCategoryChange} />
+      </div>
+      
       {/* Sponsored Products Section */}
       <div className="mb-8">
         <SponsoredProducts />
@@ -122,6 +129,11 @@ const OptimizedMarketplace = () => {
       {/* Trending Products */}
       <div className="mb-8">
         <TrendingProducts />
+      </div>
+      
+      {/* Top Products - renamed from SponsoredRecommendations */}
+      <div className="mb-8">
+        <TopProducts title="Top Products" showTitle={true} />
       </div>
       
       {/* Personalized Recommendations */}
@@ -137,12 +149,6 @@ const OptimizedMarketplace = () => {
       {/* Crazy Deals Section */}
       <div className="mb-8">
         <CrazyDeals />
-      </div>
-      
-      {/* Category with Subcategories */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold mb-4">Shop by Category</h2>
-        <CategorySubcategoryGrid onCategorySelect={handleCategoryChange} />
       </div>
       
       {/* Main content - Browse All */}
