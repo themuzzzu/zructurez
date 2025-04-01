@@ -9,6 +9,7 @@ import {
   Smartphone, Headphones, Tv, Watch, Tablet
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 
 interface CategoriesProps {
   onCategorySelect: (category: string) => void;
@@ -17,26 +18,26 @@ interface CategoriesProps {
 }
 
 const categoryIcons: Record<string, React.ReactNode> = {
-  clothing: <Shirt className="h-4 w-4" />,
-  home: <Home className="h-4 w-4" />,
-  electronics: <Laptop className="h-4 w-4" />,
-  mobiles: <Smartphone className="h-4 w-4" />,
-  food: <Utensils className="h-4 w-4" />,
-  gifts: <Gift className="h-4 w-4" />,
-  automotive: <Car className="h-4 w-4" />,
-  photography: <Camera className="h-4 w-4" />,
-  health: <Heart className="h-4 w-4" />,
-  art: <Paintbrush className="h-4 w-4" />,
-  beauty: <Leaf className="h-4 w-4" />,
-  books: <BookOpen className="h-4 w-4" />,
-  sports: <Dumbbell className="h-4 w-4" />,
-  music: <Music className="h-4 w-4" />,
-  baby: <Baby className="h-4 w-4" />,
-  furniture: <Sofa className="h-4 w-4" />,
-  headphones: <Headphones className="h-4 w-4" />,
-  appliances: <Tv className="h-4 w-4" />,
-  wearables: <Watch className="h-4 w-4" />,
-  tablets: <Tablet className="h-4 w-4" />,
+  clothing: <Shirt className="h-5 w-5" />, // Increased from h-4 w-4
+  home: <Home className="h-5 w-5" />,
+  electronics: <Laptop className="h-5 w-5" />,
+  mobiles: <Smartphone className="h-5 w-5" />,
+  food: <Utensils className="h-5 w-5" />,
+  gifts: <Gift className="h-5 w-5" />,
+  automotive: <Car className="h-5 w-5" />,
+  photography: <Camera className="h-5 w-5" />,
+  health: <Heart className="h-5 w-5" />,
+  art: <Paintbrush className="h-5 w-5" />,
+  beauty: <Leaf className="h-5 w-5" />,
+  books: <BookOpen className="h-5 w-5" />,
+  sports: <Dumbbell className="h-5 w-5" />,
+  music: <Music className="h-5 w-5" />,
+  baby: <Baby className="h-5 w-5" />,
+  furniture: <Sofa className="h-5 w-5" />,
+  headphones: <Headphones className="h-5 w-5" />,
+  appliances: <Tv className="h-5 w-5" />,
+  wearables: <Watch className="h-5 w-5" />,
+  tablets: <Tablet className="h-5 w-5" />,
 };
 
 const categoryNames: Record<string, string> = {
@@ -92,9 +93,17 @@ export const Categories = ({
     if (subCategories[category] && subCategories[category].length > 0) {
       setCurrentCategory(category);
       setShowSubcategories(true);
+      toast.success(`Browsing ${categoryNames[category] || category}`);
     } else {
       setShowSubcategories(false);
+      toast.success(`Showing all ${categoryNames[category] || category}`);
     }
+  };
+  
+  const handleSubcategoryClick = (subcategory: string) => {
+    const formattedSubcategory = `${currentCategory}-${subcategory.toLowerCase().replace(/[' ]/g, '-')}`;
+    onCategorySelect(formattedSubcategory);
+    toast.success(`Browsing ${subcategory}`);
   };
   
   // If trending categories are empty, use the predefined list
@@ -121,7 +130,7 @@ export const Categories = ({
               <Badge
                 variant="outline"
                 className={cn(
-                  "h-9 px-4 py-2 cursor-pointer whitespace-nowrap border border-gray-200 dark:border-gray-700 transition-all duration-300",
+                  "h-10 px-4 py-2 cursor-pointer whitespace-nowrap border border-gray-200 dark:border-gray-700 transition-all duration-300",
                   selectedCategory === category 
                     ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/30' 
                     : 'bg-background hover:bg-accent/50 transition-colors'
@@ -152,8 +161,8 @@ export const Categories = ({
                 >
                   <Badge
                     variant="outline"
-                    className="h-8 px-3 py-1.5 cursor-pointer whitespace-nowrap border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 transition-colors"
-                    onClick={() => onCategorySelect(`${currentCategory}-${subcategory.toLowerCase().replace(/[' ]/g, '-')}`)}
+                    className="h-9 px-3 py-1.5 cursor-pointer whitespace-nowrap border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 transition-colors"
+                    onClick={() => handleSubcategoryClick(subcategory)}
                   >
                     {subcategory}
                   </Badge>

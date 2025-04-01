@@ -1,8 +1,8 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ShoppingSection } from "@/components/ShoppingSection";
 import { Categories } from "@/components/marketplace/Categories";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { SponsoredProducts } from "@/components/marketplace/SponsoredProducts";
 import { TopDeals } from "@/components/marketplace/TopDeals";
 import { TrendingProducts } from "@/components/marketplace/TrendingProducts";
@@ -28,13 +28,25 @@ export const BrowseTabContent = ({
   onSearchSelect
 }: BrowseTabContentProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [selectedCategory, setSelectedCategory] = useState("all");
+  
+  // Parse URL query parameters to set initial category
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const categoryParam = params.get('category');
+    if (categoryParam) {
+      setSelectedCategory(categoryParam);
+    }
+  }, [location.search]);
   
   const handleCategorySelect = (category: string) => {
     setSelectedCategory(category);
     
     if (category !== "all") {
       navigate(`/marketplace?category=${category}`);
+    } else {
+      navigate('/marketplace');
     }
     
     // Call the parent handler if provided

@@ -1,6 +1,6 @@
 
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { BusinessCard } from "@/components/BusinessCard";
 import { BusinessCategoryFilter } from "@/components/BusinessCategoryFilter";
@@ -21,18 +21,31 @@ import { TrendingServices } from "@/components/home/TrendingServices";
 import { PopularCategories } from "@/components/home/PopularCategories";
 import { FeaturedBusinesses } from "@/components/home/FeaturedBusinesses";
 import { DealsSection } from "@/components/home/DealsSection";
+import { BusinessCategoryNavBar } from "@/components/business/BusinessCategoryNavBar";
 
 const Business = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
   
+  // Parse URL parameters
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const categoryParam = params.get('category');
+    const subcategoryParam = params.get('subcategory');
+    
+    if (categoryParam) {
+      setSelectedCategory(subcategoryParam ? `${categoryParam}-${subcategoryParam}` : categoryParam);
+    }
+  }, [location.search]);
+  
   const { data: businesses, isLoading, error } = useQuery({
-    queryKey: ['businesses'],
+    queryKey: ['businesses', selectedCategory],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('businesses')
         .select(`
           *,
@@ -40,7 +53,20 @@ const Business = () => {
           business_ratings (*)
         `)
         .order('created_at', { ascending: false });
+      
+      // Filter by category if not "all"
+      if (selectedCategory !== "all") {
+        // Check if it's a subcategory selection (contains a hyphen)
+        if (selectedCategory.includes('-')) {
+          const [category, subcategory] = selectedCategory.split('-');
+          query = query.eq('category', category).eq('subcategory', subcategory);
+        } else {
+          query = query.eq('category', selectedCategory);
+        }
+      }
 
+      const { data, error } = await query;
+      
       if (error) throw error;
       
       const businessesWithRating = data?.map(business => {
@@ -62,7 +88,6 @@ const Business = () => {
   if (error) return <ErrorView />;
 
   const filteredBusinesses = businesses?.filter(business => 
-    (selectedCategory === "all" || business.category === selectedCategory) &&
     (
       business.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       business.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -90,6 +115,12 @@ const Business = () => {
 
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
+    
+    if (category === "all") {
+      navigate("/businesses");
+    } else {
+      navigate(`/businesses?category=${category}`);
+    }
   };
 
   return (
@@ -123,6 +154,9 @@ const Business = () => {
             <>
               {/* Hero Section with Search */}
               <SearchHero />
+              
+              {/* Add Business Category Navigation Bar */}
+              <BusinessCategoryNavBar />
               
               <div className="space-y-8 mt-8">
                 {/* Business Categories Grid */}

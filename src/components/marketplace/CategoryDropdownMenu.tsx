@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
+import { toast } from "sonner";
 
 interface SubSubCategory {
   id: string;
@@ -44,10 +45,17 @@ export const CategoryDropdownMenu = ({ categoryId, categoryName, subCategories }
 
   const handleSubCategoryClick = (subCategoryId: string) => {
     navigate(`/marketplace?category=${categoryId}&subcategory=${subCategoryId}`);
+    toast.success(`Browsing ${subCategories.find(s => s.id === subCategoryId)?.name || ''} products`);
   };
 
   const handleSubSubCategoryClick = (subCategoryId: string, subSubCategoryId: string) => {
     navigate(`/marketplace?category=${categoryId}&subcategory=${subCategoryId}&subsubcategory=${subSubCategoryId}`);
+    
+    // Find the subcategory and subsubcategory names for the toast
+    const subCategory = subCategories.find(s => s.id === subCategoryId);
+    const subSubCategory = subCategory?.subSubCategories?.find(ss => ss.id === subSubCategoryId);
+    
+    toast.success(`Browsing ${subSubCategory?.name || ''} products`);
   };
 
   return (

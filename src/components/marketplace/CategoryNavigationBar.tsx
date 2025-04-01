@@ -166,6 +166,9 @@ export const CategoryNavigationBar = () => {
     } else {
       setActiveCategory(categoryId);
     }
+
+    // Navigate to category page when clicking on a category
+    navigate(`/marketplace?category=${categoryId}`);
   };
 
   return (
@@ -176,7 +179,7 @@ export const CategoryNavigationBar = () => {
             <div key={category.id} className="relative flex-shrink-0">
               <button
                 className={cn(
-                  "flex flex-col items-center justify-center p-2 min-w-[80px] text-center whitespace-nowrap",
+                  "flex flex-col items-center justify-center p-2 min-w-[85px] text-center whitespace-nowrap",
                   activeCategory === category.id ? "text-blue-600 dark:text-blue-400" : "text-gray-700 dark:text-gray-200"
                 )}
                 onClick={() => handleCategoryClick(category.id)}
@@ -184,7 +187,7 @@ export const CategoryNavigationBar = () => {
                 <img 
                   src={category.icon} 
                   alt={category.name}
-                  className="w-12 h-12 mb-1 object-contain"
+                  className="w-14 h-14 mb-1 object-contain" // Increased from w-12 h-12 to w-14 h-14
                 />
                 <span className="text-xs font-medium flex items-center">
                   {category.name}
