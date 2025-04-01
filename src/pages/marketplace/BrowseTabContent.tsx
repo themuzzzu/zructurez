@@ -86,6 +86,9 @@ export const BrowseTabContent = ({
       {/* Sponsored Products */}
       <SponsoredProducts />
       
+      {/* Trending Products */}
+      <TrendingProducts />
+      
       {/* Categories Navigation */}
       <div className="mb-6 px-2">
         <Categories 
@@ -101,9 +104,6 @@ export const BrowseTabContent = ({
           <CategorySubcategoryGrid onCategorySelect={handleSubcategorySelect} />
         </div>
       )}
-      
-      {/* Trending Products */}
-      <TrendingProducts />
       
       {/* Product Sections */}
       <div className="space-y-12">

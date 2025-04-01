@@ -4,24 +4,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ProductCard } from "@/components/products/ProductCard";
-import { ThumbsUp } from "lucide-react";
+import { ThumbsUp, ChevronLeft, ChevronRight } from "lucide-react";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
-import { useState, useEffect } from "react";
-import { 
-  Carousel, 
-  CarouselContent, 
-  CarouselItem, 
-  CarouselNext, 
-  CarouselPrevious 
-} from "@/components/ui/carousel";
+import { useState, useRef } from "react";
+import { Button } from "@/components/ui/button";
 
 interface RecommendedProductsProps {
   gridLayout?: GridLayoutType;
 }
 
 export const RecommendedProducts = ({ gridLayout = "grid4x4" }: RecommendedProductsProps) => {
-  const [api, setApi] = useState<any>(null);
-  const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   
   const { data: products, isLoading } = useQuery({
     queryKey: ['recommended-products'],
@@ -36,23 +29,25 @@ export const RecommendedProducts = ({ gridLayout = "grid4x4" }: RecommendedProdu
     }
   });
   
-  // Auto-scroll effect for carousel
-  useEffect(() => {
-    if (!api || !autoScrollEnabled || !products || products.length <= 1) return;
-    
-    const interval = setInterval(() => {
-      api.scrollNext();
-    }, 5000); // Different timing from other carousels
-    
-    return () => clearInterval(interval);
-  }, [api, autoScrollEnabled, products]);
+  // Handle horizontal scroll with buttons
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = 300;
+      const currentScroll = scrollContainerRef.current.scrollLeft;
+      
+      scrollContainerRef.current.scrollTo({
+        left: direction === 'left' ? currentScroll - scrollAmount : currentScroll + scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
   
   if (isLoading) {
     return (
       <div className="space-y-4 mb-8">
         <h3 className="text-xl md:text-2xl font-bold flex items-center gap-2">
           <ThumbsUp className="h-5 w-5 text-green-500" />
-          Trending
+          Recommended For You
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
@@ -70,35 +65,57 @@ export const RecommendedProducts = ({ gridLayout = "grid4x4" }: RecommendedProdu
   }
   
   if (!products || products.length === 0) {
-    return <div className="text-center text-muted-foreground">No trending products found</div>;
+    return <div className="text-center text-muted-foreground">No recommended products found</div>;
   }
   
   return (
-    <div className="space-y-4 mb-8">
-      <h3 className="text-xl md:text-2xl font-bold flex items-center gap-2">
-        <ThumbsUp className="h-5 w-5 text-green-500" />
-        Trending
-      </h3>
+    <div className="space-y-4 mb-8 relative">
+      <div className="flex justify-between items-center">
+        <h3 className="text-xl md:text-2xl font-bold flex items-center gap-2">
+          <ThumbsUp className="h-5 w-5 text-green-500" />
+          Recommended For You
+        </h3>
+      </div>
       
-      <Carousel 
-        className="w-full" 
-        setApi={setApi}
-        onMouseEnter={() => setAutoScrollEnabled(false)}
-        onMouseLeave={() => setAutoScrollEnabled(true)}
-      >
-        <CarouselContent className="-ml-2 md:-ml-4">
+      <div className="relative group">
+        {/* Left scroll button */}
+        <Button 
+          onClick={() => scroll('left')}
+          size="icon"
+          variant="ghost" 
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 dark:bg-black/50 rounded-full opacity-70 hover:opacity-100 shadow-md hidden md:flex"
+        >
+          <ChevronLeft />
+        </Button>
+        
+        {/* Scrollable container */}
+        <div 
+          ref={scrollContainerRef}
+          className="flex overflow-x-auto gap-3 pb-2 pt-1 px-1 no-scrollbar snap-x snap-mandatory scroll-smooth"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
           {products.map((product) => (
-            <CarouselItem key={product.id} className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4">
-              <ProductCard 
-                product={product}
-                layout={gridLayout}
-              />
-            </CarouselItem>
+            <div key={product.id} className="min-w-[220px] flex-shrink-0 snap-start">
+              <div className="relative h-full">
+                <ProductCard 
+                  product={product}
+                  layout={gridLayout}
+                />
+              </div>
+            </div>
           ))}
-        </CarouselContent>
-        <CarouselPrevious className="hidden md:flex left-0 bg-white/80 dark:bg-zinc-800/80 hover:bg-white dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-700" />
-        <CarouselNext className="hidden md:flex right-0 bg-white/80 dark:bg-zinc-800/80 hover:bg-white dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-700" />
-      </Carousel>
+        </div>
+        
+        {/* Right scroll button */}
+        <Button 
+          onClick={() => scroll('right')}
+          size="icon"
+          variant="ghost" 
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 dark:bg-black/50 rounded-full opacity-70 hover:opacity-100 shadow-md hidden md:flex"
+        >
+          <ChevronRight />
+        </Button>
+      </div>
     </div>
   );
 };
