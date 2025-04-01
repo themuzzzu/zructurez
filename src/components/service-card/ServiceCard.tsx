@@ -1,103 +1,140 @@
 
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Star } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
+import { Calendar, Heart, MapPin, Clock, Star, ExternalLink } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { trackServiceView } from "@/services/serviceService";
 
-export interface ServiceCardProps {
+interface ServiceCardProps {
   id: string;
-  title?: string;
-  name?: string;
+  title: string;
   description: string;
-  image?: string;
   image_url?: string;
-  price?: number;
-  hourlyRate?: number;
-  providerId?: string;
+  price: number;
   providerName?: string;
-  provider?: string;
-  avatar?: string;
+  providerId: string;
   category?: string;
-  rating?: number;
-  reviews?: number;
-  views?: number;
   location?: string;
-  tags?: string[];
-  isFeatured?: boolean;
-  isRecommended?: boolean;
-  isPopular?: boolean;
+  views?: number;
+  rating?: number;
+  sponsored?: boolean;
 }
 
 export const ServiceCard = ({
   id,
   title,
-  name,
   description,
-  image,
   image_url,
   price,
-  hourlyRate,
-  providerId,
   providerName,
-  provider,
-  avatar,
+  providerId,
   category,
-  rating = 0,
-  reviews = 0,
   location,
-  tags,
-  isFeatured,
-  isRecommended,
-  isPopular,
+  views,
+  rating = 4.5,
+  sponsored = false
 }: ServiceCardProps) => {
-  const displayName = title || name || "";
-  const displayImage = image || image_url || "/placeholder.jpg";
-  const displayPrice = price || hourlyRate || 0;
-  const displayProvider = providerName || provider || "";
+  const navigate = useNavigate();
+  const [isLiked, setIsLiked] = useState(false);
+
+  const handleClick = () => {
+    trackServiceView(id); // Track the view
+    navigate(`/services/${id}`);
+  };
+
+  const handleProviderClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/businesses/${providerId}`);
+  };
+
+  const toggleLike = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsLiked(!isLiked);
+  };
 
   return (
-    <Card className="overflow-hidden transition-all duration-300 hover:shadow-md border">
-      <div className="relative">
+    <Card className="overflow-hidden transition-all duration-300 hover:shadow-md h-full flex flex-col">
+      <div className="relative h-48 overflow-hidden cursor-pointer" onClick={handleClick}>
         <img 
-          src={displayImage} 
-          alt={displayName} 
-          className="w-full h-48 object-cover" 
+          src={image_url || '/placeholder-service.jpg'}
+          alt={title}
+          className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
         />
-        {isFeatured && (
-          <Badge className="absolute top-2 right-2 bg-yellow-500">Featured</Badge>
+        {sponsored && (
+          <Badge 
+            variant="secondary" 
+            className="absolute top-2 right-2 bg-blue-500/80 text-white hover:bg-blue-600 border-none"
+          >
+            Sponsored
+          </Badge>
         )}
       </div>
       
-      <div className="p-4">
+      <CardContent className="flex-1 p-4 space-y-2 cursor-pointer" onClick={handleClick}>
         <div className="flex justify-between items-start">
-          <h3 className="font-semibold text-lg truncate">{displayName}</h3>
-          <Badge variant="outline">
-            ${displayPrice}
-            {hourlyRate ? "/hr" : ""}
+          <h3 className="font-semibold line-clamp-1">{title}</h3>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8"
+            onClick={toggleLike}
+          >
+            <Heart 
+              className={`h-4 w-4 ${isLiked ? 'fill-red-500 text-red-500' : ''}`} 
+            />
+          </Button>
+        </div>
+        
+        {providerName && (
+          <Badge 
+            variant="outline" 
+            className="text-xs bg-transparent cursor-pointer hover:bg-secondary"
+            onClick={handleProviderClick}
+          >
+            {providerName}
           </Badge>
-        </div>
-        
-        <p className="text-muted-foreground text-sm my-2 line-clamp-2">{description}</p>
-        
-        <div className="flex justify-between items-center mt-4">
-          <div className="flex items-center space-x-1">
-            <Star className="h-4 w-4 fill-yellow-400 stroke-yellow-400" />
-            <span className="text-sm font-medium">{rating}</span>
-            <span className="text-xs text-muted-foreground">({reviews})</span>
-          </div>
-          
-          <Link to={`/services/${id}`}>
-            <Button size="sm" variant="outline">View Details</Button>
-          </Link>
-        </div>
-        
-        {displayProvider && (
-          <div className="mt-3 pt-3 border-t text-xs text-muted-foreground flex items-center">
-            By {displayProvider}
-          </div>
         )}
-      </div>
+        
+        <p className="text-sm text-muted-foreground line-clamp-2">{description}</p>
+        
+        <div className="flex items-center gap-2">
+          <span className="font-bold">₹{price.toLocaleString()}</span>
+        </div>
+        
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+          {location && (
+            <span className="flex items-center gap-1">
+              <MapPin className="h-3 w-3" />
+              {location}
+            </span>
+          )}
+          {category && (
+            <span className="flex items-center gap-1">
+              <ExternalLink className="h-3 w-3" />
+              {category}
+            </span>
+          )}
+          <span className="flex items-center gap-1">
+            <Star className="h-3 w-3 text-yellow-500" />
+            {rating}
+          </span>
+        </div>
+      </CardContent>
+      
+      <CardFooter className="p-4 pt-0">
+        <Button 
+          className="w-full gap-2" 
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/services/${id}/book`);
+          }}
+        >
+          <Calendar className="h-4 w-4" />
+          Book Now
+        </Button>
+      </CardFooter>
     </Card>
   );
 };

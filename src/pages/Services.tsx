@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
@@ -9,6 +10,13 @@ import { Spinner } from "@/components/common/Spinner";
 import { Layout } from "@/components/layout/Layout";
 import { GridLayoutSelector } from "@/components/marketplace/GridLayoutSelector";
 import { GridLayoutType } from "@/components/products/types/layouts";
+import { MarketplaceBanner } from "@/components/marketplace/MarketplaceBanner";
+import { ServiceCategoryFilter } from "@/components/ServiceCategoryFilter";
+import { SponsoredServices } from "@/components/service-marketplace/SponsoredServices";
+import { TrendingServices } from "@/components/service-marketplace/TrendingServices";
+import { RecommendedServices } from "@/components/service-marketplace/RecommendedServices";
+import { TopServices } from "@/components/service-marketplace/TopServices";
+import { ServiceIconGrid } from "@/components/service-marketplace/ServiceIconGrid";
 
 export default function Services() {
   const [services, setServices] = useState([]);
@@ -17,6 +25,7 @@ export default function Services() {
   const [userServices, setUserServices] = useState([]);
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
   const [gridLayout, setGridLayout] = useState<GridLayoutType>("grid3x3");
+  const [selectedCategory, setSelectedCategory] = useState("all");
 
   useEffect(() => {
     const checkUserAuth = async () => {
@@ -31,11 +40,16 @@ export default function Services() {
     const fetchServices = async () => {
       setLoading(true);
       try {
-        const { data, error } = await supabase
+        let query = supabase
           .from('services')
           .select('*')
-          .order('created_at', { ascending: false })
-          .limit(12);
+          .order('created_at', { ascending: false });
+
+        if (selectedCategory !== "all") {
+          query = query.eq('category', selectedCategory);
+        }
+          
+        const { data, error } = await query.limit(12);
           
         if (error) throw error;
         setServices(data || []);
@@ -63,8 +77,12 @@ export default function Services() {
     
     checkUserAuth();
     fetchServices();
-  }, []);
+  }, [selectedCategory]);
   
+  const handleCategoryChange = (category) => {
+    setSelectedCategory(category);
+  };
+
   const handleCreateSuccess = () => {
     setIsDialogOpen(false);
     window.location.reload();
@@ -88,7 +106,7 @@ export default function Services() {
 
   return (
     <Layout>
-      <div className="container max-w-7xl mx-auto px-2 sm:px-4 py-4 sm:py-8">
+      <div className="container max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <h1 className="text-2xl sm:text-3xl font-bold">Services</h1>
           <div className="flex items-center gap-4 w-full sm:w-auto">
@@ -103,6 +121,41 @@ export default function Services() {
               </Button>
             )}
           </div>
+        </div>
+
+        {/* Banner */}
+        <div className="mb-6">
+          <MarketplaceBanner />
+        </div>
+        
+        {/* Service Categories Icon Grid */}
+        <div className="mb-6">
+          <ServiceIconGrid onCategorySelect={handleCategoryChange} />
+        </div>
+
+        {/* Category Filter */}
+        <div className="mb-6">
+          <ServiceCategoryFilter onCategoryChange={handleCategoryChange} />
+        </div>
+        
+        {/* Sponsored Services */}
+        <div className="mb-8">
+          <SponsoredServices />
+        </div>
+
+        {/* Trending Services */}
+        <div className="mb-8">
+          <TrendingServices />
+        </div>
+
+        {/* Top Services */}
+        <div className="mb-8">
+          <TopServices />
+        </div>
+
+        {/* Recommended Services */}
+        <div className="mb-8">
+          <RecommendedServices />
         </div>
         
         {isUserLoggedIn && userServices.length > 0 && (
