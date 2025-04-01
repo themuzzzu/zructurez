@@ -49,7 +49,7 @@ export const BrowseTabContent = ({
     setSelectedSubcategory("");
     
     if (category !== "all") {
-      navigate(`/marketplace?category=${category}`);
+      navigate(`/products?category=${category}`);
     } else {
       navigate('/marketplace');
     }
@@ -65,10 +65,10 @@ export const BrowseTabContent = ({
     
     if (subcategory) {
       setSelectedSubcategory(subcategory);
-      navigate(`/marketplace?category=${category}&subcategory=${subcategory}`);
+      navigate(`/products?category=${category}&subcategory=${subcategory}`);
     } else {
       setSelectedSubcategory("");
-      navigate(`/marketplace?category=${category}`);
+      navigate(`/products?category=${category}`);
     }
   };
   
@@ -77,11 +77,14 @@ export const BrowseTabContent = ({
       {/* Banner */}
       <MarketplaceBanner />
       
-      {/* Category Icons - Moved right below banner */}
+      {/* Category Icons - Positioned between banner and sponsored products */}
       <div className="mb-6">
         <h2 className="text-xl font-bold mb-4">Shop by Category</h2>
         <CategoryIconGrid onCategorySelect={handleCategorySelect} />
       </div>
+      
+      {/* Sponsored Products */}
+      <SponsoredProducts />
       
       {/* Categories Navigation */}
       <div className="mb-6 px-2">
@@ -98,9 +101,6 @@ export const BrowseTabContent = ({
           <CategorySubcategoryGrid onCategorySelect={handleSubcategorySelect} />
         </div>
       )}
-      
-      {/* Sponsored Products */}
-      <SponsoredProducts />
       
       {/* Trending Products */}
       <TrendingProducts />

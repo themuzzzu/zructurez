@@ -59,6 +59,7 @@ function App() {
             <Route path="/jobs" element={<Jobs />} />
             <Route path="/marketplace" element={<Marketplace />} />
             <Route path="/marketplace/*" element={<Marketplace />} />
+            <Route path="/products" element={<Marketplace />} /> {/* Added route for products page that will use the Marketplace component */}
             <Route path="/businesses" element={<Business />} />
             <Route path="/businesses/:id" element={<BusinessDetails />} />
             <Route path="/register-business" element={<BusinessRegistrationForm />} />

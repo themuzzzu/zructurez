@@ -38,7 +38,8 @@ export const CategoryIconGrid = ({ onCategorySelect }: CategoryIconGridProps) =>
   ];
   
   const handleCategoryClick = (category: string) => {
-    navigate(`/marketplace?category=${category.toLowerCase().replace(/\s+/g, '-').replace(/&/g, '')}`);
+    // Navigate directly to a dedicated category page
+    navigate(`/products?category=${category.toLowerCase().replace(/\s+/g, '-').replace(/&/g, '')}`);
     
     if (onCategorySelect) {
       onCategorySelect(category.toLowerCase().replace(/\s+/g, '-').replace(/&/g, ''));
@@ -57,7 +58,7 @@ export const CategoryIconGrid = ({ onCategorySelect }: CategoryIconGridProps) =>
               className="flex flex-col items-center cursor-pointer group"
               onClick={() => handleCategoryClick(category.name)}
             >
-              <div className="w-12 h-12 rounded-full flex items-center justify-center bg-blue-900/30 mb-2 transition-all group-hover:scale-110 border border-red-500 group-hover:border-red-600 animate-pulse">
+              <div className="w-12 h-12 rounded-full flex items-center justify-center bg-blue-900/30 mb-2 transition-all group-hover:scale-110">
                 <Icon size={20} className="text-blue-400" />
               </div>
               <span className="text-xs text-center text-white">{category.name}</span>
