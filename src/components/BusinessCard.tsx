@@ -1,5 +1,6 @@
+
 import { useState } from "react";
-import { BusinessCardRating } from "./BusinessCardRating";
+import { BusinessCardRating } from "./business/BusinessCardRating";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
