@@ -20,13 +20,14 @@ export const PersonalizedRecommendations = () => {
   const navigate = useNavigate();
   const [api, setApi] = useState<any>(null);
   const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
-  // Fix: Properly destructure the user object and isLoading from useCurrentUser
-  const { user, isLoading: authLoading } = useCurrentUser();
+  
+  // Fix: The useCurrentUser hook returns a query result, so we need to access data
+  const { data: profile, isLoading: authLoading } = useCurrentUser();
   
   const { data: products, isLoading } = useQuery({
-    queryKey: ['personalized-recommendations', user?.id],
+    queryKey: ['personalized-recommendations', profile?.id],
     queryFn: async () => {
-      if (!user?.id) {
+      if (!profile?.id) {
         // Return popular products for non-logged in users
         const { data, error } = await supabase
           .from('products')
@@ -42,7 +43,7 @@ export const PersonalizedRecommendations = () => {
       const { data: viewedProducts } = await supabase
         .from('performance_metrics')
         .select('metadata')
-        .eq('user_id', user.id)
+        .eq('user_id', profile.id)
         .eq('endpoint', 'product_view')
         .order('timestamp', { ascending: false })
         .limit(5);
