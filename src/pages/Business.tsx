@@ -24,8 +24,25 @@ import { DealsSection } from "@/components/home/DealsSection";
 import { BusinessCategoryNavBar } from "@/components/business/BusinessCategoryNavBar";
 import type { Business, BusinessHours } from "@/types/business";
 
-// Define a simplified type for the business with ratings data
-interface BusinessWithRating extends Business {
+// Define a simpler type for business with ratings data that avoids recursion
+interface BusinessWithRating {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  subcategory?: string;
+  location?: string;
+  contact?: string;
+  hours?: string | BusinessHours;
+  business_hours?: string | BusinessHours;
+  verified?: boolean;
+  image_url?: string;
+  is_open?: boolean;
+  wait_time?: string;
+  closure_reason?: string;
+  created_at?: string;
+  appointment_price?: number;
+  consultation_price?: number;
   average_rating: number;
   business_ratings?: Array<{ rating: number }>;
 }
@@ -72,10 +89,10 @@ const Business = () => {
       
       if (error) throw error;
       
-      // Transform data to include average_rating
+      // Transform data to include average_rating with type safety
       return (data || []).map((business: any) => {
         const ratings = business.business_ratings || [];
-        const totalRating = ratings.reduce((sum: number, rating: any) => sum + rating.rating, 0);
+        const totalRating = ratings.reduce((sum: number, rating: any) => sum + (rating.rating || 0), 0);
         const averageRating = ratings.length > 0 ? totalRating / ratings.length : 0;
         
         return {
