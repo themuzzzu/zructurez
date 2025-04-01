@@ -43,6 +43,7 @@ export const ProductLikeButton = ({
       className={`relative group ${className}`}
       onClick={handleClick}
       disabled={isLoading}
+      aria-label={liked ? "Unlike product" : "Like product"}
     >
       <div className="relative z-10">
         {isLoading ? (

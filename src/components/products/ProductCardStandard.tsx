@@ -2,7 +2,7 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Heart, Star } from "lucide-react";
+import { ShoppingCart, Star } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,62 +27,6 @@ export const ProductCardStandard = ({
 }: ProductCardStandardProps) => {
   const queryClient = useQueryClient();
   const [isAddingToCart, setIsAddingToCart] = useState(false);
-  
-  const addToWishlistMutation = useMutation({
-    mutationFn: async () => {
-      const { data: session } = await supabase.auth.getSession();
-      if (!session?.session?.user) {
-        throw new Error('User must be logged in to add items to wishlist');
-      }
-
-      const { data: existingItems, error: checkError } = await supabase
-        .from('wishlists')
-        .select('*')
-        .eq('user_id', session.session.user.id)
-        .eq('product_id', product.id)
-        .single();
-
-      if (checkError && checkError.code !== 'PGRST116') {
-        throw checkError;
-      }
-
-      if (existingItems) {
-        const { error: deleteError } = await supabase
-          .from('wishlists')
-          .delete()
-          .eq('id', existingItems.id);
-          
-        if (deleteError) throw deleteError;
-        return { action: 'removed' };
-      }
-
-      const { error: insertError } = await supabase
-        .from('wishlists')
-        .insert({
-          user_id: session.session.user.id,
-          product_id: product.id
-        });
-
-      if (insertError) throw insertError;
-      return { action: 'added' };
-    },
-    onSuccess: (result) => {
-      if (result.action === 'added') {
-        toast.success("Added to wishlist");
-      } else {
-        toast.success("Removed from wishlist");
-      }
-      queryClient.invalidateQueries({ queryKey: ['wishlists'] });
-    },
-    onError: (error) => {
-      console.error('Error updating wishlist:', error);
-      if (error instanceof Error && error.message.includes('logged in')) {
-        toast.error(error.message);
-      } else {
-        toast.error("Failed to update wishlist");
-      }
-    },
-  });
   
   const addToCart = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -142,22 +86,10 @@ export const ProductCardStandard = ({
         )}
         
         {sponsored && (
-          <Badge variant="outline" className="absolute top-2 right-10 text-xs py-0 px-1.5 bg-purple-100 text-purple-600 border-purple-200">
+          <Badge variant="outline" className="absolute top-2 left-2 text-xs py-0 px-1.5 bg-purple-100 text-purple-600 border-purple-200">
             Ad
           </Badge>
         )}
-        
-        <Button
-          size="icon"
-          variant="ghost"
-          className="absolute top-2 right-2 h-7 w-7 bg-white/60 hover:bg-white/80 backdrop-blur-sm"
-          onClick={(e) => {
-            e.stopPropagation();
-            addToWishlistMutation.mutate();
-          }}
-        >
-          <Heart className="h-3.5 w-3.5" />
-        </Button>
       </div>
       
       <div className={`p-3 ${isGrid2x2 ? 'p-4' : ''}`} onClick={onClick}>

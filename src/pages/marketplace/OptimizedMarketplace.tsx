@@ -6,10 +6,12 @@ import { SearchTabContent } from "./SearchTabContent";
 import { GridLayoutType } from "@/components/products/types/layouts";
 import { AutocompleteSearch } from "@/components/marketplace/AutocompleteSearch";
 import { BannerCarousel } from "@/components/marketplace/BannerCarousel";
-import { TopRatedBusinesses } from "@/components/home/TopRatedBusinesses";
 import { CrazyDeals } from "@/components/marketplace/CrazyDeals";
 import { SponsoredProducts } from "@/components/marketplace/SponsoredProducts";
 import { CategorySubcategoryGrid } from "@/components/marketplace/CategorySubcategoryGrid";
+import { TrendingProducts } from "@/components/marketplace/TrendingProducts"; 
+import { RecommendedProducts } from "@/components/marketplace/RecommendedProducts";
+import { PersonalizedRecommendations } from "@/components/marketplace/PersonalizedRecommendations";
 
 const OptimizedMarketplace = () => {
   const navigate = useNavigate();
@@ -117,9 +119,19 @@ const OptimizedMarketplace = () => {
         <SponsoredProducts />
       </div>
       
-      {/* Top Rated Businesses */}
+      {/* Trending Products */}
       <div className="mb-8">
-        <TopRatedBusinesses />
+        <TrendingProducts />
+      </div>
+      
+      {/* Personalized Recommendations */}
+      <div className="mb-8">
+        <PersonalizedRecommendations />
+      </div>
+      
+      {/* Recommended Products */}
+      <div className="mb-8">
+        <RecommendedProducts />
       </div>
       
       {/* Crazy Deals Section */}

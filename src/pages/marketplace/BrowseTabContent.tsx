@@ -3,6 +3,9 @@ import { useState } from "react";
 import { ShoppingSection } from "@/components/ShoppingSection";
 import { Categories } from "@/components/marketplace/Categories";
 import { useNavigate } from "react-router-dom";
+import { SponsoredProducts } from "@/components/marketplace/SponsoredProducts";
+import { TopDeals } from "@/components/marketplace/TopDeals";
+import { TrendingProducts } from "@/components/marketplace/TrendingProducts";
 
 interface BrowseTabContentProps {
   searchResults?: any[];
@@ -37,7 +40,7 @@ export const BrowseTabContent = ({
   
   return (
     <div className="space-y-6">
-      {/* Categories moved below banner */}
+      {/* Categories */}
       <div className="mb-6 px-2">
         <Categories 
           onCategorySelect={handleCategorySelect} 
@@ -45,10 +48,14 @@ export const BrowseTabContent = ({
         />
       </div>
       
-      <ShoppingSection 
-        searchQuery={searchTerm || ""}
-        selectedCategory={selectedCategory === "all" ? "" : selectedCategory}
-      />
+      {/* Product Sections */}
+      <div className="space-y-12">
+        {/* Shopping Section - filtered by category */}
+        <ShoppingSection 
+          searchQuery={searchTerm || ""}
+          selectedCategory={selectedCategory === "all" ? "" : selectedCategory}
+        />
+      </div>
     </div>
   );
 };
