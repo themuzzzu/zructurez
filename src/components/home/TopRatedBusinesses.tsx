@@ -124,7 +124,7 @@ export const TopRatedBusinesses = () => {
                 reviews={business.reviews_count || 0}
                 location={business.location || ''}
                 contact={business.contact || ''}
-                hours={business.hours || business.business_hours || ''}
+                hours={business.hours || ''}
                 verified={business.verified || false}
                 appointment_price={business.appointment_price}
                 consultation_price={business.consultation_price}

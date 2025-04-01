@@ -94,7 +94,25 @@ export const EnhancedShoppingSection = ({
           ) : businesses && businesses.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {businesses.map((business) => (
-                <BusinessCard key={business.id} business={business} />
+                <BusinessCard 
+                  key={business.id}
+                  id={business.id}
+                  name={business.name}
+                  category={business.category}
+                  description={business.description || ""}
+                  image={business.image_url || '/placeholder.svg'}
+                  rating={business.ratings || 0}
+                  reviews={business.reviews_count || 0}
+                  location={business.location || ''}
+                  contact={business.contact || ''}
+                  hours={business.hours || ''}
+                  verified={business.verified || false}
+                  appointment_price={business.appointment_price}
+                  consultation_price={business.consultation_price}
+                  is_open={business.is_open || false}
+                  wait_time={business.wait_time}
+                  closure_reason={business.closure_reason}
+                />
               ))}
             </div>
           ) : (

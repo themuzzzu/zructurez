@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
@@ -28,7 +27,6 @@ import { SponsoredProducts } from "@/components/marketplace/SponsoredProducts";
 import { CategorySubcategoryGrid } from "@/components/marketplace/CategorySubcategoryGrid";
 import type { BusinessHours } from "@/types/business";
 
-// Define a completely flat type for business with ratings data to avoid recursion
 interface BusinessWithRating {
   id: string;
   name: string;
@@ -37,8 +35,8 @@ interface BusinessWithRating {
   subcategory?: string;
   location?: string;
   contact?: string;
-  hours?: string | BusinessHours;
-  business_hours?: string | BusinessHours;
+  hours?: string;
+  business_hours?: string;
   verified?: boolean;
   image_url?: string;
   is_open?: boolean;
@@ -48,6 +46,7 @@ interface BusinessWithRating {
   appointment_price?: number;
   consultation_price?: number;
   average_rating: number;
+  reviews_count: number;
   business_ratings: Array<{ rating: number }>;
 }
 
@@ -69,13 +68,11 @@ const Business = () => {
     }
   }, [location.search]);
   
-  // Use explicit types for the query function to avoid recursion
   const fetchBusinesses = async (): Promise<BusinessWithRating[]> => {
     let query = supabase
       .from('businesses')
       .select(`
         *,
-        business_products (*),
         business_ratings (*)
       `);
     
@@ -92,8 +89,7 @@ const Business = () => {
     
     if (error) throw error;
     
-    // Transform data to include average_rating with explicit typing
-    return (data || []).map((business: any): BusinessWithRating => {
+    return (data || []).map((business): BusinessWithRating => {
       const ratings = business.business_ratings || [];
       const totalRating = ratings.reduce((sum: number, rating: any) => sum + (rating.rating || 0), 0);
       const averageRating = ratings.length > 0 ? totalRating / ratings.length : 0;
@@ -117,6 +113,7 @@ const Business = () => {
         appointment_price: business.appointment_price,
         consultation_price: business.consultation_price,
         average_rating: averageRating,
+        reviews_count: ratings.length,
         business_ratings: ratings
       };
     });
@@ -130,7 +127,6 @@ const Business = () => {
   if (isLoading) return <LoadingView />;
   if (error) return <ErrorView />;
 
-  // Filter businesses based on search query
   const filteredBusinesses = (businesses || []).filter(business => 
     business.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     business.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -138,7 +134,6 @@ const Business = () => {
     (business.location && business.location.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
-  // Sort businesses based on sort criteria
   const sortedBusinesses = [...filteredBusinesses].sort((a, b) => {
     switch (sortBy) {
       case "newest":
@@ -166,7 +161,6 @@ const Business = () => {
     }
   };
 
-  // Helper function to convert hours to string format
   const formatHours = (hours: string | BusinessHours | undefined): string => {
     if (!hours) return '';
     if (typeof hours === 'string') return hours;
@@ -224,14 +218,12 @@ const Business = () => {
               <BusinessCategoryNavBar />
               
               <div className="space-y-8 mt-8">
-                {/* New Sections */}
                 <TopRatedBusinesses />
                 
                 <CrazyDeals />
                 
                 <SponsoredProducts />
                 
-                {/* Category with subcategories grid */}
                 <div className="mt-8">
                   <h2 className="text-2xl font-bold mb-4">Browse by Category</h2>
                   <CategorySubcategoryGrid onCategorySelect={handleSubcategorySelect} />
@@ -268,28 +260,51 @@ const Business = () => {
 
                   {businesses && businesses.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {sortedBusinesses.map((business) => (
-                        <div key={business.id} className="h-full">
-                          <BusinessCard 
-                            id={business.id}
-                            name={business.name}
-                            category={business.category}
-                            description={business.description}
-                            image={business.image_url || '/placeholder.svg'}
-                            rating={business.average_rating || 0}
-                            reviews={business.business_ratings?.length || 0}
-                            location={business.location || ''}
-                            contact={business.contact || ''}
-                            hours={formatHours(business.hours || business.business_hours)}
-                            verified={business.verified || false}
-                            appointment_price={business.appointment_price}
-                            consultation_price={business.consultation_price}
-                            is_open={business.is_open}
-                            wait_time={business.wait_time}
-                            closure_reason={business.closure_reason}
-                          />
-                        </div>
-                      ))}
+                      {businesses
+                        .filter(business => 
+                          business.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          business.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          business.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (business.location && business.location.toLowerCase().includes(searchQuery.toLowerCase()))
+                        )
+                        .sort((a, b) => {
+                          switch (sortBy) {
+                            case "newest":
+                              return new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime();
+                            case "oldest":
+                              return new Date(a.created_at || '').getTime() - new Date(b.created_at || '').getTime();
+                            case "rating":
+                              return (b.average_rating || 0) - (a.average_rating || 0);
+                            case "name_asc":
+                              return (a.name || '').localeCompare(b.name || '');
+                            case "name_desc":
+                              return (b.name || '').localeCompare(a.name || '');
+                            default:
+                              return 0;
+                          }
+                        })
+                        .map((business) => (
+                          <div key={business.id} className="h-full">
+                            <BusinessCard 
+                              id={business.id}
+                              name={business.name}
+                              category={business.category}
+                              description={business.description}
+                              image={business.image_url || '/placeholder.svg'}
+                              rating={business.average_rating || 0}
+                              reviews={business.reviews_count || 0}
+                              location={business.location || ''}
+                              contact={business.contact || ''}
+                              hours={formatHours(business.hours || business.business_hours)}
+                              verified={business.verified || false}
+                              appointment_price={business.appointment_price}
+                              consultation_price={business.consultation_price}
+                              is_open={business.is_open}
+                              wait_time={business.wait_time}
+                              closure_reason={business.closure_reason}
+                            />
+                          </div>
+                        ))}
                     </div>
                   ) : (
                     <div className="text-center py-12">
