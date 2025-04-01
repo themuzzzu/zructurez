@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BusinessCard } from './BusinessCard';
 import { Business } from '@/types/business';
 import { GridLayoutType } from './products/types/layouts';
+import { useNavigate } from 'react-router-dom';
 
 interface EnhancedShoppingSectionProps {
   searchQuery: string;
@@ -32,6 +33,7 @@ export const EnhancedShoppingSection = ({
   gridLayout = 'grid4x4'
 }: EnhancedShoppingSectionProps) => {
   const [activeTab, setActiveTab] = useState("products");
+  const navigate = useNavigate();
   
   // Query for businesses that match the search query
   const { data: businesses, isLoading: businessesLoading } = useQuery({
@@ -55,9 +57,18 @@ export const EnhancedShoppingSection = ({
     enabled: !!searchQuery
   });
 
+  // Handle tab change - for services redirect to search results
+  const handleTabChange = (value: string) => {
+    if (value === "services") {
+      navigate(`/search?q=${encodeURIComponent(searchQuery)}&type=services`);
+      return;
+    }
+    setActiveTab(value);
+  };
+
   return (
     <div>
-      <Tabs defaultValue="products" value={activeTab} onValueChange={setActiveTab}>
+      <Tabs defaultValue="products" value={activeTab} onValueChange={handleTabChange}>
         <TabsList className="mb-6">
           <TabsTrigger value="products">Products</TabsTrigger>
           <TabsTrigger value="businesses">Businesses</TabsTrigger>

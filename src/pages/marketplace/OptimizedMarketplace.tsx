@@ -7,6 +7,8 @@ import { BrowseTabContent } from "./BrowseTabContent";
 import { SearchTabContent } from "./SearchTabContent";
 import { CategoryTabContent } from "./CategoryTabContent";
 import { GridLayoutType } from "@/components/products/types/layouts";
+import { AutocompleteSearch } from "@/components/marketplace/AutocompleteSearch";
+import { BannerCarousel } from "@/components/marketplace/BannerCarousel";
 
 const OptimizedMarketplace = () => {
   const navigate = useNavigate();
@@ -45,20 +47,15 @@ const OptimizedMarketplace = () => {
   // Update URL when search query changes
   const handleSearchChange = (query: string) => {
     setSearchQuery(query);
-    setActiveTab("search");
     
-    const newSearchParams = new URLSearchParams();
-    if (query) {
-      newSearchParams.set("q", query);
-    }
-    if (selectedCategory !== "all") {
-      newSearchParams.set("category", selectedCategory);
-    }
-    
-    navigate({
-      pathname: location.pathname,
-      search: newSearchParams.toString()
-    });
+    // Redirect to the search results page instead of changing tab
+    navigate(`/search?q=${encodeURIComponent(query)}`);
+  };
+  
+  // Handle search selection from autocomplete
+  const handleSearchSelect = (query: string) => {
+    setSearchQuery(query);
+    navigate(`/search?q=${encodeURIComponent(query)}`);
   };
   
   // Update URL when category changes
@@ -82,6 +79,22 @@ const OptimizedMarketplace = () => {
   
   return (
     <div className="container max-w-[1400px] mx-auto px-4 py-6">
+      {/* Search Bar moved to the top */}
+      <div className="mb-6">
+        <AutocompleteSearch 
+          value={searchQuery}
+          onChange={setSearchQuery}
+          onSearchSelect={handleSearchSelect}
+          placeholder="Search for products, services, or businesses..."
+          className="w-full max-w-3xl mx-auto"
+        />
+      </div>
+      
+      {/* Banner carousel below search */}
+      <div className="mb-6">
+        <BannerCarousel />
+      </div>
+      
       <MarketplaceHeader
         searchTerm={searchQuery}
         setSearchTerm={setSearchQuery}

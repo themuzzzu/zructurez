@@ -1,6 +1,8 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Search, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -59,14 +61,29 @@ export const AutocompleteSearch = ({
     queryFn: async () => {
       if (!debouncedValue || debouncedValue.length < 2) return [];
       
-      const { data, error } = await supabase
+      // Get product suggestions
+      const { data: productData, error: productError } = await supabase
         .from('products')
-        .select('title')
+        .select('title, category')
         .ilike('title', `%${debouncedValue}%`)
-        .limit(5);
+        .limit(3);
       
-      if (error) throw error;
-      return data || [];
+      if (productError) throw productError;
+      
+      // Get business suggestions
+      const { data: businessData, error: businessError } = await supabase
+        .from('businesses')
+        .select('name as title, category')
+        .ilike('name', `%${debouncedValue}%`)
+        .limit(2);
+      
+      if (businessError) throw businessError;
+      
+      // Combine and return all suggestions
+      return [
+        ...(productData || []).map(item => ({ ...item, type: 'product' })),
+        ...(businessData || []).map(item => ({ ...item, type: 'business' }))
+      ];
     },
     enabled: debouncedValue.length >= 2,
   });
@@ -120,19 +137,27 @@ export const AutocompleteSearch = ({
   return (
     <div className={`relative ${className}`}>
       <form onSubmit={handleSubmit} className="relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         <Input
           ref={inputRef}
           type="text"
           placeholder={placeholder}
           value={value}
           onChange={handleInputChange}
-          className="w-full border-zinc-300 dark:border-zinc-700 focus:border-zinc-900 dark:focus:border-zinc-100 pl-3"
+          className="w-full pl-10 pr-12 h-12 border-zinc-300 dark:border-zinc-700 focus:border-zinc-900 dark:focus:border-zinc-100"
           onFocus={() => {
             setIsFocused(true);
             setShowSuggestions(value.length >= 2);
           }}
           onBlur={() => setTimeout(() => setIsFocused(false), 200)}
         />
+        <Button 
+          type="submit" 
+          size="sm" 
+          className="absolute right-1.5 top-1/2 transform -translate-y-1/2 h-9"
+        >
+          Search
+        </Button>
       </form>
 
       {((showSuggestions && suggestions && suggestions.length > 0) || 
@@ -151,23 +176,42 @@ export const AutocompleteSearch = ({
               suggestions.map((item, index) => (
                 <div
                   key={index}
-                  className="text-sm py-1 px-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer rounded"
+                  className="text-sm py-2 px-3 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer rounded flex justify-between items-center"
                   onClick={() => handleSuggestionClick(item.title)}
                 >
-                  {item.title}
+                  <div className="flex items-center">
+                    <span>{item.title}</span>
+                  </div>
+                  <span className="text-xs px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 rounded">
+                    {item.type || item.category}
+                  </span>
                 </div>
               ))
             ) : popularSearches && (
               popularSearches.map((item, index) => (
                 <div
                   key={index}
-                  className="text-sm py-1 px-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer rounded flex justify-between items-center"
+                  className="text-sm py-2 px-3 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer rounded flex justify-between items-center"
                   onClick={() => handleSuggestionClick(item.title)}
                 >
                   <span>{item.title}</span>
                   <span className="text-xs text-zinc-400">{item.views} views</span>
                 </div>
               ))
+            )}
+            
+            {value && (
+              <div className="mt-2 pt-2 border-t border-zinc-200 dark:border-zinc-700">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="w-full justify-between text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-zinc-800"
+                  onClick={() => handleSuggestionClick(value)}
+                >
+                  <span>Search for "{value}"</span>
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </div>
             )}
           </div>
         </div>
