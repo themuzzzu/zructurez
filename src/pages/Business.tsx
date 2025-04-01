@@ -27,6 +27,7 @@ import type { Business, BusinessHours } from "@/types/business";
 // Define a simplified type for the business with ratings data
 interface BusinessWithRating extends Business {
   average_rating: number;
+  business_ratings?: Array<{ rating: number }>;
 }
 
 const Business = () => {
