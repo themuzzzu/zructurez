@@ -121,11 +121,6 @@ export const CrazyDeals = () => {
                     product={product}
                     sponsored={false}
                   />
-                  {product.discount_percentage && (
-                    <Badge className="absolute top-2 left-2 bg-red-500 text-white">
-                      {product.discount_percentage}% OFF
-                    </Badge>
-                  )}
                 </div>
               </CarouselItem>
             ))}

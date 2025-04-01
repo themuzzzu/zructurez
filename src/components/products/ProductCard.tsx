@@ -11,9 +11,10 @@ import { GridLayoutType } from "./types/ProductTypes";
 interface ProductCardProps {
   product: any;
   layout?: GridLayoutType;
+  sponsored?: boolean;
 }
 
-export const ProductCard = ({ product, layout = "grid4x4" }: ProductCardProps) => {
+export const ProductCard = ({ product, layout = "grid4x4", sponsored = false }: ProductCardProps) => {
   const navigate = useNavigate();
   const [imageLoaded, setImageLoaded] = useState(false);
   
@@ -61,6 +62,13 @@ export const ProductCard = ({ product, layout = "grid4x4" }: ProductCardProps) =
         {product.is_discounted && product.discount_percentage && (
           <Badge className="absolute top-2 left-2 bg-red-500 text-white">
             {Math.round(product.discount_percentage)}% OFF
+          </Badge>
+        )}
+        
+        {/* Sponsored Badge - Added this */}
+        {sponsored && (
+          <Badge variant="outline" className="absolute top-2 left-2 bg-yellow-500/90 text-xs">
+            Sponsored
           </Badge>
         )}
         
