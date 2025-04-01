@@ -20,12 +20,12 @@ export const PersonalizedRecommendations = () => {
   const navigate = useNavigate();
   const [api, setApi] = useState<any>(null);
   const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
-  const { user } = useCurrentUser();
+  const { user, isLoading: authLoading } = useCurrentUser();
   
   const { data: products, isLoading } = useQuery({
     queryKey: ['personalized-recommendations', user?.id],
     queryFn: async () => {
-      if (!user) {
+      if (!user?.id) {
         // Return popular products for non-logged in users
         const { data, error } = await supabase
           .from('products')
@@ -48,7 +48,14 @@ export const PersonalizedRecommendations = () => {
       
       if (viewedProducts && viewedProducts.length > 0) {
         const productIds = viewedProducts
-          .map(view => view.metadata?.product_id)
+          .map(view => {
+            // Handle metadata properly based on its type
+            const metadata = view.metadata;
+            if (typeof metadata === 'object' && metadata !== null && 'product_id' in metadata) {
+              return metadata.product_id;
+            }
+            return null;
+          })
           .filter(Boolean);
         
         if (productIds.length > 0) {
@@ -87,7 +94,8 @@ export const PersonalizedRecommendations = () => {
       if (error) throw error;
       return data;
     },
-    staleTime: 5 * 60 * 1000 // 5 minutes
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    enabled: !authLoading // Only run when auth state is known
   });
   
   // Auto-scroll effect for carousel
