@@ -1,5 +1,7 @@
+
 import { useEffect, useState } from "react";
-import { fetchActiveAds, incrementAdView, AdType, AdFormat, Advertisement } from "@/services/adService";
+import { useNavigate } from "react-router-dom";
+import { AdType, AdFormat, Advertisement } from "@/services/adService";
 import {
   Carousel,
   CarouselContent,
@@ -7,7 +9,6 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { BannerAd } from "@/components/ads/BannerAd";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -137,6 +138,7 @@ const sampleBannerAds: Advertisement[] = [
 ];
 
 export const BannerCarousel = () => {
+  const navigate = useNavigate();
   const [progressValue, setProgressValue] = useState(0);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [api, setApi] = useState<any>(null);
@@ -144,14 +146,6 @@ export const BannerCarousel = () => {
 
   // Use the sample banner ads instead of fetching from API for now
   const bannerAds = sampleBannerAds;
-
-  // Record views for the ads when they are displayed (mock functionality)
-  useEffect(() => {
-    if (bannerAds?.length) {
-      // In a real implementation, this would call the incrementAdView function
-      console.log("Showing ads:", bannerAds.map(ad => ad.title).join(", "));
-    }
-  }, [bannerAds]);
 
   // Handle slide changes
   useEffect(() => {
@@ -199,6 +193,17 @@ export const BannerCarousel = () => {
     };
   }, [bannerAds.length, currentSlide, api, isHovered]);
 
+  // Handle banner click to navigate to appropriate page
+  const handleBannerClick = (ad: Advertisement) => {
+    if (ad.type === "product") {
+      navigate(`/product/${ad.reference_id}`);
+    } else if (ad.type === "business") {
+      navigate(`/businesses/${ad.reference_id}`);
+    } else if (ad.type === "service") {
+      navigate(`/services/${ad.reference_id}`);
+    }
+  };
+
   // Fallback content if no banner ads are available
   if (!bannerAds.length) {
     return (
@@ -215,7 +220,7 @@ export const BannerCarousel = () => {
 
   return (
     <div 
-      className="w-full relative mb-8 px-0 sm:px-4"
+      className="w-full relative mb-8 px-2 sm:px-4"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -229,8 +234,44 @@ export const BannerCarousel = () => {
       >
         <CarouselContent className="!ml-0">
           {bannerAds.map((ad) => (
-            <CarouselItem key={ad.id} className="!pl-0 sm:!pl-4">
-              <BannerAd ad={ad} />
+            <CarouselItem key={ad.id} className="!pl-0 sm:!pl-4 cursor-pointer" onClick={() => handleBannerClick(ad)}>
+              <div className="relative">
+                {ad.image_url ? (
+                  <div className="relative">
+                    <img 
+                      src={ad.image_url} 
+                      alt={ad.title}
+                      className="w-full h-full object-cover aspect-[16/9] rounded-lg"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-transparent to-transparent flex items-center p-4 sm:p-6 rounded-lg">
+                      <div className="w-full max-w-xl">
+                        <h2 className="text-xl sm:text-2xl md:text-4xl font-bold text-white mb-2">
+                          {ad.title.includes("Orient Electric") ? (
+                            <>
+                              <div className="text-lg sm:text-2xl md:text-4xl">Sleek. Slim. Stunning.</div>
+                              <div className="text-xl sm:text-3xl md:text-5xl mt-2 text-white">Up to 40% Off</div>
+                              <div className="text-sm sm:text-lg md:text-xl mt-2 font-normal">Next-gen BLDC fans</div>
+                            </>
+                          ) : (
+                            ad.title
+                          )}
+                        </h2>
+                        
+                        <p className="text-xs sm:text-sm text-white/80 mb-2 sm:mb-3 max-w-lg line-clamp-2">
+                          {ad.description}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="aspect-[16/9] rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-4 sm:p-6 flex items-center">
+                    <div className="max-w-xl">
+                      <h2 className="text-xl sm:text-3xl font-bold mb-2">{ad.title}</h2>
+                      <p className="text-white/80 text-sm sm:text-lg mb-4 sm:mb-6">{ad.description}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
             </CarouselItem>
           ))}
         </CarouselContent>

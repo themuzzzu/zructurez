@@ -1,10 +1,8 @@
 
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BrowseTabContent } from "./BrowseTabContent";
 import { SearchTabContent } from "./SearchTabContent";
-import { CategoryTabContent } from "./CategoryTabContent";
 import { GridLayoutType } from "@/components/products/types/layouts";
 import { AutocompleteSearch } from "@/components/marketplace/AutocompleteSearch";
 import { BannerCarousel } from "@/components/marketplace/BannerCarousel";
@@ -20,9 +18,6 @@ const OptimizedMarketplace = () => {
   const [searchQuery, setSearchQuery] = useState(queryParam);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [cartItemCount, setCartItemCount] = useState(0);
-  
-  // State for active tab
-  const [activeTab, setActiveTab] = useState("browse");
   
   // State for filters
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -52,7 +47,6 @@ const OptimizedMarketplace = () => {
   // Update URL when category changes
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
-    setActiveTab(category === "all" ? "browse" : "category");
     
     const newSearchParams = new URLSearchParams();
     if (searchQuery) {
@@ -69,7 +63,7 @@ const OptimizedMarketplace = () => {
   };
   
   return (
-    <div className="container max-w-[1400px] mx-auto px-4 py-6">
+    <div className="container max-w-[1400px] mx-auto px-4 sm:px-6 py-6">
       {/* Single Search Bar at the top */}
       <div className="mb-6">
         <AutocompleteSearch 
@@ -86,24 +80,13 @@ const OptimizedMarketplace = () => {
         <BannerCarousel />
       </div>
       
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="browse">Browse All</TabsTrigger>
-          <TabsTrigger value="category">Categories</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="browse" className="mt-6">
-          <BrowseTabContent />
-        </TabsContent>
-        
-        <TabsContent value="category" className="mt-6">
-          <CategoryTabContent 
-            selectedCategory={selectedCategory}
-            setSelectedCategory={handleCategoryChange}
-            setActiveTab={setActiveTab}
-          />
-        </TabsContent>
-      </Tabs>
+      {/* Main content - Browse All by default */}
+      <div className="mt-6">
+        <BrowseTabContent 
+          searchTerm={searchQuery}
+          onCategorySelect={handleCategoryChange}
+        />
+      </div>
     </div>
   );
 };

@@ -2,9 +2,8 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Advertisement, incrementAdClick, incrementAdView } from "@/services/adService";
-import { ExternalLink, Info, ShoppingBag } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 
@@ -57,27 +56,13 @@ export function BannerAd({ ad, className }: BannerAdProps) {
   // Extract other details from description
   const details = ad.description?.replace(price || '', '').trim();
   
-  // Get a badge label based on ad type
-  const getBadgeLabel = () => {
-    switch (ad.type) {
-      case "product":
-        return "Featured Product";
-      case "business":
-        return "Featured Business";
-      case "service":
-        return "Featured Service";
-      default:
-        return "Sponsored";
-    }
-  };
-  
   // Get credit card and offer info if available in the description
   const creditCardMatch = ad.description?.match(/([\d]+%\s+Instant\s+Discount.+)/i);
   const creditCardInfo = creditCardMatch ? creditCardMatch[0] : null;
   
   return (
     <Card 
-      className={`relative overflow-hidden cursor-pointer hover:shadow-lg transition-shadow w-full ${className}`}
+      className={`relative overflow-hidden cursor-pointer hover:shadow-lg transition-shadow w-full rounded-lg ${className}`}
       onClick={handleClick}
     >
       {ad.image_url ? (
@@ -87,17 +72,10 @@ export function BannerAd({ ad, className }: BannerAdProps) {
               <img 
                 src={ad.image_url} 
                 alt={ad.title}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover rounded-lg"
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-transparent to-transparent flex items-center p-4 sm:p-6">
+              <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-transparent to-transparent flex items-center p-4 sm:p-6 rounded-lg">
                 <div className="w-full max-w-xl">
-                  <Badge 
-                    variant="outline" 
-                    className="mb-2 border-white/40 text-white bg-black/20 backdrop-blur-sm"
-                  >
-                    {getBadgeLabel()}
-                  </Badge>
-                  
                   <h2 className="text-xl sm:text-2xl md:text-4xl font-bold text-white mb-2">
                     {ad.title.includes("Orient Electric") ? (
                       <>
@@ -129,25 +107,13 @@ export function BannerAd({ ad, className }: BannerAdProps) {
                   </Button>
                 </div>
               </div>
-              
-              {/* Sponsored tag - moved to top right for better visibility and to avoid overlapping */}
-              <div className="absolute top-2 right-2 flex items-center bg-black/50 backdrop-blur-sm text-white/80 text-xs px-2 py-1 rounded-full">
-                <ExternalLink className="h-3 w-3 mr-1" />
-                <span>Sponsored</span>
-              </div>
             </div>
           </AspectRatio>
         </div>
       ) : (
         <AspectRatio ratio={16/9}>
-          <div className="p-4 sm:p-6 bg-gradient-to-r from-blue-500 to-indigo-600 text-white h-full flex items-center">
+          <div className="p-4 sm:p-6 bg-gradient-to-r from-blue-500 to-indigo-600 text-white h-full flex items-center rounded-lg">
             <div className="max-w-xl">
-              <Badge 
-                variant="outline" 
-                className="mb-2 border-white/40 text-white bg-white/10"
-              >
-                {getBadgeLabel()}
-              </Badge>
               <h2 className="text-xl sm:text-3xl font-bold mb-2">{ad.title}</h2>
               <p className="text-white/80 text-sm sm:text-lg mb-4 sm:mb-6">{ad.description}</p>
               <Button 
@@ -156,12 +122,6 @@ export function BannerAd({ ad, className }: BannerAdProps) {
               >
                 Learn More
               </Button>
-              
-              {/* Sponsored tag - positioned at top right in text-only ads */}
-              <div className="absolute top-2 right-2 flex items-center text-white/70 text-xs bg-black/30 px-2 py-1 rounded-full inline-flex">
-                <Info className="h-3 w-3 mr-1" />
-                <span>Sponsored</span>
-              </div>
             </div>
           </div>
         </AspectRatio>

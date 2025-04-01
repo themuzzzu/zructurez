@@ -65,26 +65,31 @@ export const Categories = ({
     : categories;
 
   return (
-    <ScrollArea className="w-full">
-      <div className="flex space-x-2 pb-4">
-        {allCategories.map((category) => (
-          <Badge
-            key={category}
-            variant="outline"
-            className={cn(
-              "h-9 px-4 py-2 cursor-pointer whitespace-nowrap",
-              selectedCategory === category && "bg-primary text-primary-foreground"
-            )}
-            onClick={() => handleCategoryClick(category)}
-          >
-            {categoryIcons[category] && (
-              <span className="mr-2">{categoryIcons[category]}</span>
-            )}
-            {categoryNames[category] || category.charAt(0).toUpperCase() + category.slice(1)}
-          </Badge>
-        ))}
-      </div>
-      <ScrollBar orientation="horizontal" />
-    </ScrollArea>
+    <div className="py-2">
+      <h2 className="text-lg font-semibold mb-3 px-1">Browse by Category</h2>
+      <ScrollArea className="w-full">
+        <div className="flex space-x-2 pb-4">
+          {allCategories.map((category) => (
+            <Badge
+              key={category}
+              variant="outline"
+              className={cn(
+                "h-9 px-4 py-2 cursor-pointer whitespace-nowrap border border-gray-200 dark:border-gray-700",
+                selectedCategory === category 
+                  ? "bg-primary text-primary-foreground" 
+                  : "bg-background hover:bg-accent/50 transition-colors"
+              )}
+              onClick={() => handleCategoryClick(category)}
+            >
+              {categoryIcons[category] && (
+                <span className="mr-2">{categoryIcons[category]}</span>
+              )}
+              {categoryNames[category] || category.charAt(0).toUpperCase() + category.slice(1)}
+            </Badge>
+          ))}
+        </div>
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
+    </div>
   );
 };

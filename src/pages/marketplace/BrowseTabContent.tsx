@@ -37,8 +37,8 @@ export const BrowseTabContent = ({
   
   return (
     <div className="space-y-6">
-      {/* Categories moved to Browse All tab */}
-      <div className="mb-6">
+      {/* Categories moved below banner */}
+      <div className="mb-6 px-2">
         <Categories 
           onCategorySelect={handleCategorySelect} 
           showAllCategories={true}
