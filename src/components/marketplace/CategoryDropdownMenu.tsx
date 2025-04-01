@@ -1,6 +1,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { ChevronRight } from "lucide-react";
 
 interface SubSubCategory {
   id: string;
@@ -21,14 +22,13 @@ interface CategoryMenuProps {
 
 export const CategoryDropdownMenu = ({ categoryId, categoryName, subCategories }: CategoryMenuProps) => {
   const navigate = useNavigate();
-  const [isOpen, setIsOpen] = useState(false);
   const [activeSubCategory, setActiveSubCategory] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
+        setActiveSubCategory(null);
       }
     };
 
@@ -38,80 +38,58 @@ export const CategoryDropdownMenu = ({ categoryId, categoryName, subCategories }
     };
   }, []);
 
+  const handleSubCategoryHover = (subCategoryId: string) => {
+    setActiveSubCategory(subCategoryId);
+  };
+
   const handleSubCategoryClick = (subCategoryId: string) => {
     navigate(`/marketplace?category=${categoryId}&subcategory=${subCategoryId}`);
-    setIsOpen(false);
+  };
+
+  const handleSubSubCategoryClick = (subCategoryId: string, subSubCategoryId: string) => {
+    navigate(`/marketplace?category=${categoryId}&subcategory=${subCategoryId}&subsubcategory=${subSubCategoryId}`);
   };
 
   return (
-    <div className="relative" ref={dropdownRef}>
-      <button 
-        className="flex items-center space-x-1 px-4 py-2 hover:bg-gray-100 dark:hover:bg-zinc-700 rounded-md"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <span>{categoryName}</span>
-        <svg 
-          className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-          fill="none" 
-          stroke="currentColor" 
-          viewBox="0 0 24 24" 
-          xmlns="http://www.w3.org/2000/svg"
+    <div ref={dropdownRef}>
+      {subCategories.map((subCategory) => (
+        <div 
+          key={subCategory.id}
+          className="relative"
+          onMouseEnter={() => handleSubCategoryHover(subCategory.id)}
+          onMouseLeave={() => setActiveSubCategory(null)}
         >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
-
-      {isOpen && (
-        <div className="absolute z-50 left-0 mt-2 bg-white dark:bg-zinc-800 shadow-lg border border-gray-200 dark:border-zinc-700 rounded-md min-w-[250px]">
-          <div className="grid grid-cols-1 py-2">
-            {subCategories.map((subCategory) => (
-              <div 
-                key={subCategory.id} 
-                className="relative"
-                onMouseEnter={() => setActiveSubCategory(subCategory.id)}
-                onMouseLeave={() => setActiveSubCategory(null)}
-              >
-                <button
-                  className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-zinc-700 text-sm flex justify-between items-center"
-                  onClick={() => handleSubCategoryClick(subCategory.id)}
-                >
-                  {subCategory.name}
-                  {subCategory.subSubCategories && (
-                    <svg 
-                      className="w-4 h-4"
-                      fill="none" 
-                      stroke="currentColor" 
-                      viewBox="0 0 24 24" 
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  )}
-                </button>
-                
-                {subCategory.subSubCategories && activeSubCategory === subCategory.id && (
-                  <div className="absolute left-full top-0 bg-white dark:bg-zinc-800 shadow-lg border border-gray-200 dark:border-zinc-700 rounded-md min-w-[250px] -ml-1">
-                    <div className="py-2">
-                      {subCategory.subSubCategories.map((item) => (
-                        <button
-                          key={item.id}
-                          className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-zinc-700 text-sm"
-                          onClick={() => {
-                            navigate(`/marketplace?category=${categoryId}&subcategory=${subCategory.id}&subsubcategory=${item.id}`);
-                            setIsOpen(false);
-                          }}
-                        >
-                          {item.name}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
+          <button
+            className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-zinc-700 text-sm flex justify-between items-center"
+            onClick={() => handleSubCategoryClick(subCategory.id)}
+          >
+            {subCategory.name}
+            {subCategory.subSubCategories && subCategory.subSubCategories.length > 0 && (
+              <ChevronRight className="h-4 w-4" />
+            )}
+          </button>
+          
+          {/* If there are sub-sub-categories and this subcategory is active, show them */}
+          {subCategory.subSubCategories && activeSubCategory === subCategory.id && (
+            <div className="absolute left-full top-0 bg-white dark:bg-zinc-800 shadow-lg border border-gray-200 dark:border-zinc-700 rounded-md min-w-[250px] -ml-1">
+              <div className="py-2">
+                <div className="px-4 py-2 text-xs font-medium text-gray-500 border-b border-gray-200 dark:border-zinc-700 mb-1">
+                  More in {subCategory.name}
+                </div>
+                {subCategory.subSubCategories.map((subSubCategory) => (
+                  <button
+                    key={subSubCategory.id}
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-zinc-700 text-sm"
+                    onClick={() => handleSubSubCategoryClick(subCategory.id, subSubCategory.id)}
+                  >
+                    {subSubCategory.name}
+                  </button>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          )}
         </div>
-      )}
+      ))}
     </div>
   );
 };

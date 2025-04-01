@@ -10,6 +10,7 @@ import { PersonalizedRecommendations } from "@/components/marketplace/Personaliz
 import { FlashSale } from "@/components/marketplace/FlashSale";
 import { CategoryFeatured } from "@/components/marketplace/CategoryFeatured";
 import { CategoryNavigationBar } from "@/components/marketplace/CategoryNavigationBar";
+import { MarketplaceBanner } from "@/components/marketplace/MarketplaceBanner";
 
 interface BrowseTabContentProps {
   searchResults?: any[];
@@ -47,6 +48,9 @@ export const BrowseTabContent = ({
   
   return (
     <div className="space-y-6 px-1 sm:px-2">
+      {/* Banner at the top */}
+      <MarketplaceBanner />
+      
       {/* Main Category Navigation Bar */}
       <div className="mb-6">
         <CategoryNavigationBar />

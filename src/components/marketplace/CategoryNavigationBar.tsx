@@ -3,10 +3,15 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CategoryDropdownMenu } from "./CategoryDropdownMenu";
 
 interface SubCategory {
   id: string;
   name: string;
+  subSubCategories?: {
+    id: string;
+    name: string;
+  }[];
 }
 
 interface Category {
@@ -37,7 +42,22 @@ export const CategoryNavigationBar = () => {
       name: "Fashion",
       icon: "/lovable-uploads/c86169c0-2979-42b7-8182-313a645ea572.png",
       subCategories: [
-        { id: "mens-top-wear", name: "Men's Top Wear" },
+        { 
+          id: "mens-top-wear", 
+          name: "Men's Top Wear",
+          subSubCategories: [
+            { id: "mens-tshirts", name: "Men's T-Shirts" },
+            { id: "mens-casual-shirts", name: "Men's Casual Shirts" },
+            { id: "mens-formal-shirts", name: "Men's Formal Shirts" },
+            { id: "mens-kurtas", name: "Men's Kurtas" },
+            { id: "mens-ethnic-sets", name: "Men's Ethnic Sets" },
+            { id: "mens-blazers", name: "Men's Blazers" },
+            { id: "mens-raincoat", name: "Men's Raincoat" },
+            { id: "mens-windcheaters", name: "Men's Windcheaters" },
+            { id: "mens-suit", name: "Men's Suit" },
+            { id: "mens-fabrics", name: "Men's Fabrics" },
+          ]
+        },
         { id: "mens-bottom-wear", name: "Men's Bottom Wear" },
         { id: "women-ethnic", name: "Women Ethnic" },
         { id: "men-footwear", name: "Men Footwear" },
@@ -127,21 +147,6 @@ export const CategoryNavigationBar = () => {
     },
   ];
 
-  // Detailed subcategories for Men's Top Wear for the second level dropdown
-  const mensTopWearSubcategories = [
-    { id: "all", name: "All" },
-    { id: "tshirts", name: "Men's T-Shirts" },
-    { id: "casual-shirts", name: "Men's Casual Shirts" },
-    { id: "formal-shirts", name: "Men's Formal Shirts" },
-    { id: "kurtas", name: "Men's Kurtas" },
-    { id: "ethnic-sets", name: "Men's Ethnic Sets" },
-    { id: "blazers", name: "Men's Blazers" },
-    { id: "raincoat", name: "Men's Raincoat" },
-    { id: "windcheaters", name: "Men's Windcheaters" },
-    { id: "suits", name: "Men's Suit" },
-    { id: "fabrics", name: "Men's Fabrics" },
-  ];
-
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -163,17 +168,12 @@ export const CategoryNavigationBar = () => {
     }
   };
 
-  const handleSubCategoryClick = (subCategoryId: string) => {
-    navigate(`/marketplace?category=${subCategoryId}`);
-    setActiveCategory(null);
-  };
-
   return (
     <div className="bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800 shadow-sm">
-      <div className="container max-w-[1400px] mx-auto px-4">
+      <div className="container max-w-[1400px] mx-auto">
         <div className="flex items-center justify-between overflow-x-auto scrollbar-hide">
           {categories.map((category) => (
-            <div key={category.id} className="relative" ref={category.id === activeCategory ? dropdownRef : null}>
+            <div key={category.id} className="relative flex-shrink-0">
               <button
                 className={cn(
                   "flex flex-col items-center justify-center p-2 min-w-[80px] text-center whitespace-nowrap",
@@ -199,47 +199,17 @@ export const CategoryNavigationBar = () => {
                 </span>
               </button>
 
+              {/* Display Dropdown Menu if category has subcategories */}
               {category.subCategories && activeCategory === category.id && (
-                <div className="absolute z-50 left-0 mt-1 bg-white dark:bg-zinc-800 shadow-lg border border-gray-200 dark:border-zinc-700 rounded-md w-60">
+                <div ref={dropdownRef} className="absolute z-50 left-0 mt-1 bg-white dark:bg-zinc-800 shadow-lg border border-gray-200 dark:border-zinc-700 rounded-md min-w-[250px]">
                   <div className="py-2">
                     {category.subCategories.map((subCategory) => (
-                      <div 
-                        key={subCategory.id} 
-                        className="relative group"
-                      >
-                        <button
-                          className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-zinc-700 text-sm flex justify-between items-center"
-                          onClick={() => handleSubCategoryClick(subCategory.id)}
-                        >
-                          {subCategory.name}
-                          {subCategory.id === "mens-top-wear" && (
-                            <ChevronDown className="h-4 w-4" />
-                          )}
-                        </button>
-                        
-                        {/* Second level dropdown for Men's Top Wear */}
-                        {subCategory.id === "mens-top-wear" && (
-                          <div className="absolute left-full top-0 hidden group-hover:block bg-white dark:bg-zinc-800 shadow-lg border border-gray-200 dark:border-zinc-700 rounded-md w-64">
-                            <div className="py-2">
-                              <div className="px-4 py-1 text-sm font-medium text-gray-500 dark:text-gray-400">
-                                More in Men's Top Wear
-                              </div>
-                              {mensTopWearSubcategories.map((item) => (
-                                <button
-                                  key={item.id}
-                                  className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-zinc-700 text-sm"
-                                  onClick={() => {
-                                    navigate(`/marketplace?category=mens-top-wear&subcategory=${item.id}`);
-                                    setActiveCategory(null);
-                                  }}
-                                >
-                                  {item.name}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
+                      <CategoryDropdownMenu 
+                        key={subCategory.id}
+                        categoryId={category.id}
+                        categoryName={category.name}
+                        subCategories={[subCategory]}
+                      />
                     ))}
                   </div>
                 </div>
