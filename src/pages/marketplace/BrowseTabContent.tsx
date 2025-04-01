@@ -94,7 +94,7 @@ export const BrowseTabContent = ({
       {/* If a category is selected, display subcategories */}
       {selectedCategory !== "all" && (
         <div className="mb-8">
-          <h2 className="text-xl font-bold mb-4 px-2">Browse {selectedCategory}</h2>
+          <h2 className="text-xl font-bold mb-4 px-2">Browse {selectedCategory.replace(/-/g, ' ')}</h2>
           <CategorySubcategoryGrid onCategorySelect={handleSubcategorySelect} />
         </div>
       )}
