@@ -20,6 +20,7 @@ export const PersonalizedRecommendations = () => {
   const navigate = useNavigate();
   const [api, setApi] = useState<any>(null);
   const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
+  // Fix: Properly destructure the user object and isLoading from useCurrentUser
   const { user, isLoading: authLoading } = useCurrentUser();
   
   const { data: products, isLoading } = useQuery({
@@ -47,6 +48,7 @@ export const PersonalizedRecommendations = () => {
         .limit(5);
       
       if (viewedProducts && viewedProducts.length > 0) {
+        // Fix: Properly extract product_ids from metadata with type checking
         const productIds = viewedProducts
           .map(view => {
             // Handle metadata properly based on its type
@@ -56,7 +58,7 @@ export const PersonalizedRecommendations = () => {
             }
             return null;
           })
-          .filter(Boolean);
+          .filter(Boolean) as string[]; // Explicitly cast to string[] after filtering
         
         if (productIds.length > 0) {
           // Get categories of viewed products
