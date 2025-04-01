@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { SearchIcon } from "lucide-react";
 import { GridLayoutSelector } from "@/components/marketplace/GridLayoutSelector";
 import { GridLayoutType } from "@/components/products/types/layouts";
+import { LikeProvider } from "@/components/products/LikeContext";
 
 export default function Search() {
   const [searchParams] = useSearchParams();
@@ -98,11 +99,13 @@ export default function Search() {
         </div>
         
         {/* Enhanced shopping section with tabbed interface for products, businesses and services */}
-        <EnhancedShoppingSection 
-          searchQuery={searchTerm} 
-          showFilters={showFilters}
-          gridLayout={gridLayout}
-        />
+        <LikeProvider>
+          <EnhancedShoppingSection 
+            searchQuery={searchTerm} 
+            showFilters={showFilters}
+            gridLayout={gridLayout}
+          />
+        </LikeProvider>
       </main>
     </div>
   );
