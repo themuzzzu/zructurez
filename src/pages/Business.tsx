@@ -22,12 +22,12 @@ import { PopularCategories } from "@/components/home/PopularCategories";
 import { FeaturedBusinesses } from "@/components/home/FeaturedBusinesses";
 import { DealsSection } from "@/components/home/DealsSection";
 import { BusinessCategoryNavBar } from "@/components/business/BusinessCategoryNavBar";
-import type { Business } from "@/types/business";
+import type { Business, BusinessHours } from "@/types/business";
 
-type BusinessWithRating = Business & {
+// Define a simplified type for the business with ratings data
+interface BusinessWithRating extends Business {
   average_rating: number;
-  business_ratings?: { rating: number }[];
-};
+}
 
 const Business = () => {
   const navigate = useNavigate();
@@ -124,6 +124,19 @@ const Business = () => {
     }
   };
 
+  // Helper function to convert hours to string format
+  const formatHours = (hours: string | BusinessHours | undefined): string => {
+    if (!hours) return '';
+    if (typeof hours === 'string') return hours;
+    
+    try {
+      return JSON.stringify(hours);
+    } catch (e) {
+      console.error("Error formatting hours:", e);
+      return '';
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
       <Navbar />
@@ -201,7 +214,7 @@ const Business = () => {
                             reviews={business.business_ratings?.length || 0}
                             location={business.location || ''}
                             contact={business.contact || ''}
-                            hours={business.hours || ''}
+                            hours={formatHours(business.hours || business.business_hours)}
                             verified={business.verified || false}
                             appointment_price={business.appointment_price}
                             consultation_price={business.consultation_price}
