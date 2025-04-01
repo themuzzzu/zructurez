@@ -187,12 +187,12 @@ export const ProductsGrid = ({
                     </span>
                   )}
                 </div>
-                {product.rating && (
+                {product.rating !== undefined && (
                   <div className="flex items-center mt-1">
                     <div className="flex text-yellow-400">
                       {[...Array(5)].map((_, i) => (
                         <span key={i}>
-                          {i < Math.floor(product.rating) ? "★" : "☆"}
+                          {i < Math.floor(product.rating || 0) ? "★" : "☆"}
                         </span>
                       ))}
                     </div>

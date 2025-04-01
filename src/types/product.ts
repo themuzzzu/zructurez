@@ -19,4 +19,6 @@ export interface Product {
   created_at?: string;
   user_id?: string;
   discount_percentage?: number;
+  rating?: number;
+  rating_count?: number;
 }

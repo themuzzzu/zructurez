@@ -12,6 +12,7 @@ export interface ProductsGridProps {
   isLoading?: boolean;
   onOpenAddProductDialog?: () => void;
   searchQuery?: string;
+  onLayoutChange?: (layout: GridLayoutType) => void;
 }
 
 export const ProductsGrid = ({ 
@@ -19,7 +20,8 @@ export const ProductsGrid = ({
   layout = "grid3x3",
   isLoading = false,
   onOpenAddProductDialog,
-  searchQuery
+  searchQuery,
+  onLayoutChange
 }: ProductsGridProps) => {
   if (isLoading) {
     return (
