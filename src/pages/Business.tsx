@@ -22,9 +22,9 @@ import { PopularCategories } from "@/components/home/PopularCategories";
 import { FeaturedBusinesses } from "@/components/home/FeaturedBusinesses";
 import { DealsSection } from "@/components/home/DealsSection";
 import { BusinessCategoryNavBar } from "@/components/business/BusinessCategoryNavBar";
-import type { Business, BusinessHours } from "@/types/business";
+import type { BusinessHours } from "@/types/business";
 
-// Define a simpler type for business with ratings data that avoids recursion
+// Define a completely flat type for business with ratings data to avoid recursion
 interface BusinessWithRating {
   id: string;
   name: string;
@@ -44,7 +44,7 @@ interface BusinessWithRating {
   appointment_price?: number;
   consultation_price?: number;
   average_rating: number;
-  business_ratings?: Array<{ rating: number }>;
+  business_ratings: Array<{ rating: number }>;
 }
 
 const Business = () => {
@@ -65,42 +65,62 @@ const Business = () => {
     }
   }, [location.search]);
   
+  // Use explicit types for the query function to avoid recursion
+  const fetchBusinesses = async (): Promise<BusinessWithRating[]> => {
+    let query = supabase
+      .from('businesses')
+      .select(`
+        *,
+        business_products (*),
+        business_ratings (*)
+      `);
+    
+    if (selectedCategory !== "all") {
+      if (selectedCategory.includes('-')) {
+        const [category, subcategory] = selectedCategory.split('-');
+        query = query.eq('category', category).eq('subcategory', subcategory);
+      } else {
+        query = query.eq('category', selectedCategory);
+      }
+    }
+
+    const { data, error } = await query;
+    
+    if (error) throw error;
+    
+    // Transform data to include average_rating with explicit typing
+    return (data || []).map((business: any): BusinessWithRating => {
+      const ratings = business.business_ratings || [];
+      const totalRating = ratings.reduce((sum: number, rating: any) => sum + (rating.rating || 0), 0);
+      const averageRating = ratings.length > 0 ? totalRating / ratings.length : 0;
+      
+      return {
+        id: business.id,
+        name: business.name,
+        description: business.description,
+        category: business.category,
+        subcategory: business.subcategory,
+        location: business.location,
+        contact: business.contact,
+        hours: business.hours,
+        business_hours: business.business_hours,
+        verified: business.verified,
+        image_url: business.image_url,
+        is_open: business.is_open,
+        wait_time: business.wait_time,
+        closure_reason: business.closure_reason,
+        created_at: business.created_at,
+        appointment_price: business.appointment_price,
+        consultation_price: business.consultation_price,
+        average_rating: averageRating,
+        business_ratings: ratings
+      };
+    });
+  };
+  
   const { data: businesses, isLoading, error } = useQuery({
     queryKey: ['businesses', selectedCategory],
-    queryFn: async () => {
-      let query = supabase
-        .from('businesses')
-        .select(`
-          *,
-          business_products (*),
-          business_ratings (*)
-        `);
-      
-      if (selectedCategory !== "all") {
-        if (selectedCategory.includes('-')) {
-          const [category, subcategory] = selectedCategory.split('-');
-          query = query.eq('category', category).eq('subcategory', subcategory);
-        } else {
-          query = query.eq('category', selectedCategory);
-        }
-      }
-
-      const { data, error } = await query;
-      
-      if (error) throw error;
-      
-      // Transform data to include average_rating with type safety
-      return (data || []).map((business: any) => {
-        const ratings = business.business_ratings || [];
-        const totalRating = ratings.reduce((sum: number, rating: any) => sum + (rating.rating || 0), 0);
-        const averageRating = ratings.length > 0 ? totalRating / ratings.length : 0;
-        
-        return {
-          ...business,
-          average_rating: averageRating
-        } as BusinessWithRating;
-      });
-    }
+    queryFn: fetchBusinesses
   });
 
   if (isLoading) return <LoadingView />;
