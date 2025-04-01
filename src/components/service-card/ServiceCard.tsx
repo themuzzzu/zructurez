@@ -2,10 +2,11 @@
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Heart, MapPin, Clock, Star, ExternalLink } from "lucide-react";
+import { Calendar, Heart, MapPin, Clock, Star, ExternalLink, Phone } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { trackServiceView } from "@/services/serviceService";
+import { trackServiceView, trackContactClick } from "@/services/serviceService";
+import { toast } from "sonner";
 
 interface ServiceCardProps {
   id: string;
@@ -52,6 +53,12 @@ export const ServiceCard = ({
   const toggleLike = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsLiked(!isLiked);
+  };
+
+  const handleCallClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    trackContactClick(id);
+    toast.success("Contact details shared! A provider will call you shortly.");
   };
 
   return (
@@ -123,9 +130,9 @@ export const ServiceCard = ({
         </div>
       </CardContent>
       
-      <CardFooter className="p-4 pt-0">
+      <CardFooter className="p-4 pt-0 flex gap-2">
         <Button 
-          className="w-full gap-2" 
+          className="flex-1 gap-2" 
           onClick={(e) => {
             e.stopPropagation();
             navigate(`/services/${id}/book`);
@@ -133,6 +140,14 @@ export const ServiceCard = ({
         >
           <Calendar className="h-4 w-4" />
           Book Now
+        </Button>
+        <Button 
+          variant="outline"
+          className="flex-1 gap-2" 
+          onClick={handleCallClick}
+        >
+          <Phone className="h-4 w-4" />
+          Call
         </Button>
       </CardFooter>
     </Card>

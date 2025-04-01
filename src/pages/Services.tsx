@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Button, } from "@/components/ui/button";
+import { Plus, Phone } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ServiceCard } from "@/components/service-card/ServiceCard";
 import { CreateServiceForm } from "@/components/service-form/CreateServiceForm";
@@ -17,6 +16,7 @@ import { TrendingServices } from "@/components/service-marketplace/TrendingServi
 import { RecommendedServices } from "@/components/service-marketplace/RecommendedServices";
 import { TopServices } from "@/components/service-marketplace/TopServices";
 import { ServiceIconGrid } from "@/components/service-marketplace/ServiceIconGrid";
+import { SearchInput } from "@/components/SearchInput";
 
 export default function Services() {
   const [services, setServices] = useState([]);
@@ -26,6 +26,7 @@ export default function Services() {
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
   const [gridLayout, setGridLayout] = useState<GridLayoutType>("grid3x3");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const checkUserAuth = async () => {
@@ -47,6 +48,10 @@ export default function Services() {
 
         if (selectedCategory !== "all") {
           query = query.eq('category', selectedCategory);
+        }
+
+        if (searchQuery) {
+          query = query.ilike('title', `%${searchQuery}%`);
         }
           
         const { data, error } = await query.limit(12);
@@ -77,7 +82,7 @@ export default function Services() {
     
     checkUserAuth();
     fetchServices();
-  }, [selectedCategory]);
+  }, [selectedCategory, searchQuery]);
   
   const handleCategoryChange = (category) => {
     setSelectedCategory(category);
@@ -106,7 +111,7 @@ export default function Services() {
 
   return (
     <Layout>
-      <div className="container max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
+      <div className="container max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <h1 className="text-2xl sm:text-3xl font-bold">Services</h1>
           <div className="flex items-center gap-4 w-full sm:w-auto">
@@ -123,6 +128,16 @@ export default function Services() {
           </div>
         </div>
 
+        {/* Search Bar */}
+        <div className="mb-6">
+          <SearchInput 
+            placeholder="Search for services..." 
+            value={searchQuery} 
+            onChange={setSearchQuery} 
+            className="w-full max-w-3xl mx-auto"
+          />
+        </div>
+        
         {/* Banner */}
         <div className="mb-6">
           <MarketplaceBanner />
@@ -131,11 +146,6 @@ export default function Services() {
         {/* Service Categories Icon Grid */}
         <div className="mb-6">
           <ServiceIconGrid onCategorySelect={handleCategoryChange} />
-        </div>
-
-        {/* Category Filter */}
-        <div className="mb-6">
-          <ServiceCategoryFilter onCategoryChange={handleCategoryChange} />
         </div>
         
         {/* Sponsored Services */}
@@ -156,6 +166,12 @@ export default function Services() {
         {/* Recommended Services */}
         <div className="mb-8">
           <RecommendedServices />
+        </div>
+        
+        {/* Category Filter - Moved below recommended services */}
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold mb-4">Filter by Category</h2>
+          <ServiceCategoryFilter onCategoryChange={handleCategoryChange} />
         </div>
         
         {isUserLoggedIn && userServices.length > 0 && (

@@ -71,15 +71,15 @@ export const ServiceCategoryFilter = ({ onCategoryChange }: ServiceCategoryFilte
   }, []);
 
   return (
-    <div className="flex gap-3 overflow-x-auto pb-4 px-2 scrollbar-hide animate-fade-up">
+    <div className="flex gap-3 overflow-x-auto pb-4 px-3 md:px-4 scrollbar-hide animate-fade-up rounded-lg bg-zinc-50 dark:bg-zinc-900 p-3 shadow-sm">
       {categories.map(({ id, name, icon: Icon }) => (
         <Button
           key={id}
           variant={id === selectedCategory ? "default" : "outline"}
-          className="whitespace-nowrap transition-all duration-300 hover:scale-105 hover:shadow-md min-w-fit px-4"
+          className="whitespace-nowrap transition-all duration-300 hover:scale-105 hover:shadow-md min-w-fit px-3 sm:px-4 flex-shrink-0"
           onClick={() => handleCategoryClick(id)}
         >
-          {Icon && <Icon className="h-4 w-4 mr-2" />}
+          {Icon && <Icon className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />}
           {name}
         </Button>
       ))}

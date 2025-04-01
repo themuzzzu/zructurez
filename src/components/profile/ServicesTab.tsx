@@ -44,7 +44,7 @@ export const ServicesTab = () => {
       <Dialog open={isServiceDialogOpen} onOpenChange={setIsServiceDialogOpen}>
         <DialogContent className="sm:max-w-[600px] h-[90vh]">
           <ScrollArea className="h-full pr-4">
-            <CreateServiceForm onClose={() => setIsServiceDialogOpen(false)} />
+            <CreateServiceForm onSuccess={() => setIsServiceDialogOpen(false)} onCancel={() => setIsServiceDialogOpen(false)} />
           </ScrollArea>
         </DialogContent>
       </Dialog>
