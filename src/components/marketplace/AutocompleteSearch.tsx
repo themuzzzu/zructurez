@@ -30,7 +30,7 @@ interface ProductData {
 }
 
 interface BusinessData {
-  name: string;
+  name: string; // The business table uses "name" not "title"
   category?: string;
   [key: string]: any;
 }
@@ -93,7 +93,7 @@ export const AutocompleteSearch = ({
       // Get business suggestions
       const { data: businessData, error: businessError } = await supabase
         .from('businesses')
-        .select('name as title, category')
+        .select('name, category') // Note: business has "name" field, not "title"
         .ilike('name', `%${debouncedValue}%`)
         .limit(2);
       
@@ -106,8 +106,9 @@ export const AutocompleteSearch = ({
         type: 'product' 
       }));
       
+      // Fix this mapping to correctly handle the business data structure
       const businessSuggestions: Suggestion[] = (businessData || []).map((item: BusinessData) => ({ 
-        title: item.title, 
+        title: item.name, // Use "name" from business instead of "title"
         category: item.category,
         type: 'business' 
       }));
