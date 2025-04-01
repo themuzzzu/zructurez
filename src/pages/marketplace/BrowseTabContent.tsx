@@ -77,9 +77,10 @@ export const BrowseTabContent = ({
       {/* Banner */}
       <MarketplaceBanner />
       
-      {/* Category Icons */}
+      {/* Category Icons - Moved right below banner */}
       <div className="mb-6">
-        <CategoryIconGrid />
+        <h2 className="text-xl font-bold mb-4">Shop by Category</h2>
+        <CategoryIconGrid onCategorySelect={handleCategorySelect} />
       </div>
       
       {/* Categories Navigation */}

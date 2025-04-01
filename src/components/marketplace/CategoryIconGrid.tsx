@@ -11,9 +11,12 @@ import {
   Utensils,
   BookOpen
 } from "lucide-react";
-import { FilledIcon } from "../sidebar/FilledIcon";
 
-export const CategoryIconGrid = () => {
+interface CategoryIconGridProps {
+  onCategorySelect?: (category: string) => void;
+}
+
+export const CategoryIconGrid = ({ onCategorySelect }: CategoryIconGridProps) => {
   const navigate = useNavigate();
   
   const categories = [
@@ -28,11 +31,15 @@ export const CategoryIconGrid = () => {
   ];
   
   const handleCategoryClick = (category: string) => {
-    navigate(`/marketplace?category=${category.toLowerCase()}`);
+    navigate(`/marketplace?category=${category.toLowerCase().replace(/\s+/g, '-')}`);
+    
+    if (onCategorySelect) {
+      onCategorySelect(category.toLowerCase().replace(/\s+/g, '-'));
+    }
   };
   
   return (
-    <div className="bg-white dark:bg-zinc-950 rounded-lg p-4 mb-8">
+    <div className="bg-black dark:bg-zinc-950 rounded-lg p-4">
       <div className="grid grid-cols-4 sm:grid-cols-8 gap-4">
         {categories.map((category) => {
           const Icon = category.icon;
@@ -43,10 +50,10 @@ export const CategoryIconGrid = () => {
               className="flex flex-col items-center cursor-pointer group"
               onClick={() => handleCategoryClick(category.name)}
             >
-              <div className="w-12 h-12 rounded-full flex items-center justify-center bg-primary/10 mb-2 transition-transform group-hover:scale-110">
-                <Icon size={20} fill="currentColor" stroke="black" strokeWidth={1.5} className="text-primary" />
+              <div className="w-12 h-12 rounded-full flex items-center justify-center bg-blue-900/30 mb-2 transition-transform group-hover:scale-110">
+                <Icon size={20} className="text-blue-400" />
               </div>
-              <span className="text-xs text-center">{category.name}</span>
+              <span className="text-xs text-center text-white">{category.name}</span>
             </div>
           )}
         )}
