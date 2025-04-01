@@ -40,31 +40,30 @@ export const BusinessCardActions = ({
         className={`w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 transition-colors ${!appointment_price ? 'col-span-2' : ''}`} 
         variant="default"
       >
-        <MessageSquare className="h-4 w-4 text-black dark:text-white" />
-        Message
+        <MessageSquare className="h-4 w-4" />
+        <span className="text-primary-foreground">Message</span>
       </Button>
       <Button 
         onClick={onShareClick} 
         variant="outline" 
-        className={`w-full flex items-center justify-center gap-2 
+        className={`w-full flex items-center justify-center gap-2 text-foreground
           ${isDarkMode 
-            ? "border-gray-700 hover:bg-gray-800 text-white" 
-            : "border-gray-300 hover:bg-gray-100 text-gray-800"} 
-          font-light`}
+            ? "border-gray-700 hover:bg-gray-800" 
+            : "border-gray-300 hover:bg-gray-100"}`}
       >
-        <Share2 className="h-4 w-4 text-black dark:text-white" />
-        Share
+        <Share2 className="h-4 w-4" />
+        <span>Share</span>
       </Button>
       <Button 
         onClick={onCallClick} 
         variant="outline" 
-        className={`w-full flex items-center justify-center gap-2 
+        className={`w-full flex items-center justify-center gap-2 text-foreground
           ${isDarkMode 
-            ? "border-gray-700 hover:bg-gray-800 text-white" 
-            : "border-gray-300 hover:bg-gray-100 text-gray-800"}`}
+            ? "border-gray-700 hover:bg-gray-800" 
+            : "border-gray-300 hover:bg-gray-100"}`}
       >
-        <Phone className="h-4 w-4 text-black dark:text-white" />
-        Call
+        <Phone className="h-4 w-4" />
+        <span>Call</span>
       </Button>
     </div>
   );

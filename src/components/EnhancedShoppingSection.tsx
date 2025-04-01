@@ -8,6 +8,10 @@ import { BusinessCard } from './BusinessCard';
 import { Business } from '@/types/business';
 import { GridLayoutType } from './products/types/layouts';
 import { useNavigate } from 'react-router-dom';
+import { SponsoredProducts } from './marketplace/SponsoredProducts';
+import { RecommendedProducts } from './marketplace/RecommendedProducts';
+import { TrendingProducts } from './marketplace/TrendingProducts';
+import { motion } from 'framer-motion';
 
 interface EnhancedShoppingSectionProps {
   searchQuery: string;
@@ -80,6 +84,21 @@ export const EnhancedShoppingSection = ({
     setActiveTab(value);
   };
 
+  const containerAnimation = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemAnimation = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 }
+  };
+
   return (
     <div>
       <Tabs defaultValue="products" value={activeTab} onValueChange={handleTabChange}>
@@ -90,16 +109,41 @@ export const EnhancedShoppingSection = ({
         </TabsList>
         
         <TabsContent value="products">
-          <ShoppingSection
-            searchQuery={searchQuery}
-            selectedCategory={selectedCategory}
-            showDiscounted={showDiscounted}
-            showUsed={showUsed}
-            showBranded={showBranded}
-            sortOption={sortOption}
-            priceRange={priceRange}
-            gridLayout={gridLayout}
-          />
+          <motion.div
+            initial="hidden"
+            animate="show"
+            variants={containerAnimation}
+            className="space-y-8"
+          >
+            {/* Sponsored Products Section */}
+            <motion.div variants={itemAnimation}>
+              <SponsoredProducts gridLayout={gridLayout} />
+            </motion.div>
+            
+            {/* Trending Products */}
+            <motion.div variants={itemAnimation}>
+              <TrendingProducts gridLayout={gridLayout} />
+            </motion.div>
+            
+            {/* Recommended Products */}
+            <motion.div variants={itemAnimation}>
+              <RecommendedProducts gridLayout={gridLayout} />
+            </motion.div>
+            
+            {/* Main Shopping Section */}
+            <motion.div variants={itemAnimation}>
+              <ShoppingSection
+                searchQuery={searchQuery}
+                selectedCategory={selectedCategory}
+                showDiscounted={showDiscounted}
+                showUsed={showUsed}
+                showBranded={showBranded}
+                sortOption={sortOption}
+                priceRange={priceRange}
+                gridLayout={gridLayout}
+              />
+            </motion.div>
+          </motion.div>
         </TabsContent>
         
         <TabsContent value="businesses">

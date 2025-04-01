@@ -24,6 +24,7 @@ export const ProductCard = ({
 }: ProductCardProps) => {
   const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   
   // Use IntersectionObserver for lazy loading
@@ -58,18 +59,35 @@ export const ProductCard = ({
   // Use compact layout for list view
   if (layout === "list") {
     return (
-      <div ref={cardRef}>
+      <div 
+        ref={cardRef}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
         {isVisible && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3 }}
+            whileHover={{ 
+              scale: 1.03,
+              transition: { duration: 0.2 }
+            }}
+            className="relative"
           >
             <ProductCardCompact 
               product={product} 
               onClick={handleClick}
               sponsored={sponsored}
             />
+            <div className="absolute top-2 right-2 z-10">
+              <ProductLikeButton 
+                productId={product.id} 
+                variant="ghost" 
+                size="sm"
+                className="bg-white/80 dark:bg-black/50 backdrop-blur-sm hover:bg-white/90 dark:hover:bg-black/60"
+              />
+            </div>
           </motion.div>
         )}
         {!isVisible && (
@@ -83,13 +101,21 @@ export const ProductCard = ({
   
   // Use standard card layout for grid views
   return (
-    <div ref={cardRef}>
+    <div 
+      ref={cardRef}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       {isVisible && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          whileHover={{ y: -5, transition: { duration: 0.2 } }}
+          whileHover={{ 
+            y: -5, 
+            transition: { duration: 0.2 }
+          }}
+          className="relative"
         >
           <ProductCardStandard
             product={product}
@@ -97,6 +123,19 @@ export const ProductCard = ({
             isGrid2x2={layout === "grid2x2"}
             sponsored={sponsored}
           />
+          <motion.div 
+            className="absolute top-2 right-2 z-10"
+            initial={{ opacity: isHovered ? 1 : 0 }}
+            animate={{ opacity: isHovered ? 1 : 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <ProductLikeButton 
+              productId={product.id} 
+              variant="ghost" 
+              size="sm"
+              className="bg-white/80 dark:bg-black/50 backdrop-blur-sm hover:bg-white/90 dark:hover:bg-black/60"
+            />
+          </motion.div>
         </motion.div>
       )}
       {!isVisible && (

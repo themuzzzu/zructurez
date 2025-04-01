@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
@@ -5,7 +6,7 @@ import { BusinessCard } from "@/components/BusinessCard";
 import { BusinessCategoryFilter } from "@/components/BusinessCategoryFilter";
 import { SearchInput } from "@/components/SearchInput";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Plus } from "lucide-react";
+import { ArrowLeft, Plus, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { CreateBusinessForm } from "@/components/CreateBusinessForm";
 import { useQuery } from "@tanstack/react-query";
@@ -25,7 +26,9 @@ import { TopRatedBusinesses } from "@/components/home/TopRatedBusinesses";
 import { CrazyDeals } from "@/components/marketplace/CrazyDeals";
 import { SponsoredProducts } from "@/components/marketplace/SponsoredProducts";
 import { CategorySubcategoryGrid } from "@/components/marketplace/CategorySubcategoryGrid";
-import type { Business, BusinessHours } from "@/types/business";
+import { motion } from "framer-motion";
+import { toast } from "sonner";
+import type { Business } from "@/types/business";
 
 interface BusinessWithRating {
   id: string;
@@ -76,7 +79,7 @@ const Business = () => {
     
     if (selectedCategory !== "all") {
       if (selectedCategory.includes('-')) {
-        const [category, subcategory] = selectedCategory.split('-');
+        const [category] = selectedCategory.split('-');
         query = query.eq('category', category);
       } else {
         query = query.eq('category', selectedCategory);
@@ -115,10 +118,27 @@ const Business = () => {
     });
   };
   
-  const { data: businesses, isLoading, error } = useQuery({
+  const { data: businesses, isLoading, error, refetch } = useQuery({
     queryKey: ['businesses', selectedCategory],
     queryFn: fetchBusinesses
   });
+
+  const handleDeleteBusiness = async (businessId: string) => {
+    try {
+      const { error } = await supabase
+        .from('businesses')
+        .delete()
+        .eq('id', businessId);
+        
+      if (error) throw error;
+      
+      toast.success("Business deleted successfully");
+      refetch();
+    } catch (error) {
+      console.error("Error deleting business:", error);
+      toast.error("Failed to delete business");
+    }
+  };
 
   if (isLoading) return <LoadingView />;
   if (error) return <ErrorView />;
@@ -207,7 +227,7 @@ const Business = () => {
               <BusinessCategoryNavBar />
               
               <div className="space-y-8 mt-8">
-                <TopRatedBusinesses />
+                <SponsoredProducts />
                 
                 <CrazyDeals />
                 
@@ -248,53 +268,56 @@ const Business = () => {
                   </div>
 
                   {businesses && businesses.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {businesses
-                        .filter(business => 
-                          business.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          business.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          business.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          (business.location && business.location.toLowerCase().includes(searchQuery.toLowerCase()))
-                        )
-                        .sort((a, b) => {
-                          switch (sortBy) {
-                            case "newest":
-                              return new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime();
-                            case "oldest":
-                              return new Date(a.created_at || '').getTime() - new Date(b.created_at || '').getTime();
-                            case "rating":
-                              return (b.average_rating || 0) - (a.average_rating || 0);
-                            case "name_asc":
-                              return (a.name || '').localeCompare(b.name || '');
-                            case "name_desc":
-                              return (b.name || '').localeCompare(a.name || '');
-                            default:
-                              return 0;
-                          }
-                        })
-                        .map((business) => (
-                          <div key={business.id} className="h-full">
-                            <BusinessCard 
-                              id={business.id}
-                              name={business.name}
-                              category={business.category}
-                              description={business.description}
-                              image={business.image_url || '/placeholder.svg'}
-                              rating={business.average_rating || 0}
-                              reviews={business.reviews_count || 0}
-                              location={business.location || ''}
-                              contact={business.contact || ''}
-                              hours={formatHours(business.hours)}
-                              verified={business.verified || false}
-                              appointment_price={business.appointment_price}
-                              consultation_price={business.consultation_price}
-                              is_open={business.is_open}
-                              wait_time={business.wait_time}
-                              closure_reason={business.closure_reason}
-                            />
-                          </div>
-                        ))}
-                    </div>
+                    <motion.div 
+                      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ staggerChildren: 0.1 }}
+                    >
+                      {sortedBusinesses.map((business) => (
+                        <motion.div 
+                          key={business.id} 
+                          className="relative h-full"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3 }}
+                          whileHover={{ y: -5, transition: { duration: 0.2 } }}
+                        >
+                          <Button 
+                            variant="destructive" 
+                            size="icon" 
+                            className="absolute top-2 right-2 z-10"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                              if (confirm("Are you sure you want to delete this business?")) {
+                                handleDeleteBusiness(business.id);
+                              }
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                          <BusinessCard 
+                            id={business.id}
+                            name={business.name}
+                            category={business.category}
+                            description={business.description}
+                            image={business.image_url || '/placeholder.svg'}
+                            rating={business.average_rating || 0}
+                            reviews={business.reviews_count || 0}
+                            location={business.location || ''}
+                            contact={business.contact || ''}
+                            hours={formatHours(business.hours)}
+                            verified={business.verified || false}
+                            appointment_price={business.appointment_price}
+                            consultation_price={business.consultation_price}
+                            is_open={business.is_open}
+                            wait_time={business.wait_time}
+                            closure_reason={business.closure_reason}
+                          />
+                        </motion.div>
+                      ))}
+                    </motion.div>
                   ) : (
                     <div className="text-center py-12">
                       <p className="text-muted-foreground">No businesses found. Be the first to register your business!</p>
