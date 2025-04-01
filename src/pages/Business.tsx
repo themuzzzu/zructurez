@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
@@ -31,7 +30,6 @@ const Business = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
   
-  // Parse URL parameters
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const categoryParam = params.get('category');
@@ -54,9 +52,7 @@ const Business = () => {
         `)
         .order('created_at', { ascending: false });
       
-      // Filter by category if not "all"
       if (selectedCategory !== "all") {
-        // Check if it's a subcategory selection (contains a hyphen)
         if (selectedCategory.includes('-')) {
           const [category, subcategory] = selectedCategory.split('-');
           query = query.eq('category', category).eq('subcategory', subcategory);
@@ -69,7 +65,7 @@ const Business = () => {
       
       if (error) throw error;
       
-      const businessesWithRating = data?.map(business => {
+      return (data || []).map(business => {
         const ratings = business.business_ratings || [];
         const totalRating = ratings.reduce((sum: number, rating: any) => sum + rating.rating, 0);
         const averageRating = ratings.length > 0 ? totalRating / ratings.length : 0;
@@ -78,9 +74,7 @@ const Business = () => {
           ...business,
           average_rating: averageRating
         };
-      }) || [];
-      
-      return businessesWithRating;
+      });
     }
   });
 
@@ -152,22 +146,17 @@ const Business = () => {
             />
           ) : (
             <>
-              {/* Hero Section with Search */}
               <SearchHero />
               
-              {/* Add Business Category Navigation Bar */}
               <BusinessCategoryNavBar />
               
               <div className="space-y-8 mt-8">
-                {/* Business Categories Grid */}
                 <BusinessCategoryGrid />
                 
-                {/* Quick Access Services - Mobile Only */}
                 <div className="block sm:hidden">
                   <QuickAccessServices />
                 </div>
                 
-                {/* Trending Services */}
                 <TrendingServices />
                 
                 <div className="mt-8">
@@ -191,53 +180,62 @@ const Business = () => {
                     </div>
                   </div>
 
-                  {sortedBusinesses.length === 0 ? (
-                    <div className="text-center py-12">
-                      <p className="text-muted-foreground">No businesses found. Be the first to register your business!</p>
-                    </div>
-                  ) : (
+                  {isLoading ? (
+                    <LoadingView />
+                  ) : error ? (
+                    <ErrorView />
+                  ) : businesses && businesses.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {sortedBusinesses.map((business) => {
-                        const {
-                          id,
-                          name,
-                          category,
-                          description,
-                          image_url,
-                          location,
-                          contact,
-                          hours,
-                          verified,
-                          appointment_price,
-                          consultation_price,
-                          is_open,
-                          wait_time,
-                          closure_reason
-                        } = business;
-                        
-                        return (
-                          <div key={id} className="h-full">
+                      {businesses
+                        .filter(business => 
+                          business.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          business.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          business.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (business.location && business.location.toLowerCase().includes(searchQuery.toLowerCase()))
+                        )
+                        .sort((a, b) => {
+                          switch (sortBy) {
+                            case "newest":
+                              return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+                            case "oldest":
+                              return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+                            case "rating":
+                              return (b.average_rating || 0) - (a.average_rating || 0);
+                            case "name_asc":
+                              return a.name.localeCompare(b.name);
+                            case "name_desc":
+                              return b.name.localeCompare(a.name);
+                            default:
+                              return 0;
+                          }
+                        })
+                        .map((business) => (
+                          <div key={business.id} className="h-full">
                             <BusinessCard 
-                              id={id}
-                              name={name}
-                              category={category}
-                              description={description}
-                              image={image_url || '/placeholder.svg'}
+                              id={business.id}
+                              name={business.name}
+                              category={business.category}
+                              description={business.description}
+                              image={business.image_url || '/placeholder.svg'}
                               rating={business.average_rating || 0}
                               reviews={business.business_ratings?.length || 0}
-                              location={location || ''}
-                              contact={contact || ''}
-                              hours={hours || ''}
-                              verified={verified || false}
-                              appointment_price={appointment_price}
-                              consultation_price={consultation_price}
-                              is_open={is_open}
-                              wait_time={wait_time}
-                              closure_reason={closure_reason}
+                              location={business.location || ''}
+                              contact={business.contact || ''}
+                              hours={business.hours || ''}
+                              verified={business.verified || false}
+                              appointment_price={business.appointment_price}
+                              consultation_price={business.consultation_price}
+                              is_open={business.is_open}
+                              wait_time={business.wait_time}
+                              closure_reason={business.closure_reason}
                             />
                           </div>
-                        );
-                      })}
+                        ))
+                      }
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <p className="text-muted-foreground">No businesses found. Be the first to register your business!</p>
                     </div>
                   )}
                 </div>
