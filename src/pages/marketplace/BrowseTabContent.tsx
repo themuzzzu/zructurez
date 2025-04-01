@@ -4,7 +4,21 @@ import { ShoppingSection } from "@/components/ShoppingSection";
 import { Categories } from "@/components/marketplace/Categories";
 import { useNavigate } from "react-router-dom";
 
-export const BrowseTabContent = () => {
+interface BrowseTabContentProps {
+  searchResults?: any[];
+  searchTerm?: string;
+  isSearching?: boolean;
+  onCategorySelect?: (category: string) => void;
+  onSearchSelect?: (term: string) => void;
+}
+
+export const BrowseTabContent = ({
+  searchResults = [],
+  searchTerm = "",
+  isSearching = false,
+  onCategorySelect,
+  onSearchSelect
+}: BrowseTabContentProps) => {
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState("all");
   
@@ -13,6 +27,11 @@ export const BrowseTabContent = () => {
     
     if (category !== "all") {
       navigate(`/marketplace?category=${category}`);
+    }
+    
+    // Call the parent handler if provided
+    if (onCategorySelect) {
+      onCategorySelect(category);
     }
   };
   
@@ -27,7 +46,7 @@ export const BrowseTabContent = () => {
       </div>
       
       <ShoppingSection 
-        searchQuery=""
+        searchQuery={searchTerm || ""}
         selectedCategory={selectedCategory === "all" ? "" : selectedCategory}
       />
     </div>
