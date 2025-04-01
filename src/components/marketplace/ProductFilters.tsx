@@ -1,6 +1,5 @@
 
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { Separator } from "@/components/ui/separator";
+import { useState } from "react";
 import { 
   Collapsible, 
   CollapsibleContent, 
@@ -8,8 +7,14 @@ import {
 } from "@/components/ui/collapsible";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { motion } from "framer-motion";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ProductFiltersProps {
   selectedCategory: string;
@@ -24,6 +29,7 @@ interface ProductFiltersProps {
   onSortChange: (option: string) => void;
   priceRange: string;
   onPriceRangeChange: (range: string) => void;
+  onResetFilters: () => void;
 }
 
 export const ProductFilters = ({
@@ -38,11 +44,15 @@ export const ProductFilters = ({
   sortOption,
   onSortChange,
   priceRange,
-  onPriceRangeChange
+  onPriceRangeChange,
+  onResetFilters
 }: ProductFiltersProps) => {
   const [openSort, setOpenSort] = useState(true);
   const [openPrice, setOpenPrice] = useState(true);
   const [openType, setOpenType] = useState(true);
+  const [openBrands, setOpenBrands] = useState(false);
+  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
+  const [priceRangeValue, setPriceRangeValue] = useState<[number, number]>([0, 5000]);
   
   const categories = [
     { id: "all", name: "All" },
@@ -57,43 +67,90 @@ export const ProductFilters = ({
     { id: "grocery", name: "Grocery" }
   ];
 
+  const brands = [
+    "Apple", "Samsung", "Sony", "Nike", "Adidas", "LG", "HP", "Dell", "Asus", 
+    "Lenovo", "Puma", "Zara", "H&M", "Ikea", "Philips"
+  ];
+
+  const handleBrandToggle = (brand: string) => {
+    setSelectedBrands(prev => 
+      prev.includes(brand) 
+        ? prev.filter(b => b !== brand) 
+        : [...prev, brand]
+    );
+  };
+
+  const handlePriceRangeChange = (value: [number, number]) => {
+    setPriceRangeValue(value);
+    // Format price range as "min-max" or "min" if max is at the upper limit
+    const rangeString = value[1] >= 5000 
+      ? `${value[0]}-up` 
+      : `${value[0]}-${value[1]}`;
+    onPriceRangeChange(rangeString);
+  };
+
+  // Check if any filters are active
+  const hasActiveFilters = showDiscounted || showUsed || showBranded || 
+    selectedCategory !== 'all' || sortOption !== 'newest' || 
+    selectedBrands.length > 0 || 
+    priceRangeValue[0] > 0 || priceRangeValue[1] < 5000;
+
   return (
-    <div className="bg-white dark:bg-card rounded-lg border border-border p-4 space-y-6">
+    <motion.div 
+      className="bg-white dark:bg-card rounded-lg border border-border p-4 space-y-6 shadow-sm"
+      initial={{ opacity: 0, x: -10 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <div className="flex justify-between items-center">
+        <h3 className="font-semibold text-lg">Filters</h3>
+        {hasActiveFilters && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={onResetFilters}
+            className="text-xs"
+          >
+            Reset All
+          </Button>
+        )}
+      </div>
+
+      <Separator />
+      
       <div>
         <h3 className="font-medium mb-3">Categories</h3>
-        <div className="flex flex-wrap gap-2">
-          {categories.map((category) => (
-            <div 
-              key={category.id}
-              className={`px-3 py-1.5 rounded-full text-sm cursor-pointer transition-colors ${
-                selectedCategory === category.id 
-                  ? 'bg-primary text-white' 
-                  : 'bg-muted hover:bg-muted/80'
-              }`}
-              onClick={() => onCategorySelect(category.id)}
-            >
-              {category.name}
-            </div>
-          ))}
-        </div>
+        <ScrollArea className="h-[120px]">
+          <div className="space-y-1.5 pr-3">
+            {categories.map((category) => (
+              <div 
+                key={category.id}
+                className={`py-1.5 px-3 rounded-md cursor-pointer transition-colors ${
+                  selectedCategory === category.id 
+                    ? 'bg-primary/10 text-primary font-medium' 
+                    : 'hover:bg-accent/50'
+                }`}
+                onClick={() => onCategorySelect(category.id)}
+              >
+                {category.name}
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
       </div>
       
       <Separator />
       
       <Collapsible open={openSort} onOpenChange={setOpenSort}>
-        <CollapsibleTrigger className="flex w-full items-center justify-between mb-2">
+        <CollapsibleTrigger className="flex w-full items-center justify-between py-1">
           <h3 className="font-medium">Sort By</h3>
           {openSort ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </CollapsibleTrigger>
-        <CollapsibleContent>
+        <CollapsibleContent className="pt-2 pb-1">
           <RadioGroup value={sortOption} onValueChange={onSortChange} className="space-y-2">
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="newest" id="newest" />
               <Label htmlFor="newest">Newest First</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="oldest" id="oldest" />
-              <Label htmlFor="oldest">Oldest First</Label>
             </div>
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="price-low" id="price-low" />
@@ -122,76 +179,99 @@ export const ProductFilters = ({
       <Separator />
       
       <Collapsible open={openPrice} onOpenChange={setOpenPrice}>
-        <CollapsibleTrigger className="flex w-full items-center justify-between mb-2">
+        <CollapsibleTrigger className="flex w-full items-center justify-between py-1">
           <h3 className="font-medium">Price Range</h3>
           {openPrice ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </CollapsibleTrigger>
-        <CollapsibleContent>
-          <RadioGroup value={priceRange} onValueChange={onPriceRangeChange} className="space-y-2">
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="all" id="all-prices" />
-              <Label htmlFor="all-prices">All Prices</Label>
+        <CollapsibleContent className="pt-2 pb-1">
+          <div className="space-y-4">
+            <Slider
+              value={priceRangeValue}
+              min={0}
+              max={5000}
+              step={100}
+              onValueChange={(vals) => handlePriceRangeChange(vals as [number, number])}
+              className="mt-6"
+            />
+            <div className="flex justify-between items-center">
+              <div className="px-2 py-1 bg-background border border-input rounded text-sm">
+                ₹{priceRangeValue[0]}
+              </div>
+              <div className="px-2 py-1 bg-background border border-input rounded text-sm">
+                {priceRangeValue[1] >= 5000 ? "₹5000+" : `₹${priceRangeValue[1]}`}
+              </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="0-100" id="under-100" />
-              <Label htmlFor="under-100">Under ₹100</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="100-500" id="100-500" />
-              <Label htmlFor="100-500">₹100 - ₹500</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="500-1000" id="500-1000" />
-              <Label htmlFor="500-1000">₹500 - ₹1,000</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="1000-5000" id="1000-5000" />
-              <Label htmlFor="1000-5000">₹1,000 - ₹5,000</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="5000" id="above-5000" />
-              <Label htmlFor="above-5000">Above ₹5,000</Label>
-            </div>
-          </RadioGroup>
+          </div>
         </CollapsibleContent>
       </Collapsible>
       
       <Separator />
       
       <Collapsible open={openType} onOpenChange={setOpenType}>
-        <CollapsibleTrigger className="flex w-full items-center justify-between mb-2">
+        <CollapsibleTrigger className="flex w-full items-center justify-between py-1">
           <h3 className="font-medium">Product Type</h3>
           {openType ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </CollapsibleTrigger>
-        <CollapsibleContent>
-          <ToggleGroup type="multiple" className="flex flex-col space-y-2">
-            <ToggleGroupItem 
-              value="discounted" 
-              className="justify-start"
-              data-state={showDiscounted ? "on" : "off"}
-              onClick={() => onDiscountedChange(!showDiscounted)}
-            >
-              Discounted Products
-            </ToggleGroupItem>
-            <ToggleGroupItem 
-              value="used" 
-              className="justify-start"
-              data-state={showUsed ? "on" : "off"}
-              onClick={() => onUsedChange(!showUsed)}
-            >
-              Used Items
-            </ToggleGroupItem>
-            <ToggleGroupItem 
-              value="branded" 
-              className="justify-start"
-              data-state={showBranded ? "on" : "off"}
-              onClick={() => onBrandedChange(!showBranded)}
-            >
-              Branded Products
-            </ToggleGroupItem>
-          </ToggleGroup>
+        <CollapsibleContent className="pt-2 pb-1 space-y-3">
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="discounted"
+              checked={showDiscounted}
+              onCheckedChange={onDiscountedChange}
+            />
+            <Label htmlFor="discounted">Discounted Products</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="used"
+              checked={showUsed}
+              onCheckedChange={onUsedChange}
+            />
+            <Label htmlFor="used">Used Items</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="branded"
+              checked={showBranded}
+              onCheckedChange={onBrandedChange}
+            />
+            <Label htmlFor="branded">Branded Products</Label>
+          </div>
         </CollapsibleContent>
       </Collapsible>
-    </div>
+      
+      <Separator />
+      
+      <Collapsible open={openBrands} onOpenChange={setOpenBrands}>
+        <CollapsibleTrigger className="flex w-full items-center justify-between py-1">
+          <h3 className="font-medium">Brands</h3>
+          {openBrands ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+        </CollapsibleTrigger>
+        <CollapsibleContent className="pt-2 pb-1">
+          <ScrollArea className="h-[150px] pr-3">
+            <div className="flex flex-wrap gap-2">
+              {brands.map((brand) => (
+                <Badge
+                  key={brand}
+                  variant={selectedBrands.includes(brand) ? "default" : "outline"}
+                  className="cursor-pointer"
+                  onClick={() => handleBrandToggle(brand)}
+                >
+                  {brand}
+                </Badge>
+              ))}
+            </div>
+          </ScrollArea>
+        </CollapsibleContent>
+      </Collapsible>
+      
+      {hasActiveFilters && (
+        <div className="pt-2">
+          <Button className="w-full" onClick={onResetFilters}>
+            Reset Filters
+          </Button>
+        </div>
+      )}
+    </motion.div>
   );
 };

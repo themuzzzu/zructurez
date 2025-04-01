@@ -6,6 +6,7 @@ import { Search, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface AutocompleteSearchProps {
   placeholder?: string;
@@ -167,7 +168,13 @@ export const AutocompleteSearch = ({
 
   return (
     <div className={`relative ${className}`}>
-      <form onSubmit={handleSubmit} className="relative">
+      <motion.form 
+        onSubmit={handleSubmit} 
+        className="relative"
+        initial={{ opacity: 0.9, y: -5 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         <Input
           ref={inputRef}
@@ -175,7 +182,7 @@ export const AutocompleteSearch = ({
           placeholder={placeholder}
           value={value}
           onChange={handleInputChange}
-          className="w-full pl-10 pr-12 h-12 border-zinc-300 dark:border-zinc-700 focus:border-zinc-900 dark:focus:border-zinc-100"
+          className="w-full pl-10 pr-24 h-12 rounded-full border-zinc-300 dark:border-zinc-700 focus:border-zinc-900 dark:focus:border-zinc-500 shadow-sm focus:shadow-md transition-all duration-300"
           onFocus={() => {
             setIsFocused(true);
             setShowSuggestions(value.length >= 2);
@@ -185,68 +192,78 @@ export const AutocompleteSearch = ({
         <Button 
           type="submit" 
           size="sm" 
-          className="absolute right-1.5 top-1/2 transform -translate-y-1/2 h-9"
+          className="absolute right-1.5 top-1/2 transform -translate-y-1/2 h-9 rounded-full px-4"
         >
           Search
         </Button>
-      </form>
+      </motion.form>
 
-      {((showSuggestions && suggestions && suggestions.length > 0) || 
-         (isFocused && !value && popularSearches && popularSearches.length > 0)) && (
-        <div 
-          ref={suggestionsRef}
-          className="absolute z-50 mt-1 w-full bg-white dark:bg-zinc-900 shadow-lg rounded-md border border-zinc-300 dark:border-zinc-700 overflow-hidden"
-        >
-          <div className="p-2">
-            <h4 className="text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-              {value ? "Suggestions" : "Popular Searches"}
-            </h4>
-            {isLoading ? (
-              <div className="text-sm py-1 px-2">Loading...</div>
-            ) : value && suggestions ? (
-              suggestions.map((item, index) => (
-                <div
-                  key={index}
-                  className="text-sm py-2 px-3 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer rounded flex justify-between items-center"
-                  onClick={() => handleSuggestionClick(item.title)}
-                >
-                  <div className="flex items-center">
+      <AnimatePresence>
+        {((showSuggestions && suggestions && suggestions.length > 0) || 
+           (isFocused && !value && popularSearches && popularSearches.length > 0)) && (
+          <motion.div 
+            ref={suggestionsRef}
+            className="absolute z-50 mt-1 w-full bg-white dark:bg-zinc-900 shadow-lg rounded-md border border-zinc-300 dark:border-zinc-700 overflow-hidden"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className="p-2">
+              <h4 className="text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
+                {value ? "Suggestions" : "Popular Searches"}
+              </h4>
+              {isLoading ? (
+                <div className="text-sm py-1 px-2">Loading...</div>
+              ) : value && suggestions ? (
+                suggestions.map((item, index) => (
+                  <motion.div
+                    key={index}
+                    className="text-sm py-2 px-3 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer rounded flex justify-between items-center"
+                    onClick={() => handleSuggestionClick(item.title)}
+                    whileHover={{ backgroundColor: "rgba(0,0,0,0.05)" }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <div className="flex items-center">
+                      <span>{item.title}</span>
+                    </div>
+                    <span className="text-xs px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 rounded">
+                      {item.type || item.category}
+                    </span>
+                  </motion.div>
+                ))
+              ) : popularSearches && (
+                popularSearches.map((item, index) => (
+                  <motion.div
+                    key={index}
+                    className="text-sm py-2 px-3 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer rounded flex justify-between items-center"
+                    onClick={() => handleSuggestionClick(item.title)}
+                    whileHover={{ backgroundColor: "rgba(0,0,0,0.05)" }}
+                    transition={{ duration: 0.2 }}
+                  >
                     <span>{item.title}</span>
-                  </div>
-                  <span className="text-xs px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 rounded">
-                    {item.type || item.category}
-                  </span>
+                    <span className="text-xs text-zinc-400">{item.views} views</span>
+                  </motion.div>
+                ))
+              )}
+              
+              {value && (
+                <div className="mt-2 pt-2 border-t border-zinc-200 dark:border-zinc-700">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="w-full justify-between text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-zinc-800"
+                    onClick={() => handleSuggestionClick(value)}
+                  >
+                    <span>Search for "{value}"</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
                 </div>
-              ))
-            ) : popularSearches && (
-              popularSearches.map((item, index) => (
-                <div
-                  key={index}
-                  className="text-sm py-2 px-3 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer rounded flex justify-between items-center"
-                  onClick={() => handleSuggestionClick(item.title)}
-                >
-                  <span>{item.title}</span>
-                  <span className="text-xs text-zinc-400">{item.views} views</span>
-                </div>
-              ))
-            )}
-            
-            {value && (
-              <div className="mt-2 pt-2 border-t border-zinc-200 dark:border-zinc-700">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="w-full justify-between text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-zinc-800"
-                  onClick={() => handleSuggestionClick(value)}
-                >
-                  <span>Search for "{value}"</span>
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
