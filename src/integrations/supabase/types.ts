@@ -1640,6 +1640,38 @@ export type Database = {
           },
         ]
       }
+      product_labels: {
+        Row: {
+          attributes: Json
+          created_at: string | null
+          id: string
+          name: string
+          product_id: string | null
+        }
+        Insert: {
+          attributes?: Json
+          created_at?: string | null
+          id?: string
+          name: string
+          product_id?: string | null
+        }
+        Update: {
+          attributes?: Json
+          created_at?: string | null
+          id?: string
+          name?: string
+          product_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_labels_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_purchases: {
         Row: {
           id: string
@@ -1816,6 +1848,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      saved_product_labels: {
+        Row: {
+          attributes: Json
+          created_at: string | null
+          id: string
+          name: string
+          user_id: string | null
+        }
+        Insert: {
+          attributes?: Json
+          created_at?: string | null
+          id?: string
+          name: string
+          user_id?: string | null
+        }
+        Update: {
+          attributes?: Json
+          created_at?: string | null
+          id?: string
+          name?: string
+          user_id?: string | null
+        }
+        Relationships: []
       }
       scheduled_posts: {
         Row: {

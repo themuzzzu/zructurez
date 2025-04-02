@@ -1,254 +1,254 @@
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
+import { ProductFormProps } from "./types";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { PlusCircle, X, Save } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
-import { Plus, X, Save, Tag } from "lucide-react";
-import type { ProductFormProps, ProductLabelFormData } from "./types";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { SavedLabel } from "@/types/product";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export const LabelsAttributes = ({ formData, onChange }: ProductFormProps) => {
   const [newLabel, setNewLabel] = useState("");
   const [newAttribute, setNewAttribute] = useState("");
-  const [editing, setEditing] = useState<number | null>(null);
-  
-  // Fetch saved labels for the current user
-  const { data: savedLabels, isLoading, refetch } = useQuery({
-    queryKey: ['saved-labels'],
+  const [selectedSavedLabel, setSelectedSavedLabel] = useState<string>("");
+
+  // Fetch saved labels
+  const { data: savedLabels, refetch: refetchSavedLabels } = useQuery({
+    queryKey: ["saved-labels"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return [];
+
+      // Using any to bypass TypeScript error due to custom schema types
+      const { data, error } = await (supabase as any)
+        .from("saved_product_labels")
+        .select("*")
+        .eq("user_id", user.id);
+
+      if (error) {
+        console.error("Error fetching saved labels:", error);
+        return [];
+      }
       
-      const { data, error } = await supabase
-        .from('saved_product_labels')
-        .select('*')
-        .eq('user_id', user.id);
-        
-      if (error) throw error;
-      return data || [];
-    }
+      return data as SavedLabel[];
+    },
   });
 
+  // Add a new label
   const addLabel = () => {
-    if (!newLabel.trim()) return;
-    
+    if (!newLabel.trim()) {
+      toast.error("Please enter a valid label name");
+      return;
+    }
+
     const updatedLabels = [
       ...formData.labels,
-      { name: newLabel, attributes: [] }
+      { name: newLabel.trim(), attributes: [] }
     ];
     
     onChange("labels", updatedLabels);
     setNewLabel("");
   };
 
-  const removeLabel = (index: number) => {
-    const updatedLabels = [...formData.labels];
-    updatedLabels.splice(index, 1);
-    onChange("labels", updatedLabels);
-  };
-
+  // Add attribute to a specific label
   const addAttribute = (labelIndex: number) => {
-    if (!newAttribute.trim()) return;
-    
+    if (!newAttribute.trim()) {
+      toast.error("Please enter a valid attribute");
+      return;
+    }
+
     const updatedLabels = [...formData.labels];
-    if (!updatedLabels[labelIndex].attributes) {
-      updatedLabels[labelIndex].attributes = [];
-    }
+    updatedLabels[labelIndex].attributes.push(newAttribute.trim());
     
-    // Add attribute if it doesn't already exist
-    if (!updatedLabels[labelIndex].attributes.includes(newAttribute)) {
-      updatedLabels[labelIndex].attributes.push(newAttribute);
-      onChange("labels", updatedLabels);
-    }
-    
+    onChange("labels", updatedLabels);
     setNewAttribute("");
   };
 
+  // Remove attribute from a label
   const removeAttribute = (labelIndex: number, attrIndex: number) => {
     const updatedLabels = [...formData.labels];
     updatedLabels[labelIndex].attributes.splice(attrIndex, 1);
+    
     onChange("labels", updatedLabels);
   };
 
-  const saveLabel = async (label: ProductLabelFormData) => {
+  // Remove a label
+  const removeLabel = (labelIndex: number) => {
+    const updatedLabels = [...formData.labels];
+    updatedLabels.splice(labelIndex, 1);
+    
+    onChange("labels", updatedLabels);
+  };
+
+  // Save a label for future use
+  const saveLabel = async (labelIndex: number) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("User not authenticated");
+      if (!user) {
+        toast.error("You must be logged in to save labels");
+        return;
+      }
+
+      const labelToSave = formData.labels[labelIndex];
       
-      const { error } = await supabase
-        .from('saved_product_labels')
+      // Using any to bypass TypeScript error due to custom schema types
+      const { error } = await (supabase as any)
+        .from("saved_product_labels")
         .insert({
-          name: label.name,
-          attributes: label.attributes,
-          user_id: user.id
+          user_id: user.id,
+          name: labelToSave.name,
+          attributes: labelToSave.attributes
         });
-        
+
       if (error) throw error;
       
       toast.success("Label saved successfully!");
-      refetch();
+      refetchSavedLabels();
     } catch (error) {
       console.error("Error saving label:", error);
       toast.error("Failed to save label");
     }
   };
 
-  const useSavedLabel = (savedLabel: any) => {
-    // Check if this label already exists in the form
-    const labelExists = formData.labels.some(l => l.name === savedLabel.name);
+  // Load a saved label
+  const loadSavedLabel = () => {
+    if (!selectedSavedLabel || !savedLabels) return;
     
-    if (!labelExists) {
-      const updatedLabels = [
-        ...formData.labels,
-        { 
-          name: savedLabel.name, 
-          attributes: savedLabel.attributes 
-        }
-      ];
-      
-      onChange("labels", updatedLabels);
-      toast.success(`Added ${savedLabel.name} to product`);
-    } else {
-      toast.info("This label is already added to the product");
-    }
+    const selectedLabel = savedLabels.find(label => label.id === selectedSavedLabel);
+    if (!selectedLabel) return;
+    
+    // Add the saved label to the current list
+    const updatedLabels = [
+      ...formData.labels,
+      { 
+        name: selectedLabel.name, 
+        attributes: selectedLabel.attributes 
+      }
+    ];
+    
+    onChange("labels", updatedLabels);
+    setSelectedSavedLabel("");
+    toast.success("Saved label added!");
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <Label className="text-base font-medium">Labels & Attributes</Label>
-      </div>
-      
-      {/* Add new label */}
-      <div className="flex gap-2 mb-4">
-        <Input
-          placeholder="Add new label (e.g., Size, Color, Material)"
-          value={newLabel}
-          onChange={(e) => setNewLabel(e.target.value)}
-        />
-        <Button 
-          type="button" 
-          onClick={addLabel}
-          variant="outline"
-          size="icon"
-        >
-          <Plus className="h-4 w-4" />
-        </Button>
-      </div>
-      
-      {/* Saved labels section */}
-      {savedLabels && savedLabels.length > 0 && (
-        <div className="mb-4">
-          <Label className="text-sm mb-2 block">Your Saved Labels</Label>
-          <div className="flex flex-wrap gap-2">
-            {savedLabels.map((label) => (
-              <Badge 
-                key={label.id} 
-                variant="outline" 
-                className="cursor-pointer px-3 py-1.5 flex gap-1.5 items-center hover:bg-primary hover:text-primary-foreground transition-colors"
-                onClick={() => useSavedLabel(label)}
-              >
-                <Tag className="h-3.5 w-3.5" />
-                {label.name} ({label.attributes.length})
-              </Badge>
-            ))}
-          </div>
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-lg font-medium">Labels & Attributes</h3>
+        <p className="text-sm text-muted-foreground mb-4">
+          Add labels and attributes to your product to help buyers find what they're looking for
+        </p>
+        
+        {/* Saved Labels Dropdown */}
+        <div className="flex items-center gap-2 mb-4">
+          <Select value={selectedSavedLabel} onValueChange={setSelectedSavedLabel}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Select saved label" />
+            </SelectTrigger>
+            <SelectContent>
+              {savedLabels?.map((label) => (
+                <SelectItem key={label.id} value={label.id}>
+                  {label.name} ({label.attributes.length} attributes)
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={loadSavedLabel}
+            disabled={!selectedSavedLabel}
+          >
+            Add Saved Label
+          </Button>
         </div>
-      )}
-      
-      {/* Active labels */}
-      {formData.labels.length > 0 && (
-        <div className="grid gap-4">
-          {formData.labels.map((label, labelIndex) => (
-            <Card key={labelIndex} className="p-3">
-              <div className="flex justify-between items-center mb-2">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium">{label.name}</span>
-                  <Badge variant="secondary" className="text-xs">
-                    {label.attributes.length} attributes
-                  </Badge>
-                </div>
-                <div className="flex gap-1">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => saveLabel(label)}
-                    className="h-7 w-7"
-                  >
-                    <Save className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeLabel(labelIndex)}
-                    className="h-7 w-7 text-destructive hover:text-destructive"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
+        
+        {/* Add New Label */}
+        <div className="flex items-center gap-2 mb-6">
+          <Input
+            value={newLabel}
+            onChange={(e) => setNewLabel(e.target.value)}
+            placeholder="Enter label name (e.g., Size, Color)"
+            className="flex-1"
+          />
+          <Button type="button" onClick={addLabel} variant="outline">
+            <PlusCircle className="h-4 w-4 mr-2" />
+            Add Label
+          </Button>
+        </div>
+        
+        {/* List of Labels */}
+        {formData.labels.map((label, labelIndex) => (
+          <div key={labelIndex} className="border rounded-md p-4 mb-4">
+            <div className="flex justify-between items-center mb-3">
+              <div className="flex items-center gap-2">
+                <h4 className="font-medium">{label.name}</h4>
+                <Badge variant="outline">{label.attributes.length} attributes</Badge>
               </div>
-              
-              {/* Add new attribute */}
-              <div className="flex gap-2 mb-2">
-                <Input
-                  placeholder={`Add attribute for ${label.name} (e.g., S, M, L)`}
-                  value={editing === labelIndex ? newAttribute : ""}
-                  onChange={(e) => {
-                    setNewAttribute(e.target.value);
-                    setEditing(labelIndex);
-                  }}
-                  className="text-sm h-8"
-                />
+              <div className="flex items-center gap-2">
                 <Button 
                   type="button" 
-                  onClick={() => addAttribute(labelIndex)}
+                  size="sm" 
                   variant="outline"
-                  size="sm"
-                  className="h-8"
+                  onClick={() => saveLabel(labelIndex)}
                 >
-                  <Plus className="h-3.5 w-3.5 mr-1" />
-                  Add
+                  <Save className="h-4 w-4 mr-1" />
+                  Save
+                </Button>
+                <Button 
+                  type="button" 
+                  size="sm" 
+                  variant="destructive"
+                  onClick={() => removeLabel(labelIndex)}
+                >
+                  <X className="h-4 w-4" />
                 </Button>
               </div>
-              
-              {/* Attributes list */}
-              {label.attributes.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mt-2">
-                  {label.attributes.map((attr, attrIndex) => (
-                    <Badge key={attrIndex} variant="outline" className="px-2 py-1">
-                      {attr}
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeAttribute(labelIndex, attrIndex)}
-                        className="h-4 w-4 ml-1 hover:bg-transparent hover:text-destructive p-0"
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    </Badge>
-                  ))}
-                </div>
-              )}
-            </Card>
-          ))}
-        </div>
-      )}
-      
-      {formData.labels.length === 0 && (
-        <div className="text-center py-6 border border-dashed rounded-md">
-          <Tag className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-          <p className="text-sm text-muted-foreground">
-            Add labels like Size, Color, or Material to help buyers find your product
-          </p>
-        </div>
-      )}
+            </div>
+            
+            {/* Add Attribute */}
+            <div className="flex items-center gap-2 mb-3">
+              <Input
+                value={newAttribute}
+                onChange={(e) => setNewAttribute(e.target.value)}
+                placeholder="Add attribute (e.g., S, M, L, XL)"
+                className="flex-1"
+              />
+              <Button 
+                type="button" 
+                size="sm" 
+                onClick={() => addAttribute(labelIndex)}
+              >
+                Add
+              </Button>
+            </div>
+            
+            {/* Attributes List */}
+            <div className="flex flex-wrap gap-2">
+              {label.attributes.map((attr, attrIndex) => (
+                <Badge key={attrIndex} variant="secondary" className="flex items-center gap-1">
+                  {attr}
+                  <X 
+                    className="h-3 w-3 cursor-pointer" 
+                    onClick={() => removeAttribute(labelIndex, attrIndex)}
+                  />
+                </Badge>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
