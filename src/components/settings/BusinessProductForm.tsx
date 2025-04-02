@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -6,13 +7,15 @@ import { Label } from "@/components/ui/label";
 import { ImageUpload } from "@/components/ImageUpload";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import type { BusinessProduct } from "@/types/business";
 
 interface BusinessProductFormProps {
   businessId: string;
+  product?: BusinessProduct;
   onSuccess?: () => void;
 }
 
-export const BusinessProductForm = ({ businessId, onSuccess }: BusinessProductFormProps) => {
+export const BusinessProductForm = ({ businessId, product, onSuccess }: BusinessProductFormProps) => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -21,6 +24,18 @@ export const BusinessProductForm = ({ businessId, onSuccess }: BusinessProductFo
     stock: "0",
     image: null as string | null,
   });
+
+  useEffect(() => {
+    if (product) {
+      setFormData({
+        name: product.name || "",
+        description: product.description || "",
+        price: product.price?.toString() || "",
+        stock: product.stock?.toString() || "0",
+        image: product.image_url || null,
+      });
+    }
+  }, [product]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,8 +48,10 @@ export const BusinessProductForm = ({ businessId, onSuccess }: BusinessProductFo
     setLoading(true);
 
     try {
-      let imageUrl = null;
-      if (formData.image) {
+      let imageUrl = formData.image;
+      
+      // Only upload a new image if it's a base64 string (new upload)
+      if (formData.image && formData.image.startsWith('data:')) {
         const base64Data = formData.image.split(',')[1];
         const byteCharacters = atob(base64Data);
         const byteNumbers = new Array(byteCharacters.length);
@@ -58,33 +75,55 @@ export const BusinessProductForm = ({ businessId, onSuccess }: BusinessProductFo
         imageUrl = publicUrl;
       }
 
-      const { data: product, error } = await supabase
-        .from('business_products')
-        .insert([{
-          business_id: businessId,
-          name: formData.name,
-          description: formData.description,
-          price: parseFloat(formData.price),
-          stock: parseInt(formData.stock),
-          image_url: imageUrl,
-        }])
-        .select()
-        .single();
+      if (product) {
+        // Update existing product
+        const { error } = await supabase
+          .from('business_products')
+          .update({
+            name: formData.name,
+            description: formData.description,
+            price: parseFloat(formData.price),
+            stock: parseInt(formData.stock),
+            image_url: imageUrl,
+          })
+          .eq('id', product.id);
 
-      if (error) throw error;
+        if (error) throw error;
+        
+        toast.success("Product updated successfully!");
+      } else {
+        // Create new product
+        const { error } = await supabase
+          .from('business_products')
+          .insert([{
+            business_id: businessId,
+            name: formData.name,
+            description: formData.description,
+            price: parseFloat(formData.price),
+            stock: parseInt(formData.stock),
+            image_url: imageUrl,
+          }]);
 
-      toast.success("Product added to business successfully!");
+        if (error) throw error;
+        
+        toast.success("Product added to business successfully!");
+      }
+      
       onSuccess?.();
-      setFormData({
-        name: "",
-        description: "",
-        price: "",
-        stock: "0",
-        image: null,
-      });
+      
+      if (!product) {
+        // Only reset form if creating a new product
+        setFormData({
+          name: "",
+          description: "",
+          price: "",
+          stock: "0",
+          image: null,
+        });
+      }
     } catch (error) {
       console.error('Error:', error);
-      toast.error("Failed to add product. Please try again.");
+      toast.error(product ? "Failed to update product." : "Failed to add product. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -147,7 +186,7 @@ export const BusinessProductForm = ({ businessId, onSuccess }: BusinessProductFo
       </div>
 
       <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? "Adding Product..." : "Add Product"}
+        {loading ? (product ? "Updating Product..." : "Adding Product...") : (product ? "Update Product" : "Add Product")}
       </Button>
     </form>
   );
