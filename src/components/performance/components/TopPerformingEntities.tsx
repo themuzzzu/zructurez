@@ -1,9 +1,14 @@
 
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Eye, ArrowUpRight, Package, Wrench, FileText } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Eye, ShoppingCart, Newspaper } from "lucide-react";
 
 interface EntityItem {
   id: string;
@@ -23,71 +28,146 @@ export const TopPerformingEntities = ({
   services,
   posts,
 }: TopPerformingEntitiesProps) => {
-  const [selectedTab, setSelectedTab] = useState<"products" | "services" | "posts">("products");
-
-  const getEntityData = () => {
-    switch (selectedTab) {
-      case "products":
-        return { data: products, icon: <Package className="h-4 w-4" /> };
-      case "services":
-        return { data: services, icon: <Wrench className="h-4 w-4" /> };
-      case "posts":
-        return { data: posts, icon: <FileText className="h-4 w-4" /> };
-      default:
-        return { data: [], icon: null };
-    }
-  };
-
-  const { data, icon } = getEntityData();
-
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Top Performing Entities</CardTitle>
-        <CardDescription>Entities with the most views</CardDescription>
-        <Tabs 
-          defaultValue="products" 
-          className="mt-2"
-          onValueChange={(value) => setSelectedTab(value as "products" | "services" | "posts")}
-        >
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="products">Products</TabsTrigger>
-            <TabsTrigger value="services">Services</TabsTrigger>
-            <TabsTrigger value="posts">Posts</TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </CardHeader>
-      <CardContent>
-        {data.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            No {selectedTab} data available
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {data.slice(0, 5).map((entity, index) => (
-              <div key={entity.id} className="flex items-center justify-between p-3 border rounded-md">
-                <div className="flex items-center gap-3">
-                  <Badge variant="outline" className="w-6 h-6 flex items-center justify-center p-0">
-                    {index + 1}
-                  </Badge>
-                  <div className="flex items-center gap-2">
-                    {icon}
-                    <div className="font-medium truncate max-w-[150px] sm:max-w-[300px]">
-                      {entity.title || entity.content?.substring(0, 30) || `Item ${index + 1}`}
-                      {entity.content && entity.content.length > 30 ? "..." : ""}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center text-muted-foreground">
-                  <Eye className="h-4 w-4 mr-1" />
-                  <span>{entity.views}</span>
-                  <ArrowUpRight className="h-4 w-4 ml-2 text-green-500" />
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+    <Tabs defaultValue="products" className="w-full">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold leading-none tracking-tight">
+          Top Performing
+        </h3>
+        <TabsList>
+          <TabsTrigger value="products" className="flex items-center gap-1">
+            <ShoppingCart className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Products</span>
+          </TabsTrigger>
+          <TabsTrigger value="services" className="flex items-center gap-1">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M14 3.5v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2c0-1.1.9-2 2-2h6a2 2 0 0 1 2 2z" />
+              <path d="M20 10.5v2a2 2 0 0 1-2 2h-6a2 2 0 0 1-2-2v-2c0-1.1.9-2 2-2h6a2 2 0 0 1 2 2z" />
+              <path d="M14 17.5v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2c0-1.1.9-2 2-2h6a2 2 0 0 1 2 2z" />
+            </svg>
+            <span className="hidden sm:inline">Services</span>
+          </TabsTrigger>
+          <TabsTrigger value="posts" className="flex items-center gap-1">
+            <Newspaper className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Posts</span>
+          </TabsTrigger>
+        </TabsList>
+      </div>
+      
+      <TabsContent value="products">
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Product</TableHead>
+                <TableHead className="text-right" style={{ width: '100px' }}>Views</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {products.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={2} className="text-center h-24 text-muted-foreground">
+                    No product data available
+                  </TableCell>
+                </TableRow>
+              ) : (
+                products.slice(0, 5).map((product) => (
+                  <TableRow key={product.id}>
+                    <TableCell className="font-medium">{product.title}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end">
+                        <Eye className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+                        {product.views.toLocaleString()}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </TabsContent>
+      
+      <TabsContent value="services">
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Service</TableHead>
+                <TableHead className="text-right" style={{ width: '100px' }}>Views</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {services.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={2} className="text-center h-24 text-muted-foreground">
+                    No service data available
+                  </TableCell>
+                </TableRow>
+              ) : (
+                services.slice(0, 5).map((service) => (
+                  <TableRow key={service.id}>
+                    <TableCell className="font-medium">{service.title}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end">
+                        <Eye className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+                        {service.views.toLocaleString()}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </TabsContent>
+      
+      <TabsContent value="posts">
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Post</TableHead>
+                <TableHead className="text-right" style={{ width: '100px' }}>Views</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {posts.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={2} className="text-center h-24 text-muted-foreground">
+                    No post data available
+                  </TableCell>
+                </TableRow>
+              ) : (
+                posts.slice(0, 5).map((post) => (
+                  <TableRow key={post.id}>
+                    <TableCell className="font-medium">
+                      {post.content?.substring(0, 40)}
+                      {post.content && post.content.length > 40 ? '...' : ''}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end">
+                        <Eye className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+                        {post.views.toLocaleString()}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </TabsContent>
+    </Tabs>
   );
 };

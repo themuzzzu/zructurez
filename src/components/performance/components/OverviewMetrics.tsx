@@ -1,15 +1,7 @@
 
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Eye, 
-  ShoppingCart, 
-  Heart, 
-  TrendingUp,
-  RefreshCw
-} from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { formatDistanceToNow } from "date-fns";
 
 interface OverviewMetricsProps {
   businessViews: number;
@@ -18,9 +10,9 @@ interface OverviewMetricsProps {
   postViews: number;
   wishlists: number;
   orders: number;
+  lastUpdated: string;
   onRefresh?: () => void;
   isLoading?: boolean;
-  lastUpdated?: string;
 }
 
 export const OverviewMetrics = ({
@@ -30,139 +22,80 @@ export const OverviewMetrics = ({
   postViews,
   wishlists,
   orders,
+  lastUpdated,
   onRefresh,
   isLoading = false,
-  lastUpdated
 }: OverviewMetricsProps) => {
-  const [period, setPeriod] = useState<"all" | "monthly">("all");
-
-  // Format last updated date
-  const formattedLastUpdated = lastUpdated 
-    ? new Date(lastUpdated).toLocaleString() 
-    : "Never";
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return formatDistanceToNow(date, { addSuffix: true });
+    } catch (e) {
+      return 'recently';
+    }
+  };
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <div>
-          <CardTitle>Analytics Overview</CardTitle>
-          <CardDescription>
-            Track views, wishlists and orders
-            {lastUpdated && (
-              <span className="block text-xs mt-1">
-                Last updated: {formattedLastUpdated}
-              </span>
-            )}
-          </CardDescription>
+    <div className="rounded-lg border bg-card shadow-sm">
+      <div className="flex flex-col space-y-1.5 p-6 pb-2">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold leading-none tracking-tight">
+            Performance Overview
+          </h3>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={onRefresh}
+            disabled={isLoading}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
         </div>
-        <div className="flex items-center gap-2">
-          <Tabs defaultValue="all" className="w-[200px]">
-            <TabsList>
-              <TabsTrigger value="all" onClick={() => setPeriod("all")}>All Time</TabsTrigger>
-              <TabsTrigger value="monthly" onClick={() => setPeriod("monthly")}>Monthly</TabsTrigger>
-            </TabsList>
-          </Tabs>
-          {onRefresh && (
-            <Button 
-              variant="outline" 
-              size="icon"
-              onClick={onRefresh}
-              disabled={isLoading}
-            >
-              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-            </Button>
-          )}
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          <MetricCard 
-            title="Business Views" 
-            value={businessViews} 
-            icon={<Eye className="h-4 w-4 text-blue-500" />} 
-            change={period === "monthly" ? 12 : undefined}
-          />
-          <MetricCard 
-            title="Product Views" 
-            value={productViews} 
-            icon={<Eye className="h-4 w-4 text-green-500" />} 
-            change={period === "monthly" ? 8 : undefined}
-          />
-          <MetricCard 
-            title="Service Views" 
-            value={serviceViews} 
-            icon={<Eye className="h-4 w-4 text-purple-500" />} 
-            change={period === "monthly" ? 15 : undefined}
-          />
-          <MetricCard 
-            title="Post Views" 
-            value={postViews} 
-            icon={<Eye className="h-4 w-4 text-yellow-500" />} 
-            change={period === "monthly" ? 5 : undefined}
-          />
-          <MetricCard 
-            title="Wishlists" 
-            value={wishlists} 
-            icon={<Heart className="h-4 w-4 text-red-500" />} 
-            change={period === "monthly" ? -3 : undefined}
-          />
-          <MetricCard 
-            title="Orders" 
-            value={orders} 
-            icon={<ShoppingCart className="h-4 w-4 text-indigo-500" />} 
-            change={period === "monthly" ? 20 : undefined}
-          />
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
-
-interface MetricCardProps {
-  title: string;
-  value: number;
-  icon: React.ReactNode;
-  change?: number;
-}
-
-const MetricCard = ({ title, value, icon, change }: MetricCardProps) => {
-  return (
-    <div className="bg-muted/50 p-4 rounded-lg space-y-2">
-      <div className="flex items-center justify-between">
-        <span className="text-sm text-muted-foreground">{title}</span>
-        {icon}
+        <p className="text-sm text-muted-foreground">
+          Last updated: {formatDate(lastUpdated)}
+        </p>
       </div>
-      <div className="text-2xl font-bold">{value.toLocaleString()}</div>
-      {change !== undefined && (
-        <div className={`flex items-center text-xs ${change >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-          {change >= 0 ? (
-            <ArrowUp className="h-3 w-3 mr-1" />
-          ) : (
-            <ArrowDown className="h-3 w-3 mr-1" />
-          )}
-          <span>{Math.abs(change)}% from last period</span>
+      <div className="p-6 pt-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          <div className="space-y-1">
+            <p className="text-sm font-medium leading-none">Business Profile</p>
+            <p className="text-2xl font-bold">{businessViews.toLocaleString()}</p>
+            <p className="text-xs text-muted-foreground">Page views</p>
+          </div>
+          
+          <div className="space-y-1">
+            <p className="text-sm font-medium leading-none">Products</p>
+            <p className="text-2xl font-bold">{productViews.toLocaleString()}</p>
+            <p className="text-xs text-muted-foreground">Total views</p>
+          </div>
+          
+          <div className="space-y-1">
+            <p className="text-sm font-medium leading-none">Services</p>
+            <p className="text-2xl font-bold">{serviceViews.toLocaleString()}</p>
+            <p className="text-xs text-muted-foreground">Total views</p>
+          </div>
+          
+          <div className="space-y-1">
+            <p className="text-sm font-medium leading-none">Posts</p>
+            <p className="text-2xl font-bold">{postViews.toLocaleString()}</p>
+            <p className="text-xs text-muted-foreground">Total views</p>
+          </div>
+          
+          <div className="space-y-1">
+            <p className="text-sm font-medium leading-none">Wishlists</p>
+            <p className="text-2xl font-bold">{wishlists.toLocaleString()}</p>
+            <p className="text-xs text-muted-foreground">Saved items</p>
+          </div>
+          
+          <div className="space-y-1">
+            <p className="text-sm font-medium leading-none">Orders</p>
+            <p className="text-2xl font-bold">{orders.toLocaleString()}</p>
+            <p className="text-xs text-muted-foreground">Completed transactions</p>
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };
-
-const ArrowUp = ({ className }: { className?: string }) => (
-  <TrendingUp className={className} />
-);
-
-const ArrowDown = ({ className }: { className?: string }) => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round" 
-    className={className}
-  >
-    <polyline points="23 18 13.5 8.5 8.5 13.5 1 6" />
-    <polyline points="17 18 23 18 23 12" />
-  </svg>
-);

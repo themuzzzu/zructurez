@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -64,7 +63,6 @@ const BusinessDashboard = () => {
     enabled: !!user
   });
   
-  // Fetch sales data for the selected business
   const { data: salesData, isLoading: salesLoading, refetch: refetchSales } = useQuery({
     queryKey: ['business-sales', businessData?.id, dateRange],
     queryFn: async () => {
@@ -82,7 +80,6 @@ const BusinessDashboard = () => {
     enabled: !!businessData?.id
   });
   
-  // Fetch ad performance data
   const { data: adData, isLoading: adLoading, refetch: refetchAds } = useQuery({
     queryKey: ['business-ads', businessData?.id],
     queryFn: async () => {
@@ -101,7 +98,6 @@ const BusinessDashboard = () => {
     enabled: !!businessData?.id
   });
   
-  // Fetch product inventory data
   const { data: inventoryData, isLoading: inventoryLoading, refetch: refetchInventory } = useQuery({
     queryKey: ['business-inventory', businessData?.id],
     queryFn: async () => {
@@ -119,7 +115,6 @@ const BusinessDashboard = () => {
     enabled: !!businessData?.id && !!user?.id
   });
   
-  // Fetch business analytics data
   const { data: businessAnalytics, isLoading: analyticsLoading, refetch: refetchAnalytics } = useBusinessAnalytics(user?.id);
   
   const refreshData = async () => {
@@ -135,13 +130,11 @@ const BusinessDashboard = () => {
     toast.success("Dashboard data refreshed");
   };
   
-  // Calculate basic metrics
   const totalSales = salesData?.reduce((sum, order) => sum + order.total_price, 0) || 0;
   const totalOrders = salesData?.length || 0;
   const averageOrderValue = totalOrders > 0 ? totalSales / totalOrders : 0;
   const lowStockItems = inventoryData?.filter(product => product.stock < 5).length || 0;
   
-  // Calculate ad metrics
   const totalImpressions = adData?.reduce((sum, ad) => sum + (ad.reach || 0), 0) || 0;
   const totalClicks = adData?.reduce((sum, ad) => sum + (ad.clicks || 0), 0) || 0;
   const averageCTR = totalImpressions > 0 ? (totalClicks / totalImpressions * 100).toFixed(2) : "0";
