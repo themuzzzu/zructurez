@@ -21,4 +21,20 @@ export interface Product {
   discount_percentage?: number;
   rating?: number;
   rating_count?: number;
+  labels?: ProductLabel[];
+}
+
+export interface ProductLabel {
+  id?: string;
+  name: string;
+  attributes: string[];
+  product_id?: string;
+}
+
+export interface SavedLabel {
+  id: string;
+  name: string;
+  attributes: string[];
+  user_id: string;
+  created_at?: string;
 }

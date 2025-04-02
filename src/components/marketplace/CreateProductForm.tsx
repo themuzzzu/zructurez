@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ImageUpload } from "@/components/ImageUpload";
@@ -8,6 +9,7 @@ import { BasicInfo } from "./product-form/BasicInfo";
 import { PricingInfo } from "./product-form/PricingInfo";
 import { ProductDetails } from "./product-form/ProductDetails";
 import { BrandInfo } from "./product-form/BrandInfo";
+import { LabelsAttributes } from "./product-form/LabelsAttributes";
 import type { ProductFormData } from "./product-form/types";
 
 interface CreateProductFormProps {
@@ -33,6 +35,7 @@ export const CreateProductForm = ({ onSuccess, businessId }: CreateProductFormPr
     brand_name: "",
     model: "",
     size: "",
+    labels: [],
   });
 
   const handleChange = (name: string, value: any) => {
@@ -93,7 +96,8 @@ export const CreateProductForm = ({ onSuccess, businessId }: CreateProductFormPr
         ? originalPrice - (originalPrice * (parseFloat(formData.discount_percentage) / 100))
         : originalPrice;
 
-      const { error } = await supabase
+      // Insert the product first
+      const { data: product, error } = await supabase
         .from('products')
         .insert([{
           user_id: user.id,
@@ -114,9 +118,31 @@ export const CreateProductForm = ({ onSuccess, businessId }: CreateProductFormPr
           model: formData.model || null,
           size: formData.size || null,
           business_id: businessId || null,
-        }]);
+        }])
+        .select();
 
       if (error) throw error;
+      
+      // If we have labels, insert them as well
+      if (formData.labels.length > 0 && product) {
+        const productId = product[0].id;
+        
+        // Insert labels
+        const labelsToInsert = formData.labels.map(label => ({
+          product_id: productId,
+          name: label.name,
+          attributes: label.attributes
+        }));
+        
+        const { error: labelsError } = await supabase
+          .from('product_labels')
+          .insert(labelsToInsert);
+          
+        if (labelsError) {
+          console.error("Error inserting labels:", labelsError);
+          // Continue with success even if labels fail
+        }
+      }
 
       toast.success("Product created successfully!");
       onSuccess?.();
@@ -134,6 +160,7 @@ export const CreateProductForm = ({ onSuccess, businessId }: CreateProductFormPr
       <PricingInfo formData={formData} onChange={handleChange} />
       <ProductDetails formData={formData} onChange={handleChange} />
       <BrandInfo formData={formData} onChange={handleChange} />
+      <LabelsAttributes formData={formData} onChange={handleChange} />
 
       <div className="space-y-2">
         <Label>Product Image</Label>

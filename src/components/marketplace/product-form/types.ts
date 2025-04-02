@@ -1,3 +1,4 @@
+
 export interface ProductFormData {
   title: string;
   description: string;
@@ -14,6 +15,13 @@ export interface ProductFormData {
   brand_name: string;
   model: string;
   size: string;
+  labels: ProductLabelFormData[];
+}
+
+export interface ProductLabelFormData {
+  id?: string;
+  name: string;
+  attributes: string[];
 }
 
 export interface ProductFormProps {

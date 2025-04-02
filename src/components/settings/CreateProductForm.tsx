@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ImageUpload } from "@/components/ImageUpload";
@@ -6,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { BasicInfo } from "../marketplace/product-form/BasicInfo";
 import { PricingInfo } from "../marketplace/product-form/PricingInfo";
 import { ProductDetails } from "../marketplace/product-form/ProductDetails";
+import { LabelsAttributes } from "../marketplace/product-form/LabelsAttributes";
 import { Label } from "../ui/label";
 import type { ProductFormData } from "../marketplace/product-form/types";
 
@@ -31,6 +33,7 @@ export const CreateProductForm = ({ onSuccess }: CreateProductFormProps) => {
     is_branded: false,
     brand_name: "",
     model: "",
+    labels: [],
   });
 
   const handleChange = (name: string, value: any) => {
@@ -76,6 +79,7 @@ export const CreateProductForm = ({ onSuccess }: CreateProductFormProps) => {
         imageUrl = publicUrl;
       }
 
+      // Insert product first
       const { data: product, error } = await supabase
         .from('products')
         .insert([{
@@ -100,6 +104,27 @@ export const CreateProductForm = ({ onSuccess }: CreateProductFormProps) => {
         .single();
 
       if (error) throw error;
+      
+      // If we have labels, insert them as well
+      if (formData.labels.length > 0 && product) {
+        const productId = product.id;
+        
+        // Insert labels
+        const labelsToInsert = formData.labels.map(label => ({
+          product_id: productId,
+          name: label.name,
+          attributes: label.attributes
+        }));
+        
+        const { error: labelsError } = await supabase
+          .from('product_labels')
+          .insert(labelsToInsert);
+          
+        if (labelsError) {
+          console.error("Error inserting labels:", labelsError);
+          // Continue with success even if labels fail
+        }
+      }
 
       toast.success("Product created successfully!");
       onSuccess?.();
@@ -116,6 +141,7 @@ export const CreateProductForm = ({ onSuccess }: CreateProductFormProps) => {
       <BasicInfo formData={formData} onChange={handleChange} />
       <PricingInfo formData={formData} onChange={handleChange} />
       <ProductDetails formData={formData} onChange={handleChange} />
+      <LabelsAttributes formData={formData} onChange={handleChange} />
 
       <div className="space-y-4">
         <div className="space-y-2">
