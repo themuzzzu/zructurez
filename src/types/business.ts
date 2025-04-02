@@ -1,3 +1,4 @@
+
 export type MenuType = 'menu' | 'list';
 
 export interface MenuItem {
@@ -61,6 +62,9 @@ export interface Owner {
   image_url?: string | null;
 }
 
+// Alias for Owner to handle older code references
+export type BusinessOwner = Owner;
+
 export interface StaffMember {
   name: string;
   position: string;
@@ -86,6 +90,16 @@ export interface BusinessPhoto {
   title: string;
   image_url: string;
   created_at: string;
+}
+
+export interface BusinessHours {
+  monday?: { open: string; close: string };
+  tuesday?: { open: string; close: string };
+  wednesday?: { open: string; close: string };
+  thursday?: { open: string; close: string };
+  friday?: { open: string; close: string };
+  saturday?: { open: string; close: string };
+  sunday?: { open: string; close: string };
 }
 
 export interface Business {
@@ -123,6 +137,7 @@ export interface Business {
   business_portfolio?: PortfolioItem[];
   business_products?: BusinessProduct[];
   business_photos?: BusinessPhoto[];
+  business_hours?: BusinessHours;
   posts?: any[];
   membership_plans?: MembershipPlan[];
 }
@@ -135,4 +150,30 @@ export interface PortfolioItem {
   image_url?: string;
   created_at: string;
   views?: number;
+}
+
+// Add UserPost type to address the imported but unused error
+export interface UserPost {
+  id: string;
+  user_id: string;
+  profile_id: string;
+  content: string;
+  image_url?: string;
+  created_at: string;
+  category?: string;
+  location?: string;
+  business_id?: string;
+  views?: number;
+  likes_count?: number;
+  comments_count?: number;
+  reposts_count?: number;
+  profile?: {
+    username?: string;
+    avatar_url?: string;
+    name?: string;
+  };
+  groups?: {
+    name: string;
+    image_url: string | null;
+  };
 }

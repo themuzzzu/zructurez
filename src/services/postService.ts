@@ -78,6 +78,129 @@ export const createPost = async ({
   }
 };
 
+export const schedulePost = async ({
+  content,
+  image,
+  category,
+  location,
+  scheduledFor,
+  groupId,
+}: {
+  content: string;
+  image?: string | null;
+  category?: string;
+  location?: string;
+  scheduledFor: Date;
+  groupId?: string | null;
+}) => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("User not authenticated");
+
+    // Get profile ID from user ID
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("id", user.id)
+      .single();
+
+    if (!profiles) throw new Error("Profile not found");
+
+    let imageUrl = null;
+    if (image) {
+      const base64Data = image.split(',')[1];
+      const byteCharacters = atob(base64Data);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'image/jpeg' });
+
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('post-images')
+        .upload(fileName, blob);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('post-images')
+        .getPublicUrl(fileName);
+
+      imageUrl = publicUrl;
+    }
+
+    // Create scheduled post
+    const { data: post, error: postError } = await supabase
+      .from("scheduled_posts")
+      .insert({
+        user_id: user.id,
+        profile_id: profiles.id,
+        content,
+        image_url: imageUrl,
+        category,
+        location,
+        group_id: groupId,
+        scheduled_for: scheduledFor.toISOString(),
+        status: 'scheduled'
+      })
+      .select()
+      .single();
+
+    if (postError) throw postError;
+    return post;
+  } catch (error) {
+    console.error("Error scheduling post:", error);
+    throw error;
+  }
+};
+
+export const getScheduledPosts = async () => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("User not authenticated");
+
+    const { data, error } = await supabase
+      .from("scheduled_posts")
+      .select(`
+        *,
+        groups (
+          name,
+          image_url
+        )
+      `)
+      .eq("user_id", user.id)
+      .eq("status", "scheduled")
+      .order("scheduled_for", { ascending: true });
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error("Error fetching scheduled posts:", error);
+    throw error;
+  }
+};
+
+export const cancelScheduledPost = async (postId: string) => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("User not authenticated");
+
+    const { error } = await supabase
+      .from("scheduled_posts")
+      .delete()
+      .eq("id", postId)
+      .eq("user_id", user.id);
+
+    if (error) throw error;
+    return true;
+  } catch (error) {
+    console.error("Error canceling scheduled post:", error);
+    throw error;
+  }
+};
+
 export const incrementViews = async (tableName: string, recordId: string) => {
   try {
     await supabase.rpc('increment_views', {
