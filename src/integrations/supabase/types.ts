@@ -2337,6 +2337,25 @@ export type Database = {
         }
         Returns: string
       }
+      delete_business_cascade: {
+        Args: {
+          business_id_param: string
+        }
+        Returns: boolean
+      }
+      delete_product_safely: {
+        Args: {
+          product_id_param: string
+          is_business_product?: boolean
+        }
+        Returns: boolean
+      }
+      delete_service_safely: {
+        Args: {
+          service_id_param: string
+        }
+        Returns: boolean
+      }
       get_group_members: {
         Args: {
           group_id: string

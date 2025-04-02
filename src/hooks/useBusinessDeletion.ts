@@ -11,80 +11,20 @@ export const useBusinessDeletion = (onSuccess?: () => void) => {
     
     setIsDeleting(true);
     try {
-      // Execute deletion in the correct order to handle dependencies
-      
-      // 1. Delete business_portfolio items
-      await supabase
-        .from('business_portfolio')
-        .delete()
-        .eq('business_id', businessId);
-      
-      // 2. Delete business_products
-      await supabase
-        .from('business_products')
-        .delete()
-        .eq('business_id', businessId);
-      
-      // 3. Delete business_ratings
-      await supabase
-        .from('business_ratings')
-        .delete()
-        .eq('business_id', businessId);
-      
-      // 4. Delete business comments
-      await supabase
-        .from('business_comments')
-        .delete()
-        .eq('business_id', businessId);
-      
-      // 5. Delete business subscriptions
-      await supabase
-        .from('business_subscriptions')
-        .delete()
-        .eq('business_id', businessId);
-      
-      // 6. Delete business memberships
-      await supabase
-        .from('business_memberships')
-        .delete()
-        .eq('business_id', businessId);
-      
-      // 7. Delete business likes
-      await supabase
-        .from('business_likes')
-        .delete()
-        .eq('business_id', businessId);
-      
-      // 8. Delete business analytics
-      await supabase
-        .from('business_analytics')
-        .delete()
-        .eq('business_id', businessId);
-      
-      // 9. Update status of related orders to canceled
-      await supabase
-        .from('orders')
-        .update({ status: 'canceled' })
-        .eq('business_id', businessId);
-      
-      // 10. Update status of related appointments to canceled
-      await supabase
-        .from('appointments')
-        .update({ status: 'canceled' })
-        .eq('business_id', businessId);
-      
-      // 11. Finally delete the business
-      const { error } = await supabase
-        .from('businesses')
-        .delete()
-        .eq('id', businessId);
-      
+      // Use the SQL function we created to perform cascading deletion
+      const { data, error } = await supabase
+        .rpc('delete_business_cascade', { business_id_param: businessId });
+
       if (error) throw error;
       
-      toast.success("Business deleted successfully");
-      onSuccess?.();
-      
-      return true;
+      if (data === true) {
+        toast.success("Business deleted successfully");
+        onSuccess?.();
+        return true;
+      } else {
+        toast.error("Failed to delete business");
+        return false;
+      }
     } catch (error) {
       console.error("Error deleting business:", error);
       toast.error("Failed to delete business. Please try again.");
