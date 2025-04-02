@@ -142,6 +142,7 @@ export const ProductsTab = () => {
             <DialogTitle>Add New Product</DialogTitle>
           </DialogHeader>
           <ServiceProductForm 
+            serviceId=""
             onSuccess={() => {
               toast.success("Product added successfully");
               setIsAddProductDialogOpen(false);
@@ -159,7 +160,8 @@ export const ProductsTab = () => {
           </DialogHeader>
           {editingProduct && (
             <ServiceProductForm 
-              product={editingProduct}
+              serviceId=""
+              initialData={editingProduct}
               onSuccess={() => {
                 toast.success("Product updated successfully");
                 setIsEditProductDialogOpen(false);
