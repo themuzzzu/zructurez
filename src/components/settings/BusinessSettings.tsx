@@ -12,10 +12,13 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useBusinessDeletion } from "@/hooks/useBusinessDeletion";
 import { DeleteConfirmDialog } from "../DeleteConfirmDialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MenuTab } from "./MenuTab";
 
 export const BusinessSettings = () => {
   const [deletingBusinessId, setDeletingBusinessId] = useState<string | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("general");
   const navigate = useNavigate();
   
   const { isDeleting, deleteBusiness } = useBusinessDeletion(() => {
@@ -109,17 +112,30 @@ export const BusinessSettings = () => {
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <h4 className="font-medium text-sm text-muted-foreground mb-2">Visibility Settings</h4>
-                <div className="flex items-center justify-between">
-                  <Label htmlFor={`show-in-services-${business.id}`}>Show in Services Page</Label>
-                  <Switch
-                    id={`show-in-services-${business.id}`}
-                    checked={business.show_in_services}
-                    onCheckedChange={() => handleShowInServicesChange(business.id, business.show_in_services)}
-                  />
-                </div>
-              </div>
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="w-full">
+                  <TabsTrigger value="general">General</TabsTrigger>
+                  <TabsTrigger value="menu">Menu/List</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="general" className="space-y-4 mt-4">
+                  <div className="space-y-4">
+                    <h4 className="font-medium text-sm text-muted-foreground mb-2">Visibility Settings</h4>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor={`show-in-services-${business.id}`}>Show in Services Page</Label>
+                      <Switch
+                        id={`show-in-services-${business.id}`}
+                        checked={business.show_in_services}
+                        onCheckedChange={() => handleShowInServicesChange(business.id, business.show_in_services)}
+                      />
+                    </div>
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="menu" className="mt-4">
+                  <MenuTab businessId={business.id} />
+                </TabsContent>
+              </Tabs>
             </div>
           ))}
         </CardContent>

@@ -12,6 +12,7 @@ import { BusinessAboutTab } from "@/components/business-details/tabs/BusinessAbo
 import { BusinessPostsTab } from "@/components/business-details/tabs/BusinessPostsTab";
 import { BusinessProductsTab } from "@/components/business-details/tabs/BusinessProductsTab";
 import { BusinessPortfolioTab } from "@/components/business-details/tabs/BusinessPortfolioTab";
+import { BusinessMenuTab } from "@/components/business-details/tabs/BusinessMenuTab";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, Edit } from "lucide-react";
 import { BusinessStatus } from "@/components/business-details/header/BusinessStatus";
@@ -26,6 +27,7 @@ const BusinessDetails = () => {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("about");
   const [isOwner, setIsOwner] = useState(false);
+  const [hasMenu, setHasMenu] = useState(false);
 
   useEffect(() => {
     const fetchBusinessDetails = async () => {
@@ -63,6 +65,16 @@ const BusinessDetails = () => {
         if (user && businessData.user_id === user.id) {
           setIsOwner(true);
         }
+
+        // Check if business has a menu
+        const { data: menuData } = await supabase
+          .from('business_menus')
+          .select('id')
+          .eq('business_id', id)
+          .eq('is_published', true)
+          .maybeSingle();
+
+        setHasMenu(!!menuData);
       } catch (err) {
         console.error("Error fetching business details:", err);
         setError(err instanceof Error ? err.message : "Failed to load business details");
@@ -133,11 +145,12 @@ const BusinessDetails = () => {
         onValueChange={setActiveTab}
         className="mt-6"
       >
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="about">About</TabsTrigger>
           <TabsTrigger value="posts">Posts</TabsTrigger>
           <TabsTrigger value="products">Products</TabsTrigger>
           <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
+          {hasMenu && <TabsTrigger value="menu">Menu</TabsTrigger>}
         </TabsList>
 
         <div className={cn("mt-6", business.is_open === false && "opacity-60")}>
@@ -175,6 +188,12 @@ const BusinessDetails = () => {
               businessId={id || ""}
             />
           </TabsContent>
+
+          {hasMenu && (
+            <TabsContent value="menu" className="m-0">
+              <BusinessMenuTab businessId={id || ""} />
+            </TabsContent>
+          )}
         </div>
       </Tabs>
     </div>
