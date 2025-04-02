@@ -58,6 +58,19 @@ const formatNumber = (num: number) => {
   return new Intl.NumberFormat('en-IN').format(num);
 };
 
+// Default data objects to handle empty states
+const defaultWishlistPurchaseData = {
+  wishlist_count: 0,
+  purchase_count: 0
+};
+
+const defaultConversionData = {
+  conversion_rate: 0,
+  total_views: 0,
+  total_wishlists: 0,
+  total_purchases: 0
+};
+
 // Main Analytics Tab Component
 export const AnalyticsTab = () => {
   const { user } = useAuth();
@@ -221,7 +234,10 @@ export const AnalyticsTab = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <WishlistPieChart data={wishlistPurchaseData || {}} isLoading={isWishlistLoading} />
+                <WishlistPieChart 
+                  data={wishlistPurchaseData || defaultWishlistPurchaseData} 
+                  isLoading={isWishlistLoading} 
+                />
               </CardContent>
             </Card>
             
@@ -265,8 +281,14 @@ export const AnalyticsTab = () => {
         {/* Engagement Tab */}
         <TabsContent value="engagement" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <ConversionRate data={conversionData || {}} isLoading={isConversionLoading} />
-            <DropOffRate data={conversionData || {}} isLoading={isConversionLoading} />
+            <ConversionRate 
+              data={conversionData || defaultConversionData} 
+              isLoading={isConversionLoading} 
+            />
+            <DropOffRate 
+              data={conversionData || defaultConversionData} 
+              isLoading={isConversionLoading} 
+            />
             <BestPostingTimes data={engagementData || []} isLoading={isEngagementLoading} />
           </div>
           
