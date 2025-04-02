@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { Settings, Bell, Shield, User, Package, Briefcase, Wrench, Megaphone, ShoppingBag, Calendar, BarChart, Bell as BellIcon, Activity, Heart } from "lucide-react";
+import { Settings, Bell, Shield, User, Package, Briefcase, Wrench, Megaphone, ShoppingBag, Calendar, BarChart, Activity, Heart } from "lucide-react";
 
 interface SettingsNavProps {
   activeTab: string;
