@@ -6,9 +6,29 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { BusinessVerification } from "./BusinessVerification";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Trash } from "lucide-react";
+import { useState } from "react";
+import { BusinessStatus } from "../business-details/header/BusinessStatus";
+import { TemporaryStatus } from "../business-details/header/TemporaryStatus";
 
 export const BusinessSettings = () => {
-  const { data: businesses, isLoading } = useQuery({
+  const [deletingBusinessId, setDeletingBusinessId] = useState<string | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const { data: businesses, isLoading, refetch } = useQuery({
     queryKey: ['user-businesses'],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -37,6 +57,31 @@ export const BusinessSettings = () => {
     toast.success("Setting updated successfully");
   };
 
+  const handleDeleteBusiness = async () => {
+    if (!deletingBusinessId) return;
+    
+    setIsDeleting(true);
+    try {
+      // Delete the business
+      const { error } = await supabase
+        .from('businesses')
+        .delete()
+        .eq('id', deletingBusinessId);
+      
+      if (error) throw error;
+      
+      toast.success("Business deleted successfully");
+      refetch(); // Refresh the businesses list
+      setIsDeleteDialogOpen(false);
+    } catch (error) {
+      console.error("Error deleting business:", error);
+      toast.error("Failed to delete business. Please try again.");
+    } finally {
+      setIsDeleting(false);
+      setDeletingBusinessId(null);
+    }
+  };
+
   if (isLoading) {
     return <div>Loading businesses...</div>;
   }
@@ -62,15 +107,58 @@ export const BusinessSettings = () => {
         </CardHeader>
         <CardContent className="space-y-6">
           {businesses.map((business) => (
-            <div key={business.id} className="space-y-4">
-              <h3 className="font-semibold text-lg">{business.name}</h3>
+            <div key={business.id} className="space-y-4 pt-4 first:pt-0 border-t first:border-t-0">
               <div className="flex items-center justify-between">
-                <Label htmlFor={`show-in-services-${business.id}`}>Show in Services Page</Label>
-                <Switch
-                  id={`show-in-services-${business.id}`}
-                  checked={business.show_in_services}
-                  onCheckedChange={() => handleShowInServicesChange(business.id, business.show_in_services)}
-                />
+                <h3 className="font-semibold text-lg">{business.name}</h3>
+                <AlertDialog open={isDeleteDialogOpen && deletingBusinessId === business.id} onOpenChange={setIsDeleteDialogOpen}>
+                  <AlertDialogTrigger asChild>
+                    <Button 
+                      variant="destructive" 
+                      size="sm"
+                      onClick={() => setDeletingBusinessId(business.id)}
+                      className="ml-auto"
+                    >
+                      <Trash className="h-4 w-4 mr-2" />
+                      Delete Business
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will permanently delete your business and all associated data. This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleDeleteBusiness}
+                        disabled={isDeleting}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        {isDeleting ? "Deleting..." : "Delete Business"}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+
+              <div className="space-y-4">
+                <h4 className="font-medium text-sm text-muted-foreground mb-2">Visibility Settings</h4>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor={`show-in-services-${business.id}`}>Show in Services Page</Label>
+                  <Switch
+                    id={`show-in-services-${business.id}`}
+                    checked={business.show_in_services}
+                    onCheckedChange={() => handleShowInServicesChange(business.id, business.show_in_services)}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h4 className="font-medium text-sm text-muted-foreground mb-2">Business Status</h4>
+                <BusinessStatus id={business.id} initialIsOpen={business.is_open ?? true} />
+                <TemporaryStatus id={business.id} isOpen={business.is_open ?? true} />
               </div>
             </div>
           ))}

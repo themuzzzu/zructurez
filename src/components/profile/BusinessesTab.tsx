@@ -43,14 +43,19 @@ export const BusinessesTab = () => {
     refetchBusinesses();
   };
 
+  // Only show the create business button if the user has no businesses
+  const showCreateButton = !businesses || businesses.length === 0;
+
   return (
     <div>
-      <div className="flex justify-end mb-4">
-        <Button onClick={() => setIsBusinessDialogOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Create Business
-        </Button>
-      </div>
+      {showCreateButton && (
+        <div className="flex justify-end mb-4">
+          <Button onClick={() => setIsBusinessDialogOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Create Business
+          </Button>
+        </div>
+      )}
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {businesses?.map((business: any) => (
           <div key={business.id} className="w-full">
