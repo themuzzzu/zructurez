@@ -116,8 +116,7 @@ export const CreateProductForm = ({ onSuccess }: CreateProductFormProps) => {
           attributes: label.attributes
         }));
         
-        // Using any to bypass TypeScript error due to custom schema types
-        const { error: labelsError } = await (supabase as any)
+        const { error: labelsError } = await supabase
           .from("product_labels")
           .insert(labelsToInsert);
           

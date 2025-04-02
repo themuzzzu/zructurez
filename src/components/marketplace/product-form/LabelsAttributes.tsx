@@ -30,8 +30,7 @@ export const LabelsAttributes = ({ formData, onChange }: ProductFormProps) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return [];
 
-      // Using any to bypass TypeScript error due to custom schema types
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("saved_product_labels")
         .select("*")
         .eq("user_id", user.id);
@@ -102,8 +101,7 @@ export const LabelsAttributes = ({ formData, onChange }: ProductFormProps) => {
 
       const labelToSave = formData.labels[labelIndex];
       
-      // Using any to bypass TypeScript error due to custom schema types
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from("saved_product_labels")
         .insert({
           user_id: user.id,

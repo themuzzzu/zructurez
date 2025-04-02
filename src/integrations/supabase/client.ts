@@ -118,6 +118,52 @@ type CustomSchema = Database['public']['Tables'] & {
       created_at?: string;
     };
   };
+  product_labels: {
+    Row: {
+      id: string;
+      product_id: string;
+      name: string;
+      attributes: string[];
+      created_at: string;
+    };
+    Insert: {
+      id?: string;
+      product_id: string;
+      name: string;
+      attributes: string[];
+      created_at?: string;
+    };
+    Update: {
+      id?: string;
+      product_id?: string;
+      name?: string;
+      attributes?: string[];
+      created_at?: string;
+    };
+  };
+  saved_product_labels: {
+    Row: {
+      id: string;
+      user_id: string;
+      name: string;
+      attributes: string[];
+      created_at: string;
+    };
+    Insert: {
+      id?: string;
+      user_id: string;
+      name: string;
+      attributes: string[];
+      created_at?: string;
+    };
+    Update: {
+      id?: string;
+      user_id?: string;
+      name?: string;
+      attributes?: string[];
+      created_at?: string;
+    };
+  };
 };
 
 // Update the orders table type to include address_id
