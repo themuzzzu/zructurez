@@ -14,6 +14,8 @@ import { BusinessProductsTab } from "@/components/business-details/tabs/Business
 import { BusinessPortfolioTab } from "@/components/business-details/tabs/BusinessPortfolioTab";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, Edit } from "lucide-react";
+import { BusinessStatus } from "@/components/business-details/header/BusinessStatus";
+import { TemporaryStatus } from "@/components/business-details/header/TemporaryStatus";
 import type { Business } from "@/types/business";
 
 const BusinessDetails = () => {
@@ -114,6 +116,16 @@ const BusinessDetails = () => {
           )}
         </div>
       </div>
+      
+      {isOwner && (
+        <div className="mb-6 p-4 bg-background rounded-lg border">
+          <h2 className="text-lg font-semibold mb-4">Business Status Controls</h2>
+          <div className="flex flex-wrap gap-8">
+            <BusinessStatus id={id || ""} initialIsOpen={business.is_open ?? true} />
+            <TemporaryStatus id={id || ""} isOpen={business.is_open ?? true} />
+          </div>
+        </div>
+      )}
 
       <Tabs
         defaultValue="about"
@@ -132,6 +144,11 @@ const BusinessDetails = () => {
           {!business.is_open && (
             <div className="mb-4 p-3 bg-destructive/10 border border-destructive/30 rounded-md text-destructive">
               This business is currently closed.
+              {business.wait_time && (
+                <span> Available in {business.wait_time}
+                  {business.closure_reason && ` (${business.closure_reason.replace(/_/g, ' ')})`}.
+                </span>
+              )}
             </div>
           )}
 

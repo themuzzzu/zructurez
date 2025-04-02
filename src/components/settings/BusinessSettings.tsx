@@ -20,13 +20,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Trash } from "lucide-react";
 import { useState } from "react";
-import { BusinessStatus } from "../business-details/header/BusinessStatus";
-import { TemporaryStatus } from "../business-details/header/TemporaryStatus";
+import { useNavigate } from "react-router-dom";
 
 export const BusinessSettings = () => {
   const [deletingBusinessId, setDeletingBusinessId] = useState<string | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const navigate = useNavigate();
 
   const { data: businesses, isLoading, refetch } = useQuery({
     queryKey: ['user-businesses'],
@@ -73,6 +73,11 @@ export const BusinessSettings = () => {
       toast.success("Business deleted successfully");
       refetch(); // Refresh the businesses list
       setIsDeleteDialogOpen(false);
+      
+      // If there are no more businesses, navigate to profile page
+      if (businesses && businesses.length <= 1) {
+        navigate('/profile');
+      }
     } catch (error) {
       console.error("Error deleting business:", error);
       toast.error("Failed to delete business. Please try again.");
@@ -110,12 +115,21 @@ export const BusinessSettings = () => {
             <div key={business.id} className="space-y-4 pt-4 first:pt-0 border-t first:border-t-0">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold text-lg">{business.name}</h3>
-                <AlertDialog open={isDeleteDialogOpen && deletingBusinessId === business.id} onOpenChange={setIsDeleteDialogOpen}>
+                <AlertDialog 
+                  open={isDeleteDialogOpen && deletingBusinessId === business.id} 
+                  onOpenChange={(open) => {
+                    setIsDeleteDialogOpen(open);
+                    if (!open) setDeletingBusinessId(null);
+                  }}
+                >
                   <AlertDialogTrigger asChild>
                     <Button 
                       variant="destructive" 
                       size="sm"
-                      onClick={() => setDeletingBusinessId(business.id)}
+                      onClick={() => {
+                        setDeletingBusinessId(business.id);
+                        setIsDeleteDialogOpen(true);
+                      }}
                       className="ml-auto"
                     >
                       <Trash className="h-4 w-4 mr-2" />
@@ -153,12 +167,6 @@ export const BusinessSettings = () => {
                     onCheckedChange={() => handleShowInServicesChange(business.id, business.show_in_services)}
                   />
                 </div>
-              </div>
-
-              <div className="space-y-4">
-                <h4 className="font-medium text-sm text-muted-foreground mb-2">Business Status</h4>
-                <BusinessStatus id={business.id} initialIsOpen={business.is_open ?? true} />
-                <TemporaryStatus id={business.id} isOpen={business.is_open ?? true} />
               </div>
             </div>
           ))}

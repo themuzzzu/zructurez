@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Clock } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -21,6 +21,32 @@ export const TemporaryStatus = ({ id, isOpen }: TemporaryStatusProps) => {
   const [waitTime, setWaitTime] = useState("");
   const [temporarilyUnavailable, setTemporarilyUnavailable] = useState(false);
   const [closureReason, setClosureReason] = useState<ClosureReason>('');
+  
+  // Fetch current status when component mounts
+  useEffect(() => {
+    const fetchBusinessStatus = async () => {
+      const { data, error } = await supabase
+        .from('businesses')
+        .select('wait_time, closure_reason')
+        .eq('id', id)
+        .single();
+        
+      if (error) {
+        console.error('Error fetching business status:', error);
+        return;
+      }
+      
+      if (data.wait_time) {
+        setWaitTime(data.wait_time);
+        setTemporarilyUnavailable(true);
+        if (data.closure_reason) {
+          setClosureReason(data.closure_reason as ClosureReason);
+        }
+      }
+    };
+    
+    fetchBusinessStatus();
+  }, [id]);
 
   const handleTemporaryStatus = async (checked: boolean) => {
     setTemporarilyUnavailable(checked);
@@ -37,6 +63,7 @@ export const TemporaryStatus = ({ id, isOpen }: TemporaryStatusProps) => {
         if (error) throw error;
         setWaitTime("");
         setClosureReason('');
+        toast.success("Business is now fully available");
       } catch (error) {
         console.error('Error clearing wait time:', error);
         toast.error("Failed to update availability");
