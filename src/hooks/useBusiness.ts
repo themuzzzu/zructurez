@@ -46,7 +46,9 @@ export const useBusiness = (businessId: string) => {
       services: data.services || [],
       products: data.products || [],
       cover_url: data.cover_url || "",
-      updated_at: data.updated_at || data.created_at
+      updated_at: data.updated_at || data.created_at,
+      wait_time: data.wait_time || null,
+      closure_reason: data.closure_reason || null
     };
   };
 

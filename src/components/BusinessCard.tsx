@@ -51,7 +51,7 @@ export const BusinessCard = ({
       case 'holiday': return 'Holiday';
       case 'next_day': return 'Available Next Day';
       case 'other': return 'Other';
-      default: return reason;
+      default: return reason.replace(/_/g, ' ');
     }
   };
   

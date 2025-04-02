@@ -18,7 +18,7 @@ import {
   AlertDialogTrigger
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Trash } from "lucide-react";
+import { Trash, Edit } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -62,6 +62,36 @@ export const BusinessSettings = () => {
     
     setIsDeleting(true);
     try {
+      // Delete associated business_products first
+      const { error: productsError } = await supabase
+        .from('business_products')
+        .delete()
+        .eq('business_id', deletingBusinessId);
+      
+      if (productsError) {
+        console.error("Error deleting business products:", productsError);
+      }
+      
+      // Delete associated business_portfolio items
+      const { error: portfolioError } = await supabase
+        .from('business_portfolio')
+        .delete()
+        .eq('business_id', deletingBusinessId);
+      
+      if (portfolioError) {
+        console.error("Error deleting business portfolio:", portfolioError);
+      }
+      
+      // Delete any business_ratings
+      const { error: ratingsError } = await supabase
+        .from('business_ratings')
+        .delete()
+        .eq('business_id', deletingBusinessId);
+      
+      if (ratingsError) {
+        console.error("Error deleting business ratings:", ratingsError);
+      }
+      
       // Delete the business
       const { error } = await supabase
         .from('businesses')
@@ -115,46 +145,58 @@ export const BusinessSettings = () => {
             <div key={business.id} className="space-y-4 pt-4 first:pt-0 border-t first:border-t-0">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold text-lg">{business.name}</h3>
-                <AlertDialog 
-                  open={isDeleteDialogOpen && deletingBusinessId === business.id} 
-                  onOpenChange={(open) => {
-                    setIsDeleteDialogOpen(open);
-                    if (!open) setDeletingBusinessId(null);
-                  }}
-                >
-                  <AlertDialogTrigger asChild>
-                    <Button 
-                      variant="destructive" 
-                      size="sm"
-                      onClick={() => {
-                        setDeletingBusinessId(business.id);
-                        setIsDeleteDialogOpen(true);
-                      }}
-                      className="ml-auto"
-                    >
-                      <Trash className="h-4 w-4 mr-2" />
-                      Delete Business
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This will permanently delete your business and all associated data. This action cannot be undone.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={handleDeleteBusiness}
-                        disabled={isDeleting}
-                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => navigate(`/business-edit/${business.id}`)}
+                  >
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit Business
+                  </Button>
+                  <AlertDialog 
+                    open={isDeleteDialogOpen && deletingBusinessId === business.id} 
+                    onOpenChange={(open) => {
+                      setIsDeleteDialogOpen(open);
+                      if (!open) setDeletingBusinessId(null);
+                    }}
+                  >
+                    <AlertDialogTrigger asChild>
+                      <Button 
+                        variant="destructive" 
+                        size="sm"
+                        onClick={() => {
+                          setDeletingBusinessId(business.id);
+                          setIsDeleteDialogOpen(true);
+                        }}
                       >
-                        {isDeleting ? "Deleting..." : "Delete Business"}
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                        <Trash className="h-4 w-4 mr-2" />
+                        Delete Business
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This will permanently delete your business and all associated data including products, portfolio items, and other related information. This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={(e) => {
+                            e.preventDefault(); // Prevent default form submission
+                            handleDeleteBusiness();
+                          }}
+                          disabled={isDeleting}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          {isDeleting ? "Deleting..." : "Delete Business"}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
               </div>
 
               <div className="space-y-4">
