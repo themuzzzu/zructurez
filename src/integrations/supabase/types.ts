@@ -599,6 +599,44 @@ export type Database = {
           },
         ]
       }
+      business_menus: {
+        Row: {
+          business_id: string | null
+          created_at: string | null
+          display_type: string
+          id: string
+          is_draft: boolean | null
+          is_published: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string | null
+          display_type?: string
+          id?: string
+          is_draft?: boolean | null
+          is_published?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string | null
+          display_type?: string
+          id?: string
+          is_draft?: boolean | null
+          is_published?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_menus_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_portfolio: {
         Row: {
           business_id: string
@@ -1248,6 +1286,131 @@ export type Database = {
             columns: ["post_id"]
             isOneToOne: false
             referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      menu_categories: {
+        Row: {
+          business_id: string | null
+          created_at: string | null
+          id: string
+          is_custom: boolean | null
+          name: string
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_custom?: boolean | null
+          name: string
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_custom?: boolean | null
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "menu_categories_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      menu_items: {
+        Row: {
+          availability: string | null
+          business_id: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          image_url: string | null
+          name: string
+          price: number | null
+          price_unit: string | null
+          subcategory_id: string | null
+        }
+        Insert: {
+          availability?: string | null
+          business_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          price?: number | null
+          price_unit?: string | null
+          subcategory_id?: string | null
+        }
+        Update: {
+          availability?: string | null
+          business_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          price?: number | null
+          price_unit?: string | null
+          subcategory_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "menu_items_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "menu_items_subcategory_id_fkey"
+            columns: ["subcategory_id"]
+            isOneToOne: false
+            referencedRelation: "menu_subcategories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      menu_subcategories: {
+        Row: {
+          business_id: string | null
+          category_id: string | null
+          created_at: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          business_id?: string | null
+          category_id?: string | null
+          created_at?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          business_id?: string | null
+          category_id?: string | null
+          created_at?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "menu_subcategories_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "menu_subcategories_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "menu_categories"
             referencedColumns: ["id"]
           },
         ]

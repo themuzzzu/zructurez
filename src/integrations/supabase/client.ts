@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
@@ -161,6 +160,119 @@ type CustomSchema = Database['public']['Tables'] & {
       user_id?: string;
       name?: string;
       attributes?: string[];
+      created_at?: string;
+    };
+  };
+  business_menus: {
+    Row: {
+      id: string;
+      business_id: string;
+      display_type: 'menu' | 'list';
+      created_at: string;
+      updated_at: string;
+      is_published: boolean;
+      is_draft: boolean;
+    };
+    Insert: {
+      id?: string;
+      business_id: string;
+      display_type?: 'menu' | 'list';
+      created_at?: string;
+      updated_at?: string;
+      is_published?: boolean;
+      is_draft?: boolean;
+    };
+    Update: {
+      id?: string;
+      business_id?: string;
+      display_type?: 'menu' | 'list';
+      created_at?: string;
+      updated_at?: string;
+      is_published?: boolean;
+      is_draft?: boolean;
+    };
+  };
+  menu_categories: {
+    Row: {
+      id: string;
+      business_id: string;
+      name: string;
+      created_at: string;
+      is_custom: boolean;
+    };
+    Insert: {
+      id?: string;
+      business_id: string;
+      name: string;
+      created_at?: string;
+      is_custom?: boolean;
+    };
+    Update: {
+      id?: string;
+      business_id?: string;
+      name?: string;
+      created_at?: string;
+      is_custom?: boolean;
+    };
+  };
+  menu_subcategories: {
+    Row: {
+      id: string;
+      category_id: string;
+      business_id: string;
+      name: string;
+      created_at: string;
+    };
+    Insert: {
+      id?: string;
+      category_id: string;
+      business_id: string;
+      name: string;
+      created_at?: string;
+    };
+    Update: {
+      id?: string;
+      category_id?: string;
+      business_id?: string;
+      name?: string;
+      created_at?: string;
+    };
+  };
+  menu_items: {
+    Row: {
+      id: string;
+      subcategory_id: string;
+      business_id: string;
+      name: string;
+      description?: string;
+      price?: number;
+      price_unit?: string;
+      image_url?: string;
+      availability: 'in_stock' | 'out_of_stock';
+      created_at: string;
+    };
+    Insert: {
+      id?: string;
+      subcategory_id: string;
+      business_id: string;
+      name: string;
+      description?: string;
+      price?: number;
+      price_unit?: string;
+      image_url?: string;
+      availability?: 'in_stock' | 'out_of_stock';
+      created_at?: string;
+    };
+    Update: {
+      id?: string;
+      subcategory_id?: string;
+      business_id?: string;
+      name?: string;
+      description?: string;
+      price?: number;
+      price_unit?: string;
+      image_url?: string;
+      availability?: 'in_stock' | 'out_of_stock';
       created_at?: string;
     };
   };
