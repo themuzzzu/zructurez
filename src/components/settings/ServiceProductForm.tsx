@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,10 +10,11 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface ServiceProductFormProps {
   serviceId: string;
+  initialData?: any;
   onSuccess?: () => void;
 }
 
-export const ServiceProductForm = ({ serviceId, onSuccess }: ServiceProductFormProps) => {
+export const ServiceProductForm = ({ serviceId, initialData, onSuccess }: ServiceProductFormProps) => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -22,6 +23,19 @@ export const ServiceProductForm = ({ serviceId, onSuccess }: ServiceProductFormP
     stock: "0",
     image: null as string | null,
   });
+
+  // Initialize form with initialData when available
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        name: initialData.title || "",
+        description: initialData.description || "",
+        price: initialData.price?.toString() || "",
+        stock: initialData.stock?.toString() || "0",
+        image: initialData.image_url || null,
+      });
+    }
+  }, [initialData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,8 +48,10 @@ export const ServiceProductForm = ({ serviceId, onSuccess }: ServiceProductFormP
     setLoading(true);
 
     try {
-      let imageUrl = null;
-      if (formData.image) {
+      let imageUrl = formData.image;
+      
+      // Only upload a new image if it's a base64 string (new upload)
+      if (formData.image && formData.image.startsWith('data:')) {
         const base64Data = formData.image.split(',')[1];
         const byteCharacters = atob(base64Data);
         const byteNumbers = new Array(byteCharacters.length);
@@ -59,33 +75,59 @@ export const ServiceProductForm = ({ serviceId, onSuccess }: ServiceProductFormP
         imageUrl = publicUrl;
       }
 
-      const { data: product, error } = await supabase
-        .from('service_products')
-        .insert([{
-          service_id: serviceId,
-          name: formData.name,
-          description: formData.description,
-          price: parseFloat(formData.price),
-          stock: parseInt(formData.stock),
-          image_url: imageUrl,
-        }])
-        .select()
-        .single();
+      // Get the current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
 
-      if (error) throw error;
+      if (initialData) {
+        // Update existing product
+        const { error } = await supabase
+          .from('products')
+          .update({
+            title: formData.name,
+            description: formData.description,
+            price: parseFloat(formData.price),
+            stock: parseInt(formData.stock),
+            image_url: imageUrl,
+          })
+          .eq('id', initialData.id);
 
-      toast.success("Product added to service successfully!");
+        if (error) throw error;
+        
+        toast.success("Product updated successfully!");
+      } else {
+        // Create new product
+        const { error } = await supabase
+          .from('products')
+          .insert([{
+            user_id: user.id,
+            title: formData.name,
+            description: formData.description,
+            price: parseFloat(formData.price),
+            stock: parseInt(formData.stock),
+            image_url: imageUrl,
+          }]);
+
+        if (error) throw error;
+        
+        toast.success("Product added successfully!");
+      }
+      
       onSuccess?.();
-      setFormData({
-        name: "",
-        description: "",
-        price: "",
-        stock: "0",
-        image: null,
-      });
+      
+      if (!initialData) {
+        // Only reset form if creating a new product
+        setFormData({
+          name: "",
+          description: "",
+          price: "",
+          stock: "0",
+          image: null,
+        });
+      }
     } catch (error) {
       console.error('Error:', error);
-      toast.error("Failed to add product. Please try again.");
+      toast.error(initialData ? "Failed to update product." : "Failed to add product. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -148,7 +190,7 @@ export const ServiceProductForm = ({ serviceId, onSuccess }: ServiceProductFormP
       </div>
 
       <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? "Adding Product..." : "Add Product"}
+        {loading ? (initialData ? "Updating Product..." : "Adding Product...") : (initialData ? "Update Product" : "Add Product")}
       </Button>
     </form>
   );
