@@ -1,113 +1,140 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import imageCompression from "browser-image-compression";
 
-export const getPosts = async () => {
+export const createPost = async ({
+  content,
+  image,
+  category,
+  location,
+  groupId,
+  pollId,
+}: {
+  content: string;
+  image?: string | null;
+  category?: string;
+  location?: string;
+  groupId?: string;
+  pollId?: string;
+}) => {
   try {
     const { data: { user } } = await supabase.auth.getUser();
-    
-    const { data, error } = await supabase
-      .from('posts')
-      .select(`
-        *,
-        profiles (username, avatar_url),
-        likes (user_id),
-        comments (id)
-      `)
-      .order('created_at', { ascending: false });
+    if (!user) throw new Error("User not authenticated");
 
-    if (error) throw error;
+    // Get profile ID from user ID
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("id", user.id)
+      .single();
 
-    return data?.map(post => ({
-      ...post,
-      likes: post.likes?.length || 0,
-      comments: post.comments?.length || 0,
-      user_has_liked: post.likes?.some((like: any) => like.user_id === user?.id) || false
-    }));
-  } catch (error) {
-    console.error('Error fetching posts:', error);
-    throw error;
-  }
-};
+    if (!profiles) throw new Error("Profile not found");
 
-export const getComments = async (postId: string) => {
-  try {
-    const { data, error } = await supabase
-      .from('comments')
-      .select(`
-        *,
-        profile:profiles!comments_profile_id_fkey (username, avatar_url)
-      `)
-      .eq('post_id', postId)
-      .order('created_at', { ascending: false });
+    let imageUrl = null;
+    if (image) {
+      const base64Data = image.split(',')[1];
+      const byteCharacters = atob(base64Data);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'image/jpeg' });
 
-    if (error) throw error;
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('post-images')
+        .upload(fileName, blob);
 
-    return data;
-  } catch (error) {
-    console.error('Error fetching comments:', error);
-    throw error;
-  }
-};
+      if (uploadError) throw uploadError;
 
-export const addComment = async (postId: string, content: string) => {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      toast.error("You must be logged in to comment");
-      throw new Error("User not authenticated");
+      const { data: { publicUrl } } = supabase.storage
+        .from('post-images')
+        .getPublicUrl(fileName);
+
+      imageUrl = publicUrl;
     }
 
-    const { error } = await supabase
-      .from('comments')
+    // Create post
+    const { data: post, error: postError } = await supabase
+      .from("posts")
       .insert({
-        post_id: postId,
         user_id: user.id,
-        profile_id: user.id,
-        content: content
-      });
+        profile_id: profiles.id,
+        content,
+        image_url: imageUrl,
+        category,
+        location,
+        group_id: groupId,
+        poll_id: pollId
+      })
+      .select()
+      .single();
 
-    if (error) throw error;
-
-    return true;
+    if (postError) throw postError;
+    return post;
   } catch (error) {
-    console.error('Error adding comment:', error);
+    console.error("Error creating post:", error);
     throw error;
   }
 };
 
-// Image optimization function
-export const optimizeImage = async (imageFile: File): Promise<string> => {
+export const incrementViews = async (tableName: string, recordId: string) => {
   try {
-    // Options for compression
-    const options = {
-      maxSizeMB: 1,
-      maxWidthOrHeight: 1920,
-      useWebWorker: true,
-      fileType: imageFile.type
-    };
-
-    // Compress the image
-    const compressedFile = await imageCompression(imageFile, options);
-    
-    // Convert to base64 for preview or storage
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(compressedFile);
-      reader.onloadend = () => {
-        const base64data = reader.result as string;
-        resolve(base64data);
-      };
-      reader.onerror = reject;
+    await supabase.rpc('increment_views', {
+      table_name: tableName,
+      record_id: recordId,
     });
   } catch (error) {
-    console.error('Error optimizing image:', error);
-    throw error;
+    console.error(`Error incrementing views for ${tableName}:`, error);
   }
 };
 
-// Generate video thumbnail
+export const optimizeImage = async (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        // Max width/height for the image
+        const MAX_SIZE = 1200;
+        let width = img.width;
+        let height = img.height;
+        
+        if (width > height) {
+          if (width > MAX_SIZE) {
+            height *= MAX_SIZE / width;
+            width = MAX_SIZE;
+          }
+        } else {
+          if (height > MAX_SIZE) {
+            width *= MAX_SIZE / height;
+            height = MAX_SIZE;
+          }
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        // Get the data URL (base64 string)
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        resolve(dataUrl);
+      };
+      img.onerror = () => {
+        reject(new Error('Failed to load image'));
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.onerror = () => {
+      reject(new Error('Failed to read file'));
+    };
+    reader.readAsDataURL(file);
+  });
+};
+
 export const generateVideoThumbnail = async (videoFile: File): Promise<string> => {
   return new Promise((resolve, reject) => {
     const video = document.createElement('video');
@@ -115,290 +142,58 @@ export const generateVideoThumbnail = async (videoFile: File): Promise<string> =
     video.muted = true;
     video.playsInline = true;
     
-    video.onloadedmetadata = () => {
-      // Seek to a position (e.g., 1 second)
-      video.currentTime = 1;
+    video.onloadeddata = () => {
+      // Seek to the first frame
+      video.currentTime = 0.1;
     };
     
-    video.onseeked = () => {
-      // Create a canvas element
+    video.ontimeupdate = () => {
       const canvas = document.createElement('canvas');
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       
-      // Draw the current video frame to canvas
       const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        
-        // Convert canvas to data URL
-        const thumbnailUrl = canvas.toDataURL('image/jpeg', 0.7);
-        resolve(thumbnailUrl);
+      ctx?.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      // Optimize the thumbnail size
+      const thumbnailCanvas = document.createElement('canvas');
+      const MAX_SIZE = 600;
+      let width = canvas.width;
+      let height = canvas.height;
+      
+      if (width > height) {
+        if (width > MAX_SIZE) {
+          height *= MAX_SIZE / width;
+          width = MAX_SIZE;
+        }
       } else {
-        reject(new Error('Could not get canvas context'));
+        if (height > MAX_SIZE) {
+          width *= MAX_SIZE / height;
+          height = MAX_SIZE;
+        }
       }
+      
+      thumbnailCanvas.width = width;
+      thumbnailCanvas.height = height;
+      
+      const thumbnailCtx = thumbnailCanvas.getContext('2d');
+      thumbnailCtx?.drawImage(canvas, 0, 0, width, height);
+      
+      const thumbnail = thumbnailCanvas.toDataURL('image/jpeg', 0.85);
+      video.pause();
+      resolve(thumbnail);
     };
     
     video.onerror = () => {
-      reject(new Error('Error generating video thumbnail'));
+      reject(new Error('Failed to load video'));
     };
     
-    // Set the video source
     video.src = URL.createObjectURL(videoFile);
-  });
-};
-
-export const createPost = async ({ content, location, image, category }: {
-  content: string;
-  location?: string;
-  image?: string | null;
-  category?: string | null;
-}) => {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('User not authenticated');
-
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('id', user.id)
-      .single();
-
-    if (!profile) throw new Error('Profile not found');
-
-    const { error } = await supabase
-      .from('posts')
-      .insert({
-        user_id: user.id,
-        profile_id: profile.id,
-        content,
-        location,
-        image_url: image,
-        category
-      });
-
-    if (error) throw error;
-  } catch (error) {
-    console.error('Error creating post:', error);
-    throw error;
-  }
-};
-
-// Schedule a post for later
-export const schedulePost = async ({ 
-  content, 
-  location, 
-  image, 
-  category,
-  scheduledFor,
-  groupId 
-}: {
-  content: string;
-  location?: string;
-  image?: string | null;
-  category?: string | null;
-  scheduledFor: Date;
-  groupId?: string | null;
-}) => {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('User not authenticated');
-
-    // Check if scheduled time is in the future
-    if (scheduledFor <= new Date()) {
-      throw new Error('Scheduled time must be in the future');
-    }
-
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('id', user.id)
-      .single();
-
-    if (!profile) throw new Error('Profile not found');
-
-    const { data, error } = await supabase
-      .from('scheduled_posts')
-      .insert({
-        user_id: user.id,
-        profile_id: profile.id,
-        group_id: groupId || null,
-        content,
-        location,
-        image_url: image,
-        category,
-        scheduled_for: scheduledFor.toISOString(),
-        status: 'pending'
-      })
-      .select();
-
-    if (error) throw error;
-    
-    return data[0];
-  } catch (error) {
-    console.error('Error scheduling post:', error);
-    throw error;
-  }
-};
-
-// Get scheduled posts for current user
-export const getScheduledPosts = async () => {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('User not authenticated');
-    
-    const { data, error } = await supabase
-      .from('scheduled_posts')
-      .select(`
-        *,
-        groups (name, image_url)
-      `)
-      .eq('user_id', user.id)
-      .order('scheduled_for', { ascending: true });
-
-    if (error) throw error;
-
-    return data;
-  } catch (error) {
-    console.error('Error fetching scheduled posts:', error);
-    throw error;
-  }
-};
-
-// Cancel a scheduled post
-export const cancelScheduledPost = async (postId: string) => {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('User not authenticated');
-
-    const { error } = await supabase
-      .from('scheduled_posts')
-      .delete()
-      .eq('id', postId)
-      .eq('user_id', user.id);
-
-    if (error) throw error;
-  } catch (error) {
-    console.error('Error canceling scheduled post:', error);
-    throw error;
-  }
-};
-
-// Update a scheduled post
-export const updateScheduledPost = async (
-  postId: string, 
-  updates: {
-    content?: string;
-    category?: string;
-    location?: string;
-    image_url?: string;
-    scheduled_for?: Date;
-  }
-) => {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('User not authenticated');
-
-    // Convert scheduledFor to ISO string if it exists
-    const formattedUpdates = {
-      ...updates,
-      scheduled_for: updates.scheduled_for ? updates.scheduled_for.toISOString() : undefined
-    };
-
-    const { error } = await supabase
-      .from('scheduled_posts')
-      .update(formattedUpdates)
-      .eq('id', postId)
-      .eq('user_id', user.id);
-
-    if (error) throw error;
-  } catch (error) {
-    console.error('Error updating scheduled post:', error);
-    throw error;
-  }
-};
-
-export const likePost = async (postId: string) => {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('User not authenticated');
-
-    const { error } = await supabase
-      .from('likes')
-      .insert({
-        post_id: postId,
-        user_id: user.id
-      });
-
-    if (error) throw error;
-  } catch (error) {
-    console.error('Error liking post:', error);
-    throw error;
-  }
-};
-
-export const unlikePost = async (postId: string) => {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('User not authenticated');
-
-    const { error } = await supabase
-      .from('likes')
-      .delete()
-      .match({ post_id: postId, user_id: user.id });
-
-    if (error) throw error;
-  } catch (error) {
-    console.error('Error unliking post:', error);
-    throw error;
-  }
-};
-
-export const updatePost = async (postId: string, content: string, category: string) => {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('User not authenticated');
-
-    const { error } = await supabase
-      .from('posts')
-      .update({ content, category })
-      .eq('id', postId)
-      .eq('user_id', user.id);
-
-    if (error) throw error;
-  } catch (error) {
-    console.error('Error updating post:', error);
-    throw error;
-  }
-};
-
-export const deletePost = async (postId: string) => {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('User not authenticated');
-
-    const { error } = await supabase
-      .from('posts')
-      .delete()
-      .eq('id', postId)
-      .eq('user_id', user.id);
-
-    if (error) throw error;
-  } catch (error) {
-    console.error('Error deleting post:', error);
-    throw error;
-  }
-};
-
-export const incrementViews = async (tableType: 'posts' | 'products' | 'business_portfolio' | 'service_portfolio', id: string) => {
-  try {
-    const { error } = await supabase.rpc('increment_views', {
-      table_name: tableType,
-      record_id: id
+    video.load();
+    video.play().catch(error => {
+      console.error('Auto-play failed:', error);
+      // Try to generate thumbnail without playing
+      video.currentTime = 0.1;
     });
-
-    if (error) throw error;
-  } catch (error) {
-    console.error(`Error incrementing views for ${tableType}:`, error);
-  }
+  });
 };

@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/hooks/useBusiness";
+import { ImagePreview } from "@/components/image-preview/ImagePreview";
 
 interface BusinessImageSectionProps {
   business: string;
@@ -17,6 +18,8 @@ interface BusinessImageSectionProps {
 
 export const BusinessImageSection = ({ business }: BusinessImageSectionProps) => {
   const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [uploadType, setUploadType] = useState<"profile" | "cover">("profile");
   const [pendingImage, setPendingImage] = useState<string | null>(null);
   const [imageScale, setImageScale] = useState(1);
@@ -30,6 +33,11 @@ export const BusinessImageSection = ({ business }: BusinessImageSectionProps) =>
     setUploadType(type);
     setPendingImage(null);
     setIsUploadOpen(true);
+  };
+
+  const openPreviewDialog = (imageUrl: string) => {
+    setPreviewImage(imageUrl);
+    setIsPreviewOpen(true);
   };
   
   const handleImageSelect = (image: string | null) => {
@@ -52,18 +60,21 @@ export const BusinessImageSection = ({ business }: BusinessImageSectionProps) =>
       const blob = new Blob([byteArray], { type: 'image/jpeg' });
       
       // Generate filename
-      const fileName = `business-${business}-${uploadType}-${Date.now()}.jpg`;
+      const fileName = `${business}-${uploadType}-${Date.now()}.jpg`;
+      
+      // Select appropriate bucket based on upload type
+      const bucket = uploadType === "profile" ? 'business-profile-images' : 'business-cover-images';
       
       // Upload to storage
       const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('business-images')
+        .from(bucket)
         .upload(fileName, blob);
       
       if (uploadError) throw uploadError;
       
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
-        .from('business-images')
+        .from(bucket)
         .getPublicUrl(fileName);
       
       // Update business record
@@ -102,10 +113,11 @@ export const BusinessImageSection = ({ business }: BusinessImageSectionProps) =>
     <>
       <Card className="overflow-hidden relative">
         <div 
-          className="w-full h-48 bg-cover bg-center bg-no-repeat"
+          className="w-full h-48 bg-cover bg-center bg-no-repeat cursor-pointer"
           style={{ 
             backgroundImage: businessData?.cover_url ? `url(${businessData.cover_url})` : "linear-gradient(to right, #4f46e5, #2563eb)"
           }}
+          onClick={() => businessData?.cover_url && openPreviewDialog(businessData.cover_url)}
         >
           {!isMobile && (
             <Button 
@@ -123,12 +135,13 @@ export const BusinessImageSection = ({ business }: BusinessImageSectionProps) =>
         <div className="p-4 flex items-end">
           <div className="relative -mt-16">
             <div 
-              className="w-20 h-20 rounded-full border-4 border-background overflow-hidden bg-primary"
+              className="w-20 h-20 rounded-full border-4 border-background overflow-hidden bg-primary cursor-pointer"
               style={{ 
                 backgroundImage: businessData?.image_url ? `url(${businessData.image_url})` : "none",
                 backgroundSize: "cover",
                 backgroundPosition: `${businessData?.image_position?.x || 50}% ${businessData?.image_position?.y || 50}%`
               }}
+              onClick={() => businessData?.image_url && openPreviewDialog(businessData.image_url)}
             />
             <Button 
               variant="secondary" 
@@ -150,6 +163,7 @@ export const BusinessImageSection = ({ business }: BusinessImageSectionProps) =>
         </div>
       </Card>
       
+      {/* Image Upload Dialog */}
       <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
         <DialogContent>
           <DialogTitle>
@@ -172,6 +186,29 @@ export const BusinessImageSection = ({ business }: BusinessImageSectionProps) =>
                 {isUploading ? "Saving..." : "Save Image"}
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Full-size Image Preview Dialog */}
+      <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+        <DialogContent className="max-w-4xl w-full p-0 h-auto overflow-hidden bg-black/90">
+          <div className="relative w-full h-full flex items-center justify-center p-2">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="absolute top-2 right-2 text-white z-10 bg-black/40 hover:bg-black/60"
+              onClick={() => setIsPreviewOpen(false)}
+            >
+              <Camera className="h-4 w-4" />
+            </Button>
+            {previewImage && (
+              <img
+                src={previewImage}
+                alt="Business image"
+                className="max-h-[85vh] max-w-full object-contain"
+              />
+            )}
           </div>
         </DialogContent>
       </Dialog>

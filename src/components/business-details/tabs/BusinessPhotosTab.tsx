@@ -1,18 +1,24 @@
 
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Camera } from "lucide-react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { ImageUpload } from "@/components/ImageUpload";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import type { Business } from "@/types/business";
+import { ImagePreview } from "@/components/image-preview/ImagePreview";
 
 interface BusinessPhotosTabProps {
   businessId?: string;
   businessName?: string;
+}
+
+interface BusinessPhoto {
+  id: string;
+  image_url: string;
+  title: string;
 }
 
 export const BusinessPhotosTab = ({ businessId, businessName }: BusinessPhotosTabProps) => {
@@ -20,7 +26,34 @@ export const BusinessPhotosTab = ({ businessId, businessName }: BusinessPhotosTa
   const [title, setTitle] = useState("");
   const [image, setImage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [photos, setPhotos] = useState<Array<{id: string, image_url: string, title: string}>>([]);
+  const [photos, setPhotos] = useState<BusinessPhoto[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (businessId) {
+      fetchBusinessPhotos();
+    } else {
+      setIsLoading(false);
+    }
+  }, [businessId]);
+
+  const fetchBusinessPhotos = async () => {
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('business_photos')
+        .select('*')
+        .eq('business_id', businessId);
+        
+      if (error) throw error;
+      setPhotos(data || []);
+    } catch (error) {
+      console.error('Error fetching business photos:', error);
+      toast.error('Failed to load business photos');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSubmit = async () => {
     if (!businessId) {
@@ -51,28 +84,33 @@ export const BusinessPhotosTab = ({ businessId, businessName }: BusinessPhotosTa
         const byteArray = new Uint8Array(byteNumbers);
         const blob = new Blob([byteArray], { type: 'image/jpeg' });
 
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}`;
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
         const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('business-images')
+          .from('business-photos')
           .upload(fileName, blob);
 
         if (uploadError) throw uploadError;
 
         const { data: { publicUrl } } = supabase.storage
-          .from('business-images')
+          .from('business-photos')
           .getPublicUrl(fileName);
 
         imageUrl = publicUrl;
       }
 
-      // Here we would normally save to a database, but for now we'll just update the local state
-      const newPhoto = {
-        id: Math.random().toString(36).substring(7),
-        image_url: imageUrl as string,
-        title
-      };
+      const { data, error } = await supabase
+        .from('business_photos')
+        .insert({
+          business_id: businessId,
+          title: title.trim(),
+          image_url: imageUrl
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
       
-      setPhotos([...photos, newPhoto]);
+      setPhotos([...photos, data]);
       toast.success("Photo added successfully!");
       setIsDialogOpen(false);
       setTitle("");
@@ -124,19 +162,24 @@ export const BusinessPhotosTab = ({ businessId, businessName }: BusinessPhotosTa
         )}
       </div>
       
-      {photos.length > 0 ? (
+      {isLoading ? (
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className="aspect-square bg-muted animate-pulse rounded-lg"></div>
+          ))}
+        </div>
+      ) : photos.length > 0 ? (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           {photos.map((photo) => (
-            <div key={photo.id} className="relative group overflow-hidden rounded-lg">
-              <img 
-                src={photo.image_url} 
-                alt={photo.title} 
-                className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-110"
+            <div key={photo.id} className="relative overflow-hidden rounded-lg">
+              <ImagePreview
+                src={photo.image_url}
+                alt={photo.title}
+                aspectRatio="square"
+                objectFit="cover"
               />
-              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
-                <div className="p-3 text-white">
-                  <p className="font-medium">{photo.title}</p>
-                </div>
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-3">
+                <p className="text-white font-medium truncate">{photo.title}</p>
               </div>
             </div>
           ))}

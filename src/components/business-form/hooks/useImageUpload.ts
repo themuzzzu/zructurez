@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -29,9 +30,23 @@ export const uploadBusinessImage = async (base64Image: string, prefix: string = 
     
     console.log('Uploading image with filename:', fileName);
     
+    // Select the appropriate bucket based on prefix
+    let bucketName = 'business-images';
+    if (prefix === 'owner-') {
+      bucketName = 'business-profile-images';
+    } else if (prefix === 'staff-') {
+      bucketName = 'business-profile-images';
+    } else if (prefix === 'menu-') {
+      bucketName = 'menu-images';
+    } else if (prefix === 'portfolio-') {
+      bucketName = 'portfolio-images';
+    } else if (prefix === 'cover-') {
+      bucketName = 'business-cover-images';
+    }
+    
     // Upload to Supabase Storage
     const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('business-images')
+      .from(bucketName)
       .upload(fileName, blob, {
         contentType: 'image/jpeg',
         upsert: true
@@ -45,7 +60,7 @@ export const uploadBusinessImage = async (base64Image: string, prefix: string = 
 
     // Get public URL
     const { data: { publicUrl } } = supabase.storage
-      .from('business-images')
+      .from(bucketName)
       .getPublicUrl(fileName);
 
     console.log('Image uploaded successfully:', publicUrl);

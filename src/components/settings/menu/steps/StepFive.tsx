@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,6 +11,8 @@ import { ImageUpload } from "@/components/ImageUpload";
 import { Plus, Trash, Edit, Check, X } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
 import { MenuType } from "@/types/menu";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface Item {
   id: string;
@@ -73,27 +74,70 @@ export const StepFive = ({
   const handleAddItem = () => {
     if (!currentItem.name.trim()) return;
     
-    const newItem = {
-      ...currentItem,
-      id: uuidv4(),
-      subcategoryId: selectedSubcategoryId
+    // Upload image if there is one
+    const processImage = async () => {
+      let imageUrl = currentItem.imageUrl;
+      
+      try {
+        if (imageUrl && imageUrl.startsWith('data:')) {
+          // Convert base64 to blob
+          const base64Data = imageUrl.split(',')[1];
+          const byteCharacters = atob(base64Data);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          const blob = new Blob([byteArray], { type: 'image/jpeg' });
+          
+          // Upload to menu-images bucket
+          const fileName = `menu-${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
+          const { data, error } = await supabase.storage
+            .from('menu-images')
+            .upload(fileName, blob);
+            
+          if (error) throw error;
+          
+          // Get public URL
+          const { data: { publicUrl } } = supabase.storage
+            .from('menu-images')
+            .getPublicUrl(fileName);
+            
+          imageUrl = publicUrl;
+        }
+      } catch (error) {
+        console.error('Error uploading menu item image:', error);
+        toast.error('Error uploading image');
+      }
+      
+      return imageUrl;
     };
     
-    updateFormData({
-      items: [...items, newItem]
-    });
-    
-    // Reset form
-    setCurrentItem({
-      id: "",
-      name: "",
-      description: "",
-      price: "",
-      priceUnit: "₹",
-      imageFile: null,
-      imageUrl: "",
-      availability: 'in_stock',
-      subcategoryId: selectedSubcategoryId
+    // Process the image and then add the item
+    processImage().then(processedImageUrl => {
+      const newItem = {
+        ...currentItem,
+        id: uuidv4(),
+        subcategoryId: selectedSubcategoryId,
+        imageUrl: processedImageUrl || currentItem.imageUrl
+      };
+      
+      updateFormData({
+        items: [...items, newItem]
+      });
+      
+      // Reset form
+      setCurrentItem({
+        id: "",
+        name: "",
+        description: "",
+        price: "",
+        priceUnit: "₹",
+        imageFile: null,
+        imageUrl: "",
+        availability: 'in_stock',
+        subcategoryId: selectedSubcategoryId
+      });
     });
   };
 

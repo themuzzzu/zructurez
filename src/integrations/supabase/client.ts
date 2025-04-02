@@ -276,6 +276,29 @@ type CustomSchema = Database['public']['Tables'] & {
       created_at?: string;
     };
   };
+  business_photos: {
+    Row: {
+      id: string;
+      business_id: string;
+      title: string;
+      image_url: string;
+      created_at: string;
+    };
+    Insert: {
+      id?: string;
+      business_id: string;
+      title: string;
+      image_url: string;
+      created_at?: string;
+    };
+    Update: {
+      id?: string;
+      business_id?: string;
+      title?: string;
+      image_url?: string;
+      created_at?: string;
+    };
+  };
 };
 
 // Update the orders table type to include address_id
