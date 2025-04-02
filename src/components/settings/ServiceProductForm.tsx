@@ -7,6 +7,13 @@ import { Label } from "@/components/ui/label";
 import { ImageUpload } from "@/components/ImageUpload";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue 
+} from "@/components/ui/select";
 
 interface ServiceProductFormProps {
   serviceId: string;
@@ -22,6 +29,7 @@ export const ServiceProductForm = ({ serviceId, initialData, onSuccess }: Servic
     price: "",
     stock: "0",
     image: null as string | null,
+    category: "general" // Default category
   });
 
   // Initialize form with initialData when available
@@ -33,6 +41,7 @@ export const ServiceProductForm = ({ serviceId, initialData, onSuccess }: Servic
         price: initialData.price?.toString() || "",
         stock: initialData.stock?.toString() || "0",
         image: initialData.image_url || null,
+        category: initialData.category || "general"
       });
     }
   }, [initialData]);
@@ -89,6 +98,7 @@ export const ServiceProductForm = ({ serviceId, initialData, onSuccess }: Servic
             price: parseFloat(formData.price),
             stock: parseInt(formData.stock),
             image_url: imageUrl,
+            category: formData.category
           })
           .eq('id', initialData.id);
 
@@ -96,17 +106,18 @@ export const ServiceProductForm = ({ serviceId, initialData, onSuccess }: Servic
         
         toast.success("Product updated successfully!");
       } else {
-        // Create new product
+        // Create new product - Make sure to include all required fields
         const { error } = await supabase
           .from('products')
-          .insert([{
+          .insert({
             user_id: user.id,
             title: formData.name,
             description: formData.description,
             price: parseFloat(formData.price),
             stock: parseInt(formData.stock),
             image_url: imageUrl,
-          }]);
+            category: formData.category // This was missing and is required
+          });
 
         if (error) throw error;
         
@@ -123,6 +134,7 @@ export const ServiceProductForm = ({ serviceId, initialData, onSuccess }: Servic
           price: "",
           stock: "0",
           image: null,
+          category: "general"
         });
       }
     } catch (error) {
@@ -144,6 +156,29 @@ export const ServiceProductForm = ({ serviceId, initialData, onSuccess }: Servic
           placeholder="Enter product name"
           required
         />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="category">Category *</Label>
+        <Select
+          value={formData.category}
+          onValueChange={(value) => setFormData({ ...formData, category: value })}
+        >
+          <SelectTrigger id="category">
+            <SelectValue placeholder="Select a category" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="general">General</SelectItem>
+            <SelectItem value="electronics">Electronics</SelectItem>
+            <SelectItem value="clothing">Clothing</SelectItem>
+            <SelectItem value="home">Home & Garden</SelectItem>
+            <SelectItem value="beauty">Beauty & Health</SelectItem>
+            <SelectItem value="sports">Sports & Outdoors</SelectItem>
+            <SelectItem value="toys">Toys & Games</SelectItem>
+            <SelectItem value="books">Books & Media</SelectItem>
+            <SelectItem value="other">Other</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="space-y-2">
