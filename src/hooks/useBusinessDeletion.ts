@@ -11,7 +11,17 @@ export const useBusinessDeletion = (onSuccess?: () => void) => {
     
     setIsDeleting(true);
     try {
-      // Use the SQL function we created to perform cascading deletion
+      // First, delete related booking messages
+      const { error: bookingMessagesError } = await supabase
+        .from('business_booking_messages')
+        .delete()
+        .eq('business_id', businessId);
+
+      if (bookingMessagesError) {
+        console.error("Error deleting business booking messages:", bookingMessagesError);
+      }
+      
+      // Then use the SQL function we created to perform cascading deletion
       const { data, error } = await supabase
         .rpc('delete_business_cascade', { business_id_param: businessId });
 

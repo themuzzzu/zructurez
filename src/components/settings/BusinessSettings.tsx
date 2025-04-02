@@ -6,27 +6,22 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { BusinessVerification } from "./BusinessVerification";
-import { 
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger
-} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Trash, Edit } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useBusinessDeletion } from "@/hooks/useBusinessDeletion";
+import { DeleteConfirmDialog } from "../DeleteConfirmDialog";
 
 export const BusinessSettings = () => {
   const [deletingBusinessId, setDeletingBusinessId] = useState<string | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
   const navigate = useNavigate();
+  
+  const { isDeleting, deleteBusiness } = useBusinessDeletion(() => {
+    refetch();
+    setIsDeleteDialogOpen(false);
+  });
 
   const { data: businesses, isLoading, refetch } = useQuery({
     queryKey: ['user-businesses'],
@@ -60,133 +55,7 @@ export const BusinessSettings = () => {
   const handleDeleteBusiness = async () => {
     if (!deletingBusinessId) return;
     
-    setIsDeleting(true);
-    try {
-      // Delete all associated data in the correct order
-      
-      // 1. Delete business_portfolio items
-      const { error: portfolioError } = await supabase
-        .from('business_portfolio')
-        .delete()
-        .eq('business_id', deletingBusinessId);
-      
-      if (portfolioError) {
-        console.error("Error deleting business portfolio:", portfolioError);
-      }
-      
-      // 2. Delete business_products
-      const { error: productsError } = await supabase
-        .from('business_products')
-        .delete()
-        .eq('business_id', deletingBusinessId);
-      
-      if (productsError) {
-        console.error("Error deleting business products:", productsError);
-      }
-      
-      // 3. Delete business_ratings
-      const { error: ratingsError } = await supabase
-        .from('business_ratings')
-        .delete()
-        .eq('business_id', deletingBusinessId);
-      
-      if (ratingsError) {
-        console.error("Error deleting business ratings:", ratingsError);
-      }
-      
-      // 4. Delete any business comments
-      const { error: commentsError } = await supabase
-        .from('business_comments')
-        .delete()
-        .eq('business_id', deletingBusinessId);
-      
-      if (commentsError) {
-        console.error("Error deleting business comments:", commentsError);
-      }
-      
-      // 5. Delete any business subscriptions
-      const { error: subscriptionsError } = await supabase
-        .from('business_subscriptions')
-        .delete()
-        .eq('business_id', deletingBusinessId);
-      
-      if (subscriptionsError) {
-        console.error("Error deleting business subscriptions:", subscriptionsError);
-      }
-      
-      // 6. Delete any business memberships
-      const { error: membershipsError } = await supabase
-        .from('business_memberships')
-        .delete()
-        .eq('business_id', deletingBusinessId);
-      
-      if (membershipsError) {
-        console.error("Error deleting business memberships:", membershipsError);
-      }
-      
-      // 7. Delete any business likes
-      const { error: likesError } = await supabase
-        .from('business_likes')
-        .delete()
-        .eq('business_id', deletingBusinessId);
-      
-      if (likesError) {
-        console.error("Error deleting business likes:", likesError);
-      }
-      
-      // 8. Delete any business analytics
-      const { error: analyticsError } = await supabase
-        .from('business_analytics')
-        .delete()
-        .eq('business_id', deletingBusinessId);
-      
-      if (analyticsError) {
-        console.error("Error deleting business analytics:", analyticsError);
-      }
-      
-      // 9. Update status of related orders to canceled
-      const { error: ordersError } = await supabase
-        .from('orders')
-        .update({ status: 'canceled' })
-        .eq('business_id', deletingBusinessId);
-      
-      if (ordersError) {
-        console.error("Error updating orders:", ordersError);
-      }
-      
-      // 10. Update status of related appointments to canceled
-      const { error: appointmentsError } = await supabase
-        .from('appointments')
-        .update({ status: 'canceled' })
-        .eq('business_id', deletingBusinessId);
-      
-      if (appointmentsError) {
-        console.error("Error updating appointments:", appointmentsError);
-      }
-      
-      // 11. Finally delete the business
-      const { error } = await supabase
-        .from('businesses')
-        .delete()
-        .eq('id', deletingBusinessId);
-      
-      if (error) throw error;
-      
-      toast.success("Business deleted successfully");
-      refetch(); // Refresh the businesses list
-      setIsDeleteDialogOpen(false);
-      
-      // If there are no more businesses, navigate to profile page
-      if (businesses && businesses.length <= 1) {
-        navigate('/profile');
-      }
-    } catch (error) {
-      console.error("Error deleting business:", error);
-      toast.error("Failed to delete business. Please try again.");
-    } finally {
-      setIsDeleting(false);
-      setDeletingBusinessId(null);
-    }
+    await deleteBusiness(deletingBusinessId);
   };
 
   if (isLoading) {
@@ -226,48 +95,17 @@ export const BusinessSettings = () => {
                     <Edit className="h-4 w-4 mr-2" />
                     Edit Business
                   </Button>
-                  <AlertDialog 
-                    open={isDeleteDialogOpen && deletingBusinessId === business.id} 
-                    onOpenChange={(open) => {
-                      setIsDeleteDialogOpen(open);
-                      if (!open) setDeletingBusinessId(null);
+                  <Button 
+                    variant="destructive" 
+                    size="sm"
+                    onClick={() => {
+                      setDeletingBusinessId(business.id);
+                      setIsDeleteDialogOpen(true);
                     }}
                   >
-                    <AlertDialogTrigger asChild>
-                      <Button 
-                        variant="destructive" 
-                        size="sm"
-                        onClick={() => {
-                          setDeletingBusinessId(business.id);
-                          setIsDeleteDialogOpen(true);
-                        }}
-                      >
-                        <Trash className="h-4 w-4 mr-2" />
-                        Delete Business
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This will permanently delete your business and all associated data including products, portfolio items, ratings, comments, and other related information. This action cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={(e) => {
-                            e.preventDefault(); // Prevent default form submission
-                            handleDeleteBusiness();
-                          }}
-                          disabled={isDeleting}
-                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                        >
-                          {isDeleting ? "Deleting..." : "Delete Business"}
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                    <Trash className="h-4 w-4 mr-2" />
+                    Delete Business
+                  </Button>
                 </div>
               </div>
 
@@ -286,6 +124,16 @@ export const BusinessSettings = () => {
           ))}
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmDialog
+        title="Delete Business"
+        description="Are you sure you want to delete this business? This action cannot be undone, and the business will be permanently removed from your catalog."
+        isOpen={isDeleteDialogOpen}
+        isDeleting={isDeleting}
+        onOpenChange={setIsDeleteDialogOpen}
+        onConfirm={handleDeleteBusiness}
+      />
 
       {businesses.map((business) => (
         <BusinessVerification key={business.id} businessId={business.id} />
