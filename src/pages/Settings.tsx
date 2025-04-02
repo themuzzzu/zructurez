@@ -12,6 +12,7 @@ import { AdvertisementsTab } from "@/components/settings/AdvertisementsTab";
 import { OrdersTab } from "@/components/settings/OrdersTab";
 import { SubscribedBusinessesTab } from "@/components/profile/SubscribedBusinessesTab";
 import { AppointmentsTab } from "@/components/settings/AppointmentsTab";
+import { TestingTab } from "@/components/settings/TestingTab";
 import { AnalyticsTab } from "@/components/settings/AnalyticsTab";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -46,6 +47,8 @@ const Settings = () => {
         return <AdvertisementsTab />;
       case "subscribed":
         return <SubscribedBusinessesTab />;
+      case "testing":
+        return <TestingTab />;
       case "analytics":
         return <AnalyticsTab />;
       default:
