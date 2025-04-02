@@ -28,7 +28,8 @@ import {
   BarChart2, 
   PieChart, 
   LineChart, 
-  Activity 
+  Activity,
+  AlertCircle
 } from "lucide-react";
 import { toast } from "sonner";
 import { 
@@ -53,24 +54,18 @@ import {
   ResponsiveContainer, 
   Cell 
 } from "recharts";
+import { useBusinessAnalytics } from "../performance/hooks/useBusinessAnalytics";
+import { useAnalyticsSummary } from "@/hooks/analytics/useAnalyticsSummary";
+import { useWishlistPurchase } from "@/hooks/analytics/useWishlistPurchase";
+import { useRevenueData } from "@/hooks/analytics/useRevenueData";
+import { useEngagementData } from "@/hooks/analytics/useEngagementData";
+import { useConversionData } from "@/hooks/analytics/useConversionData";
+import { useLiveUpdates } from "@/hooks/analytics/useLiveUpdates";
+import { useViewsData } from "@/hooks/analytics/useViewsData";
 
 // Utility to format numbers
 const formatNumber = (num: number) => {
   return new Intl.NumberFormat('en-IN').format(num);
-};
-
-// Mock data generator functions
-const generateDateRangeData = (days: number, baseValue: number, variance: number) => {
-  return Array.from({ length: days }, (_, i) => {
-    const date = new Date();
-    date.setDate(date.getDate() - (days - i - 1));
-    
-    return {
-      date: date.toISOString().slice(0, 10),
-      value: Math.max(0, baseValue + Math.random() * variance - variance / 2),
-      secondValue: Math.max(0, (baseValue * 0.7) + Math.random() * variance - variance / 2)
-    };
-  });
 };
 
 // Components for Analytics Dashboard
@@ -111,14 +106,17 @@ const SummaryCard = ({ title, value, icon: Icon, change, changeType }: {
   );
 };
 
-const ViewsBarGraph = ({ data, isLoading }: { data: any[]; isLoading: boolean }) => {
+const ViewsBarGraph = ({ data, isLoading, timeRange }: { data: any[]; isLoading: boolean; timeRange: string }) => {
   if (isLoading) {
     return <Skeleton className="w-full h-[300px]" />;
   }
   
+  // Filter data based on time range
+  const filteredData = data.slice(0, timeRange === "7d" ? 7 : timeRange === "30d" ? 30 : 90);
+  
   return (
     <ResponsiveContainer width="100%" height={300}>
-      <BarChart data={data}>
+      <BarChart data={filteredData}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="date" />
         <YAxis />
@@ -167,14 +165,17 @@ const WishlistPieChart = ({ data, isLoading }: { data: any; isLoading: boolean }
   );
 };
 
-const RevenueLineGraph = ({ data, isLoading }: { data: any[]; isLoading: boolean }) => {
+const RevenueLineGraph = ({ data, isLoading, timeRange }: { data: any[]; isLoading: boolean; timeRange: string }) => {
   if (isLoading) {
     return <Skeleton className="w-full h-[300px]" />;
   }
   
+  // Filter data based on time range
+  const filteredData = data.slice(0, timeRange === "7d" ? 7 : timeRange === "30d" ? 30 : 90);
+  
   return (
     <ResponsiveContainer width="100%" height={300}>
-      <ReLineChart data={data}>
+      <ReLineChart data={filteredData}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="date" />
         <YAxis />
@@ -188,9 +189,6 @@ const RevenueLineGraph = ({ data, isLoading }: { data: any[]; isLoading: boolean
 };
 
 const EngagementHeatmap = ({ data, isLoading }: { data: any[]; isLoading: boolean }) => {
-  // For a simple heatmap visualization, we're using a bar chart
-  // In a real implementation, a proper heatmap library would be better
-  
   if (isLoading) {
     return <Skeleton className="w-full h-[300px]" />;
   }
@@ -290,15 +288,55 @@ const BestPostingTimes = ({ data, isLoading }: { data: any[]; isLoading: boolean
 };
 
 const ExportReport = () => {
-  const handleExport = () => {
-    toast.success("Report downloaded successfully!");
-    // In a real implementation, this would generate and download a CSV/PDF file
+  const [isExporting, setIsExporting] = useState(false);
+  
+  const handleExport = async () => {
+    try {
+      setIsExporting(true);
+      
+      // In a real implementation, this would fetch data and generate a CSV/PDF
+      // Simulating a delay for the download process
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Create a sample CSV content (in a real app, this would be dynamic)
+      const csvContent = [
+        "Date,Views,Wishlists,Orders,Revenue",
+        "2023-06-01,120,15,5,25000",
+        "2023-06-02,135,18,7,35000",
+        "2023-06-03,110,12,4,20000"
+      ].join("\n");
+      
+      // Create a Blob and download link
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `analytics_report_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast.success("Report downloaded successfully!");
+    } catch (error) {
+      console.error("Export failed:", error);
+      toast.error("Failed to export report. Please try again.");
+    } finally {
+      setIsExporting(false);
+    }
   };
   
   return (
-    <Button onClick={handleExport} className="flex items-center gap-2">
-      <DownloadCloud className="h-4 w-4" />
-      Export Report
+    <Button 
+      onClick={handleExport} 
+      className="flex items-center gap-2"
+      disabled={isExporting}
+    >
+      {isExporting ? (
+        <RefreshCw className="h-4 w-4 animate-spin" />
+      ) : (
+        <DownloadCloud className="h-4 w-4" />
+      )}
+      {isExporting ? "Exporting..." : "Export Report"}
     </Button>
   );
 };
@@ -321,77 +359,56 @@ export const AnalyticsTab = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(new Date().toLocaleTimeString());
   
-  // Demo data states - in a real implementation these would come from API calls
-  const [summaryData, setSummaryData] = useState({
-    totalViews: 12548,
-    totalWishlists: 825,
-    projectedRevenue: 45250,
-    totalPurchases: 142
-  });
+  // Use custom hooks for data fetching
+  const { data: summaryData, refetch: refetchSummary } = useAnalyticsSummary(user?.id);
+  const { data: viewsData, refetch: refetchViews } = useViewsData(user?.id, timeRange);
+  const { data: wishlistPurchaseData, refetch: refetchWishlist } = useWishlistPurchase(user?.id);
+  const { data: revenueData, refetch: refetchRevenue } = useRevenueData(user?.id, timeRange);
+  const { data: engagementData, refetch: refetchEngagement } = useEngagementData(user?.id);
+  const { data: conversionData, refetch: refetchConversion } = useConversionData(user?.id);
   
-  const [viewsData, setViewsData] = useState<any[]>([]);
-  const [wishlistPurchaseData, setWishlistPurchaseData] = useState<any>({
-    wishlist_count: 825,
-    purchase_count: 142
-  });
-  const [revenueData, setRevenueData] = useState<any[]>([]);
-  const [engagementData, setEngagementData] = useState<any[]>([]);
-  const [conversionData, setConversionData] = useState<any>({
-    conversion_rate: 0.0113,
-    total_views: 12548,
-    total_wishlists: 825,
-    total_purchases: 142
-  });
+  // Use live updates hook
+  const { newActivity } = useLiveUpdates(user?.id);
   
-  // Function to generate mock data based on time range
-  useEffect(() => {
-    const loadData = () => {
-      setIsLoading(true);
-      
-      // Simulate API loading time
-      setTimeout(() => {
-        // Generate views and wishlists data
-        const days = timeRange === "7d" ? 7 : timeRange === "30d" ? 30 : 90;
-        const newViewsData = generateDateRangeData(days, 400, 200).map(item => ({
-          date: item.date,
-          views: Math.floor(item.value),
-          wishlists: Math.floor(item.value * 0.07)
-        }));
-        
-        // Generate revenue data
-        const newRevenueData = generateDateRangeData(days, 1500, 800).map(item => ({
-          date: item.date,
-          revenue: Math.floor(item.value),
-          projected: Math.floor(item.value * 1.2)
-        }));
-        
-        // Generate engagement heatmap data
-        const newEngagementData = Array.from({ length: 24 }, (_, i) => ({
-          hour: `${i}`,
-          engagement: Math.floor(Math.random() * 100) + (i >= 8 && i <= 22 ? 30 : 0)
-        }));
-        
-        setViewsData(newViewsData);
-        setRevenueData(newRevenueData);
-        setEngagementData(newEngagementData);
-        setIsLoading(false);
-        setLastUpdate(new Date().toLocaleTimeString());
-      }, 800);
-    };
-    
-    loadData();
-  }, [timeRange]);
-  
-  const handleRefresh = () => {
-    toast.info("Refreshing analytics data...");
-    // Trigger data reload
+  // Refresh all data
+  const handleRefresh = async () => {
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
+    toast.info("Refreshing analytics data...");
+    
+    try {
+      await Promise.all([
+        refetchSummary(),
+        refetchViews(),
+        refetchWishlist(),
+        refetchRevenue(),
+        refetchEngagement(),
+        refetchConversion()
+      ]);
+      
       setLastUpdate(new Date().toLocaleTimeString());
       toast.success("Analytics data refreshed");
-    }, 800);
+    } catch (error) {
+      console.error("Error refreshing data:", error);
+      toast.error("Failed to refresh data. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
+  
+  // Effect to handle new activity notifications
+  useEffect(() => {
+    if (newActivity) {
+      // Update the timestamp
+      setLastUpdate(new Date().toLocaleTimeString());
+      
+      // Show a notification if it's significant activity
+      if (newActivity.type === 'purchase') {
+        toast.info(`New purchase: ${newActivity.message}`);
+      } else if (newActivity.type === 'view_spike') {
+        toast.info(`Traffic spike: ${newActivity.message}`);
+      }
+    }
+  }, [newActivity]);
   
   return (
     <div className="space-y-6">
@@ -412,37 +429,39 @@ export const AnalyticsTab = () => {
         </div>
       </div>
       
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <SummaryCard 
           title="Total Views" 
-          value={formatNumber(summaryData.totalViews)} 
+          value={formatNumber(summaryData?.totalViews || 0)} 
           icon={Eye}
           change={12.5}
           changeType="positive"
         />
         <SummaryCard 
           title="Total Wishlists" 
-          value={formatNumber(summaryData.totalWishlists)} 
+          value={formatNumber(summaryData?.totalWishlists || 0)} 
           icon={Heart}
           change={8.3}
           changeType="positive"
         />
         <SummaryCard 
           title="Total Purchases" 
-          value={formatNumber(summaryData.totalPurchases)} 
+          value={formatNumber(summaryData?.totalPurchases || 0)} 
           icon={ShoppingBag}
           change={5.2}
           changeType="positive"
         />
         <SummaryCard 
           title="Projected Revenue" 
-          value={`₹${formatNumber(summaryData.projectedRevenue)}`} 
+          value={`₹${formatNumber(summaryData?.projectedRevenue || 0)}`} 
           icon={DollarSign}
           change={9.7}
           changeType="positive"
         />
       </div>
       
+      {/* Tabs for Charts and Insights */}
       <Tabs defaultValue="graphs" className="space-y-4">
         <TabsList>
           <TabsTrigger value="graphs" className="flex items-center gap-2">
@@ -455,6 +474,7 @@ export const AnalyticsTab = () => {
           </TabsTrigger>
         </TabsList>
         
+        {/* Charts Tab */}
         <TabsContent value="graphs" className="space-y-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card>
@@ -468,7 +488,11 @@ export const AnalyticsTab = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <ViewsBarGraph data={viewsData} isLoading={isLoading} />
+                <ViewsBarGraph 
+                  data={viewsData || []} 
+                  isLoading={isLoading} 
+                  timeRange={timeRange}
+                />
               </CardContent>
             </Card>
             
@@ -483,7 +507,7 @@ export const AnalyticsTab = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <WishlistPieChart data={wishlistPurchaseData} isLoading={isLoading} />
+                <WishlistPieChart data={wishlistPurchaseData || {}} isLoading={isLoading} />
               </CardContent>
             </Card>
             
@@ -498,7 +522,11 @@ export const AnalyticsTab = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <RevenueLineGraph data={revenueData} isLoading={isLoading} />
+                <RevenueLineGraph 
+                  data={revenueData || []} 
+                  isLoading={isLoading} 
+                  timeRange={timeRange}
+                />
               </CardContent>
             </Card>
             
@@ -513,17 +541,18 @@ export const AnalyticsTab = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <EngagementHeatmap data={engagementData} isLoading={isLoading} />
+                <EngagementHeatmap data={engagementData || []} isLoading={isLoading} />
               </CardContent>
             </Card>
           </div>
         </TabsContent>
         
+        {/* Engagement Tab */}
         <TabsContent value="engagement" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <ConversionRate data={conversionData} isLoading={isLoading} />
-            <DropOffRate data={conversionData} isLoading={isLoading} />
-            <BestPostingTimes data={engagementData} isLoading={isLoading} />
+            <ConversionRate data={conversionData || {}} isLoading={isLoading} />
+            <DropOffRate data={conversionData || {}} isLoading={isLoading} />
+            <BestPostingTimes data={engagementData || []} isLoading={isLoading} />
           </div>
           
           <Card>
@@ -562,7 +591,7 @@ export const AnalyticsTab = () => {
                   Conversion Opportunity
                 </h3>
                 <p className="mt-2 text-muted-foreground">
-                  You have <span className="text-red-500 font-medium">683 users</span> who added products to their wishlist but haven't purchased yet. 
+                  You have <span className="text-red-500 font-medium">{summaryData?.totalWishlists - summaryData?.totalPurchases || 0} users</span> who added products to their wishlist but haven't purchased yet. 
                   Consider sending a limited-time discount offer to convert these potential customers.
                 </p>
               </div>
@@ -571,6 +600,7 @@ export const AnalyticsTab = () => {
         </TabsContent>
       </Tabs>
       
+      {/* LiveUpdate Component */}
       <div className="flex justify-end">
         <LiveUpdate lastUpdate={lastUpdate} onRefresh={handleRefresh} />
       </div>

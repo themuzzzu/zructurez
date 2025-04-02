@@ -7,6 +7,7 @@ import { Card } from "../ui/card";
 import { Separator } from "../ui/separator";
 import { Loader2 } from "lucide-react";
 
+// This tab has been renamed from "Analytics" to "Testing"
 export const TestingTab = () => {
   const { user } = useAuth();
   const { data: businessAnalytics, isLoading, refetch } = useBusinessAnalytics(user?.id);
