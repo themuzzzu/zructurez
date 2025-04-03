@@ -23,7 +23,7 @@ export const ProductsGrid = ({
   const getGridClasses = () => {
     switch (layout) {
       case "grid4x4":
-        return "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-3 md:gap-4";
+        return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-3 md:gap-4";
       case "grid2x2":
         return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-3 sm:gap-4";
       case "list":
@@ -31,7 +31,7 @@ export const ProductsGrid = ({
       case "grid3x3":
         return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4";
       default:
-        return "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4";
+        return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4";
     }
   };
   

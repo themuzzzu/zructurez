@@ -67,7 +67,7 @@ export const ProductCard = ({ product, layout = "grid4x4", sponsored = false }: 
           </Badge>
         )}
         
-        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="absolute top-2 right-2">
           <LikeProvider>
             <ProductLikeButton productId={product.id} />
           </LikeProvider>

@@ -49,7 +49,7 @@ export const RecommendedProducts = ({ gridLayout = "grid4x4" }: RecommendedProdu
           <ThumbsUp className="h-5 w-5 text-green-500" />
           Recommended For You
         </h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 px-1">
           {[1, 2, 3, 4].map((i) => (
             <Card key={i} className="overflow-hidden">
               <Skeleton className="h-48 w-full" />
@@ -83,7 +83,7 @@ export const RecommendedProducts = ({ gridLayout = "grid4x4" }: RecommendedProdu
           onClick={() => scroll('left')}
           size="icon"
           variant="ghost" 
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 dark:bg-black/50 rounded-full opacity-70 hover:opacity-100 shadow-md hidden md:flex"
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 dark:bg-black/50 rounded-full opacity-70 hover:opacity-100 shadow-md hidden sm:flex"
         >
           <ChevronLeft />
         </Button>
@@ -95,7 +95,7 @@ export const RecommendedProducts = ({ gridLayout = "grid4x4" }: RecommendedProdu
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {products.map((product) => (
-            <div key={product.id} className="min-w-[250px] sm:min-w-[280px] w-[70vw] max-w-[320px] flex-shrink-0 snap-start">
+            <div key={product.id} className="min-w-[160px] sm:min-w-[220px] md:min-w-[250px] w-[40vw] sm:w-[35vw] md:w-[30vw] lg:w-[25vw] max-w-[320px] flex-shrink-0 snap-start">
               <div className="relative h-full">
                 <ProductCard 
                   product={product}
@@ -111,7 +111,7 @@ export const RecommendedProducts = ({ gridLayout = "grid4x4" }: RecommendedProdu
           onClick={() => scroll('right')}
           size="icon"
           variant="ghost" 
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 dark:bg-black/50 rounded-full opacity-70 hover:opacity-100 shadow-md hidden md:flex"
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 dark:bg-black/50 rounded-full opacity-70 hover:opacity-100 shadow-md hidden sm:flex"
         >
           <ChevronRight />
         </Button>
