@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button, } from "@/components/ui/button";
 import { Plus, Phone } from "lucide-react";
@@ -19,6 +18,7 @@ import { TopServices } from "@/components/service-marketplace/TopServices";
 import { ServiceIconGrid } from "@/components/service-marketplace/ServiceIconGrid";
 import { SearchInput } from "@/components/SearchInput";
 import { ServiceBannerAd } from "@/components/ads/ServiceBannerAd";
+import { ServiceRankings } from "@/components/rankings/ServiceRankings";
 
 export default function Services() {
   const [services, setServices] = useState([]);
@@ -161,6 +161,11 @@ export default function Services() {
         {/* Trending Services */}
         <div className="mb-8">
           <TrendingServices />
+        </div>
+        
+        {/* Rankings - Added new section */}
+        <div className="mb-8">
+          <ServiceRankings />
         </div>
 
         {/* Top Services */}

@@ -11,6 +11,7 @@ import { FlashSale } from "@/components/marketplace/FlashSale";
 import { CategoryFeatured } from "@/components/marketplace/CategoryFeatured";
 import { CategoryNavigationBar } from "@/components/marketplace/CategoryNavigationBar";
 import { MarketplaceBanner } from "@/components/marketplace/MarketplaceBanner";
+import { ProductRankings } from "@/components/rankings/ProductRankings";
 
 interface BrowseTabContentProps {
   searchResults?: any[];
@@ -76,7 +77,7 @@ export const BrowseTabContent = ({
         />
       </div>
       
-      {/* Sponsored Products */}
+      {/* Sponsored Products - Renamed from "Suggested for You" */}
       <SponsoredProducts />
       
       {/* Top Deals */}
@@ -87,6 +88,11 @@ export const BrowseTabContent = ({
       
       {/* Trending Products */}
       <TrendingProducts />
+      
+      {/* Rankings - Added new section */}
+      <div className="mb-8">
+        <ProductRankings />
+      </div>
       
       {/* Personalized Recommendations */}
       <PersonalizedRecommendations />

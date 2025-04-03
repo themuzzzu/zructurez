@@ -12,6 +12,7 @@ import { RecommendedProducts } from "@/components/marketplace/RecommendedProduct
 import { PersonalizedRecommendations } from "@/components/marketplace/PersonalizedRecommendations";
 import { TopProducts } from "@/components/recommendations/TopProducts";
 import { CategoryIconGrid } from "@/components/marketplace/CategoryIconGrid";
+import { ProductRankings } from "@/components/rankings/ProductRankings";
 
 // Import from correct location - make sure components exist at these paths
 import { BrowseTabContent } from "@/pages/marketplace/BrowseTabContent";
@@ -137,6 +138,11 @@ const OptimizedMarketplace = () => {
       {/* Trending Products */}
       <div className="mb-8">
         <TrendingProducts />
+      </div>
+      
+      {/* Product Rankings - Added new section */}
+      <div className="mb-8">
+        <ProductRankings />
       </div>
       
       {/* Top Products - renamed from SponsoredRecommendations */}

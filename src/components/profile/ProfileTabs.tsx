@@ -9,6 +9,7 @@ import { LikedBusinessesTab } from "./LikedBusinessesTab";
 import { SubscribedBusinessesTab } from "./SubscribedBusinessesTab";
 import { PricingSection } from "./PricingSection";
 import { BadgeDollarSign } from "lucide-react";
+import { BusinessRankings } from "@/components/rankings/BusinessRankings";
 
 interface ProfileTabsProps {
   profileId?: string;
@@ -47,6 +48,9 @@ export const ProfileTabs = ({ profileId }: ProfileTabsProps) => {
 
       <TabsContent value="businesses">
         <BusinessesTab profileId={profileId} />
+        
+        {/* Add the BusinessRankings component */}
+        {!profileId && <BusinessRankings />}
       </TabsContent>
 
       <TabsContent value="followers">
