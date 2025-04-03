@@ -6,12 +6,12 @@ import { BannerCarousel } from '@/components/marketplace/BannerCarousel';
 import { CategorySubcategoryGrid } from '@/components/marketplace/CategorySubcategoryGrid';
 import { ShoppingSection } from '@/components/ShoppingSection';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
-import { Home } from 'lucide-react';
+import { Home, ChevronRight } from 'lucide-react';
 import { SponsoredProducts } from '@/components/marketplace/SponsoredProducts';
 import { supabase } from '@/integrations/supabase/client';
-import { CategoryWithSubcategories } from '@/components/marketplace/CategoryWithSubcategories';
 import { ProductsGrid } from '@/components/products/ProductsGrid';
 import { Skeleton } from '@/components/ui/skeleton';
+import { motion } from 'framer-motion';
 
 const CategoryPage = () => {
   const { categoryId, subcategoryId } = useParams();
@@ -88,12 +88,30 @@ const CategoryPage = () => {
           subcategories: getDefaultSubcategories()
         });
       } finally {
-        setIsLoading(false);
+        // Add a small delay to prevent flashing on fast connections
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 300);
       }
     };
     
     fetchCategoryData();
   }, [categoryId, formattedCategoryName]);
+  
+  const containerAnimation = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemAnimation = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 }
+  };
   
   if (isLoading) {
     return (
@@ -120,67 +138,75 @@ const CategoryPage = () => {
   
   return (
     <Layout>
-      <div className="container max-w-[1400px] mx-auto px-4 py-6">
+      <motion.div 
+        initial="hidden" 
+        animate="show" 
+        variants={containerAnimation}
+        className="container max-w-[1400px] mx-auto px-4 py-6"
+      >
         {/* Breadcrumb navigation */}
-        <Breadcrumb className="mb-4">
-          <BreadcrumbItem>
-            <BreadcrumbLink onClick={() => navigate('/')}>
-              <Home className="h-4 w-4 mr-1" />
-              Home
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbLink onClick={() => navigate('/marketplace')}>
-              Marketplace
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbLink isCurrentPage>
-              {formattedCategoryName}
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          {subcategoryId && (
-            <>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink isCurrentPage>
-                  {subcategoryId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-            </>
-          )}
-        </Breadcrumb>
+        <motion.div variants={itemAnimation}>
+          <Breadcrumb className="mb-4">
+            <BreadcrumbItem>
+              <BreadcrumbLink onClick={() => navigate('/')}>
+                <Home className="h-4 w-4 mr-1" />
+                Home
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink onClick={() => navigate('/marketplace')}>
+                Marketplace
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink isCurrentPage>
+                {formattedCategoryName}
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            {subcategoryId && (
+              <>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink isCurrentPage>
+                    {subcategoryId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+              </>
+            )}
+          </Breadcrumb>
+        </motion.div>
         
-        <h1 className="text-3xl font-bold mb-6">{formattedCategoryName}</h1>
+        <motion.h1 variants={itemAnimation} className="text-3xl font-bold mb-6">{formattedCategoryName}</motion.h1>
         
         {/* Banner ad for this category */}
-        <div className="mb-6">
+        <motion.div variants={itemAnimation} className="mb-6">
           <BannerCarousel />
-        </div>
+        </motion.div>
         
         {/* Subcategories */}
-        <div className="mb-8">
+        <motion.div variants={itemAnimation} className="mb-8">
           <h2 className="text-xl font-bold mb-4">Browse {formattedCategoryName}</h2>
           <CategorySubcategoryGrid onCategorySelect={(category, subcategory) => {
             navigate(`/marketplace/category/${category}${subcategory ? `/${subcategory}` : ''}`);
           }} />
-        </div>
+        </motion.div>
         
         {/* Sponsored Products for this category */}
-        <div className="mb-8">
+        <motion.div variants={itemAnimation} className="mb-8">
           <SponsoredProducts />
-        </div>
+        </motion.div>
         
         {/* Category Products */}
-        <div className="mb-8">
+        <motion.div variants={itemAnimation} className="mb-8">
           <ShoppingSection 
             selectedCategory={categoryId}
+            searchQuery=""
             title={`${formattedCategoryName} Products`}
           />
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </Layout>
   );
 };

@@ -1,10 +1,15 @@
 
+import { useState, useEffect } from "react";
 import { ProductCard } from "./ProductCard";
 import { GridLayoutType } from "./types/layouts";
 import { Product } from "@/types/product";
 import { Spinner } from "@/components/common/Spinner";
 import { EmptySearchResults } from "@/components/marketplace/EmptySearchResults";
 import { Button } from "@/components/ui/button";
+import { Grid3X3, Grid2X2, LayoutList } from "lucide-react";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { motion, AnimatePresence } from "framer-motion";
+import { ShoppingCardSkeleton } from "@/components/ShoppingCardSkeleton";
 
 export interface ProductsGridProps {
   products: Product[] | any[];
@@ -13,6 +18,9 @@ export interface ProductsGridProps {
   onOpenAddProductDialog?: () => void;
   searchQuery?: string;
   onLayoutChange?: (layout: GridLayoutType) => void;
+  hasMore?: boolean;
+  onLoadMore?: () => void;
+  loadMoreRef?: React.RefObject<HTMLDivElement>;
 }
 
 export const ProductsGrid = ({ 
@@ -21,12 +29,72 @@ export const ProductsGrid = ({
   isLoading = false,
   onOpenAddProductDialog,
   searchQuery,
-  onLayoutChange
+  onLayoutChange,
+  hasMore,
+  onLoadMore,
+  loadMoreRef
 }: ProductsGridProps) => {
-  if (isLoading) {
+  const [visibleProducts, setVisibleProducts] = useState<any[]>([]);
+  const [currentLayout, setCurrentLayout] = useState<GridLayoutType>(layout);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  
+  useEffect(() => {
+    if (products && products.length > 0) {
+      setVisibleProducts(products);
+      
+      // Set a small timeout to simulate products loading for a smoother UX
+      const timer = setTimeout(() => {
+        setIsInitialLoad(false);
+      }, 300);
+      
+      return () => clearTimeout(timer);
+    } else {
+      setIsInitialLoad(false);
+    }
+  }, [products]);
+  
+  useEffect(() => {
+    setCurrentLayout(layout);
+  }, [layout]);
+  
+  const handleLayoutChange = (value: string) => {
+    if (value === "grid2x2" || value === "grid3x3" || value === "grid4x4" || value === "list") {
+      setCurrentLayout(value as GridLayoutType);
+      if (onLayoutChange) {
+        onLayoutChange(value as GridLayoutType);
+      }
+    }
+  };
+  
+  if (isLoading || isInitialLoad) {
+    const gridLayoutClass = {
+      grid2x2: "grid-cols-1 sm:grid-cols-2 gap-4",
+      grid3x3: "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4",
+      grid4x4: "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4",
+      list: "grid-cols-1 gap-3"
+    };
+    
     return (
-      <div className="flex justify-center items-center py-12">
-        <Spinner size="lg" />
+      <div>
+        <div className="flex justify-end mb-3 mr-1">
+          <ToggleGroup type="single" value={currentLayout} onValueChange={handleLayoutChange}>
+            <ToggleGroupItem value="grid4x4">
+              <Grid3X3 className="h-4 w-4" />
+            </ToggleGroupItem>
+            <ToggleGroupItem value="grid2x2">
+              <Grid2X2 className="h-4 w-4" />
+            </ToggleGroupItem>
+            <ToggleGroupItem value="list">
+              <LayoutList className="h-4 w-4" />
+            </ToggleGroupItem>
+          </ToggleGroup>
+        </div>
+        
+        <div className={`grid ${gridLayoutClass[currentLayout]} animate-pulse`}>
+          {Array(8).fill(0).map((_, i) => (
+            <ShoppingCardSkeleton key={i} />
+          ))}
+        </div>
       </div>
     );
   }
@@ -52,14 +120,54 @@ export const ProductsGrid = ({
   };
 
   return (
-    <div className={`grid ${gridLayoutClass[layout]}`}>
-      {products.map((product) => (
-        <ProductCard 
-          key={product.id} 
-          product={product} 
-          layout={layout}
-        />
-      ))}
+    <div>
+      <div className="flex justify-end mb-3 mr-1">
+        <ToggleGroup type="single" value={currentLayout} onValueChange={handleLayoutChange}>
+          <ToggleGroupItem value="grid4x4">
+            <Grid3X3 className="h-4 w-4" />
+          </ToggleGroupItem>
+          <ToggleGroupItem value="grid2x2">
+            <Grid2X2 className="h-4 w-4" />
+          </ToggleGroupItem>
+          <ToggleGroupItem value="list">
+            <LayoutList className="h-4 w-4" />
+          </ToggleGroupItem>
+        </ToggleGroup>
+      </div>
+      
+      <AnimatePresence mode="wait">
+        <motion.div 
+          key={currentLayout}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className={`grid ${gridLayoutClass[currentLayout]}`}
+        >
+          {visibleProducts.map((product, index) => (
+            <motion.div
+              key={product.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: index * 0.05 }}
+              layout
+            >
+              <ProductCard 
+                key={product.id} 
+                product={product} 
+                layout={currentLayout}
+              />
+            </motion.div>
+          ))}
+        </motion.div>
+      </AnimatePresence>
+      
+      {hasMore && (
+        <div className="flex justify-center mt-8">
+          <Button onClick={onLoadMore} variant="outline" ref={loadMoreRef}>
+            {isLoading ? <Spinner size="sm" /> : "Load More"}
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
