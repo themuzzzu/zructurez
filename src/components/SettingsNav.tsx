@@ -1,6 +1,11 @@
 
 import { Button } from "@/components/ui/button";
-import { Settings, Bell, Shield, User, Package, Briefcase, Wrench, Megaphone, ShoppingBag, Calendar, BarChart, Activity, Heart, BadgeDollarSign } from "lucide-react";
+import { 
+  Settings, Bell, Shield, User, Package, 
+  Briefcase, Wrench, Megaphone, ShoppingBag, 
+  Calendar, BarChart, Activity, Heart, BadgeDollarSign,
+  DollarSign
+} from "lucide-react";
 
 interface SettingsNavProps {
   activeTab: string;
@@ -31,7 +36,7 @@ export const SettingsNav = ({ activeTab, setActiveTab }: SettingsNavProps) => {
         <Button
           key={id}
           variant={activeTab === id ? "default" : "ghost"}
-          className="w-full justify-start"
+          className={`w-full justify-start ${activeTab === id ? "bg-primary" : ""}`}
           onClick={() => setActiveTab(id)}
         >
           <Icon className="mr-2 h-4 w-4" />
