@@ -186,6 +186,7 @@ export const BusinessCategoryNavBar = () => {
   }, []);
 
   const handleCategoryClick = (categoryId: string) => {
+    // Toggle active category
     if (activeCategory === categoryId) {
       setActiveCategory(null);
     } else {
@@ -196,6 +197,12 @@ export const BusinessCategoryNavBar = () => {
   const handleSubCategoryClick = (categoryId: string, subCategoryId: string) => {
     navigate(`/businesses?category=${categoryId}&subcategory=${subCategoryId}`);
     setActiveCategory(null);
+  };
+
+  // Navigate to category page when clicking "View all" button
+  const handleViewAllClick = (categoryId: string, event: React.MouseEvent) => {
+    event.stopPropagation();
+    navigate(`/businesses?category=${categoryId}`);
   };
 
   return (
@@ -225,19 +232,33 @@ export const BusinessCategoryNavBar = () => {
                 </span>
               </button>
 
-              {/* Display Dropdown Menu if category has subcategories */}
+              {/* Improved dropdown menu with better visibility and interaction */}
               {category.subCategories && activeCategory === category.id && (
-                <div ref={dropdownRef} className="absolute z-50 left-0 mt-1 bg-white dark:bg-zinc-800 shadow-lg border border-gray-200 dark:border-zinc-700 rounded-md min-w-[200px]">
+                <div 
+                  ref={dropdownRef} 
+                  className="absolute z-50 left-0 mt-1 bg-white dark:bg-zinc-800 shadow-lg border border-gray-200 dark:border-zinc-700 rounded-md min-w-[250px] max-h-[400px] overflow-y-auto"
+                >
                   <div className="py-2">
-                    {category.subCategories.map((subCategory) => (
-                      <button
-                        key={subCategory.id}
-                        className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-zinc-700 text-sm"
-                        onClick={() => handleSubCategoryClick(category.id, subCategory.id)}
+                    <div className="sticky top-0 bg-gray-50 dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-700 p-2 flex justify-between items-center">
+                      <h3 className="font-semibold text-sm">{category.name}</h3>
+                      <button 
+                        className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                        onClick={(e) => handleViewAllClick(category.id, e)}
                       >
-                        {subCategory.name}
+                        View all
                       </button>
-                    ))}
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 p-2">
+                      {category.subCategories.map((subCategory) => (
+                        <button
+                          key={subCategory.id}
+                          className="text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-zinc-700 text-sm rounded-md"
+                          onClick={() => handleSubCategoryClick(category.id, subCategory.id)}
+                        >
+                          {subCategory.name}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}
