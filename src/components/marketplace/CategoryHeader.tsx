@@ -3,12 +3,21 @@ import React from 'react';
 import { ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-interface CategoryHeaderProps {
+export interface CategoryHeaderProps {
   categoryName: string;
   subcategory?: string;
+  isLoading?: boolean;
+  onLayoutChange?: (newLayout: "list" | "grid4x4" | "grid3x3" | "grid2x2") => void;
+  onSearch?: (searchTerm: string) => void;
 }
 
-export const CategoryHeader = ({ categoryName, subcategory }: CategoryHeaderProps) => {
+export const CategoryHeader = ({ 
+  categoryName, 
+  subcategory,
+  isLoading,
+  onLayoutChange,
+  onSearch 
+}: CategoryHeaderProps) => {
   return (
     <div className="mb-6">
       <div className="flex items-center text-sm text-muted-foreground mb-2">

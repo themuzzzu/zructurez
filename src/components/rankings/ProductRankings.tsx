@@ -20,7 +20,7 @@ export const ProductRankings = () => {
             // Get products with most wishlists
             const { data: wishlistData, error: wishlistError } = await supabase
               .from('wishlists')
-              .select('product_id, count(*)')
+              .select('product_id, count')
               .order('count', { ascending: false })
               .limit(8);
               
@@ -42,7 +42,7 @@ export const ProductRankings = () => {
             // Get products with most sales
             const { data: salesData, error: salesError } = await supabase
               .from('orders')
-              .select('product_id, count(*)')
+              .select('product_id, count')
               .order('count', { ascending: false })
               .limit(8);
               

@@ -17,6 +17,7 @@ const mockAnalyticsSummary: AnalyticsSummary = {
   totalViews: 2457,
   totalLikes: 184,
   totalShares: 52,
+  totalClicks: 127,
   conversionRate: 3.2,
   period: "Last 30 days"
 };
