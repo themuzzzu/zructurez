@@ -21,6 +21,7 @@ export function memoWithTracking<P extends object>(
       }
     });
     
+    // Fixed JSX syntax issue here
     return <Component {...props} />;
   };
   
