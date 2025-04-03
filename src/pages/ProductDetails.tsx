@@ -55,7 +55,7 @@ const incrementViews = async (tableName: string, id: string) => {
   try {
     const { error } = await supabase.rpc('increment_views', {
       table_name: tableName,
-      row_id: id
+      record_id: id
     });
     
     if (error) throw error;
@@ -703,7 +703,7 @@ const ProductDetails = () => {
 
           {/* People also bought section */}
           {relatedProducts.length > 0 && (
-            <div className="mt-12">
+            <div className="mt-12 max-w-[1400px] mx-auto px-4">
               <Separator className="my-8" />
               <h2 className="text-xl font-semibold text-foreground mb-6">People Also Bought</h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
