@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { ProductCard } from "./ProductCard";
 import { GridLayoutType } from "./types/layouts";
@@ -44,7 +43,6 @@ export const ProductsGrid = ({
     if (products && products.length > 0) {
       setVisibleProducts(products);
       
-      // Faster loading time - reduced from 300ms to 150ms
       const timer = setTimeout(() => {
         setIsInitialLoad(false);
       }, 150);
@@ -59,7 +57,6 @@ export const ProductsGrid = ({
     setCurrentLayout(layout);
   }, [layout]);
   
-  // Loading animation effect
   useEffect(() => {
     if (isLoading || isInitialLoad) {
       const interval = setInterval(() => {
@@ -193,8 +190,8 @@ export const ProductsGrid = ({
       </AnimatePresence>
       
       {hasMore && (
-        <div className="flex justify-center mt-8">
-          <Button onClick={onLoadMore} variant="outline" ref={loadMoreRef}>
+        <div className="flex justify-center mt-8" ref={loadMoreRef}>
+          <Button onClick={onLoadMore} variant="outline">
             {isLoading ? <Spinner size="sm" /> : "Load More"}
           </Button>
         </div>

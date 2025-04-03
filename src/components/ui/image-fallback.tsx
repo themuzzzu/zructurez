@@ -7,6 +7,7 @@ export interface ImageFallbackProps {
   alt?: string;
   fallbackSrc?: string;
   className?: string;
+  fallbackClassName?: string;
   onClick?: () => void;
 }
 
@@ -15,6 +16,7 @@ export const ImageFallback = ({
   alt = "Image",
   fallbackSrc = "/placeholders/image-placeholder.jpg",
   className,
+  fallbackClassName,
   onClick,
 }: ImageFallbackProps) => {
   const [error, setError] = useState(false);
@@ -23,7 +25,7 @@ export const ImageFallback = ({
     <img
       src={error ? fallbackSrc : src}
       alt={alt}
-      className={cn(className)}
+      className={cn(className, error && fallbackClassName)}
       onError={() => setError(true)}
       onClick={onClick}
     />

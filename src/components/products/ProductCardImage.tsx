@@ -154,9 +154,9 @@ export const ProductCardImage = ({
         {/* Fallback for failed images */}
         {imageFailed && (
           <ImageFallback 
+            src={fallbackSrc || "/placeholders/image-placeholder.jpg"}
             alt={title} 
             className="w-full h-full" 
-            fallbackClassName="p-4"
           />
         )}
       </AspectRatio>

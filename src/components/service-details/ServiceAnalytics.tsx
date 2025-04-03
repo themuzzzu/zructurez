@@ -1,12 +1,11 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Loader2, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useUserSubscription } from "@/hooks/useUserSubscription";
 
 interface ServiceAnalyticsProps {
   serviceId: string;
@@ -19,22 +18,7 @@ export const ServiceAnalytics = ({ serviceId, isOwner }: ServiceAnalyticsProps) 
   const navigate = useNavigate();
   
   // Get the user's current plan
-  const { data: userPlan, isLoading: isPlanLoading } = useQuery({
-    queryKey: ['user-plan'],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return null;
-      
-      const { data } = await supabase
-        .from('user_subscriptions')
-        .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
-      
-      return data;
-    },
-    enabled: isOwner
-  });
+  const { data: userPlan, isLoading: isPlanLoading } = useUserSubscription();
   
   // Determine plan level (default to "basic" if no plan is found)
   const planLevel = userPlan?.plan_id || "basic";
@@ -42,15 +26,15 @@ export const ServiceAnalytics = ({ serviceId, isOwner }: ServiceAnalyticsProps) 
   // Define which features are available based on plan
   const features = {
     basicAnalytics: true, // Available in all plans
-    contactClicks: ["pro", "pro-plus", "master"].includes(planLevel),
-    bookings: ["pro", "pro-plus", "master"].includes(planLevel),
+    wishlistData: ["pro-plus", "master"].includes(planLevel),
+    purchaseData: ["pro-plus", "master"].includes(planLevel),
     detailedCharts: ["pro-plus", "master"].includes(planLevel),
   };
   
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
-        // Fetch service view data
+        // Simplified analytics fetch
         const { data: serviceData, error: serviceError } = await supabase
           .from('services')
           .select('views')
@@ -59,37 +43,10 @@ export const ServiceAnalytics = ({ serviceId, isOwner }: ServiceAnalyticsProps) 
           
         if (serviceError) throw serviceError;
         
-        let analyticsData: any = {
+        setAnalytics({
           views: serviceData?.views || 0,
           last_updated: new Date().toISOString()
-        };
-        
-        // Only fetch additional data based on plan
-        if (features.contactClicks || features.bookings) {
-          // Count contact clicks
-          if (features.contactClicks) {
-            const { data: contactClicksData, error: contactClicksError } = await supabase
-              .from('search_result_clicks')
-              .select('*')
-              .eq('result_id', serviceId);
-              
-            if (contactClicksError) throw contactClicksError;
-            analyticsData.contact_clicks = contactClicksData ? contactClicksData.length : 0;
-          }
-          
-          // Count bookings
-          if (features.bookings) {
-            const { data: bookingsData, error: bookingsError } = await supabase
-              .from('appointments')
-              .select('*')
-              .eq('service_name', serviceId);
-              
-            if (bookingsError) throw bookingsError;
-            analyticsData.bookings = bookingsData ? bookingsData.length : 0;
-          }
-        }
-        
-        setAnalytics(analyticsData);
+        });
       } catch (error) {
         console.error("Failed to fetch analytics:", error);
       } finally {
@@ -123,8 +80,8 @@ export const ServiceAnalytics = ({ serviceId, isOwner }: ServiceAnalyticsProps) 
   
   // If analytics data is empty or has all zeroes, show placeholder
   const hasData = analytics && (analytics.views > 0 || 
-                              (analytics.bookings && analytics.bookings > 0) || 
-                              (analytics.contact_clicks && analytics.contact_clicks > 0));
+                              (analytics.wishlists && analytics.wishlists > 0) || 
+                              (analytics.purchases && analytics.purchases > 0));
   
   if (!hasData) {
     return (
@@ -135,7 +92,7 @@ export const ServiceAnalytics = ({ serviceId, isOwner }: ServiceAnalyticsProps) 
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground text-center py-8">
-            Analytics data will appear here as people interact with your service.
+            Analytics data will appear here as people interact with your service listing.
           </p>
         </CardContent>
       </Card>
@@ -149,8 +106,8 @@ export const ServiceAnalytics = ({ serviceId, isOwner }: ServiceAnalyticsProps) 
   // Prepare chart data
   const chartData = [
     { name: 'Page Views', value: analytics.views || 0 },
-    features.contactClicks && { name: 'Contact Clicks', value: analytics.contact_clicks || 0 },
-    features.bookings && { name: 'Bookings', value: analytics.bookings || 0 }
+    features.wishlistData && { name: 'Wishlists', value: analytics.wishlists || 0 },
+    features.purchaseData && { name: 'Purchases', value: analytics.purchases || 0 }
   ].filter(Boolean);
   
   return (
@@ -173,35 +130,35 @@ export const ServiceAnalytics = ({ serviceId, isOwner }: ServiceAnalyticsProps) 
             <p className="text-sm text-muted-foreground">Page Views</p>
           </div>
           
-          {features.contactClicks ? (
+          {features.wishlistData ? (
             <div className="bg-muted/50 p-4 rounded-lg text-center">
-              <h3 className="text-xl font-bold">{analytics.contact_clicks || 0}</h3>
-              <p className="text-sm text-muted-foreground">Contact Clicks</p>
+              <h3 className="text-xl font-bold">{analytics.wishlists || 0}</h3>
+              <p className="text-sm text-muted-foreground">Wishlists</p>
             </div>
           ) : (
             <div className="bg-muted/50 p-4 rounded-lg text-center relative overflow-hidden">
               <div className="absolute inset-0 bg-background/80 backdrop-blur-[1px] z-10 flex flex-col items-center justify-center">
                 <Lock className="h-4 w-4 text-muted-foreground mb-1" />
-                <p className="text-xs font-medium">Pro Plan Required</p>
+                <p className="text-xs font-medium">Pro+ Plan Required</p>
               </div>
               <h3 className="text-xl font-bold">-</h3>
-              <p className="text-sm text-muted-foreground">Contact Clicks</p>
+              <p className="text-sm text-muted-foreground">Wishlists</p>
             </div>
           )}
           
-          {features.bookings ? (
+          {features.purchaseData ? (
             <div className="bg-muted/50 p-4 rounded-lg text-center">
-              <h3 className="text-xl font-bold">{analytics.bookings || 0}</h3>
-              <p className="text-sm text-muted-foreground">Bookings</p>
+              <h3 className="text-xl font-bold">{analytics.purchases || 0}</h3>
+              <p className="text-sm text-muted-foreground">Purchases</p>
             </div>
           ) : (
             <div className="bg-muted/50 p-4 rounded-lg text-center relative overflow-hidden">
               <div className="absolute inset-0 bg-background/80 backdrop-blur-[1px] z-10 flex flex-col items-center justify-center">
                 <Lock className="h-4 w-4 text-muted-foreground mb-1" />
-                <p className="text-xs font-medium">Pro Plan Required</p>
+                <p className="text-xs font-medium">Pro+ Plan Required</p>
               </div>
               <h3 className="text-xl font-bold">-</h3>
-              <p className="text-sm text-muted-foreground">Bookings</p>
+              <p className="text-sm text-muted-foreground">Purchases</p>
             </div>
           )}
         </div>
@@ -237,7 +194,7 @@ export const ServiceAnalytics = ({ serviceId, isOwner }: ServiceAnalyticsProps) 
               <div>
                 <h4 className="font-medium">Want more insights?</h4>
                 <p className="text-sm text-muted-foreground">
-                  Upgrade to Pro or higher to see contact clicks, bookings, and detailed analytics.
+                  Upgrade to Pro+ or Master to see wishlist data, purchase history, and detailed analytics.
                 </p>
               </div>
               <Button size="sm" onClick={handleUpgradeClick}>View Plans</Button>

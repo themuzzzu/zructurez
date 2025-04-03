@@ -5,21 +5,22 @@ import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge"; 
 import { Clock } from "lucide-react";
 
-interface BusinessCardProps {
+export interface BusinessCardProps {
   id: string;
   name: string;
   category: string;
   description: string;
-  image: string;
+  image?: string;
+  image_url?: string; // Added this to support both image and image_url
   rating: number;
   reviews: number;
   location: string;
   contact: string;
   hours: string;
-  verified: boolean;
+  verified?: boolean;
   appointment_price?: number;
   consultation_price?: number;
-  is_open: boolean;
+  is_open?: boolean;
   wait_time?: string;
   closure_reason?: string;
 }
@@ -30,6 +31,7 @@ export const BusinessCard = ({
   category,
   description,
   image,
+  image_url,
   rating,
   reviews,
   location,
@@ -57,7 +59,7 @@ export const BusinessCard = ({
   
   return (
     <div className="border rounded-lg shadow-md overflow-hidden">
-      <img src={image} alt={name} className="w-full h-48 object-cover" />
+      <img src={image_url || image} alt={name} className="w-full h-48 object-cover" />
       <div className="p-4">
         <div className="flex items-center justify-between mb-1">
           <h3 className="text-lg font-semibold">{name}</h3>
