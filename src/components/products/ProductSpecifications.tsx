@@ -1,48 +1,105 @@
 
-interface ProductSpecificationsProps {
-  product: any;
-}
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
-export const ProductSpecifications = ({ product }: ProductSpecificationsProps) => {
-  // Group specifications by category
-  // In a real app, this would come from the database
-  const specifications = {
-    'General': [
-      { name: 'Brand', value: product.brand_name || 'Generic' },
-      { name: 'Model', value: product.model || 'Standard Model' },
-      { name: 'Type', value: product.type || 'Regular' },
-      { name: 'Color', value: product.color || 'Multiple Options' }
-    ],
-    'Physical Specifications': [
-      { name: 'Dimensions', value: product.dimensions || '10 x 5 x 2 cm (approx)' },
-      { name: 'Weight', value: product.weight || '150g (approx)' },
-      { name: 'Material', value: product.material || 'Premium materials' }
-    ],
-    'Packaging Details': [
-      { name: 'Package Contents', value: '1 x Product, User Manual' },
-      { name: 'Box Dimensions', value: '12 x 7 x 4 cm (approx)' }
-    ],
-    'Warranty & Support': [
-      { name: 'Warranty', value: product.warranty || '1 Year Manufacturer Warranty' },
-      { name: 'Support', value: 'Customer Service Available 24/7' }
-    ]
+type ProductProps = {
+  product: {
+    id: string;
+    title: string;
+    price: number;
+    description: string;
+    category?: string;
+    subcategory?: string;
+    brand_name?: string;
+    condition?: string;
+    model?: string;
+    size?: string;
+    stock?: number;
+    [key: string]: any;
   };
+};
 
+export const ProductSpecifications = ({ product }: ProductProps) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  
+  // Generate specifications from product data
+  const generateSpecifications = () => {
+    const specs = [
+      { 
+        category: "General",
+        items: [
+          { name: "Brand", value: product.brand_name || "Not specified" },
+          { name: "Model", value: product.model || "Not specified" },
+          { name: "Type", value: product.subcategory || product.category || "Not specified" },
+          { name: "Condition", value: product.condition || (product.is_used ? "Used" : "New") }
+        ]
+      },
+      {
+        category: "Dimensions",
+        items: [
+          { name: "Size", value: product.size || "Not specified" },
+          { name: "Weight", value: product.weight || "Not specified" }
+        ]
+      }
+    ];
+    
+    // If we have product-specific specs in the data, add them
+    if (product.specifications) {
+      return [...specs, ...product.specifications];
+    }
+    
+    return specs;
+  };
+  
+  const specifications = generateSpecifications();
+  const displaySpecifications = isExpanded 
+    ? specifications 
+    : specifications.slice(0, 2);
+  
   return (
     <div className="space-y-6">
-      {Object.entries(specifications).map(([category, specs]) => (
-        <div key={category}>
-          <h3 className="text-sm font-medium text-muted-foreground mb-2">{category}</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            {specs.map((spec, index) => (
-              <div key={index} className="flex justify-between py-1 border-b border-border">
-                <span className="text-muted-foreground">{spec.name}</span>
-                <span className="font-medium text-foreground">{spec.value}</span>
+      {displaySpecifications.map((specGroup, groupIndex) => (
+        <div key={groupIndex}>
+          <h3 className="font-medium mb-3 text-foreground">{specGroup.category}</h3>
+          <div className="bg-muted rounded-md overflow-hidden">
+            {specGroup.items.map((spec, specIndex) => (
+              <div 
+                key={specIndex} 
+                className={`grid grid-cols-3 p-3 text-sm ${
+                  specIndex % 2 === 0 ? 'bg-muted' : 'bg-muted/50'
+                }`}
+              >
+                <span className="text-muted-foreground col-span-1">{spec.name}</span>
+                <span className="font-medium col-span-2">{spec.value}</span>
               </div>
             ))}
           </div>
         </div>
       ))}
+      
+      {specifications.length > 2 && (
+        <div className="flex justify-center">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="flex items-center gap-1"
+          >
+            {isExpanded ? (
+              <>
+                <ChevronUp className="h-4 w-4" />
+                Show Less
+              </>
+            ) : (
+              <>
+                <ChevronDown className="h-4 w-4" />
+                Show More
+              </>
+            )}
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

@@ -39,10 +39,8 @@ import {
 import { toast } from "sonner";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { incrementViews } from "@/services/postService";
 import { Badge } from "@/components/ui/badge";
 import { Layout } from "@/components/layout/Layout";
-import { getPeopleBoughtTogether } from "@/services/recommendationService";
 import { ProductCard } from "@/components/products/ProductCard";
 import { ProductHighlights } from "@/components/products/ProductHighlights";
 import { ProductSpecifications } from "@/components/products/ProductSpecifications";
@@ -50,6 +48,37 @@ import { ProductOffers } from "@/components/products/ProductOffers";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+
+// Import View Tracking Functions
+const incrementViews = async (tableName: string, id: string) => {
+  try {
+    const { error } = await supabase.rpc('increment_views', {
+      table_name: tableName,
+      row_id: id
+    });
+    
+    if (error) throw error;
+  } catch (error) {
+    console.error('Error incrementing views:', error);
+  }
+};
+
+// Import Recommendations Service
+const getPeopleBoughtTogether = async (productId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .neq('id', productId)
+      .limit(5);
+      
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Error fetching related products:', error);
+    return [];
+  }
+};
 
 const ProductDetails = () => {
   const { id: productId } = useParams();
@@ -193,6 +222,7 @@ const ProductDetails = () => {
 
   // Calculate discount percentage if not provided
   const getDiscountPercentage = () => {
+    if (!product) return 0;
     if (product.discount_percentage) return product.discount_percentage;
     if (product.original_price && product.price) {
       return Math.round(((product.original_price - product.price) / product.original_price) * 100);
