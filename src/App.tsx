@@ -1,90 +1,104 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
 import { Loader2 } from "lucide-react";
+import { queryClient, prefetchCommonQueries } from "@/lib/react-query";
 
-import Index from "@/pages/Index";
-import Auth from "@/pages/Auth";
-import Events from "@/pages/Events";
-import Jobs from "@/pages/Jobs";
-import Marketplace from "@/pages/Marketplace";
-import Business from "@/pages/Business";
-import BusinessDetails from "@/pages/BusinessDetails";
-import ProductDetails from "@/pages/ProductDetails";
-import Services from "@/pages/Services";
-import ServiceDetails from "@/pages/ServiceDetails";
-import Profile from "@/pages/Profile";
-import Settings from "@/pages/Settings";
-import Wishlist from "@/pages/Wishlist";
-import Maps from "@/pages/Maps";
-import Communities from "@/pages/Communities";
-import MessagesPage from "@/pages/messages";
-import Search from "@/pages/search";
-import Orders from "@/pages/orders";
-import Checkout from "@/pages/checkout";
-import NotFound from "@/pages/NotFound";
-import AdDashboard from "@/pages/admin/AdDashboard";
-import AdAnalytics from "@/pages/admin/AdAnalytics";
-import AdPlacement from "@/pages/admin/AdPlacement";
-import AdAuction from "@/pages/admin/AdAuction";
-import Dashboard from "@/pages/dashboard";
-import { BusinessRegistrationForm } from "@/components/business-registration/BusinessRegistrationForm";
+// Always loaded components
+import { LoadingView } from "@/components/LoadingView";
+
+// Lazily loaded components
+const Index = lazy(() => import("@/pages/Index"));
+const Auth = lazy(() => import("@/pages/Auth"));
+const Events = lazy(() => import("@/pages/Events"));
+const Jobs = lazy(() => import("@/pages/Jobs"));
+const Marketplace = lazy(() => import("@/pages/Marketplace"));
+const Business = lazy(() => import("@/pages/Business"));
+const BusinessDetails = lazy(() => import("@/pages/BusinessDetails"));
+const ProductDetails = lazy(() => import("@/pages/ProductDetails"));
+const Services = lazy(() => import("@/pages/Services"));
+const ServiceDetails = lazy(() => import("@/pages/ServiceDetails"));
+const Profile = lazy(() => import("@/pages/Profile"));
+const Settings = lazy(() => import("@/pages/Settings"));
+const Wishlist = lazy(() => import("@/pages/Wishlist"));
+const Maps = lazy(() => import("@/pages/Maps"));
+const Communities = lazy(() => import("@/pages/Communities"));
+const MessagesPage = lazy(() => import("@/pages/messages"));
+const Search = lazy(() => import("@/pages/search"));
+const Orders = lazy(() => import("@/pages/orders"));
+const Checkout = lazy(() => import("@/pages/checkout"));
+const NotFound = lazy(() => import("@/pages/NotFound"));
+const AdDashboard = lazy(() => import("@/pages/admin/AdDashboard"));
+const AdAnalytics = lazy(() => import("@/pages/admin/AdAnalytics"));
+const AdPlacement = lazy(() => import("@/pages/admin/AdPlacement"));
+const AdAuction = lazy(() => import("@/pages/admin/AdAuction"));
+const Dashboard = lazy(() => import("@/pages/dashboard"));
+const BusinessRegistrationForm = lazy(() => import("@/components/business-registration/BusinessRegistrationForm").then(m => ({ default: m.BusinessRegistrationForm })));
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
-  const queryClient = new QueryClient();
   const location = useLocation();
 
   useEffect(() => {
     if (!location.pathname.includes('/auth') && !location.pathname.includes('/wishlist')) {
       sessionStorage.setItem('previousPath', location.pathname + location.search);
     }
+    
+    // Prefetch data for common queries
+    prefetchCommonQueries().catch(console.error);
   }, [location]);
 
-  setTimeout(() => {
-    setIsLoading(false);
-  }, 1500);
+  // Reduce initial loading time
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 800); // Reduced from 1500ms
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="dark" storageKey="lovable-theme">
         <div className={isLoading ? "hidden" : "app"}>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/events" element={<Events />} />
-            <Route path="/jobs" element={<Jobs />} />
-            <Route path="/marketplace" element={<Marketplace />} />
-            <Route path="/marketplace/*" element={<Marketplace />} />
-            <Route path="/products" element={<Marketplace />} /> {/* Added route for products page that will use the Marketplace component */}
-            <Route path="/businesses" element={<Business />} />
-            <Route path="/businesses/:id" element={<BusinessDetails />} />
-            <Route path="/register-business" element={<BusinessRegistrationForm />} />
-            <Route path="/products/:id" element={<ProductDetails />} />
-            <Route path="/product/:id" element={<ProductDetails />} />
-            <Route path="/services" element={<Services />} />
-            <Route path="/services/:id" element={<ServiceDetails />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/profile/:id" element={<Profile />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/wishlist" element={<Wishlist />} />
-            <Route path="/maps" element={<Maps />} />
-            <Route path="/communities" element={<Communities />} />
-            <Route path="/messages/*" element={<MessagesPage />} />
-            <Route path="/messages" element={<MessagesPage />} />
-            <Route path="/search" element={<Search />} />
-            <Route path="/orders" element={<Orders />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/admin/ads" element={<AdDashboard />} />
-            <Route path="/admin/analytics" element={<AdAnalytics />} />
-            <Route path="/admin/placement" element={<AdPlacement />} />
-            <Route path="/admin/auction" element={<AdAuction />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <Suspense fallback={<LoadingView />}>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/events" element={<Events />} />
+              <Route path="/jobs" element={<Jobs />} />
+              <Route path="/marketplace" element={<Marketplace />} />
+              <Route path="/marketplace/*" element={<Marketplace />} />
+              <Route path="/products" element={<Marketplace />} />
+              <Route path="/businesses" element={<Business />} />
+              <Route path="/businesses/:id" element={<BusinessDetails />} />
+              <Route path="/register-business" element={<BusinessRegistrationForm />} />
+              <Route path="/products/:id" element={<ProductDetails />} />
+              <Route path="/product/:id" element={<ProductDetails />} />
+              <Route path="/services" element={<Services />} />
+              <Route path="/services/:id" element={<ServiceDetails />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/profile/:id" element={<Profile />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/wishlist" element={<Wishlist />} />
+              <Route path="/maps" element={<Maps />} />
+              <Route path="/communities" element={<Communities />} />
+              <Route path="/messages/*" element={<MessagesPage />} />
+              <Route path="/messages" element={<MessagesPage />} />
+              <Route path="/search" element={<Search />} />
+              <Route path="/orders" element={<Orders />} />
+              <Route path="/checkout" element={<Checkout />} />
+              <Route path="/admin/ads" element={<AdDashboard />} />
+              <Route path="/admin/analytics" element={<AdAnalytics />} />
+              <Route path="/admin/placement" element={<AdPlacement />} />
+              <Route path="/admin/auction" element={<AdAuction />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
         </div>
         {isLoading && (
           <div className="flex flex-col space-y-4 items-center justify-center min-h-screen">
