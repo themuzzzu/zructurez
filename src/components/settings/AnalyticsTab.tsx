@@ -1,102 +1,62 @@
 
-import { useState, useEffect } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { 
-  Card, 
-  CardContent, 
-  CardHeader, 
-  CardTitle, 
-  CardDescription 
-} from "@/components/ui/card";
-import { 
-  Tabs, 
-  TabsContent, 
-  TabsList, 
-  TabsTrigger 
-} from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { 
-  DownloadCloud, 
-  TrendingUp, 
-  Eye, 
-  Heart, 
-  ShoppingBag, 
-  DollarSign, 
-  RefreshCw, 
-  BarChart2, 
-  PieChart, 
-  LineChart, 
-  Activity,
-  Clock,
-  Lock
-} from "lucide-react";
-import { toast } from "sonner";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useAnalyticsSummary } from "@/hooks/analytics/useAnalyticsSummary";
-import { useWishlistPurchase } from "@/hooks/analytics/useWishlistPurchase";
-import { useRevenueData } from "@/hooks/analytics/useRevenueData";
-import { useEngagementData } from "@/hooks/analytics/useEngagementData";
-import { useConversionData } from "@/hooks/analytics/useConversionData";
-import { useLiveUpdates } from "@/hooks/analytics/useLiveUpdates";
-import { useViewsData } from "@/hooks/analytics/useViewsData";
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { 
+  LineChart, 
+  Line, 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Legend
+} from "recharts";
+import { 
+  Calendar, 
+  Lock, 
+  PieChart as PieChartIcon, 
+  BarChart2, 
+  TrendingUp, 
+  Eye, 
+  Heart,
+  Share2,
+  ArrowUpRight 
+} from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { AnalyticsSummary } from "@/types/subscription";
 
-// Import analytics components
-import { SummaryCard } from "../analytics/SummaryCard";
-import { ViewsBarGraph } from "../analytics/ViewsBarGraph";
-import { WishlistPieChart } from "../analytics/WishlistPieChart";
-import { RevenueLineGraph } from "../analytics/RevenueLineGraph";
-import { EngagementHeatmap } from "../analytics/EngagementHeatmap";
-import { ConversionRate } from "../analytics/ConversionRate";
-import { DropOffRate } from "../analytics/DropOffRate";
-import { BestPostingTimes } from "../analytics/BestPostingTimes";
-import { ExportReport } from "../analytics/ExportReport";
-import { LiveUpdate } from "../analytics/LiveUpdate";
-import { AIInsights } from "../analytics/AIInsights";
-import { Badge } from "@/components/ui/badge";
-import { useNavigate } from "react-router-dom";
+// Colors for charts
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
-// Utility to format numbers
-const formatNumber = (num: number) => {
-  return new Intl.NumberFormat('en-IN').format(num);
-};
-
-// Default data objects to handle empty states
-const defaultWishlistPurchaseData = {
-  wishlist_count: 0,
-  purchase_count: 0
-};
-
-const defaultConversionData = {
-  conversion_rate: 0,
-  total_views: 0,
-  total_wishlists: 0,
-  total_purchases: 0
-};
-
-// Main Analytics Tab Component
 export const AnalyticsTab = () => {
+  const [period, setPeriod] = useState<"7d" | "30d" | "90d">("30d");
+  const [chartType, setChartType] = useState<"line" | "bar" | "pie">("line");
   const { user } = useAuth();
-  const navigate = useNavigate();
-  const [timeRange, setTimeRange] = useState<string>("30d");
-  const [isLoading, setIsLoading] = useState(false);
-  const [lastUpdate, setLastUpdate] = useState(new Date().toLocaleTimeString());
   
-  // Get the user's current plan
+  // Get user plan data
   const { data: userPlan, isLoading: isPlanLoading } = useQuery({
     queryKey: ['user-plan'],
     queryFn: async () => {
       if (!user) return null;
       
       const { data } = await supabase
-        .from('user_subscriptions')
+        .from('pricing_plans')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('name', 'basic')
         .maybeSingle();
       
-      return data;
+      return { plan_id: data?.id || "basic" };
     },
     enabled: !!user
   });
@@ -106,411 +66,251 @@ export const AnalyticsTab = () => {
   
   // Define which features are available based on plan
   const features = {
-    views: true, // Available in all plans
-    clicks: ["pro", "pro-plus", "master"].includes(planLevel),
-    wishlists: ["pro-plus", "master"].includes(planLevel),
-    purchases: ["pro-plus", "master"].includes(planLevel),
-    revenue: ["master"].includes(planLevel),
-    engagementHours: ["pro-plus", "master"].includes(planLevel),
-    dropOffRate: ["master"].includes(planLevel),
-    bestPostingTimes: ["master"].includes(planLevel),
-    export: ["master"].includes(planLevel)
+    basicAnalytics: true, // Available in all plans
+    advancedAnalytics: ["pro", "pro-plus", "master"].includes(planLevel),
+    detailedCharts: ["pro-plus", "master"].includes(planLevel),
   };
   
-  // Use custom hooks for data fetching
-  const { data: summaryData, refetch: refetchSummary, isLoading: isSummaryLoading } = useAnalyticsSummary(user?.id);
-  const { data: viewsData, refetch: refetchViews, isLoading: isViewsLoading } = useViewsData(user?.id, timeRange);
-  const { data: wishlistPurchaseData, refetch: refetchWishlist, isLoading: isWishlistLoading } = useWishlistPurchase(user?.id);
-  const { data: revenueData, refetch: refetchRevenue, isLoading: isRevenueLoading } = useRevenueData(user?.id, timeRange);
-  const { data: engagementData, refetch: refetchEngagement, isLoading: isEngagementLoading } = useEngagementData(user?.id);
-  const { data: conversionData, refetch: refetchConversion, isLoading: isConversionLoading } = useConversionData(user?.id);
-  
-  // Use live updates hook
-  const { newActivity } = useLiveUpdates(user?.id);
-  
-  // Refresh all data
-  const handleRefresh = async () => {
-    setIsLoading(true);
-    toast.info("Refreshing analytics data...");
-    
-    try {
-      await Promise.all([
-        refetchSummary(),
-        refetchViews(),
-        features.wishlists && refetchWishlist(),
-        features.revenue && refetchRevenue(),
-        features.engagementHours && refetchEngagement(),
-        features.wishlists && refetchConversion()
-      ].filter(Boolean));
+  // Get analytics data
+  const { data: analytics, isLoading: isAnalyticsLoading } = useQuery({
+    queryKey: ['analytics', user?.id, period],
+    queryFn: async () => {
+      if (!user) return null;
       
-      setLastUpdate(new Date().toLocaleTimeString());
-      toast.success("Analytics data refreshed");
-    } catch (error) {
-      console.error("Error refreshing data:", error);
-      toast.error("Failed to refresh data. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  // Effect to handle new activity notifications
-  useEffect(() => {
-    if (newActivity) {
-      // Update the timestamp
-      setLastUpdate(new Date().toLocaleTimeString());
+      // In a real app, this would fetch from a dedicated analytics table
+      // For demo purposes, let's create mock data
+      const viewsData = [];
+      const likesData = [];
+      const sharesData = [];
+      const clicksData = [];
       
-      // Show a notification if it's significant activity
-      if (newActivity.type === 'purchase' && features.purchases) {
-        toast.info(`New purchase: ${newActivity.message}`);
-      } else if (newActivity.type === 'view_spike') {
-        toast.info(`Traffic spike: ${newActivity.message}`);
+      // Generate data points based on period
+      const dataPoints = period === "7d" ? 7 : period === "30d" ? 30 : 90;
+      const today = new Date();
+      
+      let totalViews = 0;
+      let totalLikes = 0;
+      let totalShares = 0;
+      let totalClicks = 0;
+      
+      for (let i = 0; i < dataPoints; i++) {
+        const date = new Date();
+        date.setDate(today.getDate() - (dataPoints - i - 1));
+        const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        
+        // Generate random but consistent data
+        const views = Math.floor(Math.random() * 100) + 10;
+        const likes = Math.floor(views * (Math.random() * 0.3 + 0.05));
+        const shares = Math.floor(likes * (Math.random() * 0.3 + 0.05));
+        const clicks = Math.floor(views * (Math.random() * 0.4 + 0.1));
+        
+        totalViews += views;
+        totalLikes += likes;
+        totalShares += shares;
+        totalClicks += clicks;
+        
+        viewsData.push({ date: formattedDate, value: views });
+        likesData.push({ date: formattedDate, value: likes });
+        sharesData.push({ date: formattedDate, value: shares });
+        clicksData.push({ date: formattedDate, value: clicks });
       }
       
-      // Refresh data when significant updates happen
-      handleRefresh();
-    }
-  }, [newActivity]);
-
-  const handleUpgradeClick = () => {
-    navigate("/settings/pricing");
-    toast.info("Upgrade your plan to unlock more analytics features");
-  };
+      // For pie chart
+      const contentDistribution = [
+        { name: "Products", value: 45 },
+        { name: "Services", value: 30 },
+        { name: "Posts", value: 15 },
+        { name: "Comments", value: 10 }
+      ];
+      
+      // For category performance
+      const categoryPerformance = [
+        { name: "Electronics", views: 512, engagement: 78 },
+        { name: "Clothing", views: 430, engagement: 65 },
+        { name: "Home", views: 320, engagement: 42 },
+        { name: "Services", views: 280, engagement: 38 },
+        { name: "Other", views: 190, engagement: 25 }
+      ];
+      
+      const summary: AnalyticsSummary = {
+        totalViews,
+        totalLikes,
+        totalShares,
+        totalClicks
+      };
+      
+      return {
+        views: viewsData,
+        likes: likesData,
+        shares: sharesData,
+        clicks: clicksData,
+        contentDistribution,
+        categoryPerformance,
+        summary
+      };
+    },
+    enabled: !!user
+  });
   
-  // Render a locked feature component
-  const LockedFeature = ({ title, description }: { title: string, description: string }) => (
-    <Card className="relative overflow-hidden">
-      <div className="absolute inset-0 bg-background/80 backdrop-blur-[1px] z-10 flex flex-col items-center justify-center">
-        <Lock className="h-8 w-8 text-muted-foreground mb-2" />
-        <h3 className="text-lg font-semibold">{title}</h3>
-        <p className="text-muted-foreground text-center max-w-xs mb-3">{description}</p>
-        <Button onClick={handleUpgradeClick} variant="default">Upgrade Plan</Button>
+  if (isAnalyticsLoading || isPlanLoading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-8 w-48 mb-4" />
+        <Skeleton className="h-64 w-full" />
+        <div className="grid grid-cols-4 gap-4">
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-24 w-full" />
+        </div>
       </div>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <BarChart2 className="h-5 w-5 text-primary" />
-          {title}
-        </CardTitle>
-        <CardDescription>{description}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="h-[300px] bg-muted/20"></div>
-      </CardContent>
-    </Card>
-  );
+    );
+  }
   
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold">Business Analytics</h2>
-          <p className="text-muted-foreground">
-            Track your business performance and customer engagement
-          </p>
+          <h2 className="text-2xl font-bold">Analytics</h2>
+          <p className="text-muted-foreground">Track your content performance</p>
         </div>
         
-        <div className="flex items-center gap-3">
-          {!isPlanLoading && (
-            <Badge variant="outline" className="font-medium">
-              {planLevel === "pro" ? "Pro Plan" : 
-               planLevel === "pro-plus" ? "Pro+ Plan" : 
-               planLevel === "master" ? "Master Plan" : "Basic Plan"}
-            </Badge>
-          )}
-          {features.export ? (
-            <ExportReport onExport={() => toast.success("Report downloaded successfully!")} />
-          ) : (
-            <Button variant="outline" size="sm" className="flex items-center gap-2" onClick={handleUpgradeClick}>
-              <DownloadCloud className="h-4 w-4" />
-              <span className="hidden md:inline">Export Reports</span>
-              <Lock className="h-3 w-3 ml-1" />
-            </Button>
-          )}
-          <Select value={timeRange} onValueChange={setTimeRange}>
-            <SelectTrigger className="w-[120px]">
-              <SelectValue placeholder="Select time range" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="7d">Last 7 days</SelectItem>
-              <SelectItem value="30d">Last 30 days</SelectItem>
-              <SelectItem value="90d">Last 90 days</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="flex gap-2">
+          <Tabs defaultValue={period} value={period} onValueChange={(v) => setPeriod(v as any)}>
+            <TabsList>
+              <TabsTrigger value="7d">7D</TabsTrigger>
+              <TabsTrigger value="30d">30D</TabsTrigger>
+              <TabsTrigger value="90d">90D</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          
+          <Tabs defaultValue={chartType} value={chartType} onValueChange={(v) => setChartType(v as any)}>
+            <TabsList>
+              <TabsTrigger value="line" title="Line Chart">
+                <TrendingUp className="h-4 w-4" />
+              </TabsTrigger>
+              <TabsTrigger value="bar" title="Bar Chart">
+                <BarChart2 className="h-4 w-4" />
+              </TabsTrigger>
+              <TabsTrigger value="pie" title="Pie Chart">
+                <PieChartIcon className="h-4 w-4" />
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
       </div>
       
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <SummaryCard 
-          title="Total Views" 
-          value={formatNumber(summaryData?.totalViews || 0)} 
-          icon={Eye}
-          change={12.5}
-          changeType="positive"
-          isLoading={isSummaryLoading}
-        />
-        {features.clicks ? (
-          <SummaryCard 
-            title="Total Clicks" 
-            value={formatNumber(summaryData?.totalClicks || 0)} 
-            icon={TrendingUp}
-            change={8.3}
-            changeType="positive"
-            isLoading={isSummaryLoading}
-          />
-        ) : (
-          <SummaryCard 
-            title="Total Clicks" 
-            value="Locked"
-            icon={Lock}
-            isLocked={true}
-            onUpgrade={handleUpgradeClick}
-            isLoading={isSummaryLoading}
-          />
-        )}
-        {features.wishlists ? (
-          <SummaryCard 
-            title="Total Wishlists" 
-            value={formatNumber(summaryData?.totalWishlists || 0)} 
-            icon={Heart}
-            change={8.3}
-            changeType="positive"
-            isLoading={isSummaryLoading}
-          />
-        ) : (
-          <SummaryCard 
-            title="Total Wishlists" 
-            value="Locked"
-            icon={Lock}
-            isLocked={true}
-            onUpgrade={handleUpgradeClick}
-            isLoading={isSummaryLoading}
-          />
-        )}
-        {features.revenue ? (
-          <SummaryCard 
-            title="Projected Revenue" 
-            value={`₹${formatNumber(summaryData?.projectedRevenue || 0)}`} 
-            icon={DollarSign}
-            change={9.7}
-            changeType="positive"
-            isLoading={isSummaryLoading}
-          />
-        ) : (
-          <SummaryCard 
-            title="Projected Revenue" 
-            value="Locked"
-            icon={Lock}
-            isLocked={true}
-            onUpgrade={handleUpgradeClick}
-            isLoading={isSummaryLoading}
-          />
-        )}
-      </div>
-      
-      {/* Tabs for Charts and Insights */}
-      <Tabs defaultValue="graphs" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="graphs" className="flex items-center gap-2">
-            <BarChart2 className="h-4 w-4" />
-            Graphs & Charts
-          </TabsTrigger>
-          <TabsTrigger value="engagement" className="flex items-center gap-2">
-            <Activity className="h-4 w-4" />
-            Engagement Insights
-          </TabsTrigger>
-        </TabsList>
-        
-        {/* Charts Tab */}
-        <TabsContent value="graphs" className="space-y-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart2 className="h-5 w-5 text-primary" />
-                  Views Over Time
-                </CardTitle>
-                <CardDescription>
-                  Track page views over time
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ViewsBarGraph 
-                  data={viewsData || []} 
-                  isLoading={isViewsLoading} 
-                  timeRange={timeRange}
-                  onTimeRangeChange={setTimeRange}
-                />
-              </CardContent>
-            </Card>
-            
-            {features.wishlists ? (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <PieChart className="h-5 w-5 text-primary" />
-                    Wishlist vs. Purchases
-                  </CardTitle>
-                  <CardDescription>
-                    Conversion from wishlist to purchase
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <WishlistPieChart 
-                    data={wishlistPurchaseData || defaultWishlistPurchaseData} 
-                    isLoading={isWishlistLoading} 
-                  />
-                </CardContent>
-              </Card>
-            ) : (
-              <LockedFeature 
-                title="Wishlist Analytics" 
-                description="Upgrade to Pro+ plan to see wishlist data and conversion rates" 
-              />
-            )}
-            
-            {features.revenue ? (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <LineChart className="h-5 w-5 text-primary" />
-                    Revenue Trends
-                  </CardTitle>
-                  <CardDescription>
-                    Actual vs. projected revenue
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <RevenueLineGraph 
-                    data={revenueData || []} 
-                    isLoading={isRevenueLoading} 
-                    timeRange={timeRange}
-                    onTimeRangeChange={setTimeRange}
-                  />
-                </CardContent>
-              </Card>
-            ) : (
-              <LockedFeature 
-                title="Revenue Analytics" 
-                description="Upgrade to Master plan to access revenue forecasting and trends" 
-              />
-            )}
-            
-            {features.engagementHours ? (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-primary" />
-                    Peak Engagement Hours
-                  </CardTitle>
-                  <CardDescription>
-                    When your audience is most active
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <EngagementHeatmap data={engagementData || []} isLoading={isEngagementLoading} />
-                </CardContent>
-              </Card>
-            ) : (
-              <LockedFeature 
-                title="Engagement Hours" 
-                description="Upgrade to Pro+ plan to see when your audience is most active" 
-              />
-            )}
-          </div>
-        </TabsContent>
-        
-        {/* Engagement Tab */}
-        <TabsContent value="engagement" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {features.wishlists ? (
-              <ConversionRate 
-                data={conversionData || defaultConversionData} 
-                isLoading={isConversionLoading} 
-              />
-            ) : (
-              <Card className="relative overflow-hidden">
-                <div className="absolute inset-0 bg-background/80 backdrop-blur-[1px] z-10 flex flex-col items-center justify-center p-4">
-                  <Lock className="h-8 w-8 text-muted-foreground mb-2" />
-                  <h3 className="text-lg font-semibold">Conversion Analytics</h3>
-                  <p className="text-muted-foreground text-center mb-3">Upgrade to Pro+ plan to access conversion data</p>
-                  <Button onClick={handleUpgradeClick} variant="default" size="sm">Upgrade Plan</Button>
-                </div>
-                <CardHeader>
-                  <CardTitle>Conversion Rate</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[150px] bg-muted/20"></div>
-                </CardContent>
-              </Card>
-            )}
-            
-            {features.dropOffRate ? (
-              <DropOffRate 
-                data={conversionData || defaultConversionData} 
-                isLoading={isConversionLoading} 
-              />
-            ) : (
-              <Card className="relative overflow-hidden">
-                <div className="absolute inset-0 bg-background/80 backdrop-blur-[1px] z-10 flex flex-col items-center justify-center p-4">
-                  <Lock className="h-8 w-8 text-muted-foreground mb-2" />
-                  <h3 className="text-lg font-semibold">Drop-off Analytics</h3>
-                  <p className="text-muted-foreground text-center mb-3">Upgrade to Master plan to see customer drop-off data</p>
-                  <Button onClick={handleUpgradeClick} variant="default" size="sm">Upgrade Plan</Button>
-                </div>
-                <CardHeader>
-                  <CardTitle>Drop-off Rate</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[150px] bg-muted/20"></div>
-                </CardContent>
-              </Card>
-            )}
-            
-            {features.bestPostingTimes ? (
-              <BestPostingTimes data={engagementData || []} isLoading={isEngagementLoading} />
-            ) : (
-              <Card className="relative overflow-hidden">
-                <div className="absolute inset-0 bg-background/80 backdrop-blur-[1px] z-10 flex flex-col items-center justify-center p-4">
-                  <Lock className="h-8 w-8 text-muted-foreground mb-2" />
-                  <h3 className="text-lg font-semibold">Optimal Posting Times</h3>
-                  <p className="text-muted-foreground text-center mb-3">Upgrade to Master plan to find the best times to post</p>
-                  <Button onClick={handleUpgradeClick} variant="default" size="sm">Upgrade Plan</Button>
-                </div>
-                <CardHeader>
-                  <CardTitle>Best Posting Times</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[150px] bg-muted/20"></div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </TabsContent>
-      </Tabs>
-      
-      {/* LiveUpdate Component */}
-      <div className="flex justify-end">
-        <LiveUpdate lastUpdate={lastUpdate} onRefresh={handleRefresh} isRefreshing={isLoading} />
-      </div>
-
-      {planLevel === "basic" && (
-        <Card className="bg-primary/5 border-primary/20">
-          <CardContent className="pt-6">
-            <div className="flex flex-col md:flex-row items-center gap-4">
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold mb-2">Upgrade to unlock all analytics features</h3>
-                <p className="text-muted-foreground mb-4">
-                  Get valuable insights about your business performance, customer behavior, 
-                  and revenue trends with our advanced analytics.
-                </p>
-              </div>
-              <Button onClick={handleUpgradeClick} className="shrink-0">
-                View Plans
-              </Button>
+      {/* Key metrics summary */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-4 flex flex-col">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-muted-foreground text-sm">Views</span>
+              <Eye className="h-4 w-4 text-blue-500" />
             </div>
+            <div className="text-2xl font-bold">{analytics?.summary.totalViews.toLocaleString()}</div>
+            <Progress value={100} className="h-1 mt-2" />
           </CardContent>
         </Card>
-      )}
+        
+        <Card>
+          <CardContent className="p-4 flex flex-col">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-muted-foreground text-sm">Likes</span>
+              <Heart className="h-4 w-4 text-red-500" />
+            </div>
+            <div className="text-2xl font-bold">{analytics?.summary.totalLikes.toLocaleString()}</div>
+            <Progress value={(analytics?.summary.totalLikes || 0) / (analytics?.summary.totalViews || 1) * 100} className="h-1 mt-2" />
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4 flex flex-col">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-muted-foreground text-sm">Shares</span>
+              <Share2 className="h-4 w-4 text-green-500" />
+            </div>
+            <div className="text-2xl font-bold">{analytics?.summary.totalShares.toLocaleString()}</div>
+            <Progress value={(analytics?.summary.totalShares || 0) / (analytics?.summary.totalViews || 1) * 100} className="h-1 mt-2" />
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4 flex flex-col">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-muted-foreground text-sm">Clicks</span>
+              <ArrowUpRight className="h-4 w-4 text-purple-500" />
+            </div>
+            <div className="text-2xl font-bold">{analytics?.summary.totalClicks.toLocaleString()}</div>
+            <Progress value={(analytics?.summary.totalClicks || 0) / (analytics?.summary.totalViews || 1) * 100} className="h-1 mt-2" />
+          </CardContent>
+        </Card>
+      </div>
+      
+      {/* Main chart */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Performance Overview</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[300px]">
+            {chartType === "line" && (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={analytics?.views}
+                  margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Line type="monotone" dataKey="value" name="Views" stroke="#0088FE" activeDot={{ r: 8 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
+            
+            {chartType === "bar" && (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={analytics?.views}
+                  margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="value" name="Views" fill="#0088FE" />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+            
+            {chartType === "pie" && (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={analytics?.contentDistribution}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    outerRadius={100}
+                    fill="#8884d8"
+                    dataKey="value"
+                    label={({name, percent}) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                  >
+                    {analytics?.contentDistribution.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

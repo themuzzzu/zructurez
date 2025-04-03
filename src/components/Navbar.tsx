@@ -1,95 +1,133 @@
 
-import { Menu } from "lucide-react";
-import { Button } from "./ui/button";
-import { Separator } from "./ui/separator";
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { useLocation, useNavigate } from "react-router-dom";
-import { Sidebar } from "./Sidebar";
-import { CartButton } from "./navbar/CartButton";
-import { UserMenu } from "./navbar/UserMenu";
-import { MobileNav } from "./navbar/MobileNav";
-import { SearchBox } from "./search/SearchBox";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useTheme } from "./ThemeProvider";
-import { Heart } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { ModeToggle } from "@/components/theme/ModeToggle";
+import { UserMenu } from "@/components/navbar/UserMenu";
+import { useAuth } from "@/hooks/useAuth";
+import { SearchBar } from "@/components/SearchBar";
+import { MobileMenu } from "@/components/navbar/MobileMenu";
+import { NotificationsPopover } from "@/components/notifications/NotificationsPopover";
+import { Badge } from "@/components/ui/badge";
+import { Bell, MessageCircle, ShoppingCart } from "lucide-react";
+import Logo from "@/components/Logo";
+import { AppNavigation } from "@/components/navbar/AppNavigation";
 
-export const Navbar = () => {
+type Profile = {
+  avatar_url: string;
+  bio: string;
+  created_at: string;
+  id: string;
+  location: string;
+  name: string;
+  updated_at: string;
+  username: string;
+};
+
+export const Navbar: React.FC = () => {
+  const { user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const isHomePage = location.pathname === "/";
-  const { theme } = useTheme();
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const [unreadMessages, setUnreadMessages] = useState(0);
+  const [cartItemCount, setCartItemCount] = useState(0);
 
-  const { data: profile } = useQuery({
-    queryKey: ['profile'],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return null;
+  // Check if we're on the login, signup, or forgot-password routes
+  const isAuthRoute = ["/login", "/signup", "/forgot-password", "/reset-password"].includes(
+    location.pathname
+  );
 
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const isBusinessOrServices = () => {
-    return location.pathname.includes('/business') || 
-           location.pathname.includes('/services') ||
-           location.pathname.includes('/marketplace');
-  };
+  // Don't show navbar on auth pages
+  if (isAuthRoute) {
+    return null;
+  }
 
   return (
-    <>
-      <nav className="border-b bg-background py-3 fixed top-0 left-0 right-0 w-full z-50 h-16">
-        <div className="container max-w-[1400px] flex items-center justify-between animate-fade-down">
-          <div className="flex items-center gap-4">
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="lg:hidden">
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="p-0 w-64">
-                <Sidebar className="w-full" />
-              </SheetContent>
-            </Sheet>
-            <h1 className="text-xl font-bold text-primary">
-              Zructures
-            </h1>
-          </div>
-
-          {isHomePage && (
-            <SearchBox className="flex-1 max-w-xl mx-4 hidden md:block" />
-          )}
-
-          <div className="flex items-center gap-2">
-            {isBusinessOrServices() && (
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => navigate("/wishlist")}
-                aria-label="View wishlist"
-              >
-                <Heart className="h-5 w-5" />
-              </Button>
-            )}
-            <CartButton />
-            <Separator orientation="vertical" className="h-6 hidden sm:block" />
-            <UserMenu profile={profile} />
-          </div>
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-14 items-center">
+        <div className="mr-4 hidden md:flex">
+          <Link to="/" className="mr-6 flex items-center space-x-2">
+            <Logo />
+            <span className="hidden font-bold sm:inline-block">Zructs</span>
+          </Link>
+          <AppNavigation />
         </div>
-      </nav>
-
-      <MobileNav />
-    </>
+        <MobileMenu />
+        <div className="flex flex-1 items-center justify-end space-x-2">
+          <SearchBar />
+          
+          {/* Only show these icons if user is logged in */}
+          {user && (
+            <>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative"
+                onClick={() => navigate("/notifications")}
+                aria-label="Notifications"
+              >
+                <Bell className="h-5 w-5" />
+                {unreadNotifications > 0 && (
+                  <Badge
+                    variant="destructive"
+                    className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 text-[10px] flex items-center justify-center"
+                  >
+                    {unreadNotifications > 9 ? "9+" : unreadNotifications}
+                  </Badge>
+                )}
+              </Button>
+              
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative"
+                onClick={() => navigate("/messages")}
+                aria-label="Messages"
+              >
+                <MessageCircle className="h-5 w-5" />
+                {unreadMessages > 0 && (
+                  <Badge
+                    variant="destructive"
+                    className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 text-[10px] flex items-center justify-center"
+                  >
+                    {unreadMessages > 9 ? "9+" : unreadMessages}
+                  </Badge>
+                )}
+              </Button>
+              
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative"
+                onClick={() => navigate("/cart")}
+                aria-label="Shopping Cart"
+              >
+                <ShoppingCart className="h-5 w-5" />
+                {cartItemCount > 0 && (
+                  <Badge
+                    className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 text-[10px] flex items-center justify-center"
+                  >
+                    {cartItemCount > 9 ? "9+" : cartItemCount}
+                  </Badge>
+                )}
+              </Button>
+            </>
+          )}
+          
+          <NotificationsPopover />
+          <ModeToggle />
+          
+          {user ? (
+            <UserMenu />
+          ) : (
+            <Button variant="default" onClick={() => navigate("/login")}>
+              Sign In
+            </Button>
+          )}
+        </div>
+      </div>
+    </header>
   );
 };

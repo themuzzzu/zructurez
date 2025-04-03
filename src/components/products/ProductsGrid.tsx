@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { ProductCard } from "./ProductCard";
 import { GridLayoutType } from "./types/layouts";
@@ -193,8 +192,8 @@ export const ProductsGrid = ({
       </AnimatePresence>
       
       {hasMore && (
-        <div className="flex justify-center mt-8">
-          <Button onClick={onLoadMore} variant="outline" ref={loadMoreRef}>
+        <div className="flex justify-center mt-8" ref={loadMoreRef}>
+          <Button onClick={onLoadMore} variant="outline">
             {isLoading ? <Spinner size="sm" /> : "Load More"}
           </Button>
         </div>
