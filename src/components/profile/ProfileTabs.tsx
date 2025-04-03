@@ -5,11 +5,7 @@ import { PostsTab } from "./PostsTab";
 import { MediaTab } from "./MediaTab";
 import { LikesTab } from "./LikesTab";
 
-interface ProfileTabsProps {
-  profileId: string;
-}
-
-export const ProfileTabs: React.FC<ProfileTabsProps> = ({ profileId }) => {
+export const ProfileTabs: React.FC<{ profileId: string }> = ({ profileId }) => {
   const [activeTab, setActiveTab] = useState("posts");
 
   return (

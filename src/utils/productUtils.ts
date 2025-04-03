@@ -1,6 +1,8 @@
 
 /**
- * Formats a price value as a currency string
+ * Format a price value to a currency string
+ * @param price The price to format
+ * @returns Formatted price string
  */
 export const formatPrice = (price: number): string => {
   return new Intl.NumberFormat('en-IN', {
@@ -12,34 +14,34 @@ export const formatPrice = (price: number): string => {
 };
 
 /**
- * Calculates the discount percentage based on original and current price
+ * Calculate discount percentage
+ * @param originalPrice Original price
+ * @param discountedPrice Discounted price
+ * @returns Discount percentage as a whole number
  */
 export const calculateDiscountPercentage = (
-  originalPrice: number,
-  currentPrice: number
+  originalPrice: number, 
+  discountedPrice: number
 ): number => {
-  if (!originalPrice || originalPrice <= 0 || !currentPrice || currentPrice <= 0) {
+  if (originalPrice <= 0 || discountedPrice >= originalPrice) {
     return 0;
   }
   
-  const discount = originalPrice - currentPrice;
-  const percentage = Math.round((discount / originalPrice) * 100);
+  const discount = originalPrice - discountedPrice;
+  const percentage = (discount / originalPrice) * 100;
   
-  return percentage;
+  return Math.round(percentage);
 };
 
 /**
- * Returns a truncated product description
+ * Check if a product is new (created within the last 7 days)
+ * @param createdAt Product creation date string
+ * @returns Boolean indicating if product is new
  */
-export const truncateDescription = (
-  description: string,
-  maxLength: number = 100
-): string => {
-  if (!description) return '';
+export const isNewProduct = (createdAt: string): boolean => {
+  const productDate = new Date(createdAt);
+  const now = new Date();
+  const differenceInDays = (now.getTime() - productDate.getTime()) / (1000 * 3600 * 24);
   
-  if (description.length <= maxLength) {
-    return description;
-  }
-  
-  return `${description.slice(0, maxLength)}...`;
+  return differenceInDays <= 7;
 };

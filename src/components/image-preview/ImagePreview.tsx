@@ -3,15 +3,16 @@ import React from 'react';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
-import { AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
-interface ImagePreviewProps {
+export interface ImagePreviewProps {
   imageUrl: string | null;
   altText?: string;
   className?: string;
   thumbnailClassName?: string;
   showThumbnail?: boolean;
   thumbnailSize?: number;
+  aspectRatio?: string;
+  objectFit?: string;
 }
 
 export const ImagePreview: React.FC<ImagePreviewProps> = ({
@@ -21,6 +22,8 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
   thumbnailClassName = '',
   showThumbnail = true,
   thumbnailSize = 100,
+  aspectRatio = 'auto',
+  objectFit = 'cover',
 }) => {
   const [isOpen, setIsOpen] = React.useState(false);
 
@@ -34,12 +37,17 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
         {showThumbnail ? (
           <div
             className={`cursor-pointer overflow-hidden rounded-md ${thumbnailClassName}`}
-            style={{ width: thumbnailSize, height: thumbnailSize }}
+            style={{ 
+              width: thumbnailSize, 
+              height: thumbnailSize,
+              aspectRatio: aspectRatio
+            }}
           >
             <img
               src={imageUrl}
               alt={altText}
-              className="h-full w-full object-cover transition-transform hover:scale-105"
+              className="h-full w-full transition-transform hover:scale-105"
+              style={{ objectFit }}
             />
           </div>
         ) : (

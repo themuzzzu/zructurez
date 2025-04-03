@@ -1,20 +1,23 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getServiceRankings } from "@/services/rankingService";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Eye, Calendar, MapPin, Star } from "lucide-react";
+import { Eye, CalendarClock, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { formatPrice } from "@/utils/productUtils";
+import { RankingType } from "@/services/rankingService";
 
 export const ServiceRankings = () => {
+  const [rankingType, setRankingType] = useState<"views" | "bookings">("views");
   const navigate = useNavigate();
   
   const { data: services, isLoading } = useQuery({
-    queryKey: ['service-rankings'],
-    queryFn: () => getServiceRankings("views", 20),
+    queryKey: ['service-rankings', rankingType],
+    queryFn: () => getServiceRankings(rankingType, 20)
   });
   
   const navigateToService = (id: string) => {
@@ -29,9 +32,26 @@ export const ServiceRankings = () => {
     return "bg-primary/90 text-white";
   };
   
+  const getScoreIcon = () => {
+    if (rankingType === "views") return <Eye className="h-4 w-4" />;
+    return <CalendarClock className="h-4 w-4" />;
+  };
+  
+  const getScoreLabel = () => {
+    if (rankingType === "views") return "Views";
+    return "Bookings";
+  };
+  
   if (isLoading) {
     return (
       <div className="space-y-4">
+        <Tabs defaultValue="views">
+          <TabsList>
+            <TabsTrigger value="views">Most Viewed</TabsTrigger>
+            <TabsTrigger value="bookings">Most Booked</TabsTrigger>
+          </TabsList>
+        </Tabs>
+        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <Card key={i} className="overflow-hidden">
@@ -57,8 +77,25 @@ export const ServiceRankings = () => {
   
   return (
     <div className="space-y-6">
+      <Tabs 
+        defaultValue="views" 
+        value={rankingType} 
+        onValueChange={(value) => setRankingType(value as "views" | "bookings")}
+      >
+        <TabsList>
+          <TabsTrigger value="views" className="flex items-center gap-1">
+            <Eye className="h-4 w-4" />
+            <span>Most Viewed</span>
+          </TabsTrigger>
+          <TabsTrigger value="bookings" className="flex items-center gap-1">
+            <CalendarClock className="h-4 w-4" />
+            <span>Most Booked</span>
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
+      
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {services?.map((service) => (
+        {services?.map((service, index) => (
           <Card 
             key={service.id} 
             className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
@@ -76,7 +113,7 @@ export const ServiceRankings = () => {
                       />
                     ) : (
                       <div className="h-full w-full flex items-center justify-center text-muted-foreground">
-                        <Calendar className="h-6 w-6" />
+                        <CalendarClock className="h-6 w-6" />
                       </div>
                     )}
                   </div>
@@ -91,11 +128,13 @@ export const ServiceRankings = () => {
                   <h3 className="font-medium line-clamp-1">{service.title}</h3>
                   <div className="flex items-center mt-1 text-sm text-muted-foreground">
                     <Star className="h-3 w-3 mr-1" />
-                    <span>{service.category}</span>
+                    <span>{service.category || "General"}</span>
                   </div>
-                  <p className="text-sm mt-1 font-medium">
-                    {formatPrice(service.price || 0)}
-                  </p>
+                  {service.price !== undefined && (
+                    <p className="text-sm mt-1 font-medium">
+                      {formatPrice(service.price)}
+                    </p>
+                  )}
                 </div>
                 
                 <div className="flex flex-col items-end justify-between">
@@ -105,9 +144,9 @@ export const ServiceRankings = () => {
                     </Badge>
                   )}
                   <div className="flex items-center mt-2">
-                    <Eye className="h-4 w-4" />
+                    {getScoreIcon()}
                     <span className="text-sm font-medium ml-1">
-                      {service.views?.toLocaleString() || 0} Views
+                      {service.views?.toLocaleString() || 0} {getScoreLabel()}
                     </span>
                   </div>
                 </div>
