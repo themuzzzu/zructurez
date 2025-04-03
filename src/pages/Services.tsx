@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button, } from "@/components/ui/button";
 import { Plus, Phone } from "lucide-react";
@@ -17,6 +18,7 @@ import { RecommendedServices } from "@/components/service-marketplace/Recommende
 import { TopServices } from "@/components/service-marketplace/TopServices";
 import { ServiceIconGrid } from "@/components/service-marketplace/ServiceIconGrid";
 import { SearchInput } from "@/components/SearchInput";
+import { ServiceBannerAd } from "@/components/ads/ServiceBannerAd";
 
 export default function Services() {
   const [services, setServices] = useState([]);
@@ -137,6 +139,9 @@ export default function Services() {
             className="w-full max-w-3xl mx-auto"
           />
         </div>
+        
+        {/* Banner Ad - Added below search */}
+        <ServiceBannerAd />
         
         {/* Banner */}
         <div className="mb-6">

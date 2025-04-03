@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
@@ -29,6 +28,7 @@ import { CategorySubcategoryGrid } from "@/components/marketplace/CategorySubcat
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import type { Business } from "@/types/business";
+import { BusinessBannerAd } from "@/components/ads/BusinessBannerAd";
 
 interface BusinessWithRating {
   id: string;
@@ -223,6 +223,8 @@ const Business = () => {
           ) : (
             <>
               <SearchHero />
+              
+              <BusinessBannerAd />
               
               <BusinessCategoryNavBar />
               
