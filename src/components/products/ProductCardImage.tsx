@@ -1,4 +1,3 @@
-
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Heart } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
@@ -6,6 +5,8 @@ import { toast } from "sonner";
 import { useWishlist } from "@/hooks/useWishlist";
 import { trackEntityView } from "@/utils/viewsTracking";
 import { ImageFallback } from "../ui/image-fallback";
+import { LikeProvider } from "./LikeContext";
+import { ProductLikeButton } from "./ProductLikeButton";
 
 // Quotes for loading screens
 const loadingQuotes = [
@@ -168,17 +169,16 @@ export const ProductCardImage = ({
       </div>
       
       {/* Wishlist button */}
-      <button 
-        onClick={handleWishlistClick}
-        className={`absolute top-2 right-2 p-2 bg-white dark:bg-zinc-800 rounded-full shadow-md hover:scale-110 transition-transform z-10 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-        aria-label={isInWishlist(productId) ? "Remove from wishlist" : "Add to wishlist"}
-        disabled={loading}
-      >
-        <Heart 
-          size={16} 
-          className={isInWishlist(productId) ? "fill-red-500 text-red-500" : "text-gray-500"} 
-        />
-      </button>
+      <LikeProvider>
+        <div className="absolute top-2 right-2 z-10">
+          <ProductLikeButton 
+            productId={productId} 
+            size="sm"
+            variant="ghost"
+            className="p-2 bg-white dark:bg-zinc-800 rounded-full shadow-md hover:scale-110 transition-transform"
+          />
+        </div>
+      </LikeProvider>
     </div>
   );
 };

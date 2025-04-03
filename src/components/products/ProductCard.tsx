@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +6,7 @@ import { formatPrice } from "@/utils/productUtils";
 import { ProductLikeButton } from "./ProductLikeButton";
 import { Skeleton } from "@/components/ui/skeleton";
 import { GridLayoutType } from "./types/ProductTypes";
+import { LikeProvider } from "./LikeContext";
 
 interface ProductCardProps {
   product: any;
@@ -22,15 +22,12 @@ export const ProductCard = ({ product, layout = "grid4x4", sponsored = false }: 
     navigate(`/products/${product.id}`);
   };
   
-  // Format the price properly
   const price = formatPrice(product.price);
   
-  // Calculate original price if there's a discount
   const originalPrice = product.is_discounted && product.discount_percentage 
     ? formatPrice(product.price / (1 - product.discount_percentage / 100))
     : null;
   
-  // Set layout-specific styles
   const isListLayout = layout === "list";
   const cardClassName = isListLayout 
     ? "flex flex-row overflow-hidden h-[150px]" 
@@ -45,7 +42,6 @@ export const ProductCard = ({ product, layout = "grid4x4", sponsored = false }: 
       className={`${cardClassName} hover:shadow-md transition-shadow cursor-pointer relative group border-border`}
       onClick={handleCardClick}
     >
-      {/* Image Section */}
       <div className={imageContainerClassName}>
         {!imageLoaded && (
           <div className="w-full h-full bg-gray-200 dark:bg-gray-800 animate-pulse"></div>
@@ -58,27 +54,25 @@ export const ProductCard = ({ product, layout = "grid4x4", sponsored = false }: 
           loading="lazy"
         />
         
-        {/* Discount Badge */}
         {product.is_discounted && product.discount_percentage && (
           <Badge className="absolute top-2 left-2 bg-red-500 text-white">
             {Math.round(product.discount_percentage)}% OFF
           </Badge>
         )}
         
-        {/* Sponsored Badge - Added this */}
         {sponsored && (
           <Badge variant="outline" className="absolute top-2 left-2 bg-yellow-500/90 text-xs">
             Sponsored
           </Badge>
         )}
         
-        {/* Like Button */}
         <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          <ProductLikeButton productId={product.id} />
+          <LikeProvider>
+            <ProductLikeButton productId={product.id} />
+          </LikeProvider>
         </div>
       </div>
       
-      {/* Product Details */}
       <CardContent className={`flex-1 p-3 ${isListLayout ? 'flex flex-col justify-between' : ''}`}>
         <div>
           <h3 className="font-medium text-sm line-clamp-1 mb-1">{product.name}</h3>
