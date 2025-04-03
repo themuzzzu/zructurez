@@ -21,8 +21,8 @@ export function memoWithTracking<P extends object>(
       }
     });
     
-    // Fixed JSX syntax issue here
-    return <Component {...props} />;
+    // Fixed JSX syntax issue - Return React element with proper JSX in createElement format
+    return React.createElement(Component, props);
   };
   
   WrappedComponent.displayName = `Tracked(${displayName})`;
