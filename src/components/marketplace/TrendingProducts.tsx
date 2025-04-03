@@ -104,10 +104,12 @@ export const TrendingProducts = ({ gridLayout = "grid4x4" }: TrendingProductsPro
                   product={{
                     id: product.id,
                     title: product.title || '',
-                    description: '',
+                    description: product.description || '',
                     price: product.price || 0,
                     image_url: product.image_url,
-                    views: product.views || 0
+                    views: product.views || 0,
+                    stock: 0, // Default value for required field
+                    category: product.category || 'General'
                   }}
                   layout={gridLayout}
                 />

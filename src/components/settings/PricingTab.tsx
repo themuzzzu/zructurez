@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PricingPlans } from "@/components/pricing/PricingPlans";
 import { Badge } from "@/components/ui/badge";
@@ -38,9 +37,9 @@ export const PricingTab = () => {
           amount: data?.price || 0,
           billing_interval: "monthly",
           next_payment_date: new Date(Date.now() + 30*24*60*60*1000).toISOString(),
-          product_limit: data?.product_limit || 5,
-          service_limit: data?.service_limit || 1,
-          visibility_level: data?.visibility_level || "Local",
+          product_limit: data?.max_listings || 5,
+          service_limit: data?.message_quota || 1,
+          visibility_level: data?.support_level || "Local",
           analytics_level: data?.analytics_level || "Basic"
         };
         
@@ -58,7 +57,6 @@ export const PricingTab = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return [];
       
-      // Mock payment history data since we don't have a real payment_history table
       const mockPaymentHistory: PaymentHistory[] = [
         {
           id: "pay_1",
@@ -85,7 +83,6 @@ export const PricingTab = () => {
   });
 
   const handleSelectPlan = (planId: string) => {
-    // This would be connected to a payment processing system
     toast.success(`Plan ${planId} selected! Payment flow would start here.`);
   };
 

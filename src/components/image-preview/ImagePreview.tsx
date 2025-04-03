@@ -4,6 +4,8 @@ import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 
+export type ObjectFit = 'cover' | 'contain' | 'fill' | 'none' | 'scale-down';
+
 export interface ImagePreviewProps {
   imageUrl: string | null;
   altText?: string;
@@ -12,7 +14,10 @@ export interface ImagePreviewProps {
   showThumbnail?: boolean;
   thumbnailSize?: number;
   aspectRatio?: string;
-  objectFit?: string;
+  objectFit?: ObjectFit;
+  // Aliases for compatibility
+  src?: string;
+  alt?: string;
 }
 
 export const ImagePreview: React.FC<ImagePreviewProps> = ({
@@ -24,10 +29,17 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
   thumbnailSize = 100,
   aspectRatio = 'auto',
   objectFit = 'cover',
+  // Handle alias props
+  src,
+  alt,
 }) => {
   const [isOpen, setIsOpen] = React.useState(false);
 
-  if (!imageUrl) {
+  // Use either the main prop or its alias
+  const finalImageUrl = imageUrl || src;
+  const finalAltText = altText || alt;
+
+  if (!finalImageUrl) {
     return null;
   }
 
@@ -44,8 +56,8 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
             }}
           >
             <img
-              src={imageUrl}
-              alt={altText}
+              src={finalImageUrl}
+              alt={finalAltText}
               className="h-full w-full transition-transform hover:scale-105"
               style={{ objectFit }}
             />
@@ -64,8 +76,8 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
             <X className="h-4 w-4" />
           </Button>
           <img
-            src={imageUrl}
-            alt={altText}
+            src={finalImageUrl}
+            alt={finalAltText}
             className={`max-h-[80vh] w-auto ${className}`}
             onClick={() => setIsOpen(false)}
           />

@@ -4,8 +4,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Eye, ShoppingCart, MessageSquare, Users } from "lucide-react";
 
-interface CategoryStatsProps {
-  category: {
+export interface CategoryStatsProps {
+  category?: {
     name: string;
     totalProducts?: number;
     totalViews?: number;
@@ -13,9 +13,22 @@ interface CategoryStatsProps {
     conversations?: number;
     sellers?: number;
   };
+  // For backward compatibility
+  totalProducts?: number;
+  categoryName?: string;
 }
 
-export const CategoryStats: React.FC<CategoryStatsProps> = ({ category }) => {
+export const CategoryStats: React.FC<CategoryStatsProps> = (props) => {
+  // Handle both new and old prop patterns
+  const category = props.category || {
+    name: props.categoryName || "Category",
+    totalProducts: props.totalProducts || 0,
+    totalViews: 0,
+    totalSales: 0,
+    conversations: 0,
+    sellers: 0
+  };
+  
   const { name, totalProducts = 0, totalViews = 0, totalSales = 0, conversations = 0, sellers = 0 } = category;
   
   return (

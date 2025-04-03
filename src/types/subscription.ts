@@ -25,20 +25,16 @@ export interface PaymentHistory {
   transaction_id: string;
 }
 
-export interface AnalyticsSummary {
-  totalViews: number;
-  totalLikes: number;
-  totalShares: number;
-  totalClicks: number;
-}
-
 export interface RankingMetrics {
   id: string;
+  title?: string;
+  name?: string;
+  description?: string;
+  price?: number;
+  image_url?: string;
+  category?: string;
+  views?: number;
   rank?: number;
   badge?: string;
-  views?: number;
-  category?: string;
-  name?: string;
-  title?: string;
-  image_url?: string;
+  score?: number; // Added for compatibility
 }

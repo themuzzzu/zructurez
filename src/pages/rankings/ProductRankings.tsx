@@ -150,7 +150,7 @@ export const ProductRankings = () => {
                     <span>{product.category}</span>
                   </div>
                   <p className="text-sm mt-1 font-medium">
-                    {formatPrice(product.price || 0)}
+                    {formatPrice(product.price ?? 0)}
                   </p>
                 </div>
                 
@@ -163,7 +163,7 @@ export const ProductRankings = () => {
                   <div className="flex items-center mt-2">
                     {getScoreIcon()}
                     <span className="text-sm font-medium ml-1">
-                      {product.score?.toLocaleString() || 0} {getScoreLabel()}
+                      {(product.score || product.views || 0).toLocaleString()} {getScoreLabel()}
                     </span>
                   </div>
                 </div>

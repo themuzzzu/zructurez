@@ -20,7 +20,8 @@ export const getProductRankings = async (
       // This is a simplified version
       const { data: wishlistCountData } = await supabase
         .from("wishlists")
-        .select("product_id, count", { count: "exact" });
+        .select("product_id, count")
+        .count();
 
       // Transform wishlist counts to product IDs array
       const productIds = wishlistCountData?.map(item => item.product_id) || [];
@@ -34,7 +35,8 @@ export const getProductRankings = async (
       // This is a simplified version
       const { data: salesCountData } = await supabase
         .from("order_items")
-        .select("product_id, count", { count: "exact" });
+        .select("product_id, count")
+        .count();
 
       // Transform sales counts to product IDs array  
       const productIds = salesCountData?.map(item => item.product_id) || [];
@@ -57,7 +59,8 @@ export const getProductRankings = async (
     return (data || []).map((product, index) => ({
       ...product,
       rank: index + 1,
-      badge: getBadgeForRank(index + 1, sortBy)
+      badge: getBadgeForRank(index + 1, sortBy),
+      score: product.views || 0 // Add score property (same as views in this case)
     }));
   } catch (error) {
     console.error("Error fetching product rankings:", error);
@@ -78,17 +81,18 @@ export const getServiceRankings = async (
       query = query.order("views", { ascending: false });
     } else if (sortBy === "bookings") {
       // For booking count, we need to get appointment counts
-      // This is a simplified version
+      // Since there's an issue with service_id column, we'll modify our approach
       const { data: bookingCountData } = await supabase
         .from("appointments")
-        .select("service_id, count", { count: "exact" });
+        .select("*")
+        .count();
 
-      // Transform booking counts to service IDs array
-      const serviceIds = bookingCountData?.map(item => item.service_id) || [];
+      // Get unique service names from appointments
+      const serviceNames = [...new Set(bookingCountData?.map(item => item.service_name) || [])];
       
-      // Now fetch those services
-      if (serviceIds.length > 0) {
-        query = query.in("id", serviceIds);
+      // Now fetch services that match these names
+      if (serviceNames.length > 0) {
+        query = query.in("title", serviceNames);
       }
     }
 
@@ -104,7 +108,8 @@ export const getServiceRankings = async (
     return (data || []).map((service, index) => ({
       ...service,
       rank: index + 1,
-      badge: getBadgeForRank(index + 1, sortBy)
+      badge: getBadgeForRank(index + 1, sortBy),
+      score: service.views || 0 // Add score property
     }));
   } catch (error) {
     console.error("Error fetching service rankings:", error);
@@ -151,9 +156,12 @@ export const getBusinessRankings = async (
       const analytics = analyticsData?.find(a => a.business_id === business.id);
       return {
         ...business,
+        title: business.name, // Add title alias for name
         rank: index + 1,
         badge: getBadgeForRank(index + 1, sortBy),
-        views: analytics?.page_views || 0
+        views: analytics?.page_views || 0,
+        score: analytics?.page_views || 0, // Add score property
+        price: 0 // Add dummy price for compatibility
       };
     });
   } catch (error) {

@@ -75,6 +75,16 @@ export const CategoryPage = () => {
     );
   }
   
+  // Prepare stats data for CategoryStats
+  const statsData = {
+    name: categoryName || "Category",
+    totalProducts: category?.productCount || 0,
+    totalViews: 0,
+    totalSales: 0,
+    conversations: 0,
+    sellers: 0
+  };
+  
   return (
     <Layout>
       <div className="container py-8">
@@ -118,10 +128,7 @@ export const CategoryPage = () => {
         )}
         
         {/* Category Statistics */}
-        <CategoryStats 
-          totalProducts={category?.productCount || 0}
-          categoryName={categoryName || ""}
-        />
+        <CategoryStats category={statsData} />
         
         {/* Products Grid */}
         <div className="mt-8">

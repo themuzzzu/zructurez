@@ -148,8 +148,8 @@ export const BusinessPortfolioTab = ({ portfolio: initialPortfolio, businessId }
           <div key={item.id} className="border rounded-lg overflow-hidden">
             {item.image_url && (
               <ImagePreview
-                src={item.image_url}
-                alt={item.title}
+                imageUrl={item.image_url}
+                altText={item.title}
                 aspectRatio="video"
                 objectFit="cover"
               />
