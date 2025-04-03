@@ -3,47 +3,38 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { PricingPlans } from "@/components/pricing/PricingPlans";
 import { Badge } from "@/components/ui/badge";
 import { BadgeDollarSign, History, ChevronRight, BarChart3, Rocket, Zap } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { useUserSubscription } from "@/hooks/useUserSubscription";
+
+// Mock payment history data since the payment_history table doesn't exist in Supabase
+const mockPaymentHistory = [
+  {
+    id: "payment-1",
+    user_id: "user-123",
+    description: "Monthly subscription - Basic Plan",
+    amount: 99,
+    created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+    payment_method: "Card ending in 4242",
+    status: "Completed"
+  },
+  {
+    id: "payment-2",
+    user_id: "user-123",
+    description: "Monthly subscription - Basic Plan",
+    amount: 99,
+    created_at: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
+    payment_method: "Card ending in 4242",
+    status: "Completed"
+  }
+];
 
 export const PricingTab = () => {
   const [showAllPlans, setShowAllPlans] = useState(false);
   
-  const { data: currentPlan, isLoading } = useQuery({
-    queryKey: ['user-plan'],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return null;
-      
-      const { data } = await supabase
-        .from('user_subscriptions')
-        .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
-      
-      return data;
-    }
-  });
-
-  const { data: paymentHistory } = useQuery({
-    queryKey: ['payment-history'],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return [];
-      
-      const { data } = await supabase
-        .from('payment_history')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(5);
-      
-      return data || [];
-    }
-  });
+  const { data: currentPlan, isLoading } = useUserSubscription();
+  const paymentHistory = mockPaymentHistory;
 
   const handleSelectPlan = (planId: string) => {
     // This would be connected to a payment processing system
@@ -173,10 +164,10 @@ export const PricingTab = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {paymentHistory.map((payment: any, index: number) => (
+                  {paymentHistory.map((payment, index) => (
                     <div key={index} className="flex justify-between items-center py-3 border-b last:border-0">
                       <div>
-                        <div className="font-medium">{payment.description || `Payment for ${payment.plan_name || "Basic Plan"}`}</div>
+                        <div className="font-medium">{payment.description || `Payment for Basic Plan`}</div>
                         <div className="text-sm text-muted-foreground">
                           {new Date(payment.created_at).toLocaleDateString()} · 
                           {payment.payment_method || "Card ending in 4242"}

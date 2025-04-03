@@ -5,30 +5,15 @@ import { PricingPlans } from "@/components/pricing/PricingPlans";
 import { Badge } from "@/components/ui/badge";
 import { BadgeDollarSign, ChevronRight, ArrowUpRight, Zap, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { useUserSubscription } from "@/hooks/useUserSubscription";
 
 export const PricingSection = () => {
   const [showAllPlans, setShowAllPlans] = useState(false);
   const navigate = useNavigate();
   
-  const { data: currentPlan, isLoading } = useQuery({
-    queryKey: ['user-plan'],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return null;
-      
-      const { data } = await supabase
-        .from('user_subscriptions')
-        .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
-      
-      return data;
-    }
-  });
+  const { data: currentPlan, isLoading } = useUserSubscription();
 
   const handleSelectPlan = (planId: string) => {
     // This would be connected to a payment processing system

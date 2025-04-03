@@ -12,8 +12,8 @@ export const useUserSubscription = () => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return null;
         
-        // Since the user_subscriptions table doesn't exist yet in Supabase,
-        // we'll return the mock data
+        // Since the user_subscriptions table doesn't exist in the Supabase schema,
+        // we'll return the mock data instead of trying to query a non-existent table
         return mockUserSubscription;
       } catch (error) {
         console.error('Error fetching user subscription:', error);

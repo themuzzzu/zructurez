@@ -1,3 +1,5 @@
+
+import { useCallback } from "react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Heart } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
@@ -43,6 +45,9 @@ export const ProductCardImage = ({
   const [isVisible, setIsVisible] = useState(false);
   const [loadingQuote, setLoadingQuote] = useState("");
   const imageRef = useRef<HTMLDivElement>(null);
+  
+  // Define a default fallback source for images
+  const defaultFallbackSrc = "/placeholders/image-placeholder.jpg";
   
   // Optimized image URL with quality and sizing parameters
   const optimizedImageUrl = imageUrl 
@@ -154,7 +159,7 @@ export const ProductCardImage = ({
         {/* Fallback for failed images */}
         {imageFailed && (
           <ImageFallback 
-            src={fallbackSrc || "/placeholders/image-placeholder.jpg"}
+            src={defaultFallbackSrc}
             alt={title} 
             className="w-full h-full" 
           />
