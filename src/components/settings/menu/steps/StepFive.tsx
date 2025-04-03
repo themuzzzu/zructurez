@@ -58,7 +58,6 @@ export const StepFive = ({
     subcategories.length > 0 ? subcategories[0].id : ""
   );
 
-  // Function to get subcategory data with category name
   const getSubcategoryWithCategory = (subcategoryId: string) => {
     const subcategory = subcategories.find(s => s.id === subcategoryId);
     if (!subcategory) return { subcategoryName: "Unknown", categoryName: "Unknown" };
@@ -74,13 +73,11 @@ export const StepFive = ({
   const handleAddItem = () => {
     if (!currentItem.name.trim()) return;
     
-    // Upload image if there is one
     const processImage = async () => {
       let imageUrl = currentItem.imageUrl;
       
       try {
         if (imageUrl && imageUrl.startsWith('data:')) {
-          // Convert base64 to blob
           const base64Data = imageUrl.split(',')[1];
           const byteCharacters = atob(base64Data);
           const byteNumbers = new Array(byteCharacters.length);
@@ -90,7 +87,6 @@ export const StepFive = ({
           const byteArray = new Uint8Array(byteNumbers);
           const blob = new Blob([byteArray], { type: 'image/jpeg' });
           
-          // Upload to menu-images bucket
           const fileName = `menu-${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
           const { data, error } = await supabase.storage
             .from('menu-images')
@@ -98,7 +94,6 @@ export const StepFive = ({
             
           if (error) throw error;
           
-          // Get public URL
           const { data: { publicUrl } } = supabase.storage
             .from('menu-images')
             .getPublicUrl(fileName);
@@ -113,7 +108,6 @@ export const StepFive = ({
       return imageUrl;
     };
     
-    // Process the image and then add the item
     processImage().then(processedImageUrl => {
       const newItem = {
         ...currentItem,
@@ -126,7 +120,6 @@ export const StepFive = ({
         items: [...items, newItem]
       });
       
-      // Reset form
       setCurrentItem({
         id: "",
         name: "",
@@ -155,7 +148,6 @@ export const StepFive = ({
     
     updateFormData({ items: updatedItems });
     
-    // Reset editing state
     setEditingItemId(null);
     setCurrentItem({
       id: "",
@@ -191,7 +183,6 @@ export const StepFive = ({
     });
   };
 
-  // Filter items by selected subcategory
   const filteredItems = items.filter(item => 
     selectedSubcategoryId ? item.subcategoryId === selectedSubcategoryId : true
   );

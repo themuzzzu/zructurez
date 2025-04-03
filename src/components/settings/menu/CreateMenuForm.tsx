@@ -148,7 +148,7 @@ export const CreateMenuForm = ({ businessId }: { businessId: string }) => {
           priceUnit: item.price_unit || '₹',
           imageFile: null,
           imageUrl: item.image_url || '',
-          availability: item.availability || 'in_stock',
+          availability: (item.availability as 'in_stock' | 'out_of_stock') || 'in_stock',
           subcategoryId: item.subcategory_id
         }));
 
