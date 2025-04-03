@@ -8,12 +8,12 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
-interface ServiceAnalyticsProps {
-  serviceId: string;
+interface ProductAnalyticsProps {
+  productId: string;
   isOwner: boolean;
 }
 
-export const ServiceAnalytics = ({ serviceId, isOwner }: ServiceAnalyticsProps) => {
+export const ProductAnalytics = ({ productId, isOwner }: ProductAnalyticsProps) => {
   const [analytics, setAnalytics] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -42,50 +42,50 @@ export const ServiceAnalytics = ({ serviceId, isOwner }: ServiceAnalyticsProps) 
   // Define which features are available based on plan
   const features = {
     basicAnalytics: true, // Available in all plans
-    contactClicks: ["pro", "pro-plus", "master"].includes(planLevel),
-    bookings: ["pro", "pro-plus", "master"].includes(planLevel),
+    wishlistData: ["pro-plus", "master"].includes(planLevel),
+    purchaseData: ["pro-plus", "master"].includes(planLevel),
     detailedCharts: ["pro-plus", "master"].includes(planLevel),
   };
   
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
-        // Fetch service view data
-        const { data: serviceData, error: serviceError } = await supabase
-          .from('services')
+        // Fetch product view data
+        const { data: productData, error: productError } = await supabase
+          .from('products')
           .select('views')
-          .eq('id', serviceId)
+          .eq('id', productId)
           .single();
           
-        if (serviceError) throw serviceError;
+        if (productError) throw productError;
         
         let analyticsData: any = {
-          views: serviceData?.views || 0,
+          views: productData?.views || 0,
           last_updated: new Date().toISOString()
         };
         
         // Only fetch additional data based on plan
-        if (features.contactClicks || features.bookings) {
-          // Count contact clicks
-          if (features.contactClicks) {
-            const { data: contactClicksData, error: contactClicksError } = await supabase
-              .from('search_result_clicks')
+        if (features.wishlistData || features.purchaseData) {
+          // Count wishlists
+          if (features.wishlistData) {
+            const { data: wishlistData, error: wishlistError } = await supabase
+              .from('wishlists')
               .select('*')
-              .eq('result_id', serviceId);
+              .eq('product_id', productId);
               
-            if (contactClicksError) throw contactClicksError;
-            analyticsData.contact_clicks = contactClicksData ? contactClicksData.length : 0;
+            if (wishlistError) throw wishlistError;
+            analyticsData.wishlists = wishlistData ? wishlistData.length : 0;
           }
           
-          // Count bookings
-          if (features.bookings) {
-            const { data: bookingsData, error: bookingsError } = await supabase
-              .from('appointments')
+          // Count purchases
+          if (features.purchaseData) {
+            const { data: purchaseData, error: purchaseError } = await supabase
+              .from('order_items')
               .select('*')
-              .eq('service_name', serviceId);
+              .eq('product_id', productId);
               
-            if (bookingsError) throw bookingsError;
-            analyticsData.bookings = bookingsData ? bookingsData.length : 0;
+            if (purchaseError) throw purchaseError;
+            analyticsData.purchases = purchaseData ? purchaseData.length : 0;
           }
         }
         
@@ -102,7 +102,7 @@ export const ServiceAnalytics = ({ serviceId, isOwner }: ServiceAnalyticsProps) 
     } else {
       setLoading(false);
     }
-  }, [serviceId, isOwner, features]);
+  }, [productId, isOwner, features]);
   
   // If not the owner, don't display analytics
   if (!isOwner) return null;
@@ -111,7 +111,7 @@ export const ServiceAnalytics = ({ serviceId, isOwner }: ServiceAnalyticsProps) 
     return (
       <Card className="w-full mt-6">
         <CardHeader>
-          <CardTitle>Service Analytics</CardTitle>
+          <CardTitle>Product Analytics</CardTitle>
           <CardDescription>Loading engagement data...</CardDescription>
         </CardHeader>
         <CardContent className="flex justify-center py-10">
@@ -123,19 +123,19 @@ export const ServiceAnalytics = ({ serviceId, isOwner }: ServiceAnalyticsProps) 
   
   // If analytics data is empty or has all zeroes, show placeholder
   const hasData = analytics && (analytics.views > 0 || 
-                              (analytics.bookings && analytics.bookings > 0) || 
-                              (analytics.contact_clicks && analytics.contact_clicks > 0));
+                              (analytics.wishlists && analytics.wishlists > 0) || 
+                              (analytics.purchases && analytics.purchases > 0));
   
   if (!hasData) {
     return (
       <Card className="w-full mt-6">
         <CardHeader>
-          <CardTitle>Service Analytics</CardTitle>
+          <CardTitle>Product Analytics</CardTitle>
           <CardDescription>No engagement data yet</CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground text-center py-8">
-            Analytics data will appear here as people interact with your service.
+            Analytics data will appear here as people interact with your product listing.
           </p>
         </CardContent>
       </Card>
@@ -149,16 +149,16 @@ export const ServiceAnalytics = ({ serviceId, isOwner }: ServiceAnalyticsProps) 
   // Prepare chart data
   const chartData = [
     { name: 'Page Views', value: analytics.views || 0 },
-    features.contactClicks && { name: 'Contact Clicks', value: analytics.contact_clicks || 0 },
-    features.bookings && { name: 'Bookings', value: analytics.bookings || 0 }
+    features.wishlistData && { name: 'Wishlists', value: analytics.wishlists || 0 },
+    features.purchaseData && { name: 'Purchases', value: analytics.purchases || 0 }
   ].filter(Boolean);
   
   return (
     <Card className="w-full mt-6">
       <CardHeader>
-        <CardTitle>Service Analytics</CardTitle>
+        <CardTitle>Product Analytics</CardTitle>
         <CardDescription>
-          Engagement metrics for your service listing
+          Engagement metrics for your product listing
           {analytics.last_updated && (
             <span className="block text-xs mt-1">
               Last updated: {new Date(analytics.last_updated).toLocaleString()}
@@ -173,35 +173,35 @@ export const ServiceAnalytics = ({ serviceId, isOwner }: ServiceAnalyticsProps) 
             <p className="text-sm text-muted-foreground">Page Views</p>
           </div>
           
-          {features.contactClicks ? (
+          {features.wishlistData ? (
             <div className="bg-muted/50 p-4 rounded-lg text-center">
-              <h3 className="text-xl font-bold">{analytics.contact_clicks || 0}</h3>
-              <p className="text-sm text-muted-foreground">Contact Clicks</p>
+              <h3 className="text-xl font-bold">{analytics.wishlists || 0}</h3>
+              <p className="text-sm text-muted-foreground">Wishlists</p>
             </div>
           ) : (
             <div className="bg-muted/50 p-4 rounded-lg text-center relative overflow-hidden">
               <div className="absolute inset-0 bg-background/80 backdrop-blur-[1px] z-10 flex flex-col items-center justify-center">
                 <Lock className="h-4 w-4 text-muted-foreground mb-1" />
-                <p className="text-xs font-medium">Pro Plan Required</p>
+                <p className="text-xs font-medium">Pro+ Plan Required</p>
               </div>
               <h3 className="text-xl font-bold">-</h3>
-              <p className="text-sm text-muted-foreground">Contact Clicks</p>
+              <p className="text-sm text-muted-foreground">Wishlists</p>
             </div>
           )}
           
-          {features.bookings ? (
+          {features.purchaseData ? (
             <div className="bg-muted/50 p-4 rounded-lg text-center">
-              <h3 className="text-xl font-bold">{analytics.bookings || 0}</h3>
-              <p className="text-sm text-muted-foreground">Bookings</p>
+              <h3 className="text-xl font-bold">{analytics.purchases || 0}</h3>
+              <p className="text-sm text-muted-foreground">Purchases</p>
             </div>
           ) : (
             <div className="bg-muted/50 p-4 rounded-lg text-center relative overflow-hidden">
               <div className="absolute inset-0 bg-background/80 backdrop-blur-[1px] z-10 flex flex-col items-center justify-center">
                 <Lock className="h-4 w-4 text-muted-foreground mb-1" />
-                <p className="text-xs font-medium">Pro Plan Required</p>
+                <p className="text-xs font-medium">Pro+ Plan Required</p>
               </div>
               <h3 className="text-xl font-bold">-</h3>
-              <p className="text-sm text-muted-foreground">Bookings</p>
+              <p className="text-sm text-muted-foreground">Purchases</p>
             </div>
           )}
         </div>
@@ -237,7 +237,7 @@ export const ServiceAnalytics = ({ serviceId, isOwner }: ServiceAnalyticsProps) 
               <div>
                 <h4 className="font-medium">Want more insights?</h4>
                 <p className="text-sm text-muted-foreground">
-                  Upgrade to Pro or higher to see contact clicks, bookings, and detailed analytics.
+                  Upgrade to Pro+ or Master to see wishlist data, purchase history, and detailed analytics.
                 </p>
               </div>
               <Button size="sm" onClick={handleUpgradeClick}>View Plans</Button>

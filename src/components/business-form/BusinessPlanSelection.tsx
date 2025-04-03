@@ -3,7 +3,8 @@ import { PricingPlans } from "../pricing/PricingPlans";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
-import { Shield, BadgeDollarSign } from "lucide-react";
+import { Shield, BadgeDollarSign, Lock, CheckCircle, Eye, BarChart3, Zap } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface BusinessPlanSelectionProps {
   onSelectPlan: (planId: string) => void;
@@ -26,6 +27,35 @@ export const BusinessPlanSelection = ({
       toast.success(`Plan ${planId} selected successfully`);
     }, 1000);
   };
+
+  const planFeatures = {
+    basic: {
+      products: 5, 
+      services: 1,
+      visibility: "Local",
+      analytics: "Basic Views",
+    },
+    pro: {
+      products: 30, 
+      services: 4,
+      visibility: "Town-wide",
+      analytics: "Views & Clicks",
+    },
+    "pro-plus": {
+      products: 50, 
+      services: 7,
+      visibility: "City-wide",
+      analytics: "Advanced Insights",
+    },
+    master: {
+      products: 100, 
+      services: 15,
+      visibility: "Multi-city",
+      analytics: "Full Analytics",
+    }
+  };
+
+  const selectedPlanFeatures = selectedPlan ? planFeatures[selectedPlan as keyof typeof planFeatures] : null;
 
   return (
     <div className="space-y-6">
@@ -72,6 +102,48 @@ export const BusinessPlanSelection = ({
         <div className="flex justify-center py-4">
           <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
         </div>
+      )}
+
+      {selectedPlanFeatures && (
+        <Alert className="bg-primary/5 border-primary/20">
+          <div className="flex flex-col gap-4">
+            <div className="flex items-start gap-2">
+              <CheckCircle className="h-5 w-5 text-primary mt-0.5" />
+              <div>
+                <AlertTitle>Plan Selected</AlertTitle>
+                <AlertDescription>
+                  You've selected a plan that includes:
+                </AlertDescription>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
+              <div className="flex flex-col items-center p-3 bg-background rounded-lg border">
+                <BadgeDollarSign className="h-5 w-5 text-primary mb-1" />
+                <div className="text-lg font-semibold">{selectedPlanFeatures.products}</div>
+                <div className="text-xs text-muted-foreground">Products</div>
+              </div>
+              
+              <div className="flex flex-col items-center p-3 bg-background rounded-lg border">
+                <Zap className="h-5 w-5 text-primary mb-1" />
+                <div className="text-lg font-semibold">{selectedPlanFeatures.services}</div>
+                <div className="text-xs text-muted-foreground">Services</div>
+              </div>
+              
+              <div className="flex flex-col items-center p-3 bg-background rounded-lg border">
+                <Eye className="h-5 w-5 text-primary mb-1" />
+                <div className="text-lg font-semibold">{selectedPlanFeatures.visibility}</div>
+                <div className="text-xs text-muted-foreground">Visibility</div>
+              </div>
+              
+              <div className="flex flex-col items-center p-3 bg-background rounded-lg border">
+                <BarChart3 className="h-5 w-5 text-primary mb-1" />
+                <div className="text-lg font-semibold text-center text-sm">{selectedPlanFeatures.analytics}</div>
+                <div className="text-xs text-muted-foreground">Analytics</div>
+              </div>
+            </div>
+          </div>
+        </Alert>
       )}
     </div>
   );

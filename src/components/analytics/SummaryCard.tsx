@@ -1,67 +1,92 @@
 
-import { Skeleton } from "@/components/ui/skeleton";
-import { TrendingUp } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { ArrowDown, ArrowUp, LucideIcon } from "lucide-react";
+import { Skeleton } from "../ui/skeleton";
+import { Button } from "../ui/button";
 
 interface SummaryCardProps {
   title: string;
   value: string | number;
-  icon: React.ElementType;
+  icon: LucideIcon;
   change?: number;
-  changeType?: 'positive' | 'negative' | 'neutral';
+  changeType?: "positive" | "negative" | "neutral";
   isLoading?: boolean;
+  isLocked?: boolean;
+  onUpgrade?: () => void;
 }
 
-export const SummaryCard = ({
-  title,
-  value,
-  icon: Icon,
-  change,
-  changeType = 'neutral',
-  isLoading = false
+export const SummaryCard = ({ 
+  title, 
+  value, 
+  icon: Icon, 
+  change, 
+  changeType = "neutral",
+  isLoading = false,
+  isLocked = false,
+  onUpgrade
 }: SummaryCardProps) => {
   if (isLoading) {
     return (
-      <div className="rounded-lg border bg-card shadow-sm">
-        <div className="p-6">
+      <Card>
+        <CardContent className="p-6">
           <div className="flex justify-between items-start">
             <div>
-              <Skeleton className="h-5 w-32 mb-2" />
-              <Skeleton className="h-9 w-24 mb-2" />
-              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-4 w-24 mb-2" />
+              <Skeleton className="h-8 w-16" />
             </div>
-            <Skeleton className="h-8 w-8 rounded-full" />
+            <Skeleton className="h-10 w-10 rounded-full" />
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="rounded-lg border bg-card shadow-sm">
-      <div className="p-6">
+    <Card>
+      <CardContent className="p-6">
         <div className="flex justify-between items-start">
           <div>
-            <p className="text-sm font-medium text-muted-foreground">{title}</p>
-            <p className="text-3xl font-bold mt-2">{value}</p>
-            
-            {change !== undefined && (
-              <div className="flex items-center mt-2">
-                {changeType === 'positive' && <TrendingUp className="h-4 w-4 text-green-500 mr-1" />}
-                {changeType === 'negative' && <TrendingUp className="h-4 w-4 text-red-500 mr-1 rotate-180" />}
-                <span className={`text-sm font-medium ${
+            <p className="text-sm text-muted-foreground mb-1">{title}</p>
+            <div className="flex items-baseline gap-2">
+              <h3 className="text-2xl font-bold">{value}</h3>
+              {change !== undefined && !isLocked && (
+                <span className={`text-xs flex items-center ${
                   changeType === 'positive' ? 'text-green-500' : 
-                  changeType === 'negative' ? 'text-red-500' : 'text-muted-foreground'
+                  changeType === 'negative' ? 'text-red-500' : 
+                  'text-muted-foreground'
                 }`}>
-                  {change > 0 ? '+' : ''}{change}%
+                  {changeType === 'positive' ? <ArrowUp className="h-3 w-3 mr-[2px]" /> : 
+                   changeType === 'negative' ? <ArrowDown className="h-3 w-3 mr-[2px]" /> : null}
+                  {change}%
                 </span>
-              </div>
-            )}
+              )}
+            </div>
           </div>
-          <div className="p-2 bg-primary/10 rounded-full">
-            <Icon className="h-5 w-5 text-primary" />
+          <div className={`p-2 rounded-full ${
+            isLocked ? 'bg-muted' :
+            changeType === 'positive' ? 'bg-green-100' : 
+            changeType === 'negative' ? 'bg-red-100' : 
+            'bg-muted'
+          }`}>
+            <Icon className={`h-5 w-5 ${
+              isLocked ? 'text-muted-foreground' :
+              changeType === 'positive' ? 'text-green-600' : 
+              changeType === 'negative' ? 'text-red-600' : 
+              'text-muted-foreground'
+            }`} />
           </div>
         </div>
-      </div>
-    </div>
+        {isLocked && onUpgrade && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={onUpgrade}
+            className="w-full mt-2 text-xs"
+          >
+            Upgrade to unlock
+          </Button>
+        )}
+      </CardContent>
+    </Card>
   );
 };
