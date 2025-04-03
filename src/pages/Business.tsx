@@ -29,7 +29,6 @@ import { motion } from "framer-motion";
 import { toast } from "sonner";
 import type { Business } from "@/types/business";
 import { BusinessBannerAd } from "@/components/ads/BusinessBannerAd";
-import { RankingSection } from "@/components/business/RankingSection";
 
 interface BusinessWithRating {
   id: string;

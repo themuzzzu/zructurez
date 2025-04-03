@@ -9,7 +9,6 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { UserSubscription } from "@/types/subscription";
 
 export const PricingSection = () => {
   const [showAllPlans, setShowAllPlans] = useState(false);
@@ -21,39 +20,13 @@ export const PricingSection = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
       
-      // Assuming the user_subscriptions table exists in your database
-      try {
-        const { data, error } = await supabase
-          .from('pricing_plans')
-          .select('*')
-          .eq('id', 'pro') // This is a workaround, using a direct query to a plans table
-          .maybeSingle();
-        
-        if (error) throw error;
-        
-        // Map database fields to our UserSubscription interface
-        const subscriptionData: UserSubscription = {
-          id: "sub_1",
-          user_id: user.id,
-          plan_id: data?.id || "basic",
-          plan_name: data?.name || "Basic Plan",
-          status: "active",
-          created_at: new Date().toISOString(),
-          amount: data?.price || 0,
-          billing_interval: "monthly",
-          next_payment_date: new Date(Date.now() + 30*24*60*60*1000).toISOString(),
-          // Use max_listings from database or fallback to defaults
-          product_limit: data?.max_listings || 5,
-          service_limit: data?.message_quota || 1,
-          visibility_level: data?.support_level || "Local",
-          analytics_level: data?.analytics_level || "Basic"
-        };
-        
-        return subscriptionData;
-      } catch (error) {
-        console.error("Error fetching subscription:", error);
-        return null;
-      }
+      const { data } = await supabase
+        .from('user_subscriptions')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      
+      return data;
     }
   });
 

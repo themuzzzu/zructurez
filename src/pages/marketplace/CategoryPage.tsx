@@ -1,143 +1,212 @@
 
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { Layout } from "@/components/layout/Layout";
-import { Breadcrumb } from "@/components/layout/Breadcrumb";
-import { Button } from "@/components/ui/button";
-import { ProductGrid } from "@/components/marketplace/ProductGrid";
-import { supabase } from "@/integrations/supabase/client";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useQuery } from "@tanstack/react-query";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { CategoryStats } from "@/components/marketplace/CategoryStats";
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Layout } from '@/components/layout/Layout';
+import { BannerCarousel } from '@/components/marketplace/BannerCarousel';
+import { CategorySubcategoryGrid } from '@/components/marketplace/CategorySubcategoryGrid';
+import { ShoppingSection } from '@/components/ShoppingSection';
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import { Home, ChevronRight } from 'lucide-react';
+import { SponsoredProducts } from '@/components/marketplace/SponsoredProducts';
+import { supabase } from '@/integrations/supabase/client';
+import { ProductsGrid } from '@/components/products/ProductsGrid';
+import { Skeleton } from '@/components/ui/skeleton';
+import { motion } from 'framer-motion';
 
-export const CategoryPage = () => {
-  const { categoryName } = useParams();
+const CategoryPage = () => {
+  const { categoryId, subcategoryId } = useParams();
   const navigate = useNavigate();
-  const [subcategories, setSubcategories] = useState<string[]>([]);
-  const [selectedSubcategory, setSelectedSubcategory] = useState<string>("");
+  const [categoryData, setCategoryData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
-  // Get category details
-  const { data: category, isLoading: isCategoryLoading } = useQuery({
-    queryKey: ['category', categoryName],
-    queryFn: async () => {
-      // Since we don't have a categories table, we'll create a mock category object
-      const categoryData = {
-        name: categoryName || "Category",
-        description: `Browse all products in the ${categoryName} category`,
-        productCount: 0,
-        image_url: "/placeholder.jpg"
-      };
-      
-      // Get product count for this category
-      const { count } = await supabase
-        .from('products')
-        .select('*', { count: 'exact', head: true })
-        .eq('category', categoryName);
-        
-      return {
-        ...categoryData,
-        productCount: count || 0
-      };
+  // Format category name for display
+  const formattedCategoryName = categoryId ? 
+    categoryId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 
+    'Category';
+
+  // Sample subcategories data to use if database fetch fails
+  const getDefaultSubcategories = () => {
+    if (categoryId === 'electronics') {
+      return [
+        { name: 'Mobile Phones', slug: 'mobile-phones' },
+        { name: 'Laptops & Computers', slug: 'laptops-computers' },
+        { name: 'Audio', slug: 'audio' },
+        { name: 'Cameras', slug: 'cameras' },
+        { name: 'Wearables', slug: 'wearables' },
+        { name: 'Accessories', slug: 'accessories' }
+      ];
+    } else if (categoryId === 'fashion') {
+      return [
+        { name: "Men's Clothing", slug: 'mens-clothing' },
+        { name: "Women's Clothing", slug: 'womens-clothing' },
+        { name: 'Footwear', slug: 'footwear' },
+        { name: 'Watches & Eyewear', slug: 'watches-eyewear' },
+        { name: 'Jewelry', slug: 'jewelry' }
+      ];
+    } else {
+      return [
+        { name: 'Popular Items', slug: 'popular-items' },
+        { name: 'New Arrivals', slug: 'new-arrivals' },
+        { name: 'Best Sellers', slug: 'best-sellers' }
+      ];
     }
-  });
-  
-  // Get subcategories for this category
+  };
+
   useEffect(() => {
-    const fetchSubcategories = async () => {
-      const { data } = await supabase
-        .from('products')
-        .select('subcategory')
-        .eq('category', categoryName)
-        .not('subcategory', 'is', null);
-        
-      if (data) {
-        // Extract unique subcategories
-        const uniqueSubcategories = [...new Set(data.map(item => item.subcategory))];
-        setSubcategories(uniqueSubcategories as string[]);
+    const fetchCategoryData = async () => {
+      if (!categoryId) return;
+      
+      setIsLoading(true);
+      try {
+        // Try to fetch from database first
+        const { data, error } = await supabase
+          .from('categories')
+          .select('*')
+          .eq('slug', categoryId)
+          .single();
+          
+        if (error) {
+          console.error('Error fetching category data:', error);
+          // If table doesn't exist or other error, use default data
+          setCategoryData({ 
+            name: formattedCategoryName,
+            subcategories: getDefaultSubcategories()
+          });
+        } else {
+          setCategoryData(data || { 
+            name: formattedCategoryName,
+            subcategories: getDefaultSubcategories()
+          });
+        }
+      } catch (err) {
+        console.error('Error in category data fetch:', err);
+        setError('Failed to load category data');
+        // Still provide fallback data
+        setCategoryData({ 
+          name: formattedCategoryName,
+          subcategories: getDefaultSubcategories()
+        });
+      } finally {
+        // Add a small delay to prevent flashing on fast connections
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 300);
       }
     };
     
-    if (categoryName) {
-      fetchSubcategories();
-    }
-  }, [categoryName]);
+    fetchCategoryData();
+  }, [categoryId, formattedCategoryName]);
   
-  if (isCategoryLoading) {
+  const containerAnimation = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemAnimation = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 }
+  };
+  
+  if (isLoading) {
     return (
       <Layout>
-        <div className="container py-8">
-          <Skeleton className="h-8 w-48 mb-4" />
-          <Skeleton className="h-64 w-full mb-8" />
-          <Skeleton className="h-96 w-full" />
+        <div className="container max-w-[1400px] mx-auto px-4 py-6">
+          <Skeleton className="h-8 w-64 mb-6" />
+          <Skeleton className="h-48 w-full mb-6" />
+          <Skeleton className="h-12 w-48 mb-2" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 mb-8">
+            {[...Array(6)].map((_, i) => (
+              <Skeleton key={i} className="h-24 w-full rounded-md" />
+            ))}
+          </div>
+          <Skeleton className="h-12 w-48 mb-4" />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[...Array(8)].map((_, i) => (
+              <Skeleton key={i} className="h-64 w-full rounded-md" />
+            ))}
+          </div>
         </div>
       </Layout>
     );
   }
   
-  // Prepare stats data for CategoryStats
-  const statsData = {
-    name: categoryName || "Category",
-    totalProducts: category?.productCount || 0,
-    totalViews: 0,
-    totalSales: 0,
-    conversations: 0,
-    sellers: 0
-  };
-  
   return (
     <Layout>
-      <div className="container py-8">
-        <Breadcrumb
-          items={[
-            { label: "Home", href: "/" },
-            { label: "Marketplace", href: "/marketplace" },
-            { label: categoryName || "Category", href: "#" },
-          ]}
-        />
+      <motion.div 
+        initial="hidden" 
+        animate="show" 
+        variants={containerAnimation}
+        className="container max-w-[1400px] mx-auto px-4 py-6"
+      >
+        {/* Breadcrumb navigation */}
+        <motion.div variants={itemAnimation}>
+          <Breadcrumb className="mb-4">
+            <BreadcrumbItem>
+              <BreadcrumbLink onClick={() => navigate('/')}>
+                <Home className="h-4 w-4 mr-1" />
+                Home
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink onClick={() => navigate('/marketplace')}>
+                Marketplace
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink isCurrentPage>
+                {formattedCategoryName}
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            {subcategoryId && (
+              <>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink isCurrentPage>
+                    {subcategoryId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+              </>
+            )}
+          </Breadcrumb>
+        </motion.div>
         
-        <div className="mt-6 mb-8">
-          <h1 className="text-3xl font-bold mb-2">{category?.name}</h1>
-          <p className="text-muted-foreground">{category?.description}</p>
-        </div>
+        <motion.h1 variants={itemAnimation} className="text-3xl font-bold mb-6">{formattedCategoryName}</motion.h1>
         
-        {/* Subcategory filters */}
-        {subcategories.length > 0 && (
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="text-lg">Subcategories</CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-wrap gap-2">
-              <Button
-                variant={selectedSubcategory === "" ? "default" : "outline"}
-                onClick={() => setSelectedSubcategory("")}
-              >
-                All
-              </Button>
-              {subcategories.map((sub) => (
-                <Button
-                  key={sub}
-                  variant={selectedSubcategory === sub ? "default" : "outline"}
-                  onClick={() => setSelectedSubcategory(sub)}
-                >
-                  {sub}
-                </Button>
-              ))}
-            </CardContent>
-          </Card>
-        )}
+        {/* Banner ad for this category */}
+        <motion.div variants={itemAnimation} className="mb-6">
+          <BannerCarousel />
+        </motion.div>
         
-        {/* Category Statistics */}
-        <CategoryStats category={statsData} />
+        {/* Subcategories */}
+        <motion.div variants={itemAnimation} className="mb-8">
+          <h2 className="text-xl font-bold mb-4">Browse {formattedCategoryName}</h2>
+          <CategorySubcategoryGrid onCategorySelect={(category, subcategory) => {
+            navigate(`/marketplace/category/${category}${subcategory ? `/${subcategory}` : ''}`);
+          }} />
+        </motion.div>
         
-        {/* Products Grid */}
-        <div className="mt-8">
-          <ProductGrid 
-            category={categoryName}
-            subcategory={selectedSubcategory}
+        {/* Sponsored Products for this category */}
+        <motion.div variants={itemAnimation} className="mb-8">
+          <SponsoredProducts />
+        </motion.div>
+        
+        {/* Category Products */}
+        <motion.div variants={itemAnimation} className="mb-8">
+          <ShoppingSection 
+            selectedCategory={categoryId}
+            searchQuery=""
+            title={`${formattedCategoryName} Products`}
           />
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </Layout>
   );
 };

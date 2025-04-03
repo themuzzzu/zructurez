@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button, } from "@/components/ui/button";
 import { Plus, Phone } from "lucide-react";
@@ -18,7 +19,6 @@ import { TopServices } from "@/components/service-marketplace/TopServices";
 import { ServiceIconGrid } from "@/components/service-marketplace/ServiceIconGrid";
 import { SearchInput } from "@/components/SearchInput";
 import { ServiceBannerAd } from "@/components/ads/ServiceBannerAd";
-import { RankingSection } from "@/components/services/RankingSection";
 
 export default function Services() {
   const [services, setServices] = useState([]);
@@ -229,10 +229,6 @@ export default function Services() {
             <p className="text-muted-foreground">No services found</p>
           </div>
         )}
-        
-        <div className="mb-8">
-          <RankingSection />
-        </div>
         
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent className="sm:max-w-[600px] h-[90vh] overflow-y-auto">

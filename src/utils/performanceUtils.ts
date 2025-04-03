@@ -1,87 +1,150 @@
-import React from 'react';
+
+import { memo, useState, useEffect, useCallback } from "react";
+import { getMemoryUsage } from "./performanceTracking";
 
 /**
- * Measures the execution time of an API call and logs it to the console.
- * @param {string} apiName - The name of the API being called.
- * @param {Function} apiCall - The function representing the API call.
- * @returns {Promise<T>} - The result of the API call.
+ * Enhanced memoization function that logs re-renders
+ * @param Component The component to memoize
+ * @param name Optional name for debugging
  */
-export async function measureApiCall<T>(apiName: string, apiCall: () => Promise<T>): Promise<T> {
-  const start = performance.now();
-  try {
-    const result = await apiCall();
-    return result;
-  } finally {
-    const end = performance.now();
-    const duration = end - start;
-    console.log(`${apiName} took ${duration.toFixed(2)}ms`);
-  }
+export function memoWithTracking<P extends object>(
+  Component: React.ComponentType<P>,
+  name?: string
+): React.MemoExoticComponent<React.ComponentType<P>> {
+  const displayName = name || Component.displayName || Component.name || 'Component';
+  
+  // Create a wrapper that logs renders
+  const WrappedComponent = (props: P) => {
+    useEffect(() => {
+      if (process.env.NODE_ENV === 'development') {
+        console.debug(`[Performance] ${displayName} rendered`);
+      }
+    });
+    
+    // Fixed JSX syntax issue - Return React element with proper JSX in createElement format
+    return React.createElement(Component, props);
+  };
+  
+  WrappedComponent.displayName = `Tracked(${displayName})`;
+  
+  // Apply memo
+  return memo(WrappedComponent);
 }
 
 /**
- * Measures the time it takes to load a component and logs it to the console.
- * @param {string} componentName - The name of the component being loaded.
- * @param {Function} componentLoader - A function that imports the component.
- * @returns {Promise<React.ComponentType<any>>} - The loaded component.
- */
-export async function measureComponentLoad(
-  componentName: string,
-  componentLoader: () => Promise<any>
-): Promise<React.ComponentType<any>> {
-  const start = performance.now();
-  try {
-    const component = await componentLoader();
-    return component.default || component;
-  } finally {
-    const end = performance.now();
-    const duration = end - start;
-    console.log(`${componentName} loaded in ${duration.toFixed(2)}ms`);
-  }
-}
-
-/**
- * Creates a debounced version of a function that delays its execution until after
- * a certain amount of time has passed since the last time it was invoked.
- * @param {Function} func - The function to debounce.
- * @param {number} delay - The number of milliseconds to delay.
- * @returns {Function} - The debounced function.
+ * Debounces a function call
+ * @param fn The function to debounce
+ * @param delay Delay in milliseconds
  */
 export function debounce<T extends (...args: any[]) => any>(
-  func: T,
+  fn: T,
   delay: number
 ): (...args: Parameters<T>) => void {
-  let timeoutId: NodeJS.Timeout;
-
-  return function(this: any, ...args: Parameters<T>): void {
+  let timeoutId: ReturnType<typeof setTimeout>;
+  
+  return function debounced(...args: Parameters<T>) {
     clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => func.apply(this, args), delay);
+    timeoutId = setTimeout(() => fn(...args), delay);
   };
 }
 
 /**
- * Creates a throttled version of a function that only gets called once per given interval
+ * Throttles a function call
+ * @param fn The function to throttle
+ * @param limit Time limit in milliseconds
  */
 export function throttle<T extends (...args: any[]) => any>(
-  func: T,
+  fn: T,
   limit: number
 ): (...args: Parameters<T>) => void {
-  let inThrottle: boolean = false;
+  let lastCall = 0;
   
-  return function(this: any, ...args: Parameters<T>): void {
-    if (!inThrottle) {
-      func.apply(this, args);
-      inThrottle = true;
-      setTimeout(() => (inThrottle = false), limit);
+  return function throttled(...args: Parameters<T>) {
+    const now = Date.now();
+    if (now - lastCall >= limit) {
+      lastCall = now;
+      fn(...args);
     }
   };
 }
 
 /**
- * Logs user interactions for performance tracking and analytics.
- * @param {string} eventName - The name of the event being logged.
- * @param {object} metadata - Additional data associated with the event.
+ * Hook for using a debounced value
+ * @param value The value to debounce
+ * @param delay Delay in milliseconds
  */
-export function logUserInteraction(eventName: string, metadata: object = {}): void {
-  console.log(`User interaction: ${eventName}`, metadata);
-  // In a real application, this would send data to an analytics service
+export function useDebounced<T>(value: T, delay: number = 300): T {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+  
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+    
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+  
+  return debouncedValue;
+}
+
+/**
+ * Hook for throttling a callback function
+ * @param callback The callback to throttle
+ * @param delay Delay in milliseconds
+ */
+export function useThrottledCallback<T extends (...args: any[]) => any>(
+  callback: T,
+  delay: number
+): T {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  return useCallback(throttle(callback, delay), []);
+}
+
+/**
+ * Monitor application performance at runtime
+ */
+export function usePerformanceMonitor(interval = 10000) {
+  const [metrics, setMetrics] = useState({
+    memory: null as number | null,
+    domNodes: 0,
+    renderTime: 0,
+  });
+  
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      const memory = getMemoryUsage();
+      const domNodes = document.querySelectorAll('*').length;
+      
+      // Measure render time of next frame
+      const startTime = performance.now();
+      requestAnimationFrame(() => {
+        const renderTime = performance.now() - startTime;
+        
+        setMetrics({
+          memory,
+          domNodes,
+          renderTime,
+        });
+        
+        // Log warnings for potential issues
+        if (memory && memory > 80) {
+          console.warn(`[Performance] High memory usage: ${memory.toFixed(1)}%`);
+        }
+        
+        if (domNodes > 1500) {
+          console.warn(`[Performance] High DOM node count: ${domNodes}`);
+        }
+        
+        if (renderTime > 16.67) { // 60fps threshold
+          console.warn(`[Performance] Slow frame render: ${renderTime.toFixed(1)}ms`);
+        }
+      });
+    }, interval);
+    
+    return () => clearInterval(intervalId);
+  }, [interval]);
+  
+  return metrics;
 }

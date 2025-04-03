@@ -173,8 +173,8 @@ export const BusinessPhotosTab = ({ businessId, businessName }: BusinessPhotosTa
           {photos.map((photo) => (
             <div key={photo.id} className="relative overflow-hidden rounded-lg">
               <ImagePreview
-                imageUrl={photo.image_url}
-                altText={photo.title}
+                src={photo.image_url}
+                alt={photo.title}
                 aspectRatio="square"
                 objectFit="cover"
               />

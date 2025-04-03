@@ -1,32 +1,45 @@
 
 /**
- * Formats a price value with currency symbol
- * @param price The price to format
- * @param currency The currency symbol to use, defaults to ₹
- * @returns Formatted price string
+ * Formats a price value as a currency string
  */
-export const formatPrice = (price: number, currency: string = '₹'): string => {
-  return `${currency}${price.toLocaleString('en-IN')}`;
+export const formatPrice = (price: number): string => {
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(price);
 };
 
 /**
- * Calculate discount percentage
- * @param originalPrice Original price
- * @param discountedPrice Discounted price
- * @returns Discount percentage
+ * Calculates the discount percentage based on original and current price
  */
-export const calculateDiscountPercentage = (originalPrice: number, discountedPrice: number): number => {
-  if (originalPrice <= 0 || discountedPrice >= originalPrice) return 0;
-  return Math.round(((originalPrice - discountedPrice) / originalPrice) * 100);
+export const calculateDiscountPercentage = (
+  originalPrice: number,
+  currentPrice: number
+): number => {
+  if (!originalPrice || originalPrice <= 0 || !currentPrice || currentPrice <= 0) {
+    return 0;
+  }
+  
+  const discount = originalPrice - currentPrice;
+  const percentage = Math.round((discount / originalPrice) * 100);
+  
+  return percentage;
 };
 
 /**
- * Check if a product is on sale
- * @param originalPrice Original price
- * @param currentPrice Current price
- * @returns Boolean indicating if product is on sale
+ * Returns a truncated product description
  */
-export const isOnSale = (originalPrice?: number, currentPrice?: number): boolean => {
-  if (!originalPrice || !currentPrice) return false;
-  return originalPrice > currentPrice;
+export const truncateDescription = (
+  description: string,
+  maxLength: number = 100
+): string => {
+  if (!description) return '';
+  
+  if (description.length <= maxLength) {
+    return description;
+  }
+  
+  return `${description.slice(0, maxLength)}...`;
 };

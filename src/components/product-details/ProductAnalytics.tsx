@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
@@ -25,12 +26,12 @@ export const ProductAnalytics = ({ productId, isOwner }: ProductAnalyticsProps) 
       if (!user) return null;
       
       const { data } = await supabase
-        .from('pricing_plans')
+        .from('user_subscriptions')
         .select('*')
-        .eq('name', 'pro-plus')
+        .eq('user_id', user.id)
         .maybeSingle();
       
-      return { plan_id: data?.id || "basic" };
+      return data;
     },
     enabled: isOwner
   });
@@ -158,7 +159,7 @@ export const ProductAnalytics = ({ productId, isOwner }: ProductAnalyticsProps) 
         <CardTitle>Product Analytics</CardTitle>
         <CardDescription>
           Engagement metrics for your product listing
-          {analytics?.last_updated && (
+          {analytics.last_updated && (
             <span className="block text-xs mt-1">
               Last updated: {new Date(analytics.last_updated).toLocaleString()}
             </span>

@@ -30,16 +30,15 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { UserPlanInfo } from "../pricing/UserPlanInfo";
-import { supabase } from "@/integrations/supabase/client";
 
 export const UserMenu = () => {
   const navigate = useNavigate();
-  const { user, session } = useAuth();
+  const { user, signOut } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
 
   const handleSignOut = async () => {
     try {
-      await supabase.auth.signOut();
+      await signOut();
       toast.success("Signed out successfully");
       navigate("/");
     } catch (error) {

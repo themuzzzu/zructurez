@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PricingPlans } from "@/components/pricing/PricingPlans";
 import { Badge } from "@/components/ui/badge";
@@ -7,7 +8,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { PaymentHistory, UserSubscription } from "@/types/subscription";
 
 export const PricingTab = () => {
   const [showAllPlans, setShowAllPlans] = useState(false);
@@ -18,36 +18,13 @@ export const PricingTab = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
       
-      try {
-        const { data, error } = await supabase
-          .from('pricing_plans')
-          .select('*')
-          .eq('id', 'pro') // This is a workaround, using a direct query to a plans table
-          .maybeSingle();
-        
-        if (error) throw error;
-        
-        const subscriptionData: UserSubscription = {
-          id: "sub_1",
-          user_id: user.id,
-          plan_id: data?.id || "basic",
-          plan_name: data?.name || "Basic Plan",
-          status: "active",
-          created_at: new Date().toISOString(),
-          amount: data?.price || 0,
-          billing_interval: "monthly",
-          next_payment_date: new Date(Date.now() + 30*24*60*60*1000).toISOString(),
-          product_limit: data?.max_listings || 5,
-          service_limit: data?.message_quota || 1,
-          visibility_level: data?.support_level || "Local",
-          analytics_level: data?.analytics_level || "Basic"
-        };
-        
-        return subscriptionData;
-      } catch (error) {
-        console.error("Error fetching subscription:", error);
-        return null;
-      }
+      const { data } = await supabase
+        .from('user_subscriptions')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      
+      return data;
     }
   });
 
@@ -57,32 +34,19 @@ export const PricingTab = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return [];
       
-      const mockPaymentHistory: PaymentHistory[] = [
-        {
-          id: "pay_1",
-          user_id: user.id,
-          amount: 299,
-          status: "completed",
-          payment_date: new Date(Date.now() - 30*24*60*60*1000).toISOString(),
-          plan_name: "Pro Plan",
-          transaction_id: "tx_123456"
-        },
-        {
-          id: "pay_2",
-          user_id: user.id,
-          amount: 299,
-          status: "completed",
-          payment_date: new Date(Date.now() - 60*24*60*60*1000).toISOString(),
-          plan_name: "Pro Plan",
-          transaction_id: "tx_123455"
-        }
-      ];
+      const { data } = await supabase
+        .from('payment_history')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(5);
       
-      return mockPaymentHistory;
+      return data || [];
     }
   });
 
   const handleSelectPlan = (planId: string) => {
+    // This would be connected to a payment processing system
     toast.success(`Plan ${planId} selected! Payment flow would start here.`);
   };
 
@@ -209,19 +173,19 @@ export const PricingTab = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {paymentHistory.map((payment: PaymentHistory, index: number) => (
+                  {paymentHistory.map((payment: any, index: number) => (
                     <div key={index} className="flex justify-between items-center py-3 border-b last:border-0">
                       <div>
-                        <div className="font-medium">{`Payment for ${payment.plan_name || "Basic Plan"}`}</div>
+                        <div className="font-medium">{payment.description || `Payment for ${payment.plan_name || "Basic Plan"}`}</div>
                         <div className="text-sm text-muted-foreground">
-                          {new Date(payment.payment_date).toLocaleDateString()} · 
-                          Card ending in 4242
+                          {new Date(payment.created_at).toLocaleDateString()} · 
+                          {payment.payment_method || "Card ending in 4242"}
                         </div>
                       </div>
                       <div className="text-right">
                         <div className="font-medium">₹{payment.amount}</div>
                         <Badge variant="outline" className="text-xs">
-                          {payment.status}
+                          {payment.status || "Completed"}
                         </Badge>
                       </div>
                     </div>
