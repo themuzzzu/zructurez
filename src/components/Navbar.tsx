@@ -84,7 +84,7 @@ export const Navbar = () => {
             )}
             <CartButton />
             <Separator orientation="vertical" className="h-6 hidden sm:block" />
-            <UserMenu profile={profile} />
+            <UserMenu />
           </div>
         </div>
       </nav>

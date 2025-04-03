@@ -28,8 +28,8 @@ export const ProductRankings = () => {
       // Get products with the most entries in the wishlists table
       const { data, error } = await supabase
         .from('wishlists')
-        .select('product_id, count')
-        .group('product_id')
+        .select('product_id, count(*)')
+        .groupBy('product_id')
         .order('count', { ascending: false })
         .limit(8);
       
@@ -89,7 +89,19 @@ export const ProductRankings = () => {
       items={products}
       renderItem={(product, index) => (
         <ProductCard
-          product={product}
+          product={{
+            id: product.id,
+            title: product.title,
+            description: product.description,
+            price: product.price,
+            image_url: product.image_url,
+            category: product.category,
+            views: product.views,
+            stock: product.stock,
+            is_discounted: product.is_discounted,
+            discount_percentage: product.discount_percentage,
+            original_price: product.original_price
+          }}
           layout="grid1x1"
         />
       )}

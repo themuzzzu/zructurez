@@ -60,7 +60,7 @@ export function ImagePreview({
           className
         )}
       >
-        <ImageFallback
+        <img
           src={src ?? ""}
           alt={alt}
           className={cn(

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
@@ -7,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useUserSubscription } from "@/hooks/useUserSubscription";
 
 interface ProductAnalyticsProps {
   productId: string;
@@ -19,22 +19,7 @@ export const ProductAnalytics = ({ productId, isOwner }: ProductAnalyticsProps) 
   const navigate = useNavigate();
   
   // Get the user's current plan
-  const { data: userPlan, isLoading: isPlanLoading } = useQuery({
-    queryKey: ['user-plan'],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return null;
-      
-      const { data } = await supabase
-        .from('user_subscriptions')
-        .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
-      
-      return data;
-    },
-    enabled: isOwner
-  });
+  const { data: userPlan, isLoading: isPlanLoading } = useUserSubscription();
   
   // Determine plan level (default to "basic" if no plan is found)
   const planLevel = userPlan?.plan_id || "basic";

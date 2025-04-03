@@ -83,9 +83,17 @@ export const BusinessRankings = () => {
           id={business.id}
           name={business.name}
           category={business.category}
-          image={business.image_url}
-          location={business.location}
+          description={business.description || ""}
+          image_url={business.image_url}
+          location={business.location || ""}
           rating={4.5} // Default rating for now
+          reviews={10} // Default reviews count
+          contact={business.contact}
+          hours={business.hours}
+          appointment_price={business.appointment_price}
+          consultation_price={business.consultation_price}
+          is_open={business.is_open}
+          verified={business.verified}
         />
       )}
     />

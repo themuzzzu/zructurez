@@ -1,23 +1,31 @@
 
-import React, { useState } from 'react';
-import { ImageOff } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import React, { useState } from "react";
+import { cn } from "@/lib/utils";
 
-interface ImageFallbackProps {
-  alt: string;
+export interface ImageFallbackProps {
+  src: string;
+  alt?: string;
+  fallbackSrc?: string;
   className?: string;
-  fallbackClassName?: string;
+  onClick?: () => void;
 }
 
-export const ImageFallback: React.FC<ImageFallbackProps> = ({
-  alt,
+export const ImageFallback = ({
+  src,
+  alt = "Image",
+  fallbackSrc = "/placeholders/image-placeholder.jpg",
   className,
-  fallbackClassName
-}) => {
+  onClick,
+}: ImageFallbackProps) => {
+  const [error, setError] = useState(false);
+
   return (
-    <div className={cn('flex items-center justify-center bg-muted h-full w-full', className)}>
-      <ImageOff className={cn('text-muted-foreground h-10 w-10', fallbackClassName)} />
-      <span className="sr-only">{alt}</span>
-    </div>
+    <img
+      src={error ? fallbackSrc : src}
+      alt={alt}
+      className={cn(className)}
+      onError={() => setError(true)}
+      onClick={onClick}
+    />
   );
 };

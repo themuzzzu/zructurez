@@ -39,22 +39,22 @@ export const ProfileTabs = ({ profileId }: ProfileTabsProps) => {
       </TabsList>
 
       <TabsContent value="posts">
-        <PostsTab profileId={profileId} />
+        <PostsTab />
       </TabsContent>
 
       <TabsContent value="services">
-        <ServicesTab profileId={profileId} />
+        <ServicesTab />
       </TabsContent>
 
       <TabsContent value="businesses">
-        <BusinessesTab profileId={profileId} />
+        <BusinessesTab />
         
         {/* Add the BusinessRankings component */}
         {!profileId && <BusinessRankings />}
       </TabsContent>
 
       <TabsContent value="followers">
-        <FollowersTab profileId={profileId} />
+        <FollowersTab />
       </TabsContent>
 
       {isOwnProfile && (
