@@ -1,3 +1,4 @@
+
 import { useState, useEffect, lazy, Suspense } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -5,6 +6,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
 import { Loader2 } from "lucide-react";
 import { queryClient, prefetchCommonQueries } from "@/lib/react-query";
+import { AuthProvider } from "@/providers/AuthProvider";
 
 // Always loaded components
 import { LoadingView } from "@/components/LoadingView";
@@ -62,51 +64,53 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="dark" storageKey="lovable-theme">
-        <div className={isLoading ? "hidden" : "app"}>
-          <Suspense fallback={<LoadingView />}>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/events" element={<Events />} />
-              <Route path="/jobs" element={<Jobs />} />
-              <Route path="/marketplace" element={<Marketplace />} />
-              <Route path="/marketplace/*" element={<Marketplace />} />
-              <Route path="/products" element={<Marketplace />} />
-              <Route path="/businesses" element={<Business />} />
-              <Route path="/businesses/:id" element={<BusinessDetails />} />
-              <Route path="/register-business" element={<BusinessRegistrationForm />} />
-              <Route path="/products/:id" element={<ProductDetails />} />
-              <Route path="/product/:id" element={<ProductDetails />} />
-              <Route path="/services" element={<Services />} />
-              <Route path="/services/:id" element={<ServiceDetails />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/profile/:id" element={<Profile />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/wishlist" element={<Wishlist />} />
-              <Route path="/maps" element={<Maps />} />
-              <Route path="/communities" element={<Communities />} />
-              <Route path="/messages/*" element={<MessagesPage />} />
-              <Route path="/messages" element={<MessagesPage />} />
-              <Route path="/search" element={<Search />} />
-              <Route path="/orders" element={<Orders />} />
-              <Route path="/checkout" element={<Checkout />} />
-              <Route path="/pricing" element={<Pricing />} />
-              <Route path="/admin/ads" element={<AdDashboard />} />
-              <Route path="/admin/analytics" element={<AdAnalytics />} />
-              <Route path="/admin/placement" element={<AdPlacement />} />
-              <Route path="/admin/auction" element={<AdAuction />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
-        </div>
-        {isLoading && (
-          <div className="flex flex-col space-y-4 items-center justify-center min-h-screen">
-            <Loader2 className="h-10 w-10 animate-spin text-primary" />
-            <p className="animate-pulse">Loading application...</p>
+        <AuthProvider>
+          <div className={isLoading ? "hidden" : "app"}>
+            <Suspense fallback={<LoadingView />}>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/events" element={<Events />} />
+                <Route path="/jobs" element={<Jobs />} />
+                <Route path="/marketplace" element={<Marketplace />} />
+                <Route path="/marketplace/*" element={<Marketplace />} />
+                <Route path="/products" element={<Marketplace />} />
+                <Route path="/businesses" element={<Business />} />
+                <Route path="/businesses/:id" element={<BusinessDetails />} />
+                <Route path="/register-business" element={<BusinessRegistrationForm />} />
+                <Route path="/products/:id" element={<ProductDetails />} />
+                <Route path="/product/:id" element={<ProductDetails />} />
+                <Route path="/services" element={<Services />} />
+                <Route path="/services/:id" element={<ServiceDetails />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/profile/:id" element={<Profile />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/wishlist" element={<Wishlist />} />
+                <Route path="/maps" element={<Maps />} />
+                <Route path="/communities" element={<Communities />} />
+                <Route path="/messages/*" element={<MessagesPage />} />
+                <Route path="/messages" element={<MessagesPage />} />
+                <Route path="/search" element={<Search />} />
+                <Route path="/orders" element={<Orders />} />
+                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/pricing" element={<Pricing />} />
+                <Route path="/admin/ads" element={<AdDashboard />} />
+                <Route path="/admin/analytics" element={<AdAnalytics />} />
+                <Route path="/admin/placement" element={<AdPlacement />} />
+                <Route path="/admin/auction" element={<AdAuction />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
           </div>
-        )}
-        <Toaster />
+          {isLoading && (
+            <div className="flex flex-col space-y-4 items-center justify-center min-h-screen">
+              <Loader2 className="h-10 w-10 animate-spin text-primary" />
+              <p className="animate-pulse">Loading application...</p>
+            </div>
+          )}
+          <Toaster />
+        </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );

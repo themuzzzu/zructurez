@@ -24,11 +24,11 @@ import {
   AvatarFallback, 
   AvatarImage 
 } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { Button } from "./ui/button";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "../ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/providers/AuthProvider";
+import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { UserPlanInfo } from "../pricing/UserPlanInfo";
 
