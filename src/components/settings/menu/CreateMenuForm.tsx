@@ -166,7 +166,7 @@ export const CreateMenuForm = ({ businessId }: { businessId: string }) => {
 
         return {
           ...prev,
-          displayType: existingMenu.menu.display_type || 'menu',
+          displayType: (existingMenu.menu.display_type as MenuType) || 'menu',
           categories: formattedCategories,
           subcategories: formattedSubcategories,
           items: formattedItems

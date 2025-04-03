@@ -41,7 +41,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onRefresh }) => {
 
   // Default values for profile if not available
   const username = post.profile?.username || 'Anonymous';
-  const fullName = post.profile?.full_name || 'User';
+  const fullName = post.profile?.name || 'User'; // Changed from full_name to name
   const avatarUrl = post.profile?.avatar_url;
   // Get initials for avatar fallback
   const initials = fullName.split(' ').map(name => name[0]).join('').toUpperCase();

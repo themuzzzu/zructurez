@@ -2,18 +2,7 @@
 import type { MembershipPlan } from "@/types/membership";
 import type { Owner } from "./owner";
 import type { StaffMember } from "./staff";
-
-export interface BusinessProduct {
-  id: string; // Changed from optional to required
-  name: string;
-  price: number;
-  description: string;
-  category?: string;
-  image_url?: string;
-  stock?: number;
-  created_at?: string;
-  business_id?: string;
-}
+import type { BusinessProduct } from "@/types/business"; // Import from central type definition
 
 export interface BusinessFormData {
   name: string;

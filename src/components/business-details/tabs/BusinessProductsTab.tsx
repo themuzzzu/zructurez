@@ -183,12 +183,14 @@ export const BusinessProductsTab = ({ businessId, isOwner, products, onSuccess }
         </div>
       ) : (
         <BusinessContent
-          // Create a minimal Business object with required properties
+          // Create a complete Business object with required properties
           business={{ 
             id: businessId,
-            name: "", // Provide empty strings for required properties
+            name: "", 
             description: "",
-            category: ""
+            category: "",
+            user_id: "", // Adding required property
+            created_at: new Date().toISOString() // Adding required property
           }}
           business_products={filteredProducts}
           business_portfolio={[]}

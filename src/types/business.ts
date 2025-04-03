@@ -42,7 +42,7 @@ export interface BusinessMenu {
 
 export interface BusinessProduct {
   id: string;
-  business_id: string;
+  business_id: string; // Making this required to match other usage
   name: string;
   description?: string;
   price: number;

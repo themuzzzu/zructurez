@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -97,7 +96,7 @@ export const BusinessMenuTab = ({ businessId }: BusinessMenuTabProps) => {
     );
   }
 
-  const displayType: MenuType = menuData.menu.display_type || 'menu';
+  const displayType: MenuType = menuData.menu.display_type as MenuType || 'menu';
 
   // Group subcategories by category
   const categoriesWithSubcategories = menuData.categories.map(category => {
