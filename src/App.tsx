@@ -85,6 +85,8 @@ function App() {
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/profile/:id" element={<Profile />} />
                 <Route path="/settings" element={<Settings />} />
+                <Route path="/settings/pricing" element={<Pricing />} />
+                <Route path="/pricing" element={<Pricing />} />
                 <Route path="/wishlist" element={<Wishlist />} />
                 <Route path="/maps" element={<Maps />} />
                 <Route path="/communities" element={<Communities />} />
@@ -93,7 +95,6 @@ function App() {
                 <Route path="/search" element={<Search />} />
                 <Route path="/orders" element={<Orders />} />
                 <Route path="/checkout" element={<Checkout />} />
-                <Route path="/pricing" element={<Pricing />} />
                 <Route path="/admin/ads" element={<AdDashboard />} />
                 <Route path="/admin/analytics" element={<AdAnalytics />} />
                 <Route path="/admin/placement" element={<AdPlacement />} />

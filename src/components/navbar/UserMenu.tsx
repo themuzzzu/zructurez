@@ -24,10 +24,9 @@ import {
   AvatarFallback, 
   AvatarImage 
 } from "@/components/ui/avatar";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Badge } from "../ui/badge";
-import { supabase } from "@/integrations/supabase/client";
+import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { UserPlanInfo } from "../pricing/UserPlanInfo";
@@ -81,7 +80,7 @@ export const UserMenu = () => {
         </DropdownMenuLabel>
         
         {/* Add current plan info */}
-        <UserPlanInfo user={user} onUpgradeClick={() => navigateTo("/settings/pricing")} />
+        <UserPlanInfo user={user} onUpgradeClick={() => navigateTo("/pricing")} />
         
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
@@ -103,7 +102,7 @@ export const UserMenu = () => {
             <span>Cart</span>
             <Badge className="ml-auto px-1 text-xs" variant="secondary">2</Badge>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => navigateTo("/settings/pricing")}>
+          <DropdownMenuItem onClick={() => navigateTo("/pricing")}>
             <BadgeDollarSign className="mr-2 h-4 w-4" />
             <span>Pricing Plans</span>
             <ChevronRight className="ml-auto h-4 w-4" />

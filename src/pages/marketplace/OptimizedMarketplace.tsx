@@ -13,9 +13,9 @@ import { PersonalizedRecommendations } from "@/components/marketplace/Personaliz
 import { TopProducts } from "@/components/recommendations/TopProducts";
 import { CategoryIconGrid } from "@/components/marketplace/CategoryIconGrid";
 
-// Import from correct location
-import { BrowseTabContent } from "@/components/marketplace/BrowseTabContent";
-import { SearchTabContent } from "@/components/marketplace/SearchTabContent";
+// Import from correct location - make sure components exist at these paths
+import { BrowseTabContent } from "@/pages/marketplace/BrowseTabContent";
+import { SearchTabContent } from "@/pages/marketplace/SearchTabContent";
 
 const OptimizedMarketplace = () => {
   const navigate = useNavigate();
