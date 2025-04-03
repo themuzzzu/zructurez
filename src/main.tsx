@@ -7,7 +7,7 @@ import './index.css';
 
 // Set initial theme based on saved preference or system preference
 const setInitialTheme = () => {
-  const storedTheme = localStorage.getItem('app-theme');
+  const storedTheme = localStorage.getItem('lovable-theme');
   if (storedTheme === 'dark' || storedTheme === 'light') {
     document.documentElement.classList.add(storedTheme);
   } else {
