@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Eye, Heart, MessageCircle, Repeat2 } from "lucide-react";
 import { incrementViews } from "@/services/postService";
@@ -7,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "./ui/button";
 import { CommentSection } from "./CommentSection";
+import { AvatarWithFallback } from "@/components/ui/avatar-with-fallback";
 
 interface PostCardProps {
   id: string;
@@ -160,7 +160,12 @@ export const PostCard = ({
         </div>
       )}
       <div className="flex items-center">
-        <img src={avatar} alt={author} className="w-10 h-10 rounded-full" />
+        <AvatarWithFallback
+          src={avatar}
+          name={author}
+          size="md"
+        />
+        
         <div className="ml-2">
           <h3 className="font-semibold">{author}</h3>
           <p className="text-sm text-muted-foreground">{time}</p>

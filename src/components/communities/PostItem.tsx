@@ -1,8 +1,8 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { AvatarWithFallback } from "@/components/ui/avatar-with-fallback";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Post, Poll, PollVote } from "./types/postTypes";
@@ -111,13 +111,12 @@ export const PostItem = ({ post, onVote }: PostItemProps) => {
   return (
     <Card key={post.id} className="p-4">
       <div className="flex items-start gap-4">
-        <Avatar className="h-10 w-10">
-          <AvatarImage 
-            src={post.profile?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${post.user_id}`} 
-            alt={post.profile?.username || "User"} 
-          />
-          <AvatarFallback>{post.profile?.username?.charAt(0) || "U"}</AvatarFallback>
-        </Avatar>
+        <AvatarWithFallback 
+          src={post.profile?.avatar_url}
+          name={post.profile?.username} 
+          userId={post.user_id}
+          size="md"
+        />
         <div className="flex-1">
           <div className="flex justify-between">
             <div>

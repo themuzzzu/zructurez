@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Star, Reply } from "lucide-react";
 import { ReplyForm } from "./ReplyForm";
+import { AvatarWithFallback } from "@/components/ui/avatar-with-fallback";
 
 interface CommentItemProps {
   comment: any;
@@ -24,12 +25,12 @@ export const CommentItem = ({
   return (
     <div className="space-y-4">
       <div className="flex gap-4 p-4 border rounded-lg">
-        <Avatar className="h-10 w-10">
-          <img
-            src={comment.profile?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.user_id}`}
-            alt={comment.profile?.username || "User"}
-          />
-        </Avatar>
+        <AvatarWithFallback 
+          src={comment.profile?.avatar_url}
+          name={comment.profile?.username}
+          userId={comment.user_id}
+          size="md"
+        />
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
             <span className="font-medium">

@@ -1,4 +1,3 @@
-
 import { Chat } from "@/types/chat";
 import { ChatMenu } from "./ChatMenu";
 import { formatDistanceToNow } from "date-fns";
@@ -6,6 +5,7 @@ import { Phone, Video, ArrowLeft, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { AvatarWithFallback } from '@/components/ui/avatar-with-fallback';
 
 interface ChatHeaderProps {
   chat: Chat;
@@ -99,10 +99,11 @@ export const ChatHeader = ({
           >
             <div className="flex items-center gap-3">
               <div className="relative">
-                <img
+                <AvatarWithFallback
                   src={chat.avatar}
-                  alt={chat.name}
-                  className="w-10 h-10 rounded-full"
+                  name={chat.name}
+                  userId={chat.userId}
+                  size="md"
                 />
                 {userPresence[chat.userId] === 'online' && (
                   <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>

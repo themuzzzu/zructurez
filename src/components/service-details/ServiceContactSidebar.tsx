@@ -1,8 +1,8 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { PhoneCall, MessageCircle, DollarSign } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { AvatarWithFallback } from "@/components/ui/avatar-with-fallback";
 import { useNavigate } from "react-router-dom";
 
 interface ServiceContactSidebarProps {
@@ -40,10 +40,13 @@ export const ServiceContactSidebar = ({
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Avatar className="h-10 w-10">
-              <AvatarImage src={providerAvatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userId}`} />
-              <AvatarFallback>{providerName?.charAt(0) || "S"}</AvatarFallback>
-            </Avatar>
+            <AvatarWithFallback
+              src={providerAvatar}
+              name={providerName}
+              userId={userId}
+              size="md"
+            />
+            
             <div>
               <h3 className="font-medium">{providerName || "Service Provider"}</h3>
               <p className="text-sm text-muted-foreground">Service Provider</p>

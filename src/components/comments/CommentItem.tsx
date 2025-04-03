@@ -1,5 +1,5 @@
 
-import { Avatar } from "../ui/avatar";
+import { AvatarWithFallback } from "../ui/avatar-with-fallback";
 
 interface CommentItemProps {
   comment: {
@@ -17,13 +17,12 @@ interface CommentItemProps {
 export const CommentItem = ({ comment }: CommentItemProps) => {
   return (
     <div className="flex gap-4 animate-fade-up">
-      <Avatar>
-        <img
-          src={comment.profile?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${comment.user_id}`}
-          alt={`${comment.profile?.username || 'Anonymous'}'s avatar`}
-          className="h-8 w-8 rounded-full"
-        />
-      </Avatar>
+      <AvatarWithFallback
+        src={comment.profile?.avatar_url}
+        name={comment.profile?.username}
+        userId={comment.user_id}
+        size="sm"
+      />
       <div className="flex-1">
         <div className="flex items-center gap-2">
           <span className="font-semibold">{comment.profile?.username || 'Anonymous'}</span>

@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import {
@@ -12,6 +11,7 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Heart } from "lucide-react";
+import { AvatarWithFallback } from "@/components/ui/avatar-with-fallback";
 
 interface UserMenuProps {
   profile: {
@@ -46,10 +46,11 @@ export const UserMenu = ({ profile }: UserMenuProps) => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="flex gap-2 transition-all duration-300 hover:bg-accent/80">
-          <img 
-            src={profile?.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"} 
-            alt="avatar" 
-            className="h-6 w-6 rounded-full transition-transform duration-300 hover:scale-110" 
+          <AvatarWithFallback 
+            src={profile?.avatar_url} 
+            name={profile?.username}
+            size="sm"
+            className="transition-transform duration-300 hover:scale-110"
           />
           <span className="text-sm hidden sm:inline">{profile?.username || 'User'}</span>
         </Button>

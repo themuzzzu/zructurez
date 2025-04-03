@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { incrementViews } from "@/services/postService";
@@ -7,6 +6,7 @@ import { PostHeader } from "./post/PostHeader";
 import { PostActions } from "./post/PostActions";
 import { usePostLike } from "@/hooks/usePostLike";
 import { CommentSection } from "./CommentSection";
+import { AvatarWithFallback } from "@/components/ui/avatar-with-fallback";
 
 interface PostCardProps {
   id: string;
@@ -47,10 +47,12 @@ export const EnhancedPostCard = ({
   return (
     <div className="p-4">
       <div className="flex">
-        <Avatar className="h-10 w-10 mr-3 mt-1 flex-shrink-0">
-          <AvatarImage src={avatar} alt={author} />
-          <AvatarFallback>{author[0]}</AvatarFallback>
-        </Avatar>
+        <AvatarWithFallback
+          src={avatar}
+          name={author}
+          size="md"
+          className="mr-3 mt-1 flex-shrink-0"
+        />
         
         <div className="flex-1 min-w-0">
           <PostHeader author={author} avatar={avatar} time={time} />

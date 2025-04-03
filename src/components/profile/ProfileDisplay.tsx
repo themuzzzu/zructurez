@@ -1,9 +1,9 @@
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Edit, MapPin, User, Calendar, Mail, Phone } from "lucide-react";
 import type { Profile } from "@/types/profile";
 import { Badge } from "@/components/ui/badge";
+import { AvatarWithFallback } from "@/components/ui/avatar-with-fallback";
 
 interface ProfileDisplayProps {
   profile: Profile;
@@ -20,15 +20,13 @@ export function ProfileDisplay({ profile, onEdit, isOwnProfile = true }: Profile
         
         {/* Profile Picture - Positioned to overflow onto the cover photo */}
         <div className="absolute -bottom-12 left-6">
-          <Avatar className="h-24 w-24 border-4 border-background shadow-md">
-            <AvatarImage 
-              src={profile.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"} 
-              alt="Profile" 
-            />
-            <AvatarFallback>
-              <User className="h-12 w-12" />
-            </AvatarFallback>
-          </Avatar>
+          <AvatarWithFallback 
+            src={profile.avatar_url} 
+            name={profile.username || profile.name}
+            userId={profile.id}
+            size="xl"
+            className="border-4 border-background shadow-md"
+          />
         </div>
         
         {isOwnProfile && (

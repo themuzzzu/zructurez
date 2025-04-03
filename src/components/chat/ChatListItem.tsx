@@ -1,8 +1,7 @@
-
 import { useState } from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { formatDistanceToNow } from 'date-fns';
 import type { Chat } from '@/types/chat';
+import { AvatarWithFallback } from '@/components/ui/avatar-with-fallback';
 
 interface ChatListItemProps {
   chat: Chat;
@@ -40,10 +39,12 @@ export const ChatListItem = ({
       onClick={onSelect}
     >
       <div className="relative">
-        <Avatar className="h-10 w-10">
-          <AvatarImage src={chat.avatar} alt={chat.name} />
-          <AvatarFallback>{chat.name[0]}</AvatarFallback>
-        </Avatar>
+        <AvatarWithFallback
+          src={chat.avatar}
+          name={chat.name}
+          userId={chat.userId}
+          size="md"
+        />
         {getStatusIndicator()}
       </div>
       <div className="flex-1 min-w-0">

@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { Card } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Heart, MessageCircle, Repeat, Share } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { UserPost } from '@/types/business';
+import { AvatarWithFallback } from '@/components/ui/avatar-with-fallback';
 
 interface PostCardProps {
   post: UserPost;
@@ -43,16 +42,16 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onRefresh }) => {
   const username = post.profile?.username || 'Anonymous';
   const fullName = post.profile?.name || 'User'; // Changed from full_name to name
   const avatarUrl = post.profile?.avatar_url;
-  // Get initials for avatar fallback
-  const initials = fullName.split(' ').map(name => name[0]).join('').toUpperCase();
 
   return (
     <Card className="p-4 mb-4">
       <div className="flex items-start space-x-3">
-        <Avatar className="h-10 w-10">
-          <AvatarImage src={avatarUrl} alt={username} />
-          <AvatarFallback>{initials}</AvatarFallback>
-        </Avatar>
+        <AvatarWithFallback
+          src={avatarUrl}
+          name={fullName}
+          userId={post.user_id}
+          size="md"
+        />
         <div className="flex-1">
           <div className="flex items-center">
             <h3 className="font-semibold">{fullName}</h3>

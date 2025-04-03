@@ -1,14 +1,23 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
 import { Button } from "@/components/ui/button";
 import { Camera } from "lucide-react";
+import { AvatarWithFallback } from "@/components/ui/avatar-with-fallback";
 
 interface ProfileAvatarProps {
   avatarUrl: string;
   isEditing: boolean;
   onAvatarChange: (file: File) => void;
+  username?: string;
+  userId?: string;
 }
 
-export const ProfileAvatar = ({ avatarUrl, isEditing, onAvatarChange }: ProfileAvatarProps) => {
+export const ProfileAvatar = ({ 
+  avatarUrl, 
+  isEditing, 
+  onAvatarChange, 
+  username = "User",
+  userId 
+}: ProfileAvatarProps) => {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -19,10 +28,13 @@ export const ProfileAvatar = ({ avatarUrl, isEditing, onAvatarChange }: ProfileA
   return (
     <div className="flex flex-col items-center gap-4">
       <div className="relative">
-        <Avatar className="h-24 w-24">
-          <AvatarImage src={avatarUrl || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"} />
-          <AvatarFallback>User</AvatarFallback>
-        </Avatar>
+        <AvatarWithFallback 
+          src={avatarUrl} 
+          name={username}
+          userId={userId}
+          size="xl"
+        />
+        
         {isEditing && (
           <label 
             htmlFor="avatar-upload" 
