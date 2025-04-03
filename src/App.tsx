@@ -39,6 +39,7 @@ const AdPlacement = lazy(() => import("@/pages/admin/AdPlacement"));
 const AdAuction = lazy(() => import("@/pages/admin/AdAuction"));
 const Dashboard = lazy(() => import("@/pages/dashboard"));
 const Pricing = lazy(() => import("@/pages/Pricing"));
+const Rankings = lazy(() => import("@/pages/rankings"));
 const BusinessRegistrationForm = lazy(() => import("@/components/business-registration/BusinessRegistrationForm").then(m => ({ default: m.BusinessRegistrationForm })));
 
 function App() {
@@ -114,6 +115,7 @@ function App() {
                 <Route path="/admin/placement" element={<AdPlacement />} />
                 <Route path="/admin/auction" element={<AdAuction />} />
                 <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/rankings" element={<Rankings />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>

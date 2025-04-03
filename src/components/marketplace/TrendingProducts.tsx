@@ -1,14 +1,15 @@
 
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ProductCard } from "@/components/products/ProductCard";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
 import { TrendingUp, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRef } from "react";
+import { getTrendingProducts } from "@/services/rankingService";
 
 interface TrendingProductsProps {
   gridLayout?: GridLayoutType;
@@ -20,16 +21,7 @@ export const TrendingProducts = ({ gridLayout = "grid4x4" }: TrendingProductsPro
   
   const { data: products, isLoading } = useQuery({
     queryKey: ['trending-products'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .order('views', { ascending: false })
-        .limit(8);
-      
-      if (error) throw error;
-      return data;
-    }
+    queryFn: () => getTrendingProducts(8)
   });
   
   // Handle horizontal scroll with buttons
@@ -81,7 +73,7 @@ export const TrendingProducts = ({ gridLayout = "grid4x4" }: TrendingProductsPro
         <Button 
           variant="ghost" 
           size="sm"
-          onClick={() => navigate('/marketplace')}
+          onClick={() => navigate('/rankings')}
           className="gap-1"
         >
           View All
@@ -109,9 +101,24 @@ export const TrendingProducts = ({ gridLayout = "grid4x4" }: TrendingProductsPro
             <div key={product.id} className="min-w-[160px] sm:min-w-[220px] md:min-w-[250px] w-[40vw] sm:w-[35vw] md:w-[30vw] lg:w-[25vw] max-w-[320px] flex-shrink-0 snap-start">
               <div className="relative h-full">
                 <ProductCard 
-                  product={product}
+                  product={{
+                    id: product.id,
+                    title: product.title || '',
+                    description: '',
+                    price: product.price || 0,
+                    image_url: product.image_url,
+                    views: product.views || 0
+                  }}
                   layout={gridLayout}
                 />
+                {product.badge && (
+                  <Badge 
+                    className="absolute top-2 right-2 bg-blue-500/90 text-xs"
+                    variant="secondary"
+                  >
+                    {product.badge}
+                  </Badge>
+                )}
               </div>
             </div>
           ))}
