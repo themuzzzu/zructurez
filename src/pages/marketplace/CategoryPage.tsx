@@ -9,17 +9,49 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator } from 
 import { Home } from 'lucide-react';
 import { SponsoredProducts } from '@/components/marketplace/SponsoredProducts';
 import { supabase } from '@/integrations/supabase/client';
+import { CategoryWithSubcategories } from '@/components/marketplace/CategoryWithSubcategories';
+import { ProductsGrid } from '@/components/products/ProductsGrid';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const CategoryPage = () => {
-  const { categoryId } = useParams();
+  const { categoryId, subcategoryId } = useParams();
   const navigate = useNavigate();
-  const [categoryData, setCategoryData] = useState(null);
+  const [categoryData, setCategoryData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   // Format category name for display
   const formattedCategoryName = categoryId ? 
     categoryId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 
     'Category';
+
+  // Sample subcategories data to use if database fetch fails
+  const getDefaultSubcategories = () => {
+    if (categoryId === 'electronics') {
+      return [
+        { name: 'Mobile Phones', slug: 'mobile-phones' },
+        { name: 'Laptops & Computers', slug: 'laptops-computers' },
+        { name: 'Audio', slug: 'audio' },
+        { name: 'Cameras', slug: 'cameras' },
+        { name: 'Wearables', slug: 'wearables' },
+        { name: 'Accessories', slug: 'accessories' }
+      ];
+    } else if (categoryId === 'fashion') {
+      return [
+        { name: "Men's Clothing", slug: 'mens-clothing' },
+        { name: "Women's Clothing", slug: 'womens-clothing' },
+        { name: 'Footwear', slug: 'footwear' },
+        { name: 'Watches & Eyewear', slug: 'watches-eyewear' },
+        { name: 'Jewelry', slug: 'jewelry' }
+      ];
+    } else {
+      return [
+        { name: 'Popular Items', slug: 'popular-items' },
+        { name: 'New Arrivals', slug: 'new-arrivals' },
+        { name: 'Best Sellers', slug: 'best-sellers' }
+      ];
+    }
+  };
 
   useEffect(() => {
     const fetchCategoryData = async () => {
@@ -27,20 +59,34 @@ const CategoryPage = () => {
       
       setIsLoading(true);
       try {
-        // Fetch category data, subcategories, etc.
+        // Try to fetch from database first
         const { data, error } = await supabase
           .from('categories')
           .select('*')
           .eq('slug', categoryId)
           .single();
           
-        if (error && error.code !== 'PGRST116') {
-          throw error;
+        if (error) {
+          console.error('Error fetching category data:', error);
+          // If table doesn't exist or other error, use default data
+          setCategoryData({ 
+            name: formattedCategoryName,
+            subcategories: getDefaultSubcategories()
+          });
+        } else {
+          setCategoryData(data || { 
+            name: formattedCategoryName,
+            subcategories: getDefaultSubcategories()
+          });
         }
-        
-        setCategoryData(data || { name: formattedCategoryName });
       } catch (err) {
-        console.error('Error fetching category data:', err);
+        console.error('Error in category data fetch:', err);
+        setError('Failed to load category data');
+        // Still provide fallback data
+        setCategoryData({ 
+          name: formattedCategoryName,
+          subcategories: getDefaultSubcategories()
+        });
       } finally {
         setIsLoading(false);
       }
@@ -48,6 +94,29 @@ const CategoryPage = () => {
     
     fetchCategoryData();
   }, [categoryId, formattedCategoryName]);
+  
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="container max-w-[1400px] mx-auto px-4 py-6">
+          <Skeleton className="h-8 w-64 mb-6" />
+          <Skeleton className="h-48 w-full mb-6" />
+          <Skeleton className="h-12 w-48 mb-2" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 mb-8">
+            {[...Array(6)].map((_, i) => (
+              <Skeleton key={i} className="h-24 w-full rounded-md" />
+            ))}
+          </div>
+          <Skeleton className="h-12 w-48 mb-4" />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[...Array(8)].map((_, i) => (
+              <Skeleton key={i} className="h-64 w-full rounded-md" />
+            ))}
+          </div>
+        </div>
+      </Layout>
+    );
+  }
   
   return (
     <Layout>
@@ -72,6 +141,16 @@ const CategoryPage = () => {
               {formattedCategoryName}
             </BreadcrumbLink>
           </BreadcrumbItem>
+          {subcategoryId && (
+            <>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink isCurrentPage>
+                  {subcategoryId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+            </>
+          )}
         </Breadcrumb>
         
         <h1 className="text-3xl font-bold mb-6">{formattedCategoryName}</h1>

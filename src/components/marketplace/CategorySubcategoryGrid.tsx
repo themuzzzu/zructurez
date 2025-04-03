@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { useParams } from 'react-router-dom';
 
 interface CategorySubcategoryGridProps {
   onCategorySelect: (category: string, subcategory?: string) => void;
@@ -10,7 +11,7 @@ interface CategorySubcategoryGridProps {
 
 export const CategorySubcategoryGrid = ({ onCategorySelect }: CategorySubcategoryGridProps) => {
   // Define comprehensive category and subcategory mappings
-  const categorySubcategories = {
+  const categorySubcategories: Record<string, string[]> = {
     'electronics': [
       'Mobile Phones', 'Laptops & Computers', 'Audio', 'Cameras', 'Wearables', 'Accessories'
     ],
@@ -46,20 +47,55 @@ export const CategorySubcategoryGrid = ({ onCategorySelect }: CategorySubcategor
     ]
   };
 
-  // Get current category from URL
-  const [currentCategory, setCurrentCategory] = useState('');
+  // Get current category from params
+  const { categoryId } = useParams<{ categoryId: string }>();
+  const [currentCategory, setCurrentCategory] = useState(categoryId || '');
   
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const categoryParam = urlParams.get('category') || '';
-    setCurrentCategory(categoryParam);
-  }, [window.location.search]);
+    if (categoryId) {
+      setCurrentCategory(categoryId);
+    } else {
+      const urlParams = new URLSearchParams(window.location.search);
+      const categoryParam = urlParams.get('category') || '';
+      setCurrentCategory(categoryParam);
+    }
+  }, [categoryId, window.location.search]);
   
   // Get subcategories for the current category
-  const subcategories = categorySubcategories[currentCategory as keyof typeof categorySubcategories] || [];
+  const subcategories = currentCategory ? 
+    categorySubcategories[currentCategory as keyof typeof categorySubcategories] || [] : [];
+  
+  if (subcategories.length === 0 && currentCategory) {
+    return (
+      <Card className="bg-white dark:bg-zinc-900 p-4 rounded-lg shadow-sm">
+        <p className="text-muted-foreground">No subcategories found for {currentCategory.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}.</p>
+      </Card>
+    );
+  }
   
   if (subcategories.length === 0) {
-    return null;
+    // Display all categories if no current category is selected
+    return (
+      <Card className="bg-white dark:bg-zinc-900 p-4 rounded-lg shadow-sm">
+        <h3 className="font-semibold mb-3 text-sm">Browse Categories</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
+          {Object.keys(categorySubcategories).map((category) => (
+            <div
+              key={category}
+              className="p-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-md transition-colors"
+              onClick={() => {
+                onCategorySelect(category);
+                toast.success(`Browsing ${category.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}`);
+              }}
+            >
+              <Badge variant="outline" className="w-full justify-center py-1.5 hover:bg-primary hover:text-white transition-colors">
+                {category.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+              </Badge>
+            </div>
+          ))}
+        </div>
+      </Card>
+    );
   }
   
   return (
