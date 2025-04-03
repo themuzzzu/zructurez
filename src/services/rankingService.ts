@@ -16,30 +16,44 @@ export const getProductRankings = async (
     if (sortBy === "views") {
       query = query.order("views", { ascending: false });
     } else if (sortBy === "wishlists") {
-      // For wishlist count, we'd need to join with wishlists
-      // This is a simplified version
-      const { data: wishlistCountData } = await supabase
+      // For wishlist count, we need a different approach since count() isn't working
+      const { data: wishlistData } = await supabase
         .from("wishlists")
-        .select("product_id, count")
-        .count();
-
-      // Transform wishlist counts to product IDs array
-      const productIds = wishlistCountData?.map(item => item.product_id) || [];
+        .select("product_id");
+        
+      // Count occurrences of each product_id
+      const wishlistCounts: Record<string, number> = {};
+      wishlistData?.forEach(item => {
+        wishlistCounts[item.product_id] = (wishlistCounts[item.product_id] || 0) + 1;
+      });
+      
+      // Get product IDs sorted by count
+      const productIds = Object.entries(wishlistCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, limit)
+        .map(entry => entry[0]);
       
       // Now fetch those products
       if (productIds.length > 0) {
         query = query.in("id", productIds);
       }
     } else if (sortBy === "sales") {
-      // For sales count, we'd need to join with orders
-      // This is a simplified version
-      const { data: salesCountData } = await supabase
-        .from("order_items")
-        .select("product_id, count")
-        .count();
-
-      // Transform sales counts to product IDs array  
-      const productIds = salesCountData?.map(item => item.product_id) || [];
+      // For sales count, similar approach
+      const { data: salesData } = await supabase
+        .from("orders")
+        .select("product_id");
+        
+      // Count occurrences
+      const salesCounts: Record<string, number> = {};
+      salesData?.forEach(item => {
+        salesCounts[item.product_id] = (salesCounts[item.product_id] || 0) + 1;
+      });
+      
+      // Get product IDs sorted by count
+      const productIds = Object.entries(salesCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, limit)
+        .map(entry => entry[0]);
       
       // Now fetch those products
       if (productIds.length > 0) {
@@ -80,15 +94,24 @@ export const getServiceRankings = async (
     if (sortBy === "views") {
       query = query.order("views", { ascending: false });
     } else if (sortBy === "bookings") {
-      // For booking count, we need to get appointment counts
-      // Since there's an issue with service_id column, we'll modify our approach
-      const { data: bookingCountData } = await supabase
+      // For booking count, we need to work around the count issue
+      const { data: bookingData } = await supabase
         .from("appointments")
-        .select("*")
-        .count();
+        .select("*");
 
-      // Get unique service names from appointments
-      const serviceNames = [...new Set(bookingCountData?.map(item => item.service_name) || [])];
+      // Group appointments by service name and count
+      const serviceNameCounts: Record<string, number> = {};
+      bookingData?.forEach(appointment => {
+        if (appointment.service_name) {
+          serviceNameCounts[appointment.service_name] = 
+            (serviceNameCounts[appointment.service_name] || 0) + 1;
+        }
+      });
+      
+      // Get unique service names sorted by count
+      const serviceNames = Object.entries(serviceNameCounts)
+        .sort((a, b) => b[1] - a[1])
+        .map(entry => entry[0]);
       
       // Now fetch services that match these names
       if (serviceNames.length > 0) {

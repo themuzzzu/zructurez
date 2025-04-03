@@ -36,5 +36,14 @@ export interface RankingMetrics {
   views?: number;
   rank?: number;
   badge?: string;
-  score?: number; // Added for compatibility
+  score?: number;
+}
+
+export interface AnalyticsSummary {
+  pageViews: number;
+  uniqueVisitors: number;
+  averageSessionDuration: number;
+  bounceRate: number;
+  topReferrers: string[];
+  totalClicks: number;
 }

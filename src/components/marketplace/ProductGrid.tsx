@@ -1,219 +1,251 @@
 
 import React, { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductCard } from "@/components/products/ProductCard";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/common/Spinner";
+import { GridLayoutType } from "@/components/products/types/layouts";
 import { Button } from "@/components/ui/button";
-import { GridLayoutType } from "@/components/products/types/ProductTypes";
-import { Grid3x3, LayoutGrid, List } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { motion } from "framer-motion";
 
 export interface ProductGridProps {
   category?: string;
   subcategory?: string;
-  featured?: boolean;
+  searchTerm?: string;
   limit?: number;
-  showControls?: boolean;
-  defaultLayout?: GridLayoutType;
+  showPagination?: boolean;
+  gridLayout?: GridLayoutType;
+  showHeader?: boolean;
+  title?: string;
+  userId?: string;
+  isBookmarked?: boolean;
+  excludeIds?: string[];
+  onlyDiscounted?: boolean;
+  sortOrder?: "newest" | "price_asc" | "price_desc" | "popularity" | "trending";
 }
 
 export const ProductGrid: React.FC<ProductGridProps> = ({
   category,
   subcategory,
-  featured = false,
+  searchTerm = "",
   limit = 12,
-  showControls = true,
-  defaultLayout = "grid3x3"
+  showPagination = true,
+  gridLayout = "grid3x3",
+  showHeader = true,
+  title = "Products",
+  userId,
+  isBookmarked = false,
+  excludeIds = [],
+  onlyDiscounted = false,
+  sortOrder = "newest"
 }) => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [layout, setLayout] = useState<GridLayoutType>(defaultLayout);
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const navigate = useNavigate();
   
-  const getLayoutClass = () => {
-    switch (layout) {
-      case "grid4x4":
-        return "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4";
-      case "grid3x3":
-        return "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5";
-      case "grid2x2":
-        return "grid-cols-1 sm:grid-cols-2 gap-6";
-      case "list":
-        return "grid-cols-1 gap-4";
-      case "grid1x1":
-        return "grid-cols-1 gap-6";
-      default:
-        return "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5";
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      
+      try {
+        // Build the base query
+        let query = supabase
+          .from('products')
+          .select(`
+            *,
+            product_images (*)
+          `);
+        
+        // Apply filters
+        if (category && category !== "all") {
+          query = query.eq('category', category);
+        }
+        
+        if (subcategory) {
+          query = query.eq('subcategory', subcategory);
+        }
+        
+        if (searchTerm) {
+          query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`);
+        }
+        
+        if (userId) {
+          query = query.eq('user_id', userId);
+        }
+        
+        if (excludeIds.length > 0) {
+          query = query.not('id', 'in', `(${excludeIds.join(',')})`);
+        }
+        
+        if (onlyDiscounted) {
+          query = query.eq('is_discounted', true);
+        }
+        
+        // Get total count for pagination
+        const countQuery = query.count();
+        const { count, error: countError } = await countQuery;
+        
+        if (countError) {
+          console.error('Error getting count:', countError);
+          setTotalProducts(0);
+        } else {
+          setTotalProducts(count || 0);
+          setTotalPages(Math.ceil((count || 0) / limit));
+        }
+        
+        // Apply sorting
+        switch (sortOrder) {
+          case "price_asc":
+            query = query.order('price', { ascending: true });
+            break;
+          case "price_desc":
+            query = query.order('price', { ascending: false });
+            break;
+          case "popularity":
+            query = query.order('views', { ascending: false });
+            break;
+          case "trending":
+            query = query.order('views', { ascending: false }); // For now, using views as trending
+            break;
+          case "newest":
+          default:
+            query = query.order('created_at', { ascending: false });
+        }
+        
+        // Apply pagination
+        query = query.range((page - 1) * limit, page * limit - 1);
+        
+        const { data, error } = await query;
+        
+        if (error) {
+          throw error;
+        }
+        
+        setProducts(data || []);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchProducts();
+  }, [category, subcategory, searchTerm, page, limit, userId, excludeIds, onlyDiscounted, sortOrder]);
+  
+  // Handle page change
+  const handlePrevPage = () => {
+    if (page > 1) {
+      setPage(page - 1);
     }
   };
   
-  const itemsPerPage = limit;
-  const offset = (currentPage - 1) * itemsPerPage;
-  
-  const { data: products, isLoading, isError } = useQuery({
-    queryKey: ['products', category, subcategory, featured, currentPage],
-    queryFn: async () => {
-      let query = supabase.from('products').select('*');
-      
-      if (category) {
-        query = query.eq('category', category);
-      }
-      
-      if (subcategory) {
-        query = query.eq('subcategory', subcategory);
-      }
-      
-      if (featured) {
-        query = query.eq('is_featured', true);
-      }
-      
-      // Get total count
-      const { count } = await query.count();
-      
-      // Apply pagination
-      query = query
-        .order('created_at', { ascending: false })
-        .range(offset, offset + itemsPerPage - 1);
-      
-      const { data, error } = await query;
-      
-      if (error) throw error;
-      
-      return {
-        products: data || [],
-        totalCount: count || 0
-      };
+  const handleNextPage = () => {
+    if (page < totalPages) {
+      setPage(page + 1);
     }
-  });
+  };
   
-  const totalPages = Math.ceil((products?.totalCount || 0) / itemsPerPage);
+  // Get grid classes based on layout
+  const getGridClasses = () => {
+    switch (gridLayout) {
+      case "grid4x4":
+        return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4";
+      case "grid2x2":
+        return "grid grid-cols-1 sm:grid-cols-2 gap-4";
+      case "list":
+        return "flex flex-col gap-4";
+      case "grid1x1":
+        return "grid grid-cols-1 gap-4";
+      case "grid3x3":
+      default:
+        return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4";
+    }
+  };
   
-  // Reset page when category or subcategory changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [category, subcategory]);
-  
-  if (isLoading) {
+  if (loading) {
     return (
-      <div>
-        <div className="flex justify-end mb-4">
-          {showControls && (
-            <div className="flex gap-2">
-              <Skeleton className="h-9 w-9" />
-              <Skeleton className="h-9 w-9" />
-              <Skeleton className="h-9 w-9" />
-            </div>
-          )}
-        </div>
-        <div className={`grid ${getLayoutClass()}`}>
-          {Array.from({ length: 6 }).map((_, index) => (
-            <div key={index} className="space-y-3">
-              <Skeleton className="h-48 w-full rounded-lg" />
-              <Skeleton className="h-4 w-3/4" />
-              <Skeleton className="h-4 w-1/2" />
-            </div>
-          ))}
-        </div>
+      <div className="w-full flex justify-center py-10">
+        <Spinner size="lg" />
       </div>
     );
   }
   
-  if (isError) {
-    return <div className="py-12 text-center text-muted-foreground">Error loading products</div>;
-  }
-  
-  if (!products?.products.length) {
+  if (products.length === 0) {
     return (
-      <div className="py-12 text-center">
-        <p className="text-muted-foreground">
-          {subcategory 
-            ? `No products found in ${subcategory} subcategory` 
-            : category 
-              ? `No products found in ${category} category`
-              : 'No products found'}
-        </p>
+      <div className="w-full py-10 text-center">
+        <p className="text-muted-foreground">No products found</p>
       </div>
     );
   }
   
   return (
     <div>
-      {showControls && (
+      {showHeader && (
         <div className="flex justify-between items-center mb-4">
-          <div className="text-sm text-muted-foreground">
-            {products.totalCount} products
-          </div>
-          <div className="flex gap-1">
-            <Button
-              variant={layout === "grid4x4" ? "default" : "outline"}
-              size="icon"
-              className="h-9 w-9"
-              onClick={() => setLayout("grid4x4")}
-              aria-label="Grid 4x4 view"
-            >
-              <LayoutGrid className="h-4 w-4" />
+          <h2 className="text-2xl font-bold">{title}</h2>
+          {totalProducts > limit && (
+            <Button variant="link" onClick={() => navigate("/marketplace")}>
+              View All
             </Button>
-            <Button
-              variant={layout === "grid3x3" ? "default" : "outline"}
-              size="icon"
-              className="h-9 w-9"
-              onClick={() => setLayout("grid3x3")}
-              aria-label="Grid 3x3 view"
-            >
-              <Grid3x3 className="h-4 w-4" />
-            </Button>
-            <Button
-              variant={layout === "list" ? "default" : "outline"}
-              size="icon"
-              className="h-9 w-9"
-              onClick={() => setLayout("list")}
-              aria-label="List view"
-            >
-              <List className="h-4 w-4" />
-            </Button>
-          </div>
+          )}
         </div>
       )}
       
-      <div className={`grid ${getLayoutClass()}`}>
-        {products.products.map((product) => (
+      <motion.div 
+        className={getGridClasses()}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        {products.map((product) => (
           <ProductCard 
-            key={product.id} 
-            product={product}
-            layout={layout}
+            key={product.id}
+            id={product.id}
+            title={product.title}
+            price={product.price}
+            originalPrice={product.original_price}
+            description={product.description}
+            category={product.category}
+            imageUrl={product.image_url}
+            images={product.product_images}
+            views={product.views}
+            brandName={product.brand_name}
+            condition={product.condition}
+            isDiscounted={product.is_discounted}
+            isUsed={product.is_used}
+            isBranded={product.is_branded}
+            stock={product.stock}
           />
         ))}
-      </div>
+      </motion.div>
       
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex justify-center gap-2 mt-8">
+      {showPagination && totalPages > 1 && (
+        <div className="flex justify-center mt-6 gap-2">
           <Button
             variant="outline"
-            size="sm"
-            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-            disabled={currentPage === 1}
+            onClick={handlePrevPage}
+            disabled={page === 1}
+            className="flex items-center gap-1"
           >
+            <ChevronLeft className="h-4 w-4" />
             Previous
           </Button>
-          
-          {Array.from({ length: totalPages }).map((_, index) => (
-            <Button
-              key={index}
-              variant={currentPage === index + 1 ? "default" : "outline"}
-              size="sm"
-              className="w-9"
-              onClick={() => setCurrentPage(index + 1)}
-            >
-              {index + 1}
-            </Button>
-          ))}
-          
+          <span className="flex items-center px-3">
+            Page {page} of {totalPages}
+          </span>
           <Button
             variant="outline"
-            size="sm"
-            onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-            disabled={currentPage === totalPages}
+            onClick={handleNextPage}
+            disabled={page === totalPages}
+            className="flex items-center gap-1"
           >
             Next
+            <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
       )}

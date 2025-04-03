@@ -59,7 +59,7 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
               src={finalImageUrl}
               alt={finalAltText}
               className="h-full w-full transition-transform hover:scale-105"
-              style={{ objectFit }}
+              style={{ objectFit: objectFit as any }}
             />
           </div>
         ) : (

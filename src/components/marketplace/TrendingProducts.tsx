@@ -1,141 +1,122 @@
 
-import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProductCard } from "@/components/products/ProductCard";
-import { GridLayoutType } from "@/components/products/types/ProductTypes";
-import { TrendingUp, ChevronLeft, ChevronRight } from "lucide-react";
+import { Spinner } from "@/components/common/Spinner";
 import { Button } from "@/components/ui/button";
-import { useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { TrendingUp } from "lucide-react";
+import { motion } from "framer-motion";
+import { GridLayoutType } from "@/components/products/types/layouts";
 import { getTrendingProducts } from "@/services/rankingService";
+import { useQuery } from "@tanstack/react-query";
+import { formatPrice } from "@/utils/productUtils";
+import { RankingMetrics } from "@/types/subscription";
 
 interface TrendingProductsProps {
+  limit?: number;
+  showTitle?: boolean;
+  showAll?: boolean;
+  title?: string;
   gridLayout?: GridLayoutType;
+  className?: string;
 }
 
-export const TrendingProducts = ({ gridLayout = "grid4x4" }: TrendingProductsProps) => {
+export const TrendingProducts: React.FC<TrendingProductsProps> = ({
+  limit = 6,
+  showTitle = true,
+  showAll = true,
+  title = "Trending Products",
+  gridLayout = "grid3x3",
+  className = "",
+}) => {
   const navigate = useNavigate();
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  
-  const { data: products, isLoading } = useQuery({
-    queryKey: ['trending-products'],
-    queryFn: () => getTrendingProducts(8)
+
+  const { data: trendingProducts, isLoading } = useQuery({
+    queryKey: ["trendingProducts", limit],
+    queryFn: () => getTrendingProducts(limit),
   });
-  
-  // Handle horizontal scroll with buttons
-  const scroll = (direction: 'left' | 'right') => {
-    if (scrollContainerRef.current) {
-      const scrollAmount = 300;
-      const currentScroll = scrollContainerRef.current.scrollLeft;
-      
-      scrollContainerRef.current.scrollTo({
-        left: direction === 'left' ? currentScroll - scrollAmount : currentScroll + scrollAmount,
-        behavior: 'smooth'
-      });
-    }
-  };
-  
+
   if (isLoading) {
     return (
-      <div className="space-y-4 mb-8">
-        <h3 className="text-xl md:text-2xl font-bold flex items-center gap-2 px-1">
-          <TrendingUp className="h-5 w-5 text-red-500" />
-          Trending Products
-        </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 px-1">
-          {[1, 2, 3, 4].map((i) => (
-            <Card key={i} className="overflow-hidden">
-              <Skeleton className="h-48 w-full" />
-              <div className="p-3">
-                <Skeleton className="h-4 w-3/4 mb-2" />
-                <Skeleton className="h-4 w-1/2" />
-              </div>
-            </Card>
-          ))}
-        </div>
-      </div>
+      <Card className={className}>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5" />
+            {title}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex justify-center p-6">
+          <Spinner size="lg" />
+        </CardContent>
+      </Card>
     );
   }
-  
-  if (!products || products.length === 0) {
+
+  if (!trendingProducts || trendingProducts.length === 0) {
     return null;
   }
-  
+
+  const getGridClasses = () => {
+    switch (gridLayout) {
+      case "grid4x4":
+        return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4";
+      case "grid2x2":
+        return "grid grid-cols-1 sm:grid-cols-2 gap-4";
+      case "list":
+        return "flex flex-col gap-4";
+      case "grid1x1":
+        return "grid grid-cols-1 gap-4";
+      case "grid3x3":
+      default:
+        return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4";
+    }
+  };
+
   return (
-    <div className="space-y-4 mb-8 relative">
-      <div className="flex justify-between items-center px-1">
-        <h3 className="text-xl md:text-2xl font-bold flex items-center gap-2">
-          <TrendingUp className="h-5 w-5 text-red-500" />
-          Trending Products
-        </h3>
-        <Button 
-          variant="ghost" 
-          size="sm"
-          onClick={() => navigate('/rankings')}
-          className="gap-1"
+    <Card className={className}>
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        {showTitle && (
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5" />
+            {title}
+          </CardTitle>
+        )}
+        {showAll && (
+          <Button variant="ghost" size="sm" onClick={() => navigate("/rankings")}>
+            View Rankings
+          </Button>
+        )}
+      </CardHeader>
+      <CardContent>
+        <motion.div
+          className={getGridClasses()}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ staggerChildren: 0.1 }}
         >
-          View All
-        </Button>
-      </div>
-      
-      <div className="relative group">
-        {/* Left scroll button */}
-        <Button 
-          onClick={() => scroll('left')}
-          size="icon"
-          variant="ghost" 
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 dark:bg-black/50 rounded-full opacity-70 hover:opacity-100 shadow-md hidden sm:flex"
-        >
-          <ChevronLeft />
-        </Button>
-        
-        {/* Scrollable container */}
-        <div 
-          ref={scrollContainerRef}
-          className="flex overflow-x-auto gap-3 pb-2 pt-1 px-1 no-scrollbar snap-x snap-mandatory scroll-smooth"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-        >
-          {products.map((product) => (
-            <div key={product.id} className="min-w-[160px] sm:min-w-[220px] md:min-w-[250px] w-[40vw] sm:w-[35vw] md:w-[30vw] lg:w-[25vw] max-w-[320px] flex-shrink-0 snap-start">
-              <div className="relative h-full">
-                <ProductCard 
-                  product={{
-                    id: product.id,
-                    title: product.title || '',
-                    description: product.description || '',
-                    price: product.price || 0,
-                    image_url: product.image_url,
-                    views: product.views || 0,
-                    stock: 0, // Default value for required field
-                    category: product.category || 'General'
-                  }}
-                  layout={gridLayout}
-                />
-                {product.badge && (
-                  <Badge 
-                    className="absolute top-2 right-2 bg-blue-500/90 text-xs"
-                    variant="secondary"
-                  >
-                    {product.badge}
-                  </Badge>
-                )}
-              </div>
-            </div>
+          {trendingProducts.map((product: RankingMetrics, index) => (
+            <motion.div
+              key={product.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: index * 0.05 }}
+            >
+              <ProductCard
+                id={product.id}
+                title={product.title || ""}
+                price={product.price || 0}
+                description={product.description || ""}
+                category={product.category || ""}
+                imageUrl={product.image_url || ""}
+                views={product.views || 0}
+                badge={product.badge}
+                rank={product.rank}
+              />
+            </motion.div>
           ))}
-        </div>
-        
-        {/* Right scroll button */}
-        <Button 
-          onClick={() => scroll('right')}
-          size="icon"
-          variant="ghost" 
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 dark:bg-black/50 rounded-full opacity-70 hover:opacity-100 shadow-md hidden sm:flex"
-        >
-          <ChevronRight />
-        </Button>
-      </div>
-    </div>
+        </motion.div>
+      </CardContent>
+    </Card>
   );
 };
