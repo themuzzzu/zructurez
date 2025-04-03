@@ -13,20 +13,79 @@ interface ProductCardProps {
   product: any;
   layout?: GridLayoutType;
   sponsored?: boolean;
+  // Support for direct props as well
+  id?: string;
+  title?: string;
+  price?: number;
+  description?: string;
+  category?: string; 
+  imageUrl?: string;
+  views?: number;
+  badge?: string;
+  rank?: number;
+  originalPrice?: number;
+  images?: any[];
+  brandName?: string;
+  condition?: string;
+  isDiscounted?: boolean;
+  isUsed?: boolean;
+  isBranded?: boolean;
+  stock?: number;
 }
 
-export const ProductCard = ({ product, layout = "grid4x4", sponsored = false }: ProductCardProps) => {
+export const ProductCard = ({ 
+  product,
+  layout = "grid4x4", 
+  sponsored = false,
+  // Direct props
+  id,
+  title,
+  price,
+  description,
+  category,
+  imageUrl,
+  views,
+  badge,
+  rank,
+  originalPrice,
+  images,
+  brandName,
+  condition,
+  isDiscounted,
+  isUsed,
+  isBranded,
+  stock
+}: ProductCardProps) => {
   const navigate = useNavigate();
   const [imageLoaded, setImageLoaded] = useState(false);
   
+  // If individual props are provided, use them, otherwise use the product object
+  const productId = id || (product?.id);
+  const productName = title || (product?.name) || (product?.title);
+  const productPrice = price !== undefined ? price : product?.price;
+  const productDesc = description || product?.description;
+  const productCat = category || product?.category;
+  const productImgUrl = imageUrl || product?.image_url;
+  const productViews = views !== undefined ? views : product?.views;
+  const productBadge = badge || product?.badge;
+  const productRank = rank !== undefined ? rank : product?.rank;
+  const productOriginalPrice = originalPrice !== undefined ? originalPrice : product?.original_price;
+  const productImages = images || product?.product_images;
+  const productBrandName = brandName || product?.brand_name;
+  const productCondition = condition || product?.condition;
+  const productIsDiscounted = isDiscounted !== undefined ? isDiscounted : product?.is_discounted;
+  const productIsUsed = isUsed !== undefined ? isUsed : product?.is_used;
+  const productIsBranded = isBranded !== undefined ? isBranded : product?.is_branded;
+  const productStock = stock !== undefined ? stock : product?.stock;
+  
   const handleCardClick = () => {
-    navigate(`/products/${product.id}`);
+    navigate(`/products/${productId}`);
   };
   
-  const price = formatPrice(product.price);
+  const displayPrice = formatPrice(productPrice);
   
-  const originalPrice = product.is_discounted && product.discount_percentage 
-    ? formatPrice(product.price / (1 - product.discount_percentage / 100))
+  const displayOriginalPrice = productIsDiscounted && productOriginalPrice 
+    ? formatPrice(productOriginalPrice)
     : null;
   
   const isListLayout = layout === "list";
@@ -48,16 +107,16 @@ export const ProductCard = ({ product, layout = "grid4x4", sponsored = false }: 
           <div className="w-full h-full bg-gray-200 dark:bg-gray-800 animate-pulse"></div>
         )}
         <img 
-          src={product.image_url || "https://via.placeholder.com/300x300"} 
-          alt={product.name} 
+          src={productImgUrl || "https://via.placeholder.com/300x300"} 
+          alt={productName} 
           className={`w-full h-full object-cover ${imageLoaded ? 'img-loaded' : 'img-loading'}`}
           onLoad={() => setImageLoaded(true)}
           loading="lazy"
         />
         
-        {product.is_discounted && product.discount_percentage && (
+        {productIsDiscounted && (
           <Badge className="absolute top-2 left-2 bg-red-500 text-white">
-            {Math.round(product.discount_percentage)}% OFF
+            SALE
           </Badge>
         )}
         
@@ -69,26 +128,26 @@ export const ProductCard = ({ product, layout = "grid4x4", sponsored = false }: 
         
         <div className="absolute top-2 right-2">
           <LikeProvider>
-            <ProductLikeButton productId={product.id} />
+            <ProductLikeButton productId={productId} />
           </LikeProvider>
         </div>
       </div>
       
       <CardContent className={`flex-1 p-3 ${isListLayout ? 'flex flex-col justify-between' : ''}`}>
         <div>
-          <h3 className="font-medium text-sm line-clamp-1 mb-1">{product.name}</h3>
-          <p className="text-xs text-muted-foreground line-clamp-2">{product.description}</p>
+          <h3 className="font-medium text-sm line-clamp-1 mb-1">{productName}</h3>
+          <p className="text-xs text-muted-foreground line-clamp-2">{productDesc}</p>
         </div>
         
         <div className="mt-2 flex items-center justify-between">
           <div>
-            <p className="font-bold text-sm">{price}</p>
-            {originalPrice && (
-              <p className="text-xs text-muted-foreground line-through">{originalPrice}</p>
+            <p className="font-bold text-sm">{displayPrice}</p>
+            {displayOriginalPrice && (
+              <p className="text-xs text-muted-foreground line-through">{displayOriginalPrice}</p>
             )}
           </div>
           
-          {product.is_branded && (
+          {productIsBranded && (
             <Badge variant="outline" className="text-xs">Branded</Badge>
           )}
         </div>

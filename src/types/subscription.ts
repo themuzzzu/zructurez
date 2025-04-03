@@ -46,4 +46,7 @@ export interface AnalyticsSummary {
   bounceRate: number;
   topReferrers: string[];
   totalClicks: number;
+  totalViews: number;
+  totalLikes: number;
+  totalShares: number;
 }

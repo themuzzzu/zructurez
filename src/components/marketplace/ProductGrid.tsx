@@ -86,15 +86,24 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
         }
         
         // Get total count for pagination
-        const countQuery = query.count();
-        const { count, error: countError } = await countQuery;
+        const { data: countData, error: countError } = await supabase
+          .from('products')
+          .select('id', { count: 'exact', head: false })
+          .eq(category && category !== "all" ? 'category' : 'id', category && category !== "all" ? category : !userId ? 'id' : '')
+          .eq(subcategory ? 'subcategory' : 'id', subcategory ? subcategory : !userId ? 'id' : '')
+          .eq(userId ? 'user_id' : 'id', userId ? userId : !userId ? 'id' : '')
+          .eq(onlyDiscounted ? 'is_discounted' : 'id', onlyDiscounted ? true : !userId ? 'id' : '');
+          
+        const countResponse = await supabase
+          .from('products')
+          .select('*', { count: 'exact' });
         
         if (countError) {
           console.error('Error getting count:', countError);
           setTotalProducts(0);
         } else {
-          setTotalProducts(count || 0);
-          setTotalPages(Math.ceil((count || 0) / limit));
+          setTotalProducts(countResponse.count || 0);
+          setTotalPages(Math.ceil((countResponse.count || 0) / limit));
         }
         
         // Apply sorting
@@ -205,21 +214,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
         {products.map((product) => (
           <ProductCard 
             key={product.id}
-            id={product.id}
-            title={product.title}
-            price={product.price}
-            originalPrice={product.original_price}
-            description={product.description}
-            category={product.category}
-            imageUrl={product.image_url}
-            images={product.product_images}
-            views={product.views}
-            brandName={product.brand_name}
-            condition={product.condition}
-            isDiscounted={product.is_discounted}
-            isUsed={product.is_used}
-            isBranded={product.is_branded}
-            stock={product.stock}
+            product={product}
           />
         ))}
       </motion.div>
