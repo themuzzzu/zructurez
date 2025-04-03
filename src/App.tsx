@@ -44,6 +44,7 @@ const BusinessRegistrationForm = lazy(() => import("@/components/business-regist
 function App() {
   const [isLoading, setIsLoading] = useState(true);
   const location = useLocation();
+  const currentPath = location.pathname;
 
   useEffect(() => {
     if (!location.pathname.includes('/auth') && !location.pathname.includes('/wishlist')) {
@@ -55,20 +56,30 @@ function App() {
   }, [location]);
 
   useEffect(() => {
-    // Reduced loading time from 800ms to 400ms for faster initial render
+    // Reduced loading time to 250ms for much faster initial render
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 400);
+    }, 250);
     
     return () => clearTimeout(timer);
   }, []);
+
+  // Determine which section the user is in
+  const getCurrentSection = () => {
+    if (currentPath.includes('/marketplace')) return 'marketplace';
+    if (currentPath.includes('/businesses')) return 'business';
+    if (currentPath.includes('/profile')) return 'profile';
+    if (currentPath.includes('/messages')) return 'messages';
+    if (currentPath.includes('/communities')) return 'community';
+    return 'general';
+  };
 
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="dark" storageKey="lovable-theme">
         <AuthProvider>
           <div className={isLoading ? "hidden" : "app"}>
-            <Suspense fallback={<LoadingView />}>
+            <Suspense fallback={<LoadingView section={getCurrentSection()} />}>
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />

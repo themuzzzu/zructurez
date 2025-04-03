@@ -8,6 +8,7 @@ import { useMessageHandling } from "./hooks/useMessageHandling";
 import type { Chat } from "@/types/chat";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { Loader2 } from "lucide-react";
 
 interface ChatWindowProps {
   selectedChat: Chat;
@@ -38,6 +39,7 @@ export const ChatWindow = ({
   const [forwardMessage, setForwardMessage] = useState<string | null>(null);
   const [isTyping, setIsTyping] = useState(false);
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const {
     handleSendMessage,
@@ -46,6 +48,16 @@ export const ChatWindow = ({
   } = useMessageHandling(selectedChat, message, setMessage, () => {
     setMessage("");
   });
+
+  // Simulate loading for better UX
+  useEffect(() => {
+    // Faster loading for chat window
+    const timeout = setTimeout(() => {
+      setIsLoading(false);
+    }, 300);
+    
+    return () => clearTimeout(timeout);
+  }, []);
 
   // Subscribe to real-time updates for this chat
   useEffect(() => {
@@ -162,6 +174,19 @@ export const ChatWindow = ({
     setForwardMessage(content);
     toast.success("Message ready to forward. Select a recipient or send in current chat.");
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col h-full md:col-span-8 lg:col-span-9 border rounded-none md:rounded-r-lg overflow-hidden shadow-sm bg-background">
+        <div className="flex items-center justify-center h-full">
+          <div className="flex flex-col items-center space-y-4">
+            <Loader2 className="h-8 w-8 animate-spin text-pink-500" />
+            <p className="text-sm text-muted-foreground">Loading conversation...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full md:col-span-8 lg:col-span-9 border rounded-none md:rounded-r-lg overflow-hidden shadow-sm bg-background">

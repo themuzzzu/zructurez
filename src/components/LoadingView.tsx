@@ -100,12 +100,12 @@ export const LoadingView = ({ section = "general" }) => {
     // Simulate progress for better UX
     const progressInterval = setInterval(() => {
       setProgress(prev => {
-        // Slow down as it approaches 100%
-        const increment = prev < 70 ? 15 : prev < 90 ? 5 : 1;
+        // Faster progress for better UX
+        const increment = prev < 70 ? 18 : prev < 90 ? 8 : 2;
         const newProgress = Math.min(prev + increment, 99);
         return newProgress;
       });
-    }, 300);
+    }, 250); // Reduced interval for faster loading appearance
     
     return () => {
       clearInterval(contentInterval);
@@ -130,6 +130,16 @@ export const LoadingView = ({ section = "general" }) => {
         return {
           indicatorClass: "bg-purple-500",
           icon: <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
+        };
+      case "messages":
+        return {
+          indicatorClass: "bg-pink-500",
+          icon: <Loader2 className="h-8 w-8 animate-spin text-pink-500" />
+        };
+      case "community":
+        return {
+          indicatorClass: "bg-amber-500",
+          icon: <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
         };
       default:
         return {
