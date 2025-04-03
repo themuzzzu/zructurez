@@ -1,3 +1,4 @@
+
 import { Button } from "./ui/button";
 import { ImageUpload } from "./ImageUpload";
 import { BusinessBasicInfo } from "./business-form/BusinessBasicInfo";
@@ -5,8 +6,10 @@ import { BusinessPricing } from "./business-form/BusinessPricing";
 import { BusinessContactInfo } from "./business-form/BusinessContactInfo";
 import { BusinessProfileInfo } from "./business-form/BusinessProfileInfo";
 import { BusinessMembershipPlans } from "./business-form/BusinessMembershipPlans";
+import { BusinessPlanSelection } from "./business-form/BusinessPlanSelection";
 import { Label } from "./ui/label";
 import { useBusinessForm } from "./business-form/useBusinessForm";
+import { useState } from "react";
 import type { FormProps } from "./business-form/types/form";
 
 const TEST_BUSINESS = {
@@ -95,57 +98,129 @@ export const CreateBusinessForm = ({ onSuccess, onCancel, initialData }: FormPro
     handleSubmit,
   } = useBusinessForm(initialData || TEST_BUSINESS, onSuccess);
 
+  const [currentStep, setCurrentStep] = useState(1);
+  const [selectedPlan, setSelectedPlan] = useState("");
+
   const handleChange = (name: string, value: any) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (currentStep < 3) {
+      setCurrentStep(currentStep + 1);
+      return;
+    }
+    
     if (initialData && !window.confirm('Are you sure you want to update this business?')) {
       return;
     }
+    
+    // Add the selected plan to the form data
+    const updatedFormData = { ...formData, plan: selectedPlan };
+    setFormData(updatedFormData);
+    
     await handleSubmit(e);
+  };
+
+  const stepTitles = [
+    "Business Information",
+    "Upload Image",
+    "Select Plan"
+  ];
+
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 1:
+        return (
+          <div className="space-y-8">
+            <div className="space-y-4">
+              <BusinessBasicInfo formData={formData} onChange={handleChange} />
+              <BusinessProfileInfo formData={formData} onChange={handleChange} />
+              <BusinessPricing formData={formData} onChange={handleChange} />
+              <BusinessContactInfo formData={formData} onChange={handleChange} />
+              <BusinessMembershipPlans
+                plans={formData.membership_plans || []}
+                onChange={(plans) => handleChange("membership_plans", plans)}
+              />
+            </div>
+          </div>
+        );
+      case 2:
+        return (
+          <div className="space-y-4 pt-6">
+            <div className="space-y-2">
+              <Label className="text-lg font-semibold">Business Image</Label>
+              <p className="text-sm text-muted-foreground">
+                Upload a high-quality image that represents your business. This will be displayed on your business profile.
+              </p>
+              <ImageUpload
+                selectedImage={pendingImage || formData.image}
+                onImageSelect={(image) => setPendingImage(image)}
+                initialScale={imageScale}
+                initialPosition={imagePosition}
+                onScaleChange={setImageScale}
+                onPositionChange={setImagePosition}
+                skipAutoSave={true}
+              />
+            </div>
+          </div>
+        );
+      case 3:
+        return (
+          <BusinessPlanSelection 
+            onSelectPlan={setSelectedPlan} 
+            selectedPlan={selectedPlan} 
+          />
+        );
+    }
   };
 
   return (
     <form onSubmit={onSubmit} className="space-y-6">
-      <div className="space-y-8">
-        <div className="space-y-4">
-          <BusinessBasicInfo formData={formData} onChange={handleChange} />
-          <BusinessProfileInfo formData={formData} onChange={handleChange} />
-          <BusinessPricing formData={formData} onChange={handleChange} />
-          <BusinessContactInfo formData={formData} onChange={handleChange} />
-          <BusinessMembershipPlans
-            plans={formData.membership_plans || []}
-            onChange={(plans) => handleChange("membership_plans", plans)}
-          />
+      <div className="mb-8">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-bold">{stepTitles[currentStep - 1]}</h2>
+          <div className="text-sm text-muted-foreground">Step {currentStep} of 3</div>
         </div>
-
-        <div className="space-y-4 border-t pt-6">
-          <div className="space-y-2">
-            <Label className="text-lg font-semibold">Business Image</Label>
-            <p className="text-sm text-muted-foreground">
-              Upload a high-quality image that represents your business. This will be displayed on your business profile.
-            </p>
-            <ImageUpload
-              selectedImage={pendingImage || formData.image}
-              onImageSelect={(image) => setPendingImage(image)}
-              initialScale={imageScale}
-              initialPosition={imagePosition}
-              onScaleChange={setImageScale}
-              onPositionChange={setImagePosition}
-              skipAutoSave={true}
-            />
-          </div>
+        
+        <div className="w-full bg-muted h-2 rounded-full mb-8">
+          <div 
+            className="bg-primary h-2 rounded-full transition-all duration-300" 
+            style={{ width: `${(currentStep / 3) * 100}%` }} 
+          />
         </div>
       </div>
 
+      {renderStepContent()}
+
       <div className="flex gap-2 justify-end pt-4 border-t">
-        <Button variant="outline" type="button" onClick={onCancel} disabled={loading}>
+        {currentStep > 1 && (
+          <Button 
+            variant="outline" 
+            type="button" 
+            onClick={() => setCurrentStep(currentStep - 1)}
+            disabled={loading}
+          >
+            Back
+          </Button>
+        )}
+        
+        <Button 
+          variant="outline" 
+          type="button" 
+          onClick={onCancel} 
+          disabled={loading}
+        >
           Cancel
         </Button>
-        <Button type="submit" disabled={loading}>
-          {loading ? (initialData ? "Updating..." : "Registering...") : (initialData ? "Update Business" : "Register Business")}
+        
+        <Button type="submit" disabled={loading || (currentStep === 3 && !selectedPlan)}>
+          {loading ? 
+            (initialData ? "Updating..." : "Registering...") : 
+            (currentStep < 3 ? "Continue" : (initialData ? "Update Business" : "Register Business"))
+          }
         </Button>
       </div>
     </form>

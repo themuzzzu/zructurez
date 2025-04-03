@@ -1,45 +1,59 @@
 
-import { Button } from "@/components/ui/button";
+import { forwardRef } from "react";
+import { Link } from "react-router-dom";
+import { 
+  Home, ShoppingBag, 
+  CalendarClock, Briefcase, 
+  Heart, MessageSquare,
+  Map, BadgeDollarSign
+} from "lucide-react";
 import { cn } from "@/lib/utils";
-import { LucideIcon } from "lucide-react";
 
-interface NavButtonProps {
-  icon: LucideIcon;
-  label: string;
-  isActive?: boolean;
-  onClick?: () => void;
-  className?: string;
-}
-
-export const NavButton = ({
-  icon: Icon,
-  label,
-  isActive = false,
-  onClick,
-  className,
-}: NavButtonProps) => {
-  return (
-    <Button
-      variant="dark-nav"
-      onClick={onClick}
-      className={cn(
-        "justify-start text-base group", 
-        isActive && "bg-zinc-800", 
-        className
-      )}
-    >
-      <div className="flex items-center justify-center w-10 h-10">
-        <Icon className={cn(
-          "h-5 w-5", 
-          isActive ? "text-white" : "text-muted-foreground group-hover:text-gray-300"
-        )} />
-      </div>
-      <span className={cn(
-        "ml-3", 
-        isActive ? "text-white font-medium" : "text-muted-foreground group-hover:text-gray-300"
-      )}>
-        {label}
-      </span>
-    </Button>
-  );
+type NavButtonProps = {
+  pathname: string;
+  collapsed?: boolean;
 };
+
+export const NavButton = forwardRef<HTMLDivElement, NavButtonProps>(
+  ({ pathname, collapsed }, ref) => {
+    const links = [
+      { title: "Home", href: "/", icon: Home },
+      { title: "Marketplace", href: "/marketplace", icon: ShoppingBag },
+      { title: "Events", href: "/events", icon: CalendarClock },
+      { title: "Businesses", href: "/businesses", icon: Briefcase },
+      { title: "Pricing", href: "/pricing", icon: BadgeDollarSign },
+      { title: "Wishlist", href: "/wishlist", icon: Heart },
+      { title: "Messages", href: "/messages", icon: MessageSquare },
+      { title: "Maps", href: "/maps", icon: Map },
+    ];
+
+    return (
+      <div ref={ref} className="flex flex-col items-center gap-1 md:gap-2">
+        {links.map(({ title, href, icon: Icon }) => {
+          const isActive = 
+            href === "/" 
+              ? pathname === "/" 
+              : pathname.startsWith(href);
+              
+          return (
+            <Link
+              key={href}
+              to={href}
+              className={cn(
+                "w-full flex font-medium items-center justify-center md:justify-start px-2 py-1.5 rounded-md text-sm transition-colors",
+                isActive
+                  ? "bg-accent text-accent-foreground"
+                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+              )}
+            >
+              <Icon className="h-5 w-5 md:mr-2" />
+              {!collapsed && <span className="hidden md:inline-block">{title}</span>}
+            </Link>
+          );
+        })}
+      </div>
+    );
+  }
+);
+
+NavButton.displayName = "NavButton";

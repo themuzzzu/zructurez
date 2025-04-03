@@ -1,4 +1,3 @@
-
 import { useState, useEffect, lazy, Suspense } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -36,6 +35,7 @@ const AdAnalytics = lazy(() => import("@/pages/admin/AdAnalytics"));
 const AdPlacement = lazy(() => import("@/pages/admin/AdPlacement"));
 const AdAuction = lazy(() => import("@/pages/admin/AdAuction"));
 const Dashboard = lazy(() => import("@/pages/dashboard"));
+const Pricing = lazy(() => import("@/pages/Pricing"));
 const BusinessRegistrationForm = lazy(() => import("@/components/business-registration/BusinessRegistrationForm").then(m => ({ default: m.BusinessRegistrationForm })));
 
 function App() {
@@ -51,7 +51,6 @@ function App() {
     prefetchCommonQueries().catch(console.error);
   }, [location]);
 
-  // Reduce initial loading time
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
@@ -91,6 +90,7 @@ function App() {
               <Route path="/search" element={<Search />} />
               <Route path="/orders" element={<Orders />} />
               <Route path="/checkout" element={<Checkout />} />
+              <Route path="/pricing" element={<Pricing />} />
               <Route path="/admin/ads" element={<AdDashboard />} />
               <Route path="/admin/analytics" element={<AdAnalytics />} />
               <Route path="/admin/placement" element={<AdPlacement />} />

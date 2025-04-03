@@ -14,6 +14,7 @@ import { SubscribedBusinessesTab } from "@/components/profile/SubscribedBusiness
 import { AppointmentsTab } from "@/components/settings/AppointmentsTab";
 import { TestingTab } from "@/components/settings/TestingTab";
 import { AnalyticsTab } from "@/components/settings/AnalyticsTab";
+import { PricingTab } from "@/components/settings/PricingTab";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Home, ChevronLeft } from "lucide-react";
@@ -47,6 +48,8 @@ const Settings = () => {
         return <AdvertisementsTab />;
       case "subscribed":
         return <SubscribedBusinessesTab />;
+      case "pricing":
+        return <PricingTab />;
       case "testing":
         return <TestingTab />;
       case "analytics":
