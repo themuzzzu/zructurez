@@ -1,4 +1,5 @@
 
+import React from "react";
 import { Layout } from "@/components/layout/Layout";
 import { NotFound } from "@/components/NotFound";
 import { useParams } from "react-router-dom";
@@ -7,8 +8,6 @@ import { LikeProvider } from "@/components/products/LikeContext";
 // Import the Marketplace component from the correct location 
 // This is to fix the dynamic import issue
 const OptimizedMarketplace = React.lazy(() => import("./marketplace/OptimizedMarketplace"));
-
-import React from "react";
 
 const Marketplace = () => {
   const params = useParams();
