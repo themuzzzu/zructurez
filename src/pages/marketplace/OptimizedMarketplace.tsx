@@ -1,8 +1,6 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { BrowseTabContent } from "./BrowseTabContent";
-import { SearchTabContent } from "./SearchTabContent";
 import { GridLayoutType } from "@/components/products/types/layouts";
 import { AutocompleteSearch } from "@/components/marketplace/AutocompleteSearch";
 import { BannerCarousel } from "@/components/marketplace/BannerCarousel";
@@ -14,6 +12,10 @@ import { RecommendedProducts } from "@/components/marketplace/RecommendedProduct
 import { PersonalizedRecommendations } from "@/components/marketplace/PersonalizedRecommendations";
 import { TopProducts } from "@/components/recommendations/TopProducts";
 import { CategoryIconGrid } from "@/components/marketplace/CategoryIconGrid";
+
+// Import from correct location
+import { BrowseTabContent } from "@/components/marketplace/BrowseTabContent";
+import { SearchTabContent } from "@/components/marketplace/SearchTabContent";
 
 const OptimizedMarketplace = () => {
   const navigate = useNavigate();
