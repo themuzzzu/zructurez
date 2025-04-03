@@ -1,80 +1,123 @@
 
-import { useNavigate } from "react-router-dom";
-import { Button } from "../ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+import React, { useState } from "react";
+import { 
+  User, 
+  Settings, 
+  LogOut, 
+  Store, 
+  Heart, 
+  ShoppingCart,
+  BadgeDollarSign,
+  ChevronRight
+} from "lucide-react";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuGroup, 
+  DropdownMenuItem, 
+  DropdownMenuLabel, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { toast } from "sonner";
+import { 
+  Avatar, 
+  AvatarFallback, 
+  AvatarImage 
+} from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { Badge } from "../ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { Heart } from "lucide-react";
-import { AvatarWithFallback } from "@/components/ui/avatar-with-fallback";
+import { useAuth } from "@/providers/AuthProvider";
+import { toast } from "sonner";
+import { UserPlanInfo } from "../pricing/UserPlanInfo";
 
-interface UserMenuProps {
-  profile: {
-    avatar_url?: string;
-    username?: string;
-  } | null;
-}
-
-export const UserMenu = ({ profile }: UserMenuProps) => {
+export const UserMenu = () => {
   const navigate = useNavigate();
+  const { user, signOut } = useAuth();
+  const [isOpen, setIsOpen] = useState(false);
 
-  const handleProfileAction = async (action: string) => {
-    if (action === "Sign out") {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        toast.error("Error signing out");
-      } else {
-        navigate("/auth");
-      }
-    } else if (action === "Profile") {
-      navigate("/profile"); // Updated to use the correct profile route without ID
-    } else if (action === "Settings") {
-      navigate("/settings");
-    } else if (action === "Wishlist") {
-      navigate("/wishlist");
-    } else {
-      toast.info(`${action} clicked - Feature coming soon!`);
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast.success("Signed out successfully");
+      navigate("/");
+    } catch (error) {
+      console.error("Error signing out:", error);
+      toast.error("Error signing out");
     }
   };
 
+  const navigateTo = (path: string) => {
+    navigate(path);
+    setIsOpen(false);
+  };
+
+  const getInitials = (name: string) => {
+    if (!name) return "U";
+    return name.split(" ").map((n) => n[0]).join("").toUpperCase();
+  };
+
   return (
-    <DropdownMenu>
+    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="flex gap-2 transition-all duration-300 hover:bg-accent/80">
-          <AvatarWithFallback 
-            src={profile?.avatar_url} 
-            name={profile?.username}
-            size="sm"
-            className="transition-transform duration-300 hover:scale-110"
-          />
-          <span className="text-sm hidden sm:inline">{profile?.username || 'User'}</span>
+        <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+          <Avatar>
+            <AvatarImage src={user?.user_metadata?.avatar_url} />
+            <AvatarFallback>
+              {user?.user_metadata?.name 
+                ? getInitials(user.user_metadata.name) 
+                : "U"}
+            </AvatarFallback>
+          </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
-        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+      <DropdownMenuContent className="w-48" align="end">
+        <DropdownMenuLabel>
+          <div className="font-normal text-muted-foreground">Signed in as</div>
+          <div className="truncate font-medium">
+            {user?.email || "Guest"}
+          </div>
+        </DropdownMenuLabel>
+        
+        {/* Add current plan info */}
+        <UserPlanInfo user={user} onUpgradeClick={() => navigateTo("/settings/pricing")} />
+        
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => handleProfileAction("Profile")}>
-          Profile
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleProfileAction("Wishlist")}>
-          <Heart className="h-4 w-4 mr-2" />
-          Wishlist
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleProfileAction("Settings")}>
-          Settings
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleProfileAction("Help")}>
-          Help
+        <DropdownMenuGroup>
+          <DropdownMenuItem onClick={() => navigateTo("/profile")}>
+            <User className="mr-2 h-4 w-4" />
+            <span>Profile</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigateTo("/businesses/my-businesses")}>
+            <Store className="mr-2 h-4 w-4" />
+            <span>My Businesses</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigateTo("/wishlist")}>
+            <Heart className="mr-2 h-4 w-4" />
+            <span>Wishlist</span>
+            <Badge className="ml-auto px-1 text-xs" variant="secondary">3</Badge>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigateTo("/cart")}>
+            <ShoppingCart className="mr-2 h-4 w-4" />
+            <span>Cart</span>
+            <Badge className="ml-auto px-1 text-xs" variant="secondary">2</Badge>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigateTo("/settings/pricing")}>
+            <BadgeDollarSign className="mr-2 h-4 w-4" />
+            <span>Pricing Plans</span>
+            <ChevronRight className="ml-auto h-4 w-4" />
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => navigateTo("/settings")}>
+          <Settings className="mr-2 h-4 w-4" />
+          <span>Settings</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => handleProfileAction("Sign out")}>
-          Sign out
+        <DropdownMenuItem onClick={handleSignOut}>
+          <LogOut className="mr-2 h-4 w-4" />
+          <span>Log out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
