@@ -6,7 +6,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
 import { Loader2 } from "lucide-react";
 import { queryClient, prefetchCommonQueries } from "@/lib/react-query";
-import { AuthProvider } from "@/providers/AuthProvider";
+import { AuthProvider } from "@/hooks/useAuth";
 
 // Always loaded components
 import { LoadingView } from "@/components/LoadingView";
@@ -17,6 +17,7 @@ const Auth = lazy(() => import("@/pages/Auth"));
 const Events = lazy(() => import("@/pages/Events"));
 const Jobs = lazy(() => import("@/pages/Jobs"));
 const Marketplace = lazy(() => import("@/pages/Marketplace"));
+const CategoryPage = lazy(() => import("@/pages/marketplace/CategoryPage"));
 const Business = lazy(() => import("@/pages/Business"));
 const BusinessDetails = lazy(() => import("@/pages/BusinessDetails"));
 const ProductDetails = lazy(() => import("@/pages/ProductDetails"));
@@ -73,7 +74,8 @@ function App() {
                 <Route path="/events" element={<Events />} />
                 <Route path="/jobs" element={<Jobs />} />
                 <Route path="/marketplace" element={<Marketplace />} />
-                <Route path="/marketplace/*" element={<Marketplace />} />
+                <Route path="/marketplace/category/:categoryId" element={<CategoryPage />} />
+                <Route path="/marketplace/category/:categoryId/:subcategoryId" element={<CategoryPage />} />
                 <Route path="/products" element={<Marketplace />} />
                 <Route path="/businesses" element={<Business />} />
                 <Route path="/businesses/:id" element={<BusinessDetails />} />

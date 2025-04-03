@@ -1,17 +1,24 @@
+
 import React, { useState, useEffect } from 'react';
 import { Navbar } from '@/components/Navbar';
 import { MobileNav } from '@/components/navbar/MobileNav';
-import { Categories } from '@/components/marketplace/Categories';
+import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SponsoredProducts } from '@/components/marketplace/SponsoredProducts';
 import { TrendingProducts } from '@/components/marketplace/TrendingProducts';
+import { RecommendedProducts } from '@/components/marketplace/RecommendedProducts';
+import { PersonalizedRecommendations } from '@/components/marketplace/PersonalizedRecommendations';
 import { MarketplaceHeader } from './MarketplaceHeader';
 import { BrowseTabContent } from './BrowseTabContent';
 import { CategoryTabContent } from './CategoryTabContent';
-import { supabase } from '@/integrations/supabase/client';
+import { BannerCarousel } from '@/components/marketplace/BannerCarousel';
+import { CategoryIconGrid } from '@/components/marketplace/CategoryIconGrid';
+import { Categories } from '@/components/marketplace/Categories';
 import { motion } from 'framer-motion';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function MarketplaceIndex() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('browse');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -94,7 +101,8 @@ export default function MarketplaceIndex() {
 
   const handleCategorySelect = (category) => {
     setSelectedCategory(category);
-    setActiveTab('category');
+    // Navigate to category page with this category pre-selected
+    navigate(`/marketplace/category/${category}`);
   };
 
   const handleSearchSelect = (term) => {
@@ -115,11 +123,37 @@ export default function MarketplaceIndex() {
           popularSearches={popularSearches}
         />
         
+        {/* Banner carousel below search */}
+        <div className="mt-4 mb-6">
+          <BannerCarousel />
+        </div>
+
+        {/* Horizontal scrolling categories */}
         <div className="mt-2 mb-6 overflow-x-auto scrollbar-hide">
           <Categories 
             onCategorySelect={handleCategorySelect}
             trendingCategories={trendingCategories}
           />
+        </div>
+        
+        {/* Category Icon Grid for easy navigation */}
+        <div className="mb-8">
+          <CategoryIconGrid onCategorySelect={handleCategorySelect} />
+        </div>
+
+        {/* Sponsored Products Section */}
+        <div className="mb-8">
+          <SponsoredProducts />
+        </div>
+        
+        {/* Recommended Products */}
+        <div className="mb-8">
+          <RecommendedProducts />
+        </div>
+        
+        {/* Personalized Recommendations */}
+        <div className="mb-8">
+          <PersonalizedRecommendations />
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
