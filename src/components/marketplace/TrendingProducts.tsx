@@ -103,15 +103,18 @@ export const TrendingProducts: React.FC<TrendingProductsProps> = ({
               transition={{ duration: 0.3, delay: index * 0.05 }}
             >
               <ProductCard
-                id={product.id}
-                title={product.title || ""}
-                price={product.price || 0}
-                description={product.description || ""}
-                category={product.category || ""}
-                imageUrl={product.image_url || ""}
-                views={product.views || 0}
-                badge={product.badge}
-                rank={product.rank}
+                product={{
+                  id: product.id,
+                  title: product.title || "",
+                  name: product.name || "",
+                  price: product.price || 0,
+                  description: product.description || "",
+                  category: product.category || "",
+                  image_url: product.image_url || "",
+                  views: product.views || 0,
+                  badge: product.badge,
+                  rank: product.rank
+                }}
               />
             </motion.div>
           ))}
