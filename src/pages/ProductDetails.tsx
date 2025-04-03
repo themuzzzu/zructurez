@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -594,105 +595,105 @@ const ProductDetails = () => {
                             </Button>
                           </div>
                         </div>
-                      </div>
                       
-                      <div className="p-4 bg-muted rounded-lg">
-                        <div className="flex justify-between">
-                          <div className="flex items-center gap-2">
-                            <div className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-sm flex items-center">
-                              <Star className="h-3 w-3 fill-current mr-1" />
-                              4.0
+                        <div className="p-4 bg-muted rounded-lg">
+                          <div className="flex justify-between">
+                            <div className="flex items-center gap-2">
+                              <div className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded text-sm flex items-center">
+                                <Star className="h-3 w-3 fill-current mr-1" />
+                                4.0
+                              </div>
+                              <span className="font-medium">Good value for money</span>
                             </div>
-                            <span className="font-medium">Good value for money</span>
+                            <span className="text-sm text-muted-foreground">1 week ago</span>
                           </div>
-                          <span className="text-sm text-muted-foreground">1 week ago</span>
-                        </div>
-                        <p className="mt-2 text-sm">Good product for the price. Delivery was prompt and packaging was secure.</p>
-                        <div className="flex items-center gap-4 mt-2">
-                          <Button variant="ghost" size="sm" className="h-8">
-                            <ThumbsUp className="h-4 w-4 mr-2" />
-                            Helpful (1)
-                          </Button>
-                          <Button variant="ghost" size="sm" className="h-8">
-                            <MessageCircle className="h-4 w-4 mr-2" />
-                            Comment
-                          </Button>
+                          <p className="mt-2 text-sm">Good product for the price. Delivery was prompt and packaging was secure.</p>
+                          <div className="flex items-center gap-4 mt-2">
+                            <Button variant="ghost" size="sm" className="h-8">
+                              <ThumbsUp className="h-4 w-4 mr-2" />
+                              Helpful (1)
+                            </Button>
+                            <Button variant="ghost" size="sm" className="h-8">
+                              <MessageCircle className="h-4 w-4 mr-2" />
+                              Comment
+                            </Button>
+                          </div>
                         </div>
                       </div>
-                    </div>
                     
-                    <Button variant="outline" className="w-full mt-4">
-                      Load More Reviews
-                    </Button>
-                  </TabsContent>
-                  
-                  <TabsContent value="questions" className="mt-4">
-                    <div className="flex justify-between items-center mb-4">
-                      <h3 className="font-semibold">Questions & Answers</h3>
-                      <Button variant="outline" size="sm">Ask a Question</Button>
-                    </div>
+                      <Button variant="outline" className="w-full mt-4">
+                        Load More Reviews
+                      </Button>
+                    </TabsContent>
                     
-                    <div className="space-y-4">
-                      <div className="p-4 bg-muted rounded-lg">
-                        <div className="flex items-start gap-2">
-                          <span className="font-medium text-primary">Q:</span>
-                          <span>Does this product come with a warranty?</span>
+                    <TabsContent value="questions" className="mt-4">
+                      <div className="flex justify-between items-center mb-4">
+                        <h3 className="font-semibold">Questions & Answers</h3>
+                        <Button variant="outline" size="sm">Ask a Question</Button>
+                      </div>
+                      
+                      <div className="space-y-4">
+                        <div className="p-4 bg-muted rounded-lg">
+                          <div className="flex items-start gap-2">
+                            <span className="font-medium text-primary">Q:</span>
+                            <span>Does this product come with a warranty?</span>
+                          </div>
+                          <div className="flex items-start gap-2 mt-2">
+                            <span className="font-medium text-green-600">A:</span>
+                            <span>Yes, it comes with a 1-year manufacturer warranty.</span>
+                          </div>
                         </div>
-                        <div className="flex items-start gap-2 mt-2">
-                          <span className="font-medium text-green-600">A:</span>
-                          <span>Yes, it comes with a 1-year manufacturer warranty.</span>
+                        
+                        <div className="p-4 bg-muted rounded-lg">
+                          <div className="flex items-start gap-2">
+                            <span className="font-medium text-primary">Q:</span>
+                            <span>Is this product water resistant?</span>
+                          </div>
+                          <div className="flex items-start gap-2 mt-2">
+                            <span className="font-medium text-green-600">A:</span>
+                            <span>It is water resistant but not waterproof. It can handle light splashes but shouldn't be submerged in water.</span>
+                          </div>
                         </div>
                       </div>
                       
-                      <div className="p-4 bg-muted rounded-lg">
-                        <div className="flex items-start gap-2">
-                          <span className="font-medium text-primary">Q:</span>
-                          <span>Is this product water resistant?</span>
-                        </div>
-                        <div className="flex items-start gap-2 mt-2">
-                          <span className="font-medium text-green-600">A:</span>
-                          <span>It is water resistant but not waterproof. It can handle light splashes but shouldn't be submerged in water.</span>
-                        </div>
+                      <Button variant="outline" className="w-full mt-4">
+                        See All Questions
+                      </Button>
+                    </TabsContent>
+                  </Tabs>
+                </div>
+
+                {/* Delivery & warranty */}
+                <div className="bg-card p-6 rounded-lg border border-border">
+                  <h2 className="text-lg font-semibold text-foreground mb-4">Delivery & Services</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="flex items-start gap-3">
+                      <Truck className="h-5 w-5 text-primary" />
+                      <div>
+                        <p className="font-medium text-foreground">Free Delivery</p>
+                        <p className="text-sm text-muted-foreground">Delivered within 5-7 business days</p>
                       </div>
                     </div>
-                    
-                    <Button variant="outline" className="w-full mt-4">
-                      See All Questions
-                    </Button>
-                  </TabsContent>
-                </Tabs>
-              </div>
-
-              {/* Delivery & warranty */}
-              <div className="bg-card p-6 rounded-lg border border-border">
-                <h2 className="text-lg font-semibold text-foreground mb-4">Delivery & Services</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="flex items-start gap-3">
-                    <Truck className="h-5 w-5 text-primary" />
-                    <div>
-                      <p className="font-medium text-foreground">Free Delivery</p>
-                      <p className="text-sm text-muted-foreground">Delivered within 5-7 business days</p>
+                    <div className="flex items-start gap-3">
+                      <Shield className="h-5 w-5 text-primary" />
+                      <div>
+                        <p className="font-medium text-foreground">Warranty Protection</p>
+                        <p className="text-sm text-muted-foreground">1 year manufacturer warranty</p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Shield className="h-5 w-5 text-primary" />
-                    <div>
-                      <p className="font-medium text-foreground">Warranty Protection</p>
-                      <p className="text-sm text-muted-foreground">1 year manufacturer warranty</p>
+                    <div className="flex items-start gap-3">
+                      <RefreshCw className="h-5 w-5 text-primary" />
+                      <div>
+                        <p className="font-medium text-foreground">Easy Returns</p>
+                        <p className="text-sm text-muted-foreground">10 days return policy</p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <RefreshCw className="h-5 w-5 text-primary" />
-                    <div>
-                      <p className="font-medium text-foreground">Easy Returns</p>
-                      <p className="text-sm text-muted-foreground">10 days return policy</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <CheckCircle className="h-5 w-5 text-primary" />
-                    <div>
-                      <p className="font-medium text-foreground">Genuine Product</p>
-                      <p className="text-sm text-muted-foreground">100% authentic products</p>
+                    <div className="flex items-start gap-3">
+                      <CheckCircle className="h-5 w-5 text-primary" />
+                      <div>
+                        <p className="font-medium text-foreground">Genuine Product</p>
+                        <p className="text-sm text-muted-foreground">100% authentic products</p>
+                      </div>
                     </div>
                   </div>
                 </div>

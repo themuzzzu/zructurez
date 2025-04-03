@@ -1,3 +1,4 @@
+
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart } from "lucide-react";
@@ -9,6 +10,7 @@ import {
   CarouselPrevious 
 } from "@/components/ui/carousel";
 import { LikeProvider } from "@/components/products/LikeContext";
+import { ProductLikeButton } from "@/components/products/ProductLikeButton";
 
 interface ServiceProductCardProps {
   product: any;
@@ -31,44 +33,51 @@ export const ServiceProductCard = ({ product, onAddToCart, type }: ServiceProduc
   const mainImage = type === 'service' ? product.image_url : product.image_url;
 
   return (
-    <LikeProvider>
-      <Card className="p-4 space-y-2">
-        {hasMultipleImages ? (
-          <Carousel className="w-full">
-            <CarouselContent>
-              {images.map((image: any, index: number) => (
-                <CarouselItem key={index}>
-                  <img
-                    src={image.image_url}
-                    alt={`${name} - Image ${index + 1}`}
-                    className="w-full h-48 object-cover rounded-lg"
-                  />
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious />
-            <CarouselNext />
-          </Carousel>
-        ) : (
-          mainImage && (
-            <img
-              src={mainImage}
-              alt={name}
-              className="w-full h-48 object-cover rounded-lg"
-            />
-          )
+    <Card className="p-4 space-y-2">
+      {hasMultipleImages ? (
+        <Carousel className="w-full">
+          <CarouselContent>
+            {images.map((image: any, index: number) => (
+              <CarouselItem key={index}>
+                <img
+                  src={image.image_url}
+                  alt={`${name} - Image ${index + 1}`}
+                  className="w-full h-48 object-cover rounded-lg"
+                />
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
+        </Carousel>
+      ) : (
+        mainImage && (
+          <img
+            src={mainImage}
+            alt={name}
+            className="w-full h-48 object-cover rounded-lg"
+          />
+        )
+      )}
+      <div className="flex items-center gap-2">
+        <h3 className="font-semibold">{name}</h3>
+        {type === 'marketplace' && (
+          <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
+            Marketplace
+          </span>
         )}
+      </div>
+      <p className="text-sm text-muted-foreground">{description}</p>
+      <div className="flex items-center justify-between">
+        <span className="font-semibold">₹{price}</span>
         <div className="flex items-center gap-2">
-          <h3 className="font-semibold">{name}</h3>
-          {type === 'marketplace' && (
-            <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
-              Marketplace
-            </span>
-          )}
-        </div>
-        <p className="text-sm text-muted-foreground">{description}</p>
-        <div className="flex items-center justify-between">
-          <span className="font-semibold">₹{price}</span>
+          <LikeProvider>
+            <ProductLikeButton
+              productId={product.id}
+              size="sm"
+              variant="ghost"
+            />
+          </LikeProvider>
           <Button
             onClick={onAddToCart}
             className="gap-2"
@@ -77,7 +86,7 @@ export const ServiceProductCard = ({ product, onAddToCart, type }: ServiceProduc
             Add to Cart
           </Button>
         </div>
-      </Card>
-    </LikeProvider>
+      </div>
+    </Card>
   );
 };
