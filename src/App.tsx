@@ -1,3 +1,4 @@
+
 import { useState, useEffect, lazy, Suspense } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -54,9 +55,10 @@ function App() {
   }, [location]);
 
   useEffect(() => {
+    // Reduced loading time from 800ms to 400ms for faster initial render
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 800); // Reduced from 1500ms
+    }, 400);
     
     return () => clearTimeout(timer);
   }, []);
@@ -108,7 +110,7 @@ function App() {
           {isLoading && (
             <div className="flex flex-col space-y-4 items-center justify-center min-h-screen">
               <Loader2 className="h-10 w-10 animate-spin text-primary" />
-              <p className="animate-pulse">Loading application...</p>
+              <p className="animate-pulse text-center px-4">Loading your experience...</p>
             </div>
           )}
           <Toaster />

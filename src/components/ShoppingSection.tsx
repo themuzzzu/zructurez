@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { ProductsGrid } from './products/ProductsGrid';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,6 +7,8 @@ import { GridLayoutType } from './products/types/layouts';
 import { ProductFilters } from './marketplace/ProductFilters';
 import { Skeleton } from './ui/skeleton';
 import { ShoppingCardSkeleton } from './ShoppingCardSkeleton';
+import { LoadingView } from './LoadingView';
+import { Progress } from './ui/progress';
 
 interface ShoppingSectionProps {
   searchQuery: string;
@@ -40,11 +42,18 @@ export const ShoppingSection = ({
   const [localPriceRange, setLocalPriceRange] = useState(priceRange);
   const [localGridLayout, setLocalGridLayout] = useState<GridLayoutType>(gridLayout);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  
+  // Progress reference for loading animation
+  const loadingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   
   // Fetch products based on filters
   const { data: products, isLoading, error } = useQuery({
     queryKey: ['products', searchQuery, localCategory, localShowDiscounted, localShowUsed, localShowBranded, localSortOption, localPriceRange],
     queryFn: async () => {
+      // Start loading progress animation
+      startLoadingProgress();
+      
       let query = supabase.from('products').select('*');
       
       if (searchQuery) {
@@ -101,15 +110,53 @@ export const ShoppingSection = ({
         console.error('Error in products fetch:', err);
         // Return mock data on error
         return getMockProducts(localCategory);
+      } finally {
+        // Complete the loading animation
+        completeLoadingProgress();
       }
     },
     staleTime: 60000, // 1 minute
   });
   
+  // Start loading animation
+  const startLoadingProgress = () => {
+    setLoadingProgress(0);
+    if (loadingIntervalRef.current) {
+      clearInterval(loadingIntervalRef.current);
+    }
+    
+    loadingIntervalRef.current = setInterval(() => {
+      setLoadingProgress(prev => {
+        // Slow down as it approaches 100%
+        const increment = prev < 60 ? 10 : prev < 80 ? 5 : 1;
+        const newProgress = Math.min(prev + increment, 95);
+        return newProgress;
+      });
+    }, 100);
+  };
+  
+  // Complete loading animation
+  const completeLoadingProgress = () => {
+    if (loadingIntervalRef.current) {
+      clearInterval(loadingIntervalRef.current);
+      loadingIntervalRef.current = null;
+    }
+    setLoadingProgress(100);
+  };
+  
   // Reset to first page when filters change
   useEffect(() => {
     setLocalCategory(selectedCategory);
   }, [selectedCategory]);
+  
+  // Clean up interval on unmount
+  useEffect(() => {
+    return () => {
+      if (loadingIntervalRef.current) {
+        clearInterval(loadingIntervalRef.current);
+      }
+    };
+  }, []);
   
   // Reset filters function
   const resetFilters = useCallback(() => {
@@ -145,6 +192,12 @@ export const ShoppingSection = ({
     <div>
       {title && <h2 className="text-xl font-bold mb-4">{title}</h2>}
       
+      {isLoading && (
+        <div className="w-full h-1 mb-4">
+          <Progress value={loadingProgress} className="h-1" />
+        </div>
+      )}
+      
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {/* Filters - Desktop */}
         <div className="hidden md:block">
@@ -168,10 +221,12 @@ export const ShoppingSection = ({
         {/* Products Grid */}
         <div className="md:col-span-3">
           {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {[...Array(8)].map((_, i) => (
-                <ShoppingCardSkeleton key={i} />
-              ))}
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {[...Array(8)].map((_, i) => (
+                  <ShoppingCardSkeleton key={i} />
+                ))}
+              </div>
             </div>
           ) : error ? (
             <div className="text-center p-4 text-red-500">

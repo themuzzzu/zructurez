@@ -1,41 +1,23 @@
 
-import { ImageOff } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { useState } from "react";
+import React, { useState } from 'react';
+import { ImageOff } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-interface ImageFallbackProps extends React.ImgHTMLAttributes<HTMLImageElement> {
+interface ImageFallbackProps {
+  alt: string;
+  className?: string;
   fallbackClassName?: string;
 }
 
-export function ImageFallback({ 
-  src, 
-  alt, 
+export const ImageFallback: React.FC<ImageFallbackProps> = ({
+  alt,
   className,
-  fallbackClassName,
-  ...props 
-}: ImageFallbackProps) {
-  const [hasError, setHasError] = useState(false);
-
-  if (hasError || !src) {
-    return (
-      <div className={cn(
-        "flex flex-col items-center justify-center bg-muted rounded-md", 
-        className,
-        fallbackClassName
-      )}>
-        <ImageOff className="h-8 w-8 text-muted-foreground stroke-black dark:stroke-white" />
-        <p className="text-xs text-muted-foreground mt-2">{alt || "Image not available"}</p>
-      </div>
-    );
-  }
-
+  fallbackClassName
+}) => {
   return (
-    <img
-      src={src}
-      alt={alt}
-      className={className}
-      onError={() => setHasError(true)}
-      {...props}
-    />
+    <div className={cn('flex items-center justify-center bg-muted h-full w-full', className)}>
+      <ImageOff className={cn('text-muted-foreground h-10 w-10', fallbackClassName)} />
+      <span className="sr-only">{alt}</span>
+    </div>
   );
-}
+};

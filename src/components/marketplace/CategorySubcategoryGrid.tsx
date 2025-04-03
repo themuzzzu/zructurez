@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { useParams, useNavigate } from 'react-router-dom';
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
+import { Progress } from "@/components/ui/progress";
 
 interface CategorySubcategoryGridProps {
   onCategorySelect: (category: string, subcategory?: string) => void;
@@ -55,12 +56,13 @@ export const CategorySubcategoryGrid = ({ onCategorySelect }: CategorySubcategor
   const { categoryId } = useParams<{ categoryId: string }>();
   const [currentCategory, setCurrentCategory] = useState(categoryId || '');
   const [isLoading, setIsLoading] = useState(true);
+  const [loadingProgress, setLoadingProgress] = useState(0);
   
   useEffect(() => {
-    // Set a short timeout to simulate data loading and prevent flashing
+    // Much faster loading - reduced from 300ms to 100ms
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 300);
+    }, 100);
     
     if (categoryId) {
       setCurrentCategory(categoryId);
@@ -73,6 +75,23 @@ export const CategorySubcategoryGrid = ({ onCategorySelect }: CategorySubcategor
     return () => clearTimeout(timer);
   }, [categoryId, window.location.search]);
   
+  // Simulated loading progress for better UX
+  useEffect(() => {
+    if (isLoading) {
+      const interval = setInterval(() => {
+        setLoadingProgress(prev => {
+          const increment = prev < 70 ? 20 : 5;
+          const newProgress = Math.min(prev + increment, 99);
+          return newProgress;
+        });
+      }, 100);
+      
+      return () => clearInterval(interval);
+    } else {
+      setLoadingProgress(100);
+    }
+  }, [isLoading]);
+  
   // Get subcategories for the current category
   const subcategories = currentCategory ? 
     categorySubcategories[currentCategory as keyof typeof categorySubcategories] || [] : [];
@@ -80,7 +99,10 @@ export const CategorySubcategoryGrid = ({ onCategorySelect }: CategorySubcategor
   if (isLoading) {
     return (
       <Card className="bg-white dark:bg-zinc-900 p-4 rounded-lg shadow-sm">
-        <Skeleton className="h-6 w-48 mb-3" />
+        <div className="flex items-center justify-between mb-3">
+          <Skeleton className="h-6 w-48" />
+          <Progress value={loadingProgress} className="w-24 h-1" />
+        </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
           {[...Array(6)].map((_, i) => (
             <div key={i} className="p-2">
@@ -105,7 +127,7 @@ export const CategorySubcategoryGrid = ({ onCategorySelect }: CategorySubcategor
     return (
       <Card className="bg-white dark:bg-zinc-900 p-4 rounded-lg shadow-sm">
         <h3 className="font-semibold mb-3 text-sm">Browse Categories</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
           {Object.keys(categorySubcategories).map((category, index) => (
             <motion.div
               key={category}
@@ -132,7 +154,7 @@ export const CategorySubcategoryGrid = ({ onCategorySelect }: CategorySubcategor
   return (
     <Card className="bg-white dark:bg-zinc-900 p-4 rounded-lg shadow-sm">
       <h3 className="font-semibold mb-3 text-sm">Choose from {currentCategory.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())} Categories</h3>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
         {subcategories.map((subcategory, index) => (
           <motion.div
             key={subcategory}
