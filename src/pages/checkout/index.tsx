@@ -113,22 +113,44 @@ export default function Checkout() {
         throw new Error('User must be logged in to place an order');
       }
 
-      // In a real application, you would create an order in your database
-      // For this example, we'll simulate order creation
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      if (!selectedAddress) {
+        throw new Error('Please select a shipping address');
+      }
+
+      // In a real application, you would create orders for each cart item
+      // For simplicity, we'll create a single order for each cart item
+      for (const item of cartItems) {
+        const { error } = await supabase
+          .from('orders')
+          .insert({
+            user_id: session.session.user.id,
+            product_id: item.products.id,
+            total_price: item.products.price * item.quantity,
+            quantity: item.quantity,
+            status: 'pending',
+            address_id: selectedAddress,
+            payment_method: selectedPaymentMethod,
+            coupon_code: appliedCoupon?.code,
+            discount: appliedCoupon ? (item.products.price * item.quantity * appliedCoupon.discount_percentage / 100) : 0,
+            shipping_fee: subtotal > 1000 ? 0 : 40
+          });
+
+        if (error) throw error;
+      }
+
+      // Clear cart after successful order
+      const { error: clearCartError } = await supabase
+        .from('cart_items')
+        .delete()
+        .eq('user_id', session.session.user.id);
+
+      if (clearCartError) throw clearCartError;
       
-      // Mock order creation
-      return { 
-        order_id: Math.random().toString(36).substring(2, 15),
-        success: true 
-      };
+      return { success: true };
     },
     onSuccess: () => {
       setOrderSuccess(true);
       
-      // In a real app, you would clear the cart here
-      
-      // Show success message
       toast.success('Order placed successfully!');
       
       // After a delay, navigate to success page
@@ -143,9 +165,9 @@ export default function Checkout() {
         });
       }, 2000);
     },
-    onError: () => {
+    onError: (error) => {
       setIsProcessing(false);
-      toast.error('Failed to place order. Please try again.');
+      toast.error(error instanceof Error ? error.message : 'Failed to place order. Please try again.');
     },
   });
 
