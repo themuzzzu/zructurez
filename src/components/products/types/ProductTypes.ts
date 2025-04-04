@@ -1,25 +1,18 @@
 
-export type GridLayoutType = "grid4x4" | "grid3x3" | "grid2x2" | "list" | "grid1x1";
+export type GridLayoutType = "grid2x2" | "grid3x3" | "grid4x4" | "list";
 
 export interface ProductType {
   id: string;
   title: string;
   description: string;
   price: number;
-  category: string;
-  subcategory?: string;
-  image_url?: string;
-  stock: number;
-  brand?: string;
-  condition?: string;
-  is_discounted?: boolean;
-  is_used?: boolean;
-  is_branded?: boolean;
+  image_url: string;
   discount_percentage?: number;
   original_price?: number;
-  created_at?: string;
-  updated_at?: string;
-  views?: number;
-  name?: string;
-  business_id?: string;
+  is_discounted?: boolean;
+  category?: string;
+  brand_name?: string;
+  condition?: string;
+  rating?: number;
+  rating_count?: number;
 }

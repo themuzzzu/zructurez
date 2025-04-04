@@ -1,14 +1,7 @@
 
 import { useState, useEffect } from "react";
-import { Card } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
 import { ProductsGrid } from "@/components/products/ProductsGrid";
-import { Spinner } from "@/components/common/Spinner";
-import { GridLayoutType } from "@/components/products/types/layouts";
+import { GridLayoutType } from "@/components/products/types/ProductTypes";
 import { Categories } from "@/components/marketplace/Categories";
 import { EmptySearchResults } from "@/components/marketplace/EmptySearchResults";
 
@@ -33,22 +26,11 @@ export interface CategoryTabContentProps {
 export const CategoryTabContent = ({
   selectedCategory = "all",
   setSelectedCategory,
-  showDiscounted = false,
-  setShowDiscounted,
-  showUsed = false,
-  setShowUsed,
-  showBranded = false,
-  setShowBranded,
-  sortOption = "newest",
-  setSortOption,
-  priceRange = "all",
-  setPriceRange,
-  resetFilters,
   gridLayout = "grid4x4",
+  setActiveTab
 }: CategoryTabContentProps) => {
   const [products, setProducts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleCategorySelect = (category: string) => {
     if (setSelectedCategory) {
@@ -57,73 +39,20 @@ export const CategoryTabContent = ({
   };
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true);
-      try {
-        let query = supabase.from("products").select("*");
-
-        // Apply category filter
-        if (selectedCategory && selectedCategory !== "all") {
-          query = query.eq("category", selectedCategory);
-        }
-
-        // Apply discounted filter
-        if (showDiscounted) {
-          query = query.eq("is_discounted", true);
-        }
-
-        // Apply used filter
-        if (showUsed) {
-          query = query.eq("is_used", true);
-        }
-
-        // Apply branded filter
-        if (showBranded) {
-          query = query.eq("is_branded", true);
-        }
-
-        // Apply sorting
-        switch (sortOption) {
-          case "priceAsc":
-            query = query.order("price", { ascending: true });
-            break;
-          case "priceDesc":
-            query = query.order("price", { ascending: false });
-            break;
-          case "newest":
-            query = query.order("created_at", { ascending: false });
-            break;
-          default:
-            query = query.order("created_at", { ascending: false });
-        }
-
-        const { data, error } = await query;
-
-        if (error) throw error;
-
-        setProducts(data || []);
-      } catch (err) {
-        console.error("Error fetching products:", err);
-        setError(err instanceof Error ? err.message : "Failed to load products");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, [selectedCategory, showDiscounted, showUsed, showBranded, sortOption, priceRange]);
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center py-12">
-        <Spinner size="lg" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return <div className="text-center py-8 text-red-500">{error}</div>;
-  }
+    // Instead of fetching real products, use mock data
+    setLoading(true);
+    setTimeout(() => {
+      const mockProducts = Array(8).fill(null).map((_, i) => ({
+        id: `mock-${i}`,
+        title: `Product ${i+1}`,
+        description: `This is a mock product description ${i+1}`,
+        price: Math.floor(Math.random() * 100) + 10,
+        image_url: `https://picsum.photos/seed/${i+1}/300/300`
+      }));
+      setProducts(mockProducts);
+      setLoading(false);
+    }, 500);
+  }, [selectedCategory]);
 
   return (
     <div className="space-y-6">
@@ -132,13 +61,13 @@ export const CategoryTabContent = ({
         <Categories onCategorySelect={handleCategorySelect} />
       </div>
       
-      {products.length === 0 ? (
+      {products.length === 0 && !loading ? (
         <EmptySearchResults searchTerm={selectedCategory !== "all" ? selectedCategory : ""} />
       ) : (
         <ProductsGrid 
           products={products} 
           layout={gridLayout}
-          isLoading={false}
+          isLoading={loading}
           onOpenAddProductDialog={() => {}}
         />
       )}

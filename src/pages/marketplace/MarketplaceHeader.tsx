@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -9,11 +10,6 @@ export interface MarketplaceHeaderProps {
   setSearchTerm?: (term: string) => void;
   popularSearches?: any[];
   isSearching?: boolean;
-  isCartOpen?: boolean;
-  setIsCartOpen?: (open: boolean) => void;
-  isFilterOpen?: boolean;
-  setIsFilterOpen?: (open: boolean) => void;
-  cartItemCount?: number;
 }
 
 export const MarketplaceHeader = ({ 
@@ -83,31 +79,25 @@ export const MarketplaceHeader = ({
         </Button>
       </form>
       
-      {showSuggestions && (
+      {showSuggestions && popularSearches.length > 0 && (
         <div 
           ref={suggestionsRef}
           className="absolute mt-1 w-full bg-background border rounded-md shadow-lg z-10"
         >
-          {popularSearches.length > 0 ? (
-            <div className="p-2">
-              <div className="text-xs text-muted-foreground mb-2">Popular searches</div>
-              <div className="flex flex-wrap gap-2">
-                {popularSearches.map((item, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleSuggestionClick(item.term)}
-                    className="px-3 py-1 bg-secondary rounded-full text-xs hover:bg-secondary/80 transition-colors"
-                  >
-                    {item.term}
-                  </button>
-                ))}
-              </div>
+          <div className="p-2">
+            <div className="text-xs text-muted-foreground mb-2">Popular searches</div>
+            <div className="flex flex-wrap gap-2">
+              {popularSearches.map((item, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleSuggestionClick(item.term)}
+                  className="px-3 py-1 bg-secondary rounded-full text-xs hover:bg-secondary/80 transition-colors"
+                >
+                  {item.term}
+                </button>
+              ))}
             </div>
-          ) : (
-            <div className="p-3 text-center text-sm text-muted-foreground">
-              Start typing to search
-            </div>
-          )}
+          </div>
         </div>
       )}
     </div>
