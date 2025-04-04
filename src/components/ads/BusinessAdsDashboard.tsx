@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -51,7 +50,37 @@ export const BusinessAdsDashboard = ({ businessId }: BusinessAdsDashboardProps) 
 
       const { data, error } = await query.order('created_at', { ascending: false });
       if (error) throw error;
-      return data as AdCampaign[];
+      
+      // Map database fields to AdCampaign fields
+      return data.map(ad => ({
+        id: ad.id,
+        business_id: ad.business_id,
+        title: ad.title,
+        description: ad.description,
+        image_url: ad.image_url,
+        start_date: ad.start_date,
+        end_date: ad.end_date,
+        status: ad.status,
+        clicks: ad.clicks || 0,
+        impressions: ad.impressions || 0,
+        created_at: ad.created_at,
+        
+        // Keep additional database fields
+        budget: ad.budget,
+        carousel_images: ad.carousel_images,
+        format: ad.format,
+        location: ad.location,
+        reach: ad.reach,
+        reference_id: ad.reference_id,
+        targeting_age_max: ad.targeting_age_max,
+        targeting_age_min: ad.targeting_age_min,
+        targeting_gender: ad.targeting_gender,
+        targeting_interests: ad.targeting_interests,
+        targeting_locations: ad.targeting_locations,
+        type: ad.type,
+        user_id: ad.user_id,
+        video_url: ad.video_url
+      } as AdCampaign));
     },
     enabled: !!businessId
   });

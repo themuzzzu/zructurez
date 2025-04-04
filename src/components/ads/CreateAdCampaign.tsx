@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -39,7 +38,6 @@ export const CreateAdCampaign = ({ businessId, onSuccess, onCancel }: CreateAdCa
   const [pricingType, setPricingType] = useState<"daily" | "monthly" | "exclusive">("daily");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Fetch ad slots
   const { data: adSlots = [], isLoading: isLoadingSlots } = useQuery({
     queryKey: ["ad-slots"],
     queryFn: async () => {
@@ -50,7 +48,27 @@ export const CreateAdCampaign = ({ businessId, onSuccess, onCancel }: CreateAdCa
         .order('name');
       
       if (error) throw error;
-      return data as AdSlot[];
+      
+      return data.map(slot => ({
+        id: slot.id,
+        name: slot.name,
+        type: slot.type,
+        description: slot.description || '',
+        daily_price: slot.cpm_rate || 0,
+        monthly_price: (slot.cpm_rate || 0) * 20,
+        exclusive_price: (slot.cpm_rate || 0) * 30,
+        position: slot.location || '',
+        max_rotation_slots: slot.priority || 5,
+        rotation_interval_seconds: 10,
+        is_active: slot.active,
+        
+        cpc_rate: slot.cpc_rate,
+        cpm_rate: slot.cpm_rate,
+        location: slot.location,
+        max_size_kb: slot.max_size_kb,
+        priority: slot.priority,
+        size: slot.size
+      } as AdSlot));
     }
   });
 
@@ -59,18 +77,15 @@ export const CreateAdCampaign = ({ businessId, onSuccess, onCancel }: CreateAdCa
     const slot = adSlots.find(s => s.id === slotId) || null;
     setSelectedSlot(slot);
     
-    // Reset pricing type if new slot doesn't support exclusive
     if (slot && slot.exclusive_price === null && pricingType === "exclusive") {
       setPricingType("daily");
     }
   };
 
-  // Calculate campaign duration in days
   const durationDays = dateRange.from && dateRange.to 
     ? differenceInDays(dateRange.to, dateRange.from) + 1
     : 0;
 
-  // Calculate total price based on duration and pricing type
   const calculateTotalPrice = () => {
     if (!selectedSlot) return 0;
     
@@ -78,7 +93,6 @@ export const CreateAdCampaign = ({ businessId, onSuccess, onCancel }: CreateAdCa
       case "daily":
         return selectedSlot.daily_price * durationDays;
       case "monthly":
-        // Calculate proper monthly price with daily rate for partial months
         const fullMonths = Math.floor(durationDays / 30);
         const remainingDays = durationDays % 30;
         return (fullMonths * selectedSlot.monthly_price) + (remainingDays * selectedSlot.daily_price);
@@ -103,25 +117,25 @@ export const CreateAdCampaign = ({ businessId, onSuccess, onCancel }: CreateAdCa
     try {
       setIsSubmitting(true);
 
-      // Format dates for database
       const startDate = format(dateRange.from, "yyyy-MM-dd");
       const endDate = format(dateRange.to, "yyyy-MM-dd");
 
-      const { error } = await supabase.from('advertisements').insert({
+      const adData = {
         business_id: businessId,
         title,
         description,
         type: selectedSlot?.type || 'sponsored_product',
         format: 'standard',
-        reference_id: businessId, // We're using business_id as reference for now
-        location: 'global', // Default location
+        reference_id: businessId,
+        location: 'global',
         budget: totalPrice,
         start_date: startDate,
         end_date: endDate,
         image_url: imageUrl,
-        status: 'pending',
-        is_exclusive: pricingType === "exclusive"
-      });
+        status: 'pending'
+      };
+
+      const { error } = await supabase.from('advertisements').insert(adData);
 
       if (error) throw error;
       

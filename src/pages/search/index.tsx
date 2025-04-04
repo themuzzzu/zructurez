@@ -8,7 +8,7 @@ import { ArrowLeft, Filter, Heart } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { SearchIcon } from "lucide-react";
 import { GridLayoutSelector } from "@/components/marketplace/GridLayoutSelector";
-import { GridLayoutType } from "@/components/products/types/layouts";
+import { GridLayoutType } from "@/components/products/types/ProductTypes";
 import { LikeProvider } from "@/components/products/LikeContext";
 
 export default function Search() {

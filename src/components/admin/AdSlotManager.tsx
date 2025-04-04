@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,15 +29,37 @@ export const AdSlotManager = () => {
         .order('name');
       
       if (error) throw error;
-      return data as AdSlot[];
+      return data.map(slot => ({
+        ...slot,
+        daily_price: slot.cpm_rate || 0,
+        monthly_price: (slot.cpm_rate || 0) * 20,
+        exclusive_price: (slot.cpm_rate || 0) * 30,
+        position: slot.location || '',
+        max_rotation_slots: slot.priority || 5,
+        rotation_interval_seconds: 10,
+        is_active: slot.active
+      })) as AdSlot[];
     }
   });
   
   const createSlotMutation = useMutation({
     mutationFn: async (slot: Partial<AdSlot>) => {
+      const dbSlot = {
+        name: slot.name,
+        type: slot.type,
+        description: slot.description,
+        location: slot.position || '',
+        cpm_rate: slot.daily_price || 0,
+        cpc_rate: slot.daily_price ? slot.daily_price / 10 : 0,
+        size: slot.size || '',
+        max_size_kb: slot.max_size_kb || 1024,
+        priority: slot.max_rotation_slots || 5,
+        active: slot.is_active
+      };
+      
       const { data, error } = await supabase
         .from('ad_placements')
-        .insert(slot)
+        .insert(dbSlot)
         .select()
         .single();
       
@@ -59,9 +80,23 @@ export const AdSlotManager = () => {
   const updateSlotMutation = useMutation({
     mutationFn: async (slot: Partial<AdSlot>) => {
       const { id, ...updates } = slot;
+      
+      const dbUpdates = {
+        name: updates.name,
+        type: updates.type,
+        description: updates.description,
+        location: updates.position || '',
+        cpm_rate: updates.daily_price,
+        cpc_rate: updates.daily_price ? updates.daily_price / 10 : undefined,
+        size: updates.size,
+        max_size_kb: updates.max_size_kb,
+        priority: updates.max_rotation_slots,
+        active: updates.is_active
+      };
+      
       const { data, error } = await supabase
         .from('ad_placements')
-        .update(updates)
+        .update(dbUpdates)
         .eq('id', id)
         .select()
         .single();
@@ -99,7 +134,6 @@ export const AdSlotManager = () => {
     }
   });
   
-  // Slot type options
   const slotTypeOptions = [
     { value: 'homepage_banner_1', label: 'Homepage Banner 1' },
     { value: 'homepage_banner_2', label: 'Homepage Banner 2' },

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductsGrid } from "@/components/products/ProductsGrid";
 import { Spinner } from "@/components/common/Spinner";
-import { GridLayoutType } from "@/components/products/types/layouts";
+import { GridLayoutType } from "@/components/products/types/ProductTypes";
 import { Categories } from "@/components/marketplace/Categories";
 import { EmptySearchResults } from "@/components/marketplace/EmptySearchResults";
 
