@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
@@ -38,7 +37,6 @@ export default function Checkout() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
   
-  // Fetch user addresses
   const { data: addresses = [], isLoading: isLoadingAddresses } = useQuery({
     queryKey: ['user-addresses'],
     queryFn: async () => {
@@ -55,7 +53,6 @@ export default function Checkout() {
 
       if (error) throw error;
       
-      // Cast address_type to ensure it's one of the enum values
       return (data || []).map(addr => ({
         ...addr,
         address_type: addr.address_type as 'home' | 'work' | 'other'
@@ -63,7 +60,6 @@ export default function Checkout() {
     },
   });
 
-  // Fetch cart items
   const { data: cartItems = [], isLoading: isLoadingCart } = useQuery({
     queryKey: ['cart'],
     queryFn: async () => {
@@ -90,14 +86,10 @@ export default function Checkout() {
     },
   });
 
-  // Apply coupon mutation
   const applyCouponMutation = useMutation({
     mutationFn: async (code: string) => {
-      // In a real app, you would validate the coupon code against a database
-      // For this example, we'll simulate a coupon validation
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      // Mock coupon code validation
       if (code.toUpperCase() === 'WELCOME10') {
         return {
           valid: true,
@@ -124,7 +116,6 @@ export default function Checkout() {
     },
   });
 
-  // Place order mutation
   const placeOrderMutation = useMutation({
     mutationFn: async () => {
       const { data: session } = await supabase.auth.getSession();
@@ -136,8 +127,6 @@ export default function Checkout() {
         throw new Error('Please select a shipping address');
       }
 
-      // In a real application, you would create orders for each cart item
-      // For simplicity, we'll create a single order for each cart item
       for (const item of cartItems) {
         const { error } = await supabase
           .from('orders')
@@ -157,7 +146,6 @@ export default function Checkout() {
         if (error) throw error;
       }
 
-      // Clear cart after successful order
       const { error: clearCartError } = await supabase
         .from('cart_items')
         .delete()
@@ -172,7 +160,6 @@ export default function Checkout() {
       
       toast.success('Order placed successfully!');
       
-      // After a delay, navigate to success page
       setTimeout(() => {
         navigate('/order-success', { 
           state: { 
@@ -190,23 +177,18 @@ export default function Checkout() {
     },
   });
 
-  // Calculate subtotal from cart items
   const subtotal = cartItems?.reduce((sum, item) => {
     return sum + (item.products?.price || 0) * item.quantity;
   }, 0) || 0;
 
-  // Calculate discount if coupon is applied
   const discount = appliedCoupon 
     ? (subtotal * appliedCoupon.discount_percentage / 100) 
     : 0;
 
-  // Calculate shipping fee (free shipping over ₹1000)
   const shippingFee = subtotal > 1000 ? 0 : 40;
 
-  // Calculate total
   const total = subtotal - discount + shippingFee;
 
-  // Format price in Indian Rupees
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
@@ -215,13 +197,11 @@ export default function Checkout() {
     }).format(price);
   };
 
-  // Handle coupon application
   const handleApplyCoupon = () => {
     if (!couponCode) return;
     applyCouponMutation.mutate(couponCode);
   };
 
-  // Handle continue from address step
   const handleContinueFromAddress = () => {
     if (!selectedAddress) {
       toast.error('Please select or add an address');
@@ -230,28 +210,23 @@ export default function Checkout() {
     setCurrentStep(2);
   };
 
-  // Handle back to address
   const handleBackToAddress = () => {
     setCurrentStep(1);
   };
 
-  // Handle continue from payment step
   const handleContinueFromPayment = () => {
     setCurrentStep(3);
   };
 
-  // Handle back to payment
   const handleBackToPayment = () => {
     setCurrentStep(2);
   };
 
-  // Handle place order
   const handlePlaceOrder = () => {
     setIsProcessing(true);
     placeOrderMutation.mutate();
   };
 
-  // If no items in cart, redirect to home
   useEffect(() => {
     if (!isLoadingCart && cartItems.length === 0 && !orderSuccess) {
       toast.error('Your cart is empty');
@@ -306,7 +281,6 @@ export default function Checkout() {
     }
   };
 
-  // Show loading spinner while data is being fetched
   if (isLoadingCart || isLoadingAddresses) {
     return (
       <Layout>
@@ -317,7 +291,6 @@ export default function Checkout() {
     );
   }
 
-  // Success screen
   if (orderSuccess) {
     return (
       <Layout>

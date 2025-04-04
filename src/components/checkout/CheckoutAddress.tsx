@@ -8,7 +8,6 @@ import { Home, Building, MapPin, Plus } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useForm } from "react-hook-form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
@@ -86,12 +85,15 @@ export const CheckoutAddress = ({
         throw new Error('User must be logged in to add address');
       }
 
+      // Create a properly typed object for the insert operation
+      const addressData = {
+        ...values,
+        user_id: session.session.user.id,
+      };
+
       const { data, error } = await supabase
         .from('user_addresses')
-        .insert({
-          ...values,
-          user_id: session.session.user.id,
-        })
+        .insert(addressData)
         .select()
         .single();
 
