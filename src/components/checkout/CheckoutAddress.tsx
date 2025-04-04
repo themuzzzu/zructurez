@@ -1,402 +1,398 @@
 
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { Address } from '@/types/address';
-import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { FormField, FormItem, FormLabel, FormControl, FormMessage, Form } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { useForm } from 'react-hook-form';
-import { Label } from '@/components/ui/label';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { useState } from "react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Home, Building, MapPin, Plus } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useForm } from "react-hook-form";
+import { Input } from "@/components/ui/input";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "sonner";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-const US_STATES = [
-  'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware', 'Florida',
-  'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine',
-  'Maryland', 'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska',
-  'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Ohio',
-  'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee', 'Texas',
-  'Utah', 'Vermont', 'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming'
-];
-
-const addressFormSchema = z.object({
-  name: z.string().min(2, 'Name is required'),
-  address_line1: z.string().min(3, 'Address is required'),
+// Define address validation schema
+const addressSchema = z.object({
+  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
+  phone: z.string().min(10, { message: "Please enter a valid phone number." }),
+  address_line1: z.string().min(5, { message: "Address must be at least 5 characters." }),
   address_line2: z.string().optional(),
-  city: z.string().min(2, 'City is required'),
-  state: z.string().min(2, 'State is required'),
-  postal_code: z.string().min(5, 'Valid ZIP code is required'),
-  phone: z.string().min(10, 'Valid phone number is required'),
-  address_type: z.enum(['home', 'work', 'other']),
+  city: z.string().min(2, { message: "City is required." }),
+  state: z.string().min(2, { message: "State is required." }),
+  postal_code: z.string().min(6, { message: "Postal code must be at least 6 characters." }),
   is_default: z.boolean().default(false),
+  address_type: z.enum(["home", "work", "other"]),
 });
 
-interface CheckoutAddressProps {
-  selectedAddress: Address | null;
-  onSelectAddress: (address: Address) => void;
+type AddressFormValues = z.infer<typeof addressSchema>;
+
+interface Address {
+  id: string;
+  name: string;
+  phone: string;
+  address_line1: string;
+  address_line2?: string;
+  city: string;
+  state: string;
+  postal_code: string;
+  is_default: boolean;
+  address_type: 'home' | 'work' | 'other';
+  user_id: string;
 }
 
-const CheckoutAddress: React.FC<CheckoutAddressProps> = ({ selectedAddress, onSelectAddress }) => {
-  const { user } = useAuth();
-  const [addresses, setAddresses] = useState<Address[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showAddForm, setShowAddForm] = useState(false);
+interface CheckoutAddressProps {
+  addresses: Address[];
+  selectedAddress: string | null;
+  onSelectAddress: (addressId: string) => void;
+  onContinue: () => void;
+}
 
-  const form = useForm<z.infer<typeof addressFormSchema>>({
-    resolver: zodResolver(addressFormSchema),
+export const CheckoutAddress = ({
+  addresses,
+  selectedAddress,
+  onSelectAddress,
+  onContinue,
+}: CheckoutAddressProps) => {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const queryClient = useQueryClient();
+
+  // Initialize form
+  const form = useForm<AddressFormValues>({
+    resolver: zodResolver(addressSchema),
     defaultValues: {
-      name: '',
-      address_line1: '',
-      address_line2: '',
-      city: '',
-      state: '',
-      postal_code: '',
-      phone: '',
-      address_type: 'home',
+      name: "",
+      phone: "",
+      address_line1: "",
+      address_line2: "",
+      city: "",
+      state: "",
+      postal_code: "",
       is_default: false,
+      address_type: "home",
     },
   });
 
-  useEffect(() => {
-    const fetchAddresses = async () => {
-      if (!user) return;
-
-      try {
-        const { data, error } = await supabase
-          .from('user_addresses')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('is_default', { ascending: false });
-
-        if (error) throw error;
-
-        setAddresses(data as Address[]);
-
-        // Auto-select default address if available and none is selected
-        if (data.length > 0 && !selectedAddress) {
-          // Find default address or use the first one
-          const defaultAddress = data.find(addr => addr.is_default) || data[0];
-          onSelectAddress(defaultAddress as Address);
-        }
-
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching addresses:', error);
-        toast.error('Failed to load your saved addresses');
-        setLoading(false);
+  // Add address mutation
+  const addAddressMutation = useMutation({
+    mutationFn: async (values: AddressFormValues) => {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session?.session?.user) {
+        throw new Error('User must be logged in to add address');
       }
-    };
 
-    fetchAddresses();
-  }, [user, selectedAddress, onSelectAddress]);
-
-  const handleAddAddress = async (values: z.infer<typeof addressFormSchema>) => {
-    if (!user) return;
-
-    try {
-      // Prepare the complete address object
-      const newAddress: Partial<Address> = {
-        user_id: user.id,
-        name: values.name,
-        address_line1: values.address_line1,
-        address_line2: values.address_line2 || '',
-        city: values.city,
-        state: values.state,
-        postal_code: values.postal_code,
-        phone: values.phone,
-        address_type: values.address_type,
-        is_default: values.is_default,
+      // Create a properly typed object for the insert operation
+      const addressData = {
+        ...values,
+        user_id: session.session.user.id,
       };
 
       const { data, error } = await supabase
         .from('user_addresses')
-        .insert(newAddress)
+        .insert(addressData)
         .select()
         .single();
 
       if (error) throw error;
-
-      // Add the new address to the local state
-      setAddresses(prev => [...prev, data as Address]);
-      onSelectAddress(data as Address);
-      setShowAddForm(false);
-      toast.success('Address added successfully');
-
-      // Reset form
+      return data as Address;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['user-addresses'] });
+      onSelectAddress(data.id);
+      toast.success("Address added successfully!");
+      setIsDialogOpen(false);
       form.reset();
-    } catch (error) {
-      console.error('Error adding address:', error);
-      toast.error('Failed to add address');
-    }
+      // Automatically continue to payment after saving address
+      onContinue();
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : "Failed to add address");
+    },
+  });
+
+  const onSubmit = (values: AddressFormValues) => {
+    addAddressMutation.mutate(values);
   };
 
+  // Auto-select default address if none selected
+  if (addresses.length > 0 && !selectedAddress) {
+    const defaultAddress = addresses.find(addr => addr.is_default);
+    if (defaultAddress) {
+      onSelectAddress(defaultAddress.id);
+    } else {
+      onSelectAddress(addresses[0].id);
+    }
+  }
+
   return (
-    <div>
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Delivery Address</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="flex justify-center p-6">
-              <div className="animate-spin h-6 w-6 border-2 border-gray-500 rounded-full border-t-transparent"></div>
-            </div>
-          ) : addresses.length > 0 ? (
-            <>
-              <RadioGroup 
-                defaultValue={selectedAddress?.id}
-                className="space-y-4"
-                value={selectedAddress?.id}
-                onValueChange={(value) => {
-                  const address = addresses.find(a => a.id === value);
-                  if (address) onSelectAddress(address);
-                }}
-              >
-                {addresses.map((address) => (
-                  <div key={address.id} className="flex items-start space-x-2 border rounded-md p-4">
-                    <RadioGroupItem value={address.id} id={address.id} className="mt-1" />
-                    <div className="grid gap-1 flex-grow">
-                      <Label htmlFor={address.id} className="font-medium flex items-center">
-                        {address.name}
+    <div className="space-y-4">
+      {addresses.length > 0 ? (
+        <RadioGroup
+          value={selectedAddress || undefined}
+          onValueChange={onSelectAddress}
+          className="space-y-3"
+        >
+          {addresses.map((address) => (
+            <div key={address.id} className="flex items-center space-x-2">
+              <RadioGroupItem value={address.id} id={`address-${address.id}`} />
+              <Label htmlFor={`address-${address.id}`} className="flex-grow">
+                <Card className="p-4 cursor-pointer hover:border-primary transition-colors">
+                  <div className="flex items-start">
+                    <div className="mr-3 mt-1">
+                      {address.address_type === 'home' ? (
+                        <Home className="h-5 w-5 text-slate-400" />
+                      ) : address.address_type === 'work' ? (
+                        <Building className="h-5 w-5 text-slate-400" />
+                      ) : (
+                        <MapPin className="h-5 w-5 text-slate-400" />
+                      )}
+                    </div>
+                    <div className="flex-grow">
+                      <div className="flex justify-between">
+                        <h3 className="font-medium">{address.name}</h3>
                         {address.is_default && (
-                          <span className="ml-2 text-xs bg-primary/10 text-primary rounded-full px-2 py-0.5">
-                            Default
-                          </span>
+                          <span className="text-xs bg-slate-100 px-2 py-0.5 rounded-full">Default</span>
                         )}
-                        <span className="ml-2 text-xs bg-gray-100 dark:bg-gray-800 rounded-full px-2 py-0.5">
-                          {address.address_type.charAt(0).toUpperCase() + address.address_type.slice(1)}
-                        </span>
-                      </Label>
-                      <div className="text-sm text-muted-foreground">
-                        <div>{address.address_line1}</div>
-                        {address.address_line2 && <div>{address.address_line2}</div>}
-                        <div>
-                          {address.city}, {address.state} {address.postal_code}
-                        </div>
-                        <div>Phone: {address.phone}</div>
                       </div>
+                      <p className="text-sm text-slate-600">
+                        {address.address_line1}, 
+                        {address.address_line2 ? `${address.address_line2}, ` : ' '}
+                        {address.city}, {address.state}, {address.postal_code}
+                      </p>
+                      <p className="text-sm text-slate-600 mt-1">Phone: {address.phone}</p>
                     </div>
                   </div>
-                ))}
-              </RadioGroup>
+                </Card>
+              </Label>
+            </div>
+          ))}
+        </RadioGroup>
+      ) : (
+        <Card className="p-4 text-center">
+          <p className="text-slate-600 mb-4">You don't have any saved addresses</p>
+        </Card>
+      )}
 
-              <div className="mt-4 pt-4 border-t">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setShowAddForm(!showAddForm)}
-                >
-                  {showAddForm ? 'Cancel' : '+ Add New Address'}
+      {/* Add New Address */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogTrigger asChild>
+          <Button variant="outline" className="w-full flex items-center justify-center gap-2">
+            <Plus className="h-4 w-4" />
+            Add New Address
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Add New Address</DialogTitle>
+          </DialogHeader>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Full Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="John Doe" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone Number</FormLabel>
+                      <FormControl>
+                        <Input placeholder="9876543210" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="address_line1"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Address Line 1</FormLabel>
+                    <FormControl>
+                      <Input placeholder="House/Flat No, Building Name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="address_line2"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Address Line 2 (Optional)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Street, Landmark" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="city"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>City</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Mumbai" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="state"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>State</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Maharashtra" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="postal_code"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Postal Code</FormLabel>
+                    <FormControl>
+                      <Input placeholder="400001" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="address_type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Address Type</FormLabel>
+                    <div className="flex gap-4">
+                      <Label
+                        htmlFor="home"
+                        className={`flex items-center gap-2 p-2 border rounded cursor-pointer ${
+                          field.value === 'home' ? 'border-primary bg-primary/10' : 'border-gray-200'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          id="home"
+                          value="home"
+                          className="sr-only"
+                          checked={field.value === 'home'}
+                          onChange={() => field.onChange('home')}
+                        />
+                        <Home className="h-4 w-4" />
+                        <span>Home</span>
+                      </Label>
+                      <Label
+                        htmlFor="work"
+                        className={`flex items-center gap-2 p-2 border rounded cursor-pointer ${
+                          field.value === 'work' ? 'border-primary bg-primary/10' : 'border-gray-200'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          id="work"
+                          value="work"
+                          className="sr-only"
+                          checked={field.value === 'work'}
+                          onChange={() => field.onChange('work')}
+                        />
+                        <Building className="h-4 w-4" />
+                        <span>Work</span>
+                      </Label>
+                      <Label
+                        htmlFor="other"
+                        className={`flex items-center gap-2 p-2 border rounded cursor-pointer ${
+                          field.value === 'other' ? 'border-primary bg-primary/10' : 'border-gray-200'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          id="other"
+                          value="other"
+                          className="sr-only"
+                          checked={field.value === 'other'}
+                          onChange={() => field.onChange('other')}
+                        />
+                        <MapPin className="h-4 w-4" />
+                        <span>Other</span>
+                      </Label>
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="is_default"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>
+                        Set as default address
+                      </FormLabel>
+                    </div>
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex justify-end pt-2">
+                <Button type="submit" disabled={addAddressMutation.isPending}>
+                  {addAddressMutation.isPending ? "Saving..." : "Save Address"}
                 </Button>
               </div>
-            </>
-          ) : (
-            <div className="text-center py-4">
-              <p className="mb-4">You don't have any saved addresses yet.</p>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setShowAddForm(true)}
-              >
-                + Add New Address
-              </Button>
-            </div>
-          )}
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
 
-          {showAddForm && (
-            <div className="mt-6 pt-6 border-t">
-              <h3 className="font-medium text-lg mb-4">Add New Address</h3>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(handleAddAddress)} className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Full Name</FormLabel>
-                          <FormControl>
-                            <Input placeholder="John Doe" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="phone"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Phone Number</FormLabel>
-                          <FormControl>
-                            <Input placeholder="(123) 456-7890" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <FormField
-                    control={form.control}
-                    name="address_line1"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Address Line 1</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Street address" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="address_line2"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Address Line 2 (Optional)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Apt, suite, unit, etc." {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="city"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>City</FormLabel>
-                          <FormControl>
-                            <Input placeholder="City" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="state"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>State</FormLabel>
-                          <Select 
-                            onValueChange={field.onChange} 
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select state" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {US_STATES.map(state => (
-                                <SelectItem key={state} value={state}>
-                                  {state}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="postal_code"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>ZIP / Postal Code</FormLabel>
-                          <FormControl>
-                            <Input placeholder="12345" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <FormField
-                    control={form.control}
-                    name="address_type"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Address Type</FormLabel>
-                        <FormControl>
-                          <RadioGroup
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                            className="flex space-x-4"
-                          >
-                            <div className="flex items-center space-x-1">
-                              <RadioGroupItem value="home" id="home" />
-                              <Label htmlFor="home">Home</Label>
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              <RadioGroupItem value="work" id="work" />
-                              <Label htmlFor="work">Work</Label>
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              <RadioGroupItem value="other" id="other" />
-                              <Label htmlFor="other">Other</Label>
-                            </div>
-                          </RadioGroup>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="is_default"
-                    render={({ field }) => (
-                      <FormItem className="flex items-center space-x-2">
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        <FormLabel className="!mt-0">Set as default address</FormLabel>
-                      </FormItem>
-                    )}
-                  />
-
-                  <div className="flex justify-end space-x-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setShowAddForm(false)}
-                    >
-                      Cancel
-                    </Button>
-                    <Button type="submit">
-                      Save Address
-                    </Button>
-                  </div>
-                </form>
-              </Form>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {/* Continue Button */}
+      <Button 
+        onClick={onContinue} 
+        className="w-full mt-4"
+        disabled={!selectedAddress}
+      >
+        Continue to Payment
+      </Button>
     </div>
   );
 };
-
-export default CheckoutAddress;
