@@ -86,9 +86,18 @@ export const CheckoutAddress = ({
       }
 
       // Create a properly typed object for the insert operation
+      // Making sure all required fields are present and typed correctly
       const addressData = {
-        ...values,
         user_id: session.session.user.id,
+        name: values.name,
+        phone: values.phone,
+        address_line1: values.address_line1,
+        address_line2: values.address_line2 || '',
+        city: values.city,
+        state: values.state,
+        postal_code: values.postal_code,
+        is_default: values.is_default,
+        address_type: values.address_type,
       };
 
       const { data, error } = await supabase
