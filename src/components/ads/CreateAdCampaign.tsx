@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -117,11 +118,19 @@ export const CreateAdCampaign = ({ businessId, onSuccess, onCancel }: CreateAdCa
     try {
       setIsSubmitting(true);
 
+      // Get the current authenticated user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("You need to be logged in to create an ad campaign");
+        return;
+      }
+
       const startDate = format(dateRange.from, "yyyy-MM-dd");
       const endDate = format(dateRange.to, "yyyy-MM-dd");
 
       const adData = {
         business_id: businessId,
+        user_id: user.id, // Add the required user_id field
         title,
         description,
         type: selectedSlot?.type || 'sponsored_product',

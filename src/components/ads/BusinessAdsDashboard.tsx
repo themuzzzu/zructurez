@@ -62,7 +62,7 @@ export const BusinessAdsDashboard = ({ businessId }: BusinessAdsDashboardProps) 
         end_date: ad.end_date,
         status: ad.status,
         clicks: ad.clicks || 0,
-        impressions: ad.impressions || 0,
+        impressions: ad.reach || 0,
         created_at: ad.created_at,
         
         // Keep additional database fields

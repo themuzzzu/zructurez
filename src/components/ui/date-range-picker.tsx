@@ -38,14 +38,16 @@ export function DateRangePicker({
   // Handle date change
   const handleDateChange = (newDate: DateRange | undefined) => {
     setDate(newDate);
-    if (onUpdate && newDate?.from) {
+    if (onUpdate) {
       // Ensure both from and to are defined when passed to onUpdate
-      onUpdate({
-        from: newDate.from,
-        to: newDate.to || newDate.from // If to is not defined, use from
-      });
-    } else if (onUpdate) {
-      onUpdate({ from: undefined, to: undefined });
+      if (newDate?.from) {
+        onUpdate({
+          from: newDate.from,
+          to: newDate.to || newDate.from // If to is not defined, use from
+        });
+      } else {
+        onUpdate({ from: undefined, to: undefined });
+      }
     }
   };
 
