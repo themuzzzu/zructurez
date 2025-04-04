@@ -13,6 +13,20 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 
+interface Address {
+  id: string;
+  name: string;
+  phone: string;
+  address_line1: string;
+  address_line2?: string;
+  city: string;
+  state: string;
+  postal_code: string;
+  is_default: boolean;
+  address_type: 'home' | 'work' | 'other';
+  user_id: string;
+}
+
 export default function Checkout() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -40,7 +54,12 @@ export default function Checkout() {
         .order('is_default', { ascending: false });
 
       if (error) throw error;
-      return data || [];
+      
+      // Cast address_type to ensure it's one of the enum values
+      return (data || []).map(addr => ({
+        ...addr,
+        address_type: addr.address_type as 'home' | 'work' | 'other'
+      })) as Address[];
     },
   });
 
