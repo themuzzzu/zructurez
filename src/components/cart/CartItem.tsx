@@ -1,3 +1,4 @@
+
 import { Minus, Plus, X } from "lucide-react";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
@@ -36,6 +37,7 @@ export const CartItem = ({ id, title, price, quantity, image_url }: CartItemProp
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cart'] });
+      queryClient.invalidateQueries({ queryKey: ['cartCount'] });
     },
     onError: (error) => {
       toast.error(error instanceof Error ? error.message : "Failed to update quantity");
@@ -53,8 +55,7 @@ export const CartItem = ({ id, title, price, quantity, image_url }: CartItemProp
         .from('cart_items')
         .delete()
         .eq('product_id', id)
-        .eq('user_id', session.session.user.id)
-        .single();
+        .eq('user_id', session.session.user.id);
 
       if (error) {
         console.error('Delete error:', error);
@@ -63,6 +64,7 @@ export const CartItem = ({ id, title, price, quantity, image_url }: CartItemProp
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cart'] });
+      queryClient.invalidateQueries({ queryKey: ['cartCount'] });
       toast.success("Item removed from cart");
     },
     onError: (error) => {
@@ -80,12 +82,8 @@ export const CartItem = ({ id, title, price, quantity, image_url }: CartItemProp
     }).format(price);
   };
 
-  const handleRemoveItem = async () => {
-    try {
-      await removeItemMutation.mutateAsync();
-    } catch (error) {
-      console.error('Error in handleRemoveItem:', error);
-    }
+  const handleRemoveItem = () => {
+    removeItemMutation.mutate();
   };
 
   return (

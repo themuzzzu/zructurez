@@ -31,11 +31,46 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { UserPlanInfo } from "../pricing/UserPlanInfo";
 import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 export const UserMenu = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+
+  // Fetch cart count
+  const { data: cartCount = 0 } = useQuery({
+    queryKey: ['cartCount'],
+    queryFn: async () => {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session?.session?.user) return 0;
+
+      const { count, error } = await supabase
+        .from('cart_items')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', session.session.user.id);
+
+      if (error) throw error;
+      return count || 0;
+    },
+  });
+
+  // Fetch wishlist count
+  const { data: wishlistCount = 0 } = useQuery({
+    queryKey: ['wishlistCount'],
+    queryFn: async () => {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session?.session?.user) return 0;
+
+      const { count, error } = await supabase
+        .from('wishlists')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', session.session.user.id);
+
+      if (error) throw error;
+      return count || 0;
+    },
+  });
 
   const handleSignOut = async () => {
     try {
@@ -98,12 +133,16 @@ export const UserMenu = () => {
           <DropdownMenuItem onClick={() => navigateTo("/wishlist")}>
             <Heart className="mr-2 h-4 w-4" />
             <span>Wishlist</span>
-            <Badge className="ml-auto px-1 text-xs" variant="secondary">3</Badge>
+            {wishlistCount > 0 && (
+              <Badge className="ml-auto px-1 text-xs" variant="secondary">{wishlistCount}</Badge>
+            )}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => navigateTo("/cart")}>
             <ShoppingCart className="mr-2 h-4 w-4" />
             <span>Cart</span>
-            <Badge className="ml-auto px-1 text-xs" variant="secondary">2</Badge>
+            {cartCount > 0 && (
+              <Badge className="ml-auto px-1 text-xs" variant="secondary">{cartCount}</Badge>
+            )}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => navigateTo("/pricing")}>
             <BadgeDollarSign className="mr-2 h-4 w-4" />

@@ -56,6 +56,7 @@ export const Cart = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cart'] });
+      queryClient.invalidateQueries({ queryKey: ['cartCount'] });
       toast.success("Cart cleared successfully!");
     },
     onError: () => {
