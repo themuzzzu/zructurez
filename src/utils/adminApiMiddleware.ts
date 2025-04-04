@@ -1,211 +1,169 @@
 
-import { z } from "zod";
-import { validateRequest } from "./requestValidation";
-import { rateLimit } from "./rateLimiting";
-import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { hasRole } from "./securityUtils";
-
-// Define common schemas for admin API validation
-export const AdminSchemas = {
-  // Schema for ad approval
-  adApproval: z.object({
-    adId: z.string().uuid("Invalid ad ID format"),
-    approved: z.boolean(),
-    rejectionReason: z.string().optional().nullable(),
-  }),
-  
-  // Schema for user management
-  userAction: z.object({
-    userId: z.string().uuid("Invalid user ID format"),
-    action: z.enum(["suspend", "reinstate", "delete", "promote"]),
-    reason: z.string().min(3, "Reason must be at least 3 characters").optional(),
-  }),
-  
-  // Schema for content moderation
-  contentModeration: z.object({
-    contentId: z.string().uuid("Invalid content ID format"),
-    contentType: z.enum(["post", "comment", "business", "product", "service"]),
-    action: z.enum(["flag", "remove", "approve"]),
-    reason: z.string().optional(),
-  }),
-};
+import { AdminAuditApi } from "./supabase/securityTypes";
 
 /**
- * Function to securely approve or reject an advertisement
- * Protected with RBAC, rate limiting, and input validation
+ * Middleware utilities for admin API endpoints
  */
-export const approveAd = async (data: z.infer<typeof AdminSchemas.adApproval>): Promise<boolean> => {
+
+// Track sensitive operations for additional verification
+const sensitiveOperations: Record<string, { count: number, lastAttempt: number }> = {};
+
+/**
+ * Log an admin action for audit purposes
+ */
+export const logAdminAction = async (
+  adminId: string, 
+  action: string, 
+  entityType: string, 
+  entityId?: string,
+  beforeState?: any,
+  afterState?: any
+): Promise<void> => {
   try {
-    // 1. Check user session
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user) {
-      toast.error('Authentication required');
-      return false;
-    }
+    // Get IP address (in a real implementation, this would come from the request)
+    const ipAddress = "Not available in browser"; // Placeholder
     
-    // 2. Verify admin role using the RBAC utility
-    const isAdmin = await hasRole('admin');
-    if (!isAdmin) {
-      toast.error('Admin privileges required');
-      return false;
-    }
-    
-    // 3. Apply rate limiting to prevent automated abuse
-    const rateLimited = rateLimit(`admin-ad-approval:${session.user.id}`, {
-      windowMs: 60000, // 1 minute
-      maxRequests: 15,  // 15 requests per minute
-      message: 'Rate limit exceeded for admin actions',
+    await AdminAuditApi.logAction({
+      admin_id: adminId,
+      action,
+      entity_type: entityType,
+      entity_id: entityId,
+      before_state: beforeState,
+      after_state: afterState,
+      ip_address: ipAddress
     });
-    
-    if (!rateLimited) return false;
-    
-    // 4. Validate input data
-    const validData = validateRequest(data, AdminSchemas.adApproval);
-    if (!validData) return false;
-    
-    // 5. Log the admin action for audit trail
-    await supabase.from('admin_audit_logs').insert({
-      user_id: session.user.id,
-      action: validData.approved ? 'ad_approved' : 'ad_rejected',
-      resource_id: validData.adId,
-      resource_type: 'advertisement',
-      details: validData.approved ? {} : { reason: validData.rejectionReason },
-    });
-    
-    // 6. Update the advertisement status
-    const { error } = await supabase
-      .from('advertisements')
-      .update({
-        status: validData.approved ? 'approved' : 'rejected',
-        ...(validData.rejectionReason && { rejection_reason: validData.rejectionReason }),
-      })
-      .eq('id', validData.adId);
-    
-    if (error) {
-      console.error('Error updating ad status:', error);
-      toast.error('Failed to update advertisement status');
-      return false;
-    }
-    
-    // 7. Notify client of success
-    toast.success(
-      validData.approved
-        ? 'Advertisement approved successfully'
-        : 'Advertisement rejected successfully'
-    );
-    
-    return true;
   } catch (error) {
-    console.error('Error in approveAd:', error);
-    toast.error('An unexpected error occurred');
-    return false;
+    console.error("Failed to log admin action:", error);
   }
 };
 
 /**
- * Function to securely moderate user content
- * Protected with RBAC, rate limiting, and input validation
+ * Check for a sequence of suspicious admin actions
+ * This helps detect potential account takeover or misuse
  */
-export const moderateContent = async (
-  data: z.infer<typeof AdminSchemas.contentModeration>
+export const checkSuspiciousAdminActivity = (
+  adminId: string, 
+  action: string
+): boolean => {
+  const now = Date.now();
+  const key = `${adminId}:${action}`;
+  const suspiciousThreshold = 5; // Number of actions in short period to be suspicious
+  const timeWindow = 300000; // 5 minutes in milliseconds
+  
+  // Initialize if not exists
+  if (!sensitiveOperations[key]) {
+    sensitiveOperations[key] = { count: 0, lastAttempt: now };
+  }
+  
+  // Reset counter if outside time window
+  if (now - sensitiveOperations[key].lastAttempt > timeWindow) {
+    sensitiveOperations[key] = { count: 1, lastAttempt: now };
+    return false;
+  }
+  
+  // Increment counter
+  sensitiveOperations[key].count += 1;
+  sensitiveOperations[key].lastAttempt = now;
+  
+  // Check if exceeds threshold
+  if (sensitiveOperations[key].count > suspiciousThreshold) {
+    logAdminAction(
+      adminId,
+      "suspicious_activity_detected",
+      "admin_actions",
+      undefined,
+      { action, count: sensitiveOperations[key].count }
+    );
+    return true;
+  }
+  
+  return false;
+};
+
+/**
+ * Verify admin has proper permissions for an action
+ */
+export const verifyAdminPermission = async (
+  adminId: string, 
+  requiredPermission: string
 ): Promise<boolean> => {
   try {
-    // 1. Check user session
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.user) {
-      toast.error('Authentication required');
-      return false;
-    }
-    
-    // 2. Verify admin role
-    const isAdmin = await hasRole('admin');
-    if (!isAdmin) {
-      toast.error('Admin privileges required');
-      return false;
-    }
-    
-    // 3. Apply rate limiting
-    const rateLimited = rateLimit(`admin-content-moderation:${session.user.id}`, {
-      windowMs: 60000,
-      maxRequests: 20,
-      message: 'Rate limit exceeded for content moderation',
-    });
-    
-    if (!rateLimited) return false;
-    
-    // 4. Validate input data
-    const validData = validateRequest(data, AdminSchemas.contentModeration);
-    if (!validData) return false;
-    
-    // 5. Log the admin action
-    await supabase.from('admin_audit_logs').insert({
-      user_id: session.user.id,
-      action: `content_${validData.action}ed`,
-      resource_id: validData.contentId,
-      resource_type: validData.contentType,
-      details: { reason: validData.reason },
-    });
-    
-    // 6. Update the content status based on type
-    const table = getTableForContentType(validData.contentType);
-    const statusField = getStatusFieldForContentType(validData.contentType);
-    
-    if (!table || !statusField) {
-      toast.error('Invalid content type');
-      return false;
-    }
-    
-    const { error } = await supabase
-      .from(table)
-      .update({ [statusField]: getModerationStatus(validData.action) })
-      .eq('id', validData.contentId);
+    // In a more complex system, you might have a separate admin_permissions table
+    // For simplicity, we'll just check if they have the admin role
+    const { data, error } = await supabase
+      .from('user_roles')
+      .select('*')
+      .eq('user_id', adminId)
+      .eq('role', 'admin')
+      .maybeSingle();
     
     if (error) {
-      console.error('Error updating content status:', error);
-      toast.error('Failed to update content status');
+      console.error("Error verifying admin permission:", error);
       return false;
     }
     
-    // 7. Notify client of success
-    toast.success(`Content has been ${validData.action}ed`);
-    
-    return true;
+    return !!data;
   } catch (error) {
-    console.error('Error in moderateContent:', error);
-    toast.error('An unexpected error occurred');
+    console.error("Exception in verifyAdminPermission:", error);
     return false;
   }
 };
 
-// Helper functions for content moderation
-function getTableForContentType(type: string): string | null {
-  const tableMap: Record<string, string> = {
-    'post': 'posts',
-    'comment': 'comments',
-    'business': 'businesses',
-    'product': 'products',
-    'service': 'services',
-  };
-  return tableMap[type] || null;
-}
+/**
+ * Create an API key for admin actions
+ * This would be a more secure way to authenticate admin API requests
+ */
+export const createAdminApiKey = async (adminId: string, expiry: number): Promise<string | null> => {
+  try {
+    // Generate a secure token
+    const token = Array(30)
+      .fill(0)
+      .map(() => Math.floor(Math.random() * 16).toString(16))
+      .join('');
+    
+    // Store in database
+    const { error } = await supabase
+      .from('admin_api_keys')
+      .insert({
+        admin_id: adminId,
+        key: token,
+        expires_at: new Date(Date.now() + expiry).toISOString(),
+      });
+    
+    if (error) {
+      console.error("Error creating admin API key:", error);
+      return null;
+    }
+    
+    return token;
+  } catch (error) {
+    console.error("Exception in createAdminApiKey:", error);
+    return null;
+  }
+};
 
-function getStatusFieldForContentType(type: string): string | null {
-  const fieldMap: Record<string, string> = {
-    'post': 'moderation_status',
-    'comment': 'moderation_status',
-    'business': 'verification_status',
-    'product': 'moderation_status',
-    'service': 'moderation_status',
-  };
-  return fieldMap[type] || null;
-}
-
-function getModerationStatus(action: string): string {
-  const statusMap: Record<string, string> = {
-    'flag': 'flagged',
-    'remove': 'removed',
-    'approve': 'approved',
-  };
-  return statusMap[action] || 'pending';
-}
+/**
+ * Validate an admin API key
+ */
+export const validateAdminApiKey = async (apiKey: string): Promise<string | null> => {
+  try {
+    const now = new Date().toISOString();
+    
+    const { data, error } = await supabase
+      .from('admin_api_keys')
+      .select('admin_id')
+      .eq('key', apiKey)
+      .gt('expires_at', now)
+      .maybeSingle();
+    
+    if (error || !data) {
+      return null;
+    }
+    
+    return data.admin_id;
+  } catch (error) {
+    console.error("Exception in validateAdminApiKey:", error);
+    return null;
+  }
+};

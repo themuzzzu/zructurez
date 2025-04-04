@@ -1,137 +1,154 @@
 
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { SecurityEventApi, UserRoleApi } from '@/utils/supabase/securityTypes';
 
-// Set Content Security Policy
-const setCSP = () => {
-  // In a real app, this would be set by the server in HTTP headers
-  // This is a fallback client-side approach for demo purposes
-  const cspMeta = document.createElement('meta');
-  cspMeta.httpEquiv = 'Content-Security-Policy';
-  cspMeta.content = `
-    default-src 'self';
-    script-src 'self' https://kjmlxafygdzkrlopyyvk.supabase.co;
-    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-    img-src 'self' https://kjmlxafygdzkrlopyyvk.supabase.co data: blob:;
-    font-src 'self' https://fonts.gstatic.com;
-    connect-src 'self' https://kjmlxafygdzkrlopyyvk.supabase.co;
-    frame-src 'self';
-    object-src 'none';
-  `;
-  document.head.appendChild(cspMeta);
+// Define the context types
+type SecurityContextType = {
+  hasRole: (role: string) => boolean;
+  userRoles: string[];
+  isRolesLoading: boolean;
+  logSecurityEvent: (eventType: string, details?: any, severity?: 'low' | 'medium' | 'high' | 'critical') => Promise<void>;
 };
+
+// Create the context with a default value
+const SecurityContext = createContext<SecurityContextType>({
+  hasRole: () => false,
+  userRoles: [],
+  isRolesLoading: true,
+  logSecurityEvent: async () => {},
+});
+
+// Custom hook to access the security context
+export const useSecurity = () => useContext(SecurityContext);
 
 interface SecurityProviderProps {
   children: React.ReactNode;
 }
 
 export const SecurityProvider: React.FC<SecurityProviderProps> = ({ children }) => {
-  const [isSecurityChecked, setIsSecurityChecked] = useState(false);
-  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [userRoles, setUserRoles] = useState<string[]>([]);
+  const [isRolesLoading, setIsRolesLoading] = useState(true);
+  const [fingerprint, setFingerprint] = useState<string | null>(null);
 
-  // This is a simulated bot detection function
-  // In production, use a proper solution like reCAPTCHA
-  const detectBot = (): boolean => {
-    const userAgent = navigator.userAgent.toLowerCase();
-    const botPatterns = [
-      'googlebot', 'bingbot', 'yandexbot', 'ahrefsbot', 'msnbot', 'linkedinbot', 
-      'exabot', 'compspybot', 'yesupbot', 'paperlibot', 'tweetmemebot', 'semrushbot',
-      'scoutjet', 'seznambot', 'blexbot', 'pingdom', 'baiduspider', 'crawler'
-    ];
-    
-    return botPatterns.some(pattern => userAgent.includes(pattern));
-  };
-
-  // Check for common security risks on component mount
+  // Generate a basic browser fingerprint
   useEffect(() => {
-    // Set Content Security Policy
-    setCSP();
-
-    // Basic bot detection
-    if (detectBot()) {
-      console.warn('Bot activity detected');
-      // In production, you would implement more sophisticated responses
-    }
-
-    // Check for potential clickjacking
-    if (window.self !== window.top) {
-      // The page is in an iframe
-      console.error('Potential clickjacking attempt detected');
-      // In production, you would break out of the frame or show a warning
-    }
-
-    // Check for localStorage/sessionStorage support
-    let storageAvailable = false;
-    try {
-      window.localStorage.setItem('test', 'test');
-      window.localStorage.removeItem('test');
-      storageAvailable = true;
-    } catch (e) {
-      console.error('localStorage is not available, which might indicate privacy mode');
-    }
-
-    // Log security check results
-    supabase.from('security_events').insert({
-      event_type: 'security_check',
-      browser_fingerprint: navigator.userAgent,
-      ip_address: 'client-ip', // Would be set server-side in production
-      details: {
-        is_bot: detectBot(),
-        in_iframe: window.self !== window.top,
-        storage_available: storageAvailable,
-        referrer: document.referrer,
-        screen_dimensions: `${window.screen.width}x${window.screen.height}`,
+    const generateFingerprint = () => {
+      const fpData = [
+        navigator.userAgent,
+        navigator.language,
+        screen.width,
+        screen.height,
+        new Date().getTimezoneOffset(),
+        !!navigator.cookieEnabled,
+      ].join('|');
+      
+      // Use a simple hash function for demonstration
+      // In production, consider a more robust fingerprinting library
+      let hash = 0;
+      for (let i = 0; i < fpData.length; i++) {
+        const char = fpData.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32bit integer
       }
-    }).then();
-
-    setIsSecurityChecked(true);
+      
+      return hash.toString(16);
+    };
+    
+    setFingerprint(generateFingerprint());
   }, []);
 
-  // Session hijacking detection
+  // Fetch user roles when user changes
   useEffect(() => {
-    const sessionCheckInterval = setInterval(async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-
-      if (session) {
-        // In a real app, you would implement more sophisticated session validation
-        // This is a simplified example
-        const storedSessionFp = localStorage.getItem(`session_fp_${session.user.id}`);
-        const currentFp = `${navigator.userAgent}|${navigator.language}`;
-
-        if (storedSessionFp && storedSessionFp !== currentFp) {
-          console.error('Possible session hijacking detected - session fingerprint mismatch');
-          
-          // Log security event
-          await supabase.from('security_events').insert({
-            user_id: session.user.id,
-            event_type: 'possible_session_hijacking',
-            browser_fingerprint: navigator.userAgent,
-            details: {
-              stored_fingerprint: storedSessionFp,
-              current_fingerprint: currentFp,
-            }
-          });
-          
-          // Force logout for security
-          await supabase.auth.signOut();
-          toast.error('Session expired for security reasons. Please login again.');
-          navigate('/auth');
-        } else if (!storedSessionFp) {
-          // Store the session fingerprint if not already stored
-          localStorage.setItem(`session_fp_${session.user.id}`, currentFp);
-        }
+    const fetchUserRoles = async () => {
+      if (!user) {
+        setUserRoles([]);
+        setIsRolesLoading(false);
+        return;
       }
-    }, 30000); // Check every 30 seconds
+      
+      try {
+        setIsRolesLoading(true);
+        const { data, error } = await UserRoleApi.getUserRoles(user.id);
+        
+        if (error) {
+          console.error('Error fetching user roles:', error);
+          return;
+        }
+        
+        // Extract role names from the response
+        if (data) {
+          setUserRoles(data.map(role => role.role));
+        }
+      } catch (error) {
+        console.error('Error in role fetching:', error);
+      } finally {
+        setIsRolesLoading(false);
+      }
+    };
 
-    return () => clearInterval(sessionCheckInterval);
-  }, [navigate]);
+    fetchUserRoles();
+  }, [user]);
 
-  if (!isSecurityChecked) {
-    // Show nothing while performing initial security checks
-    return null;
-  }
+  // Log login and logout events
+  useEffect(() => {
+    // Log login event
+    if (user) {
+      logSecurityEvent('user_login');
+    }
 
-  return <>{children}</>;
+    // Cleanup function to log logout event
+    return () => {
+      if (user) {
+        logSecurityEvent('user_logout');
+      }
+    };
+  }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Log a security event
+  const logSecurityEvent = async (
+    eventType: string,
+    details?: any,
+    severity: 'low' | 'medium' | 'high' | 'critical' = 'low'
+  ) => {
+    if (!user && eventType !== 'auth_error' && eventType !== 'anonymous_access') {
+      return; // Only log events for authenticated users (with exceptions)
+    }
+    
+    try {
+      const ipAddress = 'Not available in browser'; // In real app, this would come from your server
+      
+      await SecurityEventApi.logEvent({
+        user_id: user?.id || null,
+        event_type: eventType,
+        browser_fingerprint: fingerprint || undefined,
+        ip_address: ipAddress,
+        details: details || {},
+        severity,
+      });
+    } catch (error) {
+      console.error('Failed to log security event:', error);
+    }
+  };
+
+  // Check if the user has a specific role
+  const hasRole = (role: string): boolean => {
+    return userRoles.includes(role);
+  };
+
+  // Create the context value
+  const contextValue: SecurityContextType = {
+    hasRole,
+    userRoles,
+    isRolesLoading,
+    logSecurityEvent,
+  };
+
+  return (
+    <SecurityContext.Provider value={contextValue}>
+      {children}
+    </SecurityContext.Provider>
+  );
 };
