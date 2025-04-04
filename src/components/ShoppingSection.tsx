@@ -3,7 +3,7 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { ProductsGrid } from './products/ProductsGrid';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { GridLayoutType } from './products/types/layouts';
+import { GridLayoutType } from './products/types/ProductTypes';
 import { ProductFilters } from './marketplace/ProductFilters';
 import { Skeleton } from './ui/skeleton';
 import { ShoppingCardSkeleton } from './ShoppingCardSkeleton';

@@ -1,105 +1,96 @@
 
-import { useState, useRef, useEffect } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
+import React, { useState } from 'react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Search, X } from 'lucide-react';
+import { 
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 
-export interface MarketplaceHeaderProps {
-  onSearch?: (query: string) => void;
-  searchTerm?: string;
-  setSearchTerm?: (term: string) => void;
-  popularSearches?: any[];
+interface MarketplaceHeaderProps {
+  onSearch: (searchTerm: string) => void;
+  searchTerm: string;
+  setSearchTerm: (value: string) => void;
   isSearching?: boolean;
+  popularSearches?: Array<{term: string}>;
 }
 
-export const MarketplaceHeader = ({ 
-  onSearch, 
-  searchTerm = "",
+export const MarketplaceHeader = ({
+  onSearch,
+  searchTerm,
   setSearchTerm,
-  popularSearches = [],
   isSearching = false,
+  popularSearches = []
 }: MarketplaceHeaderProps) => {
-  const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const suggestionsRef = useRef<HTMLDivElement>(null);
+  const [isFocused, setIsFocused] = useState(false);
   
-  useEffect(() => {
-    setLocalSearchTerm(searchTerm);
-  }, [searchTerm]);
-  
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (suggestionsRef.current && !suggestionsRef.current.contains(event.target as Node)) {
-        setShowSuggestions(false);
-      }
-    };
-    
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-  
-  const handleSearch = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (onSearch) onSearch(localSearchTerm);
-    setShowSuggestions(false);
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSearch(searchTerm);
   };
   
-  const handleInputChange = (value: string) => {
-    setLocalSearchTerm(value);
-    if (setSearchTerm) setSearchTerm(value);
-    setShowSuggestions(value.length > 0);
-  };
-  
-  const handleSuggestionClick = (term: string) => {
-    setLocalSearchTerm(term);
-    if (setSearchTerm) setSearchTerm(term);
-    if (onSearch) onSearch(term);
-    setShowSuggestions(false);
+  const handleClear = () => {
+    setSearchTerm('');
   };
   
   return (
-    <div className="w-full max-w-3xl mx-auto relative">
-      <form onSubmit={handleSearch} className="relative">
-        <Input
-          value={localSearchTerm}
-          onChange={(e) => handleInputChange(e.target.value)}
-          placeholder="Search for products, services, or businesses..."
-          className="pr-12"
-          onFocus={() => localSearchTerm && setShowSuggestions(true)}
-        />
-        <Button 
-          type="submit" 
-          variant="ghost" 
-          size="icon" 
-          className="absolute right-0 top-0 h-full"
-        >
-          <Search className="h-5 w-5" />
-        </Button>
-      </form>
-      
-      {showSuggestions && popularSearches.length > 0 && (
-        <div 
-          ref={suggestionsRef}
-          className="absolute mt-1 w-full bg-background border rounded-md shadow-lg z-10"
-        >
-          <div className="p-2">
-            <div className="text-xs text-muted-foreground mb-2">Popular searches</div>
-            <div className="flex flex-wrap gap-2">
+    <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-3 border-b">
+      <div className="flex items-center gap-4">
+        <form onSubmit={handleSubmit} className="relative w-full">
+          <Input
+            type="text"
+            placeholder="Search products, services or businesses..."
+            className="w-full pl-10 pr-10 focus-visible:ring-primary"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setTimeout(() => setIsFocused(false), 200)}
+          />
+          <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+          
+          {searchTerm && (
+            <button 
+              type="button" 
+              onClick={handleClear}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+          
+          {isFocused && popularSearches.length > 0 && !searchTerm && (
+            <div className="absolute top-full left-0 right-0 mt-1 bg-background border rounded-md shadow-md z-20 py-2">
+              <div className="text-xs font-semibold text-muted-foreground px-3 pb-1">Popular Searches</div>
               {popularSearches.map((item, index) => (
                 <button
                   key={index}
-                  onClick={() => handleSuggestionClick(item.term)}
-                  className="px-3 py-1 bg-secondary rounded-full text-xs hover:bg-secondary/80 transition-colors"
+                  type="button"
+                  className="w-full text-left px-3 py-1.5 hover:bg-muted text-sm"
+                  onClick={() => {
+                    setSearchTerm(item.term);
+                    onSearch(item.term);
+                  }}
                 >
                   {item.term}
                 </button>
               ))}
             </div>
-          </div>
-        </div>
-      )}
+          )}
+        </form>
+        
+        <Button 
+          type="button" 
+          size="sm"
+          onClick={() => onSearch(searchTerm)}
+          disabled={isSearching}
+        >
+          {isSearching ? 'Searching...' : 'Search'}
+        </Button>
+      </div>
     </div>
   );
 };
+
+export default MarketplaceHeader;

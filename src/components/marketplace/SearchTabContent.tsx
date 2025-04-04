@@ -1,3 +1,4 @@
+
 import { ShoppingSection } from "@/components/ShoppingSection";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
 
@@ -26,6 +27,7 @@ export const SearchTabContent = ({
   showBranded,
   sortOption,
   priceRange,
+  gridLayout = "grid4x4"
 }: SearchTabContentProps) => {
   return (
     <ShoppingSection
@@ -36,6 +38,7 @@ export const SearchTabContent = ({
       showBranded={showBranded}
       sortOption={sortOption}
       priceRange={priceRange}
+      gridLayout={gridLayout}
     />
   );
 };

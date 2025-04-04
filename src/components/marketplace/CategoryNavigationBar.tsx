@@ -1,32 +1,51 @@
 
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { useNavigate } from 'react-router-dom';
 
-export const CategoryNavigationBar = () => {
+interface CategoryNavigationBarProps {
+  categories?: string[];
+  selectedCategory?: string;
+  onCategorySelect?: (category: string) => void;
+  className?: string;
+}
+
+export const CategoryNavigationBar = ({
+  categories = ["All", "Electronics", "Fashion", "Home", "Beauty", "Sports", "Books", "Toys"],
+  selectedCategory = "All",
+  onCategorySelect,
+  className
+}: CategoryNavigationBarProps) => {
   const navigate = useNavigate();
   
-  const mainCategories = [
-    { name: "All", path: "/marketplace" },
-    { name: "Electronics", path: "/marketplace?category=electronics" },
-    { name: "Fashion", path: "/marketplace?category=fashion" },
-    { name: "Home", path: "/marketplace?category=home" },
-    { name: "Beauty", path: "/marketplace?category=beauty" },
-    { name: "Books", path: "/marketplace?category=books" },
-  ];
+  const handleCategoryClick = (category: string) => {
+    if (onCategorySelect) {
+      onCategorySelect(category.toLowerCase());
+    } else {
+      if (category.toLowerCase() === 'all') {
+        navigate('/marketplace');
+      } else {
+        navigate(`/marketplace/category/${category.toLowerCase()}`);
+      }
+    }
+  };
   
   return (
-    <div className="flex overflow-x-auto scrollbar-hide gap-2 pb-2">
-      {mainCategories.map((category) => (
+    <div className={cn("flex overflow-x-auto scrollbar-hide gap-2 pb-2", className)}>
+      {categories.map((category) => (
         <Button
-          key={category.name}
-          variant="outline"
+          key={category}
+          variant={selectedCategory.toLowerCase() === category.toLowerCase() ? "default" : "outline"}
           size="sm"
-          onClick={() => navigate(category.path)}
           className="whitespace-nowrap"
+          onClick={() => handleCategoryClick(category)}
         >
-          {category.name}
+          {category}
         </Button>
       ))}
     </div>
   );
 };
+
+export default CategoryNavigationBar;

@@ -13,7 +13,6 @@ import { BannerCarousel } from '@/components/marketplace/BannerCarousel';
 import { CategoryIconGrid } from '@/components/marketplace/CategoryIconGrid';
 import { Categories } from '@/components/marketplace/Categories';
 import { motion } from 'framer-motion';
-import { supabase } from '@/integrations/supabase/client';
 
 export default function MarketplaceIndex() {
   const navigate = useNavigate();
