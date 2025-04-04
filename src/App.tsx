@@ -1,4 +1,3 @@
-
 import { useState, useEffect, lazy, Suspense } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -32,6 +31,7 @@ const MessagesPage = lazy(() => import("@/pages/messages"));
 const Search = lazy(() => import("@/pages/search"));
 const Orders = lazy(() => import("@/pages/orders"));
 const Checkout = lazy(() => import("@/pages/checkout"));
+const OrderSuccess = lazy(() => import("@/pages/order-success"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 const AdDashboard = lazy(() => import("@/pages/admin/AdDashboard"));
 const AdAnalytics = lazy(() => import("@/pages/admin/AdAnalytics"));
@@ -109,6 +109,7 @@ function App() {
                 <Route path="/search" element={<Search />} />
                 <Route path="/orders" element={<Orders />} />
                 <Route path="/checkout" element={<Checkout />} />
+                <Route path="/order-success" element={<OrderSuccess />} />
                 <Route path="/admin/ads" element={<AdDashboard />} />
                 <Route path="/admin/analytics" element={<AdAnalytics />} />
                 <Route path="/admin/placement" element={<AdPlacement />} />

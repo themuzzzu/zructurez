@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -50,7 +49,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { LikeProvider } from "@/components/products/LikeContext";
 
-// Import View Tracking Functions
 const incrementViews = async (tableName: string, id: string) => {
   try {
     const { error } = await supabase.rpc('increment_views', {
@@ -64,7 +62,6 @@ const incrementViews = async (tableName: string, id: string) => {
   }
 };
 
-// Import Recommendations Service
 const getPeopleBoughtTogether = async (productId: string) => {
   try {
     const { data, error } = await supabase
@@ -88,7 +85,6 @@ const ProductDetails = () => {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const queryClient = useQueryClient();
 
-  // Fetch product details
   const { data: product, isLoading, error } = useQuery({
     queryKey: ['product', productId],
     queryFn: async () => {
@@ -104,14 +100,12 @@ const ProductDetails = () => {
     enabled: !!productId,
   });
 
-  // Fetch people also bought products
   const { data: relatedProducts = [] } = useQuery({
     queryKey: ['peopleBoughtTogether', productId],
     queryFn: () => getPeopleBoughtTogether(productId as string),
     enabled: !!productId,
   });
 
-  // Add to cart mutation
   const addToCartMutation = useMutation({
     mutationFn: async ({ productId, quantity }: { productId: string; quantity: number }) => {
       const { data: session } = await supabase.auth.getSession();
@@ -145,7 +139,6 @@ const ProductDetails = () => {
     },
   });
 
-  // Add to wishlist mutation
   const addToWishlistMutation = useMutation({
     mutationFn: async (productId: string) => {
       const { data: session } = await supabase.auth.getSession();
@@ -221,7 +214,6 @@ const ProductDetails = () => {
     }).format(price);
   };
 
-  // Calculate discount percentage if not provided
   const getDiscountPercentage = () => {
     if (!product) return 0;
     if (product.discount_percentage) return product.discount_percentage;
@@ -231,7 +223,6 @@ const ProductDetails = () => {
     return 0;
   };
 
-  // Increment product views
   useEffect(() => {
     if (productId) {
       incrementViews('products', productId);
@@ -259,13 +250,10 @@ const ProductDetails = () => {
     );
   }
 
-  // Mock data for product images (in a real app, this would come from the database)
   const productImages = [
     product.image_url || '/placeholder.svg',
-    // Additional images would be here in a real application
   ];
 
-  // Sample offers for the product
   const productOffers = [
     { 
       title: "Bank Offer", 
@@ -315,7 +303,6 @@ const ProductDetails = () => {
           </div>
 
           <div className="max-w-[1400px] mx-auto px-4 pb-20">
-            {/* Breadcrumb navigation */}
             <div className="text-sm text-muted-foreground mb-4">
               <span className="hover:underline cursor-pointer" onClick={() => navigate('/marketplace')}>Home</span>
               <span> &gt; </span>
@@ -325,7 +312,6 @@ const ProductDetails = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Left column - Product Images */}
               <div className="lg:col-span-1">
                 <div className="sticky top-24 space-y-4">
                   <div className="bg-background border border-border rounded-lg p-4">
@@ -421,7 +407,6 @@ const ProductDetails = () => {
                 </div>
               </div>
 
-              {/* Center column - Product Details */}
               <div className="lg:col-span-2 space-y-6">
                 <div className="bg-card p-6 rounded-lg border border-border">
                   <h1 className="text-2xl font-bold text-foreground">{product.title}</h1>
@@ -437,7 +422,6 @@ const ProductDetails = () => {
                     <span className="text-muted-foreground text-sm">42 ratings & 15 reviews</span>
                   </div>
 
-                  {/* Stock status */}
                   <div className="mt-2">
                     {product.stock > 0 ? (
                       <span className="text-green-600 font-medium flex items-center gap-1">
@@ -450,7 +434,6 @@ const ProductDetails = () => {
                     )}
                   </div>
 
-                  {/* Price section */}
                   <div className="mt-6">
                     <div className="flex items-baseline gap-2">
                       <span className="text-3xl font-bold text-foreground flex items-center">
@@ -476,7 +459,6 @@ const ProductDetails = () => {
                     )}
                   </div>
 
-                  {/* Offers section */}
                   <div className="mt-6">
                     <h3 className="font-semibold flex items-center gap-2">
                       <Tag className="h-4 w-4 text-orange-500" /> Available Offers
@@ -484,7 +466,6 @@ const ProductDetails = () => {
                     <ProductOffers offers={productOffers} />
                   </div>
 
-                  {/* Delivery information */}
                   <div className="mt-6 flex items-start gap-4">
                     <MapPin className="h-5 w-5 text-muted-foreground mt-1" />
                     <div>
@@ -499,7 +480,6 @@ const ProductDetails = () => {
                     </div>
                   </div>
 
-                  {/* Quantity selector */}
                   <div className="mt-6">
                     <p className="text-sm font-medium mb-2">Quantity:</p>
                     <div className="flex items-center">
@@ -526,20 +506,17 @@ const ProductDetails = () => {
                     </div>
                   </div>
 
-                  {/* Highlights section */}
                   <div className="mt-6">
                     <h3 className="font-semibold">Highlights</h3>
                     <ProductHighlights product={product} />
                   </div>
                 </div>
 
-                {/* Product specifications */}
                 <div className="bg-card p-6 rounded-lg border border-border">
                   <h2 className="text-lg font-semibold text-foreground mb-4">Specifications</h2>
                   <ProductSpecifications product={product} />
                 </div>
 
-                {/* Product details tabs */}
                 <div className="bg-card p-6 rounded-lg border border-border">
                   <Tabs defaultValue="description">
                     <TabsList className="grid w-full grid-cols-4">
@@ -663,7 +640,6 @@ const ProductDetails = () => {
                   </Tabs>
                 </div>
 
-                {/* Delivery & warranty */}
                 <div className="bg-card p-6 rounded-lg border border-border">
                   <h2 className="text-lg font-semibold text-foreground mb-4">Delivery & Services</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -701,7 +677,6 @@ const ProductDetails = () => {
             </div>
           </div>
 
-          {/* People also bought section */}
           {relatedProducts.length > 0 && (
             <div className="mt-12 max-w-[1400px] mx-auto px-4">
               <Separator className="my-8" />
