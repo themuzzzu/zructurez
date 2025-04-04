@@ -1,6 +1,5 @@
-
 import { ShoppingSection } from "@/components/ShoppingSection";
-import { GridLayoutType } from "@/components/products/types/layouts";
+import { GridLayoutType } from "@/components/products/types/ProductTypes";
 
 interface SearchTabContentProps {
   searchQuery: string;

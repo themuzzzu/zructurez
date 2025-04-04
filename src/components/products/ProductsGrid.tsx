@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { ProductCard } from "./ProductCard";
-import { GridLayoutType } from "./types/layouts";
+import { GridLayoutType } from "./types/ProductTypes";
 import { Product } from "@/types/product";
 import { Spinner } from "@/components/common/Spinner";
 import { EmptySearchResults } from "@/components/marketplace/EmptySearchResults";

@@ -1,8 +1,7 @@
-
 import { LayoutGrid, Grid2X2, Grip, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { GridLayoutType } from "@/components/products/types/layouts";
+import { GridLayoutType } from "@/components/products/types/ProductTypes";
 
 interface GridLayoutSelectorProps {
   layout: GridLayoutType;

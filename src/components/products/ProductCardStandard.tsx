@@ -106,7 +106,7 @@ export const ProductCardStandard = ({
       <div className={`p-3 ${isGrid2x2 ? 'p-4' : ''}`} onClick={onClick}>
         <div className="mb-1">
           <div className="text-xs text-gray-500 mb-1">
-            {product.brand || product.category || "General"}
+            {product.brand_name || product.brand || product.category || "General"}
           </div>
           <h3 className={`font-medium line-clamp-1 ${isGrid2x2 ? 'text-base' : 'text-sm'}`}>
             {product.title}

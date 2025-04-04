@@ -169,7 +169,7 @@ export const ProductCardCompact = ({
               </div>
               
               <div className="text-xs text-gray-500 line-clamp-1">
-                {product.brand || product.category || "General"}
+                {product.brand_name || product.brand || product.category || "General"}
               </div>
             </div>
             

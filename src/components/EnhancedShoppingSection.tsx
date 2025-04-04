@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { ShoppingSection } from './ShoppingSection';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { GridLayoutType } from './products/types/layouts';
+import { GridLayoutType } from './products/types/ProductTypes';
 import { useNavigate } from 'react-router-dom';
 import { SponsoredProducts } from './marketplace/SponsoredProducts';
 import { RecommendedProducts } from './marketplace/RecommendedProducts';
@@ -35,7 +34,6 @@ export const EnhancedShoppingSection = ({
   const [activeTab, setActiveTab] = useState("products");
   const navigate = useNavigate();
   
-  // Handle tab change - for services redirect to search results
   const handleTabChange = (value: string) => {
     if (value === "services") {
       navigate(`/search?q=${encodeURIComponent(searchQuery)}&type=services`);
@@ -74,22 +72,18 @@ export const EnhancedShoppingSection = ({
             variants={containerAnimation}
             className="space-y-8"
           >
-            {/* Sponsored Products Section */}
             <motion.div variants={itemAnimation}>
               <SponsoredProducts gridLayout={gridLayout} />
             </motion.div>
             
-            {/* Trending Products */}
             <motion.div variants={itemAnimation}>
               <TrendingProducts gridLayout={gridLayout} />
             </motion.div>
             
-            {/* Recommended Products */}
             <motion.div variants={itemAnimation}>
               <RecommendedProducts gridLayout={gridLayout} />
             </motion.div>
             
-            {/* Main Shopping Section */}
             <motion.div variants={itemAnimation}>
               <ShoppingSection
                 searchQuery={searchQuery}
