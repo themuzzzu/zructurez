@@ -35,8 +35,8 @@ export interface AdSlot {
 
 export interface AdCampaign {
   id: string;
+  user_id: string;  // Required field
   business_id: string;
-  user_id?: string;  // Add user_id field
   slot_id?: string;
   title: string;
   description: string;
@@ -50,7 +50,7 @@ export interface AdCampaign {
   total_price?: number;
   is_exclusive?: boolean;
   status: "pending" | "active" | "expired" | "rejected";
-  impressions?: number; // Added impressions field
+  impressions?: number; 
   clicks?: number;
   created_at: string;
   

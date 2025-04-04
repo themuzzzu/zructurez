@@ -25,7 +25,7 @@ export const SettingsNav = ({ activeTab, setActiveTab }: SettingsNavProps) => {
     { id: "services", label: "Services", icon: Wrench },
     { id: "products", label: "Products", icon: Package },
     { id: "advertisements", label: "Advertisements", icon: Megaphone },
-    { id: "ad-pricing", label: "Ad Pricing", icon: TagIcon },
+    { id: "ad-pricing", label: "Ad Pricing & Booking", icon: TagIcon },
     { id: "pricing", label: "Pricing & Plans", icon: BadgeDollarSign },
     { id: "testing", label: "Testing", icon: Activity },
     { id: "analytics", label: "Analytics", icon: BarChart },

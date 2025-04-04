@@ -15,7 +15,7 @@ import { Separator } from '@/components/ui/separator';
 import { 
   Monitor, ShoppingBag, Briefcase, TrendingUp, 
   MapPin, Award, LayoutTemplate, Calendar, Lock, 
-  Info, Check, AlertCircle 
+  Info, Check, AlertCircle, Image as ImageIcon
 } from 'lucide-react';
 import { 
   Dialog, 
@@ -36,16 +36,79 @@ import { Skeleton } from '@/components/ui/skeleton';
 interface AdTypeInfo {
   icon: React.ElementType;
   color: string;
+  description: string;
+  position: string;
+  dailyPrice: number;
+  monthlyPrice: number;
+  exclusivePrice: number | null;
+  previewImage?: string;
 }
 
-const adTypeIcons: Record<string, AdTypeInfo> = {
-  homepage_banner_1: { icon: Monitor, color: 'text-blue-500' },
-  homepage_banner_2: { icon: LayoutTemplate, color: 'text-indigo-500' },
-  sponsored_product: { icon: ShoppingBag, color: 'text-green-500' },
-  sponsored_service: { icon: Briefcase, color: 'text-purple-500' },
-  trending_boost: { icon: TrendingUp, color: 'text-orange-500' },
-  featured_business_pin: { icon: Award, color: 'text-amber-500' },
-  local_banner: { icon: MapPin, color: 'text-red-500' }
+const adTypes: Record<string, AdTypeInfo> = {
+  homepage_banner_1: {
+    icon: Monitor,
+    color: 'text-blue-500',
+    description: 'Premium placement at the top hero section of the homepage',
+    position: 'Top Hero Section',
+    dailyPrice: 600,
+    monthlyPrice: 12000,
+    exclusivePrice: 15000,
+    previewImage: '/lovable-uploads/f3f8aa48-7741-4ef4-b561-5578ab29cc38.png'
+  },
+  homepage_banner_2: {
+    icon: LayoutTemplate,
+    color: 'text-indigo-500',
+    description: 'Prominent banner in the middle of the homepage',
+    position: 'Mid Homepage',
+    dailyPrice: 400,
+    monthlyPrice: 8000,
+    exclusivePrice: 10000
+  },
+  sponsored_product: {
+    icon: ShoppingBag,
+    color: 'text-green-500',
+    description: 'Featured placement in the "Recommended for You" sections',
+    position: 'Product Recommendations',
+    dailyPrice: 150,
+    monthlyPrice: 3000,
+    exclusivePrice: 4500
+  },
+  sponsored_service: {
+    icon: Briefcase,
+    color: 'text-purple-500',
+    description: 'Priority placement at the top of services sections',
+    position: 'Services Section Top',
+    dailyPrice: 130,
+    monthlyPrice: 2500,
+    exclusivePrice: 4000
+  },
+  trending_boost: {
+    icon: TrendingUp,
+    color: 'text-orange-500',
+    description: 'Enhanced ranking in trending sections and feeds',
+    position: 'Trending Sections',
+    dailyPrice: 100,
+    monthlyPrice: 2000,
+    exclusivePrice: null
+  },
+  featured_business_pin: {
+    icon: Award,
+    color: 'text-amber-500',
+    description: 'Priority placement at the top of business listings',
+    position: 'Top of Business Listings',
+    dailyPrice: 180,
+    monthlyPrice: 3500,
+    exclusivePrice: 5000
+  },
+  local_banner: {
+    icon: MapPin,
+    color: 'text-red-500',
+    description: 'Targeted placement in city or locality-based feeds',
+    position: 'Location-based Feeds',
+    dailyPrice: 100,
+    monthlyPrice: 2000,
+    exclusivePrice: 3500
+  }
 };
 
 export const AdvertisementPricingTab = ({ businessId }: { businessId?: string }) => {
@@ -63,6 +126,7 @@ export const AdvertisementPricingTab = ({ businessId }: { businessId?: string })
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [bookingConfirmed, setBookingConfirmed] = useState(false);
+  const [showPricingComparison, setShowPricingComparison] = useState(false);
 
   // Fetch all available ad slots
   useEffect(() => {
@@ -81,32 +145,14 @@ export const AdvertisementPricingTab = ({ businessId }: { businessId?: string })
         const mappedSlots: AdSlot[] = (data || []).map(slot => ({
           id: slot.id,
           name: slot.name,
-          type: slot.type,
-          description: slot.description,
-          daily_price: slot.type === 'homepage_banner_1' ? 600 :
-                      slot.type === 'homepage_banner_2' ? 400 :
-                      slot.type === 'sponsored_product' ? 150 :
-                      slot.type === 'sponsored_service' ? 130 :
-                      slot.type === 'trending_boost' ? 100 :
-                      slot.type === 'featured_business_pin' ? 180 :
-                      slot.type === 'local_banner' ? 100 : 100,
-          monthly_price: slot.type === 'homepage_banner_1' ? 12000 :
-                        slot.type === 'homepage_banner_2' ? 8000 :
-                        slot.type === 'sponsored_product' ? 3000 :
-                        slot.type === 'sponsored_service' ? 2500 :
-                        slot.type === 'trending_boost' ? 2000 :
-                        slot.type === 'featured_business_pin' ? 3500 :
-                        slot.type === 'local_banner' ? 2000 : 2000,
-          exclusive_price: slot.type === 'homepage_banner_1' ? 15000 :
-                          slot.type === 'homepage_banner_2' ? 10000 :
-                          slot.type === 'sponsored_product' ? 4500 :
-                          slot.type === 'sponsored_service' ? 4000 :
-                          slot.type === 'trending_boost' ? null :
-                          slot.type === 'featured_business_pin' ? 5000 :
-                          slot.type === 'local_banner' ? 3500 : null,
-          position: slot.location || '',
-          max_rotation_slots: 5, // Default value
-          rotation_interval_seconds: 10, // Default value
+          type: slot.type as AdSlotType,
+          description: slot.description || adTypes[slot.type]?.description || '',
+          daily_price: adTypes[slot.type]?.dailyPrice || 100,
+          monthly_price: adTypes[slot.type]?.monthlyPrice || 2000,
+          exclusive_price: adTypes[slot.type]?.exclusivePrice || null,
+          position: slot.location || adTypes[slot.type]?.position || '',
+          max_rotation_slots: 5,
+          rotation_interval_seconds: 10,
           is_active: slot.active,
           
           // Include original database fields
@@ -255,14 +301,69 @@ export const AdvertisementPricingTab = ({ businessId }: { businessId?: string })
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold">Advertisement Pricing & Booking</h2>
-        <p className="text-muted-foreground">
-          Promote your business with targeted advertisements
-        </p>
+      <div className="flex justify-between items-start">
+        <div>
+          <h2 className="text-2xl font-bold">Advertisement Pricing & Booking</h2>
+          <p className="text-muted-foreground">
+            Promote your business with targeted advertisements
+          </p>
+        </div>
+        <Button 
+          variant="outline"
+          onClick={() => setShowPricingComparison(!showPricingComparison)}
+        >
+          {showPricingComparison ? "Hide Pricing Table" : "Compare All Pricing"}
+        </Button>
       </div>
       
       <Separator />
+      
+      {showPricingComparison && (
+        <div className="mb-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Ad Pricing Comparison</CardTitle>
+              <CardDescription>Compare pricing across all advertisement options</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="bg-muted/50">
+                      <th className="p-2 text-left font-medium">Ad Type</th>
+                      <th className="p-2 text-left font-medium">Position</th>
+                      <th className="p-2 text-left font-medium">Daily Price</th>
+                      <th className="p-2 text-left font-medium">Monthly Price</th>
+                      <th className="p-2 text-left font-medium">Exclusive Price</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.entries(adTypes).map(([type, info]) => (
+                      <tr key={type} className="border-b border-muted hover:bg-muted/20">
+                        <td className="p-2">
+                          <div className="flex items-center gap-2">
+                            <div className={`p-1.5 rounded-full ${info.color.replace('text-', 'bg-')}/10`}>
+                              <info.icon className={`h-3.5 w-3.5 ${info.color}`} />
+                            </div>
+                            {type.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                          </div>
+                        </td>
+                        <td className="p-2">{info.position}</td>
+                        <td className="p-2">₹{info.dailyPrice.toLocaleString()}</td>
+                        <td className="p-2">₹{info.monthlyPrice.toLocaleString()}</td>
+                        <td className="p-2">{info.exclusivePrice ? `₹${info.exclusivePrice.toLocaleString()}` : '—'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className="text-xs text-muted-foreground mt-4">
+                * Exclusive pricing gives you sole placement in that ad position for the entire duration
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
       
       {/* Section 1: Available Ad Slots */}
       <div className="space-y-4">
@@ -287,18 +388,24 @@ export const AdvertisementPricingTab = ({ businessId }: { businessId?: string })
             ))}
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-8">
             {categoryOrder.map(category => {
               if (!groupedSlots[category]) return null;
               
               return (
-                <div key={category} className="space-y-3">
-                  <h4 className="text-sm font-medium capitalize">{category} Advertisements</h4>
+                <div key={category} className="space-y-4">
+                  <h4 className="text-base font-medium capitalize mb-3">{category} Advertisements</h4>
                   
                   <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                     {groupedSlots[category].map(slot => {
-                      const AdIcon = adTypeIcons[slot.type]?.icon || TrendingUp;
-                      const iconColor = adTypeIcons[slot.type]?.color || 'text-gray-500';
+                      const adTypeInfo = adTypes[slot.type] || {
+                        icon: TrendingUp,
+                        color: 'text-gray-500',
+                        description: slot.description || `Advertisement placement in ${slot.position}`,
+                        position: slot.position
+                      };
+                      const AdIcon = adTypeInfo.icon;
+                      const iconColor = adTypeInfo.color;
                       
                       return (
                         <Card 
@@ -311,33 +418,57 @@ export const AdvertisementPricingTab = ({ businessId }: { businessId?: string })
                           onClick={() => handleSlotSelect(slot)}
                         >
                           <CardHeader className="pb-2">
-                            <div className="flex justify-between items-center">
+                            <div className="flex justify-between items-start">
                               <div className="flex items-center gap-2">
                                 <div className={`p-2 rounded-full bg-muted ${iconColor}`}>
                                   <AdIcon className="h-4 w-4" />
                                 </div>
-                                <CardTitle className="text-base">{slot.name}</CardTitle>
+                                <CardTitle className="text-base">{slot.name || slot.type.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}</CardTitle>
                               </div>
                               {selectedSlot?.id === slot.id && (
-                                <Check className="h-4 w-4 text-primary" />
+                                <Check className="h-4 w-4 text-primary mt-1" />
                               )}
                             </div>
                             <CardDescription className="line-clamp-2">
-                              {slot.description || `Advertisement placement in ${slot.position}`}
+                              {adTypeInfo.description}
                             </CardDescription>
                           </CardHeader>
-                          <CardContent className="text-sm pb-2">
-                            <div className="flex flex-wrap gap-2 text-xs mb-2">
-                              <div className="bg-primary/10 text-primary rounded px-2 py-1">
+                          <CardContent className="space-y-3 pb-2">
+                            {adTypeInfo.previewImage && (
+                              <div className="relative rounded-md overflow-hidden border bg-muted/30 h-32">
+                                <img 
+                                  src={adTypeInfo.previewImage} 
+                                  alt={`${slot.type} placement example`} 
+                                  className="object-contain w-full h-full"
+                                />
+                                <div className="absolute bottom-0 left-0 right-0 bg-background/80 text-xs p-1 text-center">
+                                  Sample placement
+                                </div>
+                              </div>
+                            )}
+                            
+                            <div>
+                              <p className="text-sm font-medium mb-1">Position:</p>
+                              <p className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded inline-flex items-center">
+                                <MapPin className="h-3 w-3 mr-1" />
+                                {adTypeInfo.position}
+                              </p>
+                            </div>
+                            
+                            <div className="flex flex-wrap gap-2 text-xs">
+                              <div className="bg-primary/10 text-primary rounded px-2 py-1 flex items-center">
+                                <Calendar className="h-3 w-3 mr-1" />
                                 {formatPrice(slot.daily_price)}/day
                               </div>
-                              <div className="bg-primary/10 text-primary rounded px-2 py-1">
+                              <div className="bg-primary/10 text-primary rounded px-2 py-1 flex items-center">
+                                <Calendar className="h-3 w-3 mr-1" />
                                 {formatPrice(slot.monthly_price)}/month
                               </div>
                               {slot.exclusive_price && (
                                 <TooltipProvider>
                                   <Tooltip>
                                     <TooltipTrigger className="bg-primary/10 text-primary rounded px-2 py-1 flex items-center gap-1">
+                                      <Lock className="h-3 w-3" />
                                       Exclusive: {formatPrice(slot.exclusive_price)}
                                       <Info className="h-3 w-3" />
                                     </TooltipTrigger>
@@ -351,13 +482,10 @@ export const AdvertisementPricingTab = ({ businessId }: { businessId?: string })
                                 </TooltipProvider>
                               )}
                             </div>
-                            <p className="text-muted-foreground text-xs">
-                              Position: {slot.position}
-                            </p>
                           </CardContent>
                           <CardFooter>
                             <Button 
-                              variant="ghost" 
+                              variant={selectedSlot?.id === slot.id ? "default" : "ghost"} 
                               className="w-full text-xs"
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -380,11 +508,11 @@ export const AdvertisementPricingTab = ({ businessId }: { businessId?: string })
       
       {/* Section 2 & 3: Price Calculator & Booking Form */}
       {selectedSlot && (
-        <Card className="mt-6">
+        <Card className="mt-8">
           <CardHeader>
             <CardTitle>Book Your Advertisement</CardTitle>
             <CardDescription>
-              {selectedSlot.name} - {selectedSlot.description || selectedSlot.position}
+              {selectedSlot.name} - {adTypes[selectedSlot.type]?.position || selectedSlot.position}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -500,6 +628,24 @@ export const AdvertisementPricingTab = ({ businessId }: { businessId?: string })
                 </div>
               )}
             </div>
+
+            {/* Price calculation display */}
+            <div className="bg-muted/50 p-4 rounded-md space-y-2">
+              <h4 className="text-sm font-medium">Price Calculation</h4>
+              {pricingType === 'daily' ? (
+                <div className="text-sm">
+                  <p>₹{selectedSlot.daily_price.toLocaleString()}/day × {differenceInDays(dateRange.to, dateRange.from) + 1} days = <span className="font-semibold text-primary">₹{calculatedPrice?.toLocaleString()}</span></p>
+                </div>
+              ) : pricingType === 'monthly' ? (
+                <div className="text-sm">
+                  <p>Monthly rate for {format(selectedMonth, 'MMMM yyyy')}: <span className="font-semibold text-primary">₹{selectedSlot.monthly_price.toLocaleString()}</span></p>
+                </div>
+              ) : (
+                <div className="text-sm">
+                  <p>Exclusive placement from {format(dateRange.from, 'MMM dd, yyyy')} to {format(dateRange.to, 'MMM dd, yyyy')}: <span className="font-semibold text-primary">₹{selectedSlot.exclusive_price?.toLocaleString()}</span></p>
+                </div>
+              )}
+            </div>
           </CardContent>
           <CardFooter className="flex flex-col items-start space-y-4 sm:flex-row sm:justify-between sm:space-y-0">
             <div>
@@ -518,6 +664,68 @@ export const AdvertisementPricingTab = ({ businessId }: { businessId?: string })
           </CardFooter>
         </Card>
       )}
+      
+      {/* Ad Placement Preview Section */}
+      <div className="mt-4">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Advertisement Placement Examples</CardTitle>
+            <CardDescription>Visual guide to where your ads will appear</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <div className="border rounded-md p-3 bg-muted/20">
+                <div className="font-medium text-sm mb-1 flex items-center gap-2">
+                  <Monitor className="h-4 w-4 text-blue-500" />
+                  Homepage Banner #1
+                </div>
+                <div className="w-full aspect-video bg-muted flex items-center justify-center rounded-md border relative overflow-hidden">
+                  <img 
+                    src="/lovable-uploads/f3f8aa48-7741-4ef4-b561-5578ab29cc38.png" 
+                    alt="Homepage Banner #1 Example" 
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-primary/10 flex items-center justify-center">
+                    <div className="bg-background/80 p-2 rounded text-xs">
+                      Top Hero Section - Maximum Visibility
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border rounded-md p-3 bg-muted/20">
+                <div className="font-medium text-sm mb-1 flex items-center gap-2">
+                  <LayoutTemplate className="h-4 w-4 text-indigo-500" />
+                  Homepage Banner #2
+                </div>
+                <div className="w-full aspect-video bg-muted flex items-center justify-center rounded-md border">
+                  <ImageIcon className="h-8 w-8 text-muted-foreground/50" />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="bg-background/80 p-2 rounded text-xs">
+                      Mid Homepage Banner
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border rounded-md p-3 bg-muted/20">
+                <div className="font-medium text-sm mb-1 flex items-center gap-2">
+                  <ShoppingBag className="h-4 w-4 text-green-500" />
+                  Sponsored Product
+                </div>
+                <div className="w-full aspect-video bg-muted flex items-center justify-center rounded-md border">
+                  <ImageIcon className="h-8 w-8 text-muted-foreground/50" />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="bg-background/80 p-2 rounded text-xs">
+                      Recommended Products Section
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
       
       {/* Confirmation Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
