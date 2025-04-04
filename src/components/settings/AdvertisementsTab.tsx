@@ -5,6 +5,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { measureRenderTime } from "@/utils/performanceTracking";
+import { AdvertisingTab } from "./AdvertisingTab";
 
 // Lazy load heavy components
 const LazyAdDashboard = lazy(() => import("@/components/ads/AdDashboard").then(
@@ -17,7 +18,7 @@ const LazyPerformanceMetricsDashboard = lazy(() => import("@/components/performa
   module => ({ default: module.PerformanceMetricsDashboard })
 ));
 
-export const AdvertisementsTab = () => {
+export const AdvertisementsTab = ({ businessId }: { businessId?: string }) => {
   const [activeTab, setActiveTab] = useState("dashboard");
   
   return measureRenderTime('AdvertisementsTab', () => (
@@ -25,6 +26,7 @@ export const AdvertisementsTab = () => {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="dashboard">Ads Dashboard</TabsTrigger>
+          <TabsTrigger value="create">Create Ads</TabsTrigger>
           <TabsTrigger value="recommendations">AI Recommendations</TabsTrigger>
           <TabsTrigger value="performance">Performance</TabsTrigger>
         </TabsList>
@@ -38,6 +40,17 @@ export const AdvertisementsTab = () => {
               <Suspense fallback={<Skeleton className="h-[500px] w-full" />}>
                 <LazyAdDashboard />
               </Suspense>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="create" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Create & Manage Ads</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <AdvertisingTab businessId={businessId} />
             </CardContent>
           </Card>
         </TabsContent>

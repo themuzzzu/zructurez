@@ -21,11 +21,13 @@ import { useNavigate } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { AdSlotManager } from "@/components/admin/AdSlotManager";
 
 const AdDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [adTypeFilter, setAdTypeFilter] = useState<AdType | "all">("all");
+  const [adminTab, setAdminTab] = useState("management");
   const [isRefreshing, setIsRefreshing] = useState(false);
   
   // Fetch all ads for admin
@@ -122,9 +124,10 @@ const AdDashboard = () => {
         </Card>
       </div>
       
-      <Tabs defaultValue="management" className="space-y-4">
+      <Tabs value={adminTab} onValueChange={setAdminTab} className="space-y-4">
         <TabsList>
           <TabsTrigger value="management">Ad Management</TabsTrigger>
+          <TabsTrigger value="slots">Ad Slots</TabsTrigger>
           <TabsTrigger value="performance">Performance Analytics</TabsTrigger>
           <TabsTrigger value="revenue">Revenue & Payments</TabsTrigger>
           <TabsTrigger value="products">Product Insights</TabsTrigger>
@@ -180,6 +183,10 @@ const AdDashboard = () => {
               <AdManagementTable ads={filteredAds} isLoading={isLoading} />
             </CardContent>
           </Card>
+        </TabsContent>
+        
+        <TabsContent value="slots" className="space-y-4">
+          <AdSlotManager />
         </TabsContent>
         
         <TabsContent value="performance" className="space-y-4">
