@@ -1,8 +1,9 @@
+
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider } from "react-router-dom";
 import { router } from "./router";
-import { ThemeProvider } from "@/components/theme-provider";
-import { Toaster } from "@/components/ui/toaster";
+import { ThemeProvider } from "./components/ThemeProvider";
+import { Toaster } from "sonner";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { SecurityProvider } from '@/components/security/SecurityProvider';
 
@@ -15,7 +16,7 @@ function App() {
         <ThemeProvider defaultTheme="system" storageKey="zructures-theme">
           <SecurityProvider>
             <RouterProvider router={router} />
-            <Toaster richColors position="top-right" />
+            <Toaster />
           </SecurityProvider>
         </ThemeProvider>
       </AuthProvider>
