@@ -104,6 +104,8 @@ export const CheckoutAddress = ({
       toast.success("Address added successfully!");
       setIsDialogOpen(false);
       form.reset();
+      // Automatically continue to payment after saving address
+      onContinue();
     },
     onError: (error) => {
       toast.error(error instanceof Error ? error.message : "Failed to add address");
