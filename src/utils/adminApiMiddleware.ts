@@ -1,186 +1,211 @@
 
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
-import { z } from 'zod';
+import { z } from "zod";
+import { validateRequest } from "./requestValidation";
+import { rateLimit } from "./rateLimiting";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { hasRole } from "./securityUtils";
 
-// Admin role verification
-export const verifyAdminRole = async (): Promise<boolean> => {
+// Define common schemas for admin API validation
+export const AdminSchemas = {
+  // Schema for ad approval
+  adApproval: z.object({
+    adId: z.string().uuid("Invalid ad ID format"),
+    approved: z.boolean(),
+    rejectionReason: z.string().optional().nullable(),
+  }),
+  
+  // Schema for user management
+  userAction: z.object({
+    userId: z.string().uuid("Invalid user ID format"),
+    action: z.enum(["suspend", "reinstate", "delete", "promote"]),
+    reason: z.string().min(3, "Reason must be at least 3 characters").optional(),
+  }),
+  
+  // Schema for content moderation
+  contentModeration: z.object({
+    contentId: z.string().uuid("Invalid content ID format"),
+    contentType: z.enum(["post", "comment", "business", "product", "service"]),
+    action: z.enum(["flag", "remove", "approve"]),
+    reason: z.string().optional(),
+  }),
+};
+
+/**
+ * Function to securely approve or reject an advertisement
+ * Protected with RBAC, rate limiting, and input validation
+ */
+export const approveAd = async (data: z.infer<typeof AdminSchemas.adApproval>): Promise<boolean> => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) return false;
-    
-    // Get user role from profiles
-    const { data: profile, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single();
-      
-    if (error) {
-      console.error('Error fetching user profile:', error);
+    // 1. Check user session
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) {
+      toast.error('Authentication required');
       return false;
     }
     
-    // Temporary solution: check if the user is an admin based on an admin list
-    // This should be replaced with a proper roles table
-    const adminIds = [
-      'feb4a063-6dfc-4b6f-a1d9-0fc2c57c04db', // Example admin ID
-      user.id // For development, treat current user as admin
-    ];
-    
-    return adminIds.includes(user.id);
-  } catch (error) {
-    console.error('Error verifying admin role:', error);
-    return false;
-  }
-};
-
-// Rate limiting implementation
-interface RateLimitOptions {
-  maxRequests: number;
-  windowMs: number;
-  message: string;
-}
-
-export const rateLimit = (
-  clientId: string,
-  options: RateLimitOptions
-): boolean => {
-  const now = Date.now();
-  const windowStart = now - options.windowMs;
-  
-  // In a real implementation, this would use a persistent store
-  // For now, use localStorage for demo purposes
-  const key = `ratelimit:${clientId}`;
-  const requestTimesStr = localStorage.getItem(key) || '[]';
-  let requestTimes: number[] = JSON.parse(requestTimesStr);
-  
-  // Filter request times to only include those within the current window
-  requestTimes = requestTimes.filter(time => time > windowStart);
-  
-  if (requestTimes.length >= options.maxRequests) {
-    toast.error(options.message);
-    return false;
-  }
-  
-  // Add the current request time and save
-  requestTimes.push(now);
-  localStorage.setItem(key, JSON.stringify(requestTimes));
-  
-  return true;
-};
-
-// Request validation
-export const validateRequest = <T>(
-  data: unknown,
-  schema: z.ZodSchema<T>,
-  errorMessage = 'Invalid request data'
-): T | null => {
-  try {
-    return schema.parse(data);
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      const issues = error.issues.map(issue => issue.message).join(", ");
-      toast.error(`${errorMessage}: ${issues}`);
-    } else {
-      toast.error(errorMessage);
-    }
-    return null;
-  }
-};
-
-// Combine admin verification, rate limiting and validation
-export const adminApiMiddleware = async <T>(
-  requestData: unknown, 
-  schema: z.ZodSchema<T>,
-  clientId: string,
-  rateLimitOptions?: Partial<RateLimitOptions>
-): Promise<T | null> => {
-  try {
-    // 1. Verify admin role
-    const isAdmin = await verifyAdminRole();
+    // 2. Verify admin role using the RBAC utility
+    const isAdmin = await hasRole('admin');
     if (!isAdmin) {
-      toast.error('Unauthorized: Admin access required');
-      return null;
+      toast.error('Admin privileges required');
+      return false;
     }
     
-    // 2. Apply stricter rate limits for admin actions
-    const adminRateLimits: RateLimitOptions = {
-      maxRequests: 50,  // 50 requests
-      windowMs: 60 * 1000, // per minute
-      message: "Too many admin actions, please try again later."
-    };
+    // 3. Apply rate limiting to prevent automated abuse
+    const rateLimited = rateLimit(`admin-ad-approval:${session.user.id}`, {
+      windowMs: 60000, // 1 minute
+      maxRequests: 15,  // 15 requests per minute
+      message: 'Rate limit exceeded for admin actions',
+    });
     
-    const limitOptions = { ...adminRateLimits, ...rateLimitOptions };
-    if (!rateLimit(clientId, limitOptions)) {
-      return null; // Toast already shown by rateLimit function
-    }
+    if (!rateLimited) return false;
     
-    // 3. Validate request data
-    return validateRequest(requestData, schema, 'Invalid admin request data');
-  } catch (error) {
-    console.error('Admin API middleware error:', error);
-    toast.error('An error occurred during admin request processing');
-    return null;
-  }
-};
-
-// Admin request validation schemas
-export const AdminSchemas = {
-  adApproval: z.object({
-    adId: z.string().uuid('Invalid ad ID'),
-    approved: z.boolean(),
-    rejectionReason: z.string().optional()
-  }),
-  
-  adUpdate: z.object({
-    adId: z.string().uuid('Invalid ad ID'),
-    title: z.string().min(3, 'Title is too short').optional(),
-    description: z.string().min(10, 'Description is too short').optional(),
-    status: z.enum(['pending', 'approved', 'rejected', 'active', 'paused', 'expired']).optional(),
-    budget: z.number().positive('Budget must be positive').optional()
-  }),
-  
-  productUpdate: z.object({
-    productId: z.string().uuid('Invalid product ID'),
-    title: z.string().min(3, 'Title is too short').optional(),
-    price: z.number().positive('Price must be positive').optional(),
-    stock: z.number().min(0, 'Stock cannot be negative').optional(),
-    featured: z.boolean().optional()
-  })
-};
-
-// Example usage for admin API endpoints
-export const approveAd = async (adData: unknown): Promise<boolean> => {
-  const clientId = 'admin-ad-approval';
-  const validData = await adminApiMiddleware(
-    adData, 
-    AdminSchemas.adApproval, 
-    clientId, 
-    { maxRequests: 30, windowMs: 60 * 1000 } // 30 approvals per minute
-  );
-  
-  if (!validData) return false;
-  
-  try {
-    const { adId, approved, rejectionReason } = validData;
+    // 4. Validate input data
+    const validData = validateRequest(data, AdminSchemas.adApproval);
+    if (!validData) return false;
     
+    // 5. Log the admin action for audit trail
+    await supabase.from('admin_audit_logs').insert({
+      user_id: session.user.id,
+      action: validData.approved ? 'ad_approved' : 'ad_rejected',
+      resource_id: validData.adId,
+      resource_type: 'advertisement',
+      details: validData.approved ? {} : { reason: validData.rejectionReason },
+    });
+    
+    // 6. Update the advertisement status
     const { error } = await supabase
       .from('advertisements')
-      .update({ 
-        status: approved ? 'approved' : 'rejected',
-        rejection_reason: approved ? null : rejectionReason
+      .update({
+        status: validData.approved ? 'approved' : 'rejected',
+        ...(validData.rejectionReason && { rejection_reason: validData.rejectionReason }),
       })
-      .eq('id', adId);
-      
-    if (error) throw error;
+      .eq('id', validData.adId);
     
-    toast.success(`Ad ${approved ? 'approved' : 'rejected'} successfully`);
+    if (error) {
+      console.error('Error updating ad status:', error);
+      toast.error('Failed to update advertisement status');
+      return false;
+    }
+    
+    // 7. Notify client of success
+    toast.success(
+      validData.approved
+        ? 'Advertisement approved successfully'
+        : 'Advertisement rejected successfully'
+    );
+    
     return true;
   } catch (error) {
-    console.error('Error approving ad:', error);
-    toast.error('Failed to update ad status');
+    console.error('Error in approveAd:', error);
+    toast.error('An unexpected error occurred');
     return false;
   }
 };
+
+/**
+ * Function to securely moderate user content
+ * Protected with RBAC, rate limiting, and input validation
+ */
+export const moderateContent = async (
+  data: z.infer<typeof AdminSchemas.contentModeration>
+): Promise<boolean> => {
+  try {
+    // 1. Check user session
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) {
+      toast.error('Authentication required');
+      return false;
+    }
+    
+    // 2. Verify admin role
+    const isAdmin = await hasRole('admin');
+    if (!isAdmin) {
+      toast.error('Admin privileges required');
+      return false;
+    }
+    
+    // 3. Apply rate limiting
+    const rateLimited = rateLimit(`admin-content-moderation:${session.user.id}`, {
+      windowMs: 60000,
+      maxRequests: 20,
+      message: 'Rate limit exceeded for content moderation',
+    });
+    
+    if (!rateLimited) return false;
+    
+    // 4. Validate input data
+    const validData = validateRequest(data, AdminSchemas.contentModeration);
+    if (!validData) return false;
+    
+    // 5. Log the admin action
+    await supabase.from('admin_audit_logs').insert({
+      user_id: session.user.id,
+      action: `content_${validData.action}ed`,
+      resource_id: validData.contentId,
+      resource_type: validData.contentType,
+      details: { reason: validData.reason },
+    });
+    
+    // 6. Update the content status based on type
+    const table = getTableForContentType(validData.contentType);
+    const statusField = getStatusFieldForContentType(validData.contentType);
+    
+    if (!table || !statusField) {
+      toast.error('Invalid content type');
+      return false;
+    }
+    
+    const { error } = await supabase
+      .from(table)
+      .update({ [statusField]: getModerationStatus(validData.action) })
+      .eq('id', validData.contentId);
+    
+    if (error) {
+      console.error('Error updating content status:', error);
+      toast.error('Failed to update content status');
+      return false;
+    }
+    
+    // 7. Notify client of success
+    toast.success(`Content has been ${validData.action}ed`);
+    
+    return true;
+  } catch (error) {
+    console.error('Error in moderateContent:', error);
+    toast.error('An unexpected error occurred');
+    return false;
+  }
+};
+
+// Helper functions for content moderation
+function getTableForContentType(type: string): string | null {
+  const tableMap: Record<string, string> = {
+    'post': 'posts',
+    'comment': 'comments',
+    'business': 'businesses',
+    'product': 'products',
+    'service': 'services',
+  };
+  return tableMap[type] || null;
+}
+
+function getStatusFieldForContentType(type: string): string | null {
+  const fieldMap: Record<string, string> = {
+    'post': 'moderation_status',
+    'comment': 'moderation_status',
+    'business': 'verification_status',
+    'product': 'moderation_status',
+    'service': 'moderation_status',
+  };
+  return fieldMap[type] || null;
+}
+
+function getModerationStatus(action: string): string {
+  const statusMap: Record<string, string> = {
+    'flag': 'flagged',
+    'remove': 'removed',
+    'approve': 'approved',
+  };
+  return statusMap[action] || 'pending';
+}
