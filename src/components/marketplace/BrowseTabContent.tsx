@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { SponsoredProducts } from "@/components/marketplace/SponsoredProducts";
 import { TrendingProducts } from "@/components/marketplace/TrendingProducts";
 import { PersonalizedRecommendations } from "@/components/marketplace/PersonalizedRecommendations";
-import { CategoryNavigationBar } from "@/components/marketplace/CategoryNavigationBar";
+import { ShopByCategory } from "@/components/marketplace/ShopByCategory";
 import { MarketplaceBanner } from "@/components/marketplace/MarketplaceBanner";
 
 interface BrowseTabContentProps {

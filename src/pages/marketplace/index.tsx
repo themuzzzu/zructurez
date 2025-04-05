@@ -10,8 +10,7 @@ import { MarketplaceHeader } from './MarketplaceHeader';
 import { BrowseTabContent } from '@/components/marketplace/BrowseTabContent';
 import { CategoryTabContent } from '@/components/marketplace/CategoryTabContent';
 import { BannerCarousel } from '@/components/marketplace/BannerCarousel';
-import { CategoryIconGrid } from '@/components/marketplace/CategoryIconGrid';
-import { Categories } from '@/components/marketplace/Categories';
+import { ShopByCategory } from '@/components/marketplace/ShopByCategory';
 import { motion } from 'framer-motion';
 
 export default function MarketplaceIndex() {
@@ -99,17 +98,9 @@ export default function MarketplaceIndex() {
         <BannerCarousel />
       </div>
 
-      {/* Horizontal scrolling categories */}
-      <div className="mt-2 mb-6 overflow-x-auto scrollbar-hide">
-        <Categories 
-          onCategorySelect={handleCategorySelect}
-          trendingCategories={trendingCategories}
-        />
-      </div>
-      
-      {/* Category Icon Grid for easy navigation */}
+      {/* New Shop by Category Section */}
       <div className="mb-8">
-        <CategoryIconGrid onCategorySelect={handleCategorySelect} />
+        <ShopByCategory onCategorySelect={handleCategorySelect} />
       </div>
 
       {/* Sponsored Products Section */}

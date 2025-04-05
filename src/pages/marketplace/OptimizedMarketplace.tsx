@@ -6,12 +6,11 @@ import { AutocompleteSearch } from "@/components/marketplace/AutocompleteSearch"
 import { BannerCarousel } from "@/components/marketplace/BannerCarousel";
 import { CrazyDeals } from "@/components/marketplace/CrazyDeals";
 import { SponsoredProducts } from "@/components/marketplace/SponsoredProducts";
-import { CategorySubcategoryGrid } from "@/components/marketplace/CategorySubcategoryGrid";
+import { ShopByCategory } from "@/components/marketplace/ShopByCategory";
 import { TrendingProducts } from "@/components/marketplace/TrendingProducts"; 
 import { RecommendedProducts } from "@/components/marketplace/RecommendedProducts";
 import { PersonalizedRecommendations } from "@/components/marketplace/PersonalizedRecommendations";
 import { TopProducts } from "@/components/recommendations/TopProducts";
-import { CategoryIconGrid } from "@/components/marketplace/CategoryIconGrid";
 import { ProductRankings } from "@/components/rankings/ProductRankings";
 
 // Import from correct location - make sure components exist at these paths
@@ -119,15 +118,9 @@ const OptimizedMarketplace = () => {
         <BannerCarousel />
       </div>
       
-      {/* Moved: Category Icon Grid */}
+      {/* New Shop by Category section */}
       <div className="mb-6">
-        <CategoryIconGrid onCategorySelect={handleCategoryChange} />
-      </div>
-      
-      {/* Category with Subcategories - Renamed to "Shop by Category" */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold mb-4 px-1">Shop by Category</h2>
-        <CategorySubcategoryGrid onCategorySelect={handleCategoryChange} />
+        <ShopByCategory onCategorySelect={handleCategoryChange} />
       </div>
       
       {/* Sponsored Products Section */}
