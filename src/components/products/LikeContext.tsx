@@ -6,7 +6,7 @@ import { toast } from "sonner";
 
 interface LikeContextType {
   isLiked: (productId: string) => boolean;
-  toggleLike: (productId: string) => void;
+  toggleLike: (productId: string) => Promise<void>;
   isLoading: boolean;
 }
 
@@ -15,12 +15,14 @@ const LikeContext = createContext<LikeContextType | undefined>(undefined);
 export const LikeProvider = ({ children }: { children: ReactNode }) => {
   const { wishlistItems, isLoading, isInWishlist, toggleWishlist, loading } = useWishlist();
   const [isAuthChecking, setIsAuthChecking] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // Check if user is logged in when component mounts
   useEffect(() => {
     const checkAuth = async () => {
       try {
         const { data } = await supabase.auth.getSession();
+        setIsAuthenticated(!!data.session);
         setIsAuthChecking(false);
       } catch (error) {
         console.error("Error checking authentication:", error);
@@ -29,20 +31,36 @@ export const LikeProvider = ({ children }: { children: ReactNode }) => {
     };
     
     checkAuth();
+
+    // Set up auth state change listener
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsAuthenticated(!!session);
+    });
+    
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
   }, []);
 
   // Enhanced toggleLike function that handles authentication
-  const handleToggleLike = async (productId: string) => {
+  const handleToggleLike = async (productId: string): Promise<void> => {
     // Check if user is logged in before toggling
-    const { data } = await supabase.auth.getSession();
-    
-    if (!data.session) {
-      toast.error("Please sign in to save items to your wishlist");
-      return;
+    if (!isAuthenticated) {
+      const { data } = await supabase.auth.getSession();
+      
+      if (!data.session) {
+        toast.error("Please sign in to save items to your wishlist", {
+          action: {
+            label: "Sign In",
+            onClick: () => window.location.href = '/login'
+          },
+        });
+        throw new Error("Authentication required");
+      }
     }
     
     // If authenticated, proceed with toggling wishlist item
-    toggleWishlist(productId);
+    await toggleWishlist(productId);
   };
 
   return (

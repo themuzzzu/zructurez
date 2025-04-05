@@ -35,6 +35,7 @@ export const useSearch = ({
   
   const previousSearchRef = useRef<{ query: string, filters: SearchFilters } | null>(null);
   const debouncedQuery = useDebounce(query, 300);
+  const searchRequestRef = useRef<AbortController | null>(null);
   
   // Create a cache key based on query and filters
   const getCacheKey = useCallback((searchQuery: string, searchFilters: SearchFilters) => {
@@ -83,7 +84,7 @@ export const useSearch = ({
     }
   }, [debouncedQuery, debouncedFetchSuggestions]);
   
-  // Optimized search function with caching and deduplication
+  // Optimized search function with caching, deduplication and request cancellation
   const search = useCallback(async (searchQuery: string, searchFilters?: SearchFilters) => {
     if (!searchQuery) {
       setResults([]);
@@ -100,6 +101,15 @@ export const useSearch = ({
     ) {
       return;
     }
+    
+    // Cancel any in-flight search request
+    if (searchRequestRef.current) {
+      searchRequestRef.current.abort();
+    }
+    
+    // Create a new abort controller
+    const abortController = new AbortController();
+    searchRequestRef.current = abortController;
     
     // Update the previous search reference
     previousSearchRef.current = { query: searchQuery, filters: finalFilters };
@@ -125,8 +135,14 @@ export const useSearch = ({
     try {
       const { results: searchResults, correctedQuery: corrected } = await performSearch(
         searchQuery, 
-        finalFilters
+        finalFilters,
+        { signal: abortController.signal }
       );
+      
+      // If this request has been aborted, don't update state
+      if (abortController.signal.aborted) {
+        return;
+      }
       
       setResults(searchResults);
       setCorrectedQuery(corrected);
@@ -140,16 +156,31 @@ export const useSearch = ({
           cacheTTL
         );
       }
-    } catch (err) {
-      setError("Failed to perform search. Please try again.");
-      console.error("Search error:", err);
+    } catch (err: any) {
+      // Don't set error state for aborted requests
+      if (err.name !== 'AbortError') {
+        setError("Failed to perform search. Please try again.");
+        console.error("Search error:", err);
+      }
     } finally {
-      setIsLoading(false);
+      if (!abortController.signal.aborted) {
+        setIsLoading(false);
+        searchRequestRef.current = null;
+      }
     }
   }, [filters, cacheResults, cacheTTL, getCacheKey]);
   
   // Debounced search to avoid hammering the API
   const [debouncedSearch, isSearching] = useDebouncedCallback(search, 500);
+  
+  // Clean up abort controller on unmount
+  useEffect(() => {
+    return () => {
+      if (searchRequestRef.current) {
+        searchRequestRef.current.abort();
+      }
+    };
+  }, []);
   
   // Combined loading state
   const combinedIsLoading = isLoading || isSearching || isFetchingSuggestions;

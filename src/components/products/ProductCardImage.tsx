@@ -1,28 +1,11 @@
 
 import { useCallback } from "react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Heart } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-import { toast } from "sonner";
-import { useWishlist } from "@/hooks/useWishlist";
 import { trackEntityView } from "@/utils/viewsTracking";
 import { ImageFallback } from "../ui/image-fallback";
 import { LikeProvider } from "./LikeContext";
 import { ProductLikeButton } from "./ProductLikeButton";
-
-// Quotes for loading screens
-const loadingQuotes = [
-  "Quality takes time, just like a good cup of coffee",
-  "Good things come to those who wait",
-  "Preparing your experience with care...",
-  "This loading time is sponsored by patience",
-  "Taking a moment to gather the best for you",
-  "Excellence is worth the wait",
-  "Finding the perfect items just for you",
-  "Curating quality takes a moment",
-  "Your amazing products are on their way",
-  "Thanks for your patience, quality incoming!"
-];
 
 interface ProductCardImageProps {
   imageUrl: string | null;
@@ -39,25 +22,11 @@ export const ProductCardImage = ({
   onClick,
   productId
 }: ProductCardImageProps) => {
-  const { isInWishlist, toggleWishlist, loading } = useWishlist();
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [imageFailed, setImageFailed] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-  const [loadingQuote, setLoadingQuote] = useState("");
   const imageRef = useRef<HTMLDivElement>(null);
   
   // Define a default fallback source for images
   const defaultFallbackSrc = "/placeholders/image-placeholder.jpg";
-  
-  // Optimized image URL - add cache buster parameter to prevent caching issues
-  const optimizedImageUrl = imageUrl 
-    ? `${imageUrl}${imageUrl.includes('?') ? '&' : '?'}cache=${Date.now()}`
-    : null;
-
-  // Random quote for loading
-  useEffect(() => {
-    setLoadingQuote(loadingQuotes[Math.floor(Math.random() * loadingQuotes.length)]);
-  }, []);
 
   // Use intersection observer for lazy loading
   useEffect(() => {
@@ -92,16 +61,6 @@ export const ProductCardImage = ({
     }
   }, [isVisible, productId]);
 
-  // Preload image before displaying
-  useEffect(() => {
-    if (optimizedImageUrl && isVisible) {
-      const img = new Image();
-      img.src = optimizedImageUrl;
-      img.onload = () => setImageLoaded(true);
-      img.onerror = () => setImageFailed(true);
-    }
-  }, [optimizedImageUrl, isVisible]);
-
   return (
     <div 
       className="cursor-pointer group relative overflow-hidden w-full touch-manipulation" 
@@ -109,41 +68,19 @@ export const ProductCardImage = ({
       ref={imageRef}
     >
       <AspectRatio ratio={1} className="bg-gray-100 dark:bg-zinc-700">
-        {/* Loading skeleton with quote */}
-        {!imageLoaded && !imageFailed && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <div className="absolute inset-0 bg-gray-200 dark:bg-zinc-800 animate-pulse"></div>
-            <div className="z-10 px-4 text-center">
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 max-w-[90%] mx-auto line-clamp-2">
-                {loadingQuote}
-              </p>
-            </div>
-          </div>
+        {/* Loading skeleton - simplified */}
+        {!isVisible && (
+          <div className="absolute inset-0 bg-gray-200 dark:bg-zinc-800 animate-pulse"></div>
         )}
         
-        {/* Main image - only load when in viewport */}
-        {optimizedImageUrl && isVisible ? (
-          <img
-            src={optimizedImageUrl}
+        {/* Main image using improved ImageFallback component */}
+        {isVisible && (
+          <ImageFallback
+            src={imageUrl || ''}
             alt={title}
-            className={`w-full h-full object-cover transition-all duration-500 ${
-              imageLoaded 
-                ? 'opacity-100 group-hover:scale-110 duration-500' 
-                : 'opacity-0'
-            }`}
-            loading="lazy"
-            decoding="async"
-            onLoad={() => setImageLoaded(true)}
-            onError={() => setImageFailed(true)}
-          />
-        ) : null}
-        
-        {/* Fallback for failed images */}
-        {imageFailed && (
-          <ImageFallback 
-            src={defaultFallbackSrc}
-            alt={title} 
-            className="w-full h-full object-cover" 
+            className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110"
+            fallbackSrc={defaultFallbackSrc}
+            lazyLoad={false} // We're already handling visibility detection above
           />
         )}
       </AspectRatio>

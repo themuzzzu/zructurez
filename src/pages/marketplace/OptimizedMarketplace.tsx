@@ -101,9 +101,9 @@ const OptimizedMarketplace = () => {
   };
   
   return (
-    <div className="container max-w-[1400px] mx-auto px-3 sm:px-4 py-6">
+    <div className="container max-w-[1400px] mx-auto px-3 sm:px-4 py-4 sm:py-6">
       {/* Single Search Bar at the top with improved design */}
-      <div className="mb-6">
+      <div className="mb-4 sm:mb-6">
         <AutocompleteSearch 
           value={searchQuery}
           onChange={setSearchQuery}
@@ -114,52 +114,52 @@ const OptimizedMarketplace = () => {
       </div>
       
       {/* Banner carousel below search */}
-      <div className="mb-6">
+      <div className="mb-4 sm:mb-6">
         <BannerCarousel />
       </div>
       
+      {/* Sponsored Products Section */}
+      <div className="mb-4 sm:mb-8">
+        <SponsoredProducts gridLayout={gridLayout} />
+      </div>
+      
       {/* New Shop by Category section */}
-      <div className="mb-6">
+      <div className="mb-4 sm:mb-6">
         <ShopByCategory onCategorySelect={handleCategoryChange} />
       </div>
       
-      {/* Sponsored Products Section */}
-      <div className="mb-8">
-        <SponsoredProducts />
-      </div>
-      
       {/* Trending Products */}
-      <div className="mb-8">
-        <TrendingProducts />
+      <div className="mb-4 sm:mb-8">
+        <TrendingProducts gridLayout={gridLayout} />
       </div>
       
       {/* Product Rankings - Added new section */}
-      <div className="mb-8">
+      <div className="mb-4 sm:mb-8">
         <ProductRankings />
       </div>
       
       {/* Top Products - renamed from SponsoredRecommendations */}
-      <div className="mb-8">
+      <div className="mb-4 sm:mb-8">
         <TopProducts title="Top Products" showTitle={true} />
       </div>
       
       {/* Personalized Recommendations */}
-      <div className="mb-8">
+      <div className="mb-4 sm:mb-8">
         <PersonalizedRecommendations />
       </div>
       
       {/* Recommended Products */}
-      <div className="mb-8">
-        <RecommendedProducts />
+      <div className="mb-4 sm:mb-8">
+        <RecommendedProducts gridLayout={gridLayout} />
       </div>
       
       {/* Crazy Deals Section */}
-      <div className="mb-8">
+      <div className="mb-4 sm:mb-8">
         <CrazyDeals />
       </div>
       
       {/* Main content - Browse All */}
-      <div className="mt-8">
+      <div className="mt-4 sm:mt-8">
         <BrowseTabContent 
           searchTerm={searchQuery}
           onCategorySelect={handleCategoryChange}

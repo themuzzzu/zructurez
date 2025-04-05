@@ -16,6 +16,8 @@ interface SponsoredProductsProps {
 
 export const SponsoredProducts = ({ gridLayout = "grid4x4" }: SponsoredProductsProps) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(true);
   
   const { data: products, isLoading } = useQuery({
     queryKey: ['sponsored-products'],
@@ -29,9 +31,30 @@ export const SponsoredProducts = ({ gridLayout = "grid4x4" }: SponsoredProductsP
         .limit(8);
       
       if (error) throw error;
-      return data;
-    }
+      return data || [];
+    },
+    staleTime: 5 * 60 * 1000 // 5 minutes
   });
+  
+  // Check scroll position to show/hide arrows
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    
+    const checkScroll = () => {
+      setShowLeftArrow(container.scrollLeft > 10);
+      setShowRightArrow(container.scrollLeft < (container.scrollWidth - container.clientWidth - 10));
+    };
+    
+    // Initial check
+    checkScroll();
+    
+    // Add scroll listener
+    container.addEventListener('scroll', checkScroll);
+    
+    // Clean up
+    return () => container.removeEventListener('scroll', checkScroll);
+  }, [products]);
   
   // Handle horizontal scroll with buttons
   const scroll = (direction: 'left' | 'right') => {
@@ -48,20 +71,22 @@ export const SponsoredProducts = ({ gridLayout = "grid4x4" }: SponsoredProductsP
   
   if (isLoading) {
     return (
-      <div className="space-y-4 mb-8">
+      <div className="space-y-4 mb-4">
         <h3 className="text-xl md:text-2xl font-bold flex items-center gap-2 px-1">
           <Sparkles className="h-5 w-5 text-yellow-500" />
           Sponsored Products
         </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 px-1">
+        <div className="flex overflow-x-auto gap-3 pb-2 pt-1 px-1 scrollbar-hide">
           {[1, 2, 3, 4].map((i) => (
-            <Card key={i} className="overflow-hidden">
-              <Skeleton className="h-48 w-full" />
-              <div className="p-3">
-                <Skeleton className="h-4 w-3/4 mb-2" />
-                <Skeleton className="h-4 w-1/2" />
-              </div>
-            </Card>
+            <div key={i} className="min-w-[160px] sm:min-w-[220px] flex-shrink-0">
+              <Card className="overflow-hidden h-full">
+                <Skeleton className="h-48 w-full" />
+                <div className="p-3">
+                  <Skeleton className="h-4 w-3/4 mb-2" />
+                  <Skeleton className="h-4 w-1/2" />
+                </div>
+              </Card>
+            </div>
           ))}
         </div>
       </div>
@@ -73,7 +98,7 @@ export const SponsoredProducts = ({ gridLayout = "grid4x4" }: SponsoredProductsP
   }
   
   return (
-    <div className="space-y-4 mb-8 relative">
+    <div className="space-y-4 mb-4 relative">
       <div className="flex justify-between items-center px-1">
         <h3 className="text-xl md:text-2xl font-bold flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-yellow-500" />
@@ -82,20 +107,22 @@ export const SponsoredProducts = ({ gridLayout = "grid4x4" }: SponsoredProductsP
       </div>
       
       <div className="relative group">
-        {/* Left scroll button */}
-        <Button 
-          onClick={() => scroll('left')}
-          size="icon"
-          variant="ghost" 
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 dark:bg-black/50 rounded-full opacity-70 hover:opacity-100 shadow-md hidden sm:flex"
-        >
-          <ChevronLeft />
-        </Button>
+        {/* Left scroll button - only shown when needed */}
+        {showLeftArrow && (
+          <Button 
+            onClick={() => scroll('left')}
+            size="icon"
+            variant="ghost" 
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 dark:bg-black/50 rounded-full opacity-70 hover:opacity-100 shadow-md hidden md:flex"
+          >
+            <ChevronLeft />
+          </Button>
+        )}
         
         {/* Scrollable container */}
         <div 
           ref={scrollContainerRef}
-          className="flex overflow-x-auto gap-3 pb-2 pt-1 px-1 no-scrollbar snap-x snap-mandatory scroll-smooth"
+          className="flex overflow-x-auto gap-3 pb-2 pt-1 px-1 scrollbar-hide snap-x snap-mandatory scroll-smooth"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {products.map((product) => (
@@ -106,20 +133,29 @@ export const SponsoredProducts = ({ gridLayout = "grid4x4" }: SponsoredProductsP
                   layout={gridLayout}
                   sponsored={true}
                 />
+                <Badge 
+                  className="absolute top-2 right-2 bg-yellow-500/90 text-white text-xs"
+                  variant="secondary"
+                >
+                  <Sparkles className="h-3 w-3 mr-1" />
+                  Sponsored
+                </Badge>
               </div>
             </div>
           ))}
         </div>
         
-        {/* Right scroll button */}
-        <Button 
-          onClick={() => scroll('right')}
-          size="icon"
-          variant="ghost" 
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 dark:bg-black/50 rounded-full opacity-70 hover:opacity-100 shadow-md hidden sm:flex"
-        >
-          <ChevronRight />
-        </Button>
+        {/* Right scroll button - only shown when needed */}
+        {showRightArrow && (
+          <Button 
+            onClick={() => scroll('right')}
+            size="icon"
+            variant="ghost" 
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 dark:bg-black/50 rounded-full opacity-70 hover:opacity-100 shadow-md hidden md:flex"
+          >
+            <ChevronRight />
+          </Button>
+        )}
       </div>
     </div>
   );

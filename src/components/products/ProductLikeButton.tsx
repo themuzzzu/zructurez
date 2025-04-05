@@ -22,29 +22,43 @@ export const ProductLikeButton = ({
 }: ProductLikeButtonProps) => {
   const { isLiked, toggleLike, isLoading } = useLike();
   const [animating, setAnimating] = useState(false);
+  const [localLiked, setLocalLiked] = useState<boolean | null>(null);
 
-  const handleClick = (e: React.MouseEvent) => {
+  // Get the actual liked status, with optimistic UI update
+  const liked = localLiked !== null ? localLiked : isLiked(productId);
+
+  const handleClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
     
-    if (!isLoading) {
-      setAnimating(true);
-      toggleLike(productId);
+    if (isLoading) return;
+    
+    // Optimistic update
+    const newLikedState = !liked;
+    setLocalLiked(newLikedState);
+    setAnimating(true);
+    
+    try {
+      await toggleLike(productId);
       
       // Show toast message based on like state
-      if (!isLiked(productId)) {
+      if (newLikedState) {
         toast.success("Added to wishlist");
       } else {
         toast.success("Removed from wishlist");
       }
-      
+    } catch (error) {
+      // Revert on error
+      setLocalLiked(!newLikedState);
+      toast.error("Something went wrong");
+    } finally {
       // Reset animation state after animation completes
-      setTimeout(() => setAnimating(false), 1000);
+      setTimeout(() => {
+        setAnimating(false);
+        setLocalLiked(null); // Reset to use the actual state
+      }, 1000);
     }
   };
-
-  // Get the liked status
-  const liked = isLiked(productId);
 
   return (
     <Button
