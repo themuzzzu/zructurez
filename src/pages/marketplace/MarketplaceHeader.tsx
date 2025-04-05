@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, X } from 'lucide-react';
@@ -8,6 +8,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { useDebounce } from '@/hooks/useDebounce';
+import { useNavigate } from 'react-router-dom';
 
 interface MarketplaceHeaderProps {
   onSearch: (searchTerm: string) => void;
@@ -24,15 +26,43 @@ export const MarketplaceHeader = ({
   isSearching = false,
   popularSearches = []
 }: MarketplaceHeaderProps) => {
+  const navigate = useNavigate();
   const [isFocused, setIsFocused] = useState(false);
+  const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm);
+  const debouncedSearchTerm = useDebounce(localSearchTerm, 300);
+  
+  useEffect(() => {
+    setLocalSearchTerm(searchTerm);
+  }, [searchTerm]);
+  
+  useEffect(() => {
+    // Only trigger search for suggestions as user types
+    if (debouncedSearchTerm !== searchTerm) {
+      // This could be used to fetch search suggestions
+    }
+  }, [debouncedSearchTerm, searchTerm]);
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSearch(searchTerm);
+    if (localSearchTerm.trim()) {
+      // Redirect to search page with query parameter
+      navigate(`/marketplace/search?q=${encodeURIComponent(localSearchTerm)}`);
+      // Also call the onSearch function passed from parent
+      onSearch(localSearchTerm);
+    }
   };
   
   const handleClear = () => {
+    setLocalSearchTerm('');
     setSearchTerm('');
+  };
+  
+  const handlePopularSearchClick = (term: string) => {
+    setLocalSearchTerm(term);
+    setSearchTerm(term);
+    // Redirect to search page with query parameter
+    navigate(`/marketplace/search?q=${encodeURIComponent(term)}`);
+    onSearch(term);
   };
   
   return (
@@ -43,14 +73,14 @@ export const MarketplaceHeader = ({
             type="text"
             placeholder="Search products, services or businesses..."
             className="w-full pl-10 pr-10 focus-visible:ring-primary"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            value={localSearchTerm}
+            onChange={(e) => setLocalSearchTerm(e.target.value)}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setTimeout(() => setIsFocused(false), 200)}
           />
           <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
           
-          {searchTerm && (
+          {localSearchTerm && (
             <button 
               type="button" 
               onClick={handleClear}
@@ -60,7 +90,7 @@ export const MarketplaceHeader = ({
             </button>
           )}
           
-          {isFocused && popularSearches.length > 0 && !searchTerm && (
+          {isFocused && popularSearches.length > 0 && !localSearchTerm && (
             <div className="absolute top-full left-0 right-0 mt-1 bg-background border rounded-md shadow-md z-20 py-2">
               <div className="text-xs font-semibold text-muted-foreground px-3 pb-1">Popular Searches</div>
               {popularSearches.map((item, index) => (
@@ -68,10 +98,7 @@ export const MarketplaceHeader = ({
                   key={index}
                   type="button"
                   className="w-full text-left px-3 py-1.5 hover:bg-muted text-sm"
-                  onClick={() => {
-                    setSearchTerm(item.term);
-                    onSearch(item.term);
-                  }}
+                  onClick={() => handlePopularSearchClick(item.term)}
                 >
                   {item.term}
                 </button>
@@ -83,7 +110,7 @@ export const MarketplaceHeader = ({
         <Button 
           type="button" 
           size="sm"
-          onClick={() => onSearch(searchTerm)}
+          onClick={handleSubmit}
           disabled={isSearching}
         >
           {isSearching ? 'Searching...' : 'Search'}
