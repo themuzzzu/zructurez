@@ -34,19 +34,19 @@ export const ShopByCategory = ({ onCategorySelect }: CategoryProps) => {
     return () => container.removeEventListener('scroll', checkScroll);
   }, []);
   
-  // Define categories with images, slugs, and subcategories
+  // Define categories with images, slugs, and subcategories - UPDATED as requested
   const categories = [
     { 
-      name: "Books & Stationery", 
+      name: "Groceries", 
       slug: "books-learning", 
-      image: "/lovable-uploads/902e00b8-b9ee-4d85-9900-5a9dc71454fd.png",
+      image: "/lovable-uploads/5942c156-f468-4ea2-a34f-796b645655ca.png",
       emoji: "📚",
       subcategories: ["Academic", "Novels", "Kids", "Competitive Prep"]
     },
     { 
-      name: "Groceries", 
+      name: "Books & Stationery", 
       slug: "groceries", 
-      image: "/lovable-uploads/5942c156-f468-4ea2-a34f-796b645655ca.png",
+      image: "/lovable-uploads/902e00b8-b9ee-4d85-9900-5a9dc71454fd.png",
       emoji: "🍅",
       subcategories: ["Fruits", "Veggies", "Snacks", "Dairy"]
     },
@@ -65,11 +65,11 @@ export const ShopByCategory = ({ onCategorySelect }: CategoryProps) => {
       subcategories: ["Living room", "Bedroom", "Kitchen", "Office"]
     },
     { 
-      name: "Tools & Equipment", 
-      slug: "tools-industrial", 
-      image: "/lovable-uploads/c395d99e-dcf4-4659-9c50-fc50708c858d.png",
-      emoji: "🛠️",
-      subcategories: ["Hand tools", "Power tools", "Safety equipment"]
+      name: "Automotive Tools", 
+      slug: "toys-kids", 
+      image: "/lovable-uploads/43fa7ba2-a733-43ca-8075-fa539aed5c48.png",
+      emoji: "🧸",
+      subcategories: ["Action figures", "Educational toys", "Puzzles"]
     },
     { 
       name: "Office Supplies", 
@@ -95,14 +95,14 @@ export const ShopByCategory = ({ onCategorySelect }: CategoryProps) => {
     { 
       name: "Fashion", 
       slug: "fashion", 
-      image: "/lovable-uploads/419c291d-6963-4a4b-b1b0-4b622135325e.png",
+      image: "/lovable-uploads/7cc6fc84-5007-4e18-8881-8eaa74d618d4.png", // Updated to image4
       emoji: "👗",
       subcategories: ["Men", "Women", "Kids", "Ethnic", "Western"]
     },
     { 
       name: "Electronics", 
       slug: "electronics-gadgets", 
-      image: "/lovable-uploads/e7c73401-c132-4b6c-abe0-2d49a225f83d.png",
+      image: "/lovable-uploads/d01039d6-6bee-4097-9c23-8981fd856e92.png", // Updated to image1
       emoji: "📱",
       subcategories: ["Mobiles", "Laptops", "Smartwatches"]
     },
@@ -116,44 +116,30 @@ export const ShopByCategory = ({ onCategorySelect }: CategoryProps) => {
     { 
       name: "Beauty & Personal Care", 
       slug: "beauty-personal-care", 
-      image: "/lovable-uploads/2e9af2d1-315c-4db1-8b84-8f97e84ca787.png",
+      image: "/lovable-uploads/bbbc13ee-6ebf-4bb8-b472-95ef720eed0c.png", // Updated to image3
       emoji: "🛍️",
       subcategories: ["Skincare", "Makeup", "Grooming"]
     },
     { 
-      name: "Health & Wellness", 
+      name: "Toys & Kids", 
       slug: "health-wellness", 
-      image: "/lovable-uploads/19edca98-103a-449f-a5ea-5145cf7426bb.png",
+      image: "/lovable-uploads/de89c019-62c3-40c7-b29b-3157b73d17a1.png",
       emoji: "🧘",
       subcategories: ["Nutrition", "Gym gear", "Ayurvedic"]
     },
     { 
-      name: "Toys & Kids", 
-      slug: "toys-kids", 
-      image: "/lovable-uploads/de89c019-62c3-40c7-b29b-3157b73d17a1.png",
-      emoji: "🧸",
-      subcategories: ["Action figures", "Educational toys", "Puzzles"]
-    },
-    { 
       name: "Sports & Outdoors", 
       slug: "sports-outdoors", 
-      image: "/lovable-uploads/402efee3-58a7-40fc-b8c9-8232c9a4ae6d.png",
+      image: "/lovable-uploads/5453d095-d661-4182-ad9b-1925b7a2cec7.png", // Updated to image2
       emoji: "🏈",
       subcategories: ["Fitness", "Camping", "Team sports"]
     },
     { 
-      name: "Automotive", 
-      slug: "automotive-accessories", 
-      image: "/lovable-uploads/43fa7ba2-a733-43ca-8075-fa539aed5c48.png",
-      emoji: "🚗",
-      subcategories: ["Car care", "Accessories", "Tools"]
-    },
-    { 
-      name: "Gifts", 
-      slug: "gifts", 
-      image: "/lovable-uploads/419c291d-6963-4a4b-b1b0-4b622135325e.png",
-      emoji: "🎁",
-      subcategories: ["Birthday", "Anniversary", "Wedding"]
+      name: "Health & Wellness", 
+      slug: "toys-kids", 
+      image: "/lovable-uploads/e31366a1-6fb7-4cc0-8fb3-de640eed4826.png", // Added with image5
+      emoji: "🧸",
+      subcategories: ["Action figures", "Educational toys", "Puzzles"]
     },
   ];
 
@@ -208,7 +194,7 @@ export const ShopByCategory = ({ onCategorySelect }: CategoryProps) => {
       >
         {categories.map((category, index) => (
           <div
-            key={category.slug}
+            key={category.slug + index}
             onClick={() => handleCategoryClick(category.slug)}
             className="flex-shrink-0 w-24 sm:w-28 cursor-pointer group"
           >
