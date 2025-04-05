@@ -31,7 +31,7 @@ export const BrowseTabContent = ({
     setSelectedCategory(category);
     
     if (category !== "all") {
-      navigate(`/marketplace?category=${category}`);
+      navigate(`/products?category=${category}`);
     } else {
       navigate('/marketplace');
     }
@@ -44,6 +44,11 @@ export const BrowseTabContent = ({
   
   return (
     <div className="space-y-6">
+      {/* Shop By Category Section with image tiles */}
+      <div className="mb-8">
+        <ShopByCategory onCategorySelect={handleCategorySelect} />
+      </div>
+
       {/* Main Shopping Section */}
       <div className="mt-8">
         <h2 className="text-2xl font-bold mb-6 px-1">All Products</h2>
