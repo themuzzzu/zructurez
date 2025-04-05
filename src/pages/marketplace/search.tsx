@@ -10,12 +10,13 @@ import {
   SlidersHorizontal, 
   ChevronDown, 
   X,
-  Search as SearchIcon
+  Search as SearchIcon,
+  Grid,
+  Grid2X2,
+  LayoutGrid,
+  Grip
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { GridLayoutSelector } from "@/components/marketplace/GridLayoutSelector";
-import { GridLayoutType } from "@/components/products/types/ProductTypes";
-import { LikeProvider } from "@/components/products/LikeContext";
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
@@ -26,6 +27,8 @@ import { EmptySearchResults } from "@/components/marketplace/EmptySearchResults"
 import { useSearch } from "@/hooks/useSearch";
 import { ProductCard } from "@/components/products/ProductCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { LikeProvider } from "@/components/products/LikeContext";
 
 export default function MarketplaceSearch() {
   // Get search parameters from the URL
@@ -40,7 +43,14 @@ export default function MarketplaceSearch() {
   const [searchQuery, setSearchQuery] = useState(queryParam);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("products");
-  const [gridLayout, setGridLayout] = useState<GridLayoutType>("grid4x4");
+  
+  // Get grid layout preference from localStorage or default to 4x4
+  const [gridLayout, setGridLayout] = useState<"grid1x1" | "grid2x2" | "grid4x4">(() => {
+    const savedLayout = localStorage.getItem("searchGridLayout");
+    return (savedLayout === "grid1x1" || savedLayout === "grid2x2" || savedLayout === "grid4x4") 
+      ? savedLayout 
+      : "grid4x4";
+  });
   
   // Filter states
   const [selectedCategory, setSelectedCategory] = useState(categoryParam);
@@ -76,6 +86,11 @@ export default function MarketplaceSearch() {
       search(queryParam);
     }
   }, [queryParam, search, setQuery]);
+
+  // Save grid layout preference to localStorage
+  useEffect(() => {
+    localStorage.setItem("searchGridLayout", gridLayout);
+  }, [gridLayout]);
 
   // Handle search form submission
   const handleSearch = (e: React.FormEvent) => {
@@ -150,10 +165,27 @@ export default function MarketplaceSearch() {
             </div>
             
             <div className="flex items-center space-x-2">
-              <GridLayoutSelector 
-                layout={gridLayout} 
-                onChange={layout => setGridLayout(layout)} 
-              />
+              {/* Grid Layout Selector */}
+              <ToggleGroup 
+                type="single" 
+                value={gridLayout} 
+                onValueChange={(value) => {
+                  if (value && (value === "grid1x1" || value === "grid2x2" || value === "grid4x4")) {
+                    setGridLayout(value);
+                  }
+                }}
+                className="border rounded-md"
+              >
+                <ToggleGroupItem value="grid4x4" title="Compact View (4×4)">
+                  <LayoutGrid className="h-4 w-4" />
+                </ToggleGroupItem>
+                <ToggleGroupItem value="grid2x2" title="Medium View (2×2)">
+                  <Grid2X2 className="h-4 w-4" />
+                </ToggleGroupItem>
+                <ToggleGroupItem value="grid1x1" title="Large View (1×1)">
+                  <Grip className="h-4 w-4" />
+                </ToggleGroupItem>
+              </ToggleGroup>
               
               {/* Filter button and panel */}
               <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
@@ -336,9 +368,16 @@ export default function MarketplaceSearch() {
         <LikeProvider>
           <div>
             {isLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {Array.from({ length: 8 }).map((_, index) => (
-                  <div key={index} className="aspect-square rounded-md bg-muted animate-pulse" />
+              <div className={`grid ${
+                gridLayout === "grid1x1" ? "grid-cols-1" :
+                gridLayout === "grid2x2" ? "grid-cols-1 sm:grid-cols-2" :
+                "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+              } gap-4`}>
+                {Array.from({ length: gridLayout === "grid1x1" ? 4 : 8 }).map((_, index) => (
+                  <div 
+                    key={index} 
+                    className={`aspect-${gridLayout === "grid1x1" ? "video" : "square"} rounded-md bg-muted animate-pulse`} 
+                  />
                 ))}
               </div>
             ) : results.length > 0 ? (
@@ -346,8 +385,7 @@ export default function MarketplaceSearch() {
                 <div className={`grid ${
                   gridLayout === "grid1x1" ? "grid-cols-1" :
                   gridLayout === "grid2x2" ? "grid-cols-1 sm:grid-cols-2" :
-                  gridLayout === "grid3x3" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" :
-                  "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                  "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
                 } gap-4`}>
                   {results.map((result) => (
                     <ProductCard 
@@ -360,6 +398,7 @@ export default function MarketplaceSearch() {
                         imageUrl: result.imageUrl || '',
                         category: result.category || '',
                       }}
+                      layout={gridLayout}
                     />
                   ))}
                 </div>
