@@ -1,137 +1,104 @@
+import React, { useState, useEffect } from "react";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
+import { Layout } from "@/components/layout/Layout";
+import { Home } from "@/pages/Home";
+import { About } from "@/pages/About";
+import { Contact } from "@/pages/Contact";
+import { NotFound } from "@/components/NotFound";
+import { Auth } from "@/pages/Auth";
+import { Profile } from "@/pages/Profile";
+import { Shopping } from "@/pages/Shopping";
+import { ProductDetails } from "@/pages/ProductDetails";
+import { Post } from "@/pages/Post";
+import { PostDetails } from "@/pages/PostDetails";
+import { Marketplace } from "@/pages/Marketplace";
+import { Wishlist } from "@/pages/Wishlist";
+import { Terms } from "@/pages/Terms";
+import { Privacy } from "@/pages/Privacy";
+import {
+  SessionContextProvider,
+  Session,
+  useSessionContext,
+} from "supabase-hooks-nextjs";
+import { supabase } from "@/integrations/supabase/client";
+import { ScrollToTop } from "@/components/ScrollToTop";
+import { Dashboard } from "@/pages/Dashboard";
+import { CreatePost } from "@/pages/CreatePost";
+import { EditPost } from "@/pages/EditPost";
+import MarketplaceSearch from "./pages/marketplace/search";
 
-import { useState, useEffect, lazy, Suspense } from "react";
-import { Routes, Route, useLocation } from "react-router-dom";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { ThemeProvider } from "@/components/ThemeProvider";
-import { Toaster } from "@/components/ui/toaster";
-import { Loader2 } from "lucide-react";
-import { queryClient, prefetchCommonQueries } from "@/lib/react-query";
-import { AuthProvider } from "@/providers/AuthProvider";
-
-// Always loaded components
-import { LoadingView } from "@/components/LoadingView";
-
-// Import Marketplace directly to solve the loading issue
-import Marketplace from "@/pages/Marketplace";
-
-// Lazily loaded components
-const Index = lazy(() => import("@/pages/Index"));
-const Auth = lazy(() => import("@/pages/Auth"));
-const Events = lazy(() => import("@/pages/Events"));
-const Jobs = lazy(() => import("@/pages/Jobs"));
-const CategoryPage = lazy(() => import("@/pages/marketplace/CategoryPage"));
-const Business = lazy(() => import("@/pages/Business"));
-const BusinessDetails = lazy(() => import("@/pages/BusinessDetails"));
-const ProductDetails = lazy(() => import("@/pages/ProductDetails"));
-const Services = lazy(() => import("@/pages/Services"));
-const ServiceDetails = lazy(() => import("@/pages/ServiceDetails"));
-const Profile = lazy(() => import("@/pages/Profile"));
-const Settings = lazy(() => import("@/pages/Settings"));
-const Wishlist = lazy(() => import("@/pages/Wishlist"));
-const Maps = lazy(() => import("@/pages/Maps"));
-const Communities = lazy(() => import("@/pages/Communities"));
-const MessagesPage = lazy(() => import("@/pages/messages"));
-const Search = lazy(() => import("@/pages/search"));
-const Orders = lazy(() => import("@/pages/orders"));
-const Checkout = lazy(() => import("@/pages/checkout"));
-const OrderSuccess = lazy(() => import("@/pages/order-success"));
-const NotFound = lazy(() => import("@/pages/NotFound"));
-const AdDashboard = lazy(() => import("@/pages/admin/AdDashboard"));
-const AdAnalytics = lazy(() => import("@/pages/admin/AdAnalytics"));
-const AdPlacement = lazy(() => import("@/pages/admin/AdPlacement"));
-const AdAuction = lazy(() => import("@/pages/admin/AdAuction"));
-const Dashboard = lazy(() => import("@/pages/dashboard"));
-const Pricing = lazy(() => import("@/pages/Pricing"));
-const BusinessRegistrationForm = lazy(() => import("@/components/business-registration/BusinessRegistrationForm").then(m => ({ default: m.BusinessRegistrationForm })));
-
-function App() {
-  const [isLoading, setIsLoading] = useState(true);
+const AppContent = () => {
+  const [session, setSession] = useState<Session | null>(null);
+  const navigate = useNavigate();
   const location = useLocation();
-  const currentPath = location.pathname;
 
   useEffect(() => {
-    if (!location.pathname.includes('/auth') && !location.pathname.includes('/wishlist')) {
-      sessionStorage.setItem('previousPath', location.pathname + location.search);
-    }
-    
-    // Prefetch data for common queries
-    prefetchCommonQueries().catch(console.error);
-  }, [location]);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
 
-  useEffect(() => {
-    // Reduced loading time to 250ms for much faster initial render
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 250);
-    
-    return () => clearTimeout(timer);
+    supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
   }, []);
 
-  // Determine which section the user is in
-  const getCurrentSection = () => {
-    if (currentPath.includes('/marketplace')) return 'marketplace';
-    if (currentPath.includes('/businesses')) return 'business';
-    if (currentPath.includes('/profile')) return 'profile';
-    if (currentPath.includes('/messages')) return 'messages';
-    if (currentPath.includes('/communities')) return 'community';
-    return 'general';
-  };
+  // Redirect to /auth if not logged in and trying to access /profile
+  useEffect(() => {
+    const publicRoutes = ["/", "/about", "/contact", "/auth", "/terms", "/privacy"];
+    const authRoutes = ["/auth/sign-in", "/auth/sign-up", "/auth/forgot-password"];
+
+    const isPublicRoute = publicRoutes.includes(location.pathname);
+    const isAuthRoute = authRoutes.some((route) =>
+      location.pathname.startsWith(route)
+    );
+
+    if (!session && location.pathname === "/profile") {
+      navigate("/auth");
+    }
+
+    if (session && isAuthRoute) {
+      navigate("/");
+    }
+  }, [session, location, navigate]);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="dark" storageKey="lovable-theme">
-        <AuthProvider>
-          <div className={isLoading ? "hidden" : "app"}>
-            <Suspense fallback={<LoadingView section={getCurrentSection()} />}>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/events" element={<Events />} />
-                <Route path="/jobs" element={<Jobs />} />
-                <Route path="/marketplace" element={<Marketplace />} />
-                <Route path="/marketplace/category/:categoryId" element={<CategoryPage />} />
-                <Route path="/marketplace/category/:categoryId/:subcategoryId" element={<CategoryPage />} />
-                <Route path="/products" element={<Marketplace />} />
-                <Route path="/businesses" element={<Business />} />
-                <Route path="/businesses/:id" element={<BusinessDetails />} />
-                <Route path="/register-business" element={<BusinessRegistrationForm />} />
-                <Route path="/products/:id" element={<ProductDetails />} />
-                <Route path="/product/:id" element={<ProductDetails />} />
-                <Route path="/services" element={<Services />} />
-                <Route path="/services/:id" element={<ServiceDetails />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/profile/:id" element={<Profile />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/settings/pricing" element={<Pricing />} />
-                <Route path="/pricing" element={<Pricing />} />
-                <Route path="/wishlist" element={<Wishlist />} />
-                <Route path="/maps" element={<Maps />} />
-                <Route path="/communities" element={<Communities />} />
-                <Route path="/messages/*" element={<MessagesPage />} />
-                <Route path="/messages" element={<MessagesPage />} />
-                <Route path="/search" element={<Search />} />
-                <Route path="/orders" element={<Orders />} />
-                <Route path="/checkout" element={<Checkout />} />
-                <Route path="/order-success" element={<OrderSuccess />} />
-                <Route path="/admin/ads" element={<AdDashboard />} />
-                <Route path="/admin/analytics" element={<AdAnalytics />} />
-                <Route path="/admin/placement" element={<AdPlacement />} />
-                <Route path="/admin/auction" element={<AdAuction />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
-          </div>
-          {isLoading && (
-            <div className="flex flex-col space-y-4 items-center justify-center min-h-screen">
-              <Loader2 className="h-10 w-10 animate-spin text-primary" />
-              <p className="animate-pulse text-center px-4">Loading your experience...</p>
-            </div>
-          )}
-          <Toaster />
-        </AuthProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/contact" element={<Contact />} />
+      <Route path="/auth" element={<Auth />} />
+      <Route path="/profile" element={<Profile />} />
+      <Route path="/shopping" element={<Shopping />} />
+      <Route path="/product/:productId" element={<ProductDetails />} />
+      <Route path="/post" element={<Post />} />
+      <Route path="/post/:postId" element={<PostDetails />} />
+      <Route path="/marketplace" element={<Marketplace />} />
+      <Route path="/wishlist" element={<Wishlist />} />
+      <Route path="/terms" element={<Terms />} />
+      <Route path="/privacy" element={<Privacy />} />
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/create-post" element={<CreatePost />} />
+      <Route path="/edit-post/:postId" element={<EditPost />} />
+      <Route path="*" element={<NotFound />} />
+      <Route path="/marketplace/search" element={<MarketplaceSearch />} />
+    </Routes>
+  );
+};
+
+function App() {
+  return (
+    <SessionContextProvider supabaseClient={supabase}>
+      <Router>
+        <ScrollToTop />
+        <AppContent />
+      </Router>
+    </SessionContextProvider>
   );
 }
 
