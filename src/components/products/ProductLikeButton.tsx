@@ -5,6 +5,7 @@ import { Heart } from "lucide-react";
 import { useLike } from "./LikeContext";
 import { Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 
 interface ProductLikeButtonProps {
   productId: string;
@@ -20,7 +21,6 @@ export const ProductLikeButton = ({
   className = ""
 }: ProductLikeButtonProps) => {
   const { isLiked, toggleLike, isLoading } = useLike();
-  const liked = isLiked(productId);
   const [animating, setAnimating] = useState(false);
 
   const handleClick = (e: React.MouseEvent) => {
@@ -31,19 +31,29 @@ export const ProductLikeButton = ({
       setAnimating(true);
       toggleLike(productId);
       
+      // Show toast message based on like state
+      if (!isLiked(productId)) {
+        toast.success("Added to wishlist");
+      } else {
+        toast.success("Removed from wishlist");
+      }
+      
       // Reset animation state after animation completes
       setTimeout(() => setAnimating(false), 1000);
     }
   };
 
+  // Get the liked status
+  const liked = isLiked(productId);
+
   return (
     <Button
       variant={variant}
       size={size}
-      className={`relative group border border-red-500 bg-white dark:bg-zinc-800 hover:bg-white dark:hover:bg-zinc-800 ${className}`}
+      className={`relative group border-none bg-white/80 dark:bg-zinc-800/80 hover:bg-white dark:hover:bg-zinc-800 ${className}`}
       onClick={handleClick}
       disabled={isLoading}
-      aria-label={liked ? "Unlike product" : "Like product"}
+      aria-label={liked ? "Remove from wishlist" : "Add to wishlist"}
     >
       <div className="relative z-10">
         {isLoading ? (

@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 export interface ImageFallbackProps {
@@ -20,14 +20,39 @@ export const ImageFallback = ({
   onClick,
 }: ImageFallbackProps) => {
   const [error, setError] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  
+  // Reset error state when src changes
+  useEffect(() => {
+    setError(false);
+    setLoaded(false);
+  }, [src]);
+
+  // Add cache-busting parameter to prevent cached broken images
+  const imageSrc = src && !error 
+    ? `${src}${src.includes('?') ? '&' : '?'}v=${Date.now()}`
+    : fallbackSrc;
 
   return (
-    <img
-      src={error ? fallbackSrc : src}
-      alt={alt}
-      className={cn(className, error && fallbackClassName)}
-      onError={() => setError(true)}
-      onClick={onClick}
-    />
+    <div className={cn("relative overflow-hidden", className)}>
+      {/* Loading skeleton */}
+      {!loaded && !error && (
+        <div className="absolute inset-0 bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+      )}
+      
+      <img
+        src={imageSrc}
+        alt={alt}
+        className={cn(
+          "w-full h-full transition-opacity duration-300",
+          loaded ? "opacity-100" : "opacity-0",
+          error && fallbackClassName
+        )}
+        onError={() => setError(true)}
+        onLoad={() => setLoaded(true)}
+        onClick={onClick}
+        loading="lazy"
+      />
+    </div>
   );
 };

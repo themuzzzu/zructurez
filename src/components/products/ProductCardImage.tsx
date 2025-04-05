@@ -49,14 +49,9 @@ export const ProductCardImage = ({
   // Define a default fallback source for images
   const defaultFallbackSrc = "/placeholders/image-placeholder.jpg";
   
-  // Optimized image URL with quality and sizing parameters
+  // Optimized image URL - add cache buster parameter to prevent caching issues
   const optimizedImageUrl = imageUrl 
-    ? `${imageUrl}${imageUrl.includes('?') ? '&' : '?'}quality=80&width=400&t=${Date.now() % 1000}`
-    : null;
-    
-  // Low quality placeholder (thumbnail) for faster initial render
-  const thumbnailUrl = optimizedImageUrl
-    ? optimizedImageUrl.replace('width=400', 'width=40&blur=10')
+    ? `${imageUrl}${imageUrl.includes('?') ? '&' : '?'}cache=${Date.now()}`
     : null;
 
   // Random quote for loading
@@ -97,17 +92,15 @@ export const ProductCardImage = ({
     }
   }, [isVisible, productId]);
 
-  const handleWishlistClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    toggleWishlist(productId);
-    
-    // Show toast message
-    if (isInWishlist(productId)) {
-      toast.success("Removed from wishlist");
-    } else {
-      toast.success("Added to wishlist");
+  // Preload image before displaying
+  useEffect(() => {
+    if (optimizedImageUrl && isVisible) {
+      const img = new Image();
+      img.src = optimizedImageUrl;
+      img.onload = () => setImageLoaded(true);
+      img.onerror = () => setImageFailed(true);
     }
-  };
+  }, [optimizedImageUrl, isVisible]);
 
   return (
     <div 
@@ -116,17 +109,6 @@ export const ProductCardImage = ({
       ref={imageRef}
     >
       <AspectRatio ratio={1} className="bg-gray-100 dark:bg-zinc-700">
-        {/* Show thumbnail placeholder while full image loads */}
-        {thumbnailUrl && !imageLoaded && !imageFailed && (
-          <img
-            src={thumbnailUrl}
-            alt=""
-            className="w-full h-full object-cover absolute inset-0 filter blur-sm scale-105"
-            aria-hidden="true"
-            loading="eager"
-          />
-        )}
-        
         {/* Loading skeleton with quote */}
         {!imageLoaded && !imageFailed && (
           <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -161,7 +143,7 @@ export const ProductCardImage = ({
           <ImageFallback 
             src={defaultFallbackSrc}
             alt={title} 
-            className="w-full h-full" 
+            className="w-full h-full object-cover" 
           />
         )}
       </AspectRatio>
@@ -180,7 +162,7 @@ export const ProductCardImage = ({
             productId={productId} 
             size="sm"
             variant="ghost"
-            className="p-2 bg-white dark:bg-zinc-800 rounded-full shadow-md hover:scale-110 transition-transform"
+            className="p-2 bg-white/90 dark:bg-zinc-800/90 rounded-full shadow-md hover:scale-110 transition-transform"
           />
         </div>
       </LikeProvider>

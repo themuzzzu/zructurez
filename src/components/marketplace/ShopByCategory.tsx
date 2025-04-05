@@ -36,6 +36,62 @@ export const ShopByCategory = ({ onCategorySelect }: CategoryProps) => {
   // Define categories with images, slugs, and subcategories
   const categories = [
     { 
+      name: "Books & Stationery", 
+      slug: "books-learning", 
+      image: "public/lovable-uploads/902e00b8-b9ee-4d85-9900-5a9dc71454fd.png",
+      emoji: "📚",
+      subcategories: ["Academic", "Novels", "Kids", "Competitive Prep"]
+    },
+    { 
+      name: "Groceries", 
+      slug: "groceries", 
+      image: "public/lovable-uploads/5942c156-f468-4ea2-a34f-796b645655ca.png",
+      emoji: "🍅",
+      subcategories: ["Fruits", "Veggies", "Snacks", "Dairy"]
+    },
+    { 
+      name: "Footwear", 
+      slug: "footwear", 
+      image: "public/lovable-uploads/8e125da5-7595-4194-9371-74a18d030bfb.png",
+      emoji: "👟",
+      subcategories: ["Casual", "Formal", "Sports", "Designer"]
+    },
+    { 
+      name: "Furniture & Decor", 
+      slug: "furniture-decor", 
+      image: "public/lovable-uploads/46a5e835-fcad-4044-8ca3-a3b617d56afd.png",
+      emoji: "🛋️",
+      subcategories: ["Living room", "Bedroom", "Kitchen", "Office"]
+    },
+    { 
+      name: "Tools & Equipment", 
+      slug: "tools-industrial", 
+      image: "public/lovable-uploads/c395d99e-dcf4-4659-9c50-fc50708c858d.png",
+      emoji: "🛠️",
+      subcategories: ["Hand tools", "Power tools", "Safety equipment"]
+    },
+    { 
+      name: "Office Supplies", 
+      slug: "office-stationery", 
+      image: "public/lovable-uploads/a7740c92-7834-44b7-8792-8219a626c89e.png",
+      emoji: "📝",
+      subcategories: ["Stationery", "Office furniture", "School supplies"]
+    },
+    { 
+      name: "Music & Instruments", 
+      slug: "music-instruments", 
+      image: "public/lovable-uploads/b115af2e-9af1-4687-aa29-54fecdc0a407.png",
+      emoji: "🎸",
+      subcategories: ["String", "Percussion", "Wind", "Electronic"]
+    },
+    { 
+      name: "Gadgets", 
+      slug: "gadgets", 
+      image: "public/lovable-uploads/acd9eefd-af02-4802-bf55-d763394f5405.png",
+      emoji: "📱",
+      subcategories: ["Smartwatches", "Earbuds", "Drones", "Smart Home"]
+    },
+    { 
       name: "Fashion", 
       slug: "fashion", 
       image: "public/lovable-uploads/419c291d-6963-4a4b-b1b0-4b622135325e.png",
@@ -64,13 +120,6 @@ export const ShopByCategory = ({ onCategorySelect }: CategoryProps) => {
       subcategories: ["Skincare", "Makeup", "Grooming", "Perfumes"]
     },
     { 
-      name: "Groceries", 
-      slug: "groceries", 
-      image: "public/lovable-uploads/3d631e65-bf21-4fc8-a468-e1d2eeba309e.png",
-      emoji: "🍅",
-      subcategories: ["Fruits", "Veggies", "Snacks", "Dairy"]
-    },
-    { 
       name: "Health & Wellness", 
       slug: "health-wellness", 
       image: "public/lovable-uploads/19edca98-103a-449f-a5ea-5145cf7426bb.png",
@@ -97,55 +146,6 @@ export const ShopByCategory = ({ onCategorySelect }: CategoryProps) => {
       image: "public/lovable-uploads/402efee3-58a7-40fc-b8c9-8232c9a4ae6d.png",
       emoji: "🚗",
       subcategories: ["Car care", "Accessories", "Tools", "Parts"]
-    },
-    { 
-      name: "Office Supplies", 
-      slug: "office-stationery", 
-      image: "public/lovable-uploads/402efee3-58a7-40fc-b8c9-8232c9a4ae6d.png",
-      emoji: "📝",
-      subcategories: ["Stationery", "Office furniture", "School supplies"]
-    },
-    { 
-      name: "Tools & Equipment", 
-      slug: "tools-industrial", 
-      image: "public/lovable-uploads/402efee3-58a7-40fc-b8c9-8232c9a4ae6d.png",
-      emoji: "🛠️",
-      subcategories: ["Hand tools", "Power tools", "Safety equipment"]
-    },
-    { 
-      name: "Footwear", 
-      slug: "footwear", 
-      image: "public/lovable-uploads/402efee3-58a7-40fc-b8c9-8232c9a4ae6d.png",
-      emoji: "👟",
-      subcategories: ["Casual", "Formal", "Sports", "Designer"]
-    },
-    { 
-      name: "Watches & Wearables", 
-      slug: "watches-wearables", 
-      image: "public/lovable-uploads/402efee3-58a7-40fc-b8c9-8232c9a4ae6d.png",
-      emoji: "⌚",
-      subcategories: ["Smartwatches", "Analog", "Digital", "Fitness bands"]
-    },
-    { 
-      name: "Furniture & Decor", 
-      slug: "furniture-decor", 
-      image: "public/lovable-uploads/402efee3-58a7-40fc-b8c9-8232c9a4ae6d.png",
-      emoji: "🛋️",
-      subcategories: ["Living room", "Bedroom", "Kitchen", "Office"]
-    },
-    { 
-      name: "Music & Instruments", 
-      slug: "music-instruments", 
-      image: "public/lovable-uploads/402efee3-58a7-40fc-b8c9-8232c9a4ae6d.png",
-      emoji: "🎸",
-      subcategories: ["String", "Percussion", "Wind", "Electronic"]
-    },
-    { 
-      name: "Books & Stationery", 
-      slug: "books-learning", 
-      image: "public/lovable-uploads/65def346-4fbc-4608-96b6-c4c84d95674a.png",
-      emoji: "📚",
-      subcategories: ["Academic", "Novels", "Kids", "Competitive Prep"]
     },
     { 
       name: "Gifts", 
