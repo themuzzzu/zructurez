@@ -1,12 +1,13 @@
 
 import { useState, useEffect, lazy, Suspense } from "react";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, RouterProvider } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
 import { Loader2 } from "lucide-react";
 import { queryClient, prefetchCommonQueries } from "@/lib/react-query";
 import { AuthProvider } from "@/providers/AuthProvider";
+import router from "./routes"; // Import our router
 
 // Always loaded components
 import { LoadingView } from "@/components/LoadingView";
@@ -20,8 +21,9 @@ const Auth = lazy(() => import("@/pages/Auth"));
 const Events = lazy(() => import("@/pages/Events"));
 const Jobs = lazy(() => import("@/pages/Jobs"));
 const CategoryPage = lazy(() => import("@/pages/marketplace/CategoryPage"));
-const Business = lazy(() => import("@/pages/Business"));
-const BusinessDetails = lazy(() => import("@/pages/BusinessDetails"));
+// Remove Business import as it's now handled by router
+// const Business = lazy(() => import("@/pages/Business"));
+// const BusinessDetails = lazy(() => import("@/pages/BusinessDetails"));
 const ProductDetails = lazy(() => import("@/pages/ProductDetails"));
 const Services = lazy(() => import("@/pages/Services"));
 const ServiceDetails = lazy(() => import("@/pages/ServiceDetails"));
@@ -83,6 +85,7 @@ function App() {
         <AuthProvider>
           <div className={isLoading ? "hidden" : "app"}>
             <Suspense fallback={<LoadingView section={getCurrentSection()} />}>
+              {/* Use Routes and Route only for paths not handled by router */}
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
@@ -92,8 +95,9 @@ function App() {
                 <Route path="/marketplace/category/:categoryId" element={<CategoryPage />} />
                 <Route path="/marketplace/category/:categoryId/:subcategoryId" element={<CategoryPage />} />
                 <Route path="/products" element={<Marketplace />} />
-                <Route path="/businesses" element={<Business />} />
-                <Route path="/businesses/:id" element={<BusinessDetails />} />
+                {/* Business routes now handled by router.tsx */}
+                {/* <Route path="/businesses" element={<Business />} />
+                <Route path="/businesses/:id" element={<BusinessDetails />} /> */}
                 <Route path="/register-business" element={<BusinessRegistrationForm />} />
                 <Route path="/products/:id" element={<ProductDetails />} />
                 <Route path="/product/:id" element={<ProductDetails />} />
@@ -118,7 +122,6 @@ function App() {
                 <Route path="/admin/placement" element={<AdPlacement />} />
                 <Route path="/admin/auction" element={<AdAuction />} />
                 <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
           </div>

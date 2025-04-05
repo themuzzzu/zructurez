@@ -60,6 +60,8 @@ export const BusinessCategoryScroller = () => {
   ];
 
   const handleCategoryClick = (categoryId: string) => {
+    // Log category click to help with debugging
+    console.log(`Category clicked: ${categoryId}`);
     navigate(`/businesses?category=${categoryId}`);
   };
   
