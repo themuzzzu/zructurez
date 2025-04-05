@@ -52,7 +52,7 @@ export const LikeProvider = ({ children }: { children: ReactNode }) => {
         toast.error("Please sign in to save items to your wishlist", {
           action: {
             label: "Sign In",
-            onClick: () => window.location.href = '/login'
+            onClick: () => window.location.href = '/auth?redirect=/wishlist'
           },
         });
         throw new Error("Authentication required");

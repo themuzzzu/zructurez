@@ -33,12 +33,12 @@ export const ProductLikeButton = ({
     
     if (isLoading) return;
     
-    // Optimistic update
-    const newLikedState = !liked;
-    setLocalLiked(newLikedState);
-    setAnimating(true);
-    
     try {
+      // Optimistic update
+      const newLikedState = !liked;
+      setLocalLiked(newLikedState);
+      setAnimating(newLikedState); // Only animate on like, not unlike
+      
       await toggleLike(productId);
       
       // Show toast message based on like state
@@ -47,10 +47,15 @@ export const ProductLikeButton = ({
       } else {
         toast.success("Removed from wishlist");
       }
-    } catch (error) {
+    } catch (error: any) {
       // Revert on error
-      setLocalLiked(!newLikedState);
-      toast.error("Something went wrong");
+      setLocalLiked(null);
+      if (error.message === "Authentication required") {
+        // Already handled in LikeContext
+      } else {
+        toast.error("Something went wrong");
+        console.error("Error toggling product like:", error);
+      }
     } finally {
       // Reset animation state after animation completes
       setTimeout(() => {

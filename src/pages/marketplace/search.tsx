@@ -473,15 +473,13 @@ export default function MarketplaceSearch() {
                           price: result.price || 0,
                           imageUrl: result.imageUrl || '',
                           category: result.category || '',
-                          // Add highlight tags (simulated - would typically come from backend)
                           highlight_tags: result.highlight_tags || 
                             (Math.random() > 0.7 ? 
                               [['Bestseller', 'New', 'Hot Deal', 'Trending', 'Limited'][Math.floor(Math.random() * 5)]] 
                               : []),
-                          // Add discount percentage if not already present
-                          is_discounted: result.isDiscounted || false,
+                          is_discounted: result.isDiscounted || result.is_discounted || false,
                           discount_percentage: result.discount_percentage || 
-                            (result.isDiscounted ? Math.floor(Math.random() * 50) + 10 : undefined)
+                            ((result.isDiscounted || result.is_discounted) ? Math.floor(Math.random() * 50) + 10 : undefined)
                         }}
                         layout={gridLayout}
                         sponsored={result.isSponsored}
