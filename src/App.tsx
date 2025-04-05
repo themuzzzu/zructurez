@@ -1,138 +1,137 @@
 
-import React, { useState, useEffect } from "react";
-import { Route, Routes, useNavigate, useLocation } from "react-router-dom";
-import { Layout } from "@/components/layout/Layout";
-import MarketplaceSearch from "./pages/marketplace/search";
+import { useState, useEffect, lazy, Suspense } from "react";
+import { Routes, Route, useLocation } from "react-router-dom";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import { Toaster } from "@/components/ui/toaster";
+import { Loader2 } from "lucide-react";
+import { queryClient, prefetchCommonQueries } from "@/lib/react-query";
+import { AuthProvider } from "@/providers/AuthProvider";
 
-// Creating a simple placeholder component for missing components
-const PlaceholderPage = ({ title }: { title: string }) => (
-  <Layout>
-    <div className="container mx-auto py-20">
-      <h1 className="text-3xl font-bold">{title} Page</h1>
-      <p className="mt-4">This is a placeholder for the {title} page.</p>
-    </div>
-  </Layout>
-);
+// Always loaded components
+import { LoadingView } from "@/components/LoadingView";
 
-// Define placeholder components for all missing pages
-const Home = () => <PlaceholderPage title="Home" />;
-const About = () => <PlaceholderPage title="About" />;
-const Contact = () => <PlaceholderPage title="Contact" />;
-// Use the default imports correctly
-import Auth from "@/pages/Auth";
-import Profile from "@/pages/Profile";
-const Shopping = () => <PlaceholderPage title="Shopping" />;
-import ProductDetails from "@/pages/ProductDetails";
-const Post = () => <PlaceholderPage title="Post" />;
-const PostDetails = () => <PlaceholderPage title="Post Details" />;
+// Import Marketplace directly to solve the loading issue
 import Marketplace from "@/pages/Marketplace";
-import Wishlist from "@/pages/Wishlist";
-const Terms = () => <PlaceholderPage title="Terms" />;
-const Privacy = () => <PlaceholderPage title="Privacy" />;
-const Dashboard = () => <PlaceholderPage title="Dashboard" />;
-const CreatePost = () => <PlaceholderPage title="Create Post" />;
-const EditPost = () => <PlaceholderPage title="Edit Post" />;
 
-// Create a simple ScrollToTop component to replace the missing import
-const ScrollToTop = () => {
-  const { pathname } = useLocation();
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
-
-  return null;
-};
-
-// Define Session type
-type Session = {
-  user: any;
-  access_token?: string;
-};
-
-// Create a SessionContextProvider replacement
-interface SessionContextProviderProps {
-  supabaseClient: any;
-  children: React.ReactNode;
-}
-
-const SessionContextProvider = ({ children }: SessionContextProviderProps) => {
-  return <>{children}</>;
-};
-
-const AppContent = () => {
-  const [session, setSession] = useState<Session | null>(null);
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  useEffect(() => {
-    // Simplified session check since we're just creating placeholders
-    const checkSession = async () => {
-      // No actual session check for now
-    };
-    checkSession();
-  }, []);
-
-  // Redirect to /auth if not logged in and trying to access /profile
-  useEffect(() => {
-    const publicRoutes = [
-      "/",
-      "/about",
-      "/contact",
-      "/auth",
-      "/terms",
-      "/privacy"
-    ];
-    const authRoutes = [
-      "/auth/sign-in",
-      "/auth/sign-up",
-      "/auth/forgot-password"
-    ];
-
-    const isPublicRoute = publicRoutes.includes(location.pathname);
-    const isAuthRoute = authRoutes.some((route) =>
-      location.pathname.startsWith(route)
-    );
-
-    if (!session && location.pathname === "/profile") {
-      navigate("/auth");
-    }
-
-    if (session && isAuthRoute) {
-      navigate("/");
-    }
-  }, [session, location, navigate]);
-
-  return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/about" element={<About />} />
-      <Route path="/contact" element={<Contact />} />
-      <Route path="/auth" element={<Auth />} />
-      <Route path="/profile" element={<Profile />} />
-      <Route path="/shopping" element={<Shopping />} />
-      <Route path="/product/:productId" element={<ProductDetails />} />
-      <Route path="/post" element={<Post />} />
-      <Route path="/post/:postId" element={<PostDetails />} />
-      <Route path="/marketplace" element={<Marketplace />} />
-      <Route path="/wishlist" element={<Wishlist />} />
-      <Route path="/terms" element={<Terms />} />
-      <Route path="/privacy" element={<Privacy />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/create-post" element={<CreatePost />} />
-      <Route path="/edit-post/:postId" element={<EditPost />} />
-      <Route path="*" element={<PlaceholderPage title="Not Found" />} />
-      <Route path="/marketplace/search" element={<MarketplaceSearch />} />
-    </Routes>
-  );
-};
+// Lazily loaded components
+const Index = lazy(() => import("@/pages/Index"));
+const Auth = lazy(() => import("@/pages/Auth"));
+const Events = lazy(() => import("@/pages/Events"));
+const Jobs = lazy(() => import("@/pages/Jobs"));
+const CategoryPage = lazy(() => import("@/pages/marketplace/CategoryPage"));
+const Business = lazy(() => import("@/pages/Business"));
+const BusinessDetails = lazy(() => import("@/pages/BusinessDetails"));
+const ProductDetails = lazy(() => import("@/pages/ProductDetails"));
+const Services = lazy(() => import("@/pages/Services"));
+const ServiceDetails = lazy(() => import("@/pages/ServiceDetails"));
+const Profile = lazy(() => import("@/pages/Profile"));
+const Settings = lazy(() => import("@/pages/Settings"));
+const Wishlist = lazy(() => import("@/pages/Wishlist"));
+const Maps = lazy(() => import("@/pages/Maps"));
+const Communities = lazy(() => import("@/pages/Communities"));
+const MessagesPage = lazy(() => import("@/pages/messages"));
+const Search = lazy(() => import("@/pages/search"));
+const Orders = lazy(() => import("@/pages/orders"));
+const Checkout = lazy(() => import("@/pages/checkout"));
+const OrderSuccess = lazy(() => import("@/pages/order-success"));
+const NotFound = lazy(() => import("@/pages/NotFound"));
+const AdDashboard = lazy(() => import("@/pages/admin/AdDashboard"));
+const AdAnalytics = lazy(() => import("@/pages/admin/AdAnalytics"));
+const AdPlacement = lazy(() => import("@/pages/admin/AdPlacement"));
+const AdAuction = lazy(() => import("@/pages/admin/AdAuction"));
+const Dashboard = lazy(() => import("@/pages/dashboard"));
+const Pricing = lazy(() => import("@/pages/Pricing"));
+const BusinessRegistrationForm = lazy(() => import("@/components/business-registration/BusinessRegistrationForm").then(m => ({ default: m.BusinessRegistrationForm })));
 
 function App() {
+  const [isLoading, setIsLoading] = useState(true);
+  const location = useLocation();
+  const currentPath = location.pathname;
+
+  useEffect(() => {
+    if (!location.pathname.includes('/auth') && !location.pathname.includes('/wishlist')) {
+      sessionStorage.setItem('previousPath', location.pathname + location.search);
+    }
+    
+    // Prefetch data for common queries
+    prefetchCommonQueries().catch(console.error);
+  }, [location]);
+
+  useEffect(() => {
+    // Reduced loading time to 250ms for much faster initial render
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 250);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Determine which section the user is in
+  const getCurrentSection = () => {
+    if (currentPath.includes('/marketplace')) return 'marketplace';
+    if (currentPath.includes('/businesses')) return 'business';
+    if (currentPath.includes('/profile')) return 'profile';
+    if (currentPath.includes('/messages')) return 'messages';
+    if (currentPath.includes('/communities')) return 'community';
+    return 'general';
+  };
+
   return (
-    <SessionContextProvider supabaseClient={{}}>
-      <ScrollToTop />
-      <AppContent />
-    </SessionContextProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider defaultTheme="dark" storageKey="lovable-theme">
+        <AuthProvider>
+          <div className={isLoading ? "hidden" : "app"}>
+            <Suspense fallback={<LoadingView section={getCurrentSection()} />}>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/events" element={<Events />} />
+                <Route path="/jobs" element={<Jobs />} />
+                <Route path="/marketplace" element={<Marketplace />} />
+                <Route path="/marketplace/category/:categoryId" element={<CategoryPage />} />
+                <Route path="/marketplace/category/:categoryId/:subcategoryId" element={<CategoryPage />} />
+                <Route path="/products" element={<Marketplace />} />
+                <Route path="/businesses" element={<Business />} />
+                <Route path="/businesses/:id" element={<BusinessDetails />} />
+                <Route path="/register-business" element={<BusinessRegistrationForm />} />
+                <Route path="/products/:id" element={<ProductDetails />} />
+                <Route path="/product/:id" element={<ProductDetails />} />
+                <Route path="/services" element={<Services />} />
+                <Route path="/services/:id" element={<ServiceDetails />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/profile/:id" element={<Profile />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/settings/pricing" element={<Pricing />} />
+                <Route path="/pricing" element={<Pricing />} />
+                <Route path="/wishlist" element={<Wishlist />} />
+                <Route path="/maps" element={<Maps />} />
+                <Route path="/communities" element={<Communities />} />
+                <Route path="/messages/*" element={<MessagesPage />} />
+                <Route path="/messages" element={<MessagesPage />} />
+                <Route path="/search" element={<Search />} />
+                <Route path="/orders" element={<Orders />} />
+                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/order-success" element={<OrderSuccess />} />
+                <Route path="/admin/ads" element={<AdDashboard />} />
+                <Route path="/admin/analytics" element={<AdAnalytics />} />
+                <Route path="/admin/placement" element={<AdPlacement />} />
+                <Route path="/admin/auction" element={<AdAuction />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </div>
+          {isLoading && (
+            <div className="flex flex-col space-y-4 items-center justify-center min-h-screen">
+              <Loader2 className="h-10 w-10 animate-spin text-primary" />
+              <p className="animate-pulse text-center px-4">Loading your experience...</p>
+            </div>
+          )}
+          <Toaster />
+        </AuthProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }
 

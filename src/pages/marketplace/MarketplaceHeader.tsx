@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, X } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { 
   Popover,
   PopoverContent,
@@ -26,15 +25,10 @@ export const MarketplaceHeader = ({
   popularSearches = []
 }: MarketplaceHeaderProps) => {
   const [isFocused, setIsFocused] = useState(false);
-  const navigate = useNavigate();
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (searchTerm.trim()) {
-      // Navigate to search page with query
-      navigate(`/marketplace/search?q=${encodeURIComponent(searchTerm)}`);
-    }
+    onSearch(searchTerm);
   };
   
   const handleClear = () => {
@@ -76,7 +70,7 @@ export const MarketplaceHeader = ({
                   className="w-full text-left px-3 py-1.5 hover:bg-muted text-sm"
                   onClick={() => {
                     setSearchTerm(item.term);
-                    navigate(`/marketplace/search?q=${encodeURIComponent(item.term)}`);
+                    onSearch(item.term);
                   }}
                 >
                   {item.term}
@@ -89,7 +83,7 @@ export const MarketplaceHeader = ({
         <Button 
           type="button" 
           size="sm"
-          onClick={handleSubmit}
+          onClick={() => onSearch(searchTerm)}
           disabled={isSearching}
         >
           {isSearching ? 'Searching...' : 'Search'}
