@@ -434,7 +434,8 @@ export const AdvertisementPricingTab = ({ businessId }: { businessId?: string })
                             </CardDescription>
                           </CardHeader>
                           <CardContent className="space-y-3 pb-2">
-                            {adTypeInfo.previewImage && (
+                            {/* Check if previewImage exists before using it */}
+                            {('previewImage' in adTypeInfo && adTypeInfo.previewImage) && (
                               <div className="relative rounded-md overflow-hidden border bg-muted/30 h-32">
                                 <img 
                                   src={adTypeInfo.previewImage} 
@@ -835,3 +836,4 @@ export const AdvertisementPricingTab = ({ businessId }: { businessId?: string })
 };
 
 export default AdvertisementPricingTab;
+
