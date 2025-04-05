@@ -29,6 +29,7 @@ import { motion } from "framer-motion";
 import { toast } from "sonner";
 import type { Business } from "@/types/business";
 import { BusinessBannerAd } from "@/components/ads/BusinessBannerAd";
+import { BusinessCategoryScroller } from "@/components/business/BusinessCategoryScroller";
 
 interface BusinessWithRating {
   id: string;
@@ -225,6 +226,8 @@ const Business = () => {
               <SearchHero />
               
               <BusinessBannerAd />
+              
+              <BusinessCategoryScroller />
               
               <BusinessCategoryNavBar />
               
