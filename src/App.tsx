@@ -11,12 +11,14 @@ import { AuthProvider } from "@/providers/AuthProvider";
 // Always loaded components
 import { LoadingView } from "@/components/LoadingView";
 
+// Import Marketplace directly to solve the loading issue
+import Marketplace from "@/pages/Marketplace";
+
 // Lazily loaded components
 const Index = lazy(() => import("@/pages/Index"));
 const Auth = lazy(() => import("@/pages/Auth"));
 const Events = lazy(() => import("@/pages/Events"));
 const Jobs = lazy(() => import("@/pages/Jobs"));
-const Marketplace = lazy(() => import("@/pages/Marketplace"));
 const CategoryPage = lazy(() => import("@/pages/marketplace/CategoryPage"));
 const Business = lazy(() => import("@/pages/Business"));
 const BusinessDetails = lazy(() => import("@/pages/BusinessDetails"));

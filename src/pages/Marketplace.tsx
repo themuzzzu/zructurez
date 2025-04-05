@@ -5,7 +5,7 @@ import { NotFound } from "@/components/NotFound";
 import { useParams } from "react-router-dom";
 import { LikeProvider } from "@/components/products/LikeContext";
 
-// Import the MarketplaceIndex directly without lazy loading
+// Import MarketplaceIndex component directly
 import MarketplaceIndex from "./marketplace/index";
 
 const Marketplace = () => {
