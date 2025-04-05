@@ -18,14 +18,15 @@ const PlaceholderPage = ({ title }: { title: string }) => (
 const Home = () => <PlaceholderPage title="Home" />;
 const About = () => <PlaceholderPage title="About" />;
 const Contact = () => <PlaceholderPage title="Contact" />;
-const Auth = () => <PlaceholderPage title="Authentication" />;
-const Profile = () => <PlaceholderPage title="Profile" />;
+// Use the default imports correctly
+import Auth from "@/pages/Auth";
+import Profile from "@/pages/Profile";
 const Shopping = () => <PlaceholderPage title="Shopping" />;
-const ProductDetails = () => <PlaceholderPage title="Product Details" />;
+import ProductDetails from "@/pages/ProductDetails";
 const Post = () => <PlaceholderPage title="Post" />;
 const PostDetails = () => <PlaceholderPage title="Post Details" />;
-const Marketplace = () => <PlaceholderPage title="Marketplace" />;
-const Wishlist = () => <PlaceholderPage title="Wishlist" />;
+import Marketplace from "@/pages/Marketplace";
+import Wishlist from "@/pages/Wishlist";
 const Terms = () => <PlaceholderPage title="Terms" />;
 const Privacy = () => <PlaceholderPage title="Privacy" />;
 const Dashboard = () => <PlaceholderPage title="Dashboard" />;
@@ -43,17 +44,17 @@ const ScrollToTop = () => {
   return null;
 };
 
-// Create a SessionContextProvider replacement
-interface SessionContextProviderProps {
-  supabaseClient: any;
-  children: React.ReactNode;
-}
-
 // Define Session type
 type Session = {
   user: any;
   access_token?: string;
 };
+
+// Create a SessionContextProvider replacement
+interface SessionContextProviderProps {
+  supabaseClient: any;
+  children: React.ReactNode;
+}
 
 const SessionContextProvider = ({ children }: SessionContextProviderProps) => {
   return <>{children}</>;
