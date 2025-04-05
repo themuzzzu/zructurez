@@ -49,6 +49,12 @@ interface SessionContextProviderProps {
   children: React.ReactNode;
 }
 
+// Define Session type
+type Session = {
+  user: any;
+  access_token?: string;
+};
+
 const SessionContextProvider = ({ children }: SessionContextProviderProps) => {
   return <>{children}</>;
 };
@@ -68,8 +74,19 @@ const AppContent = () => {
 
   // Redirect to /auth if not logged in and trying to access /profile
   useEffect(() => {
-    const publicRoutes = ["/", "/about", "/contact", "/auth", "/terms", "/privacy"];
-    const authRoutes = ["/auth/sign-in", "/auth/sign-up", "/auth/forgot-password"];
+    const publicRoutes = [
+      "/",
+      "/about",
+      "/contact",
+      "/auth",
+      "/terms",
+      "/privacy"
+    ];
+    const authRoutes = [
+      "/auth/sign-in",
+      "/auth/sign-up",
+      "/auth/forgot-password"
+    ];
 
     const isPublicRoute = publicRoutes.includes(location.pathname);
     const isAuthRoute = authRoutes.some((route) =>

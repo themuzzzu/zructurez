@@ -64,10 +64,11 @@ export const ProductLikeButton = ({
     <Button
       variant={variant}
       size={size}
-      className={`relative group border-none bg-white/80 dark:bg-zinc-800/80 hover:bg-white dark:hover:bg-zinc-800 ${className} pointer-events-auto touch-action-manipulation`}
+      className={`relative group border-none bg-white/80 dark:bg-zinc-800/80 hover:bg-white dark:hover:bg-zinc-800 ${className} pointer-events-auto`}
       onClick={handleClick}
       disabled={isLoading}
       aria-label={liked ? "Remove from wishlist" : "Add to wishlist"}
+      style={{ touchAction: "manipulation" }}
     >
       <div className="relative z-10">
         {isLoading ? (
