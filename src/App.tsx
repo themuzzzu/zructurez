@@ -3,6 +3,8 @@ import React, { useState, useEffect } from "react";
 import { Route, Routes, useNavigate, useLocation } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import MarketplaceSearch from "./pages/marketplace/search";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "./lib/react-query";
 
 // Creating a simple placeholder component for missing components
 const PlaceholderPage = ({ title }: { title: string }) => (
@@ -128,10 +130,12 @@ const AppContent = () => {
 
 function App() {
   return (
-    <SessionContextProvider supabaseClient={{}}>
-      <ScrollToTop />
-      <AppContent />
-    </SessionContextProvider>
+    <QueryClientProvider client={queryClient}>
+      <SessionContextProvider supabaseClient={{}}>
+        <ScrollToTop />
+        <AppContent />
+      </SessionContextProvider>
+    </QueryClientProvider>
   );
 }
 
