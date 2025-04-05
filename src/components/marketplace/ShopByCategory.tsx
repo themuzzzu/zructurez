@@ -162,7 +162,8 @@ export const ShopByCategory = ({ onCategorySelect }: CategoryProps) => {
         ))}
       </div>
 
-      <style jsx>{`
+      <style>
+        {`
         .hide-scrollbar::-webkit-scrollbar {
           display: none;
         }
@@ -170,7 +171,8 @@ export const ShopByCategory = ({ onCategorySelect }: CategoryProps) => {
           -ms-overflow-style: none;
           scrollbar-width: none;
         }
-      `}</style>
+        `}
+      </style>
     </section>
   );
 };
