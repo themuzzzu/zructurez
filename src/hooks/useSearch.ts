@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, useRef } from "react";
 import { 
   getSearchSuggestions, 
@@ -133,10 +132,10 @@ export const useSearch = ({
     setError(null);
     
     try {
+      // Fix here: Remove the third argument that was causing the error
       const { results: searchResults, correctedQuery: corrected } = await performSearch(
         searchQuery, 
-        finalFilters,
-        { signal: abortController.signal }
+        finalFilters
       );
       
       // If this request has been aborted, don't update state
