@@ -34,21 +34,21 @@ export const ShopByCategory = ({ onCategorySelect }: CategoryProps) => {
     return () => container.removeEventListener('scroll', checkScroll);
   }, []);
   
-  // Define categories with images, slugs, and subcategories - UPDATED as requested
+  // Define categories with images, slugs, and subcategories
   const categories = [
-    { 
-      name: "Groceries", 
-      slug: "books-learning", 
-      image: "/lovable-uploads/5942c156-f468-4ea2-a34f-796b645655ca.png",
-      emoji: "📚",
-      subcategories: ["Academic", "Novels", "Kids", "Competitive Prep"]
-    },
     { 
       name: "Books & Stationery", 
       slug: "groceries", 
-      image: "/lovable-uploads/902e00b8-b9ee-4d85-9900-5a9dc71454fd.png",
+      image: "/lovable-uploads/5942c156-f468-4ea2-a34f-796b645655ca.png",
       emoji: "🍅",
       subcategories: ["Fruits", "Veggies", "Snacks", "Dairy"]
+    },
+    { 
+      name: "Groceries", 
+      slug: "books-learning", 
+      image: "/lovable-uploads/902e00b8-b9ee-4d85-9900-5a9dc71454fd.png",
+      emoji: "📚",
+      subcategories: ["Academic", "Novels", "Kids", "Competitive Prep"]
     },
     { 
       name: "Footwear", 
@@ -58,18 +58,18 @@ export const ShopByCategory = ({ onCategorySelect }: CategoryProps) => {
       subcategories: ["Casual", "Formal", "Sports", "Designer"]
     },
     { 
-      name: "Furniture & Decor", 
-      slug: "furniture-decor", 
-      image: "/lovable-uploads/46a5e835-fcad-4044-8ca3-a3b617d56afd.png",
-      emoji: "🛋️",
-      subcategories: ["Living room", "Bedroom", "Kitchen", "Office"]
+      name: "Home & Living", 
+      slug: "home-living", 
+      image: "/lovable-uploads/1169db35-27bc-42d5-9b46-aeab175caf67.png",
+      emoji: "🏠",
+      subcategories: ["Furniture", "Decor", "Kitchen"]
     },
     { 
       name: "Automotive Tools", 
-      slug: "toys-kids", 
-      image: "/lovable-uploads/43fa7ba2-a733-43ca-8075-fa539aed5c48.png",
-      emoji: "🧸",
-      subcategories: ["Action figures", "Educational toys", "Puzzles"]
+      slug: "automotive-tools", 
+      image: "/lovable-uploads/295a2270-a21c-43e1-8d14-97743794eaa0.png",
+      emoji: "🔧",
+      subcategories: ["Car Accessories", "Tools", "Auto Parts"]
     },
     { 
       name: "Office Supplies", 
@@ -95,51 +95,58 @@ export const ShopByCategory = ({ onCategorySelect }: CategoryProps) => {
     { 
       name: "Fashion", 
       slug: "fashion", 
-      image: "/lovable-uploads/7cc6fc84-5007-4e18-8881-8eaa74d618d4.png", // Updated to image4
+      image: "/lovable-uploads/db350618-6a6d-4b77-9761-78b2c5a9d56e.png",
       emoji: "👗",
       subcategories: ["Men", "Women", "Kids", "Ethnic", "Western"]
     },
     { 
       name: "Electronics", 
       slug: "electronics-gadgets", 
-      image: "/lovable-uploads/d01039d6-6bee-4097-9c23-8981fd856e92.png", // Updated to image1
+      image: "/lovable-uploads/d01039d6-6bee-4097-9c23-8981fd856e92.png",
       emoji: "📱",
       subcategories: ["Mobiles", "Laptops", "Smartwatches"]
     },
     { 
-      name: "Home & Living", 
-      slug: "home-living", 
-      image: "/lovable-uploads/65def346-4fbc-4608-96b6-c4c84d95674a.png",
-      emoji: "🏠",
-      subcategories: ["Furniture", "Decor", "Kitchen"]
+      name: "Furniture & Decor", 
+      slug: "furniture-decor", 
+      image: "/lovable-uploads/46a5e835-fcad-4044-8ca3-a3b617d56afd.png",
+      emoji: "🛋️",
+      subcategories: ["Living room", "Bedroom", "Kitchen", "Office"]
     },
     { 
       name: "Beauty & Personal Care", 
       slug: "beauty-personal-care", 
-      image: "/lovable-uploads/bbbc13ee-6ebf-4bb8-b472-95ef720eed0c.png", // Updated to image3
+      image: "/lovable-uploads/bbbc13ee-6ebf-4bb8-b472-95ef720eed0c.png",
       emoji: "🛍️",
       subcategories: ["Skincare", "Makeup", "Grooming"]
     },
     { 
       name: "Toys & Kids", 
-      slug: "health-wellness", 
-      image: "/lovable-uploads/de89c019-62c3-40c7-b29b-3157b73d17a1.png",
-      emoji: "🧘",
-      subcategories: ["Nutrition", "Gym gear", "Ayurvedic"]
+      slug: "toys-kids", 
+      image: "/lovable-uploads/232b303d-8292-4874-957a-e46de1d74c41.png",
+      emoji: "🧸",
+      subcategories: ["Action figures", "Educational toys", "Puzzles"]
     },
     { 
       name: "Sports & Outdoors", 
       slug: "sports-outdoors", 
-      image: "/lovable-uploads/5453d095-d661-4182-ad9b-1925b7a2cec7.png", // Updated to image2
+      image: "/lovable-uploads/0c11e8d4-b796-449e-a507-165623e30fc7.png",
       emoji: "🏈",
       subcategories: ["Fitness", "Camping", "Team sports"]
     },
     { 
       name: "Health & Wellness", 
-      slug: "toys-kids", 
-      image: "/lovable-uploads/e31366a1-6fb7-4cc0-8fb3-de640eed4826.png", // Added with image5
-      emoji: "🧸",
-      subcategories: ["Action figures", "Educational toys", "Puzzles"]
+      slug: "health-wellness", 
+      image: "/lovable-uploads/e31366a1-6fb7-4cc0-8fb3-de640eed4826.png", 
+      emoji: "🧘",
+      subcategories: ["Nutrition", "Gym gear", "Ayurvedic"]
+    },
+    { 
+      name: "Gifts", 
+      slug: "gifts", 
+      image: "/lovable-uploads/1f522bd7-0eef-456b-bf41-542ae4239826.png",
+      emoji: "🎁",
+      subcategories: ["Birthday", "Anniversary", "Wedding", "Corporate"]
     },
   ];
 
