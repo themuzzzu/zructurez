@@ -159,13 +159,13 @@ export const BannerCarousel = () => {
     }
   }, [api, bannerAds.length]);
 
-  // Auto-scroll implementation with 5-second interval
+  // Auto-scroll implementation with 3-second interval (changed from 5 seconds)
   useEffect(() => {
     if (!bannerAds.length || isHovered) return;
     
     let animationFrameId: number;
     let startTime: number;
-    const duration = 5000; // 5 seconds per slide
+    const duration = 3000; // 3 seconds per slide (changed from 5 seconds)
     
     const animate = (timestamp: number) => {
       if (!startTime) startTime = timestamp;

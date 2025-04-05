@@ -44,8 +44,8 @@ export const BrowseTabContent = ({
   
   return (
     <div className="space-y-6">
-      {/* Shop By Category Section with image tiles */}
-      <div className="mb-8">
+      {/* Shop By Category Section with horizontal scrollable categories */}
+      <div className="mb-4">
         <ShopByCategory onCategorySelect={handleCategorySelect} />
       </div>
 
