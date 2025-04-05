@@ -1,12 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import {
-  BrowserRouter as Router,
-  Route,
-  Routes,
-  useNavigate,
-  useLocation,
-} from "react-router-dom";
+import { Route, Routes, useNavigate, useLocation } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import MarketplaceSearch from "./pages/marketplace/search";
 
@@ -55,17 +49,8 @@ interface SessionContextProviderProps {
   children: React.ReactNode;
 }
 
-type Session = {
-  user: any;
-  access_token?: string;
-};
-
 const SessionContextProvider = ({ children }: SessionContextProviderProps) => {
   return <>{children}</>;
-};
-
-const useSessionContext = () => {
-  return { session: null };
 };
 
 const AppContent = () => {
@@ -91,7 +76,6 @@ const AppContent = () => {
       location.pathname.startsWith(route)
     );
 
-    // Simplified session-based redirects
     if (!session && location.pathname === "/profile") {
       navigate("/auth");
     }
@@ -128,10 +112,8 @@ const AppContent = () => {
 function App() {
   return (
     <SessionContextProvider supabaseClient={{}}>
-      <Router>
-        <ScrollToTop />
-        <AppContent />
-      </Router>
+      <ScrollToTop />
+      <AppContent />
     </SessionContextProvider>
   );
 }
