@@ -17,35 +17,35 @@ export const ShopByCategory = ({ onCategorySelect }: CategoryProps) => {
     { 
       name: "Fashion", 
       slug: "fashion", 
-      image: "public/lovable-uploads/10180ea0-a08a-4746-8f5c-6c126fdcbbb1.png",
+      image: "public/lovable-uploads/c216272c-6a1e-4146-a96a-70c7d0cb465e.png",
       emoji: "👗",
       subcategories: ["Men", "Women", "Kids", "Ethnic", "Western", "Lingerie"]
     },
     { 
       name: "Electronics", 
       slug: "electronics-gadgets", 
-      image: "public/lovable-uploads/10180ea0-a08a-4746-8f5c-6c126fdcbbb1.png",
+      image: "public/lovable-uploads/c320e3c9-e690-4ef0-8499-50f270bb7360.png",
       emoji: "📱",
       subcategories: ["Mobiles", "Laptops", "Smartwatches", "Accessories"]
     },
     { 
       name: "Home & Living", 
       slug: "home-living", 
-      image: "public/lovable-uploads/10180ea0-a08a-4746-8f5c-6c126fdcbbb1.png",
+      image: "public/lovable-uploads/5b566bc2-6fbf-419b-803e-67c9ba157492.png",
       emoji: "🏠",
       subcategories: ["Furniture", "Decor", "Kitchen", "Cleaning"]
     },
     { 
       name: "Beauty & Personal Care", 
       slug: "beauty-personal-care", 
-      image: "public/lovable-uploads/10180ea0-a08a-4746-8f5c-6c126fdcbbb1.png",
+      image: "public/lovable-uploads/60ecbe86-34fd-4945-b2c3-01a0c89380c6.png",
       emoji: "🛍️",
       subcategories: ["Skincare", "Makeup", "Grooming", "Perfumes"]
     },
     { 
       name: "Groceries", 
       slug: "groceries", 
-      image: "public/lovable-uploads/10180ea0-a08a-4746-8f5c-6c126fdcbbb1.png",
+      image: "public/lovable-uploads/b89dc2ea-392d-4b8b-88a2-afcd41c34f11.png",
       emoji: "🍅",
       subcategories: ["Fruits", "Veggies", "Snacks", "Dairy"]
     },
@@ -55,6 +55,69 @@ export const ShopByCategory = ({ onCategorySelect }: CategoryProps) => {
       image: "public/lovable-uploads/10180ea0-a08a-4746-8f5c-6c126fdcbbb1.png",
       emoji: "🧘",
       subcategories: ["Nutrition", "Gym gear", "Ayurvedic", "Mental wellness"]
+    },
+    { 
+      name: "Toys & Kids", 
+      slug: "toys-kids", 
+      image: "public/lovable-uploads/10180ea0-a08a-4746-8f5c-6c126fdcbbb1.png",
+      emoji: "🧸",
+      subcategories: ["Action figures", "Educational toys", "Puzzles", "Outdoor toys"]
+    },
+    { 
+      name: "Sports & Outdoors", 
+      slug: "sports-outdoors", 
+      image: "public/lovable-uploads/10180ea0-a08a-4746-8f5c-6c126fdcbbb1.png",
+      emoji: "🏈",
+      subcategories: ["Fitness", "Camping", "Team sports", "Water sports"]
+    },
+    { 
+      name: "Automotive", 
+      slug: "automotive-accessories", 
+      image: "public/lovable-uploads/10180ea0-a08a-4746-8f5c-6c126fdcbbb1.png",
+      emoji: "🚗",
+      subcategories: ["Car care", "Accessories", "Tools", "Parts"]
+    },
+    { 
+      name: "Office Supplies", 
+      slug: "office-stationery", 
+      image: "public/lovable-uploads/10180ea0-a08a-4746-8f5c-6c126fdcbbb1.png",
+      emoji: "📝",
+      subcategories: ["Stationery", "Office furniture", "School supplies"]
+    },
+    { 
+      name: "Tools & Equipment", 
+      slug: "tools-industrial", 
+      image: "public/lovable-uploads/10180ea0-a08a-4746-8f5c-6c126fdcbbb1.png",
+      emoji: "🛠️",
+      subcategories: ["Hand tools", "Power tools", "Safety equipment"]
+    },
+    { 
+      name: "Footwear", 
+      slug: "footwear", 
+      image: "public/lovable-uploads/10180ea0-a08a-4746-8f5c-6c126fdcbbb1.png",
+      emoji: "👟",
+      subcategories: ["Casual", "Formal", "Sports", "Designer"]
+    },
+    { 
+      name: "Watches & Wearables", 
+      slug: "watches-wearables", 
+      image: "public/lovable-uploads/10180ea0-a08a-4746-8f5c-6c126fdcbbb1.png",
+      emoji: "⌚",
+      subcategories: ["Smartwatches", "Analog", "Digital", "Fitness bands"]
+    },
+    { 
+      name: "Furniture & Decor", 
+      slug: "furniture-decor", 
+      image: "public/lovable-uploads/10180ea0-a08a-4746-8f5c-6c126fdcbbb1.png",
+      emoji: "🛋️",
+      subcategories: ["Living room", "Bedroom", "Kitchen", "Office"]
+    },
+    { 
+      name: "Music & Instruments", 
+      slug: "music-instruments", 
+      image: "public/lovable-uploads/10180ea0-a08a-4746-8f5c-6c126fdcbbb1.png",
+      emoji: "🎸",
+      subcategories: ["String", "Percussion", "Wind", "Electronic"]
     },
     { 
       name: "Lifestyle", 
@@ -119,8 +182,7 @@ export const ShopByCategory = ({ onCategorySelect }: CategoryProps) => {
       
       <div 
         ref={scrollContainerRef}
-        className="flex overflow-x-auto pb-4 gap-3 hide-scrollbar"
-        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        className="flex overflow-x-auto pb-4 gap-3 scrollbar-hide"
       >
         {categories.map((category) => (
           <div
@@ -146,10 +208,10 @@ export const ShopByCategory = ({ onCategorySelect }: CategoryProps) => {
 
       <style>
         {`
-        .hide-scrollbar::-webkit-scrollbar {
+        .scrollbar-hide::-webkit-scrollbar {
           display: none;
         }
-        .hide-scrollbar {
+        .scrollbar-hide {
           -ms-overflow-style: none;
           scrollbar-width: none;
         }
