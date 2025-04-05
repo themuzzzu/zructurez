@@ -2,7 +2,7 @@
 import { useNavigate } from "react-router-dom";
 import { ImageFallback } from "@/components/ui/image-fallback";
 import { ChevronRight, ChevronLeft } from "lucide-react";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 
 interface CategoryProps {
   onCategorySelect?: (category: string) => void;
@@ -12,133 +12,147 @@ export const ShopByCategory = ({ onCategorySelect }: CategoryProps) => {
   const navigate = useNavigate();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   
-  // Define categories with images, and slugs - updated without offers
+  // Add scrollbar hiding styles to the document on component mount
+  useEffect(() => {
+    // Add a style tag to hide scrollbars
+    const style = document.createElement('style');
+    style.textContent = `
+      .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+      }
+      .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Clean up
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+  
+  // Define categories with images, slugs, and subcategories
   const categories = [
     { 
       name: "Fashion", 
       slug: "fashion", 
-      image: "public/lovable-uploads/c216272c-6a1e-4146-a96a-70c7d0cb465e.png",
+      image: "public/lovable-uploads/419c291d-6963-4a4b-b1b0-4b622135325e.png",
       emoji: "👗",
       subcategories: ["Men", "Women", "Kids", "Ethnic", "Western", "Lingerie"]
     },
     { 
       name: "Electronics", 
       slug: "electronics-gadgets", 
-      image: "public/lovable-uploads/c320e3c9-e690-4ef0-8499-50f270bb7360.png",
+      image: "public/lovable-uploads/e7c73401-c132-4b6c-abe0-2d49a225f83d.png",
       emoji: "📱",
       subcategories: ["Mobiles", "Laptops", "Smartwatches", "Accessories"]
     },
     { 
       name: "Home & Living", 
       slug: "home-living", 
-      image: "public/lovable-uploads/5b566bc2-6fbf-419b-803e-67c9ba157492.png",
+      image: "public/lovable-uploads/65def346-4fbc-4608-96b6-c4c84d95674a.png",
       emoji: "🏠",
       subcategories: ["Furniture", "Decor", "Kitchen", "Cleaning"]
     },
     { 
       name: "Beauty & Personal Care", 
       slug: "beauty-personal-care", 
-      image: "public/lovable-uploads/60ecbe86-34fd-4945-b2c3-01a0c89380c6.png",
+      image: "public/lovable-uploads/2e9af2d1-315c-4db1-8b84-8f97e84ca787.png",
       emoji: "🛍️",
       subcategories: ["Skincare", "Makeup", "Grooming", "Perfumes"]
     },
     { 
       name: "Groceries", 
       slug: "groceries", 
-      image: "public/lovable-uploads/b89dc2ea-392d-4b8b-88a2-afcd41c34f11.png",
+      image: "public/lovable-uploads/3d631e65-bf21-4fc8-a468-e1d2eeba309e.png",
       emoji: "🍅",
       subcategories: ["Fruits", "Veggies", "Snacks", "Dairy"]
     },
     { 
       name: "Health & Wellness", 
       slug: "health-wellness", 
-      image: "public/lovable-uploads/10180ea0-a08a-4746-8f5c-6c126fdcbbb1.png",
+      image: "public/lovable-uploads/19edca98-103a-449f-a5ea-5145cf7426bb.png",
       emoji: "🧘",
       subcategories: ["Nutrition", "Gym gear", "Ayurvedic", "Mental wellness"]
     },
     { 
       name: "Toys & Kids", 
       slug: "toys-kids", 
-      image: "public/lovable-uploads/10180ea0-a08a-4746-8f5c-6c126fdcbbb1.png",
+      image: "public/lovable-uploads/de89c019-62c3-40c7-b29b-3157b73d17a1.png",
       emoji: "🧸",
       subcategories: ["Action figures", "Educational toys", "Puzzles", "Outdoor toys"]
     },
     { 
       name: "Sports & Outdoors", 
       slug: "sports-outdoors", 
-      image: "public/lovable-uploads/10180ea0-a08a-4746-8f5c-6c126fdcbbb1.png",
+      image: "public/lovable-uploads/402efee3-58a7-40fc-b8c9-8232c9a4ae6d.png",
       emoji: "🏈",
       subcategories: ["Fitness", "Camping", "Team sports", "Water sports"]
     },
     { 
       name: "Automotive", 
       slug: "automotive-accessories", 
-      image: "public/lovable-uploads/10180ea0-a08a-4746-8f5c-6c126fdcbbb1.png",
+      image: "public/lovable-uploads/402efee3-58a7-40fc-b8c9-8232c9a4ae6d.png",
       emoji: "🚗",
       subcategories: ["Car care", "Accessories", "Tools", "Parts"]
     },
     { 
       name: "Office Supplies", 
       slug: "office-stationery", 
-      image: "public/lovable-uploads/10180ea0-a08a-4746-8f5c-6c126fdcbbb1.png",
+      image: "public/lovable-uploads/402efee3-58a7-40fc-b8c9-8232c9a4ae6d.png",
       emoji: "📝",
       subcategories: ["Stationery", "Office furniture", "School supplies"]
     },
     { 
       name: "Tools & Equipment", 
       slug: "tools-industrial", 
-      image: "public/lovable-uploads/10180ea0-a08a-4746-8f5c-6c126fdcbbb1.png",
+      image: "public/lovable-uploads/402efee3-58a7-40fc-b8c9-8232c9a4ae6d.png",
       emoji: "🛠️",
       subcategories: ["Hand tools", "Power tools", "Safety equipment"]
     },
     { 
       name: "Footwear", 
       slug: "footwear", 
-      image: "public/lovable-uploads/10180ea0-a08a-4746-8f5c-6c126fdcbbb1.png",
+      image: "public/lovable-uploads/402efee3-58a7-40fc-b8c9-8232c9a4ae6d.png",
       emoji: "👟",
       subcategories: ["Casual", "Formal", "Sports", "Designer"]
     },
     { 
       name: "Watches & Wearables", 
       slug: "watches-wearables", 
-      image: "public/lovable-uploads/10180ea0-a08a-4746-8f5c-6c126fdcbbb1.png",
+      image: "public/lovable-uploads/402efee3-58a7-40fc-b8c9-8232c9a4ae6d.png",
       emoji: "⌚",
       subcategories: ["Smartwatches", "Analog", "Digital", "Fitness bands"]
     },
     { 
       name: "Furniture & Decor", 
       slug: "furniture-decor", 
-      image: "public/lovable-uploads/10180ea0-a08a-4746-8f5c-6c126fdcbbb1.png",
+      image: "public/lovable-uploads/402efee3-58a7-40fc-b8c9-8232c9a4ae6d.png",
       emoji: "🛋️",
       subcategories: ["Living room", "Bedroom", "Kitchen", "Office"]
     },
     { 
       name: "Music & Instruments", 
       slug: "music-instruments", 
-      image: "public/lovable-uploads/10180ea0-a08a-4746-8f5c-6c126fdcbbb1.png",
+      image: "public/lovable-uploads/402efee3-58a7-40fc-b8c9-8232c9a4ae6d.png",
       emoji: "🎸",
       subcategories: ["String", "Percussion", "Wind", "Electronic"]
     },
     { 
-      name: "Lifestyle", 
-      slug: "lifestyle", 
-      image: "public/lovable-uploads/10180ea0-a08a-4746-8f5c-6c126fdcbbb1.png",
-      emoji: "🎁",
-      subcategories: ["Gifts", "Stationery", "Pets", "Travel", "Hobby"]
-    },
-    { 
-      name: "Books & Learning", 
+      name: "Books & Stationery", 
       slug: "books-learning", 
-      image: "public/lovable-uploads/10180ea0-a08a-4746-8f5c-6c126fdcbbb1.png",
+      image: "public/lovable-uploads/65def346-4fbc-4608-96b6-c4c84d95674a.png",
       emoji: "📚",
       subcategories: ["Academic", "Novels", "Kids", "Competitive Prep"]
     },
     { 
-      name: "Local Specials", 
-      slug: "local-specials", 
-      image: "public/lovable-uploads/10180ea0-a08a-4746-8f5c-6c126fdcbbb1.png",
-      emoji: "🛒",
-      subcategories: ["Regional", "Handmade", "Local Brands"]
+      name: "Gifts", 
+      slug: "gifts", 
+      image: "public/lovable-uploads/419c291d-6963-4a4b-b1b0-4b622135325e.png",
+      emoji: "🎁",
+      subcategories: ["Birthday", "Anniversary", "Wedding", "Corporate"]
     },
   ];
 
@@ -168,12 +182,14 @@ export const ShopByCategory = ({ onCategorySelect }: CategoryProps) => {
           <button 
             onClick={() => scroll("left")}
             className="p-1 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
+            aria-label="Scroll left"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
           <button 
             onClick={() => scroll("right")}
             className="p-1 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
+            aria-label="Scroll right"
           >
             <ChevronRight className="h-5 w-5" />
           </button>
@@ -205,18 +221,6 @@ export const ShopByCategory = ({ onCategorySelect }: CategoryProps) => {
           </div>
         ))}
       </div>
-
-      <style>
-        {`
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-        .scrollbar-hide {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-        `}
-      </style>
     </section>
   );
 };
