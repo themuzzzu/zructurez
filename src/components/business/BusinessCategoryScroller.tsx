@@ -24,6 +24,7 @@ import {
   Plane, 
   Scale 
 } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface CategoryProps {
   id: string;
@@ -68,16 +69,19 @@ export const BusinessCategoryScroller = () => {
       <ScrollArea className="w-full">
         <div className="flex gap-3 pb-2">
           {categories.map((category) => (
-            <div
+            <motion.div
               key={category.id}
               onClick={() => handleCategoryClick(category.id)}
               className="flex flex-col items-center justify-center min-w-[80px] p-2 bg-gray-50 dark:bg-zinc-800 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-zinc-700 transition-colors"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ duration: 0.2 }}
             >
               <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-2">
                 {category.icon}
               </div>
               <span className="text-xs text-center line-clamp-2 h-8">{category.name}</span>
-            </div>
+            </motion.div>
           ))}
         </div>
         <ScrollBar orientation="horizontal" />
