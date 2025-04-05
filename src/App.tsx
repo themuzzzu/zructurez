@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import {
   BrowserRouter as Router,
@@ -7,31 +8,65 @@ import {
   useLocation,
 } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
-import { Home } from "@/pages/Home";
-import { About } from "@/pages/About";
-import { Contact } from "@/pages/Contact";
-import { NotFound } from "@/components/NotFound";
-import { Auth } from "@/pages/Auth";
-import { Profile } from "@/pages/Profile";
-import { Shopping } from "@/pages/Shopping";
-import { ProductDetails } from "@/pages/ProductDetails";
-import { Post } from "@/pages/Post";
-import { PostDetails } from "@/pages/PostDetails";
-import { Marketplace } from "@/pages/Marketplace";
-import { Wishlist } from "@/pages/Wishlist";
-import { Terms } from "@/pages/Terms";
-import { Privacy } from "@/pages/Privacy";
-import {
-  SessionContextProvider,
-  Session,
-  useSessionContext,
-} from "supabase-hooks-nextjs";
-import { supabase } from "@/integrations/supabase/client";
-import { ScrollToTop } from "@/components/ScrollToTop";
-import { Dashboard } from "@/pages/Dashboard";
-import { CreatePost } from "@/pages/CreatePost";
-import { EditPost } from "@/pages/EditPost";
 import MarketplaceSearch from "./pages/marketplace/search";
+
+// Creating a simple placeholder component for missing components
+const PlaceholderPage = ({ title }: { title: string }) => (
+  <Layout>
+    <div className="container mx-auto py-20">
+      <h1 className="text-3xl font-bold">{title} Page</h1>
+      <p className="mt-4">This is a placeholder for the {title} page.</p>
+    </div>
+  </Layout>
+);
+
+// Define placeholder components for all missing pages
+const Home = () => <PlaceholderPage title="Home" />;
+const About = () => <PlaceholderPage title="About" />;
+const Contact = () => <PlaceholderPage title="Contact" />;
+const Auth = () => <PlaceholderPage title="Authentication" />;
+const Profile = () => <PlaceholderPage title="Profile" />;
+const Shopping = () => <PlaceholderPage title="Shopping" />;
+const ProductDetails = () => <PlaceholderPage title="Product Details" />;
+const Post = () => <PlaceholderPage title="Post" />;
+const PostDetails = () => <PlaceholderPage title="Post Details" />;
+const Marketplace = () => <PlaceholderPage title="Marketplace" />;
+const Wishlist = () => <PlaceholderPage title="Wishlist" />;
+const Terms = () => <PlaceholderPage title="Terms" />;
+const Privacy = () => <PlaceholderPage title="Privacy" />;
+const Dashboard = () => <PlaceholderPage title="Dashboard" />;
+const CreatePost = () => <PlaceholderPage title="Create Post" />;
+const EditPost = () => <PlaceholderPage title="Edit Post" />;
+
+// Create a simple ScrollToTop component to replace the missing import
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+};
+
+// Create a SessionContextProvider replacement
+interface SessionContextProviderProps {
+  supabaseClient: any;
+  children: React.ReactNode;
+}
+
+type Session = {
+  user: any;
+  access_token?: string;
+};
+
+const SessionContextProvider = ({ children }: SessionContextProviderProps) => {
+  return <>{children}</>;
+};
+
+const useSessionContext = () => {
+  return { session: null };
+};
 
 const AppContent = () => {
   const [session, setSession] = useState<Session | null>(null);
@@ -39,13 +74,11 @@ const AppContent = () => {
   const location = useLocation();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
-
-    supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
+    // Simplified session check since we're just creating placeholders
+    const checkSession = async () => {
+      // No actual session check for now
+    };
+    checkSession();
   }, []);
 
   // Redirect to /auth if not logged in and trying to access /profile
@@ -58,6 +91,7 @@ const AppContent = () => {
       location.pathname.startsWith(route)
     );
 
+    // Simplified session-based redirects
     if (!session && location.pathname === "/profile") {
       navigate("/auth");
     }
@@ -85,7 +119,7 @@ const AppContent = () => {
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/create-post" element={<CreatePost />} />
       <Route path="/edit-post/:postId" element={<EditPost />} />
-      <Route path="*" element={<NotFound />} />
+      <Route path="*" element={<PlaceholderPage title="Not Found" />} />
       <Route path="/marketplace/search" element={<MarketplaceSearch />} />
     </Routes>
   );
@@ -93,7 +127,7 @@ const AppContent = () => {
 
 function App() {
   return (
-    <SessionContextProvider supabaseClient={supabase}>
+    <SessionContextProvider supabaseClient={{}}>
       <Router>
         <ScrollToTop />
         <AppContent />

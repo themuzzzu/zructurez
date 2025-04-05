@@ -1,11 +1,12 @@
 
 export interface SearchFilters {
   query?: string;
-  sortBy?: "relevance" | "price-asc" | "price-desc" | "newest";
+  sortBy?: "relevance" | "price-asc" | "price-desc" | "newest" | "popularity";
   categories?: string[];
   priceMin?: number;
   priceMax?: number;
   includeSponsored?: boolean;
+  location?: string;
 }
 
 export interface SearchResult {

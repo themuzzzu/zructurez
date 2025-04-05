@@ -18,7 +18,7 @@ import { GridLayoutType } from "@/components/products/types/ProductTypes";
 import { LikeProvider } from "@/components/products/LikeContext";
 import { useDebounce } from "@/hooks/useDebounce";
 import { performSearch } from "@/services/searchService";
-import { SearchResult } from "@/types/search";
+import { SearchFilters, SearchResult } from "@/types/search";
 import { 
   Sheet, 
   SheetContent, 
@@ -60,7 +60,7 @@ export default function MarketplaceSearch() {
   
   // Filter states
   const [showFilters, setShowFilters] = useState(false);
-  const [sortBy, setSortBy] = useState<string>("relevance");
+  const [sortBy, setSortBy] = useState<"relevance" | "price-asc" | "price-desc" | "newest" | "popularity">("relevance");
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 100000]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [location, setLocation] = useState<string>("all");
@@ -97,14 +97,18 @@ export default function MarketplaceSearch() {
     const fetchResults = async () => {
       setIsLoading(true);
       try {
-        const filterObj = {
+        const filterObj: SearchFilters = {
           includeSponsored: true,
-          sortBy,
+          sortBy: sortBy,
           categories: selectedCategories.length > 0 ? selectedCategories : undefined,
           priceMin: priceRange[0] > 0 ? priceRange[0] : undefined,
           priceMax: priceRange[1] < 100000 ? priceRange[1] : undefined,
-          location: location !== "all" ? location : undefined,
         };
+        
+        if (location !== "all") {
+          // Add location as a custom property if needed
+          (filterObj as any).location = location;
+        }
         
         const { results, correctedQuery: corrected } = await performSearch(debouncedSearchTerm, filterObj);
         setProducts(results);
