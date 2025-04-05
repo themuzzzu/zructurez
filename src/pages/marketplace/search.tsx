@@ -29,6 +29,8 @@ import { ProductCard } from "@/components/products/ProductCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { LikeProvider } from "@/components/products/LikeContext";
+import { motion } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
 
 export default function MarketplaceSearch() {
   // Get search parameters from the URL
@@ -111,7 +113,7 @@ export default function MarketplaceSearch() {
     // Apply filters to search
     search(searchQuery, {
       includeSponsored: true,
-      sortBy: sortBy,
+      sortBy,
       categories: selectedCategories,
       priceMin: priceRange[0],
       priceMax: priceRange[1],
@@ -142,6 +144,53 @@ export default function MarketplaceSearch() {
         ? prev.filter(c => c !== category) 
         : [...prev, category]
     );
+  };
+  
+  // Animation variants for product cards
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.05
+      }
+    }
+  };
+  
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.3
+      }
+    }
+  };
+  
+  // Helper function to determine badge color based on tag
+  const getTagColor = (tag: string) => {
+    switch(tag.toLowerCase()) {
+      case 'bestseller':
+        return 'bg-amber-500 text-white';
+      case 'new':
+        return 'bg-blue-500 text-white';
+      case 'hot deal':
+        return 'bg-red-500 text-white';
+      case 'trending':
+        return 'bg-purple-500 text-white';
+      case 'limited':
+        return 'bg-orange-500 text-white';
+      default:
+        return 'bg-gray-500 text-white';
+    }
+  };
+  
+  // Helper function to determine discount badge color
+  const getDiscountColor = (percentage: number) => {
+    if (percentage >= 50) return 'bg-green-500 text-white';
+    if (percentage >= 30) return 'bg-amber-500 text-white';
+    return 'bg-red-500 text-white';
   };
 
   return (
@@ -367,41 +416,79 @@ export default function MarketplaceSearch() {
         {/* Search results */}
         <LikeProvider>
           <div>
-            {isLoading ? (
-              <div className={`grid ${
-                gridLayout === "grid1x1" ? "grid-cols-1" :
-                gridLayout === "grid2x2" ? "grid-cols-1 sm:grid-cols-2" :
-                "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
-              } gap-4`}>
-                {Array.from({ length: gridLayout === "grid1x1" ? 4 : 8 }).map((_, index) => (
-                  <div 
-                    key={index} 
-                    className={`aspect-${gridLayout === "grid1x1" ? "video" : "square"} rounded-md bg-muted animate-pulse`} 
+            {isLoading && (
+              <div className="pb-4">
+                <div className="w-full h-1 bg-gray-100 rounded-full overflow-hidden">
+                  <motion.div 
+                    className="h-full bg-primary"
+                    initial={{ width: "0%" }}
+                    animate={{ width: "100%" }}
+                    transition={{ duration: 1.5, ease: "linear" }}
                   />
-                ))}
+                </div>
               </div>
-            ) : results.length > 0 ? (
-              <TabsContent value="products" className="mt-0">
-                <div className={`grid ${
+            )}
+            
+            {isLoading ? (
+              <motion.div 
+                className={`grid ${
                   gridLayout === "grid1x1" ? "grid-cols-1" :
                   gridLayout === "grid2x2" ? "grid-cols-1 sm:grid-cols-2" :
                   "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
-                } gap-4`}>
+                } gap-4`}
+              >
+                {Array.from({ length: gridLayout === "grid1x1" ? 4 : 8 }).map((_, index) => (
+                  <motion.div 
+                    key={index} 
+                    variants={itemVariants}
+                    className="bg-muted rounded-md overflow-hidden shadow"
+                  >
+                    <div className={`aspect-${gridLayout === "grid1x1" ? "video" : "square"} w-full bg-muted animate-pulse`} />
+                    <div className="p-3 space-y-2">
+                      <div className="h-4 w-3/4 bg-muted-foreground/20 rounded animate-pulse"></div>
+                      <div className="h-4 w-1/2 bg-muted-foreground/20 rounded animate-pulse"></div>
+                    </div>
+                  </motion.div>
+                ))}
+              </motion.div>
+            ) : results.length > 0 ? (
+              <TabsContent value="products" className="mt-0">
+                <motion.div 
+                  className={`grid ${
+                    gridLayout === "grid1x1" ? "grid-cols-1" :
+                    gridLayout === "grid2x2" ? "grid-cols-1 sm:grid-cols-2" :
+                    "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+                  } gap-4`}
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                >
                   {results.map((result) => (
-                    <ProductCard 
-                      key={result.id}
-                      product={{
-                        id: result.id,
-                        title: result.title,
-                        description: result.description,
-                        price: result.price || 0,
-                        imageUrl: result.imageUrl || '',
-                        category: result.category || '',
-                      }}
-                      layout={gridLayout}
-                    />
+                    <motion.div key={result.id} variants={itemVariants}>
+                      <ProductCard 
+                        product={{
+                          id: result.id,
+                          title: result.title,
+                          description: result.description,
+                          price: result.price || 0,
+                          imageUrl: result.imageUrl || '',
+                          category: result.category || '',
+                          // Add highlight tags (simulated - would typically come from backend)
+                          highlight_tags: result.highlight_tags || 
+                            (Math.random() > 0.7 ? 
+                              [['Bestseller', 'New', 'Hot Deal', 'Trending', 'Limited'][Math.floor(Math.random() * 5)]] 
+                              : []),
+                          // Add discount percentage if not already present
+                          is_discounted: result.isDiscounted || result.is_discounted || false,
+                          discount_percentage: result.discount_percentage || 
+                            (result.isDiscounted ? Math.floor(Math.random() * 50) + 10 : undefined)
+                        }}
+                        layout={gridLayout}
+                        sponsored={result.isSponsored}
+                      />
+                    </motion.div>
                   ))}
-                </div>
+                </motion.div>
               </TabsContent>
             ) : (
               <EmptySearchResults 

@@ -20,6 +20,9 @@ export interface SearchResult {
   url: string;
   isSponsored?: boolean;
   relevanceScore?: number;
+  highlight_tags?: string[];
+  isDiscounted?: boolean;
+  discount_percentage?: number;
 }
 
 export interface SearchSuggestion {
