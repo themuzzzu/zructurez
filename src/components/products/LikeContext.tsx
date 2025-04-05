@@ -44,23 +44,30 @@ export const LikeProvider = ({ children }: { children: ReactNode }) => {
 
   // Enhanced toggleLike function that handles authentication
   const handleToggleLike = async (productId: string): Promise<void> => {
-    // Check if user is logged in before toggling
-    if (!isAuthenticated) {
-      const { data } = await supabase.auth.getSession();
-      
-      if (!data.session) {
-        toast.error("Please sign in to save items to your wishlist", {
-          action: {
-            label: "Sign In",
-            onClick: () => window.location.href = '/auth?redirect=/wishlist'
-          },
-        });
-        throw new Error("Authentication required");
+    try {
+      // Check if user is logged in before toggling
+      if (!isAuthenticated) {
+        const { data } = await supabase.auth.getSession();
+        
+        if (!data.session) {
+          toast.error("Please sign in to save items to your wishlist", {
+            action: {
+              label: "Sign In",
+              onClick: () => window.location.href = '/auth?redirect=/wishlist'
+            },
+          });
+          throw new Error("Authentication required");
+        }
       }
+      
+      // If authenticated, proceed with toggling wishlist item
+      await toggleWishlist(productId);
+    } catch (error) {
+      console.error("Error toggling like:", error);
+      
+      // Re-throw the error to allow downstream components to handle it appropriately
+      throw error;
     }
-    
-    // If authenticated, proceed with toggling wishlist item
-    await toggleWishlist(productId);
   };
 
   return (

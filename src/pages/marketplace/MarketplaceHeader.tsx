@@ -46,7 +46,7 @@ export const MarketplaceHeader = ({
     e.preventDefault();
     if (localSearchTerm.trim()) {
       // Redirect to search page with query parameter
-      navigate(`/marketplace/search?q=${encodeURIComponent(localSearchTerm)}`);
+      navigate(`/search?q=${encodeURIComponent(localSearchTerm)}`);
       // Also call the onSearch function passed from parent
       onSearch(localSearchTerm);
     }
@@ -61,7 +61,7 @@ export const MarketplaceHeader = ({
     setLocalSearchTerm(term);
     setSearchTerm(term);
     // Redirect to search page with query parameter
-    navigate(`/marketplace/search?q=${encodeURIComponent(term)}`);
+    navigate(`/search?q=${encodeURIComponent(term)}`);
     onSearch(term);
   };
   

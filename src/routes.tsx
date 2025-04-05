@@ -2,6 +2,7 @@
 import { createBrowserRouter } from "react-router-dom";
 import NotFoundPage from "./pages/NotFound";
 import MarketplaceSearch from "./pages/marketplace/search";
+import SearchResultsPage from "./pages/search/SearchResultsPage";
 
 // This file includes route definitions for the application
 const router = createBrowserRouter([
@@ -12,7 +13,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/search",
-    element: <MarketplaceSearch />
+    element: <SearchResultsPage />
   },
   {
     path: "*",

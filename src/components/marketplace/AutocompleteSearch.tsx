@@ -152,8 +152,13 @@ export const AutocompleteSearch = ({
   // Modified to work on single click (form submit) instead of double
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (value.trim() && onSearchSelect) {
-      onSearchSelect(value);
+    if (value.trim()) {
+      // Redirect to the search page
+      navigate(`/search?q=${encodeURIComponent(value)}`);
+      // Also call onSearchSelect if provided
+      if (onSearchSelect) {
+        onSearchSelect(value);
+      }
       setShowSuggestions(false);
     }
   };
@@ -161,6 +166,8 @@ export const AutocompleteSearch = ({
   const handleSuggestionClick = (suggestion: string) => {
     onChange(suggestion);
     setShowSuggestions(false);
+    // Navigate to search page with the suggestion
+    navigate(`/search?q=${encodeURIComponent(suggestion)}`);
     if (onSearchSelect) {
       onSearchSelect(suggestion);
     }

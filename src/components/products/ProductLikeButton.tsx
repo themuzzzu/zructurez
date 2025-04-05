@@ -50,9 +50,8 @@ export const ProductLikeButton = ({
     } catch (error: any) {
       // Revert on error
       setLocalLiked(null);
-      if (error.message === "Authentication required") {
-        // Already handled in LikeContext
-      } else {
+      if (error.message !== "Authentication required") {
+        // The auth required error is handled in LikeContext
         toast.error("Something went wrong");
         console.error("Error toggling product like:", error);
       }
