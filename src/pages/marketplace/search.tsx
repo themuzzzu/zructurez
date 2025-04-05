@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
@@ -479,7 +478,7 @@ export default function MarketplaceSearch() {
                               [['Bestseller', 'New', 'Hot Deal', 'Trending', 'Limited'][Math.floor(Math.random() * 5)]] 
                               : []),
                           // Add discount percentage if not already present
-                          is_discounted: result.isDiscounted || result.is_discounted || false,
+                          is_discounted: result.isDiscounted || false,
                           discount_percentage: result.discount_percentage || 
                             (result.isDiscounted ? Math.floor(Math.random() * 50) + 10 : undefined)
                         }}

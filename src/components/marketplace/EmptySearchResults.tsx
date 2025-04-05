@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 
 interface EmptySearchResultsProps {
   searchTerm?: string;
-  onReset: () => void;
+  onReset?: () => void;  // Make this prop optional
 }
 
 export const EmptySearchResults = ({ searchTerm, onReset }: EmptySearchResultsProps) => {
@@ -84,14 +84,16 @@ export const EmptySearchResults = ({ searchTerm, onReset }: EmptySearchResultsPr
           </Button>
         </div>
         
-        <div className="pt-2">
-          <Button 
-            variant="link" 
-            onClick={onReset}
-          >
-            Reset filters
-          </Button>
-        </div>
+        {onReset && (
+          <div className="pt-2">
+            <Button 
+              variant="link" 
+              onClick={onReset}
+            >
+              Reset filters
+            </Button>
+          </div>
+        )}
       </div>
     </motion.div>
   );

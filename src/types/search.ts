@@ -23,6 +23,7 @@ export interface SearchResult {
   highlight_tags?: string[];
   isDiscounted?: boolean;
   discount_percentage?: number;
+  is_discounted?: boolean; // Added for backward compatibility
 }
 
 export interface SearchSuggestion {
