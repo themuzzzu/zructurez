@@ -4,8 +4,9 @@ import { BusinessCard } from "@/components/BusinessCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
 import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
+import { useMemo } from "react";
 
-// Define a simpler interface to avoid complex type instantiations
+// Define a simple interface for business data
 interface BusinessType {
   id: string;
   name: string;
@@ -29,14 +30,20 @@ interface LocalBusinessSpotlightProps {
 }
 
 export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightProps) => {
-  // Fix the type issue by explicitly typing the function return and avoiding complex type inference
+  // Create stable query key
+  const queryKey = useMemo(() => 
+    ['local-businesses', businessType], 
+    [businessType]
+  );
+  
+  // Define a type-safe fetch function
   const fetchBusinesses = async (): Promise<BusinessType[]> => {
     try {
       let query = supabase
         .from('businesses')
         .select('id, name, description, image_url, category, location, contact, hours, is_open, wait_time, closure_reason, verified');
         
-      // Apply businessType filter if it's provided
+      // Apply businessType filter if provided
       if (businessType) {
         query = query.eq('business_type', businessType);
       }
@@ -51,7 +58,7 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
       
       if (!data) return [];
 
-      // Convert data to BusinessType[] directly, avoiding complex type inference
+      // Fixed: Create well-defined BusinessType objects without complex type inference
       const businesses: BusinessType[] = [];
       
       for (const item of data) {
@@ -76,10 +83,14 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
     }
   };
 
+  // Use optimized query with longer cache time
   const { data: businesses, isLoading } = useOptimizedQuery<BusinessType[]>(
-    ['local-businesses', businessType],
+    queryKey,
     fetchBusinesses,
-    { staleTime: 5 * 60 * 1000 } // 5 minutes
+    { 
+      staleTime: 15 * 60 * 1000, // 15 minutes
+      cacheTime: 30 * 60 * 1000  // 30 minutes
+    }
   );
 
   // Loading state

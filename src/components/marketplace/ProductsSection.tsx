@@ -1,6 +1,5 @@
-
-import React from "react";
-import { useQuery } from "@tanstack/react-query";
+import React, { useMemo } from "react";
+import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductGrid } from "@/components/products/ProductGrid";
 import { Button } from "@/components/ui/button";
@@ -29,9 +28,13 @@ export const ProductsSection = ({
 }: ProductsSectionProps) => {
   const [layout, setLayout] = React.useState<GridLayoutType>("grid4x4");
 
-  // Use React Query for cached data fetching
-  const { data: products, isLoading } = useQuery({
-    queryKey: ["products", { category, sortBy, limit }],
+  const queryKey = useMemo(() => 
+    ["products", { category, sortBy, limit }], 
+    [category, sortBy, limit]
+  );
+
+  const { data: products, isLoading } = useOptimizedQuery({
+    queryKey,
     queryFn: async () => {
       try {
         let query = supabase
@@ -55,7 +58,8 @@ export const ProductsSection = ({
         return [];
       }
     },
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 15 * 60 * 1000,
+    cacheTime: 30 * 60 * 1000,
   });
 
   if (!visibleOnMobile && typeof window !== "undefined" && window.innerWidth < 640) {

@@ -1,9 +1,10 @@
+
 import { useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { LoadingView } from "@/components/LoadingView";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth"; // Use our centralized auth hook
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -11,72 +12,33 @@ interface ProtectedRouteProps {
 
 export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const [isLoading, setIsLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { user, loading: authLoading, session } = useAuth();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-
+  
+  // We now use our centralized auth hook instead of directly checking supabase
   useEffect(() => {
-    let mounted = true;
-
-    const checkSession = async () => {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error('Session error:', error);
-          if (error.message.includes('invalid_credentials')) {
-            toast.error('Invalid login credentials. Please sign in again.');
-          } else {
-            toast.error('Authentication error. Please sign in again.');
-          }
-          if (mounted) {
-            setIsAuthenticated(false);
-            setIsLoading(false);
-          }
-          navigate('/auth');
-          return;
+    if (!authLoading) {
+      setIsLoading(false);
+      
+      if (!user && !session) {
+        // Only show toast if this was an unexpected session loss
+        if (localStorage.getItem('had_session') === 'true') {
+          toast.error('Your session has expired. Please sign in again.');
+          localStorage.removeItem('had_session');
         }
-
-        if (mounted) {
-          setIsAuthenticated(!!session);
-          setIsLoading(false);
-        }
-      } catch (error) {
-        console.error('Error checking session:', error);
-        if (mounted) {
-          setIsAuthenticated(false);
-          setIsLoading(false);
-        }
-        toast.error('Error checking authentication status');
-        navigate('/auth');
-      }
-    };
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_OUT') {
-        setIsAuthenticated(false);
         queryClient.clear();
-        navigate('/auth');
-      } else if (event === 'SIGNED_IN' && session) {
-        setIsAuthenticated(true);
-      } else if (event === 'TOKEN_REFRESHED' && session) {
-        setIsAuthenticated(true);
+      } else if (user && session) {
+        localStorage.setItem('had_session', 'true');
       }
-    });
+    }
+  }, [authLoading, user, session, queryClient]);
 
-    checkSession();
-
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
-  }, [navigate, queryClient]);
-
-  if (isLoading) {
+  if (isLoading || authLoading) {
     return <LoadingView />;
   }
 
-  if (!isAuthenticated) {
+  if (!session) {
     return <Navigate to="/auth" replace />;
   }
 

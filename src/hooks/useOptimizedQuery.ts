@@ -1,6 +1,7 @@
 
 import { useQuery, QueryKey, UseQueryOptions } from "@tanstack/react-query";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
+import { globalCache } from "@/utils/cacheUtils";
 
 /**
  * A wrapper around React Query's useQuery hook with built-in optimizations
@@ -13,19 +14,54 @@ export function useOptimizedQuery<TData, TError = unknown>(
     staleTime?: number;
     gcTime?: number;
     limit?: number;
+    cacheTime?: number; // Local cache TTL, separate from React Query
   }
 ) {
   // Track if this component is still mounted
   const isMountedRef = useRef(true);
+  const cacheKey = Array.isArray(queryKey) ? queryKey.join(':') : String(queryKey);
   
-  // Default staleTime to 5 minutes to reduce refetches
+  // Default staleTime to 10 minutes to drastically reduce refetches
   const defaultOptions = {
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 10 * 60 * 1000, // 10 minutes (increased from 5 mins)
+    gcTime: 30 * 60 * 1000, // 30 minutes (increased from 10 mins)
     refetchOnWindowFocus: false,
-    refetchOnMount: true,
+    refetchOnMount: false, // Changed from true to false
+    refetchOnReconnect: false, // Add this to prevent refetches on reconnect
+    retry: 1, // Limit retries to avoid cascading failures
     ...options
   };
+
+  // Create memoized query function that uses local cache first
+  const memoizedQueryFn = useCallback(async () => {
+    // Check our custom cache first (faster than React Query's cache)
+    if (options?.cacheTime) {
+      const cachedData = globalCache.get<TData>(cacheKey);
+      if (cachedData) {
+        console.debug(`Cache hit for ${cacheKey}`);
+        return cachedData;
+      }
+    }
+
+    // No cache hit, perform the actual query
+    const startTime = performance.now();
+    try {
+      const result = await queryFn();
+      const endTime = performance.now();
+      console.debug(`Query ${queryKey[0]} took ${(endTime - startTime).toFixed(2)}ms`);
+      
+      // Store in our custom cache if cacheTime is provided
+      if (options?.cacheTime && result) {
+        globalCache.set(cacheKey, result, options.cacheTime);
+      }
+      
+      return result;
+    } catch (error) {
+      const endTime = performance.now();
+      console.error(`Query ${queryKey[0]} failed after ${(endTime - startTime).toFixed(2)}ms`, error);
+      throw error;
+    }
+  }, [queryKey.toString(), options?.cacheTime]);
   
   // Set up cleanup
   useEffect(() => {
@@ -34,24 +70,9 @@ export function useOptimizedQuery<TData, TError = unknown>(
     };
   }, []);
   
-  // Add request timing logs
-  const wrappedQueryFn = async () => {
-    const startTime = performance.now();
-    try {
-      const result = await queryFn();
-      const endTime = performance.now();
-      console.debug(`Query ${queryKey[0]} took ${(endTime - startTime).toFixed(2)}ms`);
-      return result;
-    } catch (error) {
-      const endTime = performance.now();
-      console.error(`Query ${queryKey[0]} failed after ${(endTime - startTime).toFixed(2)}ms`, error);
-      throw error;
-    }
-  };
-  
   return useQuery({
     queryKey,
-    queryFn: wrappedQueryFn,
+    queryFn: memoizedQueryFn,
     ...defaultOptions
   });
 }
