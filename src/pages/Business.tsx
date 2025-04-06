@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
@@ -31,7 +32,7 @@ import type { Business, BusinessOwner, BusinessHours, StaffMember } from "@/type
 import { BusinessBannerAd } from "@/components/ads/BusinessBannerAd";
 import { BusinessCategoryScroller } from "@/components/business/BusinessCategoryScroller";
 
-interface BusinessWithRating extends Omit<Business, 'owners' | 'staff_details' | 'image_position' | 'verification_documents'> {
+interface BusinessWithRating extends Omit<Business, 'owners' | 'staff_details' | 'image_position' | 'verification_documents' | 'membership_plans'> {
   average_rating: number;
   reviews_count: number;
   business_ratings: Array<{ rating: number }>;
@@ -39,6 +40,7 @@ interface BusinessWithRating extends Omit<Business, 'owners' | 'staff_details' |
   staff_details?: StaffMember[];
   image_position?: { x: number; y: number; };
   verification_documents?: any[];
+  membership_plans?: any[];
 }
 
 const Business = () => {
@@ -137,12 +139,29 @@ const Business = () => {
         typedVerificationDocuments = [];
       }
       
+      // Parse membership_plans from JSON to array
+      let typedMembershipPlans: any[] = [];
+      try {
+        if (business.membership_plans) {
+          if (typeof business.membership_plans === 'object' && Array.isArray(business.membership_plans)) {
+            typedMembershipPlans = business.membership_plans as any[];
+          } else if (typeof business.membership_plans === 'string') {
+            typedMembershipPlans = JSON.parse(business.membership_plans);
+          }
+        }
+      } catch (e) {
+        console.error("Error parsing membership plans:", e);
+        // Provide default empty array if parsing fails
+        typedMembershipPlans = [];
+      }
+      
       return {
         ...business,
         owners: typedOwners,
         staff_details: typedStaffDetails,
         image_position: typedImagePosition,
         verification_documents: typedVerificationDocuments,
+        membership_plans: typedMembershipPlans,
         average_rating: averageRating,
         reviews_count: ratings.length,
         business_ratings: ratings
