@@ -3,7 +3,6 @@ import React from "react";
 import { Layout } from "@/components/layout/Layout";
 import { NotFound } from "@/components/NotFound";
 import { useParams } from "react-router-dom";
-import { LikeProvider } from "@/components/products/LikeContext";
 
 // Import MarketplaceIndex component directly
 import MarketplaceIndex from "./marketplace/index";
@@ -16,13 +15,11 @@ const Marketplace = () => {
     return <NotFound />;
   }
   
-  // Render the marketplace with the proper layout and LikeProvider
+  // Render the marketplace with the proper layout
   return (
     <Layout>
       <div className="overflow-x-hidden">
-        <LikeProvider>
-          <MarketplaceIndex />
-        </LikeProvider>
+        <MarketplaceIndex />
       </div>
     </Layout>
   );

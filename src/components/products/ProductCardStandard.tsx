@@ -1,3 +1,4 @@
+
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,6 @@ import { ProductType } from "./types/ProductTypes";
 import { Product } from "@/types/product";
 import { ProductCardRating } from "./ProductCardRating";
 import { ProductLikeButton } from "./ProductLikeButton";
-import { LikeProvider } from "./LikeContext";
 
 interface ProductCardStandardProps {
   product: Product | ProductType;
@@ -93,13 +93,11 @@ export const ProductCardStandard = ({
         )}
         
         <div className="absolute top-2 right-2">
-          <LikeProvider>
-            <ProductLikeButton 
-              productId={product.id} 
-              size="sm" 
-              variant="ghost"
-            />
-          </LikeProvider>
+          <ProductLikeButton 
+            productId={product.id} 
+            size="sm" 
+            variant="ghost"
+          />
         </div>
       </div>
       

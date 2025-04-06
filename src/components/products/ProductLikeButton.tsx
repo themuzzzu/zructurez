@@ -1,12 +1,10 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Heart } from "lucide-react";
-import { useLike } from "./LikeContext";
-import { Loader2 } from "lucide-react";
+import { Heart, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useWishlist } from "@/hooks/useWishlist";
 
 interface ProductLikeButtonProps {
   productId: string;
@@ -21,50 +19,27 @@ export const ProductLikeButton = ({
   variant = "ghost",
   className = ""
 }: ProductLikeButtonProps) => {
-  const { isLiked, toggleLike, isLoading: contextLoading } = useLike();
-  const [isProcessing, setIsProcessing] = useState(false);
+  const { isInWishlist, toggleWishlist, loading } = useWishlist();
   const [animating, setAnimating] = useState(false);
   
   // Get the actual liked status
-  const liked = isLiked(productId);
-  const isLoading = contextLoading || isProcessing;
+  const liked = isInWishlist(productId);
 
   const handleClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
     
-    if (isLoading) return;
+    if (loading) return;
     
-    try {
-      setIsProcessing(true);
-      
-      // Check current status before toggle
-      const willBeLiked = !liked;
-      
-      if (willBeLiked) {
-        setAnimating(true);
-        // Reset animation after it completes
-        setTimeout(() => setAnimating(false), 1000);
-      }
-      
-      // Perform the actual API call
-      await toggleLike(productId);
-      
-      // Show toast message based on like state
-      if (willBeLiked) {
-        toast.success("Added to wishlist");
-      } else {
-        toast.success("Removed from wishlist");
-      }
-    } catch (error: any) {
-      // Error is handled in the context
-      if (error.message !== "Authentication required") {
-        toast.error("Something went wrong");
-        console.error("Error toggling product like:", error);
-      }
-    } finally {
-      setIsProcessing(false);
+    if (!liked) {
+      // Only animate when adding to wishlist
+      setAnimating(true);
+      // Reset animation after it completes
+      setTimeout(() => setAnimating(false), 1000);
     }
+    
+    // Call the toggleWishlist function
+    await toggleWishlist(productId);
   };
 
   return (
@@ -74,16 +49,16 @@ export const ProductLikeButton = ({
       className={cn(
         "relative overflow-visible transition-all",
         liked ? "text-red-500" : "text-gray-400 hover:text-red-400",
-        isLoading ? "opacity-70 cursor-not-allowed" : "cursor-pointer",
+        loading ? "opacity-70 cursor-not-allowed" : "cursor-pointer",
         className
       )}
       onClick={handleClick}
-      disabled={isLoading}
+      disabled={loading}
       aria-label={liked ? "Remove from wishlist" : "Add to wishlist"}
       type="button"
     >
       <div className="relative z-10">
-        {isLoading ? (
+        {loading ? (
           <Loader2 className="h-4 w-4 animate-spin" />
         ) : (
           <Heart 

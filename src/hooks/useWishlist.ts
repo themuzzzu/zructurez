@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -35,7 +35,6 @@ export const useWishlist = () => {
 
       return data as WishlistItem[];
     },
-    enabled: true, // Only fetch if user is authenticated
   });
 
   // Check if a product is in the wishlist

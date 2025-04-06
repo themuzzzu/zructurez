@@ -9,7 +9,6 @@ import {
   CarouselNext, 
   CarouselPrevious 
 } from "@/components/ui/carousel";
-import { LikeProvider } from "@/components/products/LikeContext";
 import { ProductLikeButton } from "@/components/products/ProductLikeButton";
 
 interface ServiceProductCardProps {
@@ -71,13 +70,11 @@ export const ServiceProductCard = ({ product, onAddToCart, type }: ServiceProduc
       <div className="flex items-center justify-between">
         <span className="font-semibold">₹{price}</span>
         <div className="flex items-center gap-2">
-          <LikeProvider>
-            <ProductLikeButton
-              productId={product.id}
-              size="sm"
-              variant="ghost"
-            />
-          </LikeProvider>
+          <ProductLikeButton
+            productId={product.id}
+            size="sm"
+            variant="ghost"
+          />
           <Button
             onClick={onAddToCart}
             className="gap-2"
