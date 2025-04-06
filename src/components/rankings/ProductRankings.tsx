@@ -6,7 +6,9 @@ import { ProductCard } from "@/components/products/ProductCard";
 import { Product } from "@/types/product";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
-import { TrendingUp, Heart, ShoppingBag } from "lucide-react";
+import { TrendingUp, Heart, ShoppingBag, Eye } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export const ProductRankings = () => {
   const [rankingType, setRankingType] = useState<"views" | "wishlisted" | "sales">("views");
@@ -49,9 +51,15 @@ export const ProductRankings = () => {
               
             if (error) throw error;
             
-            // Sort products according to wishlist count
+            // Sort products according to wishlist count and add count to each product
             productsData = sortedProductIds
-              .map(id => products?.find(product => product.id === id))
+              .map(id => {
+                const product = products?.find(p => p.id === id);
+                return product ? {
+                  ...product,
+                  count: wishlistCounts[id]
+                } : null;
+              })
               .filter(Boolean) as any[];
             
             return productsData || [];
@@ -87,9 +95,15 @@ export const ProductRankings = () => {
               
             if (productsSalesError) throw productsSalesError;
             
-            // Sort products according to sales count
+            // Sort products according to sales count and add count to each product
             productsData = sortedSalesIds
-              .map(id => salesProducts?.find(product => product.id === id))
+              .map(id => {
+                const product = salesProducts?.find(p => p.id === id);
+                return product ? {
+                  ...product,
+                  count: salesCounts[id]
+                } : null;
+              })
               .filter(Boolean) as any[];
             
             return productsData || [];
@@ -104,7 +118,12 @@ export const ProductRankings = () => {
               .limit(8);
               
             if (viewsError) throw viewsError;
-            return data || [];
+            
+            // Add count (views) to each product
+            return data?.map(product => ({
+              ...product,
+              count: product.views || 0
+            })) || [];
         }
       } catch (error) {
         console.error("Error fetching top products:", error);
@@ -119,11 +138,11 @@ export const ProductRankings = () => {
     return (
       <div className="space-y-4 mb-8">
         <h3 className="text-xl md:text-2xl font-bold">Product Rankings</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map((i) => (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
             <Card key={i} className="overflow-hidden">
-              <Skeleton className="h-48 w-full" />
-              <div className="p-3">
+              <Skeleton className="h-36 w-full" />
+              <div className="p-2">
                 <Skeleton className="h-4 w-3/4 mb-2" />
                 <Skeleton className="h-4 w-1/2" />
               </div>
@@ -140,55 +159,109 @@ export const ProductRankings = () => {
     return null;
   }
 
+  const renderCountLabel = (count: number) => {
+    switch (rankingType) {
+      case "wishlisted":
+        return `${count} ${count === 1 ? 'wishlist' : 'wishlists'}`;
+      case "sales":
+        return `${count} sold`;
+      case "views":
+        return `${count} ${count === 1 ? 'view' : 'views'}`;
+      default:
+        return "";
+    }
+  };
+
+  const getIconForType = () => {
+    switch (rankingType) {
+      case "wishlisted":
+        return <Heart className="h-4 w-4 mr-1" />;
+      case "sales":
+        return <ShoppingBag className="h-4 w-4 mr-1" />;
+      case "views":
+        return <Eye className="h-4 w-4 mr-1" />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center mb-3">
         <h2 className="text-xl md:text-2xl font-bold">Product Rankings</h2>
-        <div className="flex gap-2">
-          <div 
-            className={`cursor-pointer flex items-center gap-1 px-3 py-1 rounded-full ${
+        <div className="flex flex-wrap gap-2">
+          <button 
+            className={cn(
+              "cursor-pointer flex items-center gap-1 px-3 py-1 rounded-full text-sm transition-colors",
               rankingType === "views" 
                 ? "bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100" 
                 : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300"
-            }`}
+            )}
             onClick={() => setRankingType("views")}
           >
             <TrendingUp className="h-4 w-4" />
-            <span className="text-sm">Most Viewed</span>
-          </div>
+            <span className="text-sm hidden sm:inline">Most Viewed</span>
+          </button>
           
-          <div 
-            className={`cursor-pointer flex items-center gap-1 px-3 py-1 rounded-full ${
+          <button 
+            className={cn(
+              "cursor-pointer flex items-center gap-1 px-3 py-1 rounded-full text-sm transition-colors",
               rankingType === "wishlisted" 
                 ? "bg-pink-100 dark:bg-pink-900 text-pink-800 dark:text-pink-100" 
                 : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300"
-            }`}
+            )}
             onClick={() => setRankingType("wishlisted")}
           >
             <Heart className="h-4 w-4" />
-            <span className="text-sm">Most Wishlisted</span>
-          </div>
+            <span className="text-sm hidden sm:inline">Most Wishlisted</span>
+          </button>
           
-          <div 
-            className={`cursor-pointer flex items-center gap-1 px-3 py-1 rounded-full ${
+          <button 
+            className={cn(
+              "cursor-pointer flex items-center gap-1 px-3 py-1 rounded-full text-sm transition-colors",
               rankingType === "sales" 
                 ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100" 
                 : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300"
-            }`}
+            )}
             onClick={() => setRankingType("sales")}
           >
             <ShoppingBag className="h-4 w-4" />
-            <span className="text-sm">Top Selling</span>
-          </div>
+            <span className="text-sm hidden sm:inline">Top Selling</span>
+          </button>
         </div>
       </div>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      {/* Mobile scrollable view */}
+      <div className="block md:hidden">
+        <ScrollArea className="w-full whitespace-nowrap pb-4">
+          <div className="flex gap-3 px-1 pb-2">
+            {products.map((product, index) => (
+              <div key={product.id} className="relative w-36 flex-shrink-0">
+                <ProductCard product={product} layout="grid4x4" />
+                <div className="absolute top-2 left-2 bg-black/70 text-white w-6 h-6 flex items-center justify-center rounded-full font-bold text-sm z-10">
+                  {index + 1}
+                </div>
+                <div className="absolute bottom-12 left-2 right-2 bg-black/70 text-white text-xs py-1 px-2 rounded flex items-center justify-center">
+                  {getIconForType()}
+                  <span>{renderCountLabel(product.count || 0)}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
+      </div>
+      
+      {/* Desktop grid view */}
+      <div className="hidden md:grid grid-cols-3 lg:grid-cols-6 gap-3">
         {products.map((product, index) => (
           <div key={product.id} className="relative">
             <ProductCard product={product} layout="grid4x4" />
-            <div className="absolute top-2 right-2 bg-black/70 text-white w-6 h-6 flex items-center justify-center rounded-full font-bold text-sm">
+            <div className="absolute top-2 left-2 bg-black/70 text-white w-6 h-6 flex items-center justify-center rounded-full font-bold text-sm z-10">
               {index + 1}
+            </div>
+            <div className="absolute bottom-12 left-2 right-2 bg-black/70 text-white text-xs py-1 px-2 rounded flex items-center justify-center">
+              {getIconForType()}
+              <span>{renderCountLabel(product.count || 0)}</span>
             </div>
           </div>
         ))}

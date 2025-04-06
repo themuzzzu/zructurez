@@ -9,7 +9,6 @@ import { SponsoredProducts } from "@/components/marketplace/SponsoredProducts";
 import { ShopByCategory } from "@/components/marketplace/ShopByCategory";
 import { TrendingProducts } from "@/components/marketplace/TrendingProducts"; 
 import { PersonalizedRecommendations } from "@/components/marketplace/PersonalizedRecommendations";
-import { TopProducts } from "@/components/recommendations/TopProducts";
 import { ProductRankings } from "@/components/rankings/ProductRankings";
 import { BrowseTabContent } from "@/components/marketplace/BrowseTabContent";
 import { SkeletonCard } from "@/components/loaders/SkeletonCard";
@@ -122,8 +121,6 @@ export const OptimizedMarketplace = () => {
   
   return (
     <div className="container max-w-[1400px] mx-auto px-3 sm:px-4 py-4 sm:py-6">
-      {/* Remove progress loader */}
-      
       {/* Single Search Bar at the top with improved design */}
       <div className="mb-4 sm:mb-6">
         <AutocompleteSearch 
@@ -147,17 +144,17 @@ export const OptimizedMarketplace = () => {
         <ShopByCategory onCategorySelect={handleCategoryChange} />
       </div>
       
-      {/* Flash Sale Section */}
-      <LazySection>
-        <div className="mb-4 sm:mb-8">
-          <FlashSale />
-        </div>
-      </LazySection>
-      
       {/* Real-time Product Rankings */}
       <LazySection>
         <div className="mb-4 sm:mb-8">
           <ProductRankings />
+        </div>
+      </LazySection>
+      
+      {/* Flash Sale Section */}
+      <LazySection>
+        <div className="mb-4 sm:mb-8">
+          <FlashSale />
         </div>
       </LazySection>
       

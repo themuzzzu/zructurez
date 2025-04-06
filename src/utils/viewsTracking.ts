@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -161,5 +160,22 @@ export const trackEntityView = async (
     await incrementViewCount(entityType, entityId);
   } catch (error) {
     console.error(`Error tracking ${entityType} view:`, error);
+  }
+};
+
+/**
+ * Format large numbers for display
+ * @param num The number to format
+ * @returns Formatted number as string (e.g. 1.2k, 3.4M)
+ */
+export const formatCountNumber = (num: number): string => {
+  if (num >= 1000000) {
+    return (num / 1000000).toFixed(1) + 'M';
+  } else if (num >= 10000) {
+    return Math.floor(num / 1000) + 'k';
+  } else if (num >= 1000) {
+    return (num / 1000).toFixed(1) + 'k';
+  } else {
+    return num.toString();
   }
 };
