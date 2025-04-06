@@ -51,8 +51,8 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
         
         if (!data) return [];
         
-        // Transform to BusinessType with explicit casting to avoid TS error
-        return data.map((item) => ({
+        // Use a simple type assertion to avoid deep type instantiation
+        return (data as any[]).map(item => ({
           id: item.id,
           name: item.name,
           description: item.description || "",
