@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
@@ -197,6 +198,14 @@ export default function Services() {
         </div>
         
         <h2 className="text-xl font-semibold mb-4">All Services</h2>
+        
+        {/* Grid Layout Selector for All Services Section */}
+        <div className="flex justify-end mb-4">
+          <GridLayoutSelector 
+            layout={gridLayout}
+            onChange={(layout) => setGridLayout(layout)}
+          />
+        </div>
         
         {loading ? (
           <div className="flex justify-center items-center py-12">

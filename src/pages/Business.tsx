@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
@@ -31,22 +32,7 @@ import type { Business } from "@/types/business";
 import { BusinessBannerAd } from "@/components/ads/BusinessBannerAd";
 import { BusinessCategoryScroller } from "@/components/business/BusinessCategoryScroller";
 
-interface BusinessWithRating {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  location?: string;
-  contact?: string;
-  hours?: string;
-  verified?: boolean;
-  image_url?: string;
-  is_open?: boolean;
-  wait_time?: string;
-  closure_reason?: string;
-  created_at?: string;
-  appointment_price?: number;
-  consultation_price?: number;
+interface BusinessWithRating extends Business {
   average_rating: number;
   reviews_count: number;
   business_ratings: Array<{ rating: number }>;
@@ -97,21 +83,7 @@ const Business = () => {
       const averageRating = ratings.length > 0 ? totalRating / ratings.length : 0;
       
       return {
-        id: business.id,
-        name: business.name,
-        description: business.description,
-        category: business.category,
-        location: business.location,
-        contact: business.contact,
-        hours: business.hours,
-        verified: business.verified,
-        image_url: business.image_url,
-        is_open: business.is_open,
-        wait_time: business.wait_time,
-        closure_reason: business.closure_reason,
-        created_at: business.created_at,
-        appointment_price: business.appointment_price,
-        consultation_price: business.consultation_price,
+        ...business,
         average_rating: averageRating,
         reviews_count: ratings.length,
         business_ratings: ratings
