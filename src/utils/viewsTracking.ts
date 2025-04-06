@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 /**
@@ -31,39 +30,27 @@ export const incrementViewCount = async (
     
     console.log(`Incrementing view count for ${entityType} ${entityId}`);
     
-    // Increment the view count based on entity type
+    // Use the correct functions for each entity type
     if (entityType === 'product') {
-      const { error } = await supabase
-        .from('products')
-        .update({ views: ((product: any) => (product.views || 0) + 1) })
-        .eq('id', entityId);
+      const { error } = await supabase.rpc('increment_product_views', { product_id_param: entityId });
       
       if (error) {
         console.error(`Error incrementing ${entityType} views:`, error);
       }
     } else if (entityType === 'business') {
-      const { error } = await supabase
-        .from('business_analytics')
-        .update({ page_views: ((analytics: any) => (analytics.page_views || 0) + 1) })
-        .eq('business_id', entityId);
+      const { error } = await supabase.rpc('increment_business_views', { business_id_param: entityId });
         
       if (error) {
         console.error(`Error incrementing ${entityType} views:`, error);
       }
     } else if (entityType === 'service') {
-      const { error } = await supabase
-        .from('services')
-        .update({ views: ((service: any) => (service.views || 0) + 1) })
-        .eq('id', entityId);
+      const { error } = await supabase.rpc('increment_service_views', { service_id_param: entityId });
         
       if (error) {
         console.error(`Error incrementing ${entityType} views:`, error);
       }
     } else if (entityType === 'post') {
-      const { error } = await supabase
-        .from('posts')
-        .update({ views: ((post: any) => (post.views || 0) + 1) })
-        .eq('id', entityId);
+      const { error } = await supabase.rpc('increment_post_views', { post_id_param: entityId });
         
       if (error) {
         console.error(`Error incrementing ${entityType} views:`, error);

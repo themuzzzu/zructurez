@@ -9,9 +9,9 @@ interface ProductGridProps {
   children?: React.ReactNode;
   className?: string;
   gridLayout?: GridLayoutType;
+  layout?: GridLayoutType;  // Add this alias for compatibility
   horizontalScrollOnMobile?: boolean;
   products?: Product[];
-  layout?: GridLayoutType;
   isLoading?: boolean;
   searchQuery?: string;
   onOpenAddProductDialog?: () => void;

@@ -9,6 +9,7 @@ interface ProductGridProps {
   children?: React.ReactNode;
   className?: string;
   gridLayout?: GridLayoutType;
+  layout?: GridLayoutType;  // Add this alias for compatibility
   horizontalScrollOnMobile?: boolean;
   products?: Product[];
   isLoading?: boolean;
@@ -20,7 +21,8 @@ interface ProductGridProps {
 export const ProductGrid: React.FC<ProductGridProps> = ({ 
   children, 
   className,
-  gridLayout = "grid4x4",
+  gridLayout,
+  layout,  // Accept layout as an alias for gridLayout
   horizontalScrollOnMobile = true,
   products,
   isLoading,
@@ -28,6 +30,8 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
   onOpenAddProductDialog,
   onLayoutChange
 }) => {
+  // Use layout as a fallback if gridLayout is not provided
+  const effectiveLayout = gridLayout || layout || "grid4x4";
   const isMobile = useMediaQuery("(max-width: 640px)");
   
   // If products are provided, render them as ProductCard components
@@ -35,7 +39,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
     if (!products) return null;
     
     return products.map((product) => (
-      <ProductCard key={product.id} product={product} layout={gridLayout} />
+      <ProductCard key={product.id} product={product} layout={effectiveLayout} />
     ));
   };
   
@@ -61,7 +65,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
   
   // For desktop or if horizontal scroll is disabled
   const getGridClasses = () => {
-    switch (gridLayout) {
+    switch (effectiveLayout) {
       case "grid3x3":
         return "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4";
       case "grid2x2":
