@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { BusinessCard } from "@/components/BusinessCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
+import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
 
 interface BusinessType {
   id: string;
@@ -28,9 +29,9 @@ interface LocalBusinessSpotlightProps {
 }
 
 export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightProps) => {
-  const { data: businesses, isLoading } = useQuery({
-    queryKey: ['local-businesses', businessType],
-    queryFn: async () => {
+  const { data: businesses, isLoading } = useOptimizedQuery<BusinessType[]>(
+    ['local-businesses', businessType],
+    async () => {
       try {
         let query = supabase
           .from('businesses')
@@ -50,8 +51,8 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
         if (error) throw error;
         
         if (!data) return [];
-        
-        // Use a simple type assertion to avoid deep type instantiation
+
+        // Cast the response data to an array of any, then map to our BusinessType
         return (data as any[]).map(item => ({
           id: item.id,
           name: item.name,
@@ -63,15 +64,14 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
           wait_time: item.wait_time,
           closure_reason: item.closure_reason,
           verified: item.verified,
-        })) as BusinessType[];
+        }));
       } catch (err) {
         console.error("Error fetching local businesses:", err);
-        return [] as BusinessType[];
+        return [];
       }
     },
-    // Add staleTime to prevent excessive refetches
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
+    { staleTime: 5 * 60 * 1000 } // 5 minutes
+  );
 
   // Loading state
   if (isLoading) {
