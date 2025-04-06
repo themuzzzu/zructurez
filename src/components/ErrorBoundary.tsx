@@ -1,53 +1,48 @@
 
-import { Component, ReactNode, ErrorInfo } from "react";
-import { ErrorView } from "./ErrorView";
+import React, { Component, ErrorInfo, ReactNode } from 'react';
 
-interface ErrorBoundaryProps {
+interface Props {
   children: ReactNode;
   fallback?: ReactNode;
 }
 
-interface ErrorBoundaryState {
+interface State {
   hasError: boolean;
   error: Error | null;
 }
 
-export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  constructor(props: ErrorBoundaryProps) {
-    super(props);
-    this.state = {
-      hasError: false,
-      error: null
-    };
-  }
+export class ErrorBoundary extends Component<Props, State> {
+  public state: State = {
+    hasError: false,
+    error: null
+  };
 
-  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+  public static getDerivedStateFromError(error: Error): State {
     // Update state so the next render will show the fallback UI
-    return { 
-      hasError: true,
-      error
-    };
+    return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    // Log the error to the console
-    console.error("Error caught by ErrorBoundary:", error);
-    console.error("Error info:", errorInfo);
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('Uncaught error:', error, errorInfo);
   }
 
-  render() {
+  public render() {
     if (this.state.hasError) {
-      // If a custom fallback is provided, use it
       if (this.props.fallback) {
         return this.props.fallback;
       }
       
-      // Default error UI
       return (
-        <ErrorView 
-          title="Component Error" 
-          message={`We encountered an error loading this component: ${this.state.error?.message || "Unknown error"}`} 
-        />
+        <div className="p-4 rounded-md bg-red-50 border border-red-200">
+          <h2 className="text-red-800 font-semibold mb-2">Something went wrong</h2>
+          <p className="text-red-600 text-sm">{this.state.error?.message || 'An error occurred while rendering this component'}</p>
+          <button 
+            className="mt-2 px-3 py-1 text-sm bg-red-100 hover:bg-red-200 text-red-800 rounded-md transition-colors"
+            onClick={() => this.setState({ hasError: false, error: null })}
+          >
+            Try again
+          </button>
+        </div>
       );
     }
 

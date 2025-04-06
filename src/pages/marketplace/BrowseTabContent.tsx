@@ -8,6 +8,7 @@ import { TrendingProducts } from "@/components/marketplace/TrendingProducts";
 import { CategoryIconGrid } from "@/components/marketplace/CategoryIconGrid";
 import { CategorySubcategoryGrid } from "@/components/marketplace/CategorySubcategoryGrid";
 import { MarketplaceBanner } from "@/components/marketplace/MarketplaceBanner";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 interface BrowseTabContentProps {
   searchResults?: any[];
@@ -75,44 +76,60 @@ export const BrowseTabContent = ({
   return (
     <div className="space-y-6">
       {/* Banner */}
-      <MarketplaceBanner />
+      <ErrorBoundary>
+        <MarketplaceBanner />
+      </ErrorBoundary>
       
       {/* Category Icons - Positioned between banner and sponsored products */}
-      <div className="mb-6">
-        <h2 className="text-xl font-bold mb-4">Shop by Category</h2>
-        <CategoryIconGrid onCategorySelect={handleCategorySelect} />
-      </div>
+      <ErrorBoundary>
+        <div className="mb-6">
+          <h2 className="text-xl font-bold mb-4">Shop by Category</h2>
+          <CategoryIconGrid onCategorySelect={handleCategorySelect} />
+        </div>
+      </ErrorBoundary>
       
       {/* Sponsored Products */}
-      <SponsoredProducts />
+      <ErrorBoundary>
+        <SponsoredProducts />
+      </ErrorBoundary>
       
       {/* Trending Products */}
-      <TrendingProducts />
+      <ErrorBoundary>
+        <TrendingProducts />
+      </ErrorBoundary>
       
       {/* Categories Navigation */}
-      <div className="mb-6 px-2">
-        <Categories 
-          onCategorySelect={handleCategorySelect} 
-          showAllCategories={true}
-        />
-      </div>
+      <ErrorBoundary>
+        <div className="mb-6 px-2">
+          <Categories 
+            onCategorySelect={handleCategorySelect} 
+            showAllCategories={true}
+          />
+        </div>
+      </ErrorBoundary>
       
       {/* If a category is selected, display subcategories */}
       {selectedCategory !== "all" && (
-        <div className="mb-8">
-          <h2 className="text-xl font-bold mb-4 px-2">Browse {selectedCategory.replace(/-/g, ' ')}</h2>
-          <CategorySubcategoryGrid onCategorySelect={handleSubcategorySelect} />
-        </div>
+        <ErrorBoundary>
+          <div className="mb-8">
+            <h2 className="text-xl font-bold mb-4 px-2">Browse {selectedCategory.replace(/-/g, ' ')}</h2>
+            <CategorySubcategoryGrid onCategorySelect={handleSubcategorySelect} />
+          </div>
+        </ErrorBoundary>
       )}
       
       {/* Product Sections */}
-      <div className="space-y-12">
-        {/* Shopping Section - filtered by category */}
-        <ShoppingSection 
-          searchQuery={searchTerm || ""}
-          selectedCategory={selectedCategory === "all" ? "" : selectedCategory}
-        />
-      </div>
+      <ErrorBoundary>
+        <div className="space-y-12">
+          {/* Shopping Section - filtered by category */}
+          <ShoppingSection 
+            searchQuery={searchTerm || ""}
+            selectedCategory={selectedCategory === "all" ? "" : selectedCategory}
+          />
+        </div>
+      </ErrorBoundary>
     </div>
   );
 };
+
+export default BrowseTabContent;

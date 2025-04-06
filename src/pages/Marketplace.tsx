@@ -4,6 +4,8 @@ import { Layout } from "@/components/layout/Layout";
 import { NotFound } from "@/components/NotFound";
 import { useParams } from "react-router-dom";
 import { OptimizedMarketplace } from "./marketplace/OptimizedMarketplace";
+import { Suspense } from "react";
+import { LoadingView } from "@/components/LoadingView";
 
 const Marketplace = () => {
   const params = useParams();
@@ -17,7 +19,9 @@ const Marketplace = () => {
   return (
     <Layout>
       <div className="overflow-x-hidden">
-        <OptimizedMarketplace />
+        <Suspense fallback={<LoadingView />}>
+          <OptimizedMarketplace />
+        </Suspense>
       </div>
     </Layout>
   );

@@ -1,5 +1,5 @@
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
 import { AutocompleteSearch } from "@/components/marketplace/AutocompleteSearch";
@@ -10,22 +10,39 @@ import { ShopByCategory } from "@/components/marketplace/ShopByCategory";
 import { TrendingProducts } from "@/components/marketplace/TrendingProducts"; 
 import { PersonalizedRecommendations } from "@/components/marketplace/PersonalizedRecommendations";
 import { ProductRankings } from "@/components/rankings/ProductRankings";
-import { BrowseTabContent } from "@/components/marketplace/BrowseTabContent";
-import { SkeletonCard } from "@/components/loaders";
-import { useLoading } from "@/providers/LoadingProvider";
-import { FlashSale } from "@/components/marketplace/FlashSale";
+import { BrowseTabContent } from "@/pages/marketplace/BrowseTabContent";
+import { LoadingView } from "@/components/LoadingView";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/components/ui/use-toast";
 
-const LazySection = ({ children, fallbackCount = 4 }) => (
-  <Suspense fallback={
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      {Array.from({ length: fallbackCount }).map((_, i) => (
-        <SkeletonCard key={i} />
-      ))}
+// Create a fallback skeleton component
+const SkeletonCard = () => (
+  <div className="rounded-md overflow-hidden border">
+    <div className="h-48 bg-muted animate-pulse"></div>
+    <div className="p-3 space-y-2">
+      <div className="h-4 bg-muted animate-pulse rounded w-3/4"></div>
+      <div className="h-4 bg-muted animate-pulse rounded w-1/2"></div>
     </div>
-  }>
-    {children}
-  </Suspense>
+  </div>
 );
+
+const LazySection = ({ children, fallbackCount = 4 }: { children: React.ReactNode, fallbackCount?: number }) => (
+  <ErrorBoundary fallback={<div className="p-4 text-red-500">Failed to load section. Please refresh.</div>}>
+    <Suspense fallback={
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {Array.from({ length: fallbackCount }).map((_, i) => (
+          <SkeletonCard key={i} />
+        ))}
+      </div>
+    }>
+      {children}
+    </Suspense>
+  </ErrorBoundary>
+);
+
+// Lazy load the FlashSale component as it might be heavy
+const FlashSale = lazy(() => import('@/components/marketplace/FlashSale').then(mod => ({ default: mod.FlashSale || mod.default })));
 
 export const OptimizedMarketplace = () => {
   const navigate = useNavigate();
@@ -34,6 +51,7 @@ export const OptimizedMarketplace = () => {
   const queryParam = searchParams.get("q") || "";
   const categoryParam = searchParams.get("category") || "all";
   const subcategoryParam = searchParams.get("subcategory") || "";
+  const { toast } = useToast();
   
   // State for search and cart
   const [searchQuery, setSearchQuery] = useState(queryParam);
@@ -50,15 +68,14 @@ export const OptimizedMarketplace = () => {
   const [sortOption, setSortOption] = useState("newest");
   const [priceRange, setPriceRange] = useState("all");
   const [gridLayout, setGridLayout] = useState<GridLayoutType>("grid4x4");
-  
-  const { setLoading } = useLoading();
+  const [isLoading, setIsLoading] = useState(true);
   
   // Show loading indicator when page loads
   useEffect(() => {
-    setLoading(true);
-    const timeout = setTimeout(() => setLoading(false), 800);
+    setIsLoading(true);
+    const timeout = setTimeout(() => setIsLoading(false), 800);
     return () => clearTimeout(timeout);
-  }, [setLoading]);
+  }, []);
   
   // Update state when URL parameters change
   useEffect(() => {
@@ -75,6 +92,14 @@ export const OptimizedMarketplace = () => {
     }
   }, [categoryParam, subcategoryParam, queryParam]);
   
+  useEffect(() => {
+    console.log("OptimizedMarketplace rendered");
+    
+    return () => {
+      console.log("OptimizedMarketplace unmounted");
+    };
+  }, []);
+
   const resetFilters = () => {
     setSelectedCategory("all");
     setSelectedSubcategory("");
@@ -119,6 +144,10 @@ export const OptimizedMarketplace = () => {
     });
   };
   
+  if (isLoading) {
+    return <LoadingView />;
+  }
+  
   return (
     <div className="container max-w-[1400px] mx-auto px-3 sm:px-4 py-4 sm:py-6">
       {/* Single Search Bar at the top with improved design */}
@@ -140,9 +169,11 @@ export const OptimizedMarketplace = () => {
       </LazySection>
       
       {/* New Shop by Category section */}
-      <div className="mb-4 sm:mb-6">
-        <ShopByCategory onCategorySelect={handleCategoryChange} />
-      </div>
+      <ErrorBoundary>
+        <div className="mb-4 sm:mb-6">
+          <ShopByCategory onCategorySelect={handleCategoryChange} />
+        </div>
+      </ErrorBoundary>
       
       {/* Real-time Product Rankings */}
       <LazySection>
