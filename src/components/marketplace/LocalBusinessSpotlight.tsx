@@ -49,8 +49,11 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
         
         if (error) throw error;
         
+        // Explicitly cast the data to avoid excessive type instantiation
+        const businessData = data as any[];
+        
         // Transform the data to match the BusinessType interface
-        const transformedData: BusinessType[] = data.map(item => ({
+        const transformedData: BusinessType[] = businessData.map(item => ({
           id: item.id,
           name: item.name,
           description: item.description || "",

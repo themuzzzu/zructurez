@@ -54,15 +54,28 @@ const AdDashboard = () => {
 
         if (error) {
           console.error('Error fetching ad performance:', error);
+          setAdsData([]);
           return;
         }
 
         // Process the data to aggregate daily performance
         const dailyPerformance: { [date: string]: AdPerformance } = {};
         
-        if (data && data.length > 0) {
-          data.forEach((ad: AdData) => {
-            if (!ad.start_date) return;
+        if (data && Array.isArray(data) && data.length > 0) {
+          // Check if we have valid data with the expected fields
+          data.forEach((item) => {
+            // Skip invalid items or items with errors
+            if (!item || typeof item === 'string' || !item.start_date) {
+              return;
+            }
+            
+            // Type assertion to safely access properties
+            const ad = item as {
+              start_date: string;
+              impressions?: number;
+              clicks?: number;
+              reach?: number;
+            };
             
             const date = format(new Date(ad.start_date), 'yyyy-MM-dd');
             if (!dailyPerformance[date]) {
@@ -86,6 +99,7 @@ const AdDashboard = () => {
         }
       } catch (error) {
         console.error('Failed to fetch ad performance data', error);
+        setAdsData([]);
       }
     };
 
