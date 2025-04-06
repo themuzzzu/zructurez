@@ -56,8 +56,7 @@ export const BusinessRankingsSection = () => {
 
   if (isLoading) {
     return (
-      <div className="space-y-4 mb-8">
-        <h3 className="text-xl md:text-2xl font-bold">Business Rankings</h3>
+      <div className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
             <Card key={i} className="overflow-hidden">
@@ -109,11 +108,7 @@ export const BusinessRankingsSection = () => {
   };
 
   return (
-    <div className="space-y-4 mb-8">
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl md:text-2xl font-bold">Rankings</h2>
-      </div>
-
+    <div className="space-y-4">
       <Tabs defaultValue="viewed" value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-4">
           <TabsTrigger value="viewed" className="flex items-center gap-1">
@@ -213,3 +208,5 @@ export const BusinessRankingsSection = () => {
     </div>
   );
 };
+
+export default BusinessRankingsSection;

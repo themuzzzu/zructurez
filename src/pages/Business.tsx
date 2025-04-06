@@ -1,12 +1,11 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { BusinessCard } from "@/components/BusinessCard";
-import { BusinessCategoryFilter } from "@/components/BusinessCategoryFilter";
 import { SearchInput } from "@/components/SearchInput";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, TrendingUp, Store } from "lucide-react";
 import { Link } from "react-router-dom";
 import { CreateBusinessForm } from "@/components/CreateBusinessForm";
 import { useQuery } from "@tanstack/react-query";
@@ -15,22 +14,35 @@ import { LoadingView } from "@/components/LoadingView";
 import { ErrorView } from "@/components/ErrorView";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SearchHero } from "@/components/home/SearchHero";
-import { BusinessCategoryGrid } from "@/components/home/BusinessCategoryGrid";
-import { QuickAccessServices } from "@/components/home/QuickAccessServices";
-import { TrendingServices } from "@/components/home/TrendingServices";
-import { PopularCategories } from "@/components/home/PopularCategories";
-import { FeaturedBusinesses } from "@/components/home/FeaturedBusinesses";
-import { DealsSection } from "@/components/home/DealsSection";
-import { BusinessCategoryNavBar } from "@/components/business/BusinessCategoryNavBar";
-import { TopRatedBusinesses } from "@/components/home/TopRatedBusinesses";
-import { CrazyDeals } from "@/components/marketplace/CrazyDeals";
-import { SponsoredProducts } from "@/components/marketplace/SponsoredProducts";
-import { CategorySubcategoryGrid } from "@/components/marketplace/CategorySubcategoryGrid";
-import { motion } from "framer-motion";
 import { toast } from "sonner";
 import type { Business, BusinessOwner, BusinessHours, StaffMember } from "@/types/business";
 import { BusinessBannerAd } from "@/components/ads/BusinessBannerAd";
-import { BusinessCategoryScroller } from "@/components/business/BusinessCategoryScroller";
+import { Card } from "@/components/ui/card";
+import { GridLayoutSelector } from "@/components/marketplace/GridLayoutSelector";
+import { GridLayoutType } from "@/components/products/types/ProductTypes";
+import { AutocompleteSearch } from "@/components/marketplace/AutocompleteSearch";
+import { motion } from "framer-motion";
+
+// Lazy load components for better performance
+const BusinessRankingsSection = lazy(() => import('@/components/business/BusinessRankingsSection').then(
+  mod => ({ default: mod.BusinessRankingsSection })
+));
+
+const LocalBusinessSpotlight = lazy(() => import('@/components/marketplace/LocalBusinessSpotlight').then(
+  mod => ({ default: mod.LocalBusinessSpotlight })
+));
+
+// Skeleton component for lazy loading
+const SkeletonCard = () => (
+  <Card className="overflow-hidden border h-[300px]">
+    <div className="h-40 bg-muted animate-pulse"></div>
+    <div className="p-4 space-y-2">
+      <div className="h-5 bg-muted animate-pulse rounded w-3/4"></div>
+      <div className="h-4 bg-muted animate-pulse rounded w-1/2"></div>
+      <div className="h-4 bg-muted animate-pulse rounded w-2/3"></div>
+    </div>
+  </Card>
+);
 
 interface BusinessWithRating extends Omit<Business, 'owners' | 'staff_details' | 'image_position' | 'verification_documents' | 'membership_plans'> {
   average_rating: number;
@@ -43,6 +55,28 @@ interface BusinessWithRating extends Omit<Business, 'owners' | 'staff_details' |
   membership_plans?: any[];
 }
 
+const LazySection = ({ children, title, fallbackCount = 4 }: { children: React.ReactNode, title?: string, fallbackCount?: number }) => (
+  <div className="mb-8">
+    {title && (
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold flex items-center gap-2">
+          <Store className="h-5 w-5 text-primary" />
+          {title}
+        </h2>
+      </div>
+    )}
+    <Suspense fallback={
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {Array.from({ length: fallbackCount }).map((_, i) => (
+          <SkeletonCard key={i} />
+        ))}
+      </div>
+    }>
+      {children}
+    </Suspense>
+  </div>
+);
+
 const Business = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -50,6 +84,11 @@ const Business = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
+  const [gridLayout, setGridLayout] = useState<GridLayoutType>(() => {
+    // Try to get user's saved preference from localStorage
+    const savedLayout = localStorage.getItem("preferredBusinessGridLayout");
+    return (savedLayout as GridLayoutType) || "grid3x3";
+  });
   
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -218,14 +257,9 @@ const Business = () => {
     }
   });
 
-  const handleCategoryChange = (category: string) => {
-    setSelectedCategory(category);
-    
-    if (category === "all") {
-      navigate("/businesses");
-    } else {
-      navigate(`/businesses?category=${category}`);
-    }
+  const handleLayoutChange = (layout: GridLayoutType) => {
+    setGridLayout(layout);
+    localStorage.setItem("preferredBusinessGridLayout", layout);
   };
 
   const formatHours = (hours: string | BusinessHours | undefined): string => {
@@ -253,159 +287,155 @@ const Business = () => {
     return '';
   };
 
-  const handleSubcategorySelect = (category: string, subcategory?: string) => {
-    const newCategory = subcategory ? `${category}-${subcategory}` : category;
-    setSelectedCategory(newCategory);
-    
-    if (subcategory) {
-      navigate(`/businesses?category=${category}&subcategory=${subcategory}`);
-    } else {
-      navigate(`/businesses?category=${category}`);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
       <Navbar />
       <div className="w-full max-w-[1400px] mx-auto pt-20 pb-24 px-4 sm:px-6">
-        <div className="space-y-6">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <Link to="/">
-                <Button variant="ghost" size="icon" className="hidden sm:flex">
-                  <ArrowLeft className="h-5 w-5" />
-                </Button>
-              </Link>
-              <h1 className="text-2xl sm:text-3xl font-bold animate-fade-up">Local Businesses</h1>
+        {showCreateForm ? (
+          <CreateBusinessForm 
+            onSuccess={() => setShowCreateForm(false)}
+            onCancel={() => setShowCreateForm(false)}
+          />
+        ) : (
+          <div className="space-y-6">
+            {/* Header and Search */}
+            <div className="container max-w-[1400px] mx-auto px-2">
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+                <div className="flex items-center gap-2">
+                  <Link to="/">
+                    <Button variant="ghost" size="icon" className="hidden sm:flex">
+                      <ArrowLeft className="h-5 w-5" />
+                    </Button>
+                  </Link>
+                  <h1 className="text-2xl sm:text-3xl font-bold animate-fade-up">Local Businesses</h1>
+                </div>
+                <Link to="/register-business">
+                  <Button className="w-full sm:w-auto gap-2">
+                    <Plus className="h-4 w-4" />
+                    Register Business
+                  </Button>
+                </Link>
+              </div>
+            
+              {/* Search Bar */}
+              <div className="mb-6">
+                <AutocompleteSearch 
+                  value={searchQuery}
+                  onChange={setSearchQuery}
+                  onSearchSelect={(query) => setSearchQuery(query)}
+                  placeholder="Search for businesses, categories, or locations..."
+                  className="w-full"
+                />
+              </div>
             </div>
-            <Link to="/register-business">
-              <Button className="w-full sm:w-auto gap-2">
-                <Plus className="h-4 w-4" />
-                Register Business
-              </Button>
-            </Link>
-          </div>
+            
+            {/* Banner Ad - Top placement */}
+            <BusinessBannerAd />
+            
+            {/* Spotlight Section */}
+            <LazySection title="Local Business Spotlight">
+              <LocalBusinessSpotlight />
+            </LazySection>
+            
+            {/* Rankings Section */}
+            <LazySection title="Business Rankings">
+              <BusinessRankingsSection />
+            </LazySection>
+            
+            {/* Main Business Listings */}
+            <div className="mt-8">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold">All Businesses</h2>
+                <GridLayoutSelector layout={gridLayout} onChange={handleLayoutChange} />
+              </div>
 
-          {showCreateForm ? (
-            <CreateBusinessForm 
-              onSuccess={() => setShowCreateForm(false)}
-              onCancel={() => setShowCreateForm(false)}
-            />
-          ) : (
-            <>
-              <SearchHero />
-              
-              <BusinessBannerAd />
-              
-              <BusinessCategoryScroller />
-              
-              <BusinessCategoryNavBar />
-              
-              <div className="space-y-8 mt-8">
-                <SponsoredProducts />
-                
-                <CrazyDeals />
-                
-                <SponsoredProducts />
-                
-                <div className="mt-8">
-                  <h2 className="text-2xl font-bold mb-4">Browse by Category</h2>
-                  <CategorySubcategoryGrid onCategorySelect={handleSubcategorySelect} />
-                </div>
-                
-                <BusinessCategoryGrid />
-                
-                <div className="block sm:hidden">
-                  <QuickAccessServices />
-                </div>
-                
-                <TrendingServices />
-                
-                <div className="mt-8">
-                  <h2 className="text-2xl font-bold mb-4">All Businesses</h2>
-                  
-                  <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between mb-6">
-                    <BusinessCategoryFilter onCategoryChange={handleCategoryChange} />
-                    <div className="w-full md:w-64">
-                      <Select value={sortBy} onValueChange={setSortBy}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sort by" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="newest">Newest First</SelectItem>
-                          <SelectItem value="oldest">Oldest First</SelectItem>
-                          <SelectItem value="rating">Highest Rated</SelectItem>
-                          <SelectItem value="name_asc">Name (A-Z)</SelectItem>
-                          <SelectItem value="name_desc">Name (Z-A)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  {businesses && businesses.length > 0 ? (
-                    <motion.div 
-                      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ staggerChildren: 0.1 }}
-                    >
-                      {sortedBusinesses.map((business) => (
-                        <motion.div 
-                          key={business.id} 
-                          className="relative h-full"
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.3 }}
-                          whileHover={{ y: -5, transition: { duration: 0.2 } }}
-                        >
-                          <Button 
-                            variant="destructive" 
-                            size="icon" 
-                            className="absolute top-2 right-2 z-10"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              e.preventDefault();
-                              if (confirm("Are you sure you want to delete this business?")) {
-                                handleDeleteBusiness(business.id);
-                              }
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                          <BusinessCard 
-                            id={business.id}
-                            name={business.name}
-                            category={business.category}
-                            description={business.description}
-                            image={business.image_url || '/placeholder.svg'}
-                            rating={business.average_rating || 0}
-                            reviews={business.reviews_count || 0}
-                            location={business.location || ''}
-                            contact={business.contact || ''}
-                            hours={formatHours(business.hours)}
-                            verified={business.verified || false}
-                            appointment_price={business.appointment_price}
-                            consultation_price={business.consultation_price}
-                            is_open={business.is_open}
-                            wait_time={business.wait_time}
-                            closure_reason={business.closure_reason}
-                          />
-                        </motion.div>
-                      ))}
-                    </motion.div>
-                  ) : (
-                    <div className="text-center py-12">
-                      <p className="text-muted-foreground">No businesses found. Be the first to register your business!</p>
-                    </div>
-                  )}
+              <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between mb-6">
+                <div className="w-full md:w-64">
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sort by" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="newest">Newest First</SelectItem>
+                      <SelectItem value="oldest">Oldest First</SelectItem>
+                      <SelectItem value="rating">Highest Rated</SelectItem>
+                      <SelectItem value="name_asc">Name (A-Z)</SelectItem>
+                      <SelectItem value="name_desc">Name (Z-A)</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
-            </>
-          )}
-        </div>
+
+              {businesses && businesses.length > 0 ? (
+                <motion.div 
+                  className={cn(
+                    "grid gap-4",
+                    gridLayout === "grid2x2" && "grid-cols-1 sm:grid-cols-1 md:grid-cols-2",
+                    gridLayout === "grid3x3" && "grid-cols-1 sm:grid-cols-2 md:grid-cols-3",
+                    gridLayout === "grid4x4" && "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+                  )}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ staggerChildren: 0.1 }}
+                >
+                  {sortedBusinesses.map((business) => (
+                    <motion.div 
+                      key={business.id} 
+                      className="relative h-full"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
+                      whileHover={{ y: -5, transition: { duration: 0.2 } }}
+                    >
+                      <Button 
+                        variant="destructive" 
+                        size="icon" 
+                        className="absolute top-2 right-2 z-10"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          if (confirm("Are you sure you want to delete this business?")) {
+                            handleDeleteBusiness(business.id);
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                      <BusinessCard 
+                        id={business.id}
+                        name={business.name}
+                        category={business.category}
+                        description={business.description}
+                        image={business.image_url || '/placeholder.svg'}
+                        rating={business.average_rating || 0}
+                        reviews={business.reviews_count || 0}
+                        location={business.location || ''}
+                        contact={business.contact || ''}
+                        hours={formatHours(business.hours)}
+                        verified={business.verified || false}
+                        appointment_price={business.appointment_price}
+                        consultation_price={business.consultation_price}
+                        is_open={business.is_open}
+                        wait_time={business.wait_time}
+                        closure_reason={business.closure_reason}
+                      />
+                    </motion.div>
+                  ))}
+                </motion.div>
+              ) : (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground">No businesses found. Be the first to register your business!</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 };
+
+// Import the cn utility
+import { cn } from "@/lib/utils";
 
 export default Business;

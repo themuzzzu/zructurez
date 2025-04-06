@@ -1,114 +1,51 @@
 
-import { LayoutGrid, Grid2X2, List, Grid3X3, SquareStackIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { LayoutGrid, Rows, Columns, TableProperties } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
-import { useState, useEffect } from "react";
-import { 
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 interface GridLayoutSelectorProps {
   layout: GridLayoutType;
   onChange: (layout: GridLayoutType) => void;
-  compact?: boolean;
+  className?: string;
 }
 
-export const GridLayoutSelector = ({ 
-  layout, 
-  onChange, 
-  compact = false 
-}: GridLayoutSelectorProps) => {
-  // State to track layout
-  const [selectedLayout, setSelectedLayout] = useState<GridLayoutType>(layout);
-  
-  // Log when layout changes
-  useEffect(() => {
-    console.log("GridLayoutSelector received layout:", layout);
-    setSelectedLayout(layout);
-  }, [layout]);
-  
-  const handleLayoutChange = (newLayout: GridLayoutType) => {
-    console.log("Changing layout to:", newLayout);
-    setSelectedLayout(newLayout);
-    onChange(newLayout);
-    
-    // Save layout preference to localStorage
-    localStorage.setItem("preferredGridLayout", newLayout);
-  };
-
-  const buttonSize = compact ? "h-7 w-7" : "h-8 w-8";
-  const iconSize = compact ? "h-3.5 w-3.5" : "h-4 w-4";
-  
+export function GridLayoutSelector({ layout, onChange, className }: GridLayoutSelectorProps) {
   return (
-    <TooltipProvider>
-      <div className="flex items-center gap-1">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              size="icon"
-              variant={selectedLayout === "grid4x4" ? "default" : "outline"}
-              className={buttonSize}
-              onClick={() => handleLayoutChange("grid4x4")}
-            >
-              <LayoutGrid className={iconSize} />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>4×4 Grid</p>
-          </TooltipContent>
-        </Tooltip>
-        
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              size="icon"
-              variant={selectedLayout === "grid3x3" ? "default" : "outline"}
-              className={buttonSize}
-              onClick={() => handleLayoutChange("grid3x3")}
-            >
-              <Grid3X3 className={iconSize} />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>3×3 Grid</p>
-          </TooltipContent>
-        </Tooltip>
-        
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              size="icon"
-              variant={selectedLayout === "grid2x2" ? "default" : "outline"}
-              className={buttonSize}
-              onClick={() => handleLayoutChange("grid2x2")}
-            >
-              <Grid2X2 className={iconSize} />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>2×2 Grid</p>
-          </TooltipContent>
-        </Tooltip>
-        
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              size="icon"
-              variant={selectedLayout === "list" ? "default" : "outline"}
-              className={buttonSize}
-              onClick={() => handleLayoutChange("list")}
-            >
-              <List className={iconSize} />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>List View</p>
-          </TooltipContent>
-        </Tooltip>
-      </div>
-    </TooltipProvider>
+    <div className={cn("inline-flex gap-1 bg-muted/30 p-1 rounded-md", className)}>
+      <Button
+        variant={layout === "grid2x2" ? "default" : "ghost"}
+        size="sm"
+        className={cn(
+          "h-8 w-8 p-0", 
+          layout === "grid2x2" ? "bg-white dark:bg-zinc-800" : "bg-transparent"
+        )}
+        onClick={() => onChange("grid2x2")}
+      >
+        <Rows className="h-4 w-4" />
+      </Button>
+      <Button
+        variant={layout === "grid3x3" ? "default" : "ghost"}
+        size="sm"
+        className={cn(
+          "h-8 w-8 p-0", 
+          layout === "grid3x3" ? "bg-white dark:bg-zinc-800" : "bg-transparent"
+        )}
+        onClick={() => onChange("grid3x3")}
+      >
+        <Columns className="h-4 w-4" />
+      </Button>
+      <Button
+        variant={layout === "grid4x4" ? "default" : "ghost"}
+        size="sm"
+        className={cn(
+          "h-8 w-8 p-0", 
+          layout === "grid4x4" ? "bg-white dark:bg-zinc-800" : "bg-transparent"
+        )}
+        onClick={() => onChange("grid4x4")}
+      >
+        <LayoutGrid className="h-4 w-4" />
+      </Button>
+    </div>
   );
-};
+}

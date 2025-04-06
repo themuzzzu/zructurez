@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MapPin, Store, Star, ArrowRightCircle } from "lucide-react";
+import { ImageFallback } from "../ui/image-fallback";
+import { Link } from "react-router-dom";
 
 interface LocalBusiness {
   id: string;
@@ -83,11 +85,11 @@ export const LocalBusinessSpotlight = () => {
   };
 
   return (
-    <div className="my-8 mobile-container">
+    <div>
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-2">
           <Store className="h-5 w-5 text-emerald-600" />
-          <h2 className="text-xl font-semibold">Local Business Spotlight</h2>
+          <h2 className="text-xl font-semibold">Nearby Businesses</h2>
         </div>
         <Button variant="link" className="text-blue-600 font-medium flex items-center gap-1">
           View All <ArrowRightCircle size={16} />
@@ -143,11 +145,12 @@ export const LocalBusinessSpotlight = () => {
             <Card key={business.id} className="overflow-hidden transition-all hover:shadow-lg">
               <div className="h-40 bg-slate-100 dark:bg-slate-800 relative">
                 {business.image_url ? (
-                  <img
+                  <ImageFallback
                     src={business.image_url}
                     alt={business.name}
                     className="w-full h-full object-cover"
-                    loading="lazy"
+                    fallbackSrc="/placeholders/image-placeholder.jpg"
+                    aspectRatio="wide"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-emerald-100 dark:bg-emerald-900">
@@ -170,13 +173,15 @@ export const LocalBusinessSpotlight = () => {
                 <p className="text-sm text-muted-foreground line-clamp-2">
                   {business.description || "Local business offering quality products and services."}
                 </p>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full mt-3 border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 dark:border-emerald-800 dark:hover:bg-emerald-950"
-                >
-                  View Business
-                </Button>
+                <Link to={`/business/${business.id}`}>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full mt-3 border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 dark:border-emerald-800 dark:hover:bg-emerald-950"
+                  >
+                    View Business
+                  </Button>
+                </Link>
               </div>
             </Card>
           ))}
@@ -185,3 +190,5 @@ export const LocalBusinessSpotlight = () => {
     </div>
   );
 };
+
+export default LocalBusinessSpotlight;
