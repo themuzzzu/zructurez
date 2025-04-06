@@ -1,4 +1,5 @@
 
+import { useState } from 'react';
 import { 
   Table, 
   TableBody, 
@@ -7,166 +8,182 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Advertisement } from "@/services/adService";
+import { Badge } from "@/components/ui/badge";
 import { 
-  Check, 
-  Eye, 
-  MousePointer, 
-  X 
-} from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { approveAd } from "@/utils/adminApiMiddleware";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
+import { MoreHorizontal, Eye, Edit, Trash, Play, Pause } from "lucide-react";
+import { Advertisement, AdStatus } from '@/services/adService';
+import { useNavigate } from 'react-router-dom';
 
 interface AdManagementTableProps {
   ads: Advertisement[];
-  isLoading: boolean;
+  onStatusChange?: (id: string, status: AdStatus) => void;
+  onDelete?: (id: string) => void;
 }
 
-export function AdManagementTable({ ads, isLoading }: AdManagementTableProps) {
-  const [processingId, setProcessingId] = useState<string | null>(null);
+export function AdManagementTable({ ads, onStatusChange, onDelete }: AdManagementTableProps) {
+  const navigate = useNavigate();
+  const [selectedAds, setSelectedAds] = useState<string[]>([]);
   
-  const handleApproveAd = async (adId: string) => {
-    setProcessingId(adId);
-    try {
-      const result = await approveAd({
-        adId,
-        approved: true
-      });
-      
-      if (result) {
-        toast.success("Advertisement approved successfully");
-      }
-    } catch (error) {
-      console.error('Error approving ad:', error);
-      toast.error("Failed to approve advertisement");
-    } finally {
-      setProcessingId(null);
+  const handleStatusChange = (id: string, newStatus: AdStatus) => {
+    if (onStatusChange) {
+      onStatusChange(id, newStatus);
     }
   };
   
-  const handleRejectAd = async (adId: string) => {
-    setProcessingId(adId);
-    try {
-      const result = await approveAd({
-        adId,
-        approved: false,
-        rejectionReason: "Does not meet platform standards"
-      });
-      
-      if (result) {
-        toast.success("Advertisement rejected");
-      }
-    } catch (error) {
-      console.error('Error rejecting ad:', error);
-      toast.error("Failed to reject advertisement");
-    } finally {
-      setProcessingId(null);
+  const handleDelete = (id: string) => {
+    if (onDelete) {
+      onDelete(id);
     }
+  };
+  
+  const getStatusColor = (status: AdStatus | undefined) => {
+    switch (status) {
+      case 'active':
+        return 'bg-green-500';
+      case 'pending':
+        return 'bg-yellow-500';
+      case 'paused':
+        return 'bg-gray-500';
+      case 'completed':
+        return 'bg-blue-500';
+      case 'rejected':
+        return 'bg-red-500';
+      default:
+        return 'bg-gray-500';
+    }
+  };
+  
+  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      setSelectedAds(ads.map(ad => ad.id));
+    } else {
+      setSelectedAds([]);
+    }
+  };
+  
+  const handleSelectAd = (id: string, checked: boolean) => {
+    if (checked) {
+      setSelectedAds([...selectedAds, id]);
+    } else {
+      setSelectedAds(selectedAds.filter(adId => adId !== id));
+    }
+  };
+  
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString();
   };
   
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Title</TableHead>
-          <TableHead>Type</TableHead>
-          <TableHead>Performance</TableHead>
-          <TableHead>Budget</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead>Actions</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {isLoading ? (
+    <div className="overflow-x-auto">
+      <Table>
+        <TableHeader>
           <TableRow>
-            <TableCell colSpan={6} className="text-center py-4">
-              Loading advertisements...
-            </TableCell>
+            <TableHead className="w-[40px]">
+              <input 
+                type="checkbox" 
+                onChange={handleSelectAll}
+                checked={selectedAds.length === ads.length && ads.length > 0}
+              />
+            </TableHead>
+            <TableHead>Title</TableHead>
+            <TableHead>Type</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Start Date</TableHead>
+            <TableHead>End Date</TableHead>
+            <TableHead>Budget</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
-        ) : ads.length === 0 ? (
-          <TableRow>
-            <TableCell colSpan={6} className="text-center py-4">
-              No advertisements found
-            </TableCell>
-          </TableRow>
-        ) : (
-          ads.map((ad) => {
-            const impressions = ad.reach || 0;
-            const clicks = ad.clicks || 0;
-            const ctr = impressions > 0 ? ((clicks / impressions) * 100).toFixed(2) : "0";
-            
-            return (
+        </TableHeader>
+        <TableBody>
+          {ads.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={8} className="text-center py-8">
+                No advertisements found
+              </TableCell>
+            </TableRow>
+          ) : (
+            ads.map(ad => (
               <TableRow key={ad.id}>
-                <TableCell className="font-medium">
-                  <div className="max-w-xs">
-                    <div className="truncate">{ad.title}</div>
-                    <div className="text-xs text-muted-foreground truncate">{ad.description}</div>
+                <TableCell>
+                  <input 
+                    type="checkbox"
+                    checked={selectedAds.includes(ad.id)}
+                    onChange={(e) => handleSelectAd(ad.id, e.target.checked)}
+                  />
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center">
+                    <div 
+                      className="w-8 h-8 rounded overflow-hidden bg-gray-200 mr-2"
+                      style={{ 
+                        backgroundImage: ad.image_url ? `url(${ad.image_url})` : undefined,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center'
+                      }}
+                    ></div>
+                    <div>{ad.title}</div>
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Badge variant="outline">
-                    {ad.type.charAt(0).toUpperCase() + ad.type.slice(1)}
+                  <Badge>{ad.type}</Badge>
+                </TableCell>
+                <TableCell>
+                  <Badge className={getStatusColor(ad.status)}>
+                    {ad.status || 'pending'}
                   </Badge>
                 </TableCell>
-                <TableCell>
-                  <div className="flex items-center space-x-2">
-                    <div className="flex items-center text-xs">
-                      <Eye className="mr-1 h-3 w-3" />
-                      <span>{impressions}</span>
-                    </div>
-                    <div className="flex items-center text-xs">
-                      <MousePointer className="mr-1 h-3 w-3" />
-                      <span>{clicks}</span>
-                    </div>
-                    <div className="text-xs">{ctr}%</div>
-                  </div>
-                </TableCell>
-                <TableCell>₹{ad.budget}</TableCell>
-                <TableCell>
-                  <Badge
-                    className={
-                      ad.status === "active" ? "bg-green-500" :
-                      ad.status === "pending" ? "bg-yellow-500" :
-                      ad.status === "rejected" ? "bg-red-500" :
-                      "bg-gray-500"
-                    }
-                  >
-                    {ad.status.charAt(0).toUpperCase() + ad.status.slice(1)}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  {ad.status === "pending" && (
-                    <div className="flex space-x-2">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8 text-green-500"
-                        onClick={() => handleApproveAd(ad.id)}
-                        disabled={processingId === ad.id}
-                      >
-                        <Check className="h-4 w-4" />
+                <TableCell>{formatDate(ad.start_date)}</TableCell>
+                <TableCell>{formatDate(ad.end_date)}</TableCell>
+                <TableCell>${Number(ad.budget || 0).toFixed(2)}</TableCell>
+                <TableCell className="text-right">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <MoreHorizontal className="h-4 w-4" />
                       </Button>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8 text-red-500"
-                        onClick={() => handleRejectAd(ad.id)}
-                        disabled={processingId === ad.id}
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => navigate(`/admin/ads/${ad.id}`)}>
+                        <Eye className="h-4 w-4 mr-2" />
+                        View
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate(`/admin/ads/${ad.id}/edit`)}>
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit
+                      </DropdownMenuItem>
+                      {ad.status === 'active' ? (
+                        <DropdownMenuItem onClick={() => handleStatusChange(ad.id, 'paused')}>
+                          <Pause className="h-4 w-4 mr-2" />
+                          Pause
+                        </DropdownMenuItem>
+                      ) : ad.status === 'paused' || ad.status === 'pending' ? (
+                        <DropdownMenuItem onClick={() => handleStatusChange(ad.id, 'active')}>
+                          <Play className="h-4 w-4 mr-2" />
+                          Activate
+                        </DropdownMenuItem>
+                      ) : null}
+                      <DropdownMenuItem 
+                        onClick={() => handleDelete(ad.id)}
+                        className="text-red-600"
                       >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  )}
+                        <Trash className="h-4 w-4 mr-2" />
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </TableRow>
-            );
-          })
-        )}
-      </TableBody>
-    </Table>
+            ))
+          )}
+        </TableBody>
+      </Table>
+    </div>
   );
 }

@@ -1,6 +1,7 @@
 
-export type AdType = 'product' | 'business' | 'service';
-export type AdFormat = 'banner' | 'card' | 'featured' | 'sponsored';
+export type AdType = 'product' | 'business' | 'service' | 'sponsored';
+export type AdFormat = 'banner' | 'card' | 'featured' | 'sponsored' | 'standard' | 'video' | 'carousel' | 'boosted_post';
+export type AdStatus = 'pending' | 'active' | 'paused' | 'completed' | 'rejected';
 
 export interface Advertisement {
   id: string;
@@ -12,7 +13,7 @@ export interface Advertisement {
   reference_id: string;
   budget?: number;
   format?: AdFormat;
-  status?: 'pending' | 'active' | 'paused' | 'completed';
+  status?: AdStatus;
   impressions?: number;
   clicks?: number;
   conversions?: number;
@@ -22,6 +23,16 @@ export interface Advertisement {
   end_date?: string;
   target_demographic?: any;
   target_location?: string;
+}
+
+export interface AdPlacement {
+  id: string;
+  name: string;
+  location: string;
+  type: string;
+  size: string;
+  cpc_rate: number;
+  cpm_rate: number;
 }
 
 // Sample advertisement data
@@ -94,6 +105,17 @@ const sampleAds: Record<AdType, Advertisement[]> = {
       status: "active",
       image_url: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=800&h=300&q=80",
     }
+  ],
+  sponsored: [
+    {
+      id: "sponsored-ad-1",
+      title: "Featured Partner",
+      description: "Explore our partner's exclusive offers",
+      type: "sponsored",
+      reference_id: "featured-partner",
+      status: "active",
+      image_url: "https://images.unsplash.com/photo-1520333789090-1afc82db536a?auto=format&fit=crop&w=800&h=300&q=80",
+    }
   ]
 };
 
@@ -123,6 +145,30 @@ export const fetchActiveAds = async (
     return filteredAds.slice(0, limit);
   } catch (error) {
     console.error(`Error fetching ${adType} ads:`, error);
+    return [];
+  }
+};
+
+/**
+ * Fetch user's advertisements
+ * @param userId User ID
+ * @returns Promise resolving to an array of advertisements
+ */
+export const fetchUserAds = async (userId: string): Promise<Advertisement[]> => {
+  try {
+    // In a real implementation, this would fetch from an API
+    // For demo purposes, we return sample data
+    const allAds = [
+      ...sampleAds.product,
+      ...sampleAds.business,
+      ...sampleAds.service,
+      ...sampleAds.sponsored
+    ];
+    
+    // Simulate filtering by user ID
+    return allAds;
+  } catch (error) {
+    console.error("Error fetching user ads:", error);
     return [];
   }
 };

@@ -34,8 +34,7 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
       try {
         let query = supabase
           .from('businesses')
-          .select('*')
-          .eq('is_verified', true)
+          .select('id, name, description, logo_url, image_url, category, location, contact, hours, is_open, wait_time, closure_reason, verified:is_verified')
           .order('created_at', { ascending: false })
           .limit(4);
           
@@ -83,7 +82,7 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {businesses.map((business: BusinessType) => (
+      {businesses.map((business: any) => (
         <BusinessCard 
           key={business.id}
           id={business.id}
@@ -96,7 +95,7 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
           reviews={business.reviews || 0}
           contact={business.contact || ""}
           hours={business.hours || ""}
-          verified={business.is_verified}
+          verified={business.verified}
           is_open={business.is_open}
           wait_time={business.wait_time}
           closure_reason={business.closure_reason}
