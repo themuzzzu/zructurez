@@ -5,6 +5,24 @@ import { BusinessCard } from "@/components/BusinessCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
 
+interface BusinessType {
+  id: string;
+  name: string;
+  description: string;
+  logo_url?: string;
+  image_url?: string;
+  category?: string;
+  location?: string;
+  rating?: number;
+  reviews?: number;
+  contact?: string;
+  hours?: string;
+  is_verified?: boolean;
+  is_open?: boolean;
+  wait_time?: string;
+  closure_reason?: string;
+}
+
 interface LocalBusinessSpotlightProps {
   businessType?: string;
 }
@@ -65,16 +83,23 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {businesses.map((business) => (
+      {businesses.map((business: BusinessType) => (
         <BusinessCard 
           key={business.id}
           id={business.id}
           name={business.name}
           description={business.description || ""}
-          imageUrl={business.logo_url || ""}
+          image={business.logo_url || business.image_url || ""}
           category={business.category || ""}
           location={business.location || ""}
           rating={business.rating || 4.0}
+          reviews={business.reviews || 0}
+          contact={business.contact || ""}
+          hours={business.hours || ""}
+          verified={business.is_verified}
+          is_open={business.is_open}
+          wait_time={business.wait_time}
+          closure_reason={business.closure_reason}
         />
       ))}
     </div>

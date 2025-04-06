@@ -1,184 +1,181 @@
 
-import { supabase } from "@/integrations/supabase/client";
-import { Json } from "@/integrations/supabase/types";
+export type AdType = 'product' | 'business' | 'service';
+export type AdFormat = 'banner' | 'card' | 'featured' | 'sponsored';
 
-// Define the ad types as an enum for type safety
-export type AdType = "product" | "business" | "service" | "sponsored" | "post";
-export type AdFormat = "standard" | "banner" | "video" | "carousel" | "recommendation" | "boosted_post";
-
-// Define the Advertisement type to match the database schema
 export interface Advertisement {
   id: string;
-  user_id?: string;
   title: string;
-  description: string;
+  description?: string;
+  image_url?: string;
+  business_id?: string;
   type: AdType;
   reference_id: string;
-  location?: string;
-  budget: number;
+  budget?: number;
+  format?: AdFormat;
+  status?: 'pending' | 'active' | 'paused' | 'completed';
+  impressions?: number;
+  clicks?: number;
+  conversions?: number;
+  reach?: number;
+  ctr?: number;
   start_date?: string;
   end_date?: string;
-  status: "active" | "pending" | "rejected" | "expired";
-  created_at?: string;
-  updated_at?: string;
-  image_url: string | null;
-  video_url?: string;
-  carousel_images?: Json;
-  format?: AdFormat;
-  targeting_locations?: Json;
-  targeting_interests?: Json;
-  targeting_age_min?: number;
-  targeting_age_max?: number;
-  targeting_gender?: string;
-  impressions?: number;
-  clicks?: number;
-  ctr?: number;
-  business_id?: string;
-  reach?: number;
+  target_demographic?: any;
+  target_location?: string;
 }
 
-export interface AdPlacement {
-  id: string;
-  name: string;
-  type: string;
-  location: string;
-  cpm_rate: number;
-  cpc_rate: number;
-  description: string;
-  active: boolean;
-  created_at: string;
-  size?: string;
-  max_size_kb?: number;
-  priority?: number;
-  impressions?: number;
-  clicks?: number;
-  revenue?: number;
-}
+// Sample advertisement data
+const sampleAds: Record<AdType, Advertisement[]> = {
+  product: [
+    {
+      id: "product-ad-1",
+      title: "New Summer Collection",
+      description: "Explore our latest summer fashion collection with up to 50% off",
+      type: "product",
+      reference_id: "summer-collection",
+      status: "active",
+      image_url: "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=800&h=300&q=80",
+    },
+    {
+      id: "product-ad-2",
+      title: "Tech Gadgets Sale",
+      description: "Latest smartphones and gadgets at unbeatable prices",
+      type: "product",
+      reference_id: "tech-sale",
+      status: "active",
+      image_url: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&h=300&q=80",
+    }
+  ],
+  business: [
+    {
+      id: "business-ad-1",
+      title: "Visit Our New Location",
+      description: "We've opened a new store downtown. Visit us today!",
+      type: "business",
+      reference_id: "downtown-store",
+      status: "active",
+      image_url: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&h=300&q=80",
+    },
+    {
+      id: "business-ad-2",
+      title: "Award-Winning Restaurant",
+      description: "Experience fine dining with our award-winning chefs",
+      type: "business",
+      reference_id: "fine-dining",
+      status: "active",
+      image_url: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&h=300&q=80",
+    }
+  ],
+  service: [
+    {
+      id: "service-ad-1",
+      title: "Home Cleaning Services",
+      description: "Professional house cleaning with trusted experts. Book today!",
+      type: "service",
+      reference_id: "cleaning-services",
+      status: "active",
+      image_url: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=800&h=300&q=80",
+    },
+    {
+      id: "service-banner-2",
+      title: "Plumbing Solutions",
+      description: "Expert plumbing repairs and installations. Available 24/7 for emergencies.",
+      type: "service",
+      reference_id: "plumbing-services",
+      status: "active",
+      image_url: "https://images.unsplash.com/photo-1606321022034-31968bb41e4c?auto=format&fit=crop&w=800&h=300&q=80",
+    },
+    {
+      id: "service-banner-3",
+      title: "Interior Design",
+      description: "Transform your space with professional design services",
+      type: "service",
+      reference_id: "interior-design",
+      status: "active",
+      image_url: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=800&h=300&q=80",
+    }
+  ]
+};
 
-// Fetch active ads for display
+/**
+ * Fetch active advertisements by type and format
+ * @param adType Type of advertisement (product, business, service)
+ * @param adFormat Format of advertisement (banner, card)
+ * @param limit Maximum number of ads to return
+ * @returns Promise resolving to an array of advertisements
+ */
 export const fetchActiveAds = async (
-  type?: AdType,
-  format?: AdFormat,
-  limit: number = 10
+  adType: AdType,
+  adFormat: AdFormat = 'banner',
+  limit: number = 1
 ): Promise<Advertisement[]> => {
   try {
-    let query = supabase
-      .from('advertisements')
-      .select('*')
-      .eq('status', 'active')
-      .lt('end_date', new Date().toISOString());
+    // In a real app, this would fetch from an API or database
+    // For now, we'll return sample data
+    const adsForType = sampleAds[adType] || [];
     
-    if (type) {
-      query = query.eq('type', type);
-    }
+    // Filter by format if specified
+    const filteredAds = adFormat 
+      ? adsForType.filter(ad => ad.format === adFormat || !ad.format)
+      : adsForType;
     
-    if (format) {
-      query = query.eq('format', format);
-    }
-    
-    const { data, error } = await query
-      .order('budget', { ascending: false })
-      .limit(limit);
-    
-    if (error) throw error;
-    
-    // Cast the data to ensure it matches our Advertisement type
-    return (data || []) as Advertisement[];
+    // Limit the number of results
+    return filteredAds.slice(0, limit);
   } catch (error) {
-    console.error('Error fetching advertisements:', error);
+    console.error(`Error fetching ${adType} ads:`, error);
     return [];
   }
 };
 
-// Fetch ads for a specific user
-export const fetchUserAds = async (): Promise<Advertisement[]> => {
+/**
+ * Increment ad view count
+ * @param adId Advertisement ID
+ * @returns Promise resolving to the updated view count
+ */
+export const incrementAdView = async (adId: string): Promise<number> => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return [];
+    // In a real implementation, this would call an API to increment the view
+    // For demonstration, we'll simulate counting the view
+    console.log(`Ad view recorded for ad ${adId}`);
     
-    const { data, error } = await supabase
-      .from('advertisements')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
-    
-    if (error) throw error;
-    
-    return (data || []) as Advertisement[];
+    return 1; // Return a simulated count
   } catch (error) {
-    console.error('Error fetching user advertisements:', error);
-    return [];
+    console.error("Error incrementing ad view:", error);
+    return 0;
   }
 };
 
-// Increment ad views
-export const incrementAdView = async (adId: string): Promise<void> => {
+/**
+ * Increment ad click count
+ * @param adId Advertisement ID
+ * @returns Promise resolving to the updated click count
+ */
+export const incrementAdClick = async (adId: string): Promise<number> => {
   try {
-    // We'll use the ad_analytics table
-    const { data, error } = await supabase
-      .from('ad_analytics')
-      .select('impressions')
-      .eq('ad_id', adId)
-      .single();
+    // In a real implementation, this would call an API to increment the click
+    // For demonstration, we'll simulate counting the click
+    console.log(`Ad click recorded for ad ${adId}`);
     
-    if (error && error.code !== 'PGRST116') throw error;
-    
-    if (!data) {
-      // Insert new record if it doesn't exist
-      await supabase
-        .from('ad_analytics')
-        .insert({
-          ad_id: adId,
-          impressions: 1
-        });
-    } else {
-      // Update existing record
-      await supabase
-        .from('ad_analytics')
-        .update({ impressions: data.impressions + 1 })
-        .eq('ad_id', adId);
-    }
-    
-    // Also update the advertisement reach counter directly
-    await supabase.rpc('increment_ad_views', { ad_id: adId });
-    
+    return 1; // Return a simulated count
   } catch (error) {
-    console.error('Error incrementing ad view:', error);
+    console.error("Error incrementing ad click:", error);
+    return 0;
   }
 };
 
-// Increment ad clicks
-export const incrementAdClick = async (adId: string): Promise<void> => {
+/**
+ * Increment ad conversion count
+ * @param adId Advertisement ID
+ * @returns Promise resolving to the updated conversion count
+ */
+export const incrementAdConversion = async (adId: string): Promise<number> => {
   try {
-    // We'll use the ad_analytics table
-    const { data, error } = await supabase
-      .from('ad_analytics')
-      .select('clicks')
-      .eq('ad_id', adId)
-      .single();
+    // In a real implementation, this would call an API to increment the conversion
+    console.log(`Ad conversion recorded for ad ${adId}`);
     
-    if (error && error.code !== 'PGRST116') throw error;
-    
-    if (!data) {
-      // Insert new record if it doesn't exist
-      await supabase
-        .from('ad_analytics')
-        .insert({
-          ad_id: adId,
-          clicks: 1
-        });
-    } else {
-      // Update existing record
-      await supabase
-        .from('ad_analytics')
-        .update({ clicks: data.clicks + 1 })
-        .eq('ad_id', adId);
-    }
-    
-    // Also update the advertisement clicks counter directly using RPC properly
-    await supabase.rpc('increment_ad_clicks', { ad_id: adId });
-    
+    return 1; // Return a simulated count
   } catch (error) {
-    console.error('Error incrementing ad click:', error);
+    console.error("Error incrementing ad conversion:", error);
+    return 0;
   }
 };

@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 
 export const TrendingServicesSection = () => {
   const navigate = useNavigate();
-  const { data: trendingServices, isLoading } = useQuery({
+  const { data: trendingServices, isLoading, isError } = useQuery({
     queryKey: ['trending-services'],
     queryFn: () => getTrendingServicesInArea(""),
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -37,41 +37,13 @@ export const TrendingServicesSection = () => {
     );
   }
 
-  // Fallback data if no trending services are found
-  const services = trendingServices?.length > 0 ? trendingServices : [
-    {
-      id: "trending-1",
-      title: "Home Cleaning Service",
-      description: "Professional house cleaning services",
-      price: 1800,
-      image_url: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=300&q=80", 
-      user_id: "provider-1"
-    },
-    {
-      id: "trending-2",
-      title: "Web Development",
-      description: "Professional website design and development",
-      price: 20000,
-      image_url: "https://images.unsplash.com/photo-1547658719-da2b51169166?auto=format&fit=crop&w=300&q=80",
-      user_id: "provider-2"
-    },
-    {
-      id: "trending-3",
-      title: "Personal Trainer",
-      description: "Custom fitness programs and personal training",
-      price: 3000,
-      image_url: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=300&q=80",
-      user_id: "provider-3"
-    },
-    {
-      id: "trending-4",
-      title: "Digital Marketing",
-      description: "Boost your online presence with our marketing services",
-      price: 15000,
-      image_url: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=300&q=80",
-      user_id: "provider-4"
-    }
-  ];
+  if (isError) {
+    console.log("Error fetching trending services");
+    // Fallback to static data in case of an error
+  }
+
+  // Use trending services data or fallback to default services
+  const services = trendingServices || [];
 
   return (
     <div>
@@ -94,9 +66,9 @@ export const TrendingServicesSection = () => {
             id={service.id}
             name={service.title}
             description={service.description || ""}
-            image={service.image_url || ""}
+            image_url={service.image_url}
             price={formatPrice(service.price || 0)}
-            providerName={"Service Provider"}
+            providerName={service.provider_name || "Service Provider"}
             providerId={service.user_id || ""}
           />
         ))}

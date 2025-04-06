@@ -1,94 +1,131 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { trackEntityView } from "@/utils/viewsTracking";
 
-/**
- * Tracks a view for a service
- * @param serviceId The ID of the service
- */
-export const trackServiceView = async (serviceId: string): Promise<void> => {
-  if (!serviceId) return;
-  await trackEntityView('service', serviceId);
-};
+// Interface for trending service data
+interface TrendingService {
+  id: string;
+  title: string;
+  description?: string;
+  price?: number;
+  image_url?: string;
+  user_id?: string;
+  provider_name?: string;
+}
 
-/**
- * Tracks when a user clicks the contact/call button
- * @param serviceId The ID of the service
- */
-export const trackContactClick = async (serviceId: string): Promise<void> => {
-  if (!serviceId) return;
-  
-  try {
-    // Record the click in the search_result_clicks table
-    await supabase.rpc('record_search_result_click', {
-      user_id_param: (await supabase.auth.getUser()).data.user?.id || null,
-      query_param: 'direct_call',
-      result_id_param: serviceId,
-      is_sponsored_param: false
-    });
-  } catch (error) {
-    console.error('Error tracking contact click:', error);
+// Fallback trending services data
+const fallbackTrendingServices: TrendingService[] = [
+  {
+    id: "trending-1",
+    title: "Home Cleaning Service",
+    description: "Professional house cleaning services",
+    price: 1800,
+    image_url: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=300&q=80", 
+    user_id: "provider-1",
+    provider_name: "CleanCo"
+  },
+  {
+    id: "trending-2",
+    title: "Web Development",
+    description: "Professional website design and development",
+    price: 20000,
+    image_url: "https://images.unsplash.com/photo-1547658719-da2b51169166?auto=format&fit=crop&w=300&q=80",
+    user_id: "provider-2",
+    provider_name: "TechSolutions"
+  },
+  {
+    id: "trending-3",
+    title: "Personal Trainer",
+    description: "Custom fitness programs and personal training",
+    price: 3000,
+    image_url: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=300&q=80",
+    user_id: "provider-3",
+    provider_name: "FitLife"
+  },
+  {
+    id: "trending-4",
+    title: "Digital Marketing",
+    description: "Boost your online presence with our marketing services",
+    price: 15000,
+    image_url: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=300&q=80",
+    user_id: "provider-4",
+    provider_name: "GrowthHackers"
   }
-};
+];
 
 /**
- * Get recommended services for a user
- * @param userId The user ID to get recommendations for
- * @returns Array of recommended services
+ * Fetch trending services in a specific area
+ * @param areaCode Geographic area code (optional)
+ * @returns Array of trending services
  */
-export const getRecommendedServices = async (userId: string) => {
+export const getTrendingServicesInArea = async (areaCode: string): Promise<TrendingService[]> => {
   try {
-    // This is a simplified implementation that could be enhanced with real recommendations logic
-    const { data, error } = await supabase
+    // Get trending services from the database, considering optional area filter
+    let query = supabase
       .from('services')
-      .select(`
-        *,
-        profiles:user_id (
-          username,
-          avatar_url
-        )
-      `)
+      .select('*, profiles:user_id(username,avatar_url)')
       .order('views', { ascending: false })
       .limit(4);
-      
-    if (error) throw error;
-    return data || [];
-  } catch (error) {
-    console.error('Error fetching recommended services:', error);
-    return [];
-  }
-};
-
-/**
- * Get trending services in a specific area
- * @param location The location to get trending services for
- * @returns Array of trending services in the area
- */
-export const getTrendingServicesInArea = async (location: string) => {
-  try {
-    // Filter by location if provided, otherwise get general trending services
-    const query = supabase
-      .from('services')
-      .select(`
-        *,
-        profiles:user_id (
-          username,
-          avatar_url
-        )
-      `)
-      .order('views', { ascending: false })
-      .limit(4);
-      
-    if (location) {
-      query.ilike('location', `%${location}%`);
+    
+    // Apply area filter if provided
+    if (areaCode) {
+      query = query.eq('area_code', areaCode);
     }
     
     const { data, error } = await query;
     
-    if (error) throw error;
-    return data || [];
+    if (error) {
+      console.error('Error fetching trending services in area:', error);
+      return fallbackTrendingServices;
+    }
+    
+    // If no data returned, use fallback
+    if (!data || data.length === 0) {
+      return fallbackTrendingServices;
+    }
+    
+    // Format the data to match the TrendingService interface
+    const formattedServices = data.map(service => ({
+      id: service.id,
+      title: service.title || service.name || "Unnamed Service", 
+      description: service.description,
+      price: service.price,
+      image_url: service.image_url || service.banner_url || null,
+      user_id: service.user_id,
+      provider_name: service.profiles?.username || "Service Provider"
+    }));
+    
+    return formattedServices;
+  } catch (err) {
+    console.error('Error fetching trending services in area:', err);
+    return fallbackTrendingServices;
+  }
+};
+
+/**
+ * Get a service by its ID
+ * @param serviceId Service ID to fetch
+ * @returns Service data with its portfolio and products
+ */
+export const getServiceById = async (serviceId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('services')
+      .select(`
+        *,
+        service_portfolio(*),
+        service_products(*,service_product_images(*))
+      `)
+      .eq('id', serviceId)
+      .single();
+    
+    if (error) {
+      console.error(`Error fetching service ${serviceId}:`, error);
+      throw error;
+    }
+    
+    return data;
   } catch (error) {
-    console.error('Error fetching trending services in area:', error);
-    return [];
+    console.error(`Error in getServiceById for ${serviceId}:`, error);
+    throw error;
   }
 };

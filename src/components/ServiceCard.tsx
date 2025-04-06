@@ -4,12 +4,14 @@ import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Calendar, Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { ImageFallback } from "./ui/image-fallback";
 
 interface ServiceCardProps {
   id: string;
   name: string;
   description: string;
-  image: string;
+  image?: string;
+  image_url?: string; // Support either image or image_url
   price: string;
   providerName: string;
   providerId: string;
@@ -20,11 +22,13 @@ export const ServiceCard = ({
   name,
   description,
   image,
+  image_url,
   price,
   providerName,
   providerId
 }: ServiceCardProps) => {
   const navigate = useNavigate();
+  const imageSource = image_url || image || "";
 
   const handleClick = () => {
     navigate(`/services/${id}`);
@@ -37,11 +41,13 @@ export const ServiceCard = ({
 
   return (
     <Card className="overflow-hidden transition-all duration-300 hover:shadow-md h-full flex flex-col">
-      <div className="relative h-48 overflow-hidden">
-        <img 
-          src={image || '/placeholder-image.jpg'}
+      <div className="relative h-48 overflow-hidden" onClick={handleClick}>
+        <ImageFallback
+          src={imageSource}
           alt={name}
           className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+          aspectRatio="square"
+          contentType="service"
         />
       </div>
       

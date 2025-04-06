@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Shimmer } from "./shimmer";
+import { isLikelyValidImageUrl } from "@/utils/imageErrorTracking";
 
 interface BlurImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   src: string;
@@ -30,6 +31,7 @@ export function BlurImage({
   const [isLoading, setIsLoading] = useState(true);
   const [currentSrc, setCurrentSrc] = useState(blurDataUrl || "");
   const [loadAttempts, setLoadAttempts] = useState(0);
+  const [hasError, setHasError] = useState(false);
   
   // Create small base64 placeholder if not provided
   const placeholder = blurDataUrl || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+P+/HgAFdwI2QOYvBQAAAABJRU5ErkJggg==';
@@ -38,15 +40,17 @@ export function BlurImage({
     // Reset loading state when src changes
     setIsLoading(true);
     setLoadAttempts(0);
+    setHasError(false);
     
     // Start with placeholder
     setCurrentSrc(placeholder);
     
     const loadImage = () => {
       // Skip loading for empty or invalid URLs
-      if (!src || src === '' || src.includes('undefined')) {
+      if (!isLikelyValidImageUrl(src)) {
         setCurrentSrc("/placeholders/image-placeholder.jpg");
         setIsLoading(false);
+        setHasError(true);
         return () => {};
       }
       
@@ -60,6 +64,7 @@ export function BlurImage({
       img.onload = () => {
         setCurrentSrc(imgSrc);
         setIsLoading(false);
+        setHasError(false);
         if (onLoad) {
           onLoad();
         }
@@ -76,6 +81,7 @@ export function BlurImage({
           // After 3 attempts, show fallback
           setCurrentSrc("/placeholders/image-placeholder.jpg");
           setIsLoading(false);
+          setHasError(true);
         }
       };
       
@@ -117,11 +123,18 @@ export function BlurImage({
         className={cn(
           "w-full h-full object-cover transition-all duration-500",
           isLoading ? "scale-105 blur-sm" : "scale-100 blur-0",
+          hasError ? "opacity-80" : "",
           fill && "absolute inset-0",
           className
         )}
         {...props}
       />
+      
+      {hasError && (
+        <div className="absolute inset-0 flex items-center justify-center bg-muted/20 pointer-events-none">
+          <span className="text-xs text-muted-foreground">Image unavailable</span>
+        </div>
+      )}
     </div>
   );
 }
