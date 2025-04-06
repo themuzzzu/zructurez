@@ -1,46 +1,82 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
 import { queryClient } from "@/lib/react-query";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { LoadingProvider } from "@/providers/LoadingProvider"; 
-import router from "./routes";
 import { PageLoader } from "@/components/loaders/PageLoader";
 import { RouterProvider } from "react-router-dom";
 import { LikeProvider } from "@/components/products/LikeContext";
+import { ErrorBoundary } from "react-error-boundary";
+import { ErrorView } from "@/components/ErrorView";
+import router from "./routes";
+
+// Fallback for error boundary
+const ErrorFallback = ({ error }: { error: Error }) => {
+  return (
+    <ErrorView 
+      title="Application Error" 
+      message={`Something went wrong: ${error.message}`}
+    />
+  );
+};
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
-
+  
   useEffect(() => {
+    // Handle any uncaught errors in event handlers
+    const handleGlobalError = (event: ErrorEvent) => {
+      console.error("Global error caught:", event.error);
+      // We don't preventDefault to allow other error handlers to work
+    };
+    
+    // Handle unhandled promise rejections
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      console.error("Unhandled Promise Rejection:", event.reason);
+    };
+    
+    window.addEventListener('error', handleGlobalError);
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+    
     // Reduced loading time for much faster initial render
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 250);
     
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('error', handleGlobalError);
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+    };
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="dark" storageKey="lovable-theme">
-        <LoadingProvider>
-          <AuthProvider>
-            <LikeProvider>
-              <div className={isLoading ? "hidden" : "app"}>
-                {!isLoading && <RouterProvider router={router} />}
-              </div>
-              {isLoading && (
-                <PageLoader type="shimmer" />
-              )}
-              <Toaster />
-            </LikeProvider>
-          </AuthProvider>
-        </LoadingProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <ErrorBoundary FallbackComponent={ErrorFallback}>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider defaultTheme="dark" storageKey="lovable-theme">
+          <LoadingProvider>
+            <AuthProvider>
+              <LikeProvider>
+                <div className={isLoading ? "hidden" : "app"}>
+                  {!isLoading && (
+                    <Suspense fallback={<PageLoader type="shimmer" />}>
+                      <RouterProvider router={router} />
+                    </Suspense>
+                  )}
+                </div>
+                {isLoading && (
+                  <PageLoader type="shimmer" />
+                )}
+                <Toaster />
+              </LikeProvider>
+            </AuthProvider>
+          </LoadingProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 

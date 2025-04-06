@@ -1,21 +1,29 @@
 
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { LikeProvider } from "@/components/products/LikeContext";
+import { ErrorView } from "@/components/ErrorView";
 
-// Redirect to marketplace on index page
+// Redirect to marketplace on index page with fallback
 export default function Index() {
-  const navigate = useNavigate();
-  
   useEffect(() => {
-    navigate('/marketplace', { replace: true });
-  }, [navigate]);
+    // Log redirect for debugging purposes
+    console.log("Redirecting to marketplace from index page");
+  }, []);
   
-  // We wrap with LikeProvider even though we're redirecting,
-  // in case any components briefly render that need the context
-  return (
-    <LikeProvider>
-      {null}
-    </LikeProvider>
-  );
+  try {
+    return (
+      <LikeProvider>
+        <Navigate to="/marketplace" replace />
+      </LikeProvider>
+    );
+  } catch (error) {
+    console.error("Error during redirect:", error);
+    return (
+      <ErrorView 
+        title="Navigation Error" 
+        message="Unable to redirect to the marketplace. Please try again or navigate manually."
+      />
+    );
+  }
 }

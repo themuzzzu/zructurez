@@ -6,20 +6,28 @@ import { fetchActiveAds } from "@/services/adService";
 import { BannerAd } from "@/components/ads/BannerAd";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 export function ServiceBannerAd({ maxAds = 1 }: { maxAds?: number }) {
   const isMobile = useMediaQuery("(max-width: 640px)");
-  const { data: ads = [], isLoading } = useQuery({
+  const { data: ads = [], isLoading, error } = useQuery({
     queryKey: ['banner-ads', 'service', maxAds],
     queryFn: () => fetchActiveAds("service", "banner", maxAds),
+    retry: 2,
+    retryDelay: 1000,
+    staleTime: 60000, // Cache for 1 minute
   });
 
   // Record views for the ads
   useEffect(() => {
     if (ads?.length) {
-      ads.forEach(ad => {
-        incrementAdView(ad.id);
-      });
+      try {
+        ads.forEach(ad => {
+          incrementAdView(ad.id);
+        });
+      } catch (error) {
+        console.error("Error recording ad views:", error);
+      }
     }
   }, [ads]);
 
@@ -31,7 +39,7 @@ export function ServiceBannerAd({ maxAds = 1 }: { maxAds?: number }) {
     );
   }
 
-  if (!ads.length) {
+  if (error || !ads || !ads.length) {
     // Show as many fallback ads as requested
     const fallbackAds = Array(maxAds).fill(null).map((_, index) => ({
       id: `fallback-service-${index}`,
@@ -47,9 +55,11 @@ export function ServiceBannerAd({ maxAds = 1 }: { maxAds?: number }) {
     return (
       <div className="mb-6 space-y-4">
         {fallbackAds.map((ad, index) => (
-          <div key={index} className={isMobile ? "pb-2" : ""}>
-            <BannerAd ad={ad} />
-          </div>
+          <ErrorBoundary key={index}>
+            <div className={isMobile ? "pb-2" : ""}>
+              <BannerAd ad={ad} />
+            </div>
+          </ErrorBoundary>
         ))}
       </div>
     );
@@ -58,9 +68,11 @@ export function ServiceBannerAd({ maxAds = 1 }: { maxAds?: number }) {
   return (
     <div className="mb-6 space-y-4">
       {ads.map((ad, index) => (
-        <div key={ad.id} className={isMobile ? "pb-2" : ""}>
-          <BannerAd ad={ad} />
-        </div>
+        <ErrorBoundary key={ad.id}>
+          <div className={isMobile ? "pb-2" : ""}>
+            <BannerAd ad={ad} />
+          </div>
+        </ErrorBoundary>
       ))}
     </div>
   );
