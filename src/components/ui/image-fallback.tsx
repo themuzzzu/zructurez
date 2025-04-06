@@ -20,6 +20,7 @@ export interface ImageFallbackProps {
   trackView?: boolean;
   retryCount?: number;
   maxRetries?: number;
+  onLoad?: () => void;
 }
 
 export const ImageFallback = ({
@@ -37,6 +38,7 @@ export const ImageFallback = ({
   trackView = false,
   retryCount = 0,
   maxRetries = 2,
+  onLoad,
 }: ImageFallbackProps) => {
   const [error, setError] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
@@ -73,6 +75,11 @@ export const ImageFallback = ({
   const handleLoad = () => {
     console.log(`Image loaded successfully: ${src}`);
     setHasLoaded(true);
+    
+    // Call the onLoad callback if provided
+    if (onLoad) {
+      onLoad();
+    }
     
     // Track product view when image loads and tracking is enabled
     if (trackView && productId) {
