@@ -17,6 +17,8 @@ import {
 } from 'recharts';
 import { subDays, format } from 'date-fns';
 import { supabase } from "@/integrations/supabase/client";
+import { createQueryKey } from "@/lib/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 interface AdPerformance {
   date: string;
@@ -40,71 +42,62 @@ const AdDashboard = () => {
   const [adsData, setAdsData] = useState<AdPerformance[]>([]);
   const [selectedMetric, setSelectedMetric] = useState<'impressions' | 'clicks' | 'reach'>('impressions');
 
+  // Use React Query for caching and better performance
+  const { data: advertisementData, isLoading } = useQuery({
+    queryKey: createQueryKey('advertisements-performance', {
+      fromDate: format(dateRange.from, 'yyyy-MM-dd'),
+      toDate: format(dateRange.to, 'yyyy-MM-dd')
+    }),
+    queryFn: async () => {
+      const fromDate = format(dateRange.from, 'yyyy-MM-dd');
+      const toDate = format(dateRange.to, 'yyyy-MM-dd');
+
+      const { data, error } = await supabase
+        .from('advertisements')
+        .select('start_date, impressions, clicks, reach')
+        .gte('start_date', fromDate)
+        .lte('start_date', toDate);
+
+      if (error) {
+        throw error;
+      }
+
+      return data || [];
+    },
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
+
+  // Process data when it changes
   useEffect(() => {
-    const fetchAdPerformance = async () => {
-      try {
-        const fromDate = format(dateRange.from, 'yyyy-MM-dd');
-        const toDate = format(dateRange.to, 'yyyy-MM-dd');
+    if (!isLoading && advertisementData) {
+      // Process the data to aggregate daily performance
+      const dailyPerformance: { [date: string]: AdPerformance } = {};
 
-        const { data, error } = await supabase
-          .from('advertisements')
-          .select('start_date, impressions, clicks, reach')
-          .gte('start_date', fromDate)
-          .lte('start_date', toDate);
-
-        if (error) {
-          console.error('Error fetching ad performance:', error);
-          setAdsData([]);
+      advertisementData.forEach((item: any) => {
+        // Skip invalid items
+        if (!item || typeof item !== 'object' || !item.start_date) {
           return;
         }
 
-        // Process the data to aggregate daily performance
-        const dailyPerformance: { [date: string]: AdPerformance } = {};
-        
-        if (data && Array.isArray(data) && data.length > 0) {
-          // Check if we have valid data with the expected fields
-          data.forEach((item: any) => {
-            // Skip invalid items or items with errors
-            if (!item || typeof item !== 'object' || !item.start_date) {
-              return;
-            }
-            
-            // Type assertion to safely access properties
-            const ad = item as {
-              start_date: string;
-              impressions?: number;
-              clicks?: number;
-              reach?: number;
-            };
-            
-            const date = format(new Date(ad.start_date), 'yyyy-MM-dd');
-            if (!dailyPerformance[date]) {
-              dailyPerformance[date] = {
-                date: date,
-                impressions: 0,
-                clicks: 0,
-                reach: 0,
-              };
-            }
-            dailyPerformance[date].impressions += ad.impressions || 0;
-            dailyPerformance[date].clicks += ad.clicks || 0;
-            dailyPerformance[date].reach += ad.reach || 0;
-          });
-
-          // Convert the processed data to an array
-          const adsPerformanceArray: AdPerformance[] = Object.values(dailyPerformance);
-          setAdsData(adsPerformanceArray);
-        } else {
-          setAdsData([]);
+        const date = format(new Date(item.start_date), 'yyyy-MM-dd');
+        if (!dailyPerformance[date]) {
+          dailyPerformance[date] = {
+            date,
+            impressions: 0,
+            clicks: 0,
+            reach: 0,
+          };
         }
-      } catch (error) {
-        console.error('Failed to fetch ad performance data', error);
-        setAdsData([]);
-      }
-    };
+        
+        dailyPerformance[date].impressions += item.impressions || 0;
+        dailyPerformance[date].clicks += item.clicks || 0;
+        dailyPerformance[date].reach += item.reach || 0;
+      });
 
-    fetchAdPerformance();
-  }, [dateRange]);
+      // Convert to array
+      setAdsData(Object.values(dailyPerformance));
+    }
+  }, [advertisementData, isLoading]);
 
   const chartData = adsData.map(item => ({
     date: item.date,

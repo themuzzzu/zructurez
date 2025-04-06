@@ -17,7 +17,6 @@ interface BusinessType {
   reviews?: number;
   contact?: string;
   hours?: string;
-  is_verified?: boolean;
   is_open?: boolean;
   wait_time?: string;
   closure_reason?: string;
@@ -42,6 +41,7 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
           query = query.eq('business_type', businessType);
         }
         
+        // Add limit to reduce data transfer
         query = query.order('created_at', { ascending: false })
           .limit(4);
         
@@ -49,10 +49,10 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
         
         if (error) throw error;
         
-        if (!data) return [] as BusinessType[];
+        if (!data) return [];
         
-        // Use type assertion to avoid excessive type instantiation
-        return (data as any[]).map(item => ({
+        // Transform to BusinessType with explicit casting to avoid TS error
+        return data.map((item) => ({
           id: item.id,
           name: item.name,
           description: item.description || "",
@@ -63,12 +63,14 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
           wait_time: item.wait_time,
           closure_reason: item.closure_reason,
           verified: item.verified,
-        } as BusinessType));
+        })) as BusinessType[];
       } catch (err) {
         console.error("Error fetching local businesses:", err);
         return [] as BusinessType[];
       }
     },
+    // Add staleTime to prevent excessive refetches
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   // Loading state

@@ -3,15 +3,13 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SponsoredProducts } from '@/components/marketplace/SponsoredProducts';
-import { TrendingProducts } from '@/components/marketplace/TrendingProducts';
-import { RecommendedProducts } from '@/components/marketplace/RecommendedProducts';
-import { PersonalizedRecommendations } from '@/components/marketplace/PersonalizedRecommendations';
 import { MarketplaceHeader } from './MarketplaceHeader';
 import { BrowseTabContent } from '@/components/marketplace/BrowseTabContent';
 import { CategoryTabContent } from '@/components/marketplace/CategoryTabContent';
 import { BannerCarousel } from '@/components/marketplace/BannerCarousel';
 import { ShopByCategory } from '@/components/marketplace/ShopByCategory';
 import { motion } from 'framer-motion';
+import { ProductsSection } from '@/components/marketplace/ProductsSection';
 
 export default function MarketplaceIndex() {
   const navigate = useNavigate();
@@ -98,7 +96,7 @@ export default function MarketplaceIndex() {
         <BannerCarousel />
       </div>
 
-      {/* New Shop by Category Section */}
+      {/* Shop by Category Section */}
       <div className="mb-8">
         <ShopByCategory onCategorySelect={handleCategorySelect} />
       </div>
@@ -108,15 +106,18 @@ export default function MarketplaceIndex() {
         <SponsoredProducts />
       </div>
       
-      {/* Recommended Products */}
-      <div className="mb-8">
-        <RecommendedProducts />
-      </div>
+      {/* Featured Products Sections - using our optimized component */}
+      <ProductsSection 
+        title="New Arrivals" 
+        sortBy="created_at" 
+        limit={8} 
+      />
       
-      {/* Personalized Recommendations */}
-      <div className="mb-8">
-        <PersonalizedRecommendations />
-      </div>
+      <ProductsSection 
+        title="Popular Products" 
+        sortBy="views" 
+        limit={8} 
+      />
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-4">
@@ -152,8 +153,12 @@ export default function MarketplaceIndex() {
 
           <TabsContent value="trending">
             <div className="space-y-8">
-              <SponsoredProducts />
-              <TrendingProducts />
+              <ProductsSection 
+                title="Trending Products" 
+                sortBy="views" 
+                limit={12}
+                showViewAll={false} 
+              />
             </div>
           </TabsContent>
         </motion.div>
