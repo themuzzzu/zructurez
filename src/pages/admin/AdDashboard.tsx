@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,6 +23,13 @@ interface AdPerformance {
   impressions: number;
   clicks: number;
   reach: number;
+}
+
+interface AdData {
+  start_date: string;
+  impressions?: number;
+  clicks?: number;
+  reach?: number;
 }
 
 const AdDashboard = () => {
@@ -51,25 +59,31 @@ const AdDashboard = () => {
 
         // Process the data to aggregate daily performance
         const dailyPerformance: { [date: string]: AdPerformance } = {};
-        data.forEach(ad => {
-          const date = format(new Date(ad.start_date), 'yyyy-MM-dd');
-          if (!dailyPerformance[date]) {
-            dailyPerformance[date] = {
-              date: date,
-              impressions: 0,
-              clicks: 0,
-              reach: 0,
-            };
-          }
-          dailyPerformance[date].impressions += ad.impressions || 0;
-          dailyPerformance[date].clicks += ad.clicks || 0;
-          dailyPerformance[date].reach += ad.reach || 0;
-        });
+        
+        if (data && data.length > 0) {
+          data.forEach((ad: AdData) => {
+            if (!ad.start_date) return;
+            
+            const date = format(new Date(ad.start_date), 'yyyy-MM-dd');
+            if (!dailyPerformance[date]) {
+              dailyPerformance[date] = {
+                date: date,
+                impressions: 0,
+                clicks: 0,
+                reach: 0,
+              };
+            }
+            dailyPerformance[date].impressions += ad.impressions || 0;
+            dailyPerformance[date].clicks += ad.clicks || 0;
+            dailyPerformance[date].reach += ad.reach || 0;
+          });
 
-        // Convert the processed data to an array
-        const adsPerformanceArray: AdPerformance[] = Object.values(dailyPerformance);
-        setAdsData(adsPerformanceArray);
-
+          // Convert the processed data to an array
+          const adsPerformanceArray: AdPerformance[] = Object.values(dailyPerformance);
+          setAdsData(adsPerformanceArray);
+        } else {
+          setAdsData([]);
+        }
       } catch (error) {
         console.error('Failed to fetch ad performance data', error);
       }

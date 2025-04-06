@@ -35,19 +35,35 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
       try {
         let query = supabase
           .from('businesses')
-          .select('id, name, description, image_url, category, location, contact, hours, is_open, wait_time, closure_reason, verified:is_verified')
-          .order('created_at', { ascending: false })
-          .limit(4);
+          .select('id, name, description, image_url, category, location, contact, hours, is_open, wait_time, closure_reason, verified');
           
         // Apply businessType filter if it's provided
         if (businessType) {
           query = query.eq('business_type', businessType);
         }
         
+        query = query.order('created_at', { ascending: false })
+          .limit(4);
+        
         const { data, error } = await query;
         
         if (error) throw error;
-        return data as BusinessType[];
+        
+        // Transform the data to match the BusinessType interface
+        const transformedData: BusinessType[] = data.map(item => ({
+          id: item.id,
+          name: item.name,
+          description: item.description || "",
+          image_url: item.image_url,
+          category: item.category,
+          location: item.location,
+          is_open: item.is_open,
+          wait_time: item.wait_time,
+          closure_reason: item.closure_reason,
+          verified: item.verified,
+        }));
+        
+        return transformedData;
       } catch (err) {
         console.error("Error fetching local businesses:", err);
         return [] as BusinessType[];
@@ -92,8 +108,8 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
           image={business.image_url || ""}
           category={business.category || ""}
           location={business.location || ""}
-          rating={business.rating || 4.0}
-          reviews={business.reviews || 0}
+          rating={4.0}
+          reviews={0}
           contact={business.contact || ""}
           hours={business.hours || ""}
           verified={business.verified || false}

@@ -4,12 +4,22 @@ import { Button } from "@/components/ui/button";
 import { Camera, X } from "lucide-react";
 import { toast } from "sonner";
 
+interface ImagePosition {
+  x: number;
+  y: number;
+}
+
 interface ImageUploadProps {
   selectedImage: string | null;
   onImageSelect: (image: string | null) => void;
   label?: string;
   accept?: string;
   buttonText?: React.ReactNode;
+  initialScale?: number;
+  initialPosition?: ImagePosition;
+  onScaleChange?: (scale: number) => void;
+  onPositionChange?: (position: ImagePosition) => void;
+  skipAutoSave?: boolean;
 }
 
 export const ImageUpload = ({ 
@@ -17,7 +27,12 @@ export const ImageUpload = ({
   onImageSelect, 
   label = "Upload Image", 
   accept = "image/*",
-  buttonText
+  buttonText,
+  initialScale,
+  initialPosition,
+  onScaleChange,
+  onPositionChange,
+  skipAutoSave
 }: ImageUploadProps) => {
   const [loading, setLoading] = useState(false);
 
