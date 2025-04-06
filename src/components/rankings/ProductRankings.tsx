@@ -3,7 +3,6 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductCard } from "@/components/products/ProductCard";
-import { RankingsTabs } from "./RankingsTabs";
 import { Product } from "@/types/product";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
@@ -16,66 +15,84 @@ export const ProductRankings = () => {
     queryKey: ['top-products', rankingType],
     queryFn: async () => {
       try {
-        let query;
+        let productsData: any[] = [];
         
         switch (rankingType) {
           case "wishlisted":
-            // Get products with most wishlists
-            const { data: wishlistData, error: wishlistError } = await supabase
+            // First get all wishlisted product entries
+            const { data: wishlistEntries, error: wishlistError } = await supabase
               .from('wishlists')
-              .select('product_id, count(*) as wishlist_count')
-              .group('product_id')
-              .order('wishlist_count', { ascending: false })
-              .limit(8);
+              .select('product_id');
               
             if (wishlistError) throw wishlistError;
             
-            // Get the product details
-            const productIds = wishlistData?.map(item => item.product_id) || [];
-            if (productIds.length === 0) return [];
+            // Count occurrences of each product_id
+            const wishlistCounts: Record<string, number> = {};
+            wishlistEntries?.forEach(entry => {
+              if (entry.product_id) {
+                wishlistCounts[entry.product_id] = (wishlistCounts[entry.product_id] || 0) + 1;
+              }
+            });
             
+            // Sort product IDs by wishlist count
+            const sortedProductIds = Object.keys(wishlistCounts).sort(
+              (a, b) => wishlistCounts[b] - wishlistCounts[a]
+            ).slice(0, 8); // Limit to top 8
+            
+            if (sortedProductIds.length === 0) return [];
+            
+            // Get the actual product details
             const { data: products, error } = await supabase
               .from('products')
               .select('*')
-              .in('id', productIds);
+              .in('id', sortedProductIds);
               
             if (error) throw error;
             
-            // Sort according to wishlist count
-            const sortedProducts = productIds.map(id => 
-              products?.find(product => product.id === id)
-            ).filter(Boolean);
+            // Sort products according to wishlist count
+            productsData = sortedProductIds
+              .map(id => products?.find(product => product.id === id))
+              .filter(Boolean) as any[];
             
-            return sortedProducts || [];
+            return productsData || [];
             
           case "sales":
-            // Get products with most sales
-            const { data: salesData, error: salesError } = await supabase
+            // First get all purchased products
+            const { data: purchaseEntries, error: salesError } = await supabase
               .from('product_purchases')
-              .select('product_id, count(*) as purchase_count')
-              .group('product_id')
-              .order('purchase_count', { ascending: false })
-              .limit(8);
+              .select('product_id, quantity');
               
             if (salesError) throw salesError;
             
-            // Get the product details
-            const productIdsSales = salesData?.map(item => item.product_id) || [];
-            if (productIdsSales.length === 0) return [];
+            // Count total quantity sold for each product
+            const salesCounts: Record<string, number> = {};
+            purchaseEntries?.forEach(entry => {
+              if (entry.product_id) {
+                salesCounts[entry.product_id] = (salesCounts[entry.product_id] || 0) + (entry.quantity || 1);
+              }
+            });
             
-            const { data: productsSales, error: productsSalesError } = await supabase
+            // Sort product IDs by sales count
+            const sortedSalesIds = Object.keys(salesCounts).sort(
+              (a, b) => salesCounts[b] - salesCounts[a]
+            ).slice(0, 8); // Limit to top 8
+            
+            if (sortedSalesIds.length === 0) return [];
+            
+            // Get the actual product details
+            const { data: salesProducts, error: productsSalesError } = await supabase
               .from('products')
               .select('*')
-              .in('id', productIdsSales);
+              .in('id', sortedSalesIds);
               
             if (productsSalesError) throw productsSalesError;
             
-            // Sort according to sales count
-            const sortedSalesProducts = productIdsSales.map(id => 
-              productsSales?.find(product => product.id === id)
-            ).filter(Boolean);
+            // Sort products according to sales count
+            productsData = sortedSalesIds
+              .map(id => salesProducts?.find(product => product.id === id))
+              .filter(Boolean) as any[];
             
-            return sortedSalesProducts || [];
+            return productsData || [];
             
           case "views":
           default:
