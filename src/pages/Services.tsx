@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
-import { Button, } from "@/components/ui/button";
-import { Plus, Phone } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ServiceCard } from "@/components/service-card/ServiceCard";
 import { CreateServiceForm } from "@/components/service-form/CreateServiceForm";
@@ -17,15 +17,15 @@ import { TrendingServices } from "@/components/service-marketplace/TrendingServi
 import { RecommendedServices } from "@/components/service-marketplace/RecommendedServices";
 import { TopServices } from "@/components/service-marketplace/TopServices";
 import { ServiceIconGrid } from "@/components/service-marketplace/ServiceIconGrid";
-import { SearchInput } from "@/components/SearchInput";
 import { ServiceBannerAd } from "@/components/ads/ServiceBannerAd";
 import { ServiceRankings } from "@/components/rankings/ServiceRankings";
+import { useNavigate } from "react-router-dom";
 
 export default function Services() {
+  const navigate = useNavigate();
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [userServices, setUserServices] = useState([]);
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
   const [gridLayout, setGridLayout] = useState<GridLayoutType>("grid3x3");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -35,10 +35,6 @@ export default function Services() {
     const checkUserAuth = async () => {
       const { data } = await supabase.auth.getUser();
       setIsUserLoggedIn(!!data.user);
-      
-      if (data.user) {
-        fetchUserServices(data.user.id);
-      }
     };
     
     const fetchServices = async () => {
@@ -68,21 +64,6 @@ export default function Services() {
       }
     };
     
-    const fetchUserServices = async (userId) => {
-      try {
-        const { data, error } = await supabase
-          .from('services')
-          .select('*')
-          .eq('user_id', userId)
-          .order('created_at', { ascending: false });
-          
-        if (error) throw error;
-        setUserServices(data || []);
-      } catch (err) {
-        console.error('Error fetching user services:', err);
-      }
-    };
-    
     checkUserAuth();
     fetchServices();
   }, [selectedCategory, searchQuery]);
@@ -94,6 +75,12 @@ export default function Services() {
   const handleCreateSuccess = () => {
     setIsDialogOpen(false);
     window.location.reload();
+  };
+
+  const handleSearch = (query: string) => {
+    if (query.trim()) {
+      navigate(`/search?q=${encodeURIComponent(query)}&type=service`);
+    }
   };
 
   const getGridClasses = () => {
@@ -133,17 +120,37 @@ export default function Services() {
           </div>
         </div>
 
-        {/* Search Bar */}
+        {/* Search Bar - Updated to navigate to search results page */}
         <div className="mb-6">
-          <SearchInput 
-            placeholder="Search for services..." 
-            value={searchQuery} 
-            onChange={setSearchQuery} 
-            className="w-full max-w-3xl mx-auto"
-          />
+          <div className="relative w-full max-w-3xl mx-auto">
+            <input 
+              type="search"
+              placeholder="Search for services..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch(searchQuery)}
+              className="w-full pl-10 pr-4 py-3 rounded-lg border border-zinc-300 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+            <Button 
+              className="absolute right-2 top-1/2 transform -translate-y-1/2"
+              onClick={() => handleSearch(searchQuery)}
+              size="sm"
+            >
+              Search
+            </Button>
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
         </div>
         
-        {/* Banner Ad - Added below search */}
+        {/* Banner Ad - First position */}
         <ServiceBannerAd />
         
         {/* Banner */}
@@ -161,14 +168,24 @@ export default function Services() {
           <SponsoredServices />
         </div>
 
+        {/* Second Banner Ad - Added new position */}
+        <div className="mb-8">
+          <ServiceBannerAd />
+        </div>
+
         {/* Trending Services */}
         <div className="mb-8">
           <TrendingServices />
         </div>
         
-        {/* Rankings - Added new section */}
+        {/* Rankings - Enhanced with more data */}
         <div className="mb-8">
           <ServiceRankings />
+        </div>
+
+        {/* Third Banner Ad - Added new position */}
+        <div className="mb-8">
+          <ServiceBannerAd />
         </div>
 
         {/* Top Services */}
@@ -187,27 +204,10 @@ export default function Services() {
           <ServiceCategoryFilter onCategoryChange={handleCategoryChange} />
         </div>
         
-        {isUserLoggedIn && userServices.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold mb-4">Your Services</h2>
-            <div className={getGridClasses()}>
-              {userServices.map((service) => (
-                <ServiceCard 
-                  key={service.id}
-                  id={service.id}
-                  title={service.title}
-                  description={service.description}
-                  image_url={service.image_url}
-                  price={service.price}
-                  providerName="You"
-                  providerId={service.user_id}
-                  category={service.category}
-                  location={service.location}
-                />
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Fourth Banner Ad - Added new position */}
+        <div className="mb-8">
+          <ServiceBannerAd />
+        </div>
         
         <h2 className="text-xl font-semibold mb-4">All Services</h2>
         
