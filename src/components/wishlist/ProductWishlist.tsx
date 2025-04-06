@@ -34,7 +34,11 @@ export const ProductWishlist = () => {
       // Transform Supabase data to match ProductType
       return (data || []).map(product => ({
         ...product,
+        // Ensure title exists (use product.title, product.name, or empty string)
         title: product.title || product.name || '',
+        // Make sure we have proper field mapping
+        imageUrl: product.image_url || product.imageUrl,
+        name: product.name || product.title || '',
       })) as ProductType[];
     },
     enabled: wishlistItems.length > 0,
