@@ -1,25 +1,33 @@
 
-export type GridLayoutType = "grid2x2" | "grid3x3" | "grid4x4";
+export type GridLayoutType = "grid2x2" | "grid3x3" | "grid4x4" | "grid1x1" | "list" | "single";
 
 export interface Product {
   id: string;
   title: string;
+  name?: string; // Add name as optional property
   description?: string;
   price: number;
   original_price?: number;
   image_url?: string;
+  imageUrl?: string; // Add imageUrl as alternative to image_url
   category?: string;
   subcategory?: string;
   tags?: string[];
   is_discounted?: boolean;
   discount_percentage?: number;
   brand?: string;
+  brand_name?: string; // Add brand_name
   in_stock?: boolean;
   stock_count?: number;
   ratings?: number;
+  rating?: number; // Add rating as alternative to ratings
   reviews_count?: number;
+  rating_count?: number; // Add rating_count
   created_at?: string;
   updated_at?: string;
+  views?: number; // Add views
+  wishlist_count?: number; // Add wishlist_count
+  highlight_tags?: string[]; // Add highlight_tags
 }
 
 export interface ProductVariant {
@@ -85,3 +93,6 @@ export interface ProductFilter {
   in_stock_only?: boolean;
   sort_by?: 'price_low' | 'price_high' | 'newest' | 'ratings' | 'popularity';
 }
+
+// Add ProductType as an alias to Product for backward compatibility
+export type ProductType = Product;

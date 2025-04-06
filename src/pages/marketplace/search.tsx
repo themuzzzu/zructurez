@@ -472,10 +472,6 @@ export default function MarketplaceSearch() {
                           price: result.price || 0,
                           image_url: `https://picsum.photos/seed/${result.id}/300/300`,
                           category: result.category || '',
-                          highlight_tags: result.highlight_tags || 
-                            (Math.random() > 0.7 ? 
-                              [['Bestseller', 'New', 'Hot Deal', 'Trending', 'Limited'][Math.floor(Math.random() * 5)]] 
-                              : []),
                           is_discounted: result.isDiscounted || result.is_discounted || false,
                           discount_percentage: result.discount_percentage || 
                             ((result.isDiscounted || result.is_discounted) ? Math.floor(Math.random() * 50) + 10 : undefined)

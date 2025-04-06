@@ -93,7 +93,7 @@ export const ProductCard = ({
             "relative overflow-hidden"
           )}>
             <img 
-              src={product.image_url || product.imageUrl} 
+              src={product.image_url || product.imageUrl || ""} 
               alt={product.title || product.name || "Product image"} 
               className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
               loading="lazy"
@@ -128,7 +128,7 @@ export const ProductCard = ({
                 </Badge>
               )}
               
-              {product.highlight_tags && product.highlight_tags[0] && (
+              {product.highlight_tags && product.highlight_tags.length > 0 && (
                 <Badge className="bg-blue-500 hover:bg-blue-600 text-white text-xs">
                   {product.highlight_tags[0]}
                 </Badge>
@@ -157,7 +157,7 @@ export const ProductCard = ({
           
           <div className={getContentClasses()}>
             <h3 className="font-medium text-sm sm:text-base mb-1 line-clamp-2">
-              {product.title || product.name}
+              {product.title || product.name || ""}
             </h3>
             
             <div className="mt-auto pt-2">
@@ -187,18 +187,18 @@ export const ProductCard = ({
                 </div>
               </div>
               
-              {product.rating !== undefined && (
+              {(product.rating !== undefined || product.ratings !== undefined) && (
                 <div className="flex items-center mt-1">
                   <div className="flex text-yellow-400 text-xs">
                     {[...Array(5)].map((_, i) => (
                       <span key={i}>
-                        {i < Math.floor(product.rating || 0) ? "★" : "☆"}
+                        {i < Math.floor((product.rating || product.ratings || 0)) ? "★" : "☆"}
                       </span>
                     ))}
                   </div>
-                  {product.rating_count && (
+                  {(product.rating_count || product.reviews_count) && (
                     <span className="text-xs ml-1 text-muted-foreground">
-                      ({product.rating_count})
+                      ({product.rating_count || product.reviews_count})
                     </span>
                   )}
                 </div>

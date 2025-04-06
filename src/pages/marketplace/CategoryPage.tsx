@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductCard } from "@/components/products/ProductCard";
-import { ProductGrid } from "@/components/products/ProductsGrid"; // Updated import
+import { ProductGrid } from "@/components/products/ProductsGrid";
 import { Layout } from "@/components/layout/Layout";
 import { CategoryHeader } from "@/components/marketplace/CategoryHeader";
 import { CategorySidebar } from "@/components/marketplace/CategorySidebar";
@@ -16,14 +15,14 @@ const CategoryPage = () => {
   const [categoryName, setCategoryName] = useState<string>("");
   const [layout, setLayout] = useState<"grid4x4" | "grid3x3" | "grid2x2" | "list">("grid3x3");
   const [searchQuery, setSearchQuery] = useState("");
+  const [gridLayout, setGridLayout] = useState<GridLayoutType>("grid3x3");
 
   useEffect(() => {
     const fetchCategories = async () => {
       setIsLoading(true);
       try {
-        // Replace this query with one that works with existing tables
         const { data, error } = await supabase
-          .from('ad_categories')  // Use an existing table or handle the error gracefully
+          .from('ad_categories')
           .select('*')
           .eq('name', categorySlug);
 
@@ -84,8 +83,9 @@ const CategoryPage = () => {
     }
   }, [categorySlug, searchQuery]);
 
-  const handleLayoutChange = (newLayout: "grid4x4" | "grid3x3" | "grid2x2" | "list") => {
-    setLayout(newLayout);
+  const handleLayoutChange = (newLayout: GridLayoutType) => {
+    setGridLayout(newLayout);
+    localStorage.setItem('categoryGridLayout', newLayout);
   };
 
   const handleSearch = (searchTerm: string) => {
