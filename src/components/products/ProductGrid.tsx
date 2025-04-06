@@ -22,6 +22,8 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
         return "grid-cols-1 sm:grid-cols-2 gap-4";
       case "list":
         return "grid-cols-1 gap-4";
+      case "single":
+        return "grid-cols-1 gap-4 max-w-3xl mx-auto";
       case "grid4x4":
       default:
         return "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4";

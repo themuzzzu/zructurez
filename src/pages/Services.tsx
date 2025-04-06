@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button, } from "@/components/ui/button";
 import { Plus, Phone } from "lucide-react";
@@ -8,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Spinner } from "@/components/common/Spinner";
 import { Layout } from "@/components/layout/Layout";
 import { GridLayoutSelector } from "@/components/marketplace/GridLayoutSelector";
-import { GridLayoutType } from "@/components/products/types/layouts";
+import { GridLayoutType } from "@/components/products/types/ProductTypes";
 import { MarketplaceBanner } from "@/components/marketplace/MarketplaceBanner";
 import { ServiceCategoryFilter } from "@/components/ServiceCategoryFilter";
 import { SponsoredServices } from "@/components/service-marketplace/SponsoredServices";
@@ -105,6 +106,8 @@ export default function Services() {
         return "flex flex-col gap-4";
       case "grid1x1":
         return "grid grid-cols-1 gap-4";
+      case "single":
+        return "grid grid-cols-1 gap-4 max-w-3xl mx-auto";
       case "grid3x3":
       default:
         return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4";

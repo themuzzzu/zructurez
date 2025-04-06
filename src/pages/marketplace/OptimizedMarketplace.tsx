@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { GridLayoutType } from "@/components/products/types/layouts";
+import { GridLayoutType } from "@/components/products/types/ProductTypes";
 import { AutocompleteSearch } from "@/components/marketplace/AutocompleteSearch";
 import { BannerCarousel } from "@/components/marketplace/BannerCarousel";
 import { CrazyDeals } from "@/components/marketplace/CrazyDeals";

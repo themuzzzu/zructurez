@@ -14,3 +14,6 @@ export interface Product {
   is_discounted?: boolean;
   discount_percentage?: number;
 }
+
+// Add ProductType as an alias for Product to fix the imports
+export type ProductType = Product;
