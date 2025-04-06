@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { GridLayoutType, Product } from './types/ProductTypes';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { ProductCard } from './ProductCard';
+import { LikeProvider } from './LikeContext';
 
 interface ProductGridProps {
   children?: React.ReactNode;
@@ -20,7 +21,11 @@ interface ProductGridProps {
 
 export const ProductsGrid: React.FC<ProductGridProps> = (props) => {
   // Forward all props to ProductGrid to maintain backward compatibility
-  return <ProductGrid {...props} />;
+  return (
+    <LikeProvider>
+      <ProductGrid {...props} />
+    </LikeProvider>
+  );
 };
 
 // Import the ProductGrid component from the new file

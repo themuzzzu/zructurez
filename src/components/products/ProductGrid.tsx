@@ -82,10 +82,8 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
   };
 
   return (
-    <LikeProvider>
-      <div className={cn("grid", getGridClasses(), className)}>
-        {products ? renderProducts() : children}
-      </div>
-    </LikeProvider>
+    <div className={cn("grid", getGridClasses(), className)}>
+      {products ? renderProducts() : children}
+    </div>
   );
 };

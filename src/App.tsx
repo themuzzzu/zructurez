@@ -9,6 +9,7 @@ import { LoadingProvider } from "@/providers/LoadingProvider";
 import router from "./routes";
 import { PageLoader } from "@/components/loaders/PageLoader";
 import { RouterProvider } from "react-router-dom";
+import { LikeProvider } from "@/components/products/LikeContext";
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -27,13 +28,15 @@ function App() {
       <ThemeProvider defaultTheme="dark" storageKey="lovable-theme">
         <LoadingProvider>
           <AuthProvider>
-            <div className={isLoading ? "hidden" : "app"}>
-              {!isLoading && <RouterProvider router={router} />}
-            </div>
-            {isLoading && (
-              <PageLoader type="shimmer" />
-            )}
-            <Toaster />
+            <LikeProvider>
+              <div className={isLoading ? "hidden" : "app"}>
+                {!isLoading && <RouterProvider router={router} />}
+              </div>
+              {isLoading && (
+                <PageLoader type="shimmer" />
+              )}
+              <Toaster />
+            </LikeProvider>
           </AuthProvider>
         </LoadingProvider>
       </ThemeProvider>
