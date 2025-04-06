@@ -5,6 +5,7 @@ import { Heart, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useWishlist } from "@/hooks/useWishlist";
+import { useLikes } from "./LikeContext";
 
 interface ProductLikeButtonProps {
   productId: string;
@@ -19,17 +20,19 @@ export const ProductLikeButton = ({
   variant = "ghost",
   className = ""
 }: ProductLikeButtonProps) => {
-  const { isInWishlist, toggleWishlist, loading } = useWishlist();
+  const { isLiked, toggleLike } = useLikes();
   const [animating, setAnimating] = useState(false);
+  const [loading, setLoading] = useState(false);
   
   // Get the actual liked status
-  const liked = isInWishlist(productId);
+  const liked = isLiked(productId);
 
   const handleClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
     
     if (loading) return;
+    setLoading(true);
     
     if (!liked) {
       // Only animate when adding to wishlist
@@ -38,8 +41,9 @@ export const ProductLikeButton = ({
       setTimeout(() => setAnimating(false), 1000);
     }
     
-    // Call the toggleWishlist function
-    await toggleWishlist(productId);
+    // Call the toggleLike function
+    await toggleLike(productId);
+    setLoading(false);
   };
 
   return (

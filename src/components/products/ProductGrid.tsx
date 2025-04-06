@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { GridLayoutType, Product } from './types/ProductTypes';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { ProductCard } from './ProductCard';
+import { LikeProvider } from './LikeContext';
 
 interface ProductGridProps {
   children?: React.ReactNode;
@@ -81,8 +82,10 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
   };
 
   return (
-    <div className={cn("grid", getGridClasses(), className)}>
-      {products ? renderProducts() : children}
-    </div>
+    <LikeProvider>
+      <div className={cn("grid", getGridClasses(), className)}>
+        {products ? renderProducts() : children}
+      </div>
+    </LikeProvider>
   );
 };

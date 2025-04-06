@@ -1,3 +1,4 @@
+
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,6 @@ import { formatPrice } from "@/utils/productUtils";
 import { ProductType } from "./types/ProductTypes";
 import { Product } from "@/types/product";
 import { ProductLikeButton } from "./ProductLikeButton";
-import { LikeProvider } from "./LikeContext";
 
 interface ProductCardCompactProps {
   product: Product | ProductType;
@@ -146,14 +146,12 @@ export const ProductCardCompact = ({
             <div>
               <div className="flex justify-between">
                 <h3 className="font-medium text-sm line-clamp-1">{product.title}</h3>
-                <LikeProvider>
-                  <ProductLikeButton 
-                    productId={product.id}
-                    size="sm"
-                    variant="ghost"
-                    className="ml-auto"
-                  />
-                </LikeProvider>
+                <ProductLikeButton 
+                  productId={product.id}
+                  size="sm"
+                  variant="ghost"
+                  className="ml-auto"
+                />
               </div>
               
               <div className="flex items-center mt-1 mb-1.5">

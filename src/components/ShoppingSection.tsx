@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { ProductGrid } from './products/ProductsGrid';
 import { useQuery } from '@tanstack/react-query';
@@ -8,6 +9,7 @@ import { Skeleton } from './ui/skeleton';
 import { ShoppingCardSkeleton } from './ShoppingCardSkeleton';
 import { LoadingView } from './LoadingView';
 import { Progress } from './ui/progress';
+import { LikeProvider } from './products/LikeContext';
 
 interface ShoppingSectionProps {
   searchQuery: string;
@@ -221,13 +223,15 @@ export const ShoppingSection = ({
               An error occurred while loading products. Please try again.
             </div>
           ) : (
-            <ProductGrid 
-              products={products || []} 
-              isLoading={isLoading} 
-              layout={localGridLayout}
-              onLayoutChange={setLocalGridLayout}
-              searchQuery={searchQuery}
-            />
+            <LikeProvider>
+              <ProductGrid 
+                products={products || []} 
+                isLoading={isLoading} 
+                layout={localGridLayout}
+                onLayoutChange={setLocalGridLayout}
+                searchQuery={searchQuery}
+              />
+            </LikeProvider>
           )}
         </div>
       </div>
