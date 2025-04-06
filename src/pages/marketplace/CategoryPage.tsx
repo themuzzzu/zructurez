@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductCard } from "@/components/products/ProductCard";
-import { ProductsGrid } from "@/components/products/ProductsGrid";
+import { ProductGrid } from "@/components/products/ProductsGrid"; // Updated import
 import { Layout } from "@/components/layout/Layout";
 import { CategoryHeader } from "@/components/marketplace/CategoryHeader";
 import { CategorySidebar } from "@/components/marketplace/CategorySidebar";
@@ -110,7 +111,7 @@ const CategoryPage = () => {
             {isLoading ? (
               <div>Loading products...</div>
             ) : products.length > 0 ? (
-              <ProductsGrid
+              <ProductGrid
                 products={products}
                 layout={layout}
                 isLoading={isLoading}

@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -22,8 +21,6 @@ export const SponsoredProducts = ({ gridLayout = "grid4x4" }: SponsoredProductsP
   const { data: products, isLoading } = useQuery({
     queryKey: ['sponsored-products'],
     queryFn: async () => {
-      // In a real implementation, we would have a sponsored field in the products table
-      // For this demo, we'll use brand to represent sponsored products
       const { data, error } = await supabase
         .from('products')
         .select('*')
@@ -36,7 +33,6 @@ export const SponsoredProducts = ({ gridLayout = "grid4x4" }: SponsoredProductsP
     staleTime: 5 * 60 * 1000 // 5 minutes
   });
   
-  // Check scroll position to show/hide arrows
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
@@ -46,17 +42,13 @@ export const SponsoredProducts = ({ gridLayout = "grid4x4" }: SponsoredProductsP
       setShowRightArrow(container.scrollLeft < (container.scrollWidth - container.clientWidth - 10));
     };
     
-    // Initial check
     checkScroll();
     
-    // Add scroll listener
     container.addEventListener('scroll', checkScroll);
     
-    // Clean up
     return () => container.removeEventListener('scroll', checkScroll);
   }, [products]);
   
-  // Handle horizontal scroll with buttons
   const scroll = (direction: 'left' | 'right') => {
     if (scrollContainerRef.current) {
       const scrollAmount = 300;
@@ -107,7 +99,6 @@ export const SponsoredProducts = ({ gridLayout = "grid4x4" }: SponsoredProductsP
       </div>
       
       <div className="relative group">
-        {/* Left scroll button - only shown when needed */}
         {showLeftArrow && (
           <Button 
             onClick={() => scroll('left')}
@@ -119,7 +110,6 @@ export const SponsoredProducts = ({ gridLayout = "grid4x4" }: SponsoredProductsP
           </Button>
         )}
         
-        {/* Scrollable container */}
         <div 
           ref={scrollContainerRef}
           className="flex overflow-x-auto gap-3 pb-2 pt-1 px-1 scrollbar-hide snap-x snap-mandatory scroll-smooth"
@@ -145,7 +135,6 @@ export const SponsoredProducts = ({ gridLayout = "grid4x4" }: SponsoredProductsP
           ))}
         </div>
         
-        {/* Right scroll button - only shown when needed */}
         {showRightArrow && (
           <Button 
             onClick={() => scroll('right')}

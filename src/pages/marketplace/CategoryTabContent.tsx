@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -6,7 +5,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { ProductsGrid } from "@/components/products/ProductsGrid";
+import { ProductGrid } from "@/components/products/ProductsGrid";
 import { Spinner } from "@/components/common/Spinner";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
 import { Categories } from "@/components/marketplace/Categories";
@@ -135,7 +134,7 @@ export const CategoryTabContent = ({
       {products.length === 0 ? (
         <EmptySearchResults searchTerm={selectedCategory !== "all" ? selectedCategory : ""} />
       ) : (
-        <ProductsGrid 
+        <ProductGrid 
           products={products} 
           layout={gridLayout}
           isLoading={false}

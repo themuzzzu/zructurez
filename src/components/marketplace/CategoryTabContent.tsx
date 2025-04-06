@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { ProductsGrid } from "@/components/products/ProductsGrid";
+import { ProductGrid } from "@/components/products/ProductsGrid"; // Updated import
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
 import { Categories } from "@/components/marketplace/Categories";
 import { EmptySearchResults } from "@/components/marketplace/EmptySearchResults";
@@ -64,7 +64,7 @@ export const CategoryTabContent = ({
       {products.length === 0 && !loading ? (
         <EmptySearchResults searchTerm={selectedCategory !== "all" ? selectedCategory : ""} />
       ) : (
-        <ProductsGrid 
+        <ProductGrid 
           products={products} 
           layout={gridLayout}
           isLoading={loading}

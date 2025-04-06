@@ -17,7 +17,8 @@ interface ProductsGridProps {
   searchQuery?: string;
 }
 
-export const ProductsGrid = ({ 
+// Rename the component to ProductGrid to match expected imports
+export const ProductGrid = ({ 
   products, 
   isLoading, 
   onOpenAddProductDialog,
@@ -100,3 +101,6 @@ export const ProductsGrid = ({
     </LikeProvider>
   );
 };
+
+// Export for backward compatibility
+export { ProductGrid as ProductsGrid };

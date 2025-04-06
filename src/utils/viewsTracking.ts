@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 /**
@@ -31,41 +32,42 @@ export const incrementViewCount = async (
     console.log(`Incrementing view count for ${entityType} ${entityId}`);
     
     // Increment the view count based on entity type
-    let error;
-    
-    // Use the appropriate function based on entity type
     if (entityType === 'product') {
-      const { data, error: updateError } = await supabase
+      const { error } = await supabase
         .from('products')
-        .update({ views: supabase.rpc('increment_counter', { row_id: entityId, counter_name: 'views' }) })
+        .update({ views: (product) => (product.views || 0) + 1 })
         .eq('id', entityId);
       
-      error = updateError;
+      if (error) {
+        console.error(`Error incrementing ${entityType} views:`, error);
+      }
     } else if (entityType === 'business') {
-      const { data, error: updateError } = await supabase
+      const { error } = await supabase
         .from('businesses')
-        .update({ views: supabase.rpc('increment_counter', { row_id: entityId, counter_name: 'views' }) })
+        .update({ views: (business) => (business.views || 0) + 1 })
         .eq('id', entityId);
         
-      error = updateError;
+      if (error) {
+        console.error(`Error incrementing ${entityType} views:`, error);
+      }
     } else if (entityType === 'service') {
-      const { data, error: updateError } = await supabase
+      const { error } = await supabase
         .from('services')
-        .update({ views: supabase.rpc('increment_counter', { row_id: entityId, counter_name: 'views' }) })
+        .update({ views: (service) => (service.views || 0) + 1 })
         .eq('id', entityId);
         
-      error = updateError;
+      if (error) {
+        console.error(`Error incrementing ${entityType} views:`, error);
+      }
     } else if (entityType === 'post') {
-      const { data, error: updateError } = await supabase
+      const { error } = await supabase
         .from('posts')
-        .update({ views: supabase.rpc('increment_counter', { row_id: entityId, counter_name: 'views' }) })
+        .update({ views: (post) => (post.views || 0) + 1 })
         .eq('id', entityId);
         
-      error = updateError;
-    }
-    
-    if (error) {
-      console.error(`Error incrementing ${entityType} views:`, error);
+      if (error) {
+        console.error(`Error incrementing ${entityType} views:`, error);
+      }
     }
   } catch (error) {
     console.error(`Failed to increment ${entityType} view:`, error);

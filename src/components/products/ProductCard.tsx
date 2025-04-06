@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { Link, useNavigate } from "react-router-dom";
 import { ImageFallback } from "@/components/ui/image-fallback";
 import { useToast } from "@/hooks/use-toast";
-import { useLikeContext } from "./LikeContext";
+import { useLike } from "./LikeContext"; // Fix: Changed useLikeContext to useLike
 import { formatCountNumber } from "@/utils/viewsTracking";
 import { incrementViewCount } from "@/utils/viewsTracking";
 import { GridLayoutType } from './types/ProductTypes';
@@ -32,12 +32,13 @@ interface ProductCardProps {
   product: Product;
   layout?: GridLayoutType;
   className?: string;
+  sponsored?: boolean; // Add sponsored prop
 }
 
-export const ProductCard = ({ product, layout = "grid4x4", className }: ProductCardProps) => {
+export const ProductCard = ({ product, layout = "grid4x4", className, sponsored = false }: ProductCardProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { isLiked, toggleLike } = useLikeContext();
+  const { isLiked, toggleLike } = useLike();
   const [isHovered, setIsHovered] = useState(false);
   
   const liked = isLiked(product.id);

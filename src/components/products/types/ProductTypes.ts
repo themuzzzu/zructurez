@@ -6,8 +6,7 @@ export interface Product {
   title: string;
   description: string;
   price: number;
-  imageUrl?: string;
-  image_url?: string; // Allow both imageUrl and image_url
+  image_url: string; // Make this required
   category: string;
   rating?: number;
   rating_count?: number;
@@ -18,6 +17,9 @@ export interface Product {
   brand_name?: string;
   brand?: string;
   name?: string; // Some components use name instead of title
+  imageUrl?: string; // Allow both image_url and imageUrl but prefer image_url
+  views?: number;
+  wishlist_count?: number;
 }
 
 // Add ProductType as an alias for Product to fix the imports

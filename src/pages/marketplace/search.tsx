@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
@@ -471,7 +470,7 @@ export default function MarketplaceSearch() {
                           title: result.title,
                           description: result.description,
                           price: result.price || 0,
-                          imageUrl: result.imageUrl || '',
+                          image_url: `https://picsum.photos/seed/${selectedCat}${index}/300/300`,
                           category: result.category || '',
                           highlight_tags: result.highlight_tags || 
                             (Math.random() > 0.7 ? 
