@@ -77,14 +77,12 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
     }
   };
 
-  // Use optimized query with longer cache time
+  // Use optimized query with longer cache time - fixed function call syntax
   const { data: businesses, isLoading } = useOptimizedQuery({
     queryKey,
     queryFn: fetchBusinesses,
-    config: { 
-      staleTime: 15 * 60 * 1000, // 15 minutes
-      cacheTime: 30 * 60 * 1000  // 30 minutes
-    }
+    staleTime: 15 * 60 * 1000, // 15 minutes
+    cacheTime: 30 * 60 * 1000  // 30 minutes
   });
 
   // Loading state
@@ -104,8 +102,8 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
     );
   }
 
-  // No results
-  if (!businesses || businesses.length === 0) {
+  // No results - explicitly check for array properties
+  if (!businesses || (businesses as BusinessType[]).length === 0) {
     return (
       <div className="text-center py-8">
         <p className="text-muted-foreground">No local businesses found.</p>
@@ -115,7 +113,7 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {businesses.map((business) => (
+      {(businesses as BusinessType[]).map((business) => (
         <BusinessCard 
           key={business.id}
           id={business.id}
