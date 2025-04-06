@@ -16,16 +16,11 @@ const LoadingContext = createContext<LoadingContextType>({
 });
 
 const loadingMessages = [
-  "Calling the vendor anna…",
-  "Warming up your street deals…",
-  "Folding the veshti… almost ready 👕",
-  "Unpacking your goodies…",
-  "Gathering the freshest produce…",
-  "Brewing your filter coffee…",
-  "Arranging the jasmine flowers…",
-  "Preparing your favorite dishes…",
-  "Finding the best local deals…",
-  "Sorting through the marketplace…"
+  "Loading...",
+  "Please wait...",
+  "Getting things ready...",
+  "Almost there...",
+  "Preparing your experience..."
 ];
 
 export const LoadingProvider = ({ children }: { children: ReactNode }) => {

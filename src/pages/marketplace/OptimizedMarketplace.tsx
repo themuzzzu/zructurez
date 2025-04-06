@@ -1,4 +1,3 @@
-
 import { useState, useEffect, Suspense } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
@@ -15,7 +14,6 @@ import { ProductRankings } from "@/components/rankings/ProductRankings";
 import { BrowseTabContent } from "@/components/marketplace/BrowseTabContent";
 import { SkeletonCard } from "@/components/loaders/SkeletonCard";
 import { useLoading } from "@/providers/LoadingProvider";
-import { ProgressLoader } from "@/components/loaders/ProgressLoader";
 
 const LazySection = ({ children, fallbackCount = 4 }) => (
   <Suspense fallback={
@@ -123,7 +121,7 @@ export const OptimizedMarketplace = () => {
   
   return (
     <div className="container max-w-[1400px] mx-auto px-3 sm:px-4 py-4 sm:py-6">
-      <ProgressLoader className="mb-4" />
+      {/* Remove progress loader */}
       
       {/* Single Search Bar at the top with improved design */}
       <div className="mb-4 sm:mb-6">

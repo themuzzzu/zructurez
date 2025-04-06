@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { PageLoader } from "./loaders/PageLoader";
 import { useLoading } from "@/providers/LoadingProvider";
-import { ProgressLoader } from "./loaders/ProgressLoader";
 
 interface LoadingViewProps {
   section?: "general" | "marketplace" | "business" | "profile" | "messages" | "community";
@@ -11,7 +10,7 @@ interface LoadingViewProps {
 
 export const LoadingView = ({ 
   section = "general",
-  showProgress = true
+  showProgress = false // Changed default to false to disable progress bars
 }: LoadingViewProps) => {
   const [loaderType, setLoaderType] = useState<"bouncing" | "rangoli">("rangoli");
   const [iconTypes, setIconTypes] = useState<("car" | "coffee" | "palmtree" | "dot")[]>(["dot", "dot", "dot"]);
@@ -49,13 +48,12 @@ export const LoadingView = ({
   return (
     <div className="min-h-screen bg-background">
       <div className="container max-w-[1400px]">
-        {showProgress && <ProgressLoader fixed />}
-        
         <PageLoader 
           type={loaderType} 
           iconType={iconTypes} 
           fullScreen={false} 
           className="h-[80vh]"
+          showMessage={false} // Hide messages
         />
       </div>
     </div>

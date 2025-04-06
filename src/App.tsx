@@ -35,7 +35,7 @@ function App() {
               {!isLoading && <RouterProvider router={router} />}
             </div>
             {isLoading && (
-              <PageLoader type="rangoli" />
+              <PageLoader type="rangoli" showMessage={false} />
             )}
             <Toaster />
           </AuthProvider>

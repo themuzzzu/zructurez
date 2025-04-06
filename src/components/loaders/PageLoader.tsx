@@ -19,7 +19,7 @@ export function PageLoader({
   type = "rangoli",
   className,
   fullScreen = true,
-  showMessage = true,
+  showMessage = false, // Default to false to hide messages
   messageClassName,
   iconType = ["car", "coffee", "palmtree"],
 }: PageLoaderProps) {
