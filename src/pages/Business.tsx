@@ -28,15 +28,16 @@ import { SponsoredProducts } from "@/components/marketplace/SponsoredProducts";
 import { CategorySubcategoryGrid } from "@/components/marketplace/CategorySubcategoryGrid";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
-import type { Business, BusinessOwner, BusinessHours } from "@/types/business";
+import type { Business, BusinessOwner, BusinessHours, StaffMember } from "@/types/business";
 import { BusinessBannerAd } from "@/components/ads/BusinessBannerAd";
 import { BusinessCategoryScroller } from "@/components/business/BusinessCategoryScroller";
 
-interface BusinessWithRating extends Omit<Business, 'owners'> {
+interface BusinessWithRating extends Omit<Business, 'owners' | 'staff_details'> {
   average_rating: number;
   reviews_count: number;
   business_ratings: Array<{ rating: number }>;
   owners?: BusinessOwner[];
+  staff_details?: StaffMember[];
 }
 
 const Business = () => {
@@ -86,16 +87,27 @@ const Business = () => {
       // Convert owners from JSON to proper BusinessOwner[] type
       let typedOwners: BusinessOwner[] = [];
       try {
-        if (business.owners && Array.isArray(business.owners)) {
-          typedOwners = business.owners as BusinessOwner[];
+        if (business.owners && typeof business.owners === 'object' && Array.isArray(business.owners)) {
+          typedOwners = business.owners as unknown as BusinessOwner[];
         }
       } catch (e) {
         console.error("Error parsing owners:", e);
+      }
+
+      // Convert staff_details from JSON to proper StaffMember[] type
+      let typedStaffDetails: StaffMember[] = [];
+      try {
+        if (business.staff_details && typeof business.staff_details === 'object' && Array.isArray(business.staff_details)) {
+          typedStaffDetails = business.staff_details as unknown as StaffMember[];
+        }
+      } catch (e) {
+        console.error("Error parsing staff details:", e);
       }
       
       return {
         ...business,
         owners: typedOwners,
+        staff_details: typedStaffDetails,
         average_rating: averageRating,
         reviews_count: ratings.length,
         business_ratings: ratings
