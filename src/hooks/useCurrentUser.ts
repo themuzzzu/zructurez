@@ -1,5 +1,5 @@
 
-import { useQuery, useQueryClient, QueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Profile } from "@/types/profile";
@@ -62,7 +62,8 @@ export const prefetchUserProfile = async (userId: string) => {
       .maybeSingle();
       
     if (data) {
-      const queryClient = new QueryClient();
+      // Use the imported QueryClient instead of creating a new one
+      const queryClient = useQueryClient();
       queryClient.setQueryData(CURRENT_USER_QUERY_KEY, data);
     }
   } catch (error) {

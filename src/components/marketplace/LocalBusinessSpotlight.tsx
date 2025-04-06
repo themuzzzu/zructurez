@@ -58,25 +58,19 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
       
       if (!data) return [];
 
-      // Create typed business objects from raw data
-      const businesses: BusinessType[] = [];
-      
-      for (const item of data) {
-        businesses.push({
-          id: item.id,
-          name: item.name,
-          description: item.description || "",
-          image_url: item.image_url,
-          category: item.category,
-          location: item.location,
-          is_open: item.is_open,
-          wait_time: item.wait_time,
-          closure_reason: item.closure_reason,
-          verified: item.verified,
-        });
-      }
-      
-      return businesses;
+      // Map raw data to the BusinessType interface
+      return data.map(item => ({
+        id: item.id,
+        name: item.name,
+        description: item.description || "",
+        image_url: item.image_url,
+        category: item.category,
+        location: item.location,
+        is_open: item.is_open,
+        wait_time: item.wait_time,
+        closure_reason: item.closure_reason,
+        verified: item.verified,
+      }));
     } catch (err) {
       console.error("Error fetching local businesses:", err);
       return [];
