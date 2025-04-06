@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { ProductsGrid } from './products/ProductsGrid';
 import { useQuery } from '@tanstack/react-query';
@@ -76,14 +75,20 @@ export const ShoppingSection = ({
         query = query.eq('is_branded', true);
       }
       
-      if (localSortOption === 'price-low') {
-        query = query.order('price', { ascending: true });
-      } else if (localSortOption === 'price-high') {
-        query = query.order('price', { ascending: false });
-      } else if (localSortOption === 'most-viewed') {
-        query = query.order('views', { ascending: false });
-      } else {
-        query = query.order('created_at', { ascending: false });
+      switch (localSortOption) {
+        case 'price-low':
+          query = query.order('price', { ascending: true });
+          break;
+        case 'price-high':
+          query = query.order('price', { ascending: false });
+          break;
+        case 'most-viewed':
+          query = query.order('views', { ascending: false });
+          break;
+        case 'newest':
+        default:
+          query = query.order('created_at', { ascending: false });
+          break;
       }
       
       if (localPriceRange !== 'all') {

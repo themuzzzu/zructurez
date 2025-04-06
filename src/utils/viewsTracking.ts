@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 /**
@@ -11,39 +10,58 @@ export const incrementViewCount = async (
   entityId: string
 ): Promise<void> => {
   try {
-    // Check if user has viewed this entity in the last hour (to prevent spam)
+    // Check if user has viewed this entity in the current session
     const sessionKey = `viewed_${entityType}_${entityId}`;
-    const lastViewed = localStorage.getItem(sessionKey);
+    const lastViewed = sessionStorage.getItem(sessionKey);
     
     if (lastViewed) {
       const lastViewedTime = parseInt(lastViewed, 10);
-      const oneHourAgo = Date.now() - 3600000; // 1 hour in milliseconds
+      const fifteenMinutesAgo = Date.now() - 900000; // 15 minutes in milliseconds
       
-      if (lastViewedTime > oneHourAgo) {
-        // User has viewed this entity within the last hour
+      if (lastViewedTime > fifteenMinutesAgo) {
+        // User has viewed this entity within the last 15 minutes - don't increment
+        console.log(`Skipping view increment for ${entityType} ${entityId} - viewed recently`);
         return;
       }
     }
     
     // Mark this entity as viewed in this session
-    localStorage.setItem(sessionKey, Date.now().toString());
+    sessionStorage.setItem(sessionKey, Date.now().toString());
+    
+    console.log(`Incrementing view count for ${entityType} ${entityId}`);
     
     // Increment the view count based on entity type
     let error;
     
     // Use the appropriate function based on entity type
     if (entityType === 'product') {
-      const result = await supabase.rpc('increment_product_views', { product_id_param: entityId });
-      error = result.error;
+      const { data, error: updateError } = await supabase
+        .from('products')
+        .update({ views: supabase.rpc('increment_counter', { row_id: entityId, counter_name: 'views' }) })
+        .eq('id', entityId);
+      
+      error = updateError;
     } else if (entityType === 'business') {
-      const result = await supabase.rpc('increment_business_views', { business_id_param: entityId });
-      error = result.error;
+      const { data, error: updateError } = await supabase
+        .from('businesses')
+        .update({ views: supabase.rpc('increment_counter', { row_id: entityId, counter_name: 'views' }) })
+        .eq('id', entityId);
+        
+      error = updateError;
     } else if (entityType === 'service') {
-      const result = await supabase.rpc('increment_service_views', { service_id_param: entityId });
-      error = result.error;
+      const { data, error: updateError } = await supabase
+        .from('services')
+        .update({ views: supabase.rpc('increment_counter', { row_id: entityId, counter_name: 'views' }) })
+        .eq('id', entityId);
+        
+      error = updateError;
     } else if (entityType === 'post') {
-      const result = await supabase.rpc('increment_post_views', { post_id_param: entityId });
-      error = result.error;
+      const { data, error: updateError } = await supabase
+        .from('posts')
+        .update({ views: supabase.rpc('increment_counter', { row_id: entityId, counter_name: 'views' }) })
+        .eq('id', entityId);
+        
+      error = updateError;
     }
     
     if (error) {
@@ -169,6 +187,8 @@ export const trackEntityView = async (
  * @returns Formatted number as string (e.g. 1.2k, 3.4M)
  */
 export const formatCountNumber = (num: number): string => {
+  if (!num) return '0';
+  
   if (num >= 1000000) {
     return (num / 1000000).toFixed(1) + 'M';
   } else if (num >= 10000) {

@@ -1,296 +1,187 @@
 
 import { useState } from "react";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { useNavigate } from "react-router-dom";
-import { formatPrice } from "@/utils/productUtils";
-import { ProductLikeButton } from "./ProductLikeButton";
-import { Skeleton } from "@/components/ui/skeleton";
-import { GridLayoutType } from "./types/ProductTypes";
-import { LikeProvider } from "./LikeContext";
-import { motion } from "framer-motion";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Heart, ShoppingCart } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Link, useNavigate } from "react-router-dom";
+import { ImageFallback } from "@/components/ui/image-fallback";
+import { useToast } from "@/hooks/use-toast";
+import { useLikeContext } from "./LikeContext";
+import { formatCountNumber } from "@/utils/viewsTracking";
+import { incrementViewCount } from "@/utils/viewsTracking";
+import { GridLayoutType } from './types/ProductTypes';
 
-interface ProductCardProps {
-  product: any;
-  layout?: GridLayoutType;
-  sponsored?: boolean;
+interface Product {
+  id: string;
+  title: string;
+  price: number;
+  image_url: string;
+  category?: string;
+  description?: string;
+  is_discounted?: boolean;
+  discount_percentage?: number;
+  original_price?: number;
+  rating?: number;
+  rating_count?: number;
+  views?: number;
+  wishlist_count?: number;
 }
 
-export const ProductCard = ({ product, layout = "grid4x4", sponsored = false }: ProductCardProps) => {
+interface ProductCardProps {
+  product: Product;
+  layout?: GridLayoutType;
+  className?: string;
+}
+
+export const ProductCard = ({ product, layout = "grid4x4", className }: ProductCardProps) => {
+  const { toast } = useToast();
   const navigate = useNavigate();
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const { isLiked, toggleLike } = useLikeContext();
+  const [isHovered, setIsHovered] = useState(false);
   
-  const handleCardClick = () => {
-    navigate(`/products/${product.id}`);
-  };
-  
-  const price = formatPrice(product.price);
-  
-  const originalPrice = product.is_discounted && product.discount_percentage 
-    ? formatPrice(product.price / (1 - product.discount_percentage / 100))
-    : null;
-  
-  // Helper function to determine highlight tag badge color
-  const getTagColor = (tag: string) => {
-    switch(tag.toLowerCase()) {
-      case 'bestseller':
-        return 'bg-amber-500 text-white border-amber-600';
-      case 'new':
-        return 'bg-blue-500 text-white border-blue-600';
-      case 'hot deal':
-        return 'bg-red-500 text-white border-red-600';
-      case 'trending':
-        return 'bg-purple-500 text-white border-purple-600';
-      case 'limited':
-        return 'bg-orange-500 text-white border-orange-600';
-      default:
-        return 'bg-gray-500 text-white border-gray-600';
-    }
+  const liked = isLiked(product.id);
+
+  const handleProductClick = () => {
+    incrementViewCount('product', product.id);
+    navigate(`/product/${product.id}`);
   };
 
-  // Helper function to determine discount badge color based on percentage
-  const getDiscountBadgeColor = (percentage?: number) => {
-    if (!percentage) return 'bg-red-500';
-    if (percentage >= 50) return 'bg-green-500 text-white';
-    if (percentage >= 30) return 'bg-amber-500 text-white';
-    return 'bg-red-500 text-white';
+  const handleLikeClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleLike(product.id);
+    toast({
+      title: liked ? "Removed from wishlist" : "Added to wishlist",
+      description: liked ? "Product has been removed from your wishlist" : "Product has been added to your wishlist",
+      variant: liked ? "destructive" : "default",
+    });
   };
-  
-  // Render different layouts based on the grid type
-  if (layout === "grid1x1") {
-    return (
-      <motion.div 
-        whileHover={{ y: -5, transition: { duration: 0.2 } }}
-        className="h-full"
-      >
-        <Card 
-          className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer border-border flex flex-col md:flex-row h-full"
-          onClick={handleCardClick}
-        >
-          <div className="w-full md:w-1/3 aspect-square md:h-auto relative">
-            {!imageLoaded && (
-              <div className="w-full h-full bg-gray-200 dark:bg-gray-800 animate-pulse"></div>
-            )}
-            <img 
-              src={product.imageUrl || product.image_url || "https://via.placeholder.com/300x300"} 
-              alt={product.title || product.name} 
-              className={`w-full h-full object-cover transition-all duration-300 ${imageLoaded ? 'img-loaded' : 'img-loading'}`}
-              onLoad={() => setImageLoaded(true)}
-              loading="lazy"
-            />
-            
-            {/* Highlight tags */}
-            {product.highlight_tags && product.highlight_tags.length > 0 && (
-              <div className="absolute bottom-2 left-2 flex flex-wrap gap-1">
-                {product.highlight_tags.map((tag: string, index: number) => (
-                  <Badge 
-                    key={index}
-                    className={`${getTagColor(tag)} text-xs font-semibold shadow-sm`}
-                  >
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            )}
-          </div>
-          
-          <div className="flex flex-col flex-1 p-4">
-            <div className="flex justify-between items-start">
-              <div>
-                <h2 className="text-xl font-semibold">{product.title || product.name}</h2>
-                {product.category && (
-                  <Badge variant="outline" className="mt-1">
-                    {product.category}
-                  </Badge>
-                )}
-              </div>
-              
-              <div className="flex items-center">
-                <LikeProvider>
-                  <ProductLikeButton productId={product.id} />
-                </LikeProvider>
-                
-                {sponsored && (
-                  <Badge variant="outline" className="ml-2 bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
-                    Sponsored
-                  </Badge>
-                )}
-              </div>
-            </div>
-            
-            <p className="text-sm text-muted-foreground my-4 line-clamp-3">
-              {product.description}
-            </p>
-            
-            <div className="mt-auto flex justify-between items-center">
-              <div>
-                <span className="text-2xl font-bold">{price}</span>
-                {originalPrice && (
-                  <span className="text-sm text-muted-foreground line-through ml-2">
-                    {originalPrice}
-                  </span>
-                )}
-              </div>
-              
-              {product.is_discounted && product.discount_percentage && (
-                <Badge className={`${getDiscountBadgeColor(product.discount_percentage)} text-white`}>
-                  {Math.round(product.discount_percentage)}% OFF
-                </Badge>
-              )}
-            </div>
-          </div>
-        </Card>
-      </motion.div>
-    );
-  }
-  
-  if (layout === "grid2x2") {
-    return (
-      <motion.div 
-        whileHover={{ y: -5, transition: { duration: 0.2 } }}
-        className="h-full"
-      >
-        <Card 
-          className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer border-border h-full flex flex-col"
-          onClick={handleCardClick}
-        >
-          <div className="relative w-full aspect-video">
-            {!imageLoaded && (
-              <div className="w-full h-full bg-gray-200 dark:bg-gray-800 animate-pulse"></div>
-            )}
-            <img 
-              src={product.imageUrl || product.image_url || "https://via.placeholder.com/300x300"} 
-              alt={product.title || product.name} 
-              className={`w-full h-full object-cover transition-all duration-300 ${imageLoaded ? 'img-loaded hover:scale-105' : 'img-loading'}`}
-              onLoad={() => setImageLoaded(true)}
-              loading="lazy"
-            />
-            
-            {product.is_discounted && product.discount_percentage && (
-              <Badge className={`absolute top-2 left-2 ${getDiscountBadgeColor(product.discount_percentage)}`}>
-                {Math.round(product.discount_percentage)}% OFF
-              </Badge>
-            )}
-            
-            {sponsored && (
-              <Badge variant="outline" className="absolute top-2 right-2 bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
-                Sponsored
-              </Badge>
-            )}
-            
-            {/* Highlight tags */}
-            {product.highlight_tags && product.highlight_tags.length > 0 && (
-              <div className="absolute bottom-2 left-2 flex flex-wrap gap-1">
-                {product.highlight_tags.map((tag: string, index: number) => (
-                  <Badge 
-                    key={index}
-                    className={`${getTagColor(tag)} text-xs font-semibold shadow-sm`}
-                  >
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            )}
-          </div>
-          
-          <CardContent className="flex-1 p-4 pt-3">
-            <div className="flex justify-between">
-              <h3 className="font-medium line-clamp-1">{product.title || product.name}</h3>
-              <LikeProvider>
-                <ProductLikeButton productId={product.id} size="sm" />
-              </LikeProvider>
-            </div>
-            
-            <p className="text-sm text-muted-foreground mt-1 mb-2 line-clamp-2">
-              {product.description}
-            </p>
-            
-            {product.category && (
-              <Badge variant="outline" className="text-xs mt-1">
-                {product.category}
-              </Badge>
-            )}
-            
-            <div className="mt-2 pt-2 border-t flex justify-between items-center">
-              <span className="font-bold">{price}</span>
-              {originalPrice && (
-                <span className="text-sm text-muted-foreground line-through">
-                  {originalPrice}
-                </span>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
-    );
-  }
-  
-  // Default grid4x4 (compact) view
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toast({
+      title: "Added to cart",
+      description: `${product.title} has been added to your cart`,
+    });
+  };
+
+  // Use card layout based on the specified layout type
+  const isListLayout = layout === 'list';
+
   return (
-    <motion.div 
-      whileHover={{ y: -5, transition: { duration: 0.2 } }}
-      className="h-full"
+    <Card
+      className={cn(
+        "overflow-hidden transition-all duration-300 h-full group relative",
+        isListLayout ? "flex flex-row" : "flex flex-col",
+        className
+      )}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onClick={handleProductClick}
     >
-      <Card 
-        className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer border-border h-full flex flex-col"
-        onClick={handleCardClick}
-      >
-        <div className="relative w-full aspect-square">
-          {!imageLoaded && (
-            <div className="w-full h-full bg-gray-200 dark:bg-gray-800 animate-pulse"></div>
-          )}
-          <img 
-            src={product.imageUrl || product.image_url || "https://via.placeholder.com/300x300"} 
-            alt={product.title || product.name} 
-            className={`w-full h-full object-cover transition-all duration-300 ${imageLoaded ? 'img-loaded hover:scale-105' : 'img-loading'}`}
-            onLoad={() => setImageLoaded(true)}
-            loading="lazy"
-          />
-          
-          {product.is_discounted && product.discount_percentage && (
-            <Badge className={`absolute top-2 left-2 ${getDiscountBadgeColor(product.discount_percentage)} text-xs shadow-sm`}>
-              {Math.round(product.discount_percentage)}% OFF
-            </Badge>
-          )}
-          
-          <div className="absolute top-2 right-2">
-            <LikeProvider>
-              <ProductLikeButton productId={product.id} size="sm" />
-            </LikeProvider>
+      {/* Image section */}
+      <div className={cn(
+        "relative overflow-hidden",
+        isListLayout ? "w-1/3" : "w-full aspect-square"
+      )}>
+        <ImageFallback
+          src={product.image_url}
+          alt={product.title}
+          className="w-full h-full transition-transform duration-500 group-hover:scale-105"
+          aspectRatio={isListLayout ? "square" : "square"}
+          trackView={false} // We track on click handler instead
+          productId={product.id}
+        />
+
+        {/* Discount badge */}
+        {product.is_discounted && (
+          <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
+            {product.discount_percentage ? `-${product.discount_percentage}%` : "SALE"}
           </div>
-          
-          {sponsored && (
-            <Badge variant="outline" className="absolute bottom-2 right-2 text-xs bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
-              Sponsored
-            </Badge>
-          )}
-          
-          {/* Highlight tags */}
-          {product.highlight_tags && product.highlight_tags.length > 0 && (
-            <div className="absolute bottom-2 left-2 flex flex-wrap gap-1">
-              {product.highlight_tags.map((tag: string, index: number) => (
-                <Badge 
-                  key={index}
-                  className={`${getTagColor(tag)} text-xs font-semibold shadow-sm`}
-                >
-                  {tag}
-                </Badge>
+        )}
+
+        {/* View count badge */}
+        {product.views && product.views > 0 && (
+          <div className="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full">
+            👁️ {formatCountNumber(product.views)}
+          </div>
+        )}
+      </div>
+
+      {/* Content section */}
+      <div className={cn(
+        "flex flex-col",
+        isListLayout ? "w-2/3 p-4" : "p-3"
+      )}>
+        <h3 className="font-medium text-base line-clamp-2 mb-1">{product.title}</h3>
+        
+        {/* Price section */}
+        <div className="flex justify-between items-center mt-1">
+          <div className="flex items-center">
+            <span className="font-bold text-lg">${product.price}</span>
+            {product.is_discounted && product.original_price && (
+              <span className="text-sm line-through text-muted-foreground ml-2">
+                ${product.original_price}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Ratings */}
+        {product.rating !== undefined && (
+          <div className="flex items-center mt-1">
+            <div className="flex text-yellow-400">
+              {Array(5).fill(0).map((_, i) => (
+                <span key={i}>
+                  {i < Math.round(product.rating) ? "★" : "☆"}
+                </span>
               ))}
             </div>
-          )}
-        </div>
-        
-        <CardContent className="flex-1 p-3 pt-2">
-          <h3 className="font-medium text-sm line-clamp-1 mb-1">{product.title || product.name}</h3>
-          
-          <div className="flex items-baseline justify-between">
-            <p className="font-bold text-sm">{price}</p>
-            {originalPrice && (
-              <p className="text-xs text-muted-foreground line-through">{originalPrice}</p>
-            )}
+            <span className="text-xs ml-1 text-muted-foreground">
+              ({product.rating_count || 0})
+            </span>
           </div>
-        </CardContent>
-      </Card>
-    </motion.div>
+        )}
+
+        {/* Wishlist count if available */}
+        {product.wishlist_count && product.wishlist_count > 0 && (
+          <div className="flex items-center mt-1 text-xs text-muted-foreground">
+            <Heart className="w-3 h-3 mr-1" />
+            <span>{formatCountNumber(product.wishlist_count)} wishlisted</span>
+          </div>
+        )}
+
+        {/* Action buttons */}
+        <div className={cn(
+          "flex mt-2 gap-2",
+          isListLayout ? "justify-start" : "justify-between"
+        )}>
+          <Button
+            size="sm"
+            variant="outline"
+            className={cn(
+              "rounded-full w-9 h-9 p-0 flex items-center justify-center",
+              liked && "text-red-500 hover:text-red-600"
+            )}
+            onClick={handleLikeClick}
+          >
+            <Heart
+              className={cn("w-4 h-4", liked && "fill-current")}
+            />
+          </Button>
+          <Button
+            size="sm"
+            className={cn(
+              "rounded-full",
+              isListLayout ? "px-4" : "w-9 h-9 p-0"
+            )}
+            onClick={handleAddToCart}
+          >
+            <ShoppingCart className="w-4 h-4" />
+            {isListLayout && <span className="ml-2">Add to cart</span>}
+          </Button>
+        </div>
+      </div>
+    </Card>
   );
 };

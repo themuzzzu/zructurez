@@ -11,6 +11,8 @@ interface BlurImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   containerClassName?: string;
   aspectRatio?: "square" | "video" | "portrait" | "wide";
   fill?: boolean;
+  priority?: boolean;
+  onLoad?: () => void;
 }
 
 export function BlurImage({
@@ -21,10 +23,12 @@ export function BlurImage({
   containerClassName,
   aspectRatio = "square",
   fill = false,
+  priority = false,
+  onLoad,
   ...props
 }: BlurImageProps) {
   const [isLoading, setIsLoading] = useState(true);
-  const [currentSrc, setCurrentSrc] = useState(blurDataUrl || src);
+  const [currentSrc, setCurrentSrc] = useState(blurDataUrl || "");
   
   // Create small base64 placeholder if not provided
   const placeholder = blurDataUrl || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+P+/HgAFdwI2QOYvBQAAAABJRU5ErkJggg==';
@@ -42,8 +46,15 @@ export function BlurImage({
     img.onload = () => {
       setCurrentSrc(src);
       setIsLoading(false);
+      if (onLoad) {
+        onLoad();
+      }
     };
-  }, [src, placeholder]);
+    
+    return () => {
+      img.onload = null;
+    };
+  }, [src, placeholder, onLoad]);
   
   // Calculate aspect ratio classes
   const aspectRatioClass = {
@@ -68,8 +79,10 @@ export function BlurImage({
       <img
         src={currentSrc}
         alt={alt}
+        loading={priority ? "eager" : "lazy"}
+        decoding={priority ? "sync" : "async"}
         className={cn(
-          "w-full h-full object-cover transition-all duration-700",
+          "w-full h-full object-cover transition-all duration-500",
           isLoading ? "scale-105 blur-sm" : "scale-100 blur-0",
           fill && "absolute inset-0",
           className
