@@ -12,7 +12,7 @@ interface PageLoaderProps {
   fullScreen?: boolean;
   showMessage?: boolean;
   messageClassName?: string;
-  iconType?: ("auto" | "dosa" | "coconut" | "dot")[];
+  iconType?: ("car" | "coffee" | "palmtree" | "dot")[];
 }
 
 export function PageLoader({
@@ -21,7 +21,7 @@ export function PageLoader({
   fullScreen = true,
   showMessage = true,
   messageClassName,
-  iconType = ["auto", "dosa", "coconut"],
+  iconType = ["car", "coffee", "palmtree"],
 }: PageLoaderProps) {
   const { loadingMessage } = useLoading();
   

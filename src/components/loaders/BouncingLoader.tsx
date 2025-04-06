@@ -2,9 +2,9 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { Auto, Dosa, Coconut } from "lucide-react";
+import { Car, Coffee, PalmtreeIcon } from "lucide-react";
 
-type IconType = "auto" | "dosa" | "coconut" | "dot";
+type IconType = "car" | "coffee" | "palmtree" | "dot";
 
 interface BouncingLoaderProps {
   size?: 'sm' | 'md' | 'lg';
@@ -36,12 +36,12 @@ export function BouncingLoader({
     };
     
     switch(type) {
-      case "auto":
-        return <Auto {...iconProps} />;
-      case "dosa":
-        return <Dosa {...iconProps} />;
-      case "coconut":
-        return <Coconut {...iconProps} />;
+      case "car":
+        return <Car {...iconProps} />;
+      case "coffee":
+        return <Coffee {...iconProps} />;
+      case "palmtree":
+        return <PalmtreeIcon {...iconProps} />;
       default:
         return (
           <div 

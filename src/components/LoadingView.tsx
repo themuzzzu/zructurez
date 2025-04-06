@@ -14,7 +14,7 @@ export const LoadingView = ({
   showProgress = true
 }: LoadingViewProps) => {
   const [loaderType, setLoaderType] = useState<"bouncing" | "rangoli">("rangoli");
-  const [iconTypes, setIconTypes] = useState<("auto" | "dosa" | "coconut" | "dot")[]>(["dot", "dot", "dot"]);
+  const [iconTypes, setIconTypes] = useState<("car" | "coffee" | "palmtree" | "dot")[]>(["dot", "dot", "dot"]);
   const { progress } = useLoading();
 
   // Set loader type based on section
@@ -23,7 +23,7 @@ export const LoadingView = ({
     switch(section) {
       case "marketplace":
         setLoaderType("bouncing");
-        setIconTypes(["auto", "coconut", "auto"]);
+        setIconTypes(["car", "palmtree", "car"]);
         break;
       case "business":
         setLoaderType("rangoli");
@@ -42,7 +42,7 @@ export const LoadingView = ({
       default:
         // Randomly choose for general sections
         setLoaderType(Math.random() > 0.5 ? "rangoli" : "bouncing");
-        setIconTypes(Math.random() > 0.5 ? ["auto", "dosa", "coconut"] : ["dot", "dot", "dot"]);
+        setIconTypes(Math.random() > 0.5 ? ["car", "coffee", "palmtree"] : ["dot", "dot", "dot"]);
     }
   }, [section]);
   
@@ -60,4 +60,4 @@ export const LoadingView = ({
       </div>
     </div>
   );
-};
+}
