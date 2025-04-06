@@ -32,14 +32,17 @@ export const ProductWishlist = () => {
       }
       
       // Transform Supabase data to match ProductType
-      return (data || []).map(product => ({
-        ...product,
-        // Ensure title exists (use product.title, product.name, or empty string)
-        title: product.title || product.name || '',
-        // Make sure we have proper field mapping
-        imageUrl: product.image_url || product.imageUrl,
-        name: product.name || product.title || '',
-      })) as ProductType[];
+      return (data || []).map(product => {
+        // First assign all properties from the product
+        const transformedProduct: ProductType = {
+          ...product,
+          // Make sure required fields are present
+          title: product.title || '',
+          imageUrl: product.image_url || '',
+        };
+        
+        return transformedProduct;
+      });
     },
     enabled: wishlistItems.length > 0,
   });
@@ -47,7 +50,7 @@ export const ProductWishlist = () => {
   const isLoading = wishlistLoading || productsLoading;
   
   const filteredProducts = products.filter(product => {
-    const productName = product.name || product.title || '';
+    const productName = product.title || '';
     const productDesc = product.description || '';
     const query = searchQuery.toLowerCase();
     
