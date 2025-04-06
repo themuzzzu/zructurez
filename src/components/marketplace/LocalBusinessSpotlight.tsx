@@ -51,19 +51,25 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
       
       if (!data) return [];
 
-      // Use a simple type assertion to avoid deep type instantiation
-      return data.map(item => ({
-        id: item.id,
-        name: item.name,
-        description: item.description || "",
-        image_url: item.image_url,
-        category: item.category,
-        location: item.location,
-        is_open: item.is_open,
-        wait_time: item.wait_time,
-        closure_reason: item.closure_reason,
-        verified: item.verified,
-      }));
+      // Convert data to BusinessType[] directly, avoiding complex type inference
+      const businesses: BusinessType[] = [];
+      
+      for (const item of data) {
+        businesses.push({
+          id: item.id,
+          name: item.name,
+          description: item.description || "",
+          image_url: item.image_url,
+          category: item.category,
+          location: item.location,
+          is_open: item.is_open,
+          wait_time: item.wait_time,
+          closure_reason: item.closure_reason,
+          verified: item.verified,
+        });
+      }
+      
+      return businesses;
     } catch (err) {
       console.error("Error fetching local businesses:", err);
       return [];
