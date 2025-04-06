@@ -1,3 +1,4 @@
+
 import { useState, useEffect, Suspense } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
@@ -7,13 +8,13 @@ import { CrazyDeals } from "@/components/marketplace/CrazyDeals";
 import { SponsoredProducts } from "@/components/marketplace/SponsoredProducts";
 import { ShopByCategory } from "@/components/marketplace/ShopByCategory";
 import { TrendingProducts } from "@/components/marketplace/TrendingProducts"; 
-import { RecommendedProducts } from "@/components/marketplace/RecommendedProducts";
 import { PersonalizedRecommendations } from "@/components/marketplace/PersonalizedRecommendations";
 import { TopProducts } from "@/components/recommendations/TopProducts";
 import { ProductRankings } from "@/components/rankings/ProductRankings";
 import { BrowseTabContent } from "@/components/marketplace/BrowseTabContent";
 import { SkeletonCard } from "@/components/loaders/SkeletonCard";
 import { useLoading } from "@/providers/LoadingProvider";
+import { FlashSale } from "@/components/marketplace/FlashSale";
 
 const LazySection = ({ children, fallbackCount = 4 }) => (
   <Suspense fallback={
@@ -141,17 +142,31 @@ export const OptimizedMarketplace = () => {
         </div>
       </LazySection>
       
+      {/* New Shop by Category section */}
+      <div className="mb-4 sm:mb-6">
+        <ShopByCategory onCategorySelect={handleCategoryChange} />
+      </div>
+      
+      {/* Flash Sale Section */}
+      <LazySection>
+        <div className="mb-4 sm:mb-8">
+          <FlashSale />
+        </div>
+      </LazySection>
+      
+      {/* Real-time Product Rankings */}
+      <LazySection>
+        <div className="mb-4 sm:mb-8">
+          <ProductRankings />
+        </div>
+      </LazySection>
+      
       {/* Sponsored Products Section */}
       <LazySection>
         <div className="mb-4 sm:mb-8">
           <SponsoredProducts gridLayout={gridLayout} />
         </div>
       </LazySection>
-      
-      {/* New Shop by Category section */}
-      <div className="mb-4 sm:mb-6">
-        <ShopByCategory onCategorySelect={handleCategoryChange} />
-      </div>
       
       {/* Trending Products */}
       <LazySection>
@@ -160,31 +175,10 @@ export const OptimizedMarketplace = () => {
         </div>
       </LazySection>
       
-      {/* Product Rankings - Added new section */}
-      <LazySection>
-        <div className="mb-4 sm:mb-8">
-          <ProductRankings />
-        </div>
-      </LazySection>
-      
-      {/* Top Products - renamed from SponsoredRecommendations */}
-      <LazySection>
-        <div className="mb-4 sm:mb-8">
-          <TopProducts title="Top Products" showTitle={true} />
-        </div>
-      </LazySection>
-      
       {/* Personalized Recommendations */}
       <LazySection>
         <div className="mb-4 sm:mb-8">
           <PersonalizedRecommendations />
-        </div>
-      </LazySection>
-      
-      {/* Recommended Products */}
-      <LazySection>
-        <div className="mb-4 sm:mb-8">
-          <RecommendedProducts gridLayout={gridLayout} />
         </div>
       </LazySection>
       

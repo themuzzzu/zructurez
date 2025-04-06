@@ -100,14 +100,14 @@ export const fetchBusinessAnalytics = async (userId: string | undefined) => {
       console.error('Error fetching product analytics:', productsError);
     }
     
-    // Fetch service view counts - handle properly now that services has views column
+    // Fetch service view counts
     const { data: services, error: servicesError } = await supabase
       .from('services')
       .select('id, title, views')
       .eq('user_id', userId)
       .order('views', { ascending: false });
       
-    // Handle services data with proper default values when error or no data
+    // Handle services data with proper default values
     const serviceAnalytics = servicesError || !services 
       ? [] 
       : services.map(service => ({
