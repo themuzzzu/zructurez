@@ -168,7 +168,7 @@ export const ServiceRankings = () => {
                 description={service.description || 'No description available'}
                 image={service.image_url || '/placeholder.svg'}
                 price={formatPrice(service.price || 0)}
-                providerName={service.provider_name || 'Service Provider'}
+                providerName={'Service Provider'} // Fixed: Using static text instead of service.provider_name
                 providerId={service.user_id || ''}
               />
             </div>
@@ -186,7 +186,7 @@ export const ServiceRankings = () => {
                 description={service.description || 'No description available'}
                 image={service.image_url || '/placeholder.svg'}
                 price={formatPrice(service.price || 0)}
-                providerName={service.provider_name || 'Service Provider'}
+                providerName={'Service Provider'} // Fixed: Using static text instead of service.provider_name
                 providerId={service.user_id || ''}
               />
             </ErrorBoundary>

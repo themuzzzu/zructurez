@@ -9,7 +9,7 @@ import { LoadingProvider } from "@/providers/LoadingProvider";
 import { PageLoader } from "@/components/loaders/PageLoader";
 import { RouterProvider } from "react-router-dom";
 import { LikeProvider } from "@/components/products/LikeContext";
-import { ErrorBoundary } from "react-error-boundary";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ErrorView } from "@/components/ErrorView";
 import router from "./routes";
 
@@ -54,7 +54,7 @@ function App() {
   }, []);
 
   return (
-    <ErrorBoundary FallbackComponent={ErrorFallback}>
+    <ErrorBoundary fallback={<ErrorFallback error={new Error("Application failed to load")} />}>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider defaultTheme="dark" storageKey="lovable-theme">
           <LoadingProvider>
