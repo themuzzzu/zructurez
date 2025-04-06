@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
@@ -10,15 +9,13 @@ import { Spinner } from "@/components/common/Spinner";
 import { Layout } from "@/components/layout/Layout";
 import { GridLayoutSelector } from "@/components/marketplace/GridLayoutSelector";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
-import { MarketplaceBanner } from "@/components/marketplace/MarketplaceBanner";
 import { ServiceCategoryFilter } from "@/components/ServiceCategoryFilter";
 import { SponsoredServices } from "@/components/service-marketplace/SponsoredServices";
 import { TrendingServices } from "@/components/service-marketplace/TrendingServices";
 import { RecommendedServices } from "@/components/service-marketplace/RecommendedServices";
 import { TopServices } from "@/components/service-marketplace/TopServices";
 import { ServiceIconGrid } from "@/components/service-marketplace/ServiceIconGrid";
-import { ServiceBannerAd } from "@/components/ads/ServiceBannerAd";
-import { ServiceRankings } from "@/components/rankings/ServiceRankings";
+import { AutoScrollServiceBannerAd } from "@/components/ads/AutoScrollServiceBannerAd";
 import { useNavigate } from "react-router-dom";
 
 export default function Services() {
@@ -120,7 +117,7 @@ export default function Services() {
           </div>
         </div>
 
-        {/* Search Bar - Updated to navigate to search results page */}
+        {/* Search Bar */}
         <div className="mb-6">
           <div className="relative w-full max-w-3xl mx-auto">
             <input 
@@ -150,13 +147,8 @@ export default function Services() {
           </div>
         </div>
         
-        {/* Banner Ad - First position */}
-        <ServiceBannerAd />
-        
-        {/* Banner */}
-        <div className="mb-6">
-          <MarketplaceBanner />
-        </div>
+        {/* Banner Ad - First position with auto-scroll (3 seconds) */}
+        <AutoScrollServiceBannerAd maxAds={3} />
         
         {/* Service Categories Icon Grid */}
         <div className="mb-6">
@@ -170,7 +162,7 @@ export default function Services() {
 
         {/* Second Banner Ad - Added new position */}
         <div className="mb-8">
-          <ServiceBannerAd />
+          <AutoScrollServiceBannerAd maxAds={2} />
         </div>
 
         {/* Trending Services */}
@@ -178,14 +170,9 @@ export default function Services() {
           <TrendingServices />
         </div>
         
-        {/* Rankings - Enhanced with more data */}
-        <div className="mb-8">
-          <ServiceRankings />
-        </div>
-
         {/* Third Banner Ad - Added new position */}
         <div className="mb-8">
-          <ServiceBannerAd />
+          <AutoScrollServiceBannerAd maxAds={2} />
         </div>
 
         {/* Top Services */}
@@ -206,7 +193,7 @@ export default function Services() {
         
         {/* Fourth Banner Ad - Added new position */}
         <div className="mb-8">
-          <ServiceBannerAd />
+          <AutoScrollServiceBannerAd maxAds={3} />
         </div>
         
         <h2 className="text-xl font-semibold mb-4">All Services</h2>
