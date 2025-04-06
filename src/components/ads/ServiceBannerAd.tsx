@@ -40,7 +40,7 @@ export function ServiceBannerAd({ maxAds = 1 }: { maxAds?: number }) {
       type: "service" as AdType,
       reference_id: "",
       budget: 0,
-      status: "active",
+      status: "active" as "active" | "pending" | "rejected" | "expired",
       image_url: `https://via.placeholder.com/1200x300/4F46E5/FFFFFF?text=Advertise+Your+Services+Here+${index + 1}`,
     }));
     
