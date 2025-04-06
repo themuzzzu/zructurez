@@ -49,11 +49,10 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
         
         if (error) throw error;
         
-        // Explicitly cast the data to avoid excessive type instantiation
-        const businessData = data as any[];
+        if (!data) return [] as BusinessType[];
         
-        // Transform the data to match the BusinessType interface
-        const transformedData: BusinessType[] = businessData.map(item => ({
+        // Use type assertion to avoid excessive type instantiation
+        return (data as any[]).map(item => ({
           id: item.id,
           name: item.name,
           description: item.description || "",
@@ -64,9 +63,7 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
           wait_time: item.wait_time,
           closure_reason: item.closure_reason,
           verified: item.verified,
-        }));
-        
-        return transformedData;
+        } as BusinessType));
       } catch (err) {
         console.error("Error fetching local businesses:", err);
         return [] as BusinessType[];

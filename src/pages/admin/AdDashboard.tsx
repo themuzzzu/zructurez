@@ -63,9 +63,9 @@ const AdDashboard = () => {
         
         if (data && Array.isArray(data) && data.length > 0) {
           // Check if we have valid data with the expected fields
-          data.forEach((item) => {
+          data.forEach((item: any) => {
             // Skip invalid items or items with errors
-            if (!item || typeof item === 'string' || !item.start_date) {
+            if (!item || typeof item !== 'object' || !item.start_date) {
               return;
             }
             
