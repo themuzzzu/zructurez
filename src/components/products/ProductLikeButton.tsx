@@ -6,7 +6,7 @@ import { useLike } from "./LikeContext";
 import { Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
+import { cn } from "@/lib/utils";
 
 interface ProductLikeButtonProps {
   productId: string;
@@ -21,13 +21,14 @@ export const ProductLikeButton = ({
   variant = "ghost",
   className = ""
 }: ProductLikeButtonProps) => {
-  const { isLiked, toggleLike, isLoading } = useLike();
+  const { isLiked, toggleLike, isLoading: contextLoading } = useLike();
+  const [isProcessing, setIsProcessing] = useState(false);
   const [animating, setAnimating] = useState(false);
-  const [localLiked, setLocalLiked] = useState<boolean | null>(null);
-  const queryClient = useQueryClient();
-
+  const [optimisticLiked, setOptimisticLiked] = useState<boolean | null>(null);
+  
   // Get the actual liked status, with optimistic UI update
-  const liked = localLiked !== null ? localLiked : isLiked(productId);
+  const liked = optimisticLiked !== null ? optimisticLiked : isLiked(productId);
+  const isLoading = contextLoading || isProcessing;
 
   const handleClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -36,16 +37,18 @@ export const ProductLikeButton = ({
     if (isLoading) return;
     
     try {
+      setIsProcessing(true);
+      
       // Optimistic update
       const newLikedState = !liked;
-      setLocalLiked(newLikedState);
-      setAnimating(newLikedState); // Only animate on like, not unlike
+      setOptimisticLiked(newLikedState);
       
+      if (newLikedState) {
+        setAnimating(true);
+      }
+      
+      // Perform the actual API call
       await toggleLike(productId);
-      
-      // Explicitly invalidate wishlist queries to ensure UI updates
-      queryClient.invalidateQueries({ queryKey: ['wishlists'] });
-      queryClient.invalidateQueries({ queryKey: ['wishlist-products'] });
       
       // Show toast message based on like state
       if (newLikedState) {
@@ -54,18 +57,19 @@ export const ProductLikeButton = ({
         toast.success("Removed from wishlist");
       }
     } catch (error: any) {
-      // Revert on error
-      setLocalLiked(null);
+      // Revert on error (only if not an auth error which is handled in LikeContext)
       if (error.message !== "Authentication required") {
-        // The auth required error is handled in LikeContext
+        setOptimisticLiked(null);
         toast.error("Something went wrong");
         console.error("Error toggling product like:", error);
       }
     } finally {
+      setIsProcessing(false);
+      
       // Reset animation state after animation completes
       setTimeout(() => {
         setAnimating(false);
-        setLocalLiked(null); // Reset to use the actual state
+        setOptimisticLiked(null); // Reset to use the actual state
       }, 1000);
     }
   };
@@ -74,19 +78,27 @@ export const ProductLikeButton = ({
     <Button
       variant={variant}
       size={size}
-      className={`relative group border-none bg-white/80 dark:bg-zinc-800/80 hover:bg-white dark:hover:bg-zinc-800 ${className}`}
+      className={cn(
+        "relative overflow-visible transition-all",
+        liked ? "text-red-500" : "text-gray-400 hover:text-red-400",
+        isLoading ? "opacity-70 cursor-not-allowed" : "cursor-pointer",
+        className
+      )}
       onClick={handleClick}
       disabled={isLoading}
       aria-label={liked ? "Remove from wishlist" : "Add to wishlist"}
+      type="button"
     >
       <div className="relative z-10">
         {isLoading ? (
-          <Loader2 className="h-4 w-4 animate-spin text-red-500" />
+          <Loader2 className="h-4 w-4 animate-spin" />
         ) : (
           <Heart 
-            className={`h-4 w-4 transition-all duration-300 
-            ${liked ? 'fill-red-500 text-red-500' : 'text-red-500'} 
-            ${liked && animating ? 'scale-110' : ''}`} 
+            className={cn(
+              "transition-all duration-300",
+              liked ? "fill-red-500 text-red-500" : "",
+              liked && animating ? "scale-110" : "",
+            )}
           />
         )}
       </div>

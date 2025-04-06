@@ -42,13 +42,13 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
         {!hideSidebar && !isMobile && (
           <div 
             style={{ width: sidebarWidth + 'px', left: '0px' }} 
-            className={`transition-all duration-300 fixed h-[calc(100vh-64px)] ${isDarkMode ? 'border-zinc-800/50' : 'border-zinc-200/50'} border-r scrollbar-hide overflow-y-auto`}
+            className="transition-all duration-300 fixed h-[calc(100vh-64px)] overflow-y-auto scrollbar-hide"
           >
             <Sidebar />
           </div>
         )}
         <main 
-          className={`flex-1 transition-all duration-300 w-full overflow-y-auto scrollbar-hide overflow-x-hidden pb-16 sm:pb-6`}
+          className="flex-1 transition-all duration-300 w-full overflow-y-auto scrollbar-hide overflow-x-hidden pb-16 sm:pb-6"
           style={{ 
             marginLeft: hideSidebar || isMobile ? 0 : sidebarWidth + 'px', 
             paddingBottom: isMobile ? '5rem' : '', 

@@ -2,9 +2,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useState } from "react";
 
 export const useBusinessLikes = (businessId: string) => {
   const queryClient = useQueryClient();
+  const [optimisticLiked, setOptimisticLiked] = useState<boolean | null>(null);
+  const [optimisticCount, setOptimisticCount] = useState<number | null>(null);
 
   const { data: isLiked, isLoading: isLikeLoading } = useQuery({
     queryKey: ['business-like', businessId],
@@ -48,28 +51,54 @@ export const useBusinessLikes = (businessId: string) => {
         throw new Error('Must be logged in to like businesses');
       }
 
-      if (isLiked) {
-        const { error } = await supabase
-          .from('business_likes')
-          .delete()
-          .eq('business_id', businessId)
-          .eq('user_id', user.id);
+      // Get current state before optimistic update
+      const currentLiked = optimisticLiked !== null ? optimisticLiked : !!isLiked;
+      const currentCount = optimisticCount !== null ? optimisticCount : likesCount;
 
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from('business_likes')
-          .insert([
-            { business_id: businessId, user_id: user.id }
-          ]);
+      // Apply optimistic update
+      setOptimisticLiked(!currentLiked);
+      setOptimisticCount(currentLiked ? Math.max(0, currentCount - 1) : currentCount + 1);
 
-        if (error) throw error;
+      try {
+        if (currentLiked) {
+          const { error } = await supabase
+            .from('business_likes')
+            .delete()
+            .eq('business_id', businessId)
+            .eq('user_id', user.id);
+
+          if (error) throw error;
+        } else {
+          const { error } = await supabase
+            .from('business_likes')
+            .insert([
+              { business_id: businessId, user_id: user.id }
+            ]);
+
+          if (error) throw error;
+        }
+        
+        return { success: true };
+      } catch (error) {
+        // Revert optimistic updates on error
+        setOptimisticLiked(currentLiked);
+        setOptimisticCount(currentCount);
+        throw error;
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['business-like', businessId] });
       queryClient.invalidateQueries({ queryKey: ['business-likes-count', businessId] });
-      toast.success(isLiked ? 'Business unliked' : 'Business liked');
+      queryClient.invalidateQueries({ queryKey: ['user-liked-businesses'] });
+      
+      const liked = optimisticLiked !== null ? optimisticLiked : !!isLiked;
+      toast.success(liked ? 'Business liked' : 'Business unliked');
+      
+      // Reset optimistic values after successful update
+      setTimeout(() => {
+        setOptimisticLiked(null);
+        setOptimisticCount(null);
+      }, 1000);
     },
     onError: (error) => {
       console.error('Error:', error);
@@ -80,10 +109,12 @@ export const useBusinessLikes = (businessId: string) => {
   });
 
   const isLoading = isLikeLoading || isCountLoading || isTogglePending;
+  const finalIsLiked = optimisticLiked !== null ? optimisticLiked : !!isLiked;
+  const finalLikesCount = optimisticCount !== null ? optimisticCount : likesCount;
 
   return {
-    isLiked: !!isLiked,
-    likesCount,
+    isLiked: finalIsLiked,
+    likesCount: finalLikesCount,
     toggleLike,
     isLoading
   };

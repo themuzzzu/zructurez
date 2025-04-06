@@ -17,7 +17,7 @@ export const BusinessWishlist = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return [];
 
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('business_likes')
         .select(`
           business_id,
@@ -25,6 +25,11 @@ export const BusinessWishlist = () => {
         `)
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching liked businesses:', error);
+        return [];
+      }
 
       return data?.map(item => item.businesses) || [];
     },

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useBusinessLikes } from "./hooks/useBusinessLikes";
 import { cn } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
 
 interface BusinessLikeButtonProps {
   businessId: string;
@@ -19,18 +20,22 @@ export const BusinessLikeButton = ({
   variant = "ghost",
   className
 }: BusinessLikeButtonProps) => {
-  const { isLiked, likesCount, toggleLike } = useBusinessLikes(businessId);
+  const { isLiked, likesCount, toggleLike, isLoading } = useBusinessLikes(businessId);
   const [animating, setAnimating] = useState(false);
 
   const handleLikeClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
     
-    setAnimating(true);
-    toggleLike();
+    if (isLoading) return;
     
-    // Reset animation state after animation completes
-    setTimeout(() => setAnimating(false), 1000);
+    if (!isLiked) {
+      setAnimating(true);
+      // Reset animation state after animation completes
+      setTimeout(() => setAnimating(false), 1000);
+    }
+    
+    toggleLike();
   };
 
   return (
@@ -43,15 +48,21 @@ export const BusinessLikeButton = ({
         className
       )}
       onClick={handleLikeClick}
+      disabled={isLoading}
+      type="button"
     >
       <div className="relative z-10">
-        <Heart 
-          className={cn(
-            "transition-all duration-300",
-            isLiked ? "fill-red-500 text-red-500" : "",
-            isLiked && animating ? "scale-110" : "",
-          )}
-        />
+        {isLoading ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <Heart 
+            className={cn(
+              "transition-all duration-300",
+              isLiked ? "fill-red-500 text-red-500" : "",
+              isLiked && animating ? "scale-110" : "",
+            )}
+          />
+        )}
       </div>
       
       {/* Heart animation on like */}
