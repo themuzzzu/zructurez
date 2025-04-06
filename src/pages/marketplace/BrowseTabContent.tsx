@@ -1,9 +1,7 @@
-
 import { useState, useEffect } from "react";
 import { ShoppingSection } from "@/components/ShoppingSection";
 import { Categories } from "@/components/marketplace/Categories";
 import { useNavigate, useLocation } from "react-router-dom";
-import { SponsoredProducts } from "@/components/marketplace/SponsoredProducts";
 import { TrendingProducts } from "@/components/marketplace/TrendingProducts";
 import { CategoryIconGrid } from "@/components/marketplace/CategoryIconGrid";
 import { CategorySubcategoryGrid } from "@/components/marketplace/CategorySubcategoryGrid";
@@ -86,11 +84,6 @@ export const BrowseTabContent = ({
           <h2 className="text-xl font-bold mb-4">Shop by Category</h2>
           <CategoryIconGrid onCategorySelect={handleCategorySelect} />
         </div>
-      </ErrorBoundary>
-      
-      {/* Sponsored Products */}
-      <ErrorBoundary>
-        <SponsoredProducts />
       </ErrorBoundary>
       
       {/* Trending Products */}

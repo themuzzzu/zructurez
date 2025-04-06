@@ -3,9 +3,6 @@ import { useState, useEffect, lazy, Suspense } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
 import { AutocompleteSearch } from "@/components/marketplace/AutocompleteSearch";
-import { BannerCarousel } from "@/components/marketplace/BannerCarousel";
-import { CrazyDeals } from "@/components/marketplace/CrazyDeals";
-import { SponsoredProducts } from "@/components/marketplace/SponsoredProducts";
 import { ShopByCategory } from "@/components/marketplace/ShopByCategory";
 import { TrendingProducts } from "@/components/marketplace/TrendingProducts"; 
 import { PersonalizedRecommendations } from "@/components/marketplace/PersonalizedRecommendations";
@@ -73,7 +70,7 @@ export const OptimizedMarketplace = () => {
   // Show loading indicator when page loads
   useEffect(() => {
     setIsLoading(true);
-    const timeout = setTimeout(() => setIsLoading(false), 800);
+    const timeout = setTimeout(() => setIsLoading(false), 500); // Reduced loading time
     return () => clearTimeout(timeout);
   }, []);
   
@@ -161,26 +158,12 @@ export const OptimizedMarketplace = () => {
         />
       </div>
       
-      {/* Banner carousel below search */}
-      <LazySection fallbackCount={1}>
-        <div className="mb-4 sm:mb-6">
-          <BannerCarousel />
-        </div>
-      </LazySection>
-      
       {/* New Shop by Category section */}
       <ErrorBoundary>
         <div className="mb-4 sm:mb-6">
           <ShopByCategory onCategorySelect={handleCategoryChange} />
         </div>
       </ErrorBoundary>
-      
-      {/* Real-time Product Rankings */}
-      <LazySection>
-        <div className="mb-4 sm:mb-8">
-          <ProductRankings />
-        </div>
-      </LazySection>
       
       {/* Flash Sale Section */}
       <LazySection>
@@ -189,31 +172,10 @@ export const OptimizedMarketplace = () => {
         </div>
       </LazySection>
       
-      {/* Sponsored Products Section */}
-      <LazySection>
-        <div className="mb-4 sm:mb-8">
-          <SponsoredProducts gridLayout={gridLayout} />
-        </div>
-      </LazySection>
-      
       {/* Trending Products */}
       <LazySection>
         <div className="mb-4 sm:mb-8">
           <TrendingProducts gridLayout={gridLayout} />
-        </div>
-      </LazySection>
-      
-      {/* Personalized Recommendations */}
-      <LazySection>
-        <div className="mb-4 sm:mb-8">
-          <PersonalizedRecommendations />
-        </div>
-      </LazySection>
-      
-      {/* Crazy Deals Section */}
-      <LazySection>
-        <div className="mb-4 sm:mb-8">
-          <CrazyDeals />
         </div>
       </LazySection>
       
