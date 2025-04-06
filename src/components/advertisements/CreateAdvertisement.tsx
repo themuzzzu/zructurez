@@ -151,12 +151,11 @@ export const CreateAdvertisement = ({ onClose }: AdvertisementFormProps) => {
         <MediaUpload
           format={formValues.format}
           imageUrl={formValues.imageUrl}
-          setImageUrl={formSetters.setImageUrl}
+          onImageChange={formSetters.setImageUrl}
           videoUrl={formValues.videoUrl}
-          setVideoUrl={formSetters.setVideoUrl}
+          onVideoUrlChange={formSetters.setVideoUrl}
           carouselImages={formValues.carouselImages}
-          addCarouselImage={addCarouselImage}
-          removeCarouselImage={removeCarouselImage}
+          onCarouselImagesChange={formSetters.setCarouselImages}
         />
 
         <TargetingOptions

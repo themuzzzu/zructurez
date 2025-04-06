@@ -34,8 +34,8 @@ export const MediaUpload = ({
     return (
       <div className="space-y-4">
         <ImageUpload
-          value={imageUrl}
-          onChange={onImageChange}
+          selectedImage={imageUrl}
+          onImageSelect={onImageChange}
           label="Upload Image"
           accept="image/*"
         />
@@ -109,20 +109,20 @@ export const MediaUpload = ({
           
           {carouselImages.length < 5 && (
             <ImageUpload
-              value={null}
-              onChange={(url) => {
+              selectedImage={null}
+              onImageSelect={(url) => {
                 if (url) {
                   onCarouselImagesChange([...carouselImages, url]);
                 }
               }}
               label=""
               accept="image/*"
-              buttonText={(
+              buttonText={
                 <div className="flex items-center">
                   <Plus className="mr-2 h-4 w-4" />
                   Add Image
                 </div>
-              )}
+              }
               key={carouselImages.length} // Force re-render after adding
             />
           )}

@@ -35,7 +35,7 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
       try {
         let query = supabase
           .from('businesses')
-          .select('id, name, description, logo_url, image_url, category, location, contact, hours, is_open, wait_time, closure_reason, verified:is_verified')
+          .select('id, name, description, image_url, category, location, contact, hours, is_open, wait_time, closure_reason, verified:is_verified')
           .order('created_at', { ascending: false })
           .limit(4);
           
@@ -89,14 +89,14 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
           id={business.id}
           name={business.name}
           description={business.description || ""}
-          image={business.logo_url || business.image_url || ""}
+          image={business.image_url || ""}
           category={business.category || ""}
           location={business.location || ""}
           rating={business.rating || 4.0}
           reviews={business.reviews || 0}
           contact={business.contact || ""}
           hours={business.hours || ""}
-          verified={business.verified}
+          verified={business.verified || false}
           is_open={business.is_open}
           wait_time={business.wait_time}
           closure_reason={business.closure_reason}

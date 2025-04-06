@@ -17,6 +17,8 @@ interface ServiceCardProps {
   category?: string;
   location?: string;
   rating?: number;
+  views?: number;
+  sponsored?: boolean;
 }
 
 export function ServiceCard({
@@ -26,9 +28,12 @@ export function ServiceCard({
   image_url,
   price,
   providerName,
+  providerId,
   category,
   location,
   rating = 4.5,
+  views,
+  sponsored,
 }: ServiceCardProps) {
   // Track view when card is rendered
   useEffect(() => {
@@ -64,6 +69,12 @@ export function ServiceCard({
               {category}
             </span>
           )}
+
+          {sponsored && (
+            <span className="absolute top-2 left-2 bg-yellow-500/80 text-white text-xs px-2 py-1 rounded">
+              Sponsored
+            </span>
+          )}
         </div>
         
         <div className="p-4">
@@ -83,12 +94,20 @@ export function ServiceCard({
               )}
             </div>
             
-            {rating && (
-              <div className="flex items-center gap-1 text-xs">
-                <span className="text-yellow-500">★</span>
-                <span>{rating.toFixed(1)}</span>
-              </div>
-            )}
+            <div className="flex items-center gap-2">
+              {views !== undefined && (
+                <span className="text-xs text-muted-foreground">
+                  {views} views
+                </span>
+              )}
+              
+              {rating && (
+                <div className="flex items-center gap-1 text-xs">
+                  <span className="text-yellow-500">★</span>
+                  <span>{rating.toFixed(1)}</span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </Link>

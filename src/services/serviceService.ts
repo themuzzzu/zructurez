@@ -46,13 +46,7 @@ export const getTrendingServicesInArea = async (location?: string, limit: number
   try {
     let query = supabase
       .from('services')
-      .select(`
-        *,
-        profiles:user_id (
-          username,
-          avatar_url
-        )
-      `)
+      .select('*')
       .order('views', { ascending: false })
       .limit(limit);
     
@@ -72,7 +66,7 @@ export const getTrendingServicesInArea = async (location?: string, limit: number
       image_url: service.image_url,
       price: service.price,
       user_id: service.user_id,
-      provider_name: service.profiles?.username || "Service Provider",
+      provider_name: "Service Provider", // Default provider name
       category: service.category,
       location: service.location,
       rating: 4.5, // Default rating since it doesn't exist on the service
@@ -90,13 +84,7 @@ export const getRecommendedServices = async (userId?: string, limit: number = 4)
     // Basic query to get services
     let query = supabase
       .from('services')
-      .select(`
-        *,
-        profiles:user_id (
-          username,
-          avatar_url
-        )
-      `)
+      .select('*')
       .limit(limit);
 
     // If user is logged in, we could personalize recommendations
