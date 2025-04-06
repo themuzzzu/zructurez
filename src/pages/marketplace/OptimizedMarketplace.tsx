@@ -3,6 +3,9 @@ import { useState, useEffect, lazy, Suspense } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
 import { AutocompleteSearch } from "@/components/marketplace/AutocompleteSearch";
+import { BannerCarousel } from "@/components/marketplace/BannerCarousel";
+import { CrazyDeals } from "@/components/marketplace/CrazyDeals";
+import { SponsoredProducts } from "@/components/marketplace/SponsoredProducts";
 import { ShopByCategory } from "@/components/marketplace/ShopByCategory";
 import { TrendingProducts } from "@/components/marketplace/TrendingProducts"; 
 import { PersonalizedRecommendations } from "@/components/marketplace/PersonalizedRecommendations";
@@ -12,7 +15,6 @@ import { LoadingView } from "@/components/LoadingView";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
-import { BannerCarousel } from "@/components/marketplace/BannerCarousel";
 
 // Create a fallback skeleton component
 const SkeletonCard = () => (
@@ -71,7 +73,7 @@ export const OptimizedMarketplace = () => {
   // Show loading indicator when page loads
   useEffect(() => {
     setIsLoading(true);
-    const timeout = setTimeout(() => setIsLoading(false), 500); // Reduced loading time
+    const timeout = setTimeout(() => setIsLoading(false), 800);
     return () => clearTimeout(timeout);
   }, []);
   
@@ -159,19 +161,26 @@ export const OptimizedMarketplace = () => {
         />
       </div>
       
+      {/* Banner carousel below search */}
+      <LazySection fallbackCount={1}>
+        <div className="mb-4 sm:mb-6">
+          <BannerCarousel />
+        </div>
+      </LazySection>
+      
       {/* New Shop by Category section */}
       <ErrorBoundary>
         <div className="mb-4 sm:mb-6">
           <ShopByCategory onCategorySelect={handleCategoryChange} />
         </div>
       </ErrorBoundary>
-
-      {/* Banner Carousel - RESTORED */}
-      <ErrorBoundary>
+      
+      {/* Real-time Product Rankings */}
+      <LazySection>
         <div className="mb-4 sm:mb-8">
-          <BannerCarousel />
+          <ProductRankings />
         </div>
-      </ErrorBoundary>
+      </LazySection>
       
       {/* Flash Sale Section */}
       <LazySection>
@@ -180,10 +189,31 @@ export const OptimizedMarketplace = () => {
         </div>
       </LazySection>
       
+      {/* Sponsored Products Section */}
+      <LazySection>
+        <div className="mb-4 sm:mb-8">
+          <SponsoredProducts gridLayout={gridLayout} />
+        </div>
+      </LazySection>
+      
       {/* Trending Products */}
       <LazySection>
         <div className="mb-4 sm:mb-8">
           <TrendingProducts gridLayout={gridLayout} />
+        </div>
+      </LazySection>
+      
+      {/* Personalized Recommendations */}
+      <LazySection>
+        <div className="mb-4 sm:mb-8">
+          <PersonalizedRecommendations />
+        </div>
+      </LazySection>
+      
+      {/* Crazy Deals Section */}
+      <LazySection>
+        <div className="mb-4 sm:mb-8">
+          <CrazyDeals />
         </div>
       </LazySection>
       

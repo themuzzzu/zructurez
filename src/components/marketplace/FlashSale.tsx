@@ -5,7 +5,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Timer, ShoppingCart, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { formatPrice } from '@/utils/productUtils';
 
 export const FlashSale = () => {
   const [timeLeft, setTimeLeft] = useState({
@@ -14,14 +13,12 @@ export const FlashSale = () => {
     seconds: 59
   });
   
-  const [imagesLoaded, setImagesLoaded] = useState(false);
-  
   const [products, setProducts] = useState([
     {
       id: '1',
       title: 'Wireless Earbuds',
-      originalPrice: 5999,
-      salePrice: 2999,
+      originalPrice: 59.99,
+      salePrice: 29.99,
       discount: 50,
       imageUrl: 'https://images.unsplash.com/photo-1606741965326-cb990f01c8cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&h=400&q=80',
       remaining: 5
@@ -29,8 +26,8 @@ export const FlashSale = () => {
     {
       id: '2',
       title: 'Smart Watch Series 5',
-      originalPrice: 14999,
-      salePrice: 8999,
+      originalPrice: 149.99,
+      salePrice: 89.99,
       discount: 40,
       imageUrl: 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&h=400&q=80',
       remaining: 3
@@ -38,8 +35,8 @@ export const FlashSale = () => {
     {
       id: '3',
       title: 'Portable Bluetooth Speaker',
-      originalPrice: 7999,
-      salePrice: 3999,
+      originalPrice: 79.99,
+      salePrice: 39.99,
       discount: 50,
       imageUrl: 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&h=400&q=80',
       remaining: 7
@@ -47,21 +44,13 @@ export const FlashSale = () => {
     {
       id: '4',
       title: 'Noise Cancelling Headphones',
-      originalPrice: 19999,
-      salePrice: 11999,
+      originalPrice: 199.99,
+      salePrice: 119.99,
       discount: 40,
       imageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&h=400&q=80',
       remaining: 2
     },
   ]);
-  
-  // Simulate images loaded after a short timeout for better UX
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setImagesLoaded(true);
-    }, 800);
-    return () => clearTimeout(timer);
-  }, []);
   
   // Update timer every second
   useEffect(() => {
@@ -103,25 +92,17 @@ export const FlashSale = () => {
           <motion.div
             key={product.id}
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: imagesLoaded ? 1 : 0, y: imagesLoaded ? 0 : 20 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: idx * 0.1 }}
             whileHover={{ y: -5 }}
           >
             <Card className="h-full overflow-hidden hover:shadow-lg transition-shadow duration-300">
               <div className="relative">
-                {!imagesLoaded ? (
-                  <div className="w-full aspect-square bg-gray-200 animate-pulse"></div>
-                ) : (
-                  <img 
-                    src={product.imageUrl} 
-                    alt={product.title}
-                    className="w-full aspect-square object-cover"
-                    loading="lazy"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = "https://placehold.co/300x300/EEE/31343C?text=Image";
-                    }}
-                  />
-                )}
+                <img 
+                  src={product.imageUrl} 
+                  alt={product.title}
+                  className="w-full aspect-square object-cover"
+                />
                 <Badge 
                   variant="destructive" 
                   className="absolute top-2 right-2 font-bold"
@@ -135,9 +116,9 @@ export const FlashSale = () => {
                 
                 <div className="flex items-center justify-between mb-3">
                   <div>
-                    <span className="text-lg font-bold">₹{formatPrice(product.salePrice).replace('₹', '')}</span>
+                    <span className="text-lg font-bold">${product.salePrice.toFixed(2)}</span>
                     <span className="text-sm text-muted-foreground line-through ml-2">
-                      ₹{formatPrice(product.originalPrice).replace('₹', '')}
+                      ${product.originalPrice.toFixed(2)}
                     </span>
                   </div>
                   

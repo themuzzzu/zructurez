@@ -10,7 +10,6 @@ import { formatCountNumber } from "@/utils/viewsTracking";
 import { trackEntityView } from "@/utils/viewsTracking";
 import { useLikes } from "./LikeContext";
 import { motion } from "framer-motion";
-import { formatPrice } from "@/utils/productUtils";
 
 // Update the interface to include sponsored property
 export interface ProductCardProps {
@@ -164,10 +163,10 @@ export const ProductCard = ({
             <div className="mt-auto pt-2">
               <div className="flex items-center justify-between">
                 <div className="font-semibold">
-                  ₹{formatPrice(product.price).replace('₹', '')}
+                  ${product.price?.toFixed(2)}
                   {product.is_discounted && product.original_price && (
                     <span className="text-xs line-through text-muted-foreground ml-1">
-                      ₹{formatPrice(product.original_price).replace('₹', '')}
+                      ${product.original_price.toFixed(2)}
                     </span>
                   )}
                 </div>

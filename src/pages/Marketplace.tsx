@@ -6,7 +6,6 @@ import { useParams } from "react-router-dom";
 import { OptimizedMarketplace } from "./marketplace/OptimizedMarketplace";
 import { Suspense } from "react";
 import { LoadingView } from "@/components/LoadingView";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 const Marketplace = () => {
   const params = useParams();
@@ -16,15 +15,13 @@ const Marketplace = () => {
     return <NotFound />;
   }
   
-  // Render the marketplace with the proper layout and error handling
+  // Render the marketplace with the proper layout
   return (
     <Layout>
       <div className="overflow-x-hidden">
-        <ErrorBoundary>
-          <Suspense fallback={<LoadingView />}>
-            <OptimizedMarketplace />
-          </Suspense>
-        </ErrorBoundary>
+        <Suspense fallback={<LoadingView />}>
+          <OptimizedMarketplace />
+        </Suspense>
       </div>
     </Layout>
   );

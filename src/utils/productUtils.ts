@@ -17,7 +17,7 @@ export const formatPrice = (price?: number | string): string => {
     style: 'currency',
     currency: 'INR',
     minimumFractionDigits: 0,
-    maximumFractionDigits: 0
+    maximumFractionDigits: 2
   }).format(numericPrice);
 };
 
