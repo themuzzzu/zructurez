@@ -5,7 +5,7 @@ import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Filter } from "lucide-react";
 import { SearchBar } from "@/components/search/SearchBar";
-import { EnhancedShoppingSection } from "@/components/EnhancedShoppingSection";
+import { ShoppingSection } from "@/components/ShoppingSection";
 import { GridLayoutSelector } from "@/components/marketplace/GridLayoutSelector";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
 import { LikeProvider } from "@/components/products/LikeContext";
@@ -126,7 +126,7 @@ export default function SearchResultsPage() {
           {/* Search bar */}
           <div className="w-full max-w-2xl mx-auto">
             <SearchBar
-              placeholder="Search products, services, or businesses..."
+              placeholder="Search products..."
               onSearch={handleSearch}
               showSuggestions={true}
               autoFocus={false}
@@ -137,10 +137,14 @@ export default function SearchResultsPage() {
           {/* Search results or empty state */}
           <div className="mt-6">
             <LikeProvider>
-              {results && results.length > 0 ? (
-                <EnhancedShoppingSection 
+              {!isLoading && (!results || results.length === 0) ? (
+                <EmptySearchResults 
+                  searchTerm={query} 
+                  onReset={resetFilters}
+                />
+              ) : (
+                <ShoppingSection 
                   searchQuery={query}
-                  showFilters={showFilters}
                   selectedCategory={selectedCategory}
                   showDiscounted={showDiscounted}
                   showUsed={showUsed}
@@ -148,11 +152,7 @@ export default function SearchResultsPage() {
                   sortOption={sortOption}
                   priceRange={priceRange}
                   gridLayout={gridLayout}
-                />
-              ) : !isLoading && (
-                <EmptySearchResults 
-                  searchTerm={query} 
-                  onReset={resetFilters}
+                  title="Search Results"
                 />
               )}
             </LikeProvider>

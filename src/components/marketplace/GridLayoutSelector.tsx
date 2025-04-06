@@ -1,4 +1,5 @@
-import { LayoutGrid, Grid2X2, Grip, List } from "lucide-react";
+
+import { LayoutGrid, Grid2X2, Grip, List, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
@@ -59,6 +60,16 @@ export const GridLayoutSelector = ({ layout, onChange }: GridLayoutSelectorProps
         title="1×1 Grid"
       >
         <Grip className="h-4 w-4" />
+      </Button>
+      
+      <Button
+        size="icon"
+        variant={layout === "single" ? "default" : "outline"}
+        className="h-8 w-8"
+        onClick={() => onChange("single")}
+        title="Single Item View"
+      >
+        <Square className="h-4 w-4" />
       </Button>
     </div>
   );

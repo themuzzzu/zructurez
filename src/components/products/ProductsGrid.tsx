@@ -75,7 +75,7 @@ export const ProductsGrid = ({
   }, [isLoading]);
   
   const handleLayoutChange = (value: string) => {
-    if (value === "grid2x2" || value === "grid3x3" || value === "grid4x4" || value === "list") {
+    if (value === "grid2x2" || value === "grid3x3" || value === "grid4x4" || value === "list" || value === "single") {
       setCurrentLayout(value as GridLayoutType);
       if (onLayoutChange) {
         onLayoutChange(value as GridLayoutType);
@@ -115,8 +115,13 @@ export const ProductsGrid = ({
     grid2x2: "grid-cols-1 sm:grid-cols-2 gap-4",
     grid3x3: "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4",
     grid4x4: "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4",
-    list: "flex flex-col gap-3"
+    list: "flex flex-col gap-3",
+    single: "grid-cols-1 gap-4 max-w-3xl mx-auto"
   };
+
+  if (!products || products.length === 0) {
+    return renderEmptyState();
+  }
 
   return (
     <div>
@@ -140,54 +145,46 @@ export const ProductsGrid = ({
       
       {isLoading ? (
         <div className={`grid ${gridLayoutClass[currentLayout]}`}>
-          {Array(8).fill(0).map((_, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.2, delay: i * 0.05 }}
-            >
-              <ShoppingCardSkeleton />
-            </motion.div>
+          {Array.from({ length: currentLayout === "single" ? 1 : currentLayout === "list" ? 4 : 8 }).map((_, i) => (
+            <ShoppingCardSkeleton key={i} />
           ))}
         </div>
-      ) : (!products || products.length === 0) ? (
+      ) : visibleProducts.length === 0 ? (
         renderEmptyState()
       ) : (
-        <AnimatePresence mode="wait">
-          <motion.div 
-            key={currentLayout}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className={`grid ${gridLayoutClass[currentLayout]}`}
-          >
-            {visibleProducts.map((product, index) => (
+        <div className={`grid ${gridLayoutClass[currentLayout]}`}>
+          <AnimatePresence mode="wait">
+            {visibleProducts.map((product) => (
               <motion.div
                 key={product.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.05 }}
                 layout
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.2 }}
               >
                 <ProductCard 
-                  key={product.id} 
                   product={product} 
                   layout={currentLayout}
                 />
               </motion.div>
             ))}
-          </motion.div>
-        </AnimatePresence>
+          </AnimatePresence>
+        </div>
       )}
       
-      {hasMore && !isLoading && products && products.length > 0 && (
+      {/* Load more button/indicator if needed */}
+      {hasMore && !isLoading && (
         <div className="flex justify-center mt-8" ref={loadMoreRef}>
-          <Button onClick={onLoadMore} variant="outline">
+          <Button 
+            variant="outline" 
+            onClick={onLoadMore}
+            className="min-w-[200px]"
+          >
             Load More
           </Button>
         </div>
       )}
     </div>
   );
-};
+}
