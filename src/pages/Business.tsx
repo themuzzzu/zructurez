@@ -32,12 +32,13 @@ import type { Business, BusinessOwner, BusinessHours, StaffMember } from "@/type
 import { BusinessBannerAd } from "@/components/ads/BusinessBannerAd";
 import { BusinessCategoryScroller } from "@/components/business/BusinessCategoryScroller";
 
-interface BusinessWithRating extends Omit<Business, 'owners' | 'staff_details'> {
+interface BusinessWithRating extends Omit<Business, 'owners' | 'staff_details' | 'image_position'> {
   average_rating: number;
   reviews_count: number;
   business_ratings: Array<{ rating: number }>;
   owners?: BusinessOwner[];
   staff_details?: StaffMember[];
+  image_position?: { x: number; y: number; };
 }
 
 const Business = () => {
@@ -104,10 +105,27 @@ const Business = () => {
         console.error("Error parsing staff details:", e);
       }
       
+      // Parse image_position from JSON to the expected object structure
+      let typedImagePosition: { x: number; y: number; } | undefined;
+      try {
+        if (business.image_position) {
+          if (typeof business.image_position === 'object') {
+            typedImagePosition = business.image_position as unknown as { x: number; y: number; };
+          } else if (typeof business.image_position === 'string') {
+            typedImagePosition = JSON.parse(business.image_position);
+          }
+        }
+      } catch (e) {
+        console.error("Error parsing image position:", e);
+        // Provide default values if parsing fails
+        typedImagePosition = { x: 50, y: 50 };
+      }
+      
       return {
         ...business,
         owners: typedOwners,
         staff_details: typedStaffDetails,
+        image_position: typedImagePosition,
         average_rating: averageRating,
         reviews_count: ratings.length,
         business_ratings: ratings
