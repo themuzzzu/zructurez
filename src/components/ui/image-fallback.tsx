@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { BlurImage } from "./blur-image";
 
@@ -27,7 +27,6 @@ export const ImageFallback = ({
   aspectRatio = "square",
 }: ImageFallbackProps) => {
   const [error, setError] = useState(false);
-  const imgRef = useRef<HTMLImageElement>(null);
   
   const imageSrc = src && !error ? src : fallbackSrc;
   

@@ -11,7 +11,7 @@ import { TrendingProducts } from "@/components/marketplace/TrendingProducts";
 import { PersonalizedRecommendations } from "@/components/marketplace/PersonalizedRecommendations";
 import { ProductRankings } from "@/components/rankings/ProductRankings";
 import { BrowseTabContent } from "@/components/marketplace/BrowseTabContent";
-import { SkeletonCard } from "@/components/loaders/SkeletonCard";
+import { SkeletonCard } from "@/components/loaders";
 import { useLoading } from "@/providers/LoadingProvider";
 import { FlashSale } from "@/components/marketplace/FlashSale";
 

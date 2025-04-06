@@ -4,11 +4,12 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductCard } from "@/components/products/ProductCard";
 import { Product } from "@/types/product";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
 import { TrendingUp, Heart, ShoppingBag, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { SkeletonCard } from "@/components/loaders";
+import { formatCountNumber } from "@/utils/viewsTracking";
 
 export const ProductRankings = () => {
   const [rankingType, setRankingType] = useState<"views" | "wishlisted" | "sales">("views");
@@ -138,15 +139,9 @@ export const ProductRankings = () => {
     return (
       <div className="space-y-4 mb-8">
         <h3 className="text-xl md:text-2xl font-bold">Product Rankings</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <Card key={i} className="overflow-hidden">
-              <Skeleton className="h-36 w-full" />
-              <div className="p-2">
-                <Skeleton className="h-4 w-3/4 mb-2" />
-                <Skeleton className="h-4 w-1/2" />
-              </div>
-            </Card>
+            <SkeletonCard key={i} imageHeight="h-36" withFooter={false} />
           ))}
         </div>
       </div>
@@ -162,11 +157,11 @@ export const ProductRankings = () => {
   const renderCountLabel = (count: number) => {
     switch (rankingType) {
       case "wishlisted":
-        return `${count} ${count === 1 ? 'wishlist' : 'wishlists'}`;
+        return `${formatCountNumber(count)} ${count === 1 ? 'wishlist' : 'wishlists'}`;
       case "sales":
-        return `${count} sold`;
+        return `${formatCountNumber(count)} sold`;
       case "views":
-        return `${count} ${count === 1 ? 'view' : 'views'}`;
+        return `${formatCountNumber(count)} ${count === 1 ? 'view' : 'views'}`;
       default:
         return "";
     }
@@ -199,7 +194,7 @@ export const ProductRankings = () => {
             )}
             onClick={() => setRankingType("views")}
           >
-            <TrendingUp className="h-4 w-4" />
+            <Eye className="h-4 w-4" />
             <span className="text-sm hidden sm:inline">Most Viewed</span>
           </button>
           
@@ -232,16 +227,16 @@ export const ProductRankings = () => {
       </div>
       
       {/* Mobile scrollable view */}
-      <div className="block md:hidden">
-        <ScrollArea className="w-full whitespace-nowrap pb-4">
+      <div className="block lg:hidden">
+        <ScrollArea className="w-full pb-4">
           <div className="flex gap-3 px-1 pb-2">
             {products.map((product, index) => (
-              <div key={product.id} className="relative w-36 flex-shrink-0">
-                <ProductCard product={product} layout="grid4x4" />
+              <div key={product.id} className="relative w-28 sm:w-32 flex-shrink-0">
+                <ProductCard product={product} layout="grid2x2" />
                 <div className="absolute top-2 left-2 bg-black/70 text-white w-6 h-6 flex items-center justify-center rounded-full font-bold text-sm z-10">
                   {index + 1}
                 </div>
-                <div className="absolute bottom-12 left-2 right-2 bg-black/70 text-white text-xs py-1 px-2 rounded flex items-center justify-center">
+                <div className="absolute bottom-2 left-0 right-0 bg-black/70 text-white text-xs py-1 px-2 mx-1 rounded flex items-center justify-center">
                   {getIconForType()}
                   <span>{renderCountLabel(product.count || 0)}</span>
                 </div>
@@ -252,7 +247,7 @@ export const ProductRankings = () => {
       </div>
       
       {/* Desktop grid view */}
-      <div className="hidden md:grid grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="hidden lg:grid grid-cols-6 gap-3">
         {products.map((product, index) => (
           <div key={product.id} className="relative">
             <ProductCard product={product} layout="grid4x4" />

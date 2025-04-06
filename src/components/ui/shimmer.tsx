@@ -6,7 +6,6 @@ interface ShimmerProps extends React.HTMLAttributes<HTMLDivElement> {
   height?: string;
   rounded?: boolean;
   circle?: boolean;
-  className?: string;
 }
 
 export function Shimmer({ 
@@ -20,7 +19,7 @@ export function Shimmer({
   return (
     <div
       className={cn(
-        "animate-pulse bg-gradient-to-r from-muted/70 via-muted/90 to-muted/70 bg-[length:400%_400%] animate-shimmer",
+        "animate-pulse bg-gradient-to-r from-muted/50 via-muted to-muted/50 bg-[length:400%_400%] animate-shimmer",
         rounded && "rounded-md",
         circle && "rounded-full",
         className
