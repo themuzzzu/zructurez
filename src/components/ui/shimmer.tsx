@@ -6,18 +6,24 @@ export interface ShimmerProps extends HTMLAttributes<HTMLDivElement> {
   className?: string;
   shimmerWidth?: string;
   shimmerColor?: string;
+  rounded?: boolean;
+  circle?: boolean;
 }
 
 export function Shimmer({
   className,
   shimmerWidth = "50%",
   shimmerColor = "rgba(255, 255, 255, 0.2)",
+  rounded = false,
+  circle = false,
   ...props
 }: ShimmerProps) {
   return (
     <div 
       className={cn(
         "animate-pulse bg-gradient-to-r from-transparent via-gray-200 to-transparent bg-[length:200%_100%] dark:via-gray-700",
+        rounded && "rounded-md",
+        circle && "rounded-full",
         className
       )}
       style={{
@@ -28,5 +34,3 @@ export function Shimmer({
     />
   );
 }
-
-// Create a public folder for placeholders if it doesn't exist
