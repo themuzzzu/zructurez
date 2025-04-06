@@ -3,14 +3,15 @@ import { useEffect, useState } from 'react';
 import { ServiceCard } from '@/components/service-card/ServiceCard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card } from '@/components/ui/card';
-import { getRecommendedServices } from '@/services/serviceService';
+import { supabase } from '@/integrations/supabase/client';
 
 interface RecommendedServicesProps {
   userId?: string;
   limit?: number;
+  userLocation?: string;
 }
 
-export const RecommendedServices = ({ userId, limit = 4 }: RecommendedServicesProps) => {
+export const RecommendedServices = ({ userId, limit = 4, userLocation }: RecommendedServicesProps) => {
   const [services, setServices] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -19,8 +20,21 @@ export const RecommendedServices = ({ userId, limit = 4 }: RecommendedServicesPr
     const fetchServices = async () => {
       try {
         setIsLoading(true);
-        const data = await getRecommendedServices(userId, limit);
-        setServices(data);
+        // Get recommended services from the database
+        let query = supabase
+          .from('services')
+          .select('*')
+          .limit(limit);
+
+        // Filter by user's location if provided
+        if (userLocation) {
+          query = query.ilike('location', `%${userLocation}%`);
+        }
+
+        const { data, error: apiError } = await query;
+
+        if (apiError) throw apiError;
+        setServices(data || []);
       } catch (err) {
         console.error('Error fetching recommended services:', err);
         setError('Failed to load recommended services');
@@ -30,7 +44,7 @@ export const RecommendedServices = ({ userId, limit = 4 }: RecommendedServicesPr
     };
 
     fetchServices();
-  }, [userId, limit]);
+  }, [userId, limit, userLocation]);
 
   if (isLoading) {
     return (

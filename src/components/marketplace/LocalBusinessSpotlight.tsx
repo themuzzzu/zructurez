@@ -21,6 +21,7 @@ interface BusinessType {
   is_open?: boolean;
   wait_time?: string;
   closure_reason?: string;
+  verified?: boolean;
 }
 
 interface LocalBusinessSpotlightProps {
@@ -46,10 +47,10 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
         const { data, error } = await query;
         
         if (error) throw error;
-        return data || [];
+        return data || [] as BusinessType[];
       } catch (err) {
         console.error("Error fetching local businesses:", err);
-        return [];
+        return [] as BusinessType[];
       }
     },
   });
@@ -82,7 +83,7 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {businesses.map((business: any) => (
+      {businesses.map((business) => (
         <BusinessCard 
           key={business.id}
           id={business.id}

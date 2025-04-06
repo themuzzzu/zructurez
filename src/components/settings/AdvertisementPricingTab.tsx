@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { format, addDays, differenceInDays } from 'date-fns';
@@ -128,7 +127,6 @@ export const AdvertisementPricingTab = ({ businessId }: { businessId?: string })
   const [bookingConfirmed, setBookingConfirmed] = useState(false);
   const [showPricingComparison, setShowPricingComparison] = useState(false);
 
-  // Fetch all available ad slots
   useEffect(() => {
     const fetchAdSlots = async () => {
       setIsLoading(true);
@@ -141,7 +139,6 @@ export const AdvertisementPricingTab = ({ businessId }: { businessId?: string })
 
         if (error) throw error;
 
-        // Map database fields to AdSlot type
         const mappedSlots: AdSlot[] = (data || []).map(slot => ({
           id: slot.id,
           name: slot.name,
@@ -155,7 +152,6 @@ export const AdvertisementPricingTab = ({ businessId }: { businessId?: string })
           rotation_interval_seconds: 10,
           is_active: slot.active,
           
-          // Include original database fields
           active: slot.active,
           cpc_rate: slot.cpc_rate,
           cpm_rate: slot.cpm_rate,
@@ -178,7 +174,6 @@ export const AdvertisementPricingTab = ({ businessId }: { businessId?: string })
     fetchAdSlots();
   }, []);
 
-  // Calculate price based on selected options
   useEffect(() => {
     if (!selectedSlot) {
       setCalculatedPrice(null);
@@ -229,7 +224,6 @@ export const AdvertisementPricingTab = ({ businessId }: { businessId?: string })
     setIsSubmitting(true);
     
     try {
-      // Get the current authenticated user
       const { data: { user: currentUser } } = await supabase.auth.getUser();
       if (!currentUser) {
         toast.error("You need to be logged in to create an ad campaign");
@@ -237,7 +231,6 @@ export const AdvertisementPricingTab = ({ businessId }: { businessId?: string })
         return;
       }
 
-      // Determine dates based on pricing type
       let startDate, endDate;
       
       if (pricingType === 'monthly') {
@@ -251,21 +244,20 @@ export const AdvertisementPricingTab = ({ businessId }: { businessId?: string })
       const formattedStartDate = format(startDate, "yyyy-MM-dd");
       const formattedEndDate = format(endDate, "yyyy-MM-dd");
       
-      // Create ad campaign record
       const { error } = await supabase.from('advertisements').insert({
         user_id: currentUser.id,
         business_id: businessId,
         title: `${selectedSlot.name} Ad Campaign`,
         description: `Advertisement for ${selectedSlot.type}`,
         type: selectedSlot.type,
-        reference_id: businessId, // Default to business ID
+        reference_id: businessId,
         format: 'standard',
         location: selectedSlot.position,
         budget: calculatedPrice || 0,
         start_date: formattedStartDate,
         end_date: formattedEndDate,
         status: 'pending',
-        image_url: null, // Will be added later
+        image_url: null,
       });
 
       if (error) throw error;
@@ -282,21 +274,18 @@ export const AdvertisementPricingTab = ({ businessId }: { businessId?: string })
 
   const handleSlotSelect = (slot: AdSlot) => {
     setSelectedSlot(slot);
-    // Reset pricing type if exclusive is not available
     if (pricingType === 'exclusive' && !slot.exclusive_price) {
       setPricingType('daily');
     }
   };
 
-  // Group slots by category for better display
   const groupedSlots = adSlots.reduce((acc, slot) => {
     const category = slot.type.split('_')[0];
     if (!acc[category]) acc[category] = [];
     acc[category].push(slot);
     return acc;
   }, {} as Record<string, AdSlot[]>);
-  
-  // Categories in the order we want to display them
+
   const categoryOrder = ['homepage', 'sponsored', 'featured', 'trending', 'local'];
 
   return (
@@ -365,7 +354,6 @@ export const AdvertisementPricingTab = ({ businessId }: { businessId?: string })
         </div>
       )}
       
-      {/* Section 1: Available Ad Slots */}
       <div className="space-y-4">
         <h3 className="text-lg font-medium">Available Ad Slots</h3>
         
@@ -434,7 +422,6 @@ export const AdvertisementPricingTab = ({ businessId }: { businessId?: string })
                             </CardDescription>
                           </CardHeader>
                           <CardContent className="space-y-3 pb-2">
-                            {/* Check if previewImage exists before using it */}
                             {('previewImage' in adTypeInfo && adTypeInfo.previewImage) && (
                               <div className="relative rounded-md overflow-hidden border bg-muted/30 h-32">
                                 <img 
@@ -507,166 +494,167 @@ export const AdvertisementPricingTab = ({ businessId }: { businessId?: string })
         )}
       </div>
       
-      {/* Section 2 & 3: Price Calculator & Booking Form */}
-      {selectedSlot && (
-        <Card className="mt-8">
-          <CardHeader>
-            <CardTitle>Book Your Advertisement</CardTitle>
-            <CardDescription>
-              {selectedSlot.name} - {adTypes[selectedSlot.type]?.position || selectedSlot.position}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Pricing Type Selection */}
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium">Select Pricing Option</h4>
-              <RadioGroup 
-                value={pricingType} 
-                onValueChange={(value) => setPricingType(value as 'daily' | 'monthly' | 'exclusive')}
-                className="flex flex-wrap gap-4"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="daily" id="daily" />
-                  <Label htmlFor="daily" className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    Daily ({formatPrice(selectedSlot.daily_price)}/day)
-                  </Label>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="monthly" id="monthly" />
-                  <Label htmlFor="monthly" className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    Monthly ({formatPrice(selectedSlot.monthly_price)})
-                  </Label>
-                </div>
-                
-                {selectedSlot.exclusive_price && (
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="exclusive" id="exclusive" />
-                    <Label htmlFor="exclusive" className="flex items-center gap-2">
-                      <Lock className="h-4 w-4" />
-                      Exclusive ({formatPrice(selectedSlot.exclusive_price)})
-                    </Label>
-                  </div>
-                )}
-              </RadioGroup>
-            </div>
-            
-            {/* Date Selection */}
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium">Select Duration</h4>
-              
-              {pricingType === 'daily' ? (
-                <div className="max-w-sm">
-                  <DateRangePicker 
-                    initialDateFrom={dateRange.from}
-                    initialDateTo={dateRange.to}
-                    onUpdate={handleDateRangeChange}
-                  />
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Duration: {differenceInDays(dateRange.to, dateRange.from) + 1} days
-                  </p>
-                </div>
-              ) : pricingType === 'monthly' ? (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <select 
-                      className="border rounded p-2 bg-background"
-                      value={selectedMonth.getMonth()}
-                      onChange={(e) => {
-                        const newDate = new Date(selectedMonth);
-                        newDate.setMonth(parseInt(e.target.value));
-                        setSelectedMonth(newDate);
-                      }}
-                    >
-                      <option value="0">January</option>
-                      <option value="1">February</option>
-                      <option value="2">March</option>
-                      <option value="3">April</option>
-                      <option value="4">May</option>
-                      <option value="5">June</option>
-                      <option value="6">July</option>
-                      <option value="7">August</option>
-                      <option value="8">September</option>
-                      <option value="9">October</option>
-                      <option value="10">November</option>
-                      <option value="11">December</option>
-                    </select>
-                    
-                    <select
-                      className="border rounded p-2 bg-background"
-                      value={selectedMonth.getFullYear()}
-                      onChange={(e) => {
-                        const newDate = new Date(selectedMonth);
-                        newDate.setFullYear(parseInt(e.target.value));
-                        setSelectedMonth(newDate);
-                      }}
-                    >
-                      {[0, 1, 2].map((offset) => {
-                        const year = new Date().getFullYear() + offset;
-                        return <option key={year} value={year}>{year}</option>;
-                      })}
-                    </select>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Your ad will run for the entire month
-                  </p>
-                </div>
-              ) : (
-                <div className="text-sm">
-                  <p>
-                    <span className="font-medium">Exclusive booking</span>: 
-                    Your ad will be the only one shown in this slot for the selected duration.
-                  </p>
-                  <div className="mt-2 max-w-sm">
-                    <DateRangePicker 
-                      initialDateFrom={dateRange.from}
-                      initialDateTo={dateRange.to}
-                      onUpdate={handleDateRangeChange}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Price calculation display */}
-            <div className="bg-muted/50 p-4 rounded-md space-y-2">
-              <h4 className="text-sm font-medium">Price Calculation</h4>
-              {pricingType === 'daily' ? (
-                <div className="text-sm">
-                  <p>₹{selectedSlot.daily_price.toLocaleString()}/day × {differenceInDays(dateRange.to, dateRange.from) + 1} days = <span className="font-semibold text-primary">₹{calculatedPrice?.toLocaleString()}</span></p>
-                </div>
-              ) : pricingType === 'monthly' ? (
-                <div className="text-sm">
-                  <p>Monthly rate for {format(selectedMonth, 'MMMM yyyy')}: <span className="font-semibold text-primary">₹{selectedSlot.monthly_price.toLocaleString()}</span></p>
-                </div>
-              ) : (
-                <div className="text-sm">
-                  <p>Exclusive placement from {format(dateRange.from, 'MMM dd, yyyy')} to {format(dateRange.to, 'MMM dd, yyyy')}: <span className="font-semibold text-primary">₹{selectedSlot.exclusive_price?.toLocaleString()}</span></p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-          <CardFooter className="flex flex-col items-start space-y-4 sm:flex-row sm:justify-between sm:space-y-0">
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">Total Price:</p>
-              <p className="text-2xl font-bold">
-                {calculatedPrice !== null ? formatPrice(calculatedPrice) : '-'}
-              </p>
-            </div>
-            <Button 
-              size="lg" 
-              onClick={handleBookAdClick} 
-              className="sm:w-auto w-full"
+      <Card className="mt-8">
+        <CardHeader>
+          <CardTitle>Book Your Advertisement</CardTitle>
+          <CardDescription>
+            {selectedSlot.name} - {adTypes[selectedSlot.type]?.position || selectedSlot.position}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-3">
+            <h4 className="text-sm font-medium">Select Pricing Option</h4>
+            <RadioGroup 
+              value={pricingType} 
+              onValueChange={(value) => setPricingType(value as 'daily' | 'monthly' | 'exclusive')}
+              className="flex flex-wrap gap-4"
             >
-              Book Ad Now
-            </Button>
-          </CardFooter>
-        </Card>
-      )}
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="daily" id="daily" />
+                <Label htmlFor="daily" className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Daily ({formatPrice(selectedSlot.daily_price)}/day)
+                </Label>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="monthly" id="monthly" />
+                <Label htmlFor="monthly" className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Monthly ({formatPrice(selectedSlot.monthly_price)})
+                </Label>
+              </div>
+              
+              {selectedSlot.exclusive_price && (
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="exclusive" id="exclusive" />
+                  <Label htmlFor="exclusive" className="flex items-center gap-2">
+                    <Lock className="h-4 w-4" />
+                    Exclusive ({formatPrice(selectedSlot.exclusive_price)})
+                  </Label>
+                </div>
+              )}
+            </RadioGroup>
+          </div>
+          
+          <div className="space-y-3">
+            <h4 className="text-sm font-medium">Select Duration</h4>
+            
+            {pricingType === 'daily' ? (
+              <div className="max-w-sm">
+                <DateRangePicker 
+                  date={{
+                    from: dateRange.from,
+                    to: dateRange.to
+                  }}
+                  onChange={(range) => {
+                    handleDateRangeChange(range);
+                  }}
+                />
+                <p className="text-xs text-muted-foreground mt-2">
+                  Duration: {differenceInDays(dateRange.to, dateRange.from) + 1} days
+                </p>
+              </div>
+            ) : pricingType === 'monthly' ? (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <select 
+                    className="border rounded p-2 bg-background"
+                    value={selectedMonth.getMonth()}
+                    onChange={(e) => {
+                      const newDate = new Date(selectedMonth);
+                      newDate.setMonth(parseInt(e.target.value));
+                      setSelectedMonth(newDate);
+                    }}
+                  >
+                    <option value="0">January</option>
+                    <option value="1">February</option>
+                    <option value="2">March</option>
+                    <option value="3">April</option>
+                    <option value="4">May</option>
+                    <option value="5">June</option>
+                    <option value="6">July</option>
+                    <option value="7">August</option>
+                    <option value="8">September</option>
+                    <option value="9">October</option>
+                    <option value="10">November</option>
+                    <option value="11">December</option>
+                  </select>
+                  
+                  <select
+                    className="border rounded p-2 bg-background"
+                    value={selectedMonth.getFullYear()}
+                    onChange={(e) => {
+                      const newDate = new Date(selectedMonth);
+                      newDate.setFullYear(parseInt(e.target.value));
+                      setSelectedMonth(newDate);
+                    }}
+                  >
+                    {[0, 1, 2].map((offset) => {
+                      const year = new Date().getFullYear() + offset;
+                      return <option key={year} value={year}>{year}</option>;
+                    })}
+                  </select>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Your ad will run for the entire month
+                </p>
+              </div>
+            ) : (
+              <div className="text-sm">
+                <p>
+                  <span className="font-medium">Exclusive booking</span>: 
+                  Your ad will be the only one shown in this slot for the selected duration.
+                </p>
+                <div className="mt-2 max-w-sm">
+                  <DateRangePicker 
+                    date={{
+                      from: dateRange.from,
+                      to: dateRange.to
+                    }}
+                    onChange={(range) => {
+                      handleDateRangeChange(range);
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="bg-muted/50 p-4 rounded-md space-y-2">
+            <h4 className="text-sm font-medium">Price Calculation</h4>
+            {pricingType === 'daily' ? (
+              <div className="text-sm">
+                <p>₹{selectedSlot.daily_price.toLocaleString()}/day × {differenceInDays(dateRange.to, dateRange.from) + 1} days = <span className="font-semibold text-primary">₹{calculatedPrice?.toLocaleString()}</span></p>
+              </div>
+            ) : pricingType === 'monthly' ? (
+              <div className="text-sm">
+                <p>Monthly rate for {format(selectedMonth, 'MMMM yyyy')}: <span className="font-semibold text-primary">₹{selectedSlot.monthly_price.toLocaleString()}</span></p>
+              </div>
+            ) : (
+              <div className="text-sm">
+                <p>Exclusive placement from {format(dateRange.from, 'MMM dd, yyyy')} to {format(dateRange.to, 'MMM dd, yyyy')}: <span className="font-semibold text-primary">₹{selectedSlot.exclusive_price?.toLocaleString()}</span></p>
+              </div>
+            )}
+          </div>
+        </CardContent>
+        <CardFooter className="flex flex-col items-start space-y-4 sm:flex-row sm:justify-between sm:space-y-0">
+          <div>
+            <p className="text-sm text-muted-foreground mb-1">Total Price:</p>
+            <p className="text-2xl font-bold">
+              {calculatedPrice !== null ? formatPrice(calculatedPrice) : '-'}
+            </p>
+          </div>
+          <Button 
+            size="lg" 
+            onClick={handleBookAdClick} 
+            className="sm:w-auto w-full"
+          >
+            Book Ad Now
+          </Button>
+        </CardFooter>
+      </Card>
       
-      {/* Ad Placement Preview Section */}
       <div className="mt-4">
         <Card>
           <CardHeader>
@@ -728,7 +716,6 @@ export const AdvertisementPricingTab = ({ businessId }: { businessId?: string })
         </Card>
       </div>
       
-      {/* Confirmation Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-md">
           {bookingConfirmed ? (
@@ -836,4 +823,3 @@ export const AdvertisementPricingTab = ({ businessId }: { businessId?: string })
 };
 
 export default AdvertisementPricingTab;
-

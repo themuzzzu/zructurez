@@ -1,232 +1,109 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
-// Define an interface for service data
-export interface Service {
-  id: string;
-  title: string;
-  name?: string;
-  description?: string;
-  price?: number;
-  image_url?: string;
-  banner_url?: string;
-  user_id?: string;
-  provider_name?: string;
-  category?: string;
-  location?: string;
-  views?: number;
-  rating?: number;
-  is_open?: boolean;
-}
+// Helper function to simplify error handling
+const handleApiError = (error: any, message: string) => {
+  console.error(message, error);
+  throw new Error(message);
+};
 
-// Interface for trending service data
-interface TrendingService {
-  id: string;
-  title: string;
-  description?: string;
-  price?: number;
-  image_url?: string;
-  user_id?: string;
-  provider_name?: string;
-}
-
-// Add missing functions for service tracking
-export const trackServiceView = async (serviceId: string): Promise<boolean> => {
+// Track when a service is viewed
+export const trackServiceView = async (serviceId: string) => {
   try {
-    await incrementServiceViews(serviceId);
-    return true;
+    // First, increment the views counter in the services table
+    const { error: updateError } = await supabase.rpc('increment_service_views', {
+      service_id: serviceId
+    });
+
+    if (updateError) throw updateError;
+
+    // Also record an analytics entry for more detailed tracking
+    const { error: analyticsError } = await supabase
+      .from('service_analytics')
+      .insert({
+        service_id: serviceId,
+        event_type: 'view',
+        timestamp: new Date().toISOString()
+      });
+
+    if (analyticsError) throw analyticsError;
   } catch (error) {
     console.error('Error tracking service view:', error);
-    return false;
+    // Don't throw error as this is a non-critical tracking function
   }
 };
 
-export const trackContactClick = async (serviceId: string): Promise<boolean> => {
+// Track when a user clicks contact on a service
+export const trackContactClick = async (serviceId: string) => {
   try {
-    // In a real implementation, this would call an API to record the contact click
-    console.log(`Contact click recorded for service ${serviceId}`);
-    return true;
-  } catch (error) {
-    console.error('Error tracking contact click:', error);
-    return false;
-  }
-};
-
-// Function to get recommended services
-export const getRecommendedServices = async (
-  userId?: string,
-  limit: number = 4
-): Promise<Service[]> => {
-  try {
-    // In a real app, use the userId to get personalized recommendations
-    const { data, error } = await supabase
-      .from('services')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(limit);
+    const { error } = await supabase
+      .from('service_analytics')
+      .insert({
+        service_id: serviceId,
+        event_type: 'contact_click',
+        timestamp: new Date().toISOString()
+      });
 
     if (error) throw error;
-    return data || [];
   } catch (error) {
-    console.error('Error fetching recommended services:', error);
-    return fallbackTrendingServices.map(service => ({
-      id: service.id,
-      title: service.title,
-      description: service.description || "",
-      price: service.price || 0,
-      image_url: service.image_url,
-      user_id: service.user_id,
-      provider_name: service.provider_name
-    }));
+    console.error('Error tracking contact click:', error);
+    // Don't throw error as this is a non-critical tracking function
   }
 };
 
-// Helper function to increment service views
-const incrementServiceViews = async (serviceId: string): Promise<void> => {
+// Get recommended services based on a variety of factors
+export const getRecommendedServices = async (userId?: string, limit: number = 4) => {
   try {
-    await supabase.rpc('increment_service_views', { service_id_param: serviceId });
-  } catch (error) {
-    console.error('Error incrementing service views:', error);
-    throw error;
-  }
-};
-
-// Fallback trending services data
-const fallbackTrendingServices: TrendingService[] = [
-  {
-    id: "trending-1",
-    title: "Home Cleaning Service",
-    description: "Professional house cleaning services",
-    price: 1800,
-    image_url: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=300&q=80", 
-    user_id: "provider-1",
-    provider_name: "CleanCo"
-  },
-  {
-    id: "trending-2",
-    title: "Web Development",
-    description: "Professional website design and development",
-    price: 20000,
-    image_url: "https://images.unsplash.com/photo-1547658719-da2b51169166?auto=format&fit=crop&w=300&q=80",
-    user_id: "provider-2",
-    provider_name: "TechSolutions"
-  },
-  {
-    id: "trending-3",
-    title: "Personal Trainer",
-    description: "Custom fitness programs and personal training",
-    price: 3000,
-    image_url: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=300&q=80",
-    user_id: "provider-3",
-    provider_name: "FitLife"
-  },
-  {
-    id: "trending-4",
-    title: "Digital Marketing",
-    description: "Boost your online presence with our marketing services",
-    price: 15000,
-    image_url: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=300&q=80",
-    user_id: "provider-4",
-    provider_name: "GrowthHackers"
-  }
-];
-
-/**
- * Fetch trending services in a specific area
- * @param areaCode Geographic area code (optional)
- * @returns Array of trending services
- */
-export const getTrendingServicesInArea = async (areaCode: string): Promise<Service[]> => {
-  try {
-    // Get trending services from the database, considering optional area filter
+    // Basic query to get services
     let query = supabase
-      .from('services')
-      .select('*')
-      .order('views', { ascending: false })
-      .limit(4);
-    
-    // Apply area filter if provided
-    if (areaCode) {
-      query = query.eq('area_code', areaCode);
-    }
-    
-    const { data, error } = await query;
-    
-    if (error) {
-      console.error('Error fetching trending services in area:', error);
-      return fallbackTrendingServices.map(service => ({
-        id: service.id,
-        title: service.title,
-        description: service.description || "",
-        price: service.price || 0,
-        image_url: service.image_url,
-        user_id: service.user_id,
-        provider_name: service.provider_name
-      }));
-    }
-    
-    // If no data returned, use fallback
-    if (!data || data.length === 0) {
-      return fallbackTrendingServices.map(service => ({
-        id: service.id,
-        title: service.title,
-        description: service.description || "",
-        price: service.price || 0,
-        image_url: service.image_url,
-        user_id: service.user_id,
-        provider_name: service.provider_name
-      }));
-    }
-    
-    // Format the data to match the Service interface
-    return data.map(service => ({
-      id: service.id,
-      title: service.title || "Unnamed Service", 
-      description: service.description,
-      price: service.price,
-      image_url: service.image_url || null,
-      user_id: service.user_id,
-      provider_name: "Service Provider"
-    }));
-  } catch (err) {
-    console.error('Error fetching trending services in area:', err);
-    return fallbackTrendingServices.map(service => ({
-      id: service.id,
-      title: service.title,
-      description: service.description || "",
-      price: service.price || 0,
-      image_url: service.image_url,
-      user_id: service.user_id,
-      provider_name: service.provider_name
-    }));
-  }
-};
-
-/**
- * Get a service by its ID
- * @param serviceId Service ID to fetch
- * @returns Service data with its portfolio and products
- */
-export const getServiceById = async (serviceId: string) => {
-  try {
-    const { data, error } = await supabase
       .from('services')
       .select(`
         *,
-        service_portfolio(*),
-        service_products(*,service_product_images(*))
+        profiles:user_id (
+          username,
+          avatar_url
+        )
       `)
-      .eq('id', serviceId)
-      .single();
-    
-    if (error) {
-      console.error(`Error fetching service ${serviceId}:`, error);
-      throw error;
+      .limit(limit);
+
+    // If user is logged in, we could personalize recommendations
+    if (userId) {
+      // Example: Filter by services the user hasn't viewed yet
+      // This is a simplified example - real recommendation engines would be more complex
+      const { data: viewedServices } = await supabase
+        .from('service_analytics')
+        .select('service_id')
+        .eq('user_id', userId)
+        .eq('event_type', 'view');
+
+      if (viewedServices && viewedServices.length > 0) {
+        const viewedIds = viewedServices.map(item => item.service_id);
+        query = query.not('id', 'in', `(${viewedIds.join(',')})`);
+      }
     }
-    
-    return data;
+
+    // Order by views as a simple proxy for popularity
+    query = query.order('views', { ascending: false });
+
+    const { data, error } = await query;
+    if (error) throw error;
+
+    // Map data to consistent format
+    return (data || []).map(service => ({
+      id: service.id,
+      title: service.title,
+      description: service.description,
+      image_url: service.image_url,
+      price: service.price,
+      user_id: service.user_id,
+      provider_name: service.profiles?.username || "Service Provider",
+      category: service.category,
+      location: service.location,
+      rating: service.rating || 4.5,
+      views: service.views
+    }));
   } catch (error) {
-    console.error(`Error in getServiceById for ${serviceId}:`, error);
-    throw error;
+    console.error('Error fetching recommended services:', error);
+    return [];
   }
 };
