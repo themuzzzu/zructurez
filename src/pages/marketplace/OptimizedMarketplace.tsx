@@ -12,6 +12,7 @@ import { LoadingView } from "@/components/LoadingView";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
+import { BannerCarousel } from "@/components/marketplace/BannerCarousel";
 
 // Create a fallback skeleton component
 const SkeletonCard = () => (
@@ -162,6 +163,13 @@ export const OptimizedMarketplace = () => {
       <ErrorBoundary>
         <div className="mb-4 sm:mb-6">
           <ShopByCategory onCategorySelect={handleCategoryChange} />
+        </div>
+      </ErrorBoundary>
+
+      {/* Banner Carousel - RESTORED */}
+      <ErrorBoundary>
+        <div className="mb-4 sm:mb-8">
+          <BannerCarousel />
         </div>
       </ErrorBoundary>
       

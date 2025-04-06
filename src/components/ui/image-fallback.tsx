@@ -39,6 +39,7 @@ export const ImageFallback = ({
   
   const imageSrc = src && !error ? src : fallbackSrc;
 
+  // Add additional fallback options
   const handleLoad = () => {
     setHasLoaded(true);
     setIsLoading(false);
@@ -50,10 +51,16 @@ export const ImageFallback = ({
   };
   
   const handleError = () => {
+    console.log(`Failed to load image: ${src}, using fallback`);
     setError(true);
     setIsLoading(false);
-    console.log(`Failed to load image: ${src}, using fallback`);
   };
+
+  // Pre-cache the fallback image to ensure it's available
+  React.useEffect(() => {
+    const img = new Image();
+    img.src = fallbackSrc;
+  }, [fallbackSrc]);
   
   return (
     <div className="relative">

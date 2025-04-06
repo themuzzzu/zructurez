@@ -60,6 +60,7 @@ export const BannerCarousel = () => {
   const [api, setApi] = useState<any>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [imageErrors, setImageErrors] = useState<{[key: string]: boolean}>({});
 
   // Use only the first 3 banners to reduce clutter
   const bannerAds = sampleBannerAds.slice(0, 3);
@@ -68,7 +69,7 @@ export const BannerCarousel = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 500);
+    }, 300);
     
     return () => clearTimeout(timer);
   }, []);
@@ -122,12 +123,26 @@ export const BannerCarousel = () => {
   // Handle banner click to navigate to appropriate page
   const handleBannerClick = (ad: Advertisement) => {
     if (ad.type === "product") {
-      navigate(`/product/${ad.reference_id}`);
+      navigate(`/products/${ad.reference_id}`);
     } else if (ad.type === "business") {
       navigate(`/businesses/${ad.reference_id}`);
     } else if (ad.type === "service") {
       navigate(`/services/${ad.reference_id}`);
     }
+  };
+
+  const handleImageError = (adId: string) => {
+    setImageErrors(prev => ({...prev, [adId]: true}));
+  };
+
+  // Get fallback image for ad
+  const getFallbackImage = (adId: string) => {
+    // Generic fallback images
+    const fallbacks = [
+      "/placeholders/image-placeholder.jpg",
+      "https://placehold.co/1200x675/EEE/31343C?text=Image+Not+Found"
+    ];
+    return fallbacks[0];
   };
 
   // Fallback content if no banner ads are available
@@ -170,45 +185,39 @@ export const BannerCarousel = () => {
           {bannerAds.map((ad) => (
             <CarouselItem key={ad.id} className="!pl-0 sm:!pl-4 cursor-pointer" onClick={() => handleBannerClick(ad)}>
               <div className="relative">
-                {ad.image_url ? (
-                  <div className="relative">
-                    <img 
-                      src={ad.image_url} 
-                      alt={ad.title}
-                      className="w-full h-full object-cover aspect-[16/9] rounded-lg"
-                      loading="lazy"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = "https://placehold.co/1200x675/EEE/31343C?text=Image+Not+Found";
-                      }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-transparent to-transparent flex items-center p-4 sm:p-6 rounded-lg">
-                      <div className="w-full max-w-xl">
-                        <h2 className="text-xl sm:text-2xl md:text-4xl font-bold text-white mb-2">
-                          {ad.title.includes("Orient Electric") ? (
-                            <>
-                              <div className="text-lg sm:text-2xl md:text-4xl">Sleek. Slim. Stunning.</div>
-                              <div className="text-xl sm:text-3xl md:text-5xl mt-2 text-white">Up to 40% Off</div>
-                              <div className="text-sm sm:text-lg md:text-xl mt-2 font-normal">Next-gen BLDC fans</div>
-                            </>
-                          ) : (
-                            ad.title
-                          )}
-                        </h2>
-                        
-                        <p className="text-xs sm:text-sm text-white/80 mb-2 sm:mb-3 max-w-lg line-clamp-2">
-                          {ad.description}
-                        </p>
-                      </div>
+                <div className="relative">
+                  {/* Fallback loading state if needed */}
+                  {loading && (
+                    <div className="absolute inset-0 bg-gray-200 dark:bg-gray-800 animate-pulse rounded-lg"></div>
+                  )}
+                  
+                  <img 
+                    src={imageErrors[ad.id] ? getFallbackImage(ad.id) : ad.image_url || getFallbackImage(ad.id)}
+                    alt={ad.title}
+                    className="w-full h-full object-cover aspect-[16/9] rounded-lg"
+                    loading="eager" 
+                    onError={() => handleImageError(ad.id)}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-transparent to-transparent flex items-center p-4 sm:p-6 rounded-lg">
+                    <div className="w-full max-w-xl">
+                      <h2 className="text-xl sm:text-2xl md:text-4xl font-bold text-white mb-2">
+                        {ad.title.includes("Orient Electric") ? (
+                          <>
+                            <div className="text-lg sm:text-2xl md:text-4xl">Sleek. Slim. Stunning.</div>
+                            <div className="text-xl sm:text-3xl md:text-5xl mt-2 text-white">Up to 40% Off</div>
+                            <div className="text-sm sm:text-lg md:text-xl mt-2 font-normal">Next-gen BLDC fans</div>
+                          </>
+                        ) : (
+                          ad.title
+                        )}
+                      </h2>
+                      
+                      <p className="text-xs sm:text-sm text-white/80 mb-2 sm:mb-3 max-w-lg line-clamp-2">
+                        {ad.description}
+                      </p>
                     </div>
                   </div>
-                ) : (
-                  <div className="aspect-[16/9] rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-4 sm:p-6 flex items-center">
-                    <div className="max-w-xl">
-                      <h2 className="text-xl sm:text-3xl font-bold mb-2">{ad.title}</h2>
-                      <p className="text-white/80 text-sm sm:text-lg mb-4 sm:mb-6">{ad.description}</p>
-                    </div>
-                  </div>
-                )}
+                </div>
               </div>
             </CarouselItem>
           ))}

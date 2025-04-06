@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
@@ -161,21 +160,11 @@ export default function Services() {
           <SponsoredServices />
         </div>
 
-        {/* Second Banner Ad - Added new position */}
-        <div className="mb-8">
-          <AutoScrollServiceBannerAd maxAds={2} />
-        </div>
-
         {/* Trending Services */}
         <div className="mb-8">
           <TrendingServices />
         </div>
         
-        {/* Third Banner Ad - Added new position */}
-        <div className="mb-8">
-          <AutoScrollServiceBannerAd maxAds={2} />
-        </div>
-
         {/* Top Services */}
         <div className="mb-8">
           <TopServices />
@@ -192,9 +181,9 @@ export default function Services() {
           <ServiceCategoryFilter onCategoryChange={handleCategoryChange} />
         </div>
         
-        {/* Fourth Banner Ad - Added new position */}
+        {/* Only keep one banner ad at the end */}
         <div className="mb-8">
-          <AutoScrollServiceBannerAd maxAds={3} />
+          <AutoScrollServiceBannerAd maxAds={2} />
         </div>
         
         <h2 className="text-xl font-semibold mb-4">All Services</h2>
