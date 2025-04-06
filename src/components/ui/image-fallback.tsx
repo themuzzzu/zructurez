@@ -23,10 +23,13 @@ export interface ImageFallbackProps {
   onLoad?: () => void;
 }
 
+// Create a default placeholder image
+const DEFAULT_FALLBACK = "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=300&q=80";
+
 export const ImageFallback = ({
   src,
   alt = "Image",
-  fallbackSrc = "/placeholders/image-placeholder.jpg",
+  fallbackSrc = DEFAULT_FALLBACK,
   className,
   fallbackClassName,
   onClick,
@@ -44,10 +47,20 @@ export const ImageFallback = ({
   const [hasLoaded, setHasLoaded] = useState(false);
   const [currentRetry, setCurrentRetry] = useState(retryCount);
   
+  // Check for valid image URL
+  const isValidUrl = (url?: string) => {
+    if (!url) return false;
+    
+    // Skip URLs with placeholders that don't exist
+    if (url.includes('via.placeholder.com')) return false;
+    
+    return true;
+  };
+  
   // Assign appropriate image source (original, retry URL, or fallback)
   const determineImageSrc = () => {
-    if (error) {
-      return fallbackSrc;
+    if (error || !isValidUrl(src)) {
+      return isValidUrl(fallbackSrc) ? fallbackSrc : DEFAULT_FALLBACK;
     }
     
     // Add cache-busting parameter if retrying
@@ -73,7 +86,6 @@ export const ImageFallback = ({
   };
   
   const handleLoad = () => {
-    console.log(`Image loaded successfully: ${src}`);
     setHasLoaded(true);
     
     // Call the onLoad callback if provided

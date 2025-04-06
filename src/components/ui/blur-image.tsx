@@ -43,6 +43,13 @@ export function BlurImage({
     setCurrentSrc(placeholder);
     
     const loadImage = () => {
+      // Skip loading for empty or invalid URLs
+      if (!src || src === '' || src.includes('undefined')) {
+        setCurrentSrc("/placeholders/image-placeholder.jpg");
+        setIsLoading(false);
+        return () => {};
+      }
+      
       // Preload the actual image
       const img = new Image();
       

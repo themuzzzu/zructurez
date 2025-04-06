@@ -1,36 +1,32 @@
 
 import { cn } from "@/lib/utils";
+import { HTMLAttributes } from "react";
 
-interface ShimmerProps {
+export interface ShimmerProps extends HTMLAttributes<HTMLDivElement> {
   className?: string;
-  rounded?: boolean;
-  circle?: boolean;
+  shimmerWidth?: string;
+  shimmerColor?: string;
 }
 
-export function Shimmer({ className, rounded, circle }: ShimmerProps) {
+export function Shimmer({
+  className,
+  shimmerWidth = "50%",
+  shimmerColor = "rgba(255, 255, 255, 0.2)",
+  ...props
+}: ShimmerProps) {
   return (
     <div 
       className={cn(
-        "animate-pulse overflow-hidden relative",
-        rounded && "rounded-md",
-        circle && "rounded-full",
+        "animate-pulse bg-gradient-to-r from-transparent via-gray-200 to-transparent bg-[length:200%_100%] dark:via-gray-700",
         className
       )}
-    >
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent shimmer-animation"></div>
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes shimmer {
-          0% {
-            transform: translateX(-100%);
-          }
-          100% {
-            transform: translateX(100%);
-          }
-        }
-        .shimmer-animation {
-          animation: shimmer 1.5s infinite;
-        }
-      `}} />
-    </div>
+      style={{
+        backgroundSize: "200% 100%",
+        animation: "shimmer 1.5s infinite"
+      }}
+      {...props}
+    />
   );
 }
+
+// Create a public folder for placeholders if it doesn't exist

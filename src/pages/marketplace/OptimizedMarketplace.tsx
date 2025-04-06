@@ -28,10 +28,10 @@ const SkeletonCard = () => (
   </div>
 );
 
-const LazySection = ({ children, fallbackCount = 4 }: { children: React.ReactNode, fallbackCount?: number }) => (
+const LazySection = ({ children, fallbackCount = 4, className = "" }: { children: React.ReactNode, fallbackCount?: number, className?: string }) => (
   <ErrorBoundary fallback={<div className="p-4 text-red-500">Failed to load section. Please refresh.</div>}>
     <Suspense fallback={
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 ${className}`}>
         {Array.from({ length: fallbackCount }).map((_, i) => (
           <SkeletonCard key={i} />
         ))}
@@ -42,8 +42,15 @@ const LazySection = ({ children, fallbackCount = 4 }: { children: React.ReactNod
   </ErrorBoundary>
 );
 
-// Lazy load the FlashSale component as it might be heavy
-const FlashSale = lazy(() => import('@/components/marketplace/FlashSale').then(mod => ({ default: mod.FlashSale || mod.default })));
+// Lazy load the FlashSale component with proper error handling
+const FlashSale = lazy(() => 
+  import('@/components/marketplace/FlashSale')
+    .then(mod => ({ default: mod.FlashSale || mod.default }))
+    .catch(error => {
+      console.error("Failed to load FlashSale component:", error);
+      return { default: () => <div className="p-4 bg-gray-100 rounded">Flash Sale items loading failed</div> };
+    })
+);
 
 export const OptimizedMarketplace = () => {
   const navigate = useNavigate();
@@ -69,9 +76,14 @@ export const OptimizedMarketplace = () => {
   const [sortOption, setSortOption] = useState("newest");
   const [priceRange, setPriceRange] = useState("all");
   const [gridLayout, setGridLayout] = useState<GridLayoutType>(() => {
-    // Try to get user's saved preference from localStorage
-    const savedLayout = localStorage.getItem("preferredGridLayout");
-    return (savedLayout as GridLayoutType) || "grid4x4";
+    try {
+      // Try to get user's saved preference from localStorage
+      const savedLayout = localStorage.getItem("preferredGridLayout");
+      return (savedLayout as GridLayoutType) || "grid4x4";
+    } catch (error) {
+      console.error("Error loading grid layout from localStorage:", error);
+      return "grid4x4";
+    }
   });
   const [isLoading, setIsLoading] = useState(true);
   
@@ -117,43 +129,60 @@ export const OptimizedMarketplace = () => {
   
   // Handle search selection from autocomplete
   const handleSearchSelect = (query: string) => {
-    setSearchQuery(query);
-    navigate(`/search?q=${encodeURIComponent(query)}`);
+    try {
+      setSearchQuery(query);
+      navigate(`/search?q=${encodeURIComponent(query)}`);
+    } catch (error) {
+      console.error("Search navigation error:", error);
+      toast({
+        title: "Search Error",
+        description: "There was a problem processing your search.",
+        variant: "destructive"
+      });
+    }
   };
   
   // Update URL when category changes
   const handleCategoryChange = (category: string, subcategory?: string) => {
-    setSelectedCategory(category);
-    if (subcategory) {
-      setSelectedSubcategory(subcategory);
-    } else {
-      setSelectedSubcategory("");
-    }
-    
-    const newSearchParams = new URLSearchParams();
-    if (searchQuery) {
-      newSearchParams.set("q", searchQuery);
-    }
-    
-    if (category !== "all") {
-      newSearchParams.set("category", category);
-      
+    try {
+      setSelectedCategory(category);
       if (subcategory) {
-        newSearchParams.set("subcategory", subcategory);
+        setSelectedSubcategory(subcategory);
+      } else {
+        setSelectedSubcategory("");
       }
+      
+      const newSearchParams = new URLSearchParams();
+      if (searchQuery) {
+        newSearchParams.set("q", searchQuery);
+      }
+      
+      if (category !== "all") {
+        newSearchParams.set("category", category);
+        
+        if (subcategory) {
+          newSearchParams.set("subcategory", subcategory);
+        }
+      }
+      
+      navigate({
+        pathname: location.pathname,
+        search: newSearchParams.toString()
+      });
+    } catch (error) {
+      console.error("Category navigation error:", error);
     }
-    
-    navigate({
-      pathname: location.pathname,
-      search: newSearchParams.toString()
-    });
   };
 
   // Handle grid layout change
   const handleLayoutChange = (layout: GridLayoutType) => {
-    console.log("Changing grid layout to:", layout);
-    setGridLayout(layout);
-    localStorage.setItem("preferredGridLayout", layout);
+    try {
+      console.log("Changing grid layout to:", layout);
+      setGridLayout(layout);
+      localStorage.setItem("preferredGridLayout", layout);
+    } catch (error) {
+      console.error("Error saving grid layout:", error);
+    }
   };
   
   if (isLoading) {
@@ -174,11 +203,11 @@ export const OptimizedMarketplace = () => {
       </div>
       
       {/* Banner carousel below search */}
-      <LazySection fallbackCount={1}>
+      <ErrorBoundary>
         <div className="mb-4 sm:mb-6">
           <BannerCarousel />
         </div>
-      </LazySection>
+      </ErrorBoundary>
       
       {/* New Shop by Category section */}
       <ErrorBoundary>
