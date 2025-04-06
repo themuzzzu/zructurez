@@ -9,6 +9,8 @@ import { CategoryIconGrid } from "@/components/marketplace/CategoryIconGrid";
 import { CategorySubcategoryGrid } from "@/components/marketplace/CategorySubcategoryGrid";
 import { MarketplaceBanner } from "@/components/marketplace/MarketplaceBanner";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { GridLayoutSelector } from "@/components/marketplace/GridLayoutSelector";
+import { GridLayoutType } from "@/components/products/types/ProductTypes";
 
 interface BrowseTabContentProps {
   searchResults?: any[];
@@ -16,6 +18,8 @@ interface BrowseTabContentProps {
   isSearching?: boolean;
   onCategorySelect?: (category: string) => void;
   onSearchSelect?: (term: string) => void;
+  gridLayout?: GridLayoutType;
+  onLayoutChange?: (layout: GridLayoutType) => void;
 }
 
 export const BrowseTabContent = ({
@@ -23,12 +27,15 @@ export const BrowseTabContent = ({
   searchTerm = "",
   isSearching = false,
   onCategorySelect,
-  onSearchSelect
+  onSearchSelect,
+  gridLayout = "grid4x4",
+  onLayoutChange
 }: BrowseTabContentProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedSubcategory, setSelectedSubcategory] = useState("");
+  const [localGridLayout, setLocalGridLayout] = useState<GridLayoutType>(gridLayout);
   
   // Parse URL query parameters to set initial category and subcategory
   useEffect(() => {
@@ -44,6 +51,11 @@ export const BrowseTabContent = ({
       setSelectedSubcategory(subcategoryParam);
     }
   }, [location.search]);
+  
+  // Update local grid layout when prop changes
+  useEffect(() => {
+    setLocalGridLayout(gridLayout);
+  }, [gridLayout]);
   
   const handleCategorySelect = (category: string) => {
     setSelectedCategory(category);
@@ -73,31 +85,15 @@ export const BrowseTabContent = ({
     }
   };
   
+  const handleLayoutChange = (layout: GridLayoutType) => {
+    setLocalGridLayout(layout);
+    if (onLayoutChange) {
+      onLayoutChange(layout);
+    }
+  };
+  
   return (
     <div className="space-y-6">
-      {/* Banner */}
-      <ErrorBoundary>
-        <MarketplaceBanner />
-      </ErrorBoundary>
-      
-      {/* Category Icons - Positioned between banner and sponsored products */}
-      <ErrorBoundary>
-        <div className="mb-6">
-          <h2 className="text-xl font-bold mb-4">Shop by Category</h2>
-          <CategoryIconGrid onCategorySelect={handleCategorySelect} />
-        </div>
-      </ErrorBoundary>
-      
-      {/* Sponsored Products */}
-      <ErrorBoundary>
-        <SponsoredProducts />
-      </ErrorBoundary>
-      
-      {/* Trending Products */}
-      <ErrorBoundary>
-        <TrendingProducts />
-      </ErrorBoundary>
-      
       {/* Categories Navigation */}
       <ErrorBoundary>
         <div className="mb-6 px-2">
@@ -120,11 +116,18 @@ export const BrowseTabContent = ({
       
       {/* Product Sections */}
       <ErrorBoundary>
-        <div className="space-y-12">
+        <div className="space-y-6">
+          {/* Header with Grid Layout Selector */}
+          <div className="flex justify-between items-center px-2 mb-2">
+            <h2 className="text-xl font-bold">Products</h2>
+            <GridLayoutSelector layout={localGridLayout} onChange={handleLayoutChange} />
+          </div>
+          
           {/* Shopping Section - filtered by category */}
           <ShoppingSection 
             searchQuery={searchTerm || ""}
             selectedCategory={selectedCategory === "all" ? "" : selectedCategory}
+            gridLayout={localGridLayout}
           />
         </div>
       </ErrorBoundary>

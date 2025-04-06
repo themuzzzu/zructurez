@@ -10,6 +10,8 @@ import { ShoppingCardSkeleton } from './ShoppingCardSkeleton';
 import { LoadingView } from './LoadingView';
 import { Progress } from './ui/progress';
 import { LikeProvider } from './products/LikeContext';
+import { GridLayoutSelector } from './marketplace/GridLayoutSelector';
+import { formatPrice } from '@/utils/productUtils';
 
 interface ShoppingSectionProps {
   searchQuery: string;
@@ -45,6 +47,11 @@ export const ShoppingSection = ({
   const [loadingProgress, setLoadingProgress] = useState(0);
   
   const loadingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Update local grid layout when prop changes
+  useEffect(() => {
+    setLocalGridLayout(gridLayout);
+  }, [gridLayout]);
   
   const { data: products, isLoading, error } = useQuery({
     queryKey: ['products', searchQuery, localCategory, localShowDiscounted, localShowUsed, localShowBranded, localSortOption, localPriceRange],
@@ -169,7 +176,7 @@ export const ShoppingSection = ({
       id: `mock-${index}`,
       title: `${selectedCat} Product ${index + 1}`,
       description: `This is a mock product in the ${selectedCat} category.`,
-      price: Math.floor(Math.random() * 100) + 10,
+      price: Math.floor(Math.random() * 10000) + 500, // Price in rupees
       image_url: `https://picsum.photos/seed/${selectedCat}${index}/300/300`,
       category: selectedCat.toLowerCase(),
       is_discounted: Math.random() > 0.7,
@@ -178,6 +185,10 @@ export const ShoppingSection = ({
       rating_count: Math.floor(Math.random() * 100) + 5,
       created_at: new Date().toISOString(),
     }));
+  };
+  
+  const handleLayoutChange = (layout: GridLayoutType) => {
+    setLocalGridLayout(layout);
   };
   
   return (
@@ -210,9 +221,14 @@ export const ShoppingSection = ({
         </div>
         
         <div className="md:col-span-3">
+          <div className="flex justify-between items-center mb-4 md:hidden">
+            <h3 className="text-sm font-medium">View</h3>
+            <GridLayoutSelector layout={localGridLayout} onChange={handleLayoutChange} />
+          </div>
+          
           {isLoading ? (
             <div className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {[...Array(8)].map((_, i) => (
                   <ShoppingCardSkeleton key={i} />
                 ))}
@@ -228,7 +244,7 @@ export const ShoppingSection = ({
                 products={products || []} 
                 isLoading={isLoading} 
                 layout={localGridLayout}
-                onLayoutChange={setLocalGridLayout}
+                onLayoutChange={handleLayoutChange}
                 searchQuery={searchQuery}
               />
             </LikeProvider>

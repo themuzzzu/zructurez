@@ -29,6 +29,7 @@ export function BlurImage({
 }: BlurImageProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [currentSrc, setCurrentSrc] = useState(blurDataUrl || "");
+  const [loadAttempts, setLoadAttempts] = useState(0);
   
   // Create small base64 placeholder if not provided
   const placeholder = blurDataUrl || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+P+/HgAFdwI2QOYvBQAAAABJRU5ErkJggg==';
@@ -36,25 +37,50 @@ export function BlurImage({
   useEffect(() => {
     // Reset loading state when src changes
     setIsLoading(true);
+    setLoadAttempts(0);
     
     // Start with placeholder
     setCurrentSrc(placeholder);
     
-    // Preload the actual image
-    const img = new Image();
-    img.src = src;
-    img.onload = () => {
-      setCurrentSrc(src);
-      setIsLoading(false);
-      if (onLoad) {
-        onLoad();
-      }
+    const loadImage = () => {
+      // Preload the actual image
+      const img = new Image();
+      
+      // Add cache busting parameter if we've already tried loading once
+      const imgSrc = loadAttempts > 0 ? `${src}?attempt=${loadAttempts}` : src;
+      img.src = imgSrc;
+      
+      img.onload = () => {
+        setCurrentSrc(imgSrc);
+        setIsLoading(false);
+        if (onLoad) {
+          onLoad();
+        }
+      };
+      
+      img.onerror = (e) => {
+        console.error(`Failed to load image: ${imgSrc}`, e);
+        if (loadAttempts < 2) {
+          // Try loading again with cache busting
+          setTimeout(() => {
+            setLoadAttempts(prev => prev + 1);
+          }, 1000); // Wait a second before retrying
+        } else {
+          // After 3 attempts, show fallback
+          setCurrentSrc("/placeholders/image-placeholder.jpg");
+          setIsLoading(false);
+        }
+      };
+      
+      return () => {
+        img.onload = null;
+        img.onerror = null;
+      };
     };
     
-    return () => {
-      img.onload = null;
-    };
-  }, [src, placeholder, onLoad]);
+    const cleanup = loadImage();
+    return cleanup;
+  }, [src, placeholder, onLoad, loadAttempts]);
   
   // Calculate aspect ratio classes
   const aspectRatioClass = {
@@ -66,7 +92,7 @@ export function BlurImage({
   
   return (
     <div className={cn(
-      "overflow-hidden relative",
+      "overflow-hidden relative bg-muted",
       !fill && aspectRatioClass[aspectRatio],
       containerClassName
     )}>

@@ -1,31 +1,32 @@
 
 import { cn } from "@/lib/utils";
 
-interface ShimmerProps extends React.HTMLAttributes<HTMLDivElement> {
-  width?: string;
-  height?: string;
-  rounded?: boolean;
-  circle?: boolean;
+interface ShimmerProps {
+  className?: string;
 }
 
-export function Shimmer({ 
-  width = "100%", 
-  height = "100%", 
-  rounded = false, 
-  circle = false, 
-  className, 
-  ...props 
-}: ShimmerProps) {
+export function Shimmer({ className }: ShimmerProps) {
   return (
-    <div
+    <div 
       className={cn(
-        "animate-pulse bg-gradient-to-r from-muted/50 via-muted to-muted/50 bg-[length:400%_400%] animate-shimmer",
-        rounded && "rounded-md",
-        circle && "rounded-full",
+        "animate-pulse overflow-hidden relative",
         className
       )}
-      style={{ width, height }}
-      {...props}
-    />
+    >
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent shimmer-animation"></div>
+      <style jsx>{`
+        @keyframes shimmer {
+          0% {
+            transform: translateX(-100%);
+          }
+          100% {
+            transform: translateX(100%);
+          }
+        }
+        .shimmer-animation {
+          animation: shimmer 1.5s infinite;
+        }
+      `}</style>
+    </div>
   );
 }

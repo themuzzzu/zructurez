@@ -15,6 +15,7 @@ import { LoadingView } from "@/components/LoadingView";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
+import { GridLayoutSelector } from "@/components/marketplace/GridLayoutSelector";
 
 // Create a fallback skeleton component
 const SkeletonCard = () => (
@@ -67,7 +68,11 @@ export const OptimizedMarketplace = () => {
   const [showBranded, setShowBranded] = useState(false);
   const [sortOption, setSortOption] = useState("newest");
   const [priceRange, setPriceRange] = useState("all");
-  const [gridLayout, setGridLayout] = useState<GridLayoutType>("grid4x4");
+  const [gridLayout, setGridLayout] = useState<GridLayoutType>(() => {
+    // Try to get user's saved preference from localStorage
+    const savedLayout = localStorage.getItem("preferredGridLayout");
+    return (savedLayout as GridLayoutType) || "grid4x4";
+  });
   const [isLoading, setIsLoading] = useState(true);
   
   // Show loading indicator when page loads
@@ -93,12 +98,12 @@ export const OptimizedMarketplace = () => {
   }, [categoryParam, subcategoryParam, queryParam]);
   
   useEffect(() => {
-    console.log("OptimizedMarketplace rendered");
+    console.log("OptimizedMarketplace rendered with layout:", gridLayout);
     
     return () => {
       console.log("OptimizedMarketplace unmounted");
     };
-  }, []);
+  }, [gridLayout]);
 
   const resetFilters = () => {
     setSelectedCategory("all");
@@ -142,6 +147,13 @@ export const OptimizedMarketplace = () => {
       pathname: location.pathname,
       search: newSearchParams.toString()
     });
+  };
+
+  // Handle grid layout change
+  const handleLayoutChange = (layout: GridLayoutType) => {
+    console.log("Changing grid layout to:", layout);
+    setGridLayout(layout);
+    localStorage.setItem("preferredGridLayout", layout);
   };
   
   if (isLoading) {
@@ -223,6 +235,8 @@ export const OptimizedMarketplace = () => {
           <BrowseTabContent 
             searchTerm={searchQuery}
             onCategorySelect={handleCategoryChange}
+            gridLayout={gridLayout}
+            onLayoutChange={handleLayoutChange}
           />
         </div>
       </LazySection>

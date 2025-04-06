@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { BlurImage } from "./blur-image";
 import { incrementViewCount } from "@/utils/viewsTracking";
+import { useEffect } from "react";
 
 export interface ImageFallbackProps {
   src: string;
@@ -17,6 +18,8 @@ export interface ImageFallbackProps {
   priority?: boolean;
   productId?: string;
   trackView?: boolean;
+  retryCount?: number;
+  maxRetries?: number;
 }
 
 export const ImageFallback = ({
@@ -32,13 +35,43 @@ export const ImageFallback = ({
   priority = false,
   productId,
   trackView = false,
+  retryCount = 0,
+  maxRetries = 2,
 }: ImageFallbackProps) => {
   const [error, setError] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
+  const [currentRetry, setCurrentRetry] = useState(retryCount);
   
-  const imageSrc = src && !error ? src : fallbackSrc;
+  // Assign appropriate image source (original, retry URL, or fallback)
+  const determineImageSrc = () => {
+    if (error) {
+      return fallbackSrc;
+    }
+    
+    // Add cache-busting parameter if retrying
+    if (currentRetry > 0 && src) {
+      const separator = src.includes('?') ? '&' : '?';
+      return `${src}${separator}_retry=${currentRetry}`;
+    }
+    
+    return src;
+  };
+  
+  const imageSrc = determineImageSrc();
 
+  const handleError = () => {
+    console.log(`Image error for src: ${src}, retry: ${currentRetry}`);
+    
+    // If we haven't exceeded max retries, try again
+    if (currentRetry < maxRetries) {
+      setCurrentRetry(prev => prev + 1);
+    } else {
+      setError(true);
+    }
+  };
+  
   const handleLoad = () => {
+    console.log(`Image loaded successfully: ${src}`);
     setHasLoaded(true);
     
     // Track product view when image loads and tracking is enabled
@@ -46,6 +79,13 @@ export const ImageFallback = ({
       incrementViewCount('product', productId);
     }
   };
+  
+  // Reset error state when src changes
+  useEffect(() => {
+    setError(false);
+    setHasLoaded(false);
+    setCurrentRetry(0);
+  }, [src]);
   
   return (
     <BlurImage
@@ -55,7 +95,7 @@ export const ImageFallback = ({
       className={cn(className, error && fallbackClassName)}
       aspectRatio={aspectRatio}
       loading={lazyLoad && !priority ? "lazy" : "eager"}
-      onError={() => setError(true)}
+      onError={handleError}
       onClick={onClick}
       priority={priority}
       onLoad={handleLoad}
