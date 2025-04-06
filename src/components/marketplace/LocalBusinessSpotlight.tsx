@@ -1,11 +1,11 @@
 
-import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { BusinessCard } from "@/components/BusinessCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
 import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
 
+// Define a simpler interface to avoid complex type instantiations
 interface BusinessType {
   id: string;
   name: string;
@@ -29,47 +29,50 @@ interface LocalBusinessSpotlightProps {
 }
 
 export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightProps) => {
+  // Fix the type issue by explicitly typing the function return and avoiding complex type inference
+  const fetchBusinesses = async (): Promise<BusinessType[]> => {
+    try {
+      let query = supabase
+        .from('businesses')
+        .select('id, name, description, image_url, category, location, contact, hours, is_open, wait_time, closure_reason, verified');
+        
+      // Apply businessType filter if it's provided
+      if (businessType) {
+        query = query.eq('business_type', businessType);
+      }
+      
+      // Add limit to reduce data transfer
+      query = query.order('created_at', { ascending: false })
+        .limit(4);
+      
+      const { data, error } = await query;
+      
+      if (error) throw error;
+      
+      if (!data) return [];
+
+      // Use a simple type assertion to avoid deep type instantiation
+      return data.map(item => ({
+        id: item.id,
+        name: item.name,
+        description: item.description || "",
+        image_url: item.image_url,
+        category: item.category,
+        location: item.location,
+        is_open: item.is_open,
+        wait_time: item.wait_time,
+        closure_reason: item.closure_reason,
+        verified: item.verified,
+      }));
+    } catch (err) {
+      console.error("Error fetching local businesses:", err);
+      return [];
+    }
+  };
+
   const { data: businesses, isLoading } = useOptimizedQuery<BusinessType[]>(
     ['local-businesses', businessType],
-    async () => {
-      try {
-        let query = supabase
-          .from('businesses')
-          .select('id, name, description, image_url, category, location, contact, hours, is_open, wait_time, closure_reason, verified');
-          
-        // Apply businessType filter if it's provided
-        if (businessType) {
-          query = query.eq('business_type', businessType);
-        }
-        
-        // Add limit to reduce data transfer
-        query = query.order('created_at', { ascending: false })
-          .limit(4);
-        
-        const { data, error } = await query;
-        
-        if (error) throw error;
-        
-        if (!data) return [];
-
-        // Cast the response data to an array of any, then map to our BusinessType
-        return (data as any[]).map(item => ({
-          id: item.id,
-          name: item.name,
-          description: item.description || "",
-          image_url: item.image_url,
-          category: item.category,
-          location: item.location,
-          is_open: item.is_open,
-          wait_time: item.wait_time,
-          closure_reason: item.closure_reason,
-          verified: item.verified,
-        }));
-      } catch (err) {
-        console.error("Error fetching local businesses:", err);
-        return [];
-      }
-    },
+    fetchBusinesses,
     { staleTime: 5 * 60 * 1000 } // 5 minutes
   );
 
