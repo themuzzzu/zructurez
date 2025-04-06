@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
@@ -32,13 +31,14 @@ import type { Business, BusinessOwner, BusinessHours, StaffMember } from "@/type
 import { BusinessBannerAd } from "@/components/ads/BusinessBannerAd";
 import { BusinessCategoryScroller } from "@/components/business/BusinessCategoryScroller";
 
-interface BusinessWithRating extends Omit<Business, 'owners' | 'staff_details' | 'image_position'> {
+interface BusinessWithRating extends Omit<Business, 'owners' | 'staff_details' | 'image_position' | 'verification_documents'> {
   average_rating: number;
   reviews_count: number;
   business_ratings: Array<{ rating: number }>;
   owners?: BusinessOwner[];
   staff_details?: StaffMember[];
   image_position?: { x: number; y: number; };
+  verification_documents?: any[];
 }
 
 const Business = () => {
@@ -121,11 +121,28 @@ const Business = () => {
         typedImagePosition = { x: 50, y: 50 };
       }
       
+      // Parse verification_documents from JSON to array
+      let typedVerificationDocuments: any[] = [];
+      try {
+        if (business.verification_documents) {
+          if (typeof business.verification_documents === 'object' && Array.isArray(business.verification_documents)) {
+            typedVerificationDocuments = business.verification_documents as any[];
+          } else if (typeof business.verification_documents === 'string') {
+            typedVerificationDocuments = JSON.parse(business.verification_documents);
+          }
+        }
+      } catch (e) {
+        console.error("Error parsing verification documents:", e);
+        // Provide default empty array if parsing fails
+        typedVerificationDocuments = [];
+      }
+      
       return {
         ...business,
         owners: typedOwners,
         staff_details: typedStaffDetails,
         image_position: typedImagePosition,
+        verification_documents: typedVerificationDocuments,
         average_rating: averageRating,
         reviews_count: ratings.length,
         business_ratings: ratings
@@ -192,14 +209,11 @@ const Business = () => {
     }
   };
 
-  // Convert any type of hours format to string for display
   const formatHours = (hours: string | BusinessHours | undefined): string => {
     if (!hours) return '';
     
-    // If hours is already a string, return it
     if (typeof hours === 'string') return hours;
     
-    // If it's an object, try to format it to string
     try {
       if (typeof hours === 'object') {
         return Object.entries(hours)
@@ -217,7 +231,6 @@ const Business = () => {
       console.error("Error formatting hours:", e);
     }
     
-    // Return empty string if we couldn't format it
     return '';
   };
 
