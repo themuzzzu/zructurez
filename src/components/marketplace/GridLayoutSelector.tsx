@@ -1,5 +1,5 @@
 
-import { LayoutGrid, Grid2X2, Grip, List } from "lucide-react";
+import { LayoutGrid, Grid2X2, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
 import { useEffect } from "react";
@@ -31,16 +31,6 @@ export const GridLayoutSelector = ({ layout, onChange }: GridLayoutSelectorProps
         className="h-8 w-8"
         onClick={() => handleLayoutChange("grid4x4")}
         title="4×4 Grid"
-      >
-        <LayoutGrid className="h-4 w-4" />
-      </Button>
-      
-      <Button
-        size="icon"
-        variant={layout === "grid3x3" ? "default" : "outline"}
-        className="h-8 w-8"
-        onClick={() => handleLayoutChange("grid3x3")}
-        title="3×3 Grid"
       >
         <LayoutGrid className="h-4 w-4" />
       </Button>

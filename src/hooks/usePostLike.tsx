@@ -6,7 +6,7 @@ import { toast } from "sonner";
 export const usePostLike = (id: string, initialLikeStatus: boolean = false) => {
   const queryClient = useQueryClient();
 
-  const { data: currentLikeStatus } = useQuery({
+  const { data: currentLikeStatus, isLoading: isLikeStatusLoading } = useQuery({
     queryKey: ['post-like', id],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -24,7 +24,7 @@ export const usePostLike = (id: string, initialLikeStatus: boolean = false) => {
     initialData: initialLikeStatus,
   });
 
-  const { mutate: toggleLike } = useMutation({
+  const { mutate: toggleLike, isPending: isTogglePending } = useMutation({
     mutationFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Must be logged in to like posts');
@@ -58,5 +58,9 @@ export const usePostLike = (id: string, initialLikeStatus: boolean = false) => {
     },
   });
 
-  return { currentLikeStatus, toggleLike };
+  return { 
+    currentLikeStatus, 
+    toggleLike,
+    isLoading: isLikeStatusLoading || isTogglePending
+  };
 };

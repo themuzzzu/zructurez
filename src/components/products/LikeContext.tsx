@@ -1,5 +1,5 @@
 
-import { createContext, useContext, ReactNode, useState, useCallback, useEffect } from "react";
+import { createContext, useContext, ReactNode, useState, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -97,9 +97,9 @@ export const LikeProvider = ({ children }: { children: ReactNode }) => {
   };
 
   // Check if a product is liked
-  const isLiked = useCallback((productId: string): boolean => {
+  const isLiked = (productId: string): boolean => {
     return !!likedProducts[productId];
-  }, [likedProducts]);
+  };
 
   // Toggle like status of a product
   const toggleLike = async (productId: string): Promise<void> => {
