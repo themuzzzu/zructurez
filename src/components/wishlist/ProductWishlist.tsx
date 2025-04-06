@@ -31,7 +31,11 @@ export const ProductWishlist = () => {
         return [];
       }
       
-      return data as ProductType[];
+      // Transform Supabase data to match ProductType
+      return (data || []).map(product => ({
+        ...product,
+        title: product.title || product.name || '',
+      })) as ProductType[];
     },
     enabled: wishlistItems.length > 0,
   });

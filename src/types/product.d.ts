@@ -8,6 +8,7 @@ export interface Product {
   category?: string;
   subcategory?: string;
   image_url?: string;
+  imageUrl?: string;
   brand_name?: string;
   condition?: string;
   model?: string;
@@ -22,6 +23,10 @@ export interface Product {
   discount_percentage?: number;
   service_product_id?: string;
   created_at?: string;
+  name?: string;
+  brand?: string;
+  rating?: number;
+  rating_count?: number;
 }
 
 export interface ProductCardProps {

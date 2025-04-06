@@ -8,6 +8,7 @@ export interface Product {
   original_price?: number;
   category?: string;
   image_url?: string;
+  imageUrl?: string;
   is_discounted?: boolean;
   is_used?: boolean;
   is_branded?: boolean;
