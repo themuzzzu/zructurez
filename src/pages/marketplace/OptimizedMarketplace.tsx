@@ -12,12 +12,9 @@ import { RecommendedProducts } from "@/components/marketplace/RecommendedProduct
 import { PersonalizedRecommendations } from "@/components/marketplace/PersonalizedRecommendations";
 import { TopProducts } from "@/components/recommendations/TopProducts";
 import { ProductRankings } from "@/components/rankings/ProductRankings";
+import { BrowseTabContent } from "@/components/marketplace/BrowseTabContent";
 
-// Import from correct location - make sure components exist at these paths
-import { BrowseTabContent } from "@/pages/marketplace/BrowseTabContent";
-import { SearchTabContent } from "@/pages/marketplace/SearchTabContent";
-
-const OptimizedMarketplace = () => {
+export const OptimizedMarketplace = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);

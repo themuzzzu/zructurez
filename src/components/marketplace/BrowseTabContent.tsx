@@ -1,8 +1,13 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ShoppingSection } from "@/components/ShoppingSection";
-import { useNavigate } from "react-router-dom";
-import { ShopByCategory } from "@/components/marketplace/ShopByCategory";
+import { Categories } from "@/components/marketplace/Categories";
+import { useNavigate, useLocation } from "react-router-dom";
+import { SponsoredProducts } from "@/components/marketplace/SponsoredProducts";
+import { TrendingProducts } from "@/components/marketplace/TrendingProducts";
+import { CategoryIconGrid } from "@/components/marketplace/CategoryIconGrid";
+import { CategorySubcategoryGrid } from "@/components/marketplace/CategorySubcategoryGrid";
+import { MarketplaceBanner } from "@/components/marketplace/MarketplaceBanner";
 
 interface BrowseTabContentProps {
   searchResults?: any[];
@@ -20,10 +25,28 @@ export const BrowseTabContent = ({
   onSearchSelect
 }: BrowseTabContentProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedSubcategory, setSelectedSubcategory] = useState("");
+  
+  // Parse URL query parameters to set initial category and subcategory
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const categoryParam = params.get('category');
+    const subcategoryParam = params.get('subcategory');
+    
+    if (categoryParam) {
+      setSelectedCategory(categoryParam);
+    }
+    
+    if (subcategoryParam) {
+      setSelectedSubcategory(subcategoryParam);
+    }
+  }, [location.search]);
   
   const handleCategorySelect = (category: string) => {
     setSelectedCategory(category);
+    setSelectedSubcategory("");
     
     if (category !== "all") {
       navigate(`/products?category=${category}`);
@@ -37,16 +60,54 @@ export const BrowseTabContent = ({
     }
   };
   
+  const handleSubcategorySelect = (category: string, subcategory?: string) => {
+    setSelectedCategory(category);
+    
+    if (subcategory) {
+      setSelectedSubcategory(subcategory);
+      navigate(`/products?category=${category}&subcategory=${subcategory}`);
+    } else {
+      setSelectedSubcategory("");
+      navigate(`/products?category=${category}`);
+    }
+  };
+  
   return (
     <div className="space-y-6">
-      {/* Shop By Category Section with horizontal scrollable categories */}
-      <div className="mb-4">
-        <ShopByCategory onCategorySelect={handleCategorySelect} />
+      {/* Banner */}
+      <MarketplaceBanner />
+      
+      {/* Category Icons - Positioned between banner and sponsored products */}
+      <div className="mb-6">
+        <h2 className="text-xl font-bold mb-4">Shop by Category</h2>
+        <CategoryIconGrid onCategorySelect={handleCategorySelect} />
       </div>
-
-      {/* Main Shopping Section */}
-      <div className="mt-8">
-        <h2 className="text-2xl font-bold mb-6 px-1">All Products</h2>
+      
+      {/* Sponsored Products */}
+      <SponsoredProducts />
+      
+      {/* Trending Products */}
+      <TrendingProducts />
+      
+      {/* Categories Navigation */}
+      <div className="mb-6 px-2">
+        <Categories 
+          onCategorySelect={handleCategorySelect} 
+          showAllCategories={true}
+        />
+      </div>
+      
+      {/* If a category is selected, display subcategories */}
+      {selectedCategory !== "all" && (
+        <div className="mb-8">
+          <h2 className="text-xl font-bold mb-4 px-2">Browse {selectedCategory.replace(/-/g, ' ')}</h2>
+          <CategorySubcategoryGrid onCategorySelect={handleSubcategorySelect} />
+        </div>
+      )}
+      
+      {/* Product Sections */}
+      <div className="space-y-12">
+        {/* Shopping Section - filtered by category */}
         <ShoppingSection 
           searchQuery={searchTerm || ""}
           selectedCategory={selectedCategory === "all" ? "" : selectedCategory}

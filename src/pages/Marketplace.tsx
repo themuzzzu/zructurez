@@ -3,9 +3,7 @@ import React from "react";
 import { Layout } from "@/components/layout/Layout";
 import { NotFound } from "@/components/NotFound";
 import { useParams } from "react-router-dom";
-
-// Import MarketplaceIndex component directly
-import MarketplaceIndex from "./marketplace/index";
+import { OptimizedMarketplace } from "./marketplace/OptimizedMarketplace";
 
 const Marketplace = () => {
   const params = useParams();
@@ -19,7 +17,7 @@ const Marketplace = () => {
   return (
     <Layout>
       <div className="overflow-x-hidden">
-        <MarketplaceIndex />
+        <OptimizedMarketplace />
       </div>
     </Layout>
   );

@@ -9,11 +9,10 @@ import { lazy, Suspense } from "react";
 import { LoadingView } from "@/components/LoadingView";
 
 // Lazily loaded components
-const Index = lazy(() => import("@/pages/Index"));
+const Marketplace = lazy(() => import("@/pages/Marketplace"));
 const Auth = lazy(() => import("@/pages/Auth"));
 const Events = lazy(() => import("@/pages/Events"));
 const Jobs = lazy(() => import("@/pages/Jobs"));
-const Marketplace = lazy(() => import("@/pages/Marketplace"));
 const CategoryPage = lazy(() => import("@/pages/marketplace/CategoryPage"));
 const ProductDetails = lazy(() => import("@/pages/ProductDetails"));
 const Services = lazy(() => import("@/pages/Services"));
@@ -49,7 +48,7 @@ const withSuspense = (Component) => {
 const router = createBrowserRouter([
   {
     path: "/",
-    element: withSuspense(Index)
+    element: withSuspense(Marketplace)
   },
   {
     path: "/auth",
