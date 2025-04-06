@@ -35,7 +35,7 @@ export const incrementViewCount = async (
     if (entityType === 'product') {
       const { error } = await supabase
         .from('products')
-        .update({ views: (product) => (product.views || 0) + 1 })
+        .update({ views: ((product: any) => (product.views || 0) + 1) })
         .eq('id', entityId);
       
       if (error) {
@@ -43,9 +43,9 @@ export const incrementViewCount = async (
       }
     } else if (entityType === 'business') {
       const { error } = await supabase
-        .from('businesses')
-        .update({ views: (business) => (business.views || 0) + 1 })
-        .eq('id', entityId);
+        .from('business_analytics')
+        .update({ page_views: ((analytics: any) => (analytics.page_views || 0) + 1) })
+        .eq('business_id', entityId);
         
       if (error) {
         console.error(`Error incrementing ${entityType} views:`, error);
@@ -53,7 +53,7 @@ export const incrementViewCount = async (
     } else if (entityType === 'service') {
       const { error } = await supabase
         .from('services')
-        .update({ views: (service) => (service.views || 0) + 1 })
+        .update({ views: ((service: any) => (service.views || 0) + 1) })
         .eq('id', entityId);
         
       if (error) {
@@ -62,7 +62,7 @@ export const incrementViewCount = async (
     } else if (entityType === 'post') {
       const { error } = await supabase
         .from('posts')
-        .update({ views: (post) => (post.views || 0) + 1 })
+        .update({ views: ((post: any) => (post.views || 0) + 1) })
         .eq('id', entityId);
         
       if (error) {

@@ -470,7 +470,7 @@ export default function MarketplaceSearch() {
                           title: result.title,
                           description: result.description,
                           price: result.price || 0,
-                          image_url: `https://picsum.photos/seed/${selectedCat}${index}/300/300`,
+                          image_url: `https://picsum.photos/seed/${result.id}/300/300`,
                           category: result.category || '',
                           highlight_tags: result.highlight_tags || 
                             (Math.random() > 0.7 ? 

@@ -20,6 +20,7 @@ export interface Product {
   imageUrl?: string; // Allow both image_url and imageUrl but prefer image_url
   views?: number;
   wishlist_count?: number;
+  sponsored?: boolean;
 }
 
 // Add ProductType as an alias for Product to fix the imports
