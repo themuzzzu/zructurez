@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, createContext, useContext } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User, Session, Subscription } from '@supabase/supabase-js';
@@ -144,7 +143,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     // Set up auth state change subscription only if it doesn't exist
     if (!authSubscription) {
-      const subscription = supabase.auth.onAuthStateChange((event, newSession) => {
+      authSubscription = supabase.auth.onAuthStateChange((event, newSession) => {
         // Defer state updates to avoid Supabase auth deadlock issues
         setTimeout(() => {
           setSession(newSession);
@@ -165,8 +164,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           }
         }, 0);
       });
-      
-      authSubscription = subscription;
     }
     authSubscribers++;
 
