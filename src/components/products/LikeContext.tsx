@@ -3,6 +3,7 @@ import { createContext, useContext, ReactNode, useState, useEffect } from "react
 import { useWishlist } from "@/hooks/useWishlist";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface LikeContextType {
   isLiked: (productId: string) => boolean;
@@ -16,6 +17,7 @@ export const LikeProvider = ({ children }: { children: ReactNode }) => {
   const { wishlistItems, isLoading, isInWishlist, toggleWishlist, loading } = useWishlist();
   const [isAuthChecking, setIsAuthChecking] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const queryClient = useQueryClient();
 
   // Check if user is logged in when component mounts
   useEffect(() => {
@@ -45,6 +47,8 @@ export const LikeProvider = ({ children }: { children: ReactNode }) => {
   // Enhanced toggleLike function that handles authentication
   const handleToggleLike = async (productId: string): Promise<void> => {
     try {
+      console.log("Toggle like for product:", productId);
+      
       // Check if user is logged in before toggling
       if (!isAuthenticated) {
         const { data } = await supabase.auth.getSession();
@@ -62,6 +66,12 @@ export const LikeProvider = ({ children }: { children: ReactNode }) => {
       
       // If authenticated, proceed with toggling wishlist item
       await toggleWishlist(productId);
+      
+      // Force refresh of wishlist data
+      queryClient.invalidateQueries({ queryKey: ['wishlists'] });
+      queryClient.invalidateQueries({ queryKey: ['wishlist-products'] });
+      
+      console.log("Wishlist toggle completed for:", productId);
     } catch (error) {
       console.error("Error toggling like:", error);
       

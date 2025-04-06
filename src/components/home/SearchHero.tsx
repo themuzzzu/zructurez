@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, Sparkles } from "lucide-react";
 import { useSearch } from "@/hooks/useSearch";
@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 export const SearchHero = () => {
   const navigate = useNavigate();
+  const suggestionsRef = useRef<HTMLDivElement>(null);
   
   const {
     query,
@@ -41,6 +42,20 @@ export const SearchHero = () => {
     navigate(`/search?q=${encodeURIComponent(term)}`);
   };
 
+  // Handle clicks outside of the suggestions dropdown
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (suggestionsRef.current && !suggestionsRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    }
+    
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [setShowSuggestions]);
+
   return (
     <div className="relative w-full bg-gradient-to-r from-zinc-900 to-zinc-800 text-white">
       <div className="absolute inset-0 bg-black opacity-10"></div>
@@ -70,7 +85,7 @@ export const SearchHero = () => {
           transition={{ delay: 0.6 }}
           className="max-w-2xl mx-auto"
         >
-          <form onSubmit={handleSearch} className="bg-white dark:bg-zinc-800 rounded-lg shadow-lg p-2 flex flex-col md:flex-row">
+          <form onSubmit={handleSearch} className="bg-white dark:bg-zinc-800 rounded-lg shadow-lg p-2 flex flex-col md:flex-row relative">
             <div className="relative flex-1 mb-2 md:mb-0 md:mr-2">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400" size={20} />
               <input
@@ -85,10 +100,11 @@ export const SearchHero = () => {
               <AnimatePresence>
                 {showSuggestions && suggestions.length > 0 && (
                   <motion.div 
+                    ref={suggestionsRef}
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-zinc-800 rounded-md shadow-lg z-20 border border-zinc-200 dark:border-zinc-700"
+                    className="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-zinc-800 rounded-md shadow-lg z-50 border border-zinc-200 dark:border-zinc-700"
                   >
                     {suggestions.map((suggestion, index) => (
                       <div

@@ -6,6 +6,7 @@ import { useLike } from "./LikeContext";
 import { Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface ProductLikeButtonProps {
   productId: string;
@@ -23,6 +24,7 @@ export const ProductLikeButton = ({
   const { isLiked, toggleLike, isLoading } = useLike();
   const [animating, setAnimating] = useState(false);
   const [localLiked, setLocalLiked] = useState<boolean | null>(null);
+  const queryClient = useQueryClient();
 
   // Get the actual liked status, with optimistic UI update
   const liked = localLiked !== null ? localLiked : isLiked(productId);
@@ -40,6 +42,10 @@ export const ProductLikeButton = ({
       setAnimating(newLikedState); // Only animate on like, not unlike
       
       await toggleLike(productId);
+      
+      // Explicitly invalidate wishlist queries to ensure UI updates
+      queryClient.invalidateQueries({ queryKey: ['wishlists'] });
+      queryClient.invalidateQueries({ queryKey: ['wishlist-products'] });
       
       // Show toast message based on like state
       if (newLikedState) {

@@ -6,7 +6,7 @@ import { toast } from "sonner";
 export const useBusinessLikes = (businessId: string) => {
   const queryClient = useQueryClient();
 
-  const { data: isLiked } = useQuery({
+  const { data: isLiked, isLoading: isLikeLoading } = useQuery({
     queryKey: ['business-like', businessId],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -23,7 +23,7 @@ export const useBusinessLikes = (businessId: string) => {
     }
   });
 
-  const { data: likesCount = 0 } = useQuery({
+  const { data: likesCount = 0, isLoading: isCountLoading } = useQuery({
     queryKey: ['business-likes-count', businessId],
     queryFn: async () => {
       const { count } = await supabase
@@ -35,10 +35,16 @@ export const useBusinessLikes = (businessId: string) => {
     }
   });
 
-  const { mutate: toggleLike } = useMutation({
+  const { mutate: toggleLike, isPending: isTogglePending } = useMutation({
     mutationFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
+        toast.error("Please sign in to like businesses", {
+          action: {
+            label: "Sign In",
+            onClick: () => window.location.href = '/auth?redirect=/businesses'
+          },
+        });
         throw new Error('Must be logged in to like businesses');
       }
 
@@ -67,13 +73,18 @@ export const useBusinessLikes = (businessId: string) => {
     },
     onError: (error) => {
       console.error('Error:', error);
-      toast.error('Failed to update like status');
+      if ((error as Error).message !== 'Must be logged in to like businesses') {
+        toast.error('Failed to update like status');
+      }
     }
   });
 
+  const isLoading = isLikeLoading || isCountLoading || isTogglePending;
+
   return {
-    isLiked,
+    isLiked: !!isLiked,
     likesCount,
-    toggleLike
+    toggleLike,
+    isLoading
   };
 };

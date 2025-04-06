@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, ArrowRight } from "lucide-react";
+import { Search, ArrowRight, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -173,6 +173,11 @@ export const AutocompleteSearch = ({
     }
   };
 
+  const handleClear = () => {
+    onChange('');
+    setShowSuggestions(false);
+  };
+
   return (
     <div className={`relative ${className}`}>
       <motion.form 
@@ -196,6 +201,17 @@ export const AutocompleteSearch = ({
           }}
           onBlur={() => setTimeout(() => setIsFocused(false), 200)}
         />
+        {value && (
+          <Button 
+            type="button" 
+            variant="ghost" 
+            size="icon"
+            className="absolute right-16 top-1/2 transform -translate-y-1/2 h-8 w-8 text-muted-foreground"
+            onClick={handleClear}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
         <Button 
           type="submit" 
           size="sm" 

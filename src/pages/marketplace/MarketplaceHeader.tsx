@@ -91,7 +91,7 @@ export const MarketplaceHeader = ({
           )}
           
           {isFocused && popularSearches.length > 0 && !localSearchTerm && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-background border rounded-md shadow-md z-20 py-2">
+            <div className="absolute top-full left-0 right-0 mt-1 bg-background border rounded-md shadow-lg z-50 py-2">
               <div className="text-xs font-semibold text-muted-foreground px-3 pb-1">Popular Searches</div>
               {popularSearches.map((item, index) => (
                 <button
