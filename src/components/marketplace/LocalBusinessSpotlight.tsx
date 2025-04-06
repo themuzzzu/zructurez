@@ -78,14 +78,14 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
   };
 
   // Use optimized query with longer cache time
-  const { data: businesses, isLoading } = useOptimizedQuery(
+  const { data: businesses, isLoading } = useOptimizedQuery({
     queryKey,
-    fetchBusinesses,
-    { 
+    queryFn: fetchBusinesses,
+    config: { 
       staleTime: 15 * 60 * 1000, // 15 minutes
       cacheTime: 30 * 60 * 1000  // 30 minutes
     }
-  );
+  });
 
   // Loading state
   if (isLoading) {
