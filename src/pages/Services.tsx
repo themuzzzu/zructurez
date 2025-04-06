@@ -1,17 +1,21 @@
 
 import React, { useState, useEffect, Suspense } from "react";
 import { Layout } from "@/components/layout/Layout";
-import { ProductGrid } from "@/components/products/ProductsGrid";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
+import { ServiceBannerCarousel } from "@/components/services/ServiceBannerCarousel";
+import { ServiceCategoryGrid } from "@/components/services/ServiceCategoryGrid";
+import { ServiceGrid } from "@/components/services/ServiceGrid";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ShoppingCardSkeleton } from "@/components/ShoppingCardSkeleton";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { LikeProvider } from "@/components/products/LikeContext";
-import { LoadingView } from "@/components/LoadingView";
+import { useNavigate } from "react-router-dom";
+import { ServiceRankings } from "@/components/rankings/ServiceRankings";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { LoadingView } from "@/components/LoadingView";
+import { LocalBusinessSpotlight } from "@/components/marketplace/LocalBusinessSpotlight";
+import { TrendingServicesSection } from "@/components/services/TrendingServicesSection";
 
 // Mock data for services
 const mockServices = [
@@ -58,10 +62,33 @@ const mockServices = [
     rating: 4.8,
     rating_count: 56,
     created_at: new Date().toISOString()
+  },
+  {
+    id: "service-5",
+    title: "Lawn Care",
+    description: "Professional lawn maintenance and landscaping",
+    price: 1800,
+    image_url: "https://images.unsplash.com/photo-1589923188900-85dae523342b?auto=format&fit=crop&w=300&q=80",
+    category: "outdoor",
+    rating: 4.4,
+    rating_count: 31,
+    created_at: new Date().toISOString()
+  },
+  {
+    id: "service-6",
+    title: "IT Support",
+    description: "Technical support for all your computer needs",
+    price: 3500,
+    image_url: "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=300&q=80",
+    category: "tech",
+    rating: 4.9,
+    rating_count: 48,
+    created_at: new Date().toISOString()
   }
 ];
 
 const Services = () => {
+  const navigate = useNavigate();
   const [gridLayout, setGridLayout] = useState<GridLayoutType>("grid3x3");
   const [initialized, setInitialized] = useState(false);
 
@@ -80,7 +107,7 @@ const Services = () => {
   }, []);
 
   // Use React Query with fallback to mock data
-  const { data: services, isLoading, error } = useQuery({
+  const { data: services, isLoading } = useQuery({
     queryKey: ['services'],
     queryFn: async () => {
       try {
@@ -101,6 +128,8 @@ const Services = () => {
     },
     staleTime: 60000, // 1 minute
     enabled: initialized, // Only run query when component is initialized
+    retry: 1,
+    retryDelay: 1000,
   });
 
   const handleLayoutChange = (newLayout: GridLayoutType) => {
@@ -110,6 +139,10 @@ const Services = () => {
     } catch (error) {
       console.error("Error saving layout:", error);
     }
+  };
+
+  const handleCreateService = () => {
+    navigate('/create-service');
   };
 
   return (
@@ -122,26 +155,54 @@ const Services = () => {
         </div>
       }>
         <Suspense fallback={<LoadingView />}>
-          <div className="container mx-auto py-10">
-            <h1 className="text-3xl font-bold mb-6">Our Services</h1>
+          <div className="container mx-auto py-6">
+            <div className="flex flex-col md:flex-row justify-between items-center mb-6">
+              <h1 className="text-3xl font-bold">Services Marketplace</h1>
+              <Button onClick={handleCreateService} className="mt-4 md:mt-0">
+                <Plus className="h-4 w-4 mr-2" />
+                Create Service
+              </Button>
+            </div>
 
-            {isLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {Array(6).fill(null).map((_, i) => (
-                  <ShoppingCardSkeleton key={i} />
-                ))}
+            {/* Service Banner Carousel with specific service ads */}
+            <ServiceBannerCarousel />
+
+            {/* Service Categories Grid */}
+            <div className="mb-8">
+              <h2 className="text-2xl font-semibold mb-4">Browse Categories</h2>
+              <ServiceCategoryGrid />
+            </div>
+
+            {/* Featured Service Providers */}
+            <div className="mb-8">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-semibold">Featured Service Providers</h2>
+                <Button variant="outline" onClick={() => navigate('/businesses')}>
+                  View All
+                </Button>
               </div>
-            ) : error ? (
-              <div className="text-red-500">Error loading services.</div>
-            ) : (
-              <LikeProvider>
-                <ProductGrid
-                  products={services}
-                  layout={gridLayout}
-                  onLayoutChange={handleLayoutChange}
-                />
-              </LikeProvider>
-            )}
+              <LocalBusinessSpotlight businessType="service" />
+            </div>
+
+            {/* Trending Services */}
+            <div className="mb-8">
+              <TrendingServicesSection />
+            </div>
+
+            {/* All Services with Grid Layout Selector */}
+            <div className="mb-8">
+              <ServiceGrid 
+                services={services || []} 
+                isLoading={isLoading}
+                layout={gridLayout}
+                onLayoutChange={handleLayoutChange}
+              />
+            </div>
+
+            {/* Top Ranked Services */}
+            <div className="mb-8">
+              <ServiceRankings />
+            </div>
           </div>
         </Suspense>
       </ErrorBoundary>
