@@ -58,3 +58,39 @@ export const formatCountNumber = (num: number): string => {
     return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
   }
 };
+
+/**
+ * Fetch analytics data for a business
+ * @param userId The user ID who owns the business
+ * @returns Business analytics data
+ */
+export const fetchBusinessAnalytics = async (userId: string | undefined) => {
+  if (!userId) {
+    return null;
+  }
+  
+  try {
+    // This would typically be an API call to get real analytics data
+    // For now, we'll return mock data
+    return {
+      businessViews: 1245,
+      productAnalytics: [
+        { id: "prod-1", title: "Product 1", views: 523 },
+        { id: "prod-2", title: "Product 2", views: 342 },
+        { id: "prod-3", title: "Product 3", views: 211 }
+      ],
+      serviceAnalytics: [
+        { id: "serv-1", title: "Service 1", views: 412 },
+        { id: "serv-2", title: "Service 2", views: 189 }
+      ],
+      postAnalytics: [
+        { id: "post-1", content: "First post", views: 87 },
+        { id: "post-2", content: "Second post", views: 62 }
+      ],
+      lastUpdated: new Date().toISOString()
+    };
+  } catch (error) {
+    console.error("Error fetching business analytics:", error);
+    return null;
+  }
+};
