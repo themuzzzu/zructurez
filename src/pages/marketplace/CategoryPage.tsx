@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,13 +8,14 @@ import { Layout } from "@/components/layout/Layout";
 import { CategoryHeader } from "@/components/marketplace/CategoryHeader";
 import { CategorySidebar } from "@/components/marketplace/CategorySidebar";
 import { EmptySearchResults } from "@/components/marketplace/EmptySearchResults";
+import { GridLayoutType } from "@/components/products/types/ProductTypes";
 
 const CategoryPage = () => {
   const { categorySlug } = useParams();
   const [products, setProducts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [categoryName, setCategoryName] = useState<string>("");
-  const [layout, setLayout] = useState<"grid4x4" | "grid3x3" | "grid2x2" | "list">("grid3x3");
+  const [layout, setLayout] = useState<GridLayoutType>("grid3x3");
   const [searchQuery, setSearchQuery] = useState("");
   const [gridLayout, setGridLayout] = useState<GridLayoutType>("grid3x3");
 
