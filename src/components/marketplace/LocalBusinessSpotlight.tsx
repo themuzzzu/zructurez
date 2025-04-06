@@ -47,7 +47,7 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
         const { data, error } = await query;
         
         if (error) throw error;
-        return data || [] as BusinessType[];
+        return data as BusinessType[];
       } catch (err) {
         console.error("Error fetching local businesses:", err);
         return [] as BusinessType[];

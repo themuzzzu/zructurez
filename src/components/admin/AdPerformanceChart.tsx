@@ -1,60 +1,60 @@
 
-import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Card, CardContent } from "@/components/ui/card";
 import { Advertisement } from "@/services/adService";
+import { useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface AdPerformanceChartProps {
-  data: Advertisement[];
+  ads: Advertisement[];
 }
 
-export function AdPerformanceChart({ data }: AdPerformanceChartProps) {
-  // Group data by ad type for the chart
-  const groupedData = data.reduce((acc: any, ad) => {
-    const type = ad.type;
-    if (!acc[type]) {
-      acc[type] = {
-        name: type.charAt(0).toUpperCase() + type.slice(1),
-        impressions: 0,
-        clicks: 0,
-        ctr: 0
-      };
-    }
-    
-    acc[type].impressions += ad.reach || 0;
-    acc[type].clicks += ad.clicks || 0;
-    
-    return acc;
-  }, {});
+export function AdPerformanceChart({ ads }: AdPerformanceChartProps) {
+  const [metric, setMetric] = useState<"impressions" | "clicks" | "reach">("impressions");
   
-  // Calculate CTR for each type
-  Object.values(groupedData).forEach((group: any) => {
-    group.ctr = group.impressions > 0 
-      ? ((group.clicks / group.impressions) * 100).toFixed(2) 
-      : 0;
-  });
-  
-  const chartData = Object.values(groupedData);
+  const getChartData = () => {
+    return ads.map(ad => ({
+      name: ad.title.substring(0, 15) + (ad.title.length > 15 ? "..." : ""),
+      [metric]: ad[metric] || 0
+    }));
+  };
   
   return (
-    <ResponsiveContainer width="100%" height="100%">
-      <BarChart
-        data={chartData}
-        margin={{
-          top: 20,
-          right: 30,
-          left: 20,
-          bottom: 5,
-        }}
-      >
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="name" />
-        <YAxis yAxisId="left" orientation="left" stroke="#8884d8" />
-        <YAxis yAxisId="right" orientation="right" stroke="#82ca9d" />
-        <Tooltip />
-        <Legend />
-        <Bar yAxisId="left" dataKey="impressions" name="Impressions" fill="#8884d8" />
-        <Bar yAxisId="left" dataKey="clicks" name="Clicks" fill="#82ca9d" />
-        <Bar yAxisId="right" dataKey="ctr" name="CTR (%)" fill="#ffc658" />
-      </BarChart>
-    </ResponsiveContainer>
+    <Card>
+      <CardContent className="p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-medium">Performance Metrics</h3>
+          <Select defaultValue="impressions" onValueChange={(value) => setMetric(value as any)}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select metric" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="impressions">Impressions</SelectItem>
+              <SelectItem value="clicks">Clicks</SelectItem>
+              <SelectItem value="reach">Reach</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="h-80">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={getChartData()}>
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Bar 
+                dataKey={metric} 
+                fill={metric === "impressions" ? "#8884d8" : metric === "clicks" ? "#82ca9d" : "#ffc658"} 
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

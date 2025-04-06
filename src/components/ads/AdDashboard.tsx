@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Advertisement, AdStatus } from '@/services/adService';
+import { Advertisement, AdStatus, AdFormat } from '@/services/adService';
 
 export function AdDashboard() {
   const [ads, setAds] = useState<Advertisement[]>([]);
@@ -30,7 +30,13 @@ export function AdDashboard() {
             clicks: 56,
             format: 'banner',
             image_url: 'https://example.com/ads/summer-sale.jpg',
-            description: 'Summer sale with discounts up to 50%'
+            description: 'Summer sale with discounts up to 50%',
+            user_id: 'user-123',
+            location: 'Global',
+            video_url: null,
+            carousel_images: null,
+            created_at: '2023-05-15',
+            reach: 5000
           },
           {
             id: '2',
@@ -43,9 +49,15 @@ export function AdDashboard() {
             end_date: '2023-07-15',
             impressions: 840,
             clicks: 32,
-            format: 'card',
+            format: 'standard',
             image_url: 'https://example.com/ads/business-promo.jpg',
-            description: 'Promote your local business'
+            description: 'Promote your local business',
+            user_id: 'user-123',
+            location: 'Local',
+            video_url: null,
+            carousel_images: null,
+            created_at: '2023-05-10',
+            reach: 2500
           },
           {
             id: '3',
@@ -58,9 +70,15 @@ export function AdDashboard() {
             end_date: '2023-05-01',
             impressions: 3600,
             clicks: 120,
-            format: 'featured',
+            format: 'standard',
             image_url: 'https://example.com/ads/service-spotlight.jpg',
-            description: 'Showcase your professional services'
+            description: 'Showcase your professional services',
+            user_id: 'user-123',
+            location: 'Regional',
+            video_url: null,
+            carousel_images: null,
+            created_at: '2023-03-20',
+            reach: 8000
           }
         ];
         

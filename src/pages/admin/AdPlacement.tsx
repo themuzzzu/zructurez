@@ -18,7 +18,11 @@ export default function AdPlacementPage() {
         type: 'banner',
         size: '1200x400',
         cpc_rate: 2.5,
-        cpm_rate: 10
+        cpm_rate: 10,
+        description: 'Top banner on homepage',
+        active: true,
+        max_size_kb: 500,
+        priority: 10
       },
       { 
         id: '2', 
@@ -27,7 +31,11 @@ export default function AdPlacementPage() {
         type: 'sidebar',
         size: '300x600',
         cpc_rate: 1.75,
-        cpm_rate: 8
+        cpm_rate: 8,
+        description: 'Sidebar on services page',
+        active: true,
+        max_size_kb: 300,
+        priority: 5
       },
       { 
         id: '3', 
@@ -36,7 +44,11 @@ export default function AdPlacementPage() {
         type: 'grid',
         size: '400x300',
         cpc_rate: 1.5,
-        cpm_rate: 7
+        cpm_rate: 7,
+        description: 'Grid placement on products page',
+        active: true,
+        max_size_kb: 250,
+        priority: 3
       }
     ];
     

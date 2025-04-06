@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { AdType, AdStatus, Advertisement } from "@/services/adService";
+import { AdType, AdStatus, AdFormat, Advertisement } from "@/services/adService";
 import { useNavigate } from "react-router-dom";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
@@ -23,6 +23,7 @@ const mockAds: Advertisement[] = [
     id: "ad-1",
     title: "Summer Collection",
     type: "product",
+    format: "standard",
     reference_id: "product-123",
     status: "active",
     budget: 500,
@@ -30,11 +31,19 @@ const mockAds: Advertisement[] = [
     end_date: "2023-08-31",
     impressions: 1240,
     clicks: 56,
+    user_id: "user-123",
+    description: "Summer collection products",
+    location: "Global",
+    image_url: null,
+    video_url: null,
+    carousel_images: null,
+    created_at: "2023-05-20"
   },
   {
     id: "ad-2",
     title: "New Store Opening",
     type: "business",
+    format: "standard",
     reference_id: "business-456",
     status: "active",
     budget: 750,
@@ -42,11 +51,19 @@ const mockAds: Advertisement[] = [
     end_date: "2023-07-15",
     impressions: 3600,
     clicks: 120,
+    user_id: "user-456",
+    description: "Grand opening of our new store",
+    location: "Local",
+    image_url: null,
+    video_url: null,
+    carousel_images: null,
+    created_at: "2023-04-30"
   },
   {
     id: "ad-3",
     title: "Home Cleaning Services",
     type: "service",
+    format: "standard",
     reference_id: "service-789",
     status: "paused",
     budget: 300,
@@ -54,11 +71,19 @@ const mockAds: Advertisement[] = [
     end_date: "2023-06-30",
     impressions: 840,
     clicks: 32,
+    user_id: "user-789",
+    description: "Professional home cleaning services",
+    location: "Regional",
+    image_url: null,
+    video_url: null,
+    carousel_images: null,
+    created_at: "2023-03-15"
   },
   {
     id: "ad-4",
     title: "Tech Workshop",
     type: "sponsored",
+    format: "standard",
     reference_id: "https://example.com/workshop",
     status: "completed",
     budget: 200,
@@ -66,6 +91,13 @@ const mockAds: Advertisement[] = [
     end_date: "2023-03-31",
     impressions: 1800,
     clicks: 75,
+    user_id: "user-101",
+    description: "Learn the latest tech skills",
+    location: "Online",
+    image_url: null,
+    video_url: null,
+    carousel_images: null,
+    created_at: "2023-02-15"
   },
 ];
 
@@ -107,7 +139,6 @@ export default function AdDashboard() {
   // Calculate metrics
   const totalImpressions = ads.reduce((sum, ad) => sum + (ad.impressions || 0), 0);
   const totalClicks = ads.reduce((sum, ad) => sum + (ad.clicks || 0), 0);
-  const totalConversions = ads.reduce((sum, ad) => sum + (ad.conversions || 0), 0);
   const averageCTR = totalImpressions > 0 ? (totalClicks / totalImpressions) * 100 : 0;
 
   const handleStatusChange = (id: string, newStatus: AdStatus) => {
@@ -157,10 +188,10 @@ export default function AdDashboard() {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Conversions</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Active Ads</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalConversions.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{ads.filter(ad => ad.status === 'active').length}</div>
           </CardContent>
         </Card>
       </div>
@@ -172,7 +203,7 @@ export default function AdDashboard() {
         </CardHeader>
         <CardContent>
           <div className="flex justify-end mb-4">
-            <DateRangePicker date={dateRange} onChange={setDateRange} />
+            <DateRangePicker date={dateRange} onSelect={setDateRange} />
           </div>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
@@ -205,7 +236,7 @@ export default function AdDashboard() {
             />
             <div className="flex gap-2 ml-auto">
               <Select value={selectedType} onValueChange={(value) => {
-                const newValue = value === "sponsored" ? "sponsored" : value as AdType | "all";
+                const newValue = value as AdType | "all";
                 setSelectedType(newValue);
               }}>
                 <SelectTrigger className="w-32">
@@ -242,7 +273,7 @@ export default function AdDashboard() {
             />
             <div className="flex gap-2 ml-auto">
               <Select value={selectedType} onValueChange={(value) => {
-                const newValue = value === "sponsored" ? "sponsored" : value as AdType | "all";
+                const newValue = value as AdType | "all";
                 setSelectedType(newValue);
               }}>
                 <SelectTrigger className="w-32">

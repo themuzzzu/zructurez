@@ -1,78 +1,80 @@
 
-import React from "react";
-import { useQuery } from "@tanstack/react-query";
-import { getTrendingServicesInArea } from "@/services/serviceService";
-import { Card } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { ServiceCard } from "@/components/service-card/ServiceCard";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ServiceCard } from "@/components/ServiceCard";
-import { formatPrice } from "@/utils/productUtils";
-import { ServiceBannerAd } from "@/components/ads/ServiceBannerAd";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { getTrendingServicesInArea } from "@/services/serviceService";
 
-export const TrendingServicesSection = () => {
-  const navigate = useNavigate();
-  const { data: trendingServices, isLoading, isError } = useQuery({
-    queryKey: ['trending-services'],
-    queryFn: () => getTrendingServicesInArea(""),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
+interface TrendingServicesSectionProps {
+  location?: string;
+  limit?: number;
+}
 
+export const TrendingServicesSection = ({ location, limit = 4 }: TrendingServicesSectionProps) => {
+  const [services, setServices] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  useEffect(() => {
+    const fetchTrendingServices = async () => {
+      try {
+        setIsLoading(true);
+        const trendingServices = await getTrendingServicesInArea(location, limit);
+        setServices(trendingServices);
+      } catch (err) {
+        console.error('Error fetching trending services:', err);
+        setError('Failed to load trending services');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchTrendingServices();
+  }, [location, limit]);
+  
   if (isLoading) {
     return (
-      <div>
-        <h2 className="text-2xl font-semibold mb-4">Trending Services</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {Array(4).fill(null).map((_, i) => (
-            <Card key={i} className="overflow-hidden">
-              <Skeleton className="h-48 w-full" />
-              <div className="p-4">
-                <Skeleton className="h-6 w-3/4 mb-2" />
-                <Skeleton className="h-4 w-1/2" />
-              </div>
-            </Card>
-          ))}
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {Array(limit).fill(0).map((_, index) => (
+          <Card key={index} className="overflow-hidden">
+            <Skeleton className="h-48 w-full" />
+            <div className="p-4 space-y-2">
+              <Skeleton className="h-5 w-3/4" />
+              <Skeleton className="h-4 w-1/2" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          </Card>
+        ))}
       </div>
     );
   }
-
-  if (isError) {
-    console.log("Error fetching trending services");
-    // Fallback to static data in case of an error
+  
+  if (error) {
+    return <div className="text-center text-red-500 py-4">{error}</div>;
   }
-
-  // Use trending services data or fallback to default services
-  const services = trendingServices || [];
-
+  
+  if (!services || services.length === 0) {
+    return <div className="text-center text-muted-foreground py-4">No trending services found</div>;
+  }
+  
   return (
-    <div>
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-semibold">Trending Services</h2>
-        <Button variant="outline" onClick={() => navigate('/search?type=service&sort=trending')}>
-          View All
-        </Button>
-      </div>
-
-      {/* Insert a banner ad */}
-      <div className="mb-6">
-        <ServiceBannerAd maxAds={1} />
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {services.map((service) => (
-          <ServiceCard
-            key={service.id}
-            id={service.id}
-            name={service.title}
-            description={service.description || ""}
-            image_url={service.image_url}
-            price={formatPrice(service.price || 0)}
-            providerName={service.provider_name || "Service Provider"}
-            providerId={service.user_id || ""}
-          />
-        ))}
-      </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {services.map((service) => (
+        <ServiceCard 
+          key={service.id}
+          id={service.id}
+          title={service.title}
+          description={service.description}
+          image_url={service.image_url}
+          price={service.price}
+          providerName={service.provider_name}
+          providerId={service.user_id}
+          category={service.category}
+          location={service.location}
+          rating={service.rating}
+        />
+      ))}
     </div>
   );
 };

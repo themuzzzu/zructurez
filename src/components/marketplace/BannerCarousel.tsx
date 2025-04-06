@@ -1,233 +1,157 @@
 
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { AdType, AdFormat, Advertisement } from "@/services/adService";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
-import { Card } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { ImageFallback } from "@/components/ui/image-fallback";
-
-// Sample banner ad data with fixed image URLs
-const sampleBannerAds: Advertisement[] = [
-  {
-    id: "1",
-    title: "Orient Electric Cooling Days",
-    description: "Sleek. Slim. Stunning. Up to 40% Off. Next-gen BLDC fans. 10% Instant Discount on Credit Card & EMI Transactions.",
-    image_url: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=1200&h=400&q=80",
-    business_id: "orient-electric",
-    type: "product" as AdType,
-    reference_id: "fan-collection",
-    budget: 5000,
-    format: "banner" as AdFormat,
-    status: "active"
-  },
-  {
-    id: "2",
-    title: "Summer Fashion Sale",
-    description: "Upgrade your wardrobe with the latest summer collection. Up to 50% off on all items.",
-    image_url: "https://images.unsplash.com/photo-1556740738-b6a63e27c4df?q=80&w=2070&auto=format&fit=crop&w=1200&h=400",
-    business_id: "fashion-hub",
-    type: "business",
-    reference_id: "summer-collection",
-    budget: 3500,
-    format: "banner",
-    status: "active"
-  },
-  {
-    id: "3",
-    title: "Premium Electronics",
-    description: "Latest gadgets and electronics at unbeatable prices. Free delivery on orders above $100.",
-    image_url: "https://images.unsplash.com/photo-1550009158-9ebf69173e03?q=80&w=1901&auto=format&fit=crop&w=1200&h=400",
-    business_id: "tech-world",
-    type: "product",
-    reference_id: "electronics-sale",
-    budget: 4000,
-    format: "banner",
-    status: "active"
-  }
-];
+import { Link } from "react-router-dom";
+import { Advertisement } from "@/services/adService";
 
 export const BannerCarousel = () => {
-  const navigate = useNavigate();
-  const [progressValue, setProgressValue] = useState(0);
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [api, setApi] = useState<any>(null);
-  const [isHovered, setIsHovered] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [activeIndex, setActiveIndex] = useState(0);
 
-  // Use the sample banner ads instead of fetching from API for now
-  const bannerAds = sampleBannerAds;
-
-  useEffect(() => {
-    // Set loading false after a short delay to ensure component is mounted
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 500);
-    
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Handle slide changes
-  useEffect(() => {
-    if (!bannerAds.length) return;
-    
-    if (api) {
-      api.on("select", () => {
-        setCurrentSlide(api.selectedScrollSnap());
-        setProgressValue(0); // Reset progress when slide changes
-      });
+  // Mock advertisement data - in a real app, this would come from an API
+  const banners: Advertisement[] = [
+    {
+      id: "ad-1",
+      title: "Summer Collection",
+      description: "Discover our new summer collection with items up to 50% off!",
+      image_url: "/placeholders/banner1.jpg",
+      type: "product",
+      format: "banner",
+      reference_id: "collection-summer",
+      status: "active",
+      user_id: "user-1",
+      location: "Global",
+      budget: 1000,
+      clicks: 240,
+      impressions: 10500,
+      start_date: "2023-05-01",
+      end_date: "2023-08-31",
+      created_at: "2023-04-20",
+      video_url: null,
+      carousel_images: null,
+      business_id: "biz-1"
+    },
+    {
+      id: "ad-2",
+      title: "Local Services",
+      description: "Find trusted professionals in your area for any home service needs.",
+      image_url: "/placeholders/banner2.jpg",
+      type: "service",
+      format: "banner",
+      reference_id: "services-home",
+      status: "active",
+      user_id: "user-2",
+      location: "Local",
+      budget: 750,
+      clicks: 185,
+      impressions: 8200,
+      start_date: "2023-06-01",
+      end_date: "2023-09-30",
+      created_at: "2023-05-15",
+      video_url: null,
+      carousel_images: null,
+      business_id: "biz-2"
+    },
+    {
+      id: "ad-3",
+      title: "New Business Opening",
+      description: "Visit our grand opening this weekend and get exclusive first-customer offers!",
+      image_url: "/placeholders/banner3.jpg",
+      type: "business",
+      format: "banner",
+      reference_id: "business-opening",
+      status: "active",
+      user_id: "user-3",
+      location: "Regional",
+      budget: 500,
+      clicks: 120,
+      impressions: 4800,
+      start_date: "2023-06-15",
+      end_date: "2023-07-15",
+      created_at: "2023-06-01",
+      video_url: null,
+      carousel_images: null,
+      business_id: "biz-3"
     }
-  }, [api, bannerAds.length]);
+  ];
 
-  // Auto-scroll implementation with 3-second interval
-  useEffect(() => {
-    if (!bannerAds.length || isHovered || isLoading) return;
-    
-    let animationFrameId: number;
-    let startTime: number;
-    const duration = 3000; // 3 seconds per slide
-    
-    const animate = (timestamp: number) => {
-      if (!startTime) startTime = timestamp;
-      const elapsed = timestamp - startTime;
-      const progress = Math.min(elapsed / duration * 100, 100);
-      setProgressValue(progress);
-      
-      if (elapsed < duration) {
-        animationFrameId = requestAnimationFrame(animate);
-      } else {
-        if (api) {
-          api.scrollNext();
-        } else {
-          setCurrentSlide((prev) => (prev + 1) % bannerAds.length);
-        }
-        startTime = 0; // Reset start time for next slide
-        animationFrameId = requestAnimationFrame(animate);
-      }
-    };
-    
-    animationFrameId = requestAnimationFrame(animate);
-    
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-    };
-  }, [bannerAds.length, currentSlide, api, isHovered, isLoading]);
-
-  // Handle banner click to navigate to appropriate page
-  const handleBannerClick = (ad: Advertisement) => {
-    try {
-      if (ad.type === "product") {
-        navigate(`/product/${ad.reference_id}`);
-      } else if (ad.type === "business") {
-        navigate(`/businesses/${ad.reference_id}`);
-      } else if (ad.type === "service") {
-        navigate(`/services/${ad.reference_id}`);
-      }
-    } catch (error) {
-      console.error("Navigation error:", error);
-    }
+  const goToPrevious = () => {
+    setActiveIndex((curr) => (curr === 0 ? banners.length - 1 : curr - 1));
   };
 
-  // Fallback content if no banner ads are available
-  if (!bannerAds.length) {
-    return (
-      <Card className="w-full overflow-hidden bg-white dark:bg-zinc-950 mb-8">
-        <div className="bg-white dark:bg-zinc-950 aspect-[16/5] sm:aspect-[16/4] flex items-center justify-center">
-          <div className="text-center p-4">
-            <h3 className="text-lg md:text-xl font-bold">Discover Great Deals</h3>
-            <p className="text-sm text-muted-foreground mt-1">Explore our marketplace for special offers</p>
-          </div>
-        </div>
-      </Card>
-    );
-  }
+  const goToNext = () => {
+    setActiveIndex((curr) => (curr === banners.length - 1 ? 0 : curr + 1));
+  };
+
+  if (banners.length === 0) return null;
 
   return (
-    <div 
-      className="w-full relative mb-8 px-2 sm:px-4"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <Carousel
-        className="w-full"
-        setApi={setApi}
-        opts={{
-          align: "start",
-          loop: true,
-        }}
-      >
-        <CarouselContent className="!ml-0">
-          {bannerAds.map((ad) => (
-            <CarouselItem key={ad.id} className="!pl-0 sm:!pl-4 cursor-pointer" onClick={() => handleBannerClick(ad)}>
-              <div className="relative">
-                <div className="relative">
-                  <ImageFallback
-                    src={ad.image_url}
-                    alt={ad.title}
-                    fallbackSrc="https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=1200&h=400&q=80"
-                    className="w-full h-full object-cover aspect-[16/9] rounded-lg"
-                    aspectRatio="wide"
-                    priority={true}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-transparent to-transparent flex items-center p-4 sm:p-6 rounded-lg">
-                    <div className="w-full max-w-xl">
-                      <h2 className="text-xl sm:text-2xl md:text-4xl font-bold text-white mb-2">
-                        {ad.title.includes("Orient Electric") ? (
-                          <>
-                            <div className="text-lg sm:text-2xl md:text-4xl">Sleek. Slim. Stunning.</div>
-                            <div className="text-xl sm:text-3xl md:text-5xl mt-2 text-white">Up to 40% Off</div>
-                            <div className="text-sm sm:text-lg md:text-xl mt-2 font-normal">Next-gen BLDC fans</div>
-                          </>
-                        ) : (
-                          ad.title
-                        )}
-                      </h2>
-                      
-                      <p className="text-xs sm:text-sm text-white/80 mb-2 sm:mb-3 max-w-lg line-clamp-2">
-                        {ad.description}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-        
-        <CarouselPrevious className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 h-8 w-8 sm:h-9 sm:w-9 border border-white/40 bg-black/30 hover:bg-black/50 z-10">
-          <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-        </CarouselPrevious>
-        
-        <CarouselNext className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 h-8 w-8 sm:h-9 sm:w-9 border border-white/40 bg-black/30 hover:bg-black/50 z-10">
-          <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-        </CarouselNext>
-      </Carousel>
+    <div className="relative w-full h-64 overflow-hidden rounded-lg">
+      {banners.map((banner, index) => (
+        <Link
+          key={banner.id}
+          to={`/${banner.type}/${banner.reference_id}`}
+          className={`absolute inset-0 transition-opacity duration-500 ${
+            index === activeIndex ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
+        >
+          <div 
+            className="w-full h-full bg-cover bg-center flex items-center"
+            style={{ 
+              backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${banner.image_url || "/placeholders/banner-fallback.jpg"})` 
+            }}
+          >
+            <div className="container mx-auto px-4 text-white">
+              <h2 className="text-2xl sm:text-3xl font-bold mb-2">
+                {banner.title}
+              </h2>
+              <p className="text-sm sm:text-base mb-4">
+                {banner.description}
+              </p>
+              <Button className="bg-white text-black hover:bg-gray-100">
+                Learn More
+              </Button>
+            </div>
+          </div>
+          <div className="absolute top-2 right-2 bg-primary/80 text-white text-xs px-2 py-1 rounded">
+            Sponsored
+          </div>
+        </Link>
+      ))}
       
-      {/* Progress bar to indicate time until next slide */}
-      <div className="absolute bottom-0 left-0 right-0 z-10">
-        <Progress value={progressValue} className="h-1 rounded-none bg-gray-200/50" indicatorClassName="bg-primary" />
-      </div>
-      
-      {/* Pagination dots for the carousel */}
-      {bannerAds.length > 1 && (
-        <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-10">
-          {bannerAds.map((_, index) => (
-            <div 
-              key={index} 
-              className={`h-2 w-2 rounded-full transition-all cursor-pointer ${
-                index === currentSlide ? 'bg-white scale-100' : 'bg-white/50 scale-75'
-              }`}
-              onClick={() => api?.scrollTo(index)}
-            />
-          ))}
-        </div>
+      {banners.length > 1 && (
+        <>
+          <Button
+            variant="secondary"
+            size="icon"
+            className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full h-8 w-8"
+            onClick={goToPrevious}
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </Button>
+          
+          <Button
+            variant="secondary"
+            size="icon"
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full h-8 w-8"
+            onClick={goToNext}
+          >
+            <ChevronRight className="h-5 w-5" />
+          </Button>
+          
+          <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex gap-1">
+            {banners.map((_, index) => (
+              <button
+                key={index}
+                className={`h-2 rounded-full transition-all ${
+                  index === activeIndex ? "w-4 bg-primary" : "w-2 bg-white/60"
+                }`}
+                onClick={() => setActiveIndex(index)}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
+        </>
       )}
     </div>
   );

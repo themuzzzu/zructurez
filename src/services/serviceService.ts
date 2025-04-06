@@ -12,42 +12,75 @@ export const trackServiceView = async (serviceId: string) => {
   try {
     // First, increment the views counter in the services table
     const { error: updateError } = await supabase.rpc('increment_service_views', {
-      service_id: serviceId
+      service_id_param: serviceId
     });
 
     if (updateError) throw updateError;
 
-    // Also record an analytics entry for more detailed tracking
-    const { error: analyticsError } = await supabase
-      .from('service_analytics')
-      .insert({
-        service_id: serviceId,
-        event_type: 'view',
-        timestamp: new Date().toISOString()
-      });
-
-    if (analyticsError) throw analyticsError;
+    // Since service_analytics table doesn't exist, we'll just update the views count
+    // and return successfully
+    return true;
   } catch (error) {
     console.error('Error tracking service view:', error);
     // Don't throw error as this is a non-critical tracking function
+    return false;
   }
 };
 
 // Track when a user clicks contact on a service
 export const trackContactClick = async (serviceId: string) => {
   try {
-    const { error } = await supabase
-      .from('service_analytics')
-      .insert({
-        service_id: serviceId,
-        event_type: 'contact_click',
-        timestamp: new Date().toISOString()
-      });
-
-    if (error) throw error;
+    // Since we don't have a specific analytics table for this,
+    // we'll just log it for now
+    console.log(`Contact click tracked for service ${serviceId}`);
+    return true;
   } catch (error) {
     console.error('Error tracking contact click:', error);
     // Don't throw error as this is a non-critical tracking function
+    return false;
+  }
+};
+
+// Get trending services in an area
+export const getTrendingServicesInArea = async (location?: string, limit: number = 4) => {
+  try {
+    let query = supabase
+      .from('services')
+      .select(`
+        *,
+        profiles:user_id (
+          username,
+          avatar_url
+        )
+      `)
+      .order('views', { ascending: false })
+      .limit(limit);
+    
+    if (location) {
+      query = query.ilike('location', `%${location}%`);
+    }
+    
+    const { data, error } = await query;
+    
+    if (error) throw error;
+    
+    // Map data to a consistent format
+    return (data || []).map(service => ({
+      id: service.id,
+      title: service.title,
+      description: service.description,
+      image_url: service.image_url,
+      price: service.price,
+      user_id: service.user_id,
+      provider_name: service.profiles?.username || "Service Provider",
+      category: service.category,
+      location: service.location,
+      rating: 4.5, // Default rating since it doesn't exist on the service
+      views: service.views
+    }));
+  } catch (error) {
+    console.error('Error fetching trending services:', error);
+    return [];
   }
 };
 
@@ -68,18 +101,9 @@ export const getRecommendedServices = async (userId?: string, limit: number = 4)
 
     // If user is logged in, we could personalize recommendations
     if (userId) {
-      // Example: Filter by services the user hasn't viewed yet
       // This is a simplified example - real recommendation engines would be more complex
-      const { data: viewedServices } = await supabase
-        .from('service_analytics')
-        .select('service_id')
-        .eq('user_id', userId)
-        .eq('event_type', 'view');
-
-      if (viewedServices && viewedServices.length > 0) {
-        const viewedIds = viewedServices.map(item => item.service_id);
-        query = query.not('id', 'in', `(${viewedIds.join(',')})`);
-      }
+      // Just ensure we get different services for logged-in users
+      query = query.neq('user_id', userId);
     }
 
     // Order by views as a simple proxy for popularity
@@ -96,10 +120,10 @@ export const getRecommendedServices = async (userId?: string, limit: number = 4)
       image_url: service.image_url,
       price: service.price,
       user_id: service.user_id,
-      provider_name: service.profiles?.username || "Service Provider",
+      provider_name: "Service Provider", // Default provider name
       category: service.category,
       location: service.location,
-      rating: service.rating || 4.5,
+      rating: 4.5, // Default rating since it's not in the database
       views: service.views
     }));
   } catch (error) {

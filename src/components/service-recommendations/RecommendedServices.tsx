@@ -82,7 +82,7 @@ export const RecommendedServices = ({ userId, limit = 4, userLocation }: Recomme
           description={service.description || ""}
           image_url={service.image_url}
           price={service.price || 0}
-          providerName={service.provider_name}
+          providerName={service.provider_name || "Service Provider"}
           providerId={service.user_id}
           category={service.category}
           location={service.location}
