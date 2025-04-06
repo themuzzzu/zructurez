@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
 import { AutocompleteSearch } from "@/components/marketplace/AutocompleteSearch";
@@ -13,6 +13,21 @@ import { PersonalizedRecommendations } from "@/components/marketplace/Personaliz
 import { TopProducts } from "@/components/recommendations/TopProducts";
 import { ProductRankings } from "@/components/rankings/ProductRankings";
 import { BrowseTabContent } from "@/components/marketplace/BrowseTabContent";
+import { SkeletonCard } from "@/components/loaders/SkeletonCard";
+import { useLoading } from "@/providers/LoadingProvider";
+import { ProgressLoader } from "@/components/loaders/ProgressLoader";
+
+const LazySection = ({ children, fallbackCount = 4 }) => (
+  <Suspense fallback={
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      {Array.from({ length: fallbackCount }).map((_, i) => (
+        <SkeletonCard key={i} />
+      ))}
+    </div>
+  }>
+    {children}
+  </Suspense>
+);
 
 export const OptimizedMarketplace = () => {
   const navigate = useNavigate();
@@ -37,6 +52,15 @@ export const OptimizedMarketplace = () => {
   const [sortOption, setSortOption] = useState("newest");
   const [priceRange, setPriceRange] = useState("all");
   const [gridLayout, setGridLayout] = useState<GridLayoutType>("grid4x4");
+  
+  const { setLoading } = useLoading();
+  
+  // Show loading indicator when page loads
+  useEffect(() => {
+    setLoading(true);
+    const timeout = setTimeout(() => setLoading(false), 800);
+    return () => clearTimeout(timeout);
+  }, [setLoading]);
   
   // Update state when URL parameters change
   useEffect(() => {
@@ -99,6 +123,8 @@ export const OptimizedMarketplace = () => {
   
   return (
     <div className="container max-w-[1400px] mx-auto px-3 sm:px-4 py-4 sm:py-6">
+      <ProgressLoader className="mb-4" />
+      
       {/* Single Search Bar at the top with improved design */}
       <div className="mb-4 sm:mb-6">
         <AutocompleteSearch 
@@ -111,14 +137,18 @@ export const OptimizedMarketplace = () => {
       </div>
       
       {/* Banner carousel below search */}
-      <div className="mb-4 sm:mb-6">
-        <BannerCarousel />
-      </div>
+      <LazySection fallbackCount={1}>
+        <div className="mb-4 sm:mb-6">
+          <BannerCarousel />
+        </div>
+      </LazySection>
       
       {/* Sponsored Products Section */}
-      <div className="mb-4 sm:mb-8">
-        <SponsoredProducts gridLayout={gridLayout} />
-      </div>
+      <LazySection>
+        <div className="mb-4 sm:mb-8">
+          <SponsoredProducts gridLayout={gridLayout} />
+        </div>
+      </LazySection>
       
       {/* New Shop by Category section */}
       <div className="mb-4 sm:mb-6">
@@ -126,42 +156,56 @@ export const OptimizedMarketplace = () => {
       </div>
       
       {/* Trending Products */}
-      <div className="mb-4 sm:mb-8">
-        <TrendingProducts gridLayout={gridLayout} />
-      </div>
+      <LazySection>
+        <div className="mb-4 sm:mb-8">
+          <TrendingProducts gridLayout={gridLayout} />
+        </div>
+      </LazySection>
       
       {/* Product Rankings - Added new section */}
-      <div className="mb-4 sm:mb-8">
-        <ProductRankings />
-      </div>
+      <LazySection>
+        <div className="mb-4 sm:mb-8">
+          <ProductRankings />
+        </div>
+      </LazySection>
       
       {/* Top Products - renamed from SponsoredRecommendations */}
-      <div className="mb-4 sm:mb-8">
-        <TopProducts title="Top Products" showTitle={true} />
-      </div>
+      <LazySection>
+        <div className="mb-4 sm:mb-8">
+          <TopProducts title="Top Products" showTitle={true} />
+        </div>
+      </LazySection>
       
       {/* Personalized Recommendations */}
-      <div className="mb-4 sm:mb-8">
-        <PersonalizedRecommendations />
-      </div>
+      <LazySection>
+        <div className="mb-4 sm:mb-8">
+          <PersonalizedRecommendations />
+        </div>
+      </LazySection>
       
       {/* Recommended Products */}
-      <div className="mb-4 sm:mb-8">
-        <RecommendedProducts gridLayout={gridLayout} />
-      </div>
+      <LazySection>
+        <div className="mb-4 sm:mb-8">
+          <RecommendedProducts gridLayout={gridLayout} />
+        </div>
+      </LazySection>
       
       {/* Crazy Deals Section */}
-      <div className="mb-4 sm:mb-8">
-        <CrazyDeals />
-      </div>
+      <LazySection>
+        <div className="mb-4 sm:mb-8">
+          <CrazyDeals />
+        </div>
+      </LazySection>
       
       {/* Main content - Browse All */}
-      <div className="mt-4 sm:mt-8">
-        <BrowseTabContent 
-          searchTerm={searchQuery}
-          onCategorySelect={handleCategoryChange}
-        />
-      </div>
+      <LazySection>
+        <div className="mt-4 sm:mt-8">
+          <BrowseTabContent 
+            searchTerm={searchQuery}
+            onCategorySelect={handleCategoryChange}
+          />
+        </div>
+      </LazySection>
     </div>
   );
 };
