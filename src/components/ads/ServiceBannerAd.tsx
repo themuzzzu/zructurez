@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Advertisement, incrementAdClick, incrementAdView } from "@/services/adService";
+import { Advertisement, incrementAdClick, incrementAdView, AdType } from "@/services/adService";
 import { useQuery } from "@tanstack/react-query";
 import { fetchActiveAds } from "@/services/adService";
 import { BannerAd } from "@/components/ads/BannerAd";
@@ -37,7 +37,7 @@ export function ServiceBannerAd({ maxAds = 1 }: { maxAds?: number }) {
       id: `fallback-service-${index}`,
       title: "Promote Your Service Business",
       description: "Reach thousands of potential customers in your area",
-      type: "service",
+      type: "service" as AdType,
       reference_id: "",
       budget: 0,
       status: "active",
