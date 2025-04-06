@@ -25,11 +25,6 @@ export const BusinessLikeButton = ({
   const { isLiked, likesCount, toggleLike, isLoading } = useBusinessLikes(businessId);
   const [animating, setAnimating] = useState(false);
 
-  // Debug logging
-  useEffect(() => {
-    console.log(`BusinessLikeButton [${businessId}] - liked: ${isLiked}, count: ${likesCount}`);
-  }, [businessId, isLiked, likesCount]);
-
   const handleLikeClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();

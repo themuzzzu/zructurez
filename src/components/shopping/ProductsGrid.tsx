@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, ImageOff } from "lucide-react";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
 import { useEffect } from "react";
+import { LikeProvider } from "@/components/products/LikeContext";
 
 interface ProductsGridProps {
   products: any[] | null;
@@ -33,7 +34,7 @@ export const ProductsGrid = ({
   const getGridClasses = () => {
     switch (layout) {
       case "grid4x4":
-        return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-3 md:gap-4";
+        return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4";
       case "grid2x2":
         return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-3 sm:gap-4";
       case "list":
@@ -86,14 +87,16 @@ export const ProductsGrid = ({
   }
   
   return (
-    <div className={getGridClasses()}>
-      {products.map((product) => (
-        <ProductCard 
-          key={product.id} 
-          product={product} 
-          layout={layout}
-        />
-      ))}
-    </div>
+    <LikeProvider>
+      <div className={getGridClasses()}>
+        {products.map((product) => (
+          <ProductCard 
+            key={product.id} 
+            product={product} 
+            layout={layout}
+          />
+        ))}
+      </div>
+    </LikeProvider>
   );
 };

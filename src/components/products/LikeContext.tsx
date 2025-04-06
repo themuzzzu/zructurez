@@ -170,7 +170,6 @@ export const LikeProvider = ({ children }: { children: ReactNode }) => {
       queryClient.invalidateQueries({ queryKey: ['wishlist-products'] });
       
     } catch (error) {
-      // Error already handled with optimistic updates
       console.error("Error toggling product like:", error);
       throw error;
     } finally {

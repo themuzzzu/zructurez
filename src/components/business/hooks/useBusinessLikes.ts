@@ -22,7 +22,6 @@ export const useBusinessLikes = (businessId: string) => {
         .eq('user_id', user.id)
         .maybeSingle();
 
-      console.log(`Business ${businessId} liked status:`, !!data);
       return !!data;
     }
   });
@@ -60,8 +59,6 @@ export const useBusinessLikes = (businessId: string) => {
       setOptimisticLiked(!currentLiked);
       setOptimisticCount(currentLiked ? Math.max(0, currentCount - 1) : currentCount + 1);
 
-      console.log(`[Business Like] Toggling like for ${businessId} from ${currentLiked} to ${!currentLiked}`);
-
       try {
         if (currentLiked) {
           const { error } = await supabase
@@ -71,7 +68,6 @@ export const useBusinessLikes = (businessId: string) => {
             .eq('user_id', user.id);
 
           if (error) {
-            console.error("Error unlinking business:", error);
             throw error;
           }
         } else {
@@ -82,7 +78,6 @@ export const useBusinessLikes = (businessId: string) => {
             ]);
 
           if (error) {
-            console.error("Error liking business:", error);
             throw error;
           }
         }
@@ -122,11 +117,6 @@ export const useBusinessLikes = (businessId: string) => {
   const isLoading = isLikeLoading || isCountLoading || isTogglePending;
   const finalIsLiked = optimisticLiked !== null ? optimisticLiked : !!isLiked;
   const finalLikesCount = optimisticCount !== null ? optimisticCount : likesCount;
-
-  // Debug logging
-  useEffect(() => {
-    console.log(`[Business ${businessId}] Like status: ${finalIsLiked}, Count: ${finalLikesCount}`);
-  }, [businessId, finalIsLiked, finalLikesCount]);
 
   return {
     isLiked: finalIsLiked,

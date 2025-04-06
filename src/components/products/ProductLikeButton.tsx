@@ -21,19 +21,13 @@ export const ProductLikeButton = ({
   variant = "ghost",
   className = ""
 }: ProductLikeButtonProps) => {
-  const { isLiked, toggleLike, isLoading: contextLoading, likedProducts } = useLike();
+  const { isLiked, toggleLike, isLoading: contextLoading } = useLike();
   const [isProcessing, setIsProcessing] = useState(false);
   const [animating, setAnimating] = useState(false);
   
   // Get the actual liked status
   const liked = isLiked(productId);
   const isLoading = contextLoading || isProcessing;
-
-  // Debug logs
-  useEffect(() => {
-    console.log(`ProductLikeButton [${productId}] - liked status:`, liked);
-    console.log("All liked products:", likedProducts);
-  }, [productId, liked, likedProducts]);
 
   const handleClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -46,10 +40,11 @@ export const ProductLikeButton = ({
       
       // Check current status before toggle
       const willBeLiked = !liked;
-      console.log(`Will ${willBeLiked ? 'like' : 'unlike'} product ${productId}`);
       
       if (willBeLiked) {
         setAnimating(true);
+        // Reset animation after it completes
+        setTimeout(() => setAnimating(false), 1000);
       }
       
       // Perform the actual API call
@@ -69,11 +64,6 @@ export const ProductLikeButton = ({
       }
     } finally {
       setIsProcessing(false);
-      
-      // Reset animation state after animation completes
-      setTimeout(() => {
-        setAnimating(false);
-      }, 1000);
     }
   };
 

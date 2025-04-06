@@ -1,7 +1,6 @@
 
-import { LayoutGrid, Grid2X2, Grip, List, Square } from "lucide-react";
+import { LayoutGrid, Grid2X2, Grip, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
 import { useEffect } from "react";
 
@@ -19,6 +18,9 @@ export const GridLayoutSelector = ({ layout, onChange }: GridLayoutSelectorProps
   const handleLayoutChange = (newLayout: GridLayoutType) => {
     console.log("Changing layout to:", newLayout);
     onChange(newLayout);
+    
+    // Save layout preference to localStorage
+    localStorage.setItem("preferredGridLayout", newLayout);
   };
 
   return (
