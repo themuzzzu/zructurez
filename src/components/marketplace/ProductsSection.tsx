@@ -1,3 +1,4 @@
+
 import React, { useMemo } from "react";
 import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
 import { supabase } from "@/integrations/supabase/client";
@@ -33,9 +34,9 @@ export const ProductsSection = ({
     [category, sortBy, limit]
   );
 
-  const { data: products, isLoading } = useOptimizedQuery({
+  const { data: products, isLoading } = useOptimizedQuery(
     queryKey,
-    queryFn: async () => {
+    async () => {
       try {
         let query = supabase
           .from("products")
@@ -58,9 +59,11 @@ export const ProductsSection = ({
         return [];
       }
     },
-    staleTime: 15 * 60 * 1000,
-    cacheTime: 30 * 60 * 1000,
-  });
+    {
+      staleTime: 15 * 60 * 1000,
+      cacheTime: 30 * 60 * 1000,
+    }
+  );
 
   if (!visibleOnMobile && typeof window !== "undefined" && window.innerWidth < 640) {
     return null;
@@ -107,7 +110,7 @@ export const ProductsSection = ({
           transition={{ duration: 0.4 }}
         >
           <ProductGrid 
-            products={products} 
+            products={products || []} 
             layout={layout} 
             onLayoutChange={setLayout}
           />

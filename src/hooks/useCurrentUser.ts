@@ -1,5 +1,5 @@
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient, QueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Profile } from "@/types/profile";
@@ -50,7 +50,7 @@ export const useCurrentUser = () => {
   });
 };
 
-// Helper function to prefetch user data (can be used after login)
+// Helper function to prefetch user profile (can be used after login)
 export const prefetchUserProfile = async (userId: string) => {
   if (!userId) return;
   

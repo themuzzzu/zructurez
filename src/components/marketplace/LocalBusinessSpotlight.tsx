@@ -36,7 +36,7 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
     [businessType]
   );
   
-  // Define a type-safe fetch function
+  // Define a type-safe fetch function with explicit return type
   const fetchBusinesses = async (): Promise<BusinessType[]> => {
     try {
       let query = supabase
@@ -58,7 +58,7 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
       
       if (!data) return [];
 
-      // Fixed: Create well-defined BusinessType objects without complex type inference
+      // Create typed business objects from raw data
       const businesses: BusinessType[] = [];
       
       for (const item of data) {
@@ -84,7 +84,7 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
   };
 
   // Use optimized query with longer cache time
-  const { data: businesses, isLoading } = useOptimizedQuery<BusinessType[]>(
+  const { data: businesses, isLoading } = useOptimizedQuery(
     queryKey,
     fetchBusinesses,
     { 
