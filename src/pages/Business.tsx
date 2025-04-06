@@ -28,14 +28,15 @@ import { SponsoredProducts } from "@/components/marketplace/SponsoredProducts";
 import { CategorySubcategoryGrid } from "@/components/marketplace/CategorySubcategoryGrid";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
-import type { Business } from "@/types/business";
+import type { Business, BusinessOwner, BusinessHours } from "@/types/business";
 import { BusinessBannerAd } from "@/components/ads/BusinessBannerAd";
 import { BusinessCategoryScroller } from "@/components/business/BusinessCategoryScroller";
 
-interface BusinessWithRating extends Business {
+interface BusinessWithRating extends Omit<Business, 'owners'> {
   average_rating: number;
   reviews_count: number;
   business_ratings: Array<{ rating: number }>;
+  owners?: BusinessOwner[];
 }
 
 const Business = () => {
@@ -82,8 +83,19 @@ const Business = () => {
       const totalRating = ratings.reduce((sum: number, rating: any) => sum + (rating.rating || 0), 0);
       const averageRating = ratings.length > 0 ? totalRating / ratings.length : 0;
       
+      // Convert owners from JSON to proper BusinessOwner[] type
+      let typedOwners: BusinessOwner[] = [];
+      try {
+        if (business.owners && Array.isArray(business.owners)) {
+          typedOwners = business.owners as BusinessOwner[];
+        }
+      } catch (e) {
+        console.error("Error parsing owners:", e);
+      }
+      
       return {
         ...business,
+        owners: typedOwners,
         average_rating: averageRating,
         reviews_count: ratings.length,
         business_ratings: ratings
@@ -150,9 +162,33 @@ const Business = () => {
     }
   };
 
-  const formatHours = (hours: string | undefined): string => {
+  // Convert any type of hours format to string for display
+  const formatHours = (hours: string | BusinessHours | undefined): string => {
     if (!hours) return '';
-    return hours;
+    
+    // If hours is already a string, return it
+    if (typeof hours === 'string') return hours;
+    
+    // If it's an object, try to format it to string
+    try {
+      if (typeof hours === 'object') {
+        return Object.entries(hours)
+          .map(([day, time]) => {
+            if (typeof time === 'object' && time !== null && 'open' in time && 'close' in time) {
+              return `${day}: ${time.open} - ${time.close}`;
+            } else if (typeof time === 'string') {
+              return `${day}: ${time}`;
+            }
+            return `${day}: Closed`;
+          })
+          .join(', ');
+      }
+    } catch (e) {
+      console.error("Error formatting hours:", e);
+    }
+    
+    // Return empty string if we couldn't format it
+    return '';
   };
 
   const handleSubcategorySelect = (category: string, subcategory?: string) => {
