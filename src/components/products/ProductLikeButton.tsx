@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
 import { useLike } from "./LikeContext";
@@ -21,14 +21,19 @@ export const ProductLikeButton = ({
   variant = "ghost",
   className = ""
 }: ProductLikeButtonProps) => {
-  const { isLiked, toggleLike, isLoading: contextLoading } = useLike();
+  const { isLiked, toggleLike, isLoading: contextLoading, likedProducts } = useLike();
   const [isProcessing, setIsProcessing] = useState(false);
   const [animating, setAnimating] = useState(false);
-  const [optimisticLiked, setOptimisticLiked] = useState<boolean | null>(null);
   
-  // Get the actual liked status, with optimistic UI update
-  const liked = optimisticLiked !== null ? optimisticLiked : isLiked(productId);
+  // Get the actual liked status
+  const liked = isLiked(productId);
   const isLoading = contextLoading || isProcessing;
+
+  // Debug logs
+  useEffect(() => {
+    console.log(`ProductLikeButton [${productId}] - liked status:`, liked);
+    console.log("All liked products:", likedProducts);
+  }, [productId, liked, likedProducts]);
 
   const handleClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -39,11 +44,11 @@ export const ProductLikeButton = ({
     try {
       setIsProcessing(true);
       
-      // Optimistic update
-      const newLikedState = !liked;
-      setOptimisticLiked(newLikedState);
+      // Check current status before toggle
+      const willBeLiked = !liked;
+      console.log(`Will ${willBeLiked ? 'like' : 'unlike'} product ${productId}`);
       
-      if (newLikedState) {
+      if (willBeLiked) {
         setAnimating(true);
       }
       
@@ -51,15 +56,14 @@ export const ProductLikeButton = ({
       await toggleLike(productId);
       
       // Show toast message based on like state
-      if (newLikedState) {
+      if (willBeLiked) {
         toast.success("Added to wishlist");
       } else {
         toast.success("Removed from wishlist");
       }
     } catch (error: any) {
-      // Revert on error (only if not an auth error which is handled in LikeContext)
+      // Error is handled in the context
       if (error.message !== "Authentication required") {
-        setOptimisticLiked(null);
         toast.error("Something went wrong");
         console.error("Error toggling product like:", error);
       }
@@ -69,7 +73,6 @@ export const ProductLikeButton = ({
       // Reset animation state after animation completes
       setTimeout(() => {
         setAnimating(false);
-        setOptimisticLiked(null); // Reset to use the actual state
       }, 1000);
     }
   };

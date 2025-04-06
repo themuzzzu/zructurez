@@ -19,14 +19,17 @@ export default function SearchResultsPage() {
   const query = searchParams.get("q") || "";
   const navigate = useNavigate();
   
-  const [gridLayout, setGridLayout] = useState<GridLayoutType>("grid4x4");
+  // Get grid layout from URL or default to grid4x4
+  const initialLayout = (searchParams.get("layout") || "grid4x4") as GridLayoutType;
+  const [gridLayout, setGridLayout] = useState<GridLayoutType>(initialLayout);
+  
   const [showFilters, setShowFilters] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [showDiscounted, setShowDiscounted] = useState(false);
-  const [showUsed, setShowUsed] = useState(false);
-  const [showBranded, setShowBranded] = useState(false);
-  const [sortOption, setSortOption] = useState("newest");
-  const [priceRange, setPriceRange] = useState("all");
+  const [selectedCategory, setSelectedCategory] = useState(searchParams.get("category") || "");
+  const [showDiscounted, setShowDiscounted] = useState(searchParams.get("discounted") === "true");
+  const [showUsed, setShowUsed] = useState(searchParams.get("used") === "true");
+  const [showBranded, setShowBranded] = useState(searchParams.get("branded") === "true");
+  const [sortOption, setSortOption] = useState(searchParams.get("sort") || "newest");
+  const [priceRange, setPriceRange] = useState(searchParams.get("price") || "all");
   
   // Set up search using the hook
   const { 
@@ -39,12 +42,64 @@ export default function SearchResultsPage() {
     suggestionsEnabled: false
   });
 
-  // Search when query changes
+  // Search when query or filters change
   useEffect(() => {
     if (query) {
       search(query);
     }
   }, [query, search]);
+
+  // Update URL when filters or layout change
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams);
+    
+    // Update layout in URL
+    if (gridLayout) {
+      params.set("layout", gridLayout);
+    }
+    
+    // Update filters in URL
+    if (selectedCategory) {
+      params.set("category", selectedCategory);
+    } else {
+      params.delete("category");
+    }
+    
+    if (showDiscounted) {
+      params.set("discounted", "true");
+    } else {
+      params.delete("discounted");
+    }
+    
+    if (showUsed) {
+      params.set("used", "true");
+    } else {
+      params.delete("used");
+    }
+    
+    if (showBranded) {
+      params.set("branded", "true");
+    } else {
+      params.delete("branded");
+    }
+    
+    if (sortOption && sortOption !== "newest") {
+      params.set("sort", sortOption);
+    } else {
+      params.delete("sort");
+    }
+    
+    if (priceRange && priceRange !== "all") {
+      params.set("price", priceRange);
+    } else {
+      params.delete("price");
+    }
+    
+    // Only update if parameters actually changed
+    if (searchParams.toString() !== params.toString()) {
+      setSearchParams(params);
+    }
+  }, [gridLayout, selectedCategory, showDiscounted, showUsed, showBranded, sortOption, priceRange, searchParams, setSearchParams]);
 
   const handleSearch = (newQuery: string) => {
     if (newQuery.trim()) {
@@ -52,6 +107,11 @@ export default function SearchResultsPage() {
       params.set("q", newQuery);
       setSearchParams(params);
     }
+  };
+
+  const handleGridLayoutChange = (layout: GridLayoutType) => {
+    setGridLayout(layout);
+    console.log("Grid layout changed to:", layout);
   };
 
   const resetFilters = () => {
@@ -87,7 +147,7 @@ export default function SearchResultsPage() {
             <div className="flex items-center gap-2">
               <GridLayoutSelector
                 layout={gridLayout}
-                onChange={setGridLayout}
+                onChange={handleGridLayoutChange}
               />
               
               <Sheet open={showFilters} onOpenChange={setShowFilters}>

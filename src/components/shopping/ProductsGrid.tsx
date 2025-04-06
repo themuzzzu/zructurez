@@ -5,20 +5,30 @@ import { ProductCard } from "@/components/products/ProductCard";
 import { Button } from "@/components/ui/button";
 import { Plus, ImageOff } from "lucide-react";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
+import { useEffect } from "react";
 
 interface ProductsGridProps {
   products: any[] | null;
   isLoading: boolean;
-  onOpenAddProductDialog: () => void;
+  onOpenAddProductDialog?: () => void;
   layout?: GridLayoutType;
+  onLayoutChange?: (layout: GridLayoutType) => void;
+  searchQuery?: string;
 }
 
 export const ProductsGrid = ({ 
   products, 
   isLoading, 
   onOpenAddProductDialog,
-  layout = "grid4x4" 
+  layout = "grid4x4",
+  onLayoutChange,
+  searchQuery = ""
 }: ProductsGridProps) => {
+  // Log when layout changes
+  useEffect(() => {
+    console.log("ProductsGrid using layout:", layout);
+  }, [layout]);
+  
   // Generate responsive grid classes based on layout
   const getGridClasses = () => {
     switch (layout) {
@@ -32,6 +42,8 @@ export const ProductsGrid = ({
         return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4";
       case "single":
         return "grid grid-cols-1 gap-4 max-w-3xl mx-auto";
+      case "grid1x1":
+        return "grid grid-cols-1 gap-4";
       default:
         return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4";
     }
@@ -58,10 +70,17 @@ export const ProductsGrid = ({
       <div className="flex flex-col items-center justify-center py-10 text-center">
         <ImageOff className="h-16 w-16 text-muted-foreground mb-4" />
         <h3 className="text-lg font-medium">No products found</h3>
-        <p className="text-muted-foreground mt-1 mb-6">There are no products matching your criteria</p>
-        <Button onClick={onOpenAddProductDialog} className="gap-2">
-          <Plus className="h-4 w-4" /> Add Product
-        </Button>
+        <p className="text-muted-foreground mt-1 mb-6">
+          {searchQuery 
+            ? `No products matching "${searchQuery}"` 
+            : "There are no products matching your criteria"
+          }
+        </p>
+        {onOpenAddProductDialog && (
+          <Button onClick={onOpenAddProductDialog} className="gap-2">
+            <Plus className="h-4 w-4" /> Add Product
+          </Button>
+        )}
       </div>
     );
   }

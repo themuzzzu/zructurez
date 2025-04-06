@@ -8,6 +8,7 @@ interface LikeContextType {
   isLiked: (productId: string) => boolean;
   toggleLike: (productId: string) => Promise<void>;
   isLoading: boolean;
+  likedProducts: Record<string, boolean>;
 }
 
 const LikeContext = createContext<LikeContextType | undefined>(undefined);
@@ -86,6 +87,7 @@ export const LikeProvider = ({ children }: { children: ReactNode }) => {
         likedItems[item.product_id] = true;
       });
       
+      console.log("Fetched liked products:", likedItems);
       setLikedProducts(likedItems);
     } catch (error) {
       console.error("Error in fetchWishlistItems:", error);
@@ -141,7 +143,11 @@ export const LikeProvider = ({ children }: { children: ReactNode }) => {
           .eq('user_id', user.id)
           .eq('product_id', productId);
           
-        if (error) throw error;
+        if (error) {
+          // Revert on error
+          setLikedProducts(prev => ({ ...prev, [productId]: true }));
+          throw error;
+        }
         
       } else {
         // Add to wishlist
@@ -152,7 +158,11 @@ export const LikeProvider = ({ children }: { children: ReactNode }) => {
             product_id: productId
           });
           
-        if (error) throw error;
+        if (error) {
+          // Revert on error
+          setLikedProducts(prev => ({ ...prev, [productId]: false }));
+          throw error;
+        }
       }
       
       // Invalidate related queries
@@ -160,12 +170,7 @@ export const LikeProvider = ({ children }: { children: ReactNode }) => {
       queryClient.invalidateQueries({ queryKey: ['wishlist-products'] });
       
     } catch (error) {
-      // Revert optimistic update
-      setLikedProducts(prev => ({ 
-        ...prev,
-        [productId]: isLiked(productId)
-      }));
-      
+      // Error already handled with optimistic updates
       console.error("Error toggling product like:", error);
       throw error;
     } finally {
@@ -174,7 +179,7 @@ export const LikeProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <LikeContext.Provider value={{ isLiked, toggleLike, isLoading }}>
+    <LikeContext.Provider value={{ isLiked, toggleLike, isLoading, likedProducts }}>
       {children}
     </LikeContext.Provider>
   );

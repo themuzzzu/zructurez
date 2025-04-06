@@ -41,7 +41,7 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
       <div className="flex pt-16 w-full">
         {!hideSidebar && !isMobile && (
           <div 
-            style={{ width: sidebarWidth + 'px', left: '0px' }} 
+            style={{ width: sidebarWidth + 'px' }} 
             className="transition-all duration-300 fixed h-[calc(100vh-64px)] overflow-y-auto scrollbar-hide"
           >
             <Sidebar />
@@ -53,7 +53,7 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
             marginLeft: hideSidebar || isMobile ? 0 : sidebarWidth + 'px', 
             paddingBottom: isMobile ? '5rem' : '', 
             maxHeight: 'calc(100vh - 64px)',
-            padding: isMobile ? '' : (hideSidebar ? '0 24px' : '0 24px'), 
+            padding: isMobile ? '' : '0 24px', 
           }}
         >
           {children}

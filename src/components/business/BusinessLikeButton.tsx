@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Heart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -12,16 +12,23 @@ interface BusinessLikeButtonProps {
   size?: "sm" | "default" | "lg";
   variant?: "ghost" | "outline" | "default";
   className?: string;
+  showCount?: boolean;
 }
 
 export const BusinessLikeButton = ({
   businessId,
   size = "default",
   variant = "ghost",
-  className
+  className,
+  showCount = true
 }: BusinessLikeButtonProps) => {
   const { isLiked, likesCount, toggleLike, isLoading } = useBusinessLikes(businessId);
   const [animating, setAnimating] = useState(false);
+
+  // Debug logging
+  useEffect(() => {
+    console.log(`BusinessLikeButton [${businessId}] - liked: ${isLiked}, count: ${likesCount}`);
+  }, [businessId, isLiked, likesCount]);
 
   const handleLikeClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -29,6 +36,7 @@ export const BusinessLikeButton = ({
     
     if (isLoading) return;
     
+    // Will like if currently not liked
     if (!isLiked) {
       setAnimating(true);
       // Reset animation state after animation completes
@@ -51,7 +59,7 @@ export const BusinessLikeButton = ({
       disabled={isLoading}
       type="button"
     >
-      <div className="relative z-10">
+      <div className="relative z-10 flex items-center gap-1">
         {isLoading ? (
           <Loader2 className="h-4 w-4 animate-spin" />
         ) : (
@@ -62,6 +70,12 @@ export const BusinessLikeButton = ({
               isLiked && animating ? "scale-110" : "",
             )}
           />
+        )}
+        
+        {showCount && (
+          <span className="ml-1 transition-all duration-300">
+            {likesCount}
+          </span>
         )}
       </div>
       
@@ -94,10 +108,6 @@ export const BusinessLikeButton = ({
           </div>
         )}
       </AnimatePresence>
-      
-      <span className="ml-1 transition-all duration-300">
-        {likesCount}
-      </span>
     </Button>
   );
 };

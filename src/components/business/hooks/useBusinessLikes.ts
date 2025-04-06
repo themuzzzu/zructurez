@@ -2,7 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export const useBusinessLikes = (businessId: string) => {
   const queryClient = useQueryClient();
@@ -22,6 +22,7 @@ export const useBusinessLikes = (businessId: string) => {
         .eq('user_id', user.id)
         .maybeSingle();
 
+      console.log(`Business ${businessId} liked status:`, !!data);
       return !!data;
     }
   });
@@ -59,6 +60,8 @@ export const useBusinessLikes = (businessId: string) => {
       setOptimisticLiked(!currentLiked);
       setOptimisticCount(currentLiked ? Math.max(0, currentCount - 1) : currentCount + 1);
 
+      console.log(`[Business Like] Toggling like for ${businessId} from ${currentLiked} to ${!currentLiked}`);
+
       try {
         if (currentLiked) {
           const { error } = await supabase
@@ -67,7 +70,10 @@ export const useBusinessLikes = (businessId: string) => {
             .eq('business_id', businessId)
             .eq('user_id', user.id);
 
-          if (error) throw error;
+          if (error) {
+            console.error("Error unlinking business:", error);
+            throw error;
+          }
         } else {
           const { error } = await supabase
             .from('business_likes')
@@ -75,10 +81,13 @@ export const useBusinessLikes = (businessId: string) => {
               { business_id: businessId, user_id: user.id }
             ]);
 
-          if (error) throw error;
+          if (error) {
+            console.error("Error liking business:", error);
+            throw error;
+          }
         }
         
-        return { success: true };
+        return { success: true, now_liked: !currentLiked };
       } catch (error) {
         // Revert optimistic updates on error
         setOptimisticLiked(currentLiked);
@@ -86,15 +95,17 @@ export const useBusinessLikes = (businessId: string) => {
         throw error;
       }
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['business-like', businessId] });
       queryClient.invalidateQueries({ queryKey: ['business-likes-count', businessId] });
       queryClient.invalidateQueries({ queryKey: ['user-liked-businesses'] });
       
-      const liked = optimisticLiked !== null ? optimisticLiked : !!isLiked;
+      // We need to access the new liked state from the result
+      const liked = result.now_liked;
       toast.success(liked ? 'Business liked' : 'Business unliked');
       
-      // Reset optimistic values after successful update
+      // Reset optimistic values after successful update, but with a delay
+      // to prevent UI flicker
       setTimeout(() => {
         setOptimisticLiked(null);
         setOptimisticCount(null);
@@ -111,6 +122,11 @@ export const useBusinessLikes = (businessId: string) => {
   const isLoading = isLikeLoading || isCountLoading || isTogglePending;
   const finalIsLiked = optimisticLiked !== null ? optimisticLiked : !!isLiked;
   const finalLikesCount = optimisticCount !== null ? optimisticCount : likesCount;
+
+  // Debug logging
+  useEffect(() => {
+    console.log(`[Business ${businessId}] Like status: ${finalIsLiked}, Count: ${finalLikesCount}`);
+  }, [businessId, finalIsLiked, finalLikesCount]);
 
   return {
     isLiked: finalIsLiked,
