@@ -7,7 +7,8 @@ import Business from "./pages/Business";
 import BusinessDetails from "./pages/BusinessDetails";
 import { lazy, Suspense } from "react";
 import { LoadingView } from "@/components/LoadingView";
-import UnifiedHome from "./pages/UnifiedHome";
+import Home from "./pages/Home";
+import Marketplace from "./pages/Marketplace";
 
 // Lazily loaded components
 const Auth = lazy(() => import("@/pages/Auth"));
@@ -48,7 +49,7 @@ const withSuspense = (Component) => {
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <UnifiedHome />
+    element: <Home />
   },
   {
     path: "/auth",
@@ -64,7 +65,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/marketplace",
-    element: <UnifiedHome />
+    element: <Marketplace />
   },
   {
     path: "/marketplace/category/:categoryId",
@@ -80,7 +81,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/products",
-    element: <UnifiedHome />
+    element: <Marketplace />
   },
   {
     path: "/businesses",

@@ -1,9 +1,8 @@
 
-import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import UnifiedHome from "./UnifiedHome";
+import Home from "./Home";
 
-// Render the unified home page directly
+// Render the new home page directly
 export default function Index() {
-  return <UnifiedHome />;
+  return <Home />;
 }
