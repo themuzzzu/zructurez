@@ -15,14 +15,14 @@ export interface Advertisement {
   status: string;
   type: string;
   location: string;
-  reference_id?: string;
+  reference_id: string;
   carousel_images?: string[];
   business_id?: string;
   start_date: string;
   end_date: string;
   budget: number;
   clicks: number;
-  impressions: number;
+  impressions?: number; // Optional since it's missing from DB table
   format: string;
   video_url?: string;
   user_id: string;
@@ -47,9 +47,9 @@ export type AdPlacement = {
   cpm_rate: number;
   priority: number;
   max_size_kb: number;
-  impressions?: number; // Added for AdPlacement.tsx compatibility
-  clicks?: number;     // Added for AdPlacement.tsx compatibility
-  revenue?: number;    // Added for AdPlacement.tsx compatibility
+  impressions?: number; // Added for AdPlacement.tsx compatibility 
+  clicks?: number;      // Added for AdPlacement.tsx compatibility
+  revenue?: number;     // Added for AdPlacement.tsx compatibility
 };
 
 export const getAdPlacements = async (): Promise<AdPlacement[]> => {
@@ -203,14 +203,17 @@ export const createAdvertisement = async (
   adData: Omit<Advertisement, "id" | "created_at" | "clicks" | "impressions" | "status" | "reach">
 ): Promise<{ success: boolean; id?: string; error?: string }> => {
   try {
-    const { data, error } = await supabase.from("advertisements").insert({
+    const newAd = {
       ...adData,
       id: uuidv4(),
       clicks: 0,
-      // Don't include impressions as it doesn't exist in the table
       status: "pending",
       reach: 0,
-    }).select();
+      // Make sure reference_id is provided (required in DB)
+      reference_id: adData.reference_id || adData.business_id || uuidv4()
+    };
+    
+    const { data, error } = await supabase.from("advertisements").insert(newAd).select();
 
     if (error) {
       return { success: false, error: error.message };
@@ -318,7 +321,7 @@ export const getFallbackAds = (location: AdLocation, type: string): Advertisemen
       format: "standard",
       user_id: "system",
       created_at: now.toISOString(),
-      reference_id: undefined
+      reference_id: "fallback-reference"
     }
   ];
 };

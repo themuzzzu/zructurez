@@ -162,15 +162,11 @@ const BusinessPage = () => {
     return hours;
   };
 
-  const handleSubcategorySelect = (category: string, subcategory?: string) => {
-    const newCategory = subcategory ? `${category}-${subcategory}` : category;
+  const handleSubcategorySelect = (category: { id: string, name: string, icon: string }) => {
+    const newCategory = `${category.id}`;
     setSelectedCategory(newCategory);
     
-    if (subcategory) {
-      navigate(`/businesses?category=${category}&subcategory=${subcategory}`);
-    } else {
-      navigate(`/businesses?category=${category}`);
-    }
+    navigate(`/businesses?category=${category.id}`);
   };
 
   const handleBusinessAction = (action: 'book' | 'whatsapp' | 'share' | 'call', businessId: string) => {
