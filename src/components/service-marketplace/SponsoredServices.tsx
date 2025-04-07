@@ -13,10 +13,24 @@ interface SponsoredServicesProps {
   layout?: GridLayoutType;
 }
 
+// Define the service type
+interface ServiceType {
+  id: string;
+  title: string;
+  description: string;
+  image_url?: string;
+  price: number;
+  user_id: string;
+  category?: string;
+  location?: string;
+  contact_info?: string;
+  is_sponsored: boolean;
+}
+
 export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps) => {
   const navigate = useNavigate();
   
-  const { data: services, isLoading } = useQuery({
+  const { data: services, isLoading } = useQuery<ServiceType[]>({
     queryKey: ['sponsored-services'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -86,6 +100,7 @@ export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps
             category={service.category}
             location={service.location}
             contact_info={service.contact_info}
+            sponsored={true}
           />
         ))}
       </div>

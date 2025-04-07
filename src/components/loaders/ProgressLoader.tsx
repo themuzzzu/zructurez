@@ -30,13 +30,9 @@ export function ProgressLoader({
       <Progress 
         value={progress} 
         className={cn(`h-${height}`, "bg-black/5 dark:bg-white/5")} 
-        indicatorClassName="bg-blue-500"
+        indicatorClassName={cn(`bg-[${color}]`, "transition-all duration-300 ease-in-out")}
         style={{ 
           backgroundColor: "rgba(59, 130, 246, 0.1)",
-        }}
-        indicatorStyle={{
-          backgroundColor: color,
-          transition: "width 0.3s ease-in-out"
         }}
       />
     </div>

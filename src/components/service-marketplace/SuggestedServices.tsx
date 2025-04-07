@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -13,6 +14,24 @@ interface SuggestedServicesProps {
   layout?: GridLayoutType;
 }
 
+// Define the service type to avoid the deep instantiation error
+interface ServiceType {
+  id: string;
+  title: string;
+  description: string;
+  image_url?: string;
+  price: number;
+  user_id: string;
+  category?: string;
+  location?: string;
+  contact_info?: string;
+  views?: number;
+  profiles?: {
+    username?: string;
+    avatar_url?: string;
+  };
+}
+
 export const SuggestedServices = ({ layout = "grid3x3" }: SuggestedServicesProps) => {
   const navigate = useNavigate();
   
@@ -24,7 +43,7 @@ export const SuggestedServices = ({ layout = "grid3x3" }: SuggestedServicesProps
     }
   });
   
-  const { data: suggestedServices, isLoading } = useQuery({
+  const { data: suggestedServices, isLoading } = useQuery<ServiceType[]>({
     queryKey: ['suggested-services', user?.id],
     queryFn: async () => {
       if (!user?.id) {

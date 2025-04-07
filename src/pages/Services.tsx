@@ -20,8 +20,23 @@ import { SuggestedServices } from "@/components/service-marketplace/SuggestedSer
 import { ServiceCategoryFilter } from "@/components/ServiceCategoryFilter";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
+// Define the service type
+interface ServiceType {
+  id: string;
+  title: string;
+  description: string;
+  image_url?: string;
+  price: number;
+  user_id: string;
+  category?: string;
+  location?: string;
+  views?: number;
+  contact_info?: string;
+  created_at?: string;
+}
+
 export default function Services() {
-  const [services, setServices] = useState([]);
+  const [services, setServices] = useState<ServiceType[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
@@ -80,7 +95,7 @@ export default function Services() {
     fetchServices();
   }, [selectedCategory, searchQuery]);
   
-  const handleCategoryChange = (category) => {
+  const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
     
     if (category === "all") {

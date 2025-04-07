@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
@@ -13,11 +14,25 @@ interface TrendingServicesProps {
   layout?: GridLayoutType;
 }
 
+// Define the service type
+interface ServiceType {
+  id: string;
+  title: string;
+  description: string;
+  image_url?: string;
+  price: number;
+  user_id: string;
+  category?: string;
+  location?: string;
+  contact_info?: string;
+  views?: number;
+}
+
 export const TrendingServices = ({ layout = "grid3x3" }: TrendingServicesProps) => {
   const navigate = useNavigate();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   
-  const { data: services, isLoading } = useQuery({
+  const { data: services, isLoading } = useQuery<ServiceType[]>({
     queryKey: ['trending-services'],
     queryFn: async () => {
       const { data, error } = await supabase

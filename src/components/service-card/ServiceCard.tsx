@@ -2,12 +2,13 @@
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Heart, MapPin, Clock, Star, ExternalLink, Phone } from "lucide-react";
+import { Calendar, Heart, MapPin, Clock, Star, ExternalLink, Phone, Share2, MessageCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { trackServiceView, trackContactClick } from "@/services/serviceService";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import { shareBusinessProfile, openWhatsAppChat } from "@/utils/businessCardUtils";
 
 interface ServiceCardProps {
   id: string;
@@ -22,6 +23,7 @@ interface ServiceCardProps {
   views?: number;
   rating?: number;
   sponsored?: boolean;
+  contact_info?: string; // Add this prop to fix the TypeScript errors
 }
 
 export const ServiceCard = ({
@@ -36,7 +38,8 @@ export const ServiceCard = ({
   location,
   views,
   rating = 4.5,
-  sponsored = false
+  sponsored = false,
+  contact_info
 }: ServiceCardProps) => {
   const navigate = useNavigate();
   const [isLiked, setIsLiked] = useState(false);
@@ -66,7 +69,26 @@ export const ServiceCard = ({
   const handleCallClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     trackContactClick(id);
-    toast.success("Contact details shared! A provider will call you shortly.");
+    if (contact_info) {
+      window.location.href = `tel:${contact_info}`;
+    } else {
+      toast.success("Contact details shared! A provider will call you shortly.");
+    }
+  };
+  
+  const handleShareClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    shareBusinessProfile(e, title, description, id);
+  };
+  
+  const handleMessageClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (contact_info) {
+      openWhatsAppChat(e, title, contact_info);
+    } else {
+      toast.error("Contact information not available");
+      navigate(`/services/${id}`);
+    }
   };
 
   return (
@@ -168,25 +190,43 @@ export const ServiceCard = ({
         </div>
       </CardContent>
       
-      <CardFooter className="p-4 pt-0 flex gap-2">
-        <Button 
-          className="flex-1 gap-2" 
-          onClick={(e) => {
-            e.stopPropagation();
-            navigate(`/services/${id}/book`);
-          }}
-        >
-          <Calendar className="h-4 w-4" />
-          Book Now
-        </Button>
-        <Button 
-          variant="outline"
-          className="flex-1 gap-2" 
-          onClick={handleCallClick}
-        >
-          <Phone className="h-4 w-4" />
-          Call
-        </Button>
+      <CardFooter className="p-4 pt-0">
+        <div className="grid grid-cols-2 gap-2 w-full">
+          <Button 
+            className="w-full gap-1" 
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/services/${id}/book`);
+            }}
+          >
+            <Calendar className="h-4 w-4" />
+            Book
+          </Button>
+          <Button 
+            variant="outline"
+            className="w-full gap-1" 
+            onClick={handleCallClick}
+          >
+            <Phone className="h-4 w-4" />
+            Call
+          </Button>
+          <Button 
+            variant="outline"
+            className="w-full gap-1" 
+            onClick={handleShareClick}
+          >
+            <Share2 className="h-4 w-4" />
+            Share
+          </Button>
+          <Button 
+            variant="outline"
+            className="w-full gap-1" 
+            onClick={handleMessageClick}
+          >
+            <MessageCircle className="h-4 w-4" />
+            Chat
+          </Button>
+        </div>
       </CardFooter>
     </Card>
   );
