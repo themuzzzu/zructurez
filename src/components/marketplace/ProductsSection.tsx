@@ -1,121 +1,152 @@
 
-import React, { useMemo } from "react";
-import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
-import { ProductGrid } from "@/components/products/ProductGrid";
+import { ShoppingCard } from "@/components/ShoppingCard";
+import { ShoppingCardSkeleton } from "@/components/ShoppingCardSkeleton";
 import { Button } from "@/components/ui/button";
-import { GridLayoutSelector } from "@/components/marketplace/GridLayoutSelector";
-import { GridLayoutType } from "@/components/products/types/ProductTypes";
-import { Card } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { motion } from "framer-motion";
+import { GridLayoutType } from '@/components/products/types/ProductTypes';
+import { GridLayoutSelector } from './GridLayoutSelector';
+import { cn } from '@/lib/utils';
 
 interface ProductsSectionProps {
   title: string;
-  category?: string;
+  subtitle?: string;
   sortBy?: string;
   limit?: number;
   showViewAll?: boolean;
-  visibleOnMobile?: boolean;
+  className?: string;
+  gridLayout?: GridLayoutType;
 }
 
-export const ProductsSection = ({
-  title,
-  category,
-  sortBy = "created_at",
-  limit = 8,
+export interface Product {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  image_url?: string;
+  category?: string;
+  subcategory?: string;
+  user_id?: string;
+  created_at?: string;
+  views?: number;
+}
+
+export const ProductsSection = ({ 
+  title, 
+  subtitle,
+  sortBy = "created_at", 
+  limit = 4,
   showViewAll = true,
-  visibleOnMobile = true,
+  className,
+  gridLayout = "grid3x3" 
 }: ProductsSectionProps) => {
-  const [layout, setLayout] = React.useState<GridLayoutType>("grid4x4");
-
-  const queryKey = useMemo(() => 
-    ["products", { category, sortBy, limit }], 
-    [category, sortBy, limit]
-  );
-
-  const { data: products, isLoading } = useOptimizedQuery(
-    queryKey,
-    async () => {
+  const navigate = useNavigate();
+  const [layout, setLayout] = useState<GridLayoutType>(gridLayout);
+  
+  const { data: products, isLoading } = useQuery({
+    queryKey: ['products', sortBy, limit],
+    queryFn: async (): Promise<Product[]> => {
       try {
         let query = supabase
-          .from("products")
-          .select(
-            "id, title, price, image_url, category, is_discounted, discount_percentage, original_price"
-          );
+          .from('products')
+          .select('*');
 
-        if (category) {
-          query = query.eq("category", category);
+        // Sort by the requested field
+        if (sortBy === 'price') {
+          query = query.order('price', { ascending: true });
+        } else if (sortBy === 'views') {
+          query = query.order('views', { ascending: false });
+        } else {
+          query = query.order('created_at', { ascending: false });
         }
 
-        const { data, error } = await query
-          .order(sortBy, { ascending: false })
-          .limit(limit);
+        // Add limit
+        query = query.limit(limit);
+
+        const { data, error } = await query;
 
         if (error) throw error;
-        return data || [];
+        return data || []; 
       } catch (err) {
-        console.error("Error fetching products:", err);
+        console.error(`Error fetching ${title} products:`, err);
         return [];
       }
     },
-    {
-      staleTime: 15 * 60 * 1000,
-      cacheTime: 30 * 60 * 1000,
-    }
-  );
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
 
-  if (!visibleOnMobile && typeof window !== "undefined" && window.innerWidth < 640) {
+  const getGridClass = () => {
+    switch (layout) {
+      case "grid1x1":
+        return "grid-cols-1";
+      case "grid2x2":
+        return "grid-cols-1 sm:grid-cols-2";
+      case "grid4x4":
+        return "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4";
+      case "grid3x3":
+      default:
+        return "grid-cols-1 sm:grid-cols-2 md:grid-cols-3";
+    }
+  };
+
+  const handleViewAll = () => {
+    navigate(`/products?sort=${sortBy}`);
+  };
+
+  if (isLoading) {
+    return (
+      <div className={cn("space-y-4", className)}>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold">{title}</h2>
+            {subtitle && <p className="text-muted-foreground">{subtitle}</p>}
+          </div>
+          <GridLayoutSelector layout={layout} onChange={setLayout} />
+        </div>
+        <div className={cn("grid gap-4", getGridClass())}>
+          {Array(limit).fill(0).map((_, i) => (
+            <ShoppingCardSkeleton key={i} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (!products || products.length === 0) {
     return null;
   }
 
   return (
-    <div className="mb-12">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold">{title}</h2>
+    <div className={cn("space-y-4", className)}>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold">{title}</h2>
+          {subtitle && <p className="text-muted-foreground">{subtitle}</p>}
+        </div>
         <div className="flex items-center gap-4">
-          <GridLayoutSelector layout={layout} onChange={setLayout} />
           {showViewAll && (
-            <Button variant="outline" size="sm">
+            <Button variant="outline" onClick={handleViewAll}>
               View All
             </Button>
           )}
+          <GridLayoutSelector layout={layout} onChange={setLayout} />
         </div>
       </div>
-
-      {isLoading ? (
-        <div
-          className={
-            layout === "list"
-              ? "space-y-4"
-              : "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
-          }
-        >
-          {Array(limit)
-            .fill(0)
-            .map((_, i) => (
-              <Card key={i} className="overflow-hidden">
-                <Skeleton className="h-48 w-full" />
-                <div className="p-4">
-                  <Skeleton className="h-5 w-3/4 mb-2" />
-                  <Skeleton className="h-4 w-1/2" />
-                </div>
-              </Card>
-            ))}
-        </div>
-      ) : (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-        >
-          <ProductGrid 
-            products={products || []} 
-            layout={layout} 
-            onLayoutChange={setLayout}
+      <div className={cn("grid gap-4", getGridClass())}>
+        {products.map((product) => (
+          <ShoppingCard
+            key={product.id}
+            id={product.id}
+            name={product.title}
+            description={product.description}
+            price={product.price}
+            image={product.image_url || ""}
+            category={product.category || ""}
           />
-        </motion.div>
-      )}
+        ))}
+      </div>
     </div>
   );
 };

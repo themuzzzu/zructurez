@@ -98,9 +98,51 @@ export const fetchActiveAds = async (type?: AdType, format?: AdFormat, limit: nu
   }
 };
 
-// Track ad views for analytics
+// Generate mock ads when no real ads are available or for demo purposes
+export const generateMockAds = (count: number = 3, type?: AdType, format?: AdFormat): Advertisement[] => {
+  const types = ["business", "service", "product", "sponsored"];
+  const formats = ["standard", "banner", "carousel", "featured"];
+  
+  return Array(count).fill(null).map((_, i) => {
+    const mockType = type || types[Math.floor(Math.random() * types.length)] as AdType;
+    const mockFormat = format || formats[Math.floor(Math.random() * formats.length)] as AdFormat;
+    
+    return {
+      id: `mock-ad-${i}-${Date.now()}`,
+      user_id: "system",
+      title: `Featured ${mockType.charAt(0).toUpperCase() + mockType.slice(1)}`,
+      description: `This is a mock ${mockType} advertisement for demonstration purposes.`,
+      type: mockType,
+      format: mockFormat,
+      reference_id: `mock-ref-${i}`,
+      location: "Local Area",
+      budget: 1000,
+      start_date: new Date(Date.now() - 86400000).toISOString(),
+      end_date: new Date(Date.now() + 86400000).toISOString(),
+      image_url: `https://images.unsplash.com/photo-${1580000000000 + i}?auto=format&fit=crop&w=300&q=80`,
+      video_url: null,
+      carousel_images: null,
+      status: "active",
+      created_at: new Date().toISOString(),
+      impressions: Math.floor(Math.random() * 1000),
+      clicks: Math.floor(Math.random() * 100),
+      reach: Math.floor(Math.random() * 2000),
+      conversions: Math.floor(Math.random() * 20),
+    };
+  });
+};
+
+// Track ad views for analytics - Handles non-UUID values gracefully
 export const incrementAdView = async (adId: string) => {
   try {
+    // Check if adId is a valid UUID
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    
+    if (!uuidRegex.test(adId)) {
+      console.log(`Skipping increment for non-UUID ad id: ${adId}`);
+      return false;
+    }
+    
     // Update the impressions count for the ad
     const { error: adError } = await supabase.rpc('increment_ad_views', {
       ad_id: adId
@@ -117,18 +159,30 @@ export const incrementAdView = async (adId: string) => {
         timestamp: new Date().toISOString()
       });
     
-    if (analyticsError) throw analyticsError;
+    if (analyticsError) {
+      // Just log analytics errors but don't fail the operation
+      console.warn('Error recording ad analytics:', analyticsError);
+    }
     
     return true;
   } catch (error) {
     console.error('Error incrementing ad view:', error);
-    throw error;
+    // Don't throw, just return false to prevent errors cascading
+    return false;
   }
 };
 
-// Track ad clicks for analytics
+// Track ad clicks for analytics - Handles non-UUID values gracefully
 export const incrementAdClick = async (adId: string) => {
   try {
+    // Check if adId is a valid UUID
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    
+    if (!uuidRegex.test(adId)) {
+      console.log(`Skipping increment for non-UUID ad id: ${adId}`);
+      return false;
+    }
+    
     // Update the clicks count for the ad
     const { error: adError } = await supabase.rpc('increment_ad_clicks', {
       ad_id: adId
@@ -145,12 +199,16 @@ export const incrementAdClick = async (adId: string) => {
         timestamp: new Date().toISOString()
       });
     
-    if (analyticsError) throw analyticsError;
+    if (analyticsError) {
+      // Just log analytics errors but don't fail the operation
+      console.warn('Error recording ad click analytics:', analyticsError);
+    }
     
     return true;
   } catch (error) {
     console.error('Error incrementing ad click:', error);
-    throw error;
+    // Don't throw, just return false to prevent errors cascading
+    return false;
   }
 };
 

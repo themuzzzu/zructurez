@@ -16,6 +16,9 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { LoadingView } from "@/components/LoadingView";
 import { LocalBusinessSpotlight } from "@/components/marketplace/LocalBusinessSpotlight";
 import { TrendingServicesSection } from "@/components/services/TrendingServicesSection";
+import { SponsoredServices } from "@/components/service-marketplace/SponsoredServices";
+import { RecommendedServices } from "@/components/service-marketplace/RecommendedServices";
+import { SuggestedServices } from "@/components/services/SuggestedServices";
 
 // Mock data for services
 const mockServices = [
@@ -165,7 +168,24 @@ const Services = () => {
             </div>
 
             {/* Service Banner Carousel with specific service ads */}
-            <ServiceBannerCarousel />
+            <div className="mb-8">
+              <ServiceBannerCarousel />
+            </div>
+
+            {/* Sponsored Services - NEW */}
+            <div className="mb-8">
+              <SponsoredServices />
+            </div>
+
+            {/* Recommended Services - NEW */}
+            <div className="mb-8">
+              <RecommendedServices />
+            </div>
+
+            {/* Suggested Services - NEW */}
+            <div className="mb-8">
+              <SuggestedServices />
+            </div>
 
             {/* Service Categories Grid */}
             <div className="mb-8">
@@ -175,13 +195,11 @@ const Services = () => {
 
             {/* Featured Service Providers */}
             <div className="mb-8">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-semibold">Featured Service Providers</h2>
-                <Button variant="outline" onClick={() => navigate('/businesses')}>
-                  View All
-                </Button>
-              </div>
-              <LocalBusinessSpotlight businessType="service" />
+              <LocalBusinessSpotlight 
+                businessType="service"
+                title="Featured Service Providers"
+                subtitle="Top-rated professionals in your area"
+              />
             </div>
 
             {/* Trending Services */}

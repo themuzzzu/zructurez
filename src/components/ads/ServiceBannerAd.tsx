@@ -1,124 +1,71 @@
 
 import { useState, useEffect } from "react";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ImageFallback } from "@/components/ui/image-fallback";
-import { incrementAdClick, incrementAdView } from "@/services/adService";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { generateMockAds } from "@/services/adService";
+import { ArrowRight } from "lucide-react";
 
-// Create reliable service banner ad data with guaranteed images
-const reliableServiceAds = [
+// Use predefined non-UUID IDs for static demo ads that won't cause database errors
+const SERVICE_BANNER_ADS = [
   {
-    id: "service-ad-1",
-    title: "Home Cleaning Services",
-    description: "Professional house cleaning with trusted experts. Book today!",
-    type: "service" as const,
-    reference_id: "cleaning-services",
-    status: "active" as const,
-    image_url: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1200&h=300&q=80",
+    id: "static-demo-1", // non-UUID id to avoid DB errors
+    title: "Professional Home Cleaning",
+    description: "Get spotless results with our professional cleaning services. Book now for a special discount!",
+    image_url: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1200&h=400&q=80",
+    reference_id: "/services"
   },
   {
-    id: "service-ad-2",
-    title: "Plumbing Solutions",
-    description: "Expert plumbing repairs and installations. Available 24/7 for emergencies.",
-    type: "service" as const,
-    reference_id: "plumbing-services",
-    status: "active" as const,
-    image_url: "https://images.unsplash.com/photo-1606321022034-31968bb41e4c?auto=format&fit=crop&w=1200&h=300&q=80",
+    id: "static-demo-2", // non-UUID id to avoid DB errors
+    title: "Expert Plumbing Services",
+    description: "Fast, reliable plumbing repairs and installations. Available 24/7 for emergencies.",
+    image_url: "https://images.unsplash.com/photo-1542013936693-884638332954?auto=format&fit=crop&w=1200&h=400&q=80",
+    reference_id: "/services"
   }
 ];
 
-export function ServiceBannerAd({ maxAds = 1 }: { maxAds?: number }) {
+export function ServiceBannerAd() {
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasTrackedView, setHasTrackedView] = useState(false);
+  const [currentAdIndex, setCurrentAdIndex] = useState(0);
   
-  // Use slice to limit the number of ads shown
-  const displayAds = reliableServiceAds.slice(0, maxAds);
-  
-  // Record views for the ads
+  // Rotate through ads
   useEffect(() => {
-    if (displayAds.length && !hasTrackedView) {
-      try {
-        displayAds.forEach(ad => {
-          incrementAdView(ad.id).catch(err => console.error("View tracking error:", err));
-        });
-        setHasTrackedView(true);
-      } catch (error) {
-        console.error("Error recording ad views:", error);
-        setHasTrackedView(true);  // Mark as tracked to prevent repeated attempts
-      }
-    }
-  }, [displayAds, hasTrackedView]);
-  
-  // Simulate loading state
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 500);
-    return () => clearTimeout(timer);
+    const interval = setInterval(() => {
+      setCurrentAdIndex(prev => (prev + 1) % SERVICE_BANNER_ADS.length);
+    }, 8000);
+    
+    return () => clearInterval(interval);
   }, []);
   
-  if (isLoading) {
-    return (
-      <div className="mb-6">
-        <Skeleton className="w-full h-[120px] md:h-[180px] rounded-lg" />
-      </div>
-    );
-  }
+  const currentAd = SERVICE_BANNER_ADS[currentAdIndex];
   
-  if (displayAds.length === 0) {
-    return null;
-  }
-  
-  const handleAdClick = (adId: string, referenceId: string) => {
-    try {
-      incrementAdClick(adId);
-      navigate(`/services/${referenceId}`);
-    } catch (error) {
-      console.error("Error handling ad click:", error);
-      // Still navigate even if tracking fails
-      navigate(`/services/${referenceId}`);
-    }
+  const handleClick = () => {
+    navigate(currentAd.reference_id);
   };
   
+  if (!currentAd) return null;
+  
   return (
-    <div className="mb-6 space-y-4">
-      {displayAds.map((ad) => (
-        <Card 
-          key={ad.id}
-          className="overflow-hidden cursor-pointer transition-all hover:shadow-lg"
-          onClick={() => handleAdClick(ad.id, ad.reference_id)}
-        >
-          <div className="relative">
-            <ImageFallback
-              src={ad.image_url}
-              alt={ad.title}
-              fallbackSrc="https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=1200&h=300&q=80"
-              className="w-full aspect-[16/5] object-cover"
-              aspectRatio="wide"
-              priority={true}
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-transparent to-transparent flex items-center p-4 sm:p-6">
-              <div className="w-full max-w-xl">
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-2">
-                  {ad.title}
-                </h2>
-                <p className="text-xs sm:text-sm text-white/80 mb-2 sm:mb-3 max-w-lg line-clamp-2">
-                  {ad.description}
-                </p>
-                <Button 
-                  size="sm" 
-                  className="bg-white text-black hover:bg-white/90 transition-colors"
-                >
-                  Learn More
-                </Button>
-              </div>
+    <div 
+      className="relative overflow-hidden rounded-lg cursor-pointer"
+      onClick={handleClick}
+    >
+      <div 
+        className="w-full h-48 md:h-64 bg-cover bg-center"
+        style={{ backgroundImage: `url(${currentAd.image_url})` }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent flex items-center">
+          <div className="text-white p-6 md:p-10 max-w-md">
+            <div className="text-xs uppercase tracking-wide bg-primary px-2 py-1 rounded-full inline-block mb-3">
+              Sponsored
             </div>
+            <h3 className="text-xl md:text-2xl font-bold mb-2">{currentAd.title}</h3>
+            <p className="text-sm md:text-base opacity-90 mb-4">{currentAd.description}</p>
+            <Button className="mt-2" variant="secondary">
+              Learn More <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
           </div>
-        </Card>
-      ))}
+        </div>
+      </div>
     </div>
   );
 }
