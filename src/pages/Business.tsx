@@ -167,10 +167,10 @@ const BusinessPage = () => {
     navigate(`/businesses?category=${category}`);
   };
   
-  const handleSubcategorySelect = (category: { id: string, name: string, icon: string }) => {
-    const newCategory = `${category.id}`;
-    setSelectedCategory(newCategory);
-    navigate(`/businesses?category=${category.id}`);
+  const handleSubcategorySelect = (category: string | { id: string; name: string; icon: string }) => {
+    const categoryId = typeof category === 'string' ? category : category.id;
+    setSelectedCategory(categoryId);
+    navigate(`/businesses?category=${categoryId}`);
   };
 
   const handleBusinessAction = (action: 'book' | 'whatsapp' | 'share' | 'call', businessId: string) => {
