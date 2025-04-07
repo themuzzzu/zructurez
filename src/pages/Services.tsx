@@ -17,9 +17,6 @@ import { ServiceBannerCarousel } from "@/components/services/ServiceBannerCarous
 import { SponsoredServices } from "@/components/service-marketplace/SponsoredServices";
 import { TrendingServices } from "@/components/service-marketplace/TrendingServices";
 import { SuggestedServices } from "@/components/service-marketplace/SuggestedServices";
-import { ServiceCategoryIconGrid } from "@/components/service-marketplace/ServiceCategoryIconGrid";
-import { ServiceCategorySubcategoryGrid } from "@/components/service-marketplace/ServiceCategorySubcategoryGrid";
-import { ServiceCategoryScroller } from "@/components/services/ServiceCategoryScroller";
 import { ServiceCategoryFilter } from "@/components/ServiceCategoryFilter";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -27,7 +24,6 @@ export default function Services() {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [userServices, setUserServices] = useState([]);
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
   const [gridLayout, setGridLayout] = useState<GridLayoutType>("grid3x3");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -50,10 +46,6 @@ export default function Services() {
   const checkUserAuth = async () => {
     const { data } = await supabase.auth.getUser();
     setIsUserLoggedIn(!!data.user);
-    
-    if (data.user) {
-      fetchUserServices(data.user.id);
-    }
   };
   
   const fetchServices = async () => {
@@ -80,21 +72,6 @@ export default function Services() {
       console.error('Error fetching services:', err);
     } finally {
       setLoading(false);
-    }
-  };
-  
-  const fetchUserServices = async (userId) => {
-    try {
-      const { data, error } = await supabase
-        .from('services')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
-        
-      if (error) throw error;
-      setUserServices(data || []);
-    } catch (err) {
-      console.error('Error fetching user services:', err);
     }
   };
   
@@ -206,51 +183,41 @@ export default function Services() {
         {/* Banner with Auto Scroll */}
         <ServiceBannerCarousel />
         
-        {/* Categories Icon Grid */}
-        <div className="mb-6">
-          <h2 className="text-xl font-bold mb-4">Browse by Category</h2>
-          <ServiceCategoryIconGrid onCategorySelect={handleCategoryChange} />
-        </div>
-        
-        {/* Sponsored Services Section */}
-        <SponsoredServices />
-        
-        {/* Trending Services */}
-        <TrendingServices />
-        
-        {/* Suggested Services */}
-        <SuggestedServices />
-        
-        {/* Category Subcategories Grid */}
+        {/* Sponsored Services Section with Layout Selector */}
         <div className="mt-8 mb-6">
-          <h2 className="text-2xl font-bold mb-4">Browse by Category</h2>
-          <ServiceCategorySubcategoryGrid onCategorySelect={handleSubcategorySelect} />
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-bold">Sponsored Services</h2>
+            <GridLayoutSelector 
+              layout={gridLayout} 
+              onChange={(layout) => setGridLayout(layout)} 
+            />
+          </div>
+          <SponsoredServices layout={gridLayout} />
         </div>
         
-        {/* Service Category Scroller */}
-        <ServiceCategoryScroller />
-        
-        {isUserLoggedIn && userServices.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold mb-4">Your Services</h2>
-            <div className={getGridClasses()}>
-              {userServices.map((service) => (
-                <ServiceCard 
-                  key={service.id}
-                  id={service.id}
-                  title={service.title}
-                  description={service.description}
-                  image_url={service.image_url}
-                  price={service.price}
-                  providerName="You"
-                  providerId={service.user_id}
-                  category={service.category}
-                  location={service.location}
-                />
-              ))}
-            </div>
+        {/* Trending Services with Layout Selector */}
+        <div className="mt-8 mb-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-bold">Trending Services</h2>
+            <GridLayoutSelector 
+              layout={gridLayout} 
+              onChange={(layout) => setGridLayout(layout)} 
+            />
           </div>
-        )}
+          <TrendingServices layout={gridLayout} />
+        </div>
+        
+        {/* Suggested Services with Layout Selector */}
+        <div className="mt-8 mb-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-bold">Suggested For You</h2>
+            <GridLayoutSelector 
+              layout={gridLayout} 
+              onChange={(layout) => setGridLayout(layout)} 
+            />
+          </div>
+          <SuggestedServices layout={gridLayout} />
+        </div>
         
         <div className="mt-8">
           <h2 className="text-2xl font-bold mb-4">All Services</h2>
@@ -292,6 +259,7 @@ export default function Services() {
                   category={service.category}
                   location={service.location}
                   views={service.views}
+                  contact_info={service.contact_info}
                 />
               ))}
             </div>

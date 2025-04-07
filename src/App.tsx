@@ -18,7 +18,7 @@ function App() {
     // Reduced loading time for faster initial render
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 100);
+    }, 50);
     
     return () => clearTimeout(timer);
   }, []);
@@ -36,6 +36,9 @@ function App() {
       const img = new Image();
       img.src = image;
     });
+    
+    // Fix scrolling issues
+    document.body.style.overflowX = "hidden";
   }, []);
 
   return (
@@ -43,12 +46,12 @@ function App() {
       <ThemeProvider defaultTheme="dark" storageKey="lovable-theme">
         <LoadingProvider>
           <AuthProvider>
-            <ProgressLoader fixed color="#3B82F6" />
+            <ProgressLoader fixed color="#3B82F6" height={3} />
             <div className={isLoading ? "hidden" : "app"}>
               {!isLoading && <RouterProvider router={router} />}
             </div>
             {isLoading && (
-              <div className="fixed inset-0 flex items-center justify-center bg-white dark:bg-background">
+              <div className="fixed inset-0 flex items-center justify-center bg-white dark:bg-background z-50">
                 <CircularLoader size={48} color="#3B82F6" />
               </div>
             )}

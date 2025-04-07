@@ -13,7 +13,7 @@ interface ProgressLoaderProps {
 
 export function ProgressLoader({
   className,
-  color = "#3B82F6", // Default blue color
+  color = "#3B82F6", // Default blue color matching the UI
   height = 4,
   fixed = false
 }: ProgressLoaderProps) {
@@ -30,7 +30,14 @@ export function ProgressLoader({
       <Progress 
         value={progress} 
         className={cn(`h-${height}`, "bg-black/5 dark:bg-white/5")} 
-        indicatorClassName="bg-blue-500" 
+        indicatorClassName="bg-blue-500"
+        style={{ 
+          backgroundColor: "rgba(59, 130, 246, 0.1)",
+        }}
+        indicatorStyle={{
+          backgroundColor: color,
+          transition: "width 0.3s ease-in-out"
+        }}
       />
     </div>
   );

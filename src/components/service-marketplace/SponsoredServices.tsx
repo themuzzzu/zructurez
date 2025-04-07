@@ -1,52 +1,58 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ServiceCard } from "@/components/service-card/ServiceCard";
-import { Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState, useRef } from "react";
+import { GridLayoutType } from "@/components/products/types/ProductTypes";
 
-export const SponsoredServices = () => {
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+interface SponsoredServicesProps {
+  layout?: GridLayoutType;
+}
+
+export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps) => {
+  const navigate = useNavigate();
   
   const { data: services, isLoading } = useQuery({
     queryKey: ['sponsored-services'],
     queryFn: async () => {
-      // Fetch top 6 services and mark them as sponsored for demo
       const { data, error } = await supabase
         .from('services')
         .select('*')
-        .order('views', { ascending: false })
+        .eq('is_sponsored', true)
         .limit(6);
       
       if (error) throw error;
-      return data;
-    }
+      return data || [];
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
   
-  // Handle horizontal scroll with buttons
-  const scroll = (direction: 'left' | 'right') => {
-    if (scrollContainerRef.current) {
-      const scrollAmount = 300;
-      const currentScroll = scrollContainerRef.current.scrollLeft;
-      
-      scrollContainerRef.current.scrollTo({
-        left: direction === 'left' ? currentScroll - scrollAmount : currentScroll + scrollAmount,
-        behavior: 'smooth'
-      });
+  const getGridClasses = () => {
+    switch (layout) {
+      case "grid4x4":
+        return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4";
+      case "grid2x2":
+        return "grid grid-cols-1 sm:grid-cols-2 gap-4";
+      case "list":
+        return "flex flex-col gap-4";
+      case "grid1x1":
+        return "grid grid-cols-1 gap-4";
+      case "single":
+        return "grid grid-cols-1 gap-4 max-w-3xl mx-auto";
+      case "grid3x3":
+      default:
+        return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4";
     }
   };
   
   if (isLoading) {
     return (
       <div className="space-y-4 mb-8">
-        <h3 className="text-xl md:text-2xl font-bold flex items-center gap-2 px-1">
-          <Sparkles className="h-5 w-5 text-yellow-500" />
-          Sponsored Services
-        </h3>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 px-1">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           {[1, 2, 3].map((i) => (
             <Card key={i} className="overflow-hidden">
               <Skeleton className="h-48 w-full" />
@@ -66,59 +72,31 @@ export const SponsoredServices = () => {
   }
   
   return (
-    <div className="space-y-4 mb-8 relative">
-      <div className="flex justify-between items-center px-1">
-        <h3 className="text-xl md:text-2xl font-bold flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-yellow-500" />
-          Sponsored Services
-        </h3>
+    <div className="space-y-4 mb-8">
+      <div className={getGridClasses()}>
+        {services.map((service) => (
+          <ServiceCard 
+            key={service.id}
+            id={service.id}
+            title={service.title}
+            description={service.description}
+            image_url={service.image_url}
+            price={service.price}
+            providerId={service.user_id}
+            category={service.category}
+            location={service.location}
+            contact_info={service.contact_info}
+          />
+        ))}
       </div>
       
-      <div className="relative group">
-        {/* Left scroll button */}
+      <div className="flex justify-center mt-4">
         <Button 
-          onClick={() => scroll('left')}
-          size="icon"
-          variant="ghost" 
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 dark:bg-black/50 rounded-full opacity-70 hover:opacity-100 shadow-md hidden md:flex"
+          variant="outline" 
+          onClick={() => navigate('/services?sponsored=true')}
+          className="gap-1"
         >
-          <ChevronLeft />
-        </Button>
-        
-        {/* Scrollable container */}
-        <div 
-          ref={scrollContainerRef}
-          className="flex overflow-x-auto gap-3 pb-2 pt-1 px-1 no-scrollbar snap-x snap-mandatory scroll-smooth"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-        >
-          {services.map((service) => (
-            <div key={service.id} className="min-w-[250px] sm:min-w-[280px] w-[70vw] max-w-[320px] flex-shrink-0 snap-start">
-              <div className="relative h-full">
-                <ServiceCard 
-                  id={service.id}
-                  title={service.title}
-                  description={service.description}
-                  image_url={service.image_url}
-                  price={service.price}
-                  providerId={service.user_id}
-                  category={service.category}
-                  location={service.location}
-                  views={service.views}
-                  sponsored={true}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-        
-        {/* Right scroll button */}
-        <Button 
-          onClick={() => scroll('right')}
-          size="icon"
-          variant="ghost" 
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 dark:bg-black/50 rounded-full opacity-70 hover:opacity-100 shadow-md hidden md:flex"
-        >
-          <ChevronRight />
+          View More <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
     </div>

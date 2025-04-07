@@ -71,18 +71,20 @@ export const ServiceCategoryFilter = ({ onCategoryChange }: ServiceCategoryFilte
   }, []);
 
   return (
-    <div className="flex gap-3 overflow-x-auto pb-4 px-3 md:px-4 scrollbar-hide animate-fade-up rounded-lg bg-zinc-50 dark:bg-zinc-900 p-3 shadow-sm">
-      {categories.map(({ id, name, icon: Icon }) => (
-        <Button
-          key={id}
-          variant={id === selectedCategory ? "default" : "outline"}
-          className="whitespace-nowrap transition-all duration-300 hover:scale-105 hover:shadow-md min-w-fit px-3 sm:px-4 flex-shrink-0"
-          onClick={() => handleCategoryClick(id)}
-        >
-          {Icon && <Icon className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />}
-          {name}
-        </Button>
-      ))}
+    <div className="flex gap-3 overflow-x-auto pb-4 px-3 md:px-4 scrollbar-hide animate-fade-up rounded-lg bg-zinc-50 dark:bg-zinc-900 p-3 shadow-sm -mx-2 sm:mx-0">
+      <div className="flex gap-3 overflow-x-auto w-full pb-2 no-scrollbar snap-x snap-mandatory scroll-smooth">
+        {categories.map(({ id, name, icon: Icon }) => (
+          <Button
+            key={id}
+            variant={id === selectedCategory ? "default" : "outline"}
+            className="whitespace-nowrap transition-all duration-300 hover:scale-105 hover:shadow-md min-w-fit px-3 sm:px-4 flex-shrink-0 snap-start"
+            onClick={() => handleCategoryClick(id)}
+          >
+            {Icon && <Icon className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />}
+            {name}
+          </Button>
+        ))}
+      </div>
     </div>
   );
 };

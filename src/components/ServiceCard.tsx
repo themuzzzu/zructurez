@@ -2,8 +2,10 @@
 import { Card, CardContent, CardFooter } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
-import { Calendar, Heart } from "lucide-react";
+import { Calendar, Heart, Share2, MessageSquare, Phone } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { shareBusinessProfile, openWhatsAppChat } from "@/utils/businessCardUtils";
 
 interface ServiceCardProps {
   id: string;
@@ -13,6 +15,7 @@ interface ServiceCardProps {
   price: string;
   providerName: string;
   providerId: string;
+  contact_info?: string; // Optional contact info for direct messaging/calling
 }
 
 export const ServiceCard = ({
@@ -22,7 +25,8 @@ export const ServiceCard = ({
   image,
   price,
   providerName,
-  providerId
+  providerId,
+  contact_info
 }: ServiceCardProps) => {
   const navigate = useNavigate();
 
@@ -33,6 +37,31 @@ export const ServiceCard = ({
   const handleProviderClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     navigate(`/businesses/${providerId}`);
+  };
+  
+  const handleShareClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    shareBusinessProfile(e, name, description, id);
+  };
+  
+  const handleMessageClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (contact_info) {
+      openWhatsAppChat(e, name, contact_info);
+    } else {
+      toast.error("Contact information not available");
+      navigate(`/services/${id}`);
+    }
+  };
+  
+  const handleCallClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (contact_info) {
+      window.location.href = `tel:${contact_info}`;
+    } else {
+      toast.error("Contact information not available");
+      navigate(`/services/${id}`);
+    }
   };
 
   return (
@@ -45,7 +74,7 @@ export const ServiceCard = ({
         />
       </div>
       
-      <CardContent className="flex-1 p-4 space-y-2" onClick={handleClick}>
+      <CardContent className="flex-1 p-4 space-y-2 cursor-pointer" onClick={handleClick}>
         <div className="flex justify-between items-start">
           <h3 className="font-semibold line-clamp-1">{name}</h3>
           <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -69,16 +98,42 @@ export const ServiceCard = ({
       </CardContent>
       
       <CardFooter className="p-4 pt-0">
-        <Button 
-          className="w-full gap-2" 
-          onClick={(e) => {
-            e.stopPropagation();
-            navigate(`/services/${id}/book`);
-          }}
-        >
-          <Calendar className="h-4 w-4" />
-          Book Now
-        </Button>
+        <div className="grid grid-cols-2 gap-2 w-full">
+          <Button 
+            className="w-full gap-1" 
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/services/${id}/book`);
+            }}
+          >
+            <Calendar className="h-4 w-4" />
+            Book
+          </Button>
+          <Button 
+            variant="outline"
+            className="w-full gap-1" 
+            onClick={handleMessageClick}
+          >
+            <MessageSquare className="h-4 w-4" />
+            Chat
+          </Button>
+          <Button 
+            variant="outline"
+            className="w-full gap-1" 
+            onClick={handleShareClick}
+          >
+            <Share2 className="h-4 w-4" />
+            Share
+          </Button>
+          <Button 
+            variant="outline"
+            className="w-full gap-1" 
+            onClick={handleCallClick}
+          >
+            <Phone className="h-4 w-4" />
+            Call
+          </Button>
+        </div>
       </CardFooter>
     </Card>
   );

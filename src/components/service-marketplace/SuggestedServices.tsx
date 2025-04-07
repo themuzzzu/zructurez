@@ -1,107 +1,118 @@
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ServiceCard } from "@/components/service-card/ServiceCard";
+import { getRecommendedServices } from "@/services/serviceService";
+import { useNavigate } from "react-router-dom";
+import { ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { GridLayoutType } from "@/components/products/types/ProductTypes";
 
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { ArrowRightCircle, ThumbsUp } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { formatPrice } from '@/utils/productUtils';
-import { Badge } from '@/components/ui/badge';
+interface SuggestedServicesProps {
+  layout?: GridLayoutType;
+}
 
-export function SuggestedServices() {
-  const { data: services = [], isLoading } = useQuery({
-    queryKey: ['suggested-services'],
+export const SuggestedServices = ({ layout = "grid3x3" }: SuggestedServicesProps) => {
+  const navigate = useNavigate();
+  
+  const { data: user } = useQuery({
+    queryKey: ['current-user'],
     queryFn: async () => {
-      try {
-        // Try to fetch recommended services based on popularity
+      const { data } = await supabase.auth.getUser();
+      return data.user;
+    }
+  });
+  
+  const { data: suggestedServices, isLoading } = useQuery({
+    queryKey: ['suggested-services', user?.id],
+    queryFn: async () => {
+      if (!user?.id) {
+        // If no user, fetch some default services
         const { data, error } = await supabase
           .from('services')
           .select('*')
-          .order('views', { ascending: false })
-          .limit(4);
+          .limit(6);
           
-        if (error || !data || data.length === 0) {
-          // Return mock data if no real data
-          return Array(4).fill(null).map((_, i) => ({
-            id: `mock-${i}`,
-            title: `Suggested Service ${i + 1}`,
-            description: 'This service is recommended based on your preferences and location.',
-            price: 25 + (i * 10),
-            image_url: `https://source.unsplash.com/random/300x200?service&sig=${i}`,
-            category: ['Home', 'Professional', 'Personal', 'Business'][i % 4],
-            location: 'Near you'
-          }));
-        }
-        
-        return data;
-      } catch (err) {
-        console.error('Error fetching suggested services:', err);
-        return [];
+        if (error) throw error;
+        return data || [];
       }
+      
+      // Otherwise get personalized recommendations
+      return await getRecommendedServices(user.id);
     },
-    staleTime: 60000, // 1 minute
+    enabled: !!user?.id,
   });
-
+  
+  const getGridClasses = () => {
+    switch (layout) {
+      case "grid4x4":
+        return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4";
+      case "grid2x2":
+        return "grid grid-cols-1 sm:grid-cols-2 gap-4";
+      case "list":
+        return "flex flex-col gap-4";
+      case "grid1x1":
+        return "grid grid-cols-1 gap-4";
+      case "single":
+        return "grid grid-cols-1 gap-4 max-w-3xl mx-auto";
+      case "grid3x3":
+      default:
+        return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4";
+    }
+  };
+  
   if (isLoading) {
     return (
-      <div className="mb-8">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">Suggested For You</h2>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-          {Array(4).fill(0).map((_, i) => (
-            <Card key={i} className="h-64 animate-pulse bg-muted" />
+      <div className="space-y-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {[1, 2, 3].map((i) => (
+            <Card key={i} className="overflow-hidden">
+              <Skeleton className="h-48 w-full" />
+              <div className="p-3">
+                <Skeleton className="h-4 w-3/4 mb-2" />
+                <Skeleton className="h-4 w-1/2" />
+              </div>
+            </Card>
           ))}
         </div>
       </div>
     );
   }
-
+  
+  if (!suggestedServices || suggestedServices.length === 0) {
+    return null;
+  }
+  
   return (
-    <div className="mb-8">
-      <div className="flex justify-between items-center mb-4">
-        <div className="flex items-center gap-2">
-          <ThumbsUp className="h-5 w-5 text-primary" />
-          <h2 className="text-xl font-bold">Suggested For You</h2>
-        </div>
-        <Button variant="link" className="text-primary font-medium flex items-center gap-1">
-          View All <ArrowRightCircle size={16} />
-        </Button>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-        {services.map((service) => (
-          <Link
+    <div className="space-y-4 mb-8">
+      <div className={getGridClasses()}>
+        {suggestedServices.map((service) => (
+          <ServiceCard 
             key={service.id}
-            to={`/services/${service.id}`}
-            className="block h-full transition-transform hover:-translate-y-1 duration-200"
-          >
-            <Card className="overflow-hidden h-full flex flex-col">
-              <div className="h-40 overflow-hidden">
-                <img 
-                  src={service.image_url || 'https://placehold.co/300x200/e2e8f0/64748b?text=Service'} 
-                  alt={service.title}
-                  className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                />
-              </div>
-              <CardContent className="flex-1 p-4 space-y-2">
-                <div className="flex justify-between items-start">
-                  <h3 className="font-semibold text-base line-clamp-1">{service.title}</h3>
-                  {service.category && (
-                    <Badge variant="outline" className="text-xs">{service.category}</Badge>
-                  )}
-                </div>
-                <p className="text-sm text-muted-foreground line-clamp-2">{service.description}</p>
-                <div className="flex items-center justify-between mt-2">
-                  <span className="font-bold">{formatPrice(service.price)}</span>
-                  {service.location && (
-                    <span className="text-xs text-muted-foreground">{service.location}</span>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
+            id={service.id}
+            title={service.title}
+            description={service.description}
+            image_url={service.image_url}
+            price={service.price}
+            providerId={service.user_id}
+            category={service.category}
+            location={service.location}
+            contact_info={service.contact_info}
+            providerName={service.profiles?.username || "Service Provider"}
+          />
         ))}
+      </div>
+      
+      <div className="flex justify-center mt-4">
+        <Button 
+          variant="outline" 
+          onClick={() => navigate('/services?recommended=true')}
+          className="gap-1"
+        >
+          View More <ChevronRight className="h-4 w-4" />
+        </Button>
       </div>
     </div>
   );
-}
+};

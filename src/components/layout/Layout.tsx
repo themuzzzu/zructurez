@@ -33,20 +33,32 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
     };
   }, []);
 
+  // Improve scrolling by fixing body height 
+  useEffect(() => {
+    // Fix body overflow
+    document.body.style.overflowY = "hidden";
+    document.body.style.height = "100vh";
+    
+    return () => {
+      document.body.style.overflowY = "";
+      document.body.style.height = "";
+    };
+  }, []);
+
   return (
-    <div className="min-h-screen bg-background overflow-hidden">
+    <div className="min-h-screen bg-background overflow-hidden flex flex-col">
       <Navbar />
-      <div className="flex pt-16 w-full h-[calc(100vh-4rem)]">
+      <div className="flex flex-1 w-full h-[calc(100vh-4rem)]">
         {!hideSidebar && !isMobile && (
           <div 
-            style={{ width: sidebarWidth + 'px' }} 
+            style={{ width: sidebarWidth + 'px', minWidth: sidebarWidth + 'px' }} 
             className="transition-all duration-300 fixed h-[calc(100vh-64px)] overflow-y-auto overflow-x-hidden scrollbar-hide z-20"
           >
             <Sidebar />
           </div>
         )}
         <main 
-          className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide transition-all duration-300 w-full"
+          className="flex-1 overflow-y-auto overflow-x-hidden transition-all duration-300 w-full pb-16"
           style={{ 
             marginLeft: hideSidebar || isMobile ? 0 : sidebarWidth + 'px',
             paddingBottom: isMobile ? '6rem' : '2rem', 
