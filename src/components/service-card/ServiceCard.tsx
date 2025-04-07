@@ -12,10 +12,12 @@ import { shareBusinessProfile, openWhatsAppChat } from "@/utils/businessCardUtil
 
 interface ServiceCardProps {
   id: string;
-  title: string;
+  name?: string; // Add name prop for backwards compatibility
+  title?: string;
   description: string;
+  image?: string; // Add image prop for backwards compatibility
   image_url?: string;
-  price: number;
+  price?: number | string; // Accept both number and string for flexibility
   providerName?: string;
   providerId: string;
   category?: string;
@@ -23,14 +25,16 @@ interface ServiceCardProps {
   views?: number;
   rating?: number;
   sponsored?: boolean;
-  contact_info?: string; // Add this prop to fix the TypeScript errors
+  contact_info?: string; 
 }
 
 export const ServiceCard = ({
   id,
   title,
+  name, // Handle both name and title
   description,
   image_url,
+  image, // Handle both image and image_url
   price,
   providerName,
   providerId,
@@ -45,6 +49,10 @@ export const ServiceCard = ({
   const [isLiked, setIsLiked] = useState(false);
   const [animating, setAnimating] = useState(false);
 
+  // Use name as fallback for title and vice versa
+  const displayTitle = title || name || "";
+  const displayImage = image_url || image || "";
+  
   const handleClick = () => {
     trackServiceView(id); // Track the view
     navigate(`/services/${id}`);
@@ -78,25 +86,28 @@ export const ServiceCard = ({
   
   const handleShareClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    shareBusinessProfile(e, title, description, id);
+    shareBusinessProfile(e, displayTitle, description, id);
   };
   
   const handleMessageClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (contact_info) {
-      openWhatsAppChat(e, title, contact_info);
+      openWhatsAppChat(e, displayTitle, contact_info);
     } else {
       toast.error("Contact information not available");
       navigate(`/services/${id}`);
     }
   };
 
+  // Format price display
+  const displayPrice = typeof price === 'number' ? `₹${price.toLocaleString()}` : price;
+
   return (
     <Card className="overflow-hidden transition-all duration-300 hover:shadow-md h-full flex flex-col">
       <div className="relative h-48 overflow-hidden cursor-pointer" onClick={handleClick}>
         <img 
-          src={image_url || '/placeholder-service.jpg'}
-          alt={title}
+          src={displayImage || '/placeholder-service.jpg'}
+          alt={displayTitle}
           className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
         />
         {sponsored && (
@@ -111,7 +122,7 @@ export const ServiceCard = ({
       
       <CardContent className="flex-1 p-4 space-y-2 cursor-pointer" onClick={handleClick}>
         <div className="flex justify-between items-start">
-          <h3 className="font-semibold line-clamp-1">{title}</h3>
+          <h3 className="font-semibold line-clamp-1">{displayTitle}</h3>
           <Button 
             variant="ghost" 
             size="icon" 
@@ -167,7 +178,7 @@ export const ServiceCard = ({
         <p className="text-sm text-muted-foreground line-clamp-2">{description}</p>
         
         <div className="flex items-center gap-2">
-          <span className="font-bold">₹{price.toLocaleString()}</span>
+          <span className="font-bold">{displayPrice}</span>
         </div>
         
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
