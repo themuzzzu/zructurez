@@ -35,7 +35,7 @@ export interface Advertisement {
   reach?: number;
 }
 
-// Updated AdPlacement type to include all required properties
+// Updated AdPlacement interface with all required properties
 export interface AdPlacement {
   id: string;
   name: string;
@@ -66,9 +66,21 @@ export const getAdPlacements = async (): Promise<AdPlacement[]> => {
       return [];
     }
 
-    // Ensure all returned data conforms to the AdPlacement interface
+    // Transform the raw Supabase data to ensure it has all required properties
     return (data || []).map(item => ({
-      ...item,
+      id: item.id,
+      name: item.name,
+      description: item.description || "",
+      location: item.location,
+      type: item.type,
+      size: item.size || "",
+      active: item.active,
+      cpc_rate: item.cpc_rate,
+      cpm_rate: item.cpm_rate,
+      priority: item.priority || 1,
+      max_size_kb: item.max_size_kb || 1024,
+      created_at: item.created_at,
+      // Add these properties if they don't exist in the raw data
       impressions: item.impressions || 0,
       clicks: item.clicks || 0,
       revenue: item.revenue || 0
@@ -117,7 +129,7 @@ export const fetchActiveAds = async (
       ...ad,
       carousel_images: Array.isArray(ad.carousel_images) ? ad.carousel_images.map(String) : [],
       clicks: ad.clicks || 0,
-      impressions: 0, // Handle missing impressions field
+      impressions: ad.impressions || 0,
       reach: ad.reach || 0,
       targeting_locations: Array.isArray(ad.targeting_locations) ? ad.targeting_locations.map(String) : [],
       targeting_interests: Array.isArray(ad.targeting_interests) ? ad.targeting_interests.map(String) : []
