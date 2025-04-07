@@ -41,9 +41,17 @@ export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps
       
       if (error) throw error;
       
-      // Ensure that the returned data matches the ServiceType interface by explicitly mapping it
+      // Explicitly map the results to ensure they conform to ServiceType
       return (data || []).map(service => ({
-        ...service,
+        id: service.id,
+        title: service.title,
+        description: service.description,
+        image_url: service.image_url || undefined,
+        price: service.price,
+        user_id: service.user_id,
+        category: service.category || undefined,
+        location: service.location || undefined,
+        contact_info: service.contact_info || undefined,
         is_sponsored: true
       })) as ServiceType[];
     },
@@ -97,13 +105,16 @@ export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps
           <ServiceCard 
             key={service.id}
             id={service.id}
-            name={service.title}
+            title={service.title}
             description={service.description}
-            image={service.image_url || ''}
-            price={`$${service.price.toFixed(2)}`}
+            image_url={service.image_url}
+            price={service.price}
             providerId={service.user_id}
             providerName="Service Provider"
             contact_info={service.contact_info}
+            category={service.category}
+            location={service.location}
+            sponsored={service.is_sponsored}
           />
         ))}
       </div>
