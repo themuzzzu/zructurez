@@ -26,12 +26,20 @@ export const useAdBanners = (type?: AdType | string, format: string = "banner", 
   return { ads, isLoading };
 };
 
-// Fallback ads in case the API fails or returns empty
+// Ensure fallback ads have impressions and unique UUIDs for proper tracking
 const getFallbackAds = (type?: AdType): Advertisement[] => {
+  // Generate a valid UUID (for fallback/mock purposes only)
+  const generateMockUuid = () => {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  };
+
   // Generic banners
   const genericBanners: Advertisement[] = [
     {
-      id: "fallback-banner-1",
+      id: generateMockUuid(),
       title: "Discover Premium Products",
       description: "Explore our curated collection of premium products at exclusive prices",
       image_url: "https://images.unsplash.com/photo-1472851294608-062f824d29cc?auto=format&fit=crop&w=1200&h=300&q=80",
@@ -52,7 +60,7 @@ const getFallbackAds = (type?: AdType): Advertisement[] => {
       reach: 8000
     },
     {
-      id: "fallback-banner-2",
+      id: generateMockUuid(),
       title: "Summer Sale",
       description: "Limited time offers on seasonal favorites. Up to 50% off!",
       image_url: "https://images.unsplash.com/photo-1528459105426-b9548367069a?auto=format&fit=crop&w=1200&h=300&q=80",
@@ -77,7 +85,7 @@ const getFallbackAds = (type?: AdType): Advertisement[] => {
   // Service-specific banners
   const serviceBanners: Advertisement[] = [
     {
-      id: "fallback-service-1",
+      id: generateMockUuid(),
       title: "Professional Cleaning Services",
       description: "Keep your home spotless with our expert cleaning services. Book today for 20% off your first clean!",
       image_url: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1200&h=300&q=80",
@@ -98,7 +106,7 @@ const getFallbackAds = (type?: AdType): Advertisement[] => {
       reach: 3200
     },
     {
-      id: "fallback-service-2",
+      id: generateMockUuid(),
       title: "Home Renovation Experts",
       description: "Transform your living space with our professional renovation services. Free consultation available!",
       image_url: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1200&h=300&q=80",
@@ -123,7 +131,7 @@ const getFallbackAds = (type?: AdType): Advertisement[] => {
   // Business-specific banners
   const businessBanners: Advertisement[] = [
     {
-      id: "fallback-business-1",
+      id: generateMockUuid(),
       title: "Grow Your Business",
       description: "Join our network of trusted local businesses and reach more customers in your area",
       image_url: "https://images.unsplash.com/photo-1434626881859-194d67b2b86f?auto=format&fit=crop&w=1200&h=300&q=80",
@@ -144,7 +152,7 @@ const getFallbackAds = (type?: AdType): Advertisement[] => {
       reach: 4200
     },
     {
-      id: "fallback-business-2",
+      id: generateMockUuid(),
       title: "Business Directory",
       description: "List your business in our premium directory and get discovered by potential customers",
       image_url: "https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&w=1200&h=300&q=80",

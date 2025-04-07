@@ -105,6 +105,12 @@ export const fetchActiveAds = async (type?: AdType, format: string = "banner", l
 
 export const incrementAdView = async (adId: string): Promise<void> => {
   try {
+    // Check if adId is a valid UUID
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(adId)) {
+      console.warn("Invalid UUID format for adId:", adId);
+      return;
+    }
+
     // Call the increment_ad_views function directly
     const { error } = await supabase.rpc('increment_ad_views', { ad_id: adId });
     
@@ -118,6 +124,12 @@ export const incrementAdView = async (adId: string): Promise<void> => {
 
 export const incrementAdClick = async (adId: string): Promise<void> => {
   try {
+    // Check if adId is a valid UUID
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(adId)) {
+      console.warn("Invalid UUID format for adId:", adId);
+      return;
+    }
+    
     // Call the increment_ad_clicks function directly
     const { error } = await supabase.rpc('increment_ad_clicks', { ad_id: adId });
     

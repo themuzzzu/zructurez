@@ -21,7 +21,6 @@ const Marketplace = () => {
     <Layout>
       <div className="overflow-x-hidden">
         <Suspense fallback={<LoadingView />}>
-          {/* Wrap OptimizedMarketplace with LikeProvider as an extra safety */}
           <LikeProvider>
             <OptimizedMarketplace />
           </LikeProvider>

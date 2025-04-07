@@ -43,7 +43,6 @@ export const OptimizedMarketplace = () => {
       {/* Personalized Recommendations (only visible to returning users) */}
       <PersonalizedRecommendations />
       
-      {/* Wrap all product display components with LikeProvider */}
       <LikeProvider>
         {/* Sponsored Products Carousel */}
         <SponsoredProducts />

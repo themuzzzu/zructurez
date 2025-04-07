@@ -25,8 +25,8 @@ interface LocalBusinessSpotlightProps {
 export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightProps) => {
   const [currentBusinessIndex, setCurrentBusinessIndex] = useState(0);
   
-  // Fix infinite type instantiation by using explicit type annotation
-  const { data: localBusinesses, isLoading } = useQuery({
+  // Fix infinite type instantiation by explicitly defining the query return type
+  const { data: localBusinesses, isLoading } = useQuery<LocalBusiness[], Error>({
     queryKey: ["local-businesses", businessType],
     queryFn: async () => {
       try {
