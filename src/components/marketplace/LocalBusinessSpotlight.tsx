@@ -17,18 +17,28 @@ interface LocalBusiness {
   verified: boolean;
 }
 
-export const LocalBusinessSpotlight = () => {
+interface LocalBusinessSpotlightProps {
+  businessType?: string;
+}
+
+export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightProps) => {
   const [currentBusinessIndex, setCurrentBusinessIndex] = useState(0);
   
   // Fetch local businesses
   const { data: localBusinesses, isLoading } = useQuery({
-    queryKey: ["local-businesses"],
+    queryKey: ["local-businesses", businessType],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase
+        let query = supabase
           .from("businesses")
-          .select("*")
-          .limit(5);
+          .select("*");
+          
+        // Filter by type if provided
+        if (businessType) {
+          query = query.eq("type", businessType);
+        }
+        
+        const { data, error } = await query.limit(5);
         
         if (error) throw error;
         return data as LocalBusiness[];

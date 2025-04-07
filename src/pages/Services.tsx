@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, Suspense } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { useQuery } from "@tanstack/react-query";
@@ -17,7 +16,6 @@ import { LoadingView } from "@/components/LoadingView";
 import { LocalBusinessSpotlight } from "@/components/marketplace/LocalBusinessSpotlight";
 import { TrendingServicesSection } from "@/components/services/TrendingServicesSection";
 
-// Mock data for services
 const mockServices = [
   {
     id: "service-1",
@@ -92,7 +90,6 @@ const Services = () => {
   const [gridLayout, setGridLayout] = useState<GridLayoutType>("grid3x3");
   const [initialized, setInitialized] = useState(false);
 
-  // Initialize layout from localStorage
   useEffect(() => {
     try {
       const savedLayout = localStorage.getItem('serviceGridLayout') as GridLayoutType | null;
@@ -106,7 +103,6 @@ const Services = () => {
     }
   }, []);
 
-  // Use React Query with fallback to mock data
   const { data: services, isLoading } = useQuery({
     queryKey: ['services'],
     queryFn: async () => {
@@ -117,17 +113,17 @@ const Services = () => {
 
         if (error) {
           console.error('Error fetching services:', error);
-          return mockServices; // Return mock data on error
+          return mockServices;
         }
 
         return data && data.length > 0 ? data : mockServices;
       } catch (err) {
         console.error("Fetch error:", err);
-        return mockServices; // Return mock data on error
+        return mockServices;
       }
     },
-    staleTime: 60000, // 1 minute
-    enabled: initialized, // Only run query when component is initialized
+    staleTime: 60000,
+    enabled: initialized,
     retry: 1,
     retryDelay: 1000,
   });
@@ -164,16 +160,13 @@ const Services = () => {
               </Button>
             </div>
 
-            {/* Service Banner Carousel with specific service ads */}
             <ServiceBannerCarousel />
 
-            {/* Service Categories Grid */}
             <div className="mb-8">
               <h2 className="text-2xl font-semibold mb-4">Browse Categories</h2>
               <ServiceCategoryGrid />
             </div>
 
-            {/* Featured Service Providers */}
             <div className="mb-8">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-semibold">Featured Service Providers</h2>
@@ -181,15 +174,13 @@ const Services = () => {
                   View All
                 </Button>
               </div>
-              <LocalBusinessSpotlight businessType="service" />
+              <LocalBusinessSpotlight />
             </div>
 
-            {/* Trending Services */}
             <div className="mb-8">
               <TrendingServicesSection />
             </div>
 
-            {/* All Services with Grid Layout Selector */}
             <div className="mb-8">
               <ServiceGrid 
                 services={services || []} 
@@ -199,7 +190,6 @@ const Services = () => {
               />
             </div>
 
-            {/* Top Ranked Services */}
             <div className="mb-8">
               <ServiceRankings />
             </div>
