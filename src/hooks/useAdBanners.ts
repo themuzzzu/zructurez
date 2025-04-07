@@ -1,23 +1,23 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { fetchActiveAds } from "@/services/adService";
+import { AdType, Advertisement } from "@/types/advertising";
 
-export const useAdBanners = (type?: string, format: string = "banner", limit: number = 5) => {
+export const useAdBanners = (type?: AdType | string, format: string = "banner", limit: number = 5) => {
   const { data: ads = [], isLoading } = useQuery({
     queryKey: ['ad-banners', type, format, limit],
     queryFn: async () => {
       try {
-        const ads = await fetchActiveAds(type, format, limit);
+        const ads = await fetchActiveAds(type as AdType, format, limit);
         
         // If no ads returned from API, return fallback ads
         if (!ads || ads.length === 0) {
-          return getFallbackAds(type);
+          return getFallbackAds(type as AdType);
         }
         
         return ads;
       } catch (error) {
         console.error("Error fetching banner ads:", error);
-        return getFallbackAds(type);
+        return getFallbackAds(type as AdType);
       }
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -27,7 +27,7 @@ export const useAdBanners = (type?: string, format: string = "banner", limit: nu
 };
 
 // Fallback ads in case the API fails or returns empty
-const getFallbackAds = (type?: string) => {
+const getFallbackAds = (type?: AdType): Advertisement[] => {
   // Generic banners
   const genericBanners = [
     {
