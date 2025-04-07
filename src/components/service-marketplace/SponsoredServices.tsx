@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
@@ -29,7 +30,8 @@ interface ServiceType {
 export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps) => {
   const navigate = useNavigate();
   
-  const { data: services, isLoading } = useQuery({
+  // Fix: Explicitly type the query result to avoid deep type inference issues
+  const { data: services, isLoading } = useQuery<ServiceType[], Error>({
     queryKey: ['sponsored-services'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -40,8 +42,11 @@ export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps
       
       if (error) throw error;
       
-      // Fix: Define the return type explicitly and don't rely on inference
-      const servicesToReturn: ServiceType[] = (data || []).map((item: any) => ({
+      // Explicitly cast to Array<any> before mapping to ServiceType
+      const rawData = (data || []) as Array<any>;
+      
+      // Map to our strongly typed model
+      return rawData.map(item => ({
         id: item.id,
         title: item.title,
         description: item.description,
@@ -53,8 +58,6 @@ export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps
         contact_info: item.contact_info || undefined,
         is_sponsored: true
       }));
-      
-      return servicesToReturn;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
