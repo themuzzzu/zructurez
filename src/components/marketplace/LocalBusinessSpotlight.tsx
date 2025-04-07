@@ -77,7 +77,7 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
     }
   };
 
-  // Use optimized query with longer cache time - fixed function call syntax
+  // Use optimized query with longer cache time - fixed function call syntax to use object parameter
   const { data: businesses, isLoading } = useOptimizedQuery({
     queryKey,
     queryFn: fetchBusinesses,
@@ -102,7 +102,7 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
     );
   }
 
-  // No results - explicitly check for array properties
+  // No results - explicitly check for array properties with proper typing
   if (!businesses || businesses.length === 0) {
     return (
       <div className="text-center py-8">
