@@ -24,8 +24,8 @@ interface LocalBusinessSpotlightProps {
 export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightProps) => {
   const [currentBusinessIndex, setCurrentBusinessIndex] = useState(0);
   
-  // Fetch local businesses
-  const { data: localBusinesses, isLoading } = useQuery({
+  // Fix: Specify the return type explicitly to avoid infinite type recursion
+  const { data: localBusinesses, isLoading } = useQuery<LocalBusiness[], Error>({
     queryKey: ["local-businesses", businessType],
     queryFn: async () => {
       try {
