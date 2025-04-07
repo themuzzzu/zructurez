@@ -16,7 +16,7 @@ const Marketplace = () => {
   // Render the marketplace with the proper layout
   return (
     <Layout>
-      <div className="overflow-x-hidden">
+      <div className="container max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8 overflow-x-hidden">
         <OptimizedMarketplace />
       </div>
     </Layout>

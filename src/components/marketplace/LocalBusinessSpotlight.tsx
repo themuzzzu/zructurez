@@ -16,6 +16,20 @@ interface LocalBusiness {
   location: string | null;
 }
 
+interface BusinessRating {
+  rating: number;
+}
+
+interface BusinessData {
+  id: string;
+  name: string;
+  description: string;
+  image_url?: string | null;
+  location: string | null;
+  business_ratings?: BusinessRating[];
+  [key: string]: any; // Allow other fields
+}
+
 export const LocalBusinessSpotlight = () => {
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [locationPermission, setLocationPermission] = useState<'granted' | 'denied' | 'pending'>('pending');
@@ -46,21 +60,27 @@ export const LocalBusinessSpotlight = () => {
 
       const { data, error } = await supabase
         .from('businesses')
-        .select('*')
+        .select('*, business_ratings(*)')
         .limit(4);
 
       if (error) throw error;
       
       // Transform business data to match LocalBusiness interface
-      return data.map((business): LocalBusiness => ({
-        id: business.id,
-        name: business.name,
-        description: business.description,
-        image_url: business.image_url,
-        rating: 4.5, // Mock rating
-        distance: Math.round(Math.random() * 10) / 10, // Mock distance
-        location: business.location
-      }));
+      return data.map((business: BusinessData): LocalBusiness => {
+        const ratings = business.business_ratings || [];
+        const totalRating = ratings.reduce((sum: number, rating: BusinessRating) => sum + (rating.rating || 0), 0);
+        const avgRating = ratings.length > 0 ? totalRating / ratings.length : 0;
+        
+        return {
+          id: business.id,
+          name: business.name,
+          description: business.description,
+          image_url: business.image_url,
+          rating: avgRating, 
+          distance: Math.round(Math.random() * 10) / 10, // Mock distance
+          location: business.location
+        };
+      });
     },
     enabled: !!userLocation,
   });
@@ -139,7 +159,7 @@ export const LocalBusinessSpotlight = () => {
 
       {locationPermission === 'granted' && !isLoading && businessesData.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {businessesData.map((business) => (
+          {businessesData.map((business: LocalBusiness) => (
             <Card key={business.id} className="overflow-hidden transition-all hover:shadow-lg">
               <div className="h-40 bg-slate-100 dark:bg-slate-800 relative">
                 {business.image_url ? (
@@ -160,7 +180,7 @@ export const LocalBusinessSpotlight = () => {
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center">
                     <Star size={16} className="text-yellow-500 fill-yellow-500 mr-1" />
-                    <span className="text-sm">{business.rating}</span>
+                    <span className="text-sm">{business.rating.toFixed(1)}</span>
                   </div>
                   <div className="flex items-center text-sm text-muted-foreground">
                     <MapPin size={14} className="mr-1" />

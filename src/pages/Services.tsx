@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
-import { Button, } from "@/components/ui/button";
-import { Plus, Phone } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Plus, ArrowLeft } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ServiceCard } from "@/components/service-card/ServiceCard";
 import { CreateServiceForm } from "@/components/service-form/CreateServiceForm";
@@ -10,16 +10,18 @@ import { Spinner } from "@/components/common/Spinner";
 import { Layout } from "@/components/layout/Layout";
 import { GridLayoutSelector } from "@/components/marketplace/GridLayoutSelector";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
-import { MarketplaceBanner } from "@/components/marketplace/MarketplaceBanner";
-import { ServiceCategoryFilter } from "@/components/ServiceCategoryFilter";
+import { SearchInput } from "@/components/SearchInput";
+import { useQuery } from "@tanstack/react-query";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { ServiceBannerCarousel } from "@/components/services/ServiceBannerCarousel";
 import { SponsoredServices } from "@/components/service-marketplace/SponsoredServices";
 import { TrendingServices } from "@/components/service-marketplace/TrendingServices";
-import { RecommendedServices } from "@/components/service-marketplace/RecommendedServices";
-import { TopServices } from "@/components/service-marketplace/TopServices";
-import { ServiceIconGrid } from "@/components/service-marketplace/ServiceIconGrid";
-import { SearchInput } from "@/components/SearchInput";
-import { ServiceBannerAd } from "@/components/ads/ServiceBannerAd";
-import { ServiceRankings } from "@/components/rankings/ServiceRankings";
+import { SuggestedServices } from "@/components/service-marketplace/SuggestedServices";
+import { ServiceCategoryIconGrid } from "@/components/service-marketplace/ServiceCategoryIconGrid";
+import { ServiceCategorySubcategoryGrid } from "@/components/service-marketplace/ServiceCategorySubcategoryGrid";
+import { ServiceCategoryScroller } from "@/components/services/ServiceCategoryScroller";
+import { ServiceCategoryFilter } from "@/components/ServiceCategoryFilter";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function Services() {
   const [services, setServices] = useState([]);
@@ -30,70 +32,102 @@ export default function Services() {
   const [gridLayout, setGridLayout] = useState<GridLayoutType>("grid3x3");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [sortOption, setSortOption] = useState("newest");
+  
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const checkUserAuth = async () => {
-      const { data } = await supabase.auth.getUser();
-      setIsUserLoggedIn(!!data.user);
-      
-      if (data.user) {
-        fetchUserServices(data.user.id);
-      }
-    };
+    const params = new URLSearchParams(location.search);
+    const categoryParam = params.get('category');
+    const subcategoryParam = params.get('subcategory');
     
-    const fetchServices = async () => {
-      setLoading(true);
-      try {
-        let query = supabase
-          .from('services')
-          .select('*')
-          .order('created_at', { ascending: false });
+    if (categoryParam) {
+      setSelectedCategory(subcategoryParam ? `${categoryParam}-${subcategoryParam}` : categoryParam);
+    }
+  }, [location.search]);
+  
+  const checkUserAuth = async () => {
+    const { data } = await supabase.auth.getUser();
+    setIsUserLoggedIn(!!data.user);
+    
+    if (data.user) {
+      fetchUserServices(data.user.id);
+    }
+  };
+  
+  const fetchServices = async () => {
+    setLoading(true);
+    try {
+      let query = supabase
+        .from('services')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-        if (selectedCategory !== "all") {
-          query = query.eq('category', selectedCategory);
-        }
+      if (selectedCategory !== "all") {
+        query = query.eq('category', selectedCategory);
+      }
 
-        if (searchQuery) {
-          query = query.ilike('title', `%${searchQuery}%`);
-        }
-          
-        const { data, error } = await query.limit(12);
-          
-        if (error) throw error;
-        setServices(data || []);
-      } catch (err) {
-        console.error('Error fetching services:', err);
-      } finally {
-        setLoading(false);
+      if (searchQuery) {
+        query = query.ilike('title', `%${searchQuery}%`);
       }
-    };
-    
-    const fetchUserServices = async (userId) => {
-      try {
-        const { data, error } = await supabase
-          .from('services')
-          .select('*')
-          .eq('user_id', userId)
-          .order('created_at', { ascending: false });
-          
-        if (error) throw error;
-        setUserServices(data || []);
-      } catch (err) {
-        console.error('Error fetching user services:', err);
-      }
-    };
-    
+        
+      const { data, error } = await query.limit(12);
+        
+      if (error) throw error;
+      setServices(data || []);
+    } catch (err) {
+      console.error('Error fetching services:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const fetchUserServices = async (userId) => {
+    try {
+      const { data, error } = await supabase
+        .from('services')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+        
+      if (error) throw error;
+      setUserServices(data || []);
+    } catch (err) {
+      console.error('Error fetching user services:', err);
+    }
+  };
+  
+  useEffect(() => {
     checkUserAuth();
     fetchServices();
   }, [selectedCategory, searchQuery]);
   
   const handleCategoryChange = (category) => {
     setSelectedCategory(category);
+    
+    if (category === "all") {
+      navigate("/services");
+    } else {
+      navigate(`/services?category=${category}`);
+    }
+  };
+  
+  const handleSubcategorySelect = (category: string, subcategory?: string) => {
+    const newCategory = subcategory ? `${category}-${subcategory}` : category;
+    setSelectedCategory(newCategory);
+    
+    if (subcategory) {
+      navigate(`/services?category=${category}&subcategory=${subcategory}`);
+    } else {
+      navigate(`/services?category=${category}`);
+    }
   };
 
   const handleCreateSuccess = () => {
     setIsDialogOpen(false);
-    window.location.reload();
+    fetchServices();
+    checkUserAuth();
   };
 
   const getGridClasses = () => {
@@ -114,11 +148,37 @@ export default function Services() {
     }
   };
 
+  const sortedServices = [...services].sort((a, b) => {
+    switch (sortOption) {
+      case "newest":
+        return new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime();
+      case "oldest":
+        return new Date(a.created_at || '').getTime() - new Date(b.created_at || '').getTime();
+      case "price-low":
+        return (a.price || 0) - (b.price || 0);
+      case "price-high":
+        return (b.price || 0) - (a.price || 0);
+      case "name-asc":
+        return (a.title || '').localeCompare(b.title || '');
+      case "name-desc":
+        return (b.title || '').localeCompare(a.title || '');
+      default:
+        return 0;
+    }
+  });
+
   return (
     <Layout>
       <div className="container max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold">Services</h1>
+          <div className="flex items-center gap-2">
+            <Link to="/">
+              <Button variant="ghost" size="icon" className="hidden sm:flex">
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+            </Link>
+            <h1 className="text-2xl sm:text-3xl font-bold">Services Marketplace</h1>
+          </div>
           <div className="flex items-center gap-4 w-full sm:w-auto">
             <GridLayoutSelector 
               layout={gridLayout} 
@@ -143,49 +203,32 @@ export default function Services() {
           />
         </div>
         
-        {/* Banner Ad - Added below search */}
-        <ServiceBannerAd />
+        {/* Banner with Auto Scroll */}
+        <ServiceBannerCarousel />
         
-        {/* Banner */}
+        {/* Categories Icon Grid */}
         <div className="mb-6">
-          <MarketplaceBanner />
+          <h2 className="text-xl font-bold mb-4">Browse by Category</h2>
+          <ServiceCategoryIconGrid onCategorySelect={handleCategoryChange} />
         </div>
         
-        {/* Service Categories Icon Grid */}
-        <div className="mb-6">
-          <ServiceIconGrid onCategorySelect={handleCategoryChange} />
-        </div>
+        {/* Sponsored Services Section */}
+        <SponsoredServices />
         
-        {/* Sponsored Services */}
-        <div className="mb-8">
-          <SponsoredServices />
-        </div>
-
         {/* Trending Services */}
-        <div className="mb-8">
-          <TrendingServices />
+        <TrendingServices />
+        
+        {/* Suggested Services */}
+        <SuggestedServices />
+        
+        {/* Category Subcategories Grid */}
+        <div className="mt-8 mb-6">
+          <h2 className="text-2xl font-bold mb-4">Browse by Category</h2>
+          <ServiceCategorySubcategoryGrid onCategorySelect={handleSubcategorySelect} />
         </div>
         
-        {/* Rankings - Added new section */}
-        <div className="mb-8">
-          <ServiceRankings />
-        </div>
-
-        {/* Top Services */}
-        <div className="mb-8">
-          <TopServices />
-        </div>
-
-        {/* Recommended Services */}
-        <div className="mb-8">
-          <RecommendedServices />
-        </div>
-        
-        {/* Category Filter - Moved below recommended services */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">Filter by Category</h2>
-          <ServiceCategoryFilter onCategoryChange={handleCategoryChange} />
-        </div>
+        {/* Service Category Scroller */}
+        <ServiceCategoryScroller />
         
         {isUserLoggedIn && userServices.length > 0 && (
           <div className="mb-8">
@@ -209,34 +252,55 @@ export default function Services() {
           </div>
         )}
         
-        <h2 className="text-xl font-semibold mb-4">All Services</h2>
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold mb-4">All Services</h2>
+          
+          <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between mb-6">
+            <ServiceCategoryFilter onCategoryChange={handleCategoryChange} />
+            <div className="w-full md:w-64">
+              <Select value={sortOption} onValueChange={setSortOption}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">Newest First</SelectItem>
+                  <SelectItem value="oldest">Oldest First</SelectItem>
+                  <SelectItem value="price-low">Price: Low to High</SelectItem>
+                  <SelectItem value="price-high">Price: High to Low</SelectItem>
+                  <SelectItem value="name-asc">Name (A-Z)</SelectItem>
+                  <SelectItem value="name-desc">Name (Z-A)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         
-        {loading ? (
-          <div className="flex justify-center items-center py-12">
-            <Spinner size="lg" />
-          </div>
-        ) : services.length > 0 ? (
-          <div className={getGridClasses()}>
-            {services.map((service) => (
-              <ServiceCard 
-                key={service.id}
-                id={service.id}
-                title={service.title}
-                description={service.description}
-                image_url={service.image_url}
-                price={service.price}
-                providerId={service.user_id}
-                category={service.category}
-                location={service.location}
-                views={service.views}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">No services found</p>
-          </div>
-        )}
+          {loading ? (
+            <div className="flex justify-center items-center py-12">
+              <Spinner size="lg" />
+            </div>
+          ) : sortedServices.length > 0 ? (
+            <div className={getGridClasses()}>
+              {sortedServices.map((service) => (
+                <ServiceCard 
+                  key={service.id}
+                  id={service.id}
+                  title={service.title}
+                  description={service.description}
+                  image_url={service.image_url}
+                  price={service.price}
+                  providerId={service.user_id}
+                  category={service.category}
+                  location={service.location}
+                  views={service.views}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No services found</p>
+            </div>
+          )}
+        </div>
         
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent className="sm:max-w-[600px] h-[90vh] overflow-y-auto">
