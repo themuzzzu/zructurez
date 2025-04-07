@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,12 +12,6 @@ interface AdCardProps {
   className?: string;
 }
 
-// Function to validate if a string is a UUID
-const isValidUuid = (id: string): boolean => {
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  return uuidRegex.test(id);
-};
-
 export function AdCard({ ad, className }: AdCardProps) {
   const navigate = useNavigate();
   const [hasTrackedView, setHasTrackedView] = useState(false);
@@ -31,13 +24,7 @@ export function AdCard({ ad, className }: AdCardProps) {
       if (hasTrackedView) return;
       
       try {
-        // Only try to increment view if it's a valid UUID
-        if (isValidUuid(ad.id)) {
-          await incrementAdView(ad.id);
-        } else {
-          console.log(`Skipping view tracking for non-UUID ad id: ${ad.id}`);
-        }
-        
+        await incrementAdView(ad.id);
         setHasTrackedView(true);
       } catch (error) {
         console.error("Error incrementing ad view:", error);
@@ -51,12 +38,7 @@ export function AdCard({ ad, className }: AdCardProps) {
   
   const handleClick = async () => {
     try {
-      // Only try to increment click if it's a valid UUID
-      if (isValidUuid(ad.id)) {
-        await incrementAdClick(ad.id);
-      } else {
-        console.log(`Skipping click tracking for non-UUID ad id: ${ad.id}`);
-      }
+      await incrementAdClick(ad.id);
       
       // Direct the user to the appropriate page based on ad type
       if (ad.type === "product") {

@@ -3,29 +3,20 @@ import { useQuery, QueryKey, UseQueryOptions } from "@tanstack/react-query";
 import { useEffect, useRef, useCallback } from "react";
 import { globalCache } from "@/utils/cacheUtils";
 
-interface OptimizedQueryOptions<TData, TError> extends Omit<UseQueryOptions<TData, TError, TData>, 'queryKey' | 'queryFn'> {
-  staleTime?: number;
-  gcTime?: number;
-  limit?: number;
-  cacheTime?: number; // Local cache TTL, separate from React Query
-}
-
 /**
  * A wrapper around React Query's useQuery hook with built-in optimizations
  * to reduce unnecessary database requests
  */
-export function useOptimizedQuery<TData, TError = unknown>({
-  queryKey,
-  queryFn,
-  ...options
-}: {
-  queryKey: QueryKey;
-  queryFn: () => Promise<TData>;
-  staleTime?: number;
-  gcTime?: number;
-  limit?: number;
-  cacheTime?: number;
-} & OptimizedQueryOptions<TData, TError>) {
+export function useOptimizedQuery<TData, TError = unknown>(
+  queryKey: QueryKey,
+  queryFn: () => Promise<TData>,
+  options?: Omit<UseQueryOptions<TData, TError>, 'queryKey' | 'queryFn'> & {
+    staleTime?: number;
+    gcTime?: number;
+    limit?: number;
+    cacheTime?: number; // Local cache TTL, separate from React Query
+  }
+) {
   // Track if this component is still mounted
   const isMountedRef = useRef(true);
   const cacheKey = Array.isArray(queryKey) ? queryKey.join(':') : String(queryKey);
