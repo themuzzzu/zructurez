@@ -41,8 +41,8 @@ export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps
       
       if (error) throw error;
       
-      // Transform the raw data to match our ServiceType
-      return (data || []).map((item: any) => ({
+      // Explicitly cast data to any[] before mapping
+      return (data as any[] || []).map(item => ({
         id: item.id,
         title: item.title,
         description: item.description,
