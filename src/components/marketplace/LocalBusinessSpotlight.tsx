@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BusinessCard } from "@/components/BusinessCard";
 import { Sparkles } from "lucide-react";
+import { LikeProvider } from "@/components/products/LikeContext";
 
 interface LocalBusiness {
   id: string;
@@ -24,7 +25,7 @@ interface LocalBusinessSpotlightProps {
 export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightProps) => {
   const [currentBusinessIndex, setCurrentBusinessIndex] = useState(0);
   
-  // Define the query function with explicit return type
+  // Define the query function with explicit return type to fix infinite type instantiation
   const fetchLocalBusinesses = async (): Promise<LocalBusiness[]> => {
     try {
       let query = supabase
@@ -104,19 +105,21 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <BusinessCard
-          id={currentBusiness.id}
-          name={currentBusiness.name}
-          description={currentBusiness.description}
-          image={currentBusiness.image_url}
-          category={currentBusiness.category}
-          location={currentBusiness.location}
-          rating={4.5} // Default rating
-          reviews={10} // Default reviews count
-          verified={currentBusiness.verified || false}
-          contact=""
-          hours=""
-        />
+        <LikeProvider>
+          <BusinessCard
+            id={currentBusiness.id}
+            name={currentBusiness.name}
+            description={currentBusiness.description}
+            image={currentBusiness.image_url}
+            category={currentBusiness.category}
+            location={currentBusiness.location}
+            rating={4.5} // Default rating
+            reviews={10} // Default reviews count
+            verified={currentBusiness.verified || false}
+            contact=""
+            hours=""
+          />
+        </LikeProvider>
       </CardContent>
     </Card>
   );
