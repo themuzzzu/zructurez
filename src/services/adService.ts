@@ -1,6 +1,57 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import type { AdType, Advertisement, AdFormat, AdStatus, AdPlacement } from "@/types/advertising";
+
+export type AdType = 
+  | "product"
+  | "service"
+  | "business"
+  | "event"
+  | "general";
+
+export interface Advertisement {
+  id: string;
+  title: string;
+  description: string;
+  image_url: string | null;
+  type: AdType;
+  format: string;
+  reference_id: string;
+  status: string;
+  user_id: string;
+  location: string;
+  budget: number;
+  clicks: number;
+  impressions: number;
+  start_date: string;
+  end_date: string;
+  created_at: string;
+  video_url: string | null;
+  carousel_images: any;
+  business_id?: string;
+}
+
+export type AdFormat = 
+  | "banner"
+  | "sidebar"
+  | "popup"
+  | "inline"
+  | "carousel"
+  | "video";
+
+export type AdStatus = 
+  | "active"
+  | "pending"
+  | "rejected"
+  | "expired"
+  | "paused";
+
+export type AdPlacement =
+  | "homepage"
+  | "marketplace"
+  | "services"
+  | "businesses"
+  | "profile"
+  | "search";
 
 export const fetchActiveAds = async (type?: AdType, format: string = "banner", limit: number = 3): Promise<Advertisement[]> => {
   try {
@@ -31,11 +82,8 @@ export const fetchActiveAds = async (type?: AdType, format: string = "banner", l
 
 export const incrementAdView = async (adId: string): Promise<void> => {
   try {
-    // Using direct update since RPC doesn't exist
-    const { error } = await supabase
-      .from('advertisements')
-      .update({ impressions: supabase.rpc('increment_ad_views', { ad_id: adId }) })
-      .eq('id', adId);
+    // Call the increment_ad_views function directly
+    const { error } = await supabase.rpc('increment_ad_views', { ad_id: adId });
     
     if (error) {
       console.error("Error incrementing ad view:", error);
@@ -47,11 +95,8 @@ export const incrementAdView = async (adId: string): Promise<void> => {
 
 export const incrementAdClick = async (adId: string): Promise<void> => {
   try {
-    // Using direct update since RPC doesn't exist
-    const { error } = await supabase
-      .from('advertisements')
-      .update({ clicks: supabase.rpc('increment_ad_clicks', { ad_id: adId }) })
-      .eq('id', adId);
+    // Call the increment_ad_clicks function directly
+    const { error } = await supabase.rpc('increment_ad_clicks', { ad_id: adId });
     
     if (error) {
       console.error("Error incrementing ad click:", error);
@@ -60,5 +105,3 @@ export const incrementAdClick = async (adId: string): Promise<void> => {
     console.error("Error in incrementAdClick:", error);
   }
 };
-
-export { type AdType, type Advertisement, type AdFormat, type AdStatus, type AdPlacement };

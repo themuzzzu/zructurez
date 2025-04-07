@@ -46,8 +46,8 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
     }
   };
   
-  // Use proper typing for the query
-  const { data: localBusinesses = [], isLoading } = useQuery({
+  // Fix type instantiation issue by properly typing the query
+  const { data: localBusinesses, isLoading } = useQuery({
     queryKey: ["local-businesses", businessType],
     queryFn: fetchLocalBusinesses,
     staleTime: 5 * 60 * 1000, // 5 minutes
