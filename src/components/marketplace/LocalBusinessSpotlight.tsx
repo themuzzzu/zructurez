@@ -25,10 +25,10 @@ interface LocalBusinessSpotlightProps {
 export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightProps) => {
   const [currentBusinessIndex, setCurrentBusinessIndex] = useState(0);
   
-  // Fix infinite type instantiation by explicitly defining the query return type
-  const { data: localBusinesses, isLoading } = useQuery<LocalBusiness[], Error>({
+  // Fix infinite type instantiation by explicitly defining the query function return type
+  const { data: localBusinesses, isLoading } = useQuery({
     queryKey: ["local-businesses", businessType],
-    queryFn: async () => {
+    queryFn: async (): Promise<LocalBusiness[]> => {
       try {
         let query = supabase
           .from("businesses")
@@ -45,7 +45,7 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
         return data as LocalBusiness[];
       } catch (err) {
         console.error("Error fetching local businesses:", err);
-        return [] as LocalBusiness[];
+        return [];
       }
     },
     staleTime: 5 * 60 * 1000, // 5 minutes

@@ -89,7 +89,7 @@ export const fetchActiveAds = async (type?: AdType, format: string = "banner", l
     // Transform and ensure all required fields are present
     const transformedData = (data || []).map(ad => ({
       ...ad,
-      impressions: ad.impressions || 0, // Add default value if missing
+      impressions: ad.impressions || ad.reach || 0, // Use reach as fallback for impressions
       clicks: ad.clicks || 0, // Add default for clicks too
       type: (ad.type || "general") as AdType,
       format: (ad.format || "banner") as AdFormat,
