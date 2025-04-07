@@ -37,7 +37,7 @@ export const OptimizedMarketplace = () => {
     <div className="container mx-auto px-4 py-6">
       {/* Auto-scrolling Banner Ad */}
       <div className="mb-8">
-        <AutoScrollingBannerAd ads={bannerAds} />
+        <AutoScrollingBannerAd ads={bannerAds} autoScrollInterval={3000} />
       </div>
       
       {/* Personalized Recommendations (only visible to returning users) */}

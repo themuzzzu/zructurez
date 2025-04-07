@@ -3,7 +3,9 @@ import { BusinessCardRating } from "./business/BusinessCardRating";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge"; 
-import { Clock } from "lucide-react";
+import { Clock, Share2, Phone, MessageSquare } from "lucide-react";
+import { shareBusinessProfile } from "@/utils/businessCardUtils";
+import { toast } from "sonner";
 
 export interface BusinessCardProps {
   id: string;
@@ -57,6 +59,34 @@ export const BusinessCard = ({
     }
   };
   
+  const handleCallClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (contact) {
+      window.open(`tel:${contact}`);
+    } else {
+      toast.error("No contact number available");
+    }
+  };
+  
+  const handleShareClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    shareBusinessProfile(e, name, description, id);
+  };
+  
+  const handleMessageClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (contact) {
+      // First try WhatsApp if available
+      const whatsappUrl = `https://wa.me/${contact.replace(/\D/g, '')}`;
+      window.open(whatsappUrl, '_blank');
+    } else {
+      toast.error("No contact number available for messaging");
+    }
+  };
+  
   return (
     <div className="border rounded-lg shadow-md overflow-hidden">
       <img src={image_url || image} alt={name} className="w-full h-48 object-cover" />
@@ -83,8 +113,37 @@ export const BusinessCard = ({
         <p className="text-sm text-gray-700 mt-2 line-clamp-2">{description}</p>
         <p className="text-sm text-gray-500">{location}</p>
         {verified && <span className="text-xs text-green-500 inline-block mt-1">Verified</span>}
-        <div className="mt-4">
-          <Button asChild>
+        
+        {/* Communication Actions */}
+        <div className="mt-3 grid grid-cols-2 gap-2 pt-3 border-t border-gray-200">
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="flex items-center gap-1"
+            onClick={handleCallClick}
+          >
+            <Phone className="h-4 w-4" />
+            Call
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="flex items-center gap-1"
+            onClick={handleMessageClick}
+          >
+            <MessageSquare className="h-4 w-4" />
+            Message
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="flex items-center gap-1"
+            onClick={handleShareClick}
+          >
+            <Share2 className="h-4 w-4" />
+            Share
+          </Button>
+          <Button asChild size="sm">
             <Link to={`/businesses/${id}`}>View Details</Link>
           </Button>
         </div>

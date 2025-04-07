@@ -12,6 +12,9 @@ import { AutoScrollingBannerAd } from "@/components/ads/AutoScrollingBannerAd";
 import { useAdBanners } from "@/hooks/useAdBanners";
 import { SponsoredBusinesses } from "@/components/business/SponsoredBusinesses";
 import { RecommendedBusinesses } from "@/components/business/RecommendedBusinesses";
+import { BusinessCategoryNavBar } from "@/components/business/BusinessCategoryNavBar";
+import { BusinessCategoryScroller } from "@/components/business/BusinessCategoryScroller";
+import { SuggestedBusinesses } from "@/components/business/SuggestedBusinesses";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BusinessCard } from "@/components/BusinessCard";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -66,19 +69,25 @@ const Businesses = () => {
               </Button>
             </div>
 
-            {/* Banner Ad Carousel */}
+            {/* Business Category Navigation */}
+            <BusinessCategoryNavBar />
+            
+            {/* Auto-scrolling Banner Ad Carousel (3 seconds) */}
             <div className="mb-8">
-              <AutoScrollingBannerAd ads={bannerAds} />
+              <AutoScrollingBannerAd ads={bannerAds} autoScrollInterval={3000} />
             </div>
+            
+            {/* Category Scroller */}
+            <BusinessCategoryScroller />
 
             {/* Sponsored Businesses Section */}
             <div className="mb-8">
               <SponsoredBusinesses limit={4} showTitle={true} />
             </div>
 
-            {/* Recommended Businesses */}
+            {/* Suggested Businesses Section */}
             <div className="mb-8">
-              <RecommendedBusinesses limit={4} showTitle={true} />
+              <SuggestedBusinesses limit={4} showTitle={true} />
             </div>
 
             {/* All Businesses */}
