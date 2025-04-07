@@ -10,6 +10,7 @@ import { PersonalizedRecommendations } from "@/components/marketplace/Personaliz
 import { Separator } from "@/components/ui/separator";
 import { AutoScrollingBannerAd } from '@/components/ads/AutoScrollingBannerAd';
 import { useAdBanners } from '@/hooks/useAdBanners';
+import { LikeProvider } from '@/components/products/LikeContext';
 
 // Define type for sort options
 type SortOption = "newest" | "price-asc" | "price-desc" | "popular";
@@ -42,62 +43,65 @@ export const OptimizedMarketplace = () => {
       {/* Personalized Recommendations (only visible to returning users) */}
       <PersonalizedRecommendations />
       
-      {/* Sponsored Products Carousel */}
-      <SponsoredProducts />
-      
-      {/* Category & Sort Selection */}
-      <div className="flex flex-col sm:flex-row justify-between mb-4 gap-4">
-        <CategoryFilter 
-          selectedCategory={selectedCategory} 
-          onCategoryChange={handleCategoryChange} 
-        />
-        <SortFilter 
-          selectedSort={sortBy}
-          onSortChange={handleSortChange}
-        />
-      </div>
-      
-      {/* This is the main products section that will show filtered results */}
-      <ProductsSection
-        title="Latest Products"
-        category={selectedCategory || undefined}
-        sortBy={sortBy}
-        limit={8}
-      />
-      
-      <Separator className="my-8" />
-      
-      {/* Trending Products Section - always shows most viewed */}
-      <TrendingProducts />
-      
-      <Separator className="my-8" />
-      
-      {/* Categories Sections */}
-      <div className="space-y-12">
-        {/* Electronics */}
+      {/* Wrap all product display components with LikeProvider */}
+      <LikeProvider>
+        {/* Sponsored Products Carousel */}
+        <SponsoredProducts />
+        
+        {/* Category & Sort Selection */}
+        <div className="flex flex-col sm:flex-row justify-between mb-4 gap-4">
+          <CategoryFilter 
+            selectedCategory={selectedCategory} 
+            onCategoryChange={handleCategoryChange} 
+          />
+          <SortFilter 
+            selectedSort={sortBy}
+            onSortChange={handleSortChange}
+          />
+        </div>
+        
+        {/* This is the main products section that will show filtered results */}
         <ProductsSection
-          title="Electronics"
-          category="electronics"
-          sortBy="newest"
-          limit={4}
+          title="Latest Products"
+          category={selectedCategory || undefined}
+          sortBy={sortBy}
+          limit={8}
         />
         
-        {/* Clothing */}
-        <ProductsSection
-          title="Fashion"
-          category="clothing"
-          sortBy="newest"
-          limit={4}
-        />
+        <Separator className="my-8" />
         
-        {/* Home & Garden */}
-        <ProductsSection
-          title="Home & Garden"
-          category="home"
-          sortBy="popular"
-          limit={4}
-        />
-      </div>
+        {/* Trending Products Section - always shows most viewed */}
+        <TrendingProducts />
+        
+        <Separator className="my-8" />
+        
+        {/* Categories Sections */}
+        <div className="space-y-12">
+          {/* Electronics */}
+          <ProductsSection
+            title="Electronics"
+            category="electronics"
+            sortBy="newest"
+            limit={4}
+          />
+          
+          {/* Clothing */}
+          <ProductsSection
+            title="Fashion"
+            category="clothing"
+            sortBy="newest"
+            limit={4}
+          />
+          
+          {/* Home & Garden */}
+          <ProductsSection
+            title="Home & Garden"
+            category="home"
+            sortBy="popular"
+            limit={4}
+          />
+        </div>
+      </LikeProvider>
     </div>
   );
 };

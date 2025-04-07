@@ -22,7 +22,7 @@ export interface Advertisement {
   location: string;
   budget: number;
   clicks: number;
-  impressions: number;
+  impressions: number; // Make sure this is always required
   start_date: string;
   end_date: string;
   created_at: string;
@@ -90,9 +90,10 @@ export const fetchActiveAds = async (type?: AdType, format: string = "banner", l
     const transformedData = (data || []).map(ad => ({
       ...ad,
       impressions: ad.impressions || 0, // Add default value if missing
-      type: ad.type as AdType,
-      format: ad.format as AdFormat,
-      status: ad.status as AdStatus
+      clicks: ad.clicks || 0, // Add default for clicks too
+      type: (ad.type || "general") as AdType,
+      format: (ad.format || "banner") as AdFormat,
+      status: (ad.status || "active") as AdStatus
     })) as Advertisement[];
     
     return transformedData;

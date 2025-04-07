@@ -6,6 +6,7 @@ import { useParams } from "react-router-dom";
 import { OptimizedMarketplace } from "./marketplace/OptimizedMarketplace";
 import { Suspense } from "react";
 import { LoadingView } from "@/components/LoadingView";
+import { LikeProvider } from "@/components/products/LikeContext";
 
 const Marketplace = () => {
   const params = useParams();
@@ -20,7 +21,10 @@ const Marketplace = () => {
     <Layout>
       <div className="overflow-x-hidden">
         <Suspense fallback={<LoadingView />}>
-          <OptimizedMarketplace />
+          {/* Wrap OptimizedMarketplace with LikeProvider as an extra safety */}
+          <LikeProvider>
+            <OptimizedMarketplace />
+          </LikeProvider>
         </Suspense>
       </div>
     </Layout>
