@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { v4 as uuidv4 } from "uuid";
 
@@ -81,9 +80,9 @@ export const getAdPlacements = async (): Promise<AdPlacement[]> => {
       max_size_kb: item.max_size_kb || 1024,
       created_at: item.created_at,
       // Add missing properties with default values
-      impressions: typeof item.impressions === 'number' ? item.impressions : 0,
-      clicks: typeof item.clicks === 'number' ? item.clicks : 0,
-      revenue: typeof item.revenue === 'number' ? item.revenue : 0
+      impressions: 0,
+      clicks: 0,
+      revenue: 0
     }));
   } catch (error) {
     console.error("Error in getAdPlacements:", error);
@@ -129,7 +128,7 @@ export const fetchActiveAds = async (
       ...ad,
       carousel_images: Array.isArray(ad.carousel_images) ? ad.carousel_images.map(String) : [],
       clicks: ad.clicks || 0,
-      impressions: typeof ad.impressions === 'number' ? ad.impressions : 0,
+      impressions: 0,
       reach: ad.reach || 0,
       targeting_locations: Array.isArray(ad.targeting_locations) ? ad.targeting_locations.map(String) : [],
       targeting_interests: Array.isArray(ad.targeting_interests) ? ad.targeting_interests.map(String) : []
@@ -162,7 +161,7 @@ export const fetchUserAds = async (): Promise<Advertisement[]> => {
       ...ad,
       carousel_images: Array.isArray(ad.carousel_images) ? ad.carousel_images.map(String) : [],
       clicks: ad.clicks || 0,
-      impressions: typeof ad.impressions === 'number' ? ad.impressions : 0, // Handle missing impressions field
+      impressions: 0, // Handle missing impressions field
       reach: ad.reach || 0,
       targeting_locations: Array.isArray(ad.targeting_locations) ? ad.targeting_locations.map(String) : [],
       targeting_interests: Array.isArray(ad.targeting_interests) ? ad.targeting_interests.map(String) : []
@@ -202,7 +201,7 @@ export const getAdvertisementsByLocation = async (
       ...ad,
       carousel_images: Array.isArray(ad.carousel_images) ? ad.carousel_images.map(String) : [],
       clicks: ad.clicks || 0,
-      impressions: typeof ad.impressions === 'number' ? ad.impressions : 0, // Handle missing impressions field
+      impressions: 0, // Handle missing impressions field
       reach: ad.reach || 0,
       targeting_locations: Array.isArray(ad.targeting_locations) ? ad.targeting_locations.map(String) : [],
       targeting_interests: Array.isArray(ad.targeting_interests) ? ad.targeting_interests.map(String) : []
