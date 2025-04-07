@@ -24,10 +24,10 @@ interface LocalBusinessSpotlightProps {
 export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightProps) => {
   const [currentBusinessIndex, setCurrentBusinessIndex] = useState(0);
   
-  // Fix: Specify the return type explicitly to avoid infinite type recursion
+  // Fix: Explicitly type everything to avoid recursive type inference
   const { data: localBusinesses, isLoading } = useQuery<LocalBusiness[], Error>({
     queryKey: ["local-businesses", businessType],
-    queryFn: async () => {
+    queryFn: async (): Promise<LocalBusiness[]> => {
       try {
         let query = supabase
           .from("businesses")
