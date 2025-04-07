@@ -228,7 +228,6 @@ const BusinessPage = () => {
           </Link>
         </div>
 
-        {/* Search Bar */}
         <div className="mb-6">
           <SearchInput 
             placeholder="Search for businesses..." 
@@ -238,31 +237,24 @@ const BusinessPage = () => {
           />
         </div>
         
-        {/* Banner with Auto Scroll */}
         <BusinessBannerCarousel />
         
-        {/* Categories Icon Grid */}
         <div className="mb-6">
           <h2 className="text-xl font-bold mb-4">Browse by Category</h2>
           <CategoryIconGrid onCategorySelect={handleSubcategorySelect} />
         </div>
         
-        {/* Sponsored Businesses Section */}
         <SponsoredBusinesses />
         
-        {/* Suggested Businesses Section */}
         <SuggestedBusinesses />
         
-        {/* Category Subcategories Grid */}
         <div className="mt-8 mb-6">
           <h2 className="text-2xl font-bold mb-4">Browse by Category</h2>
           <CategorySubcategoryGrid onCategorySelect={handleCategorySelect} />
         </div>
         
-        {/* Business Category Scroller */}
         <BusinessCategoryScroller />
         
-        {/* All Businesses Section */}
         <div className="mt-8">
           <h2 className="text-2xl font-bold mb-4">All Businesses</h2>
           

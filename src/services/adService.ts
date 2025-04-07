@@ -22,7 +22,7 @@ export interface Advertisement {
   end_date: string;
   budget: number;
   clicks: number;
-  impressions?: number; // Optional since it's missing from DB table
+  impressions?: number; 
   format: string;
   video_url?: string;
   user_id: string;
@@ -35,21 +35,23 @@ export interface Advertisement {
   reach?: number;
 }
 
+// Updated AdPlacement type to include the missing properties
 export type AdPlacement = {
   id: string;
   name: string;
   description: string;
   location: string;
-  type: string; // Changed from AdType to string to fix type incompatibility
+  type: string;
   size: string;
   active: boolean;
   cpc_rate: number;
   cpm_rate: number;
   priority: number;
   max_size_kb: number;
-  impressions?: number; // Added for AdPlacement.tsx compatibility 
-  clicks?: number;      // Added for AdPlacement.tsx compatibility
-  revenue?: number;     // Added for AdPlacement.tsx compatibility
+  created_at?: string;
+  impressions: number; // Added as required by the code
+  clicks: number;      // Added as required by the code
+  revenue: number;     // Added as required by the code
 };
 
 export const getAdPlacements = async (): Promise<AdPlacement[]> => {
