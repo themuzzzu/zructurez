@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ShopByCategory } from "@/components/marketplace/ShopByCategory";
 import { useState } from "react";
 import { LazyImage } from "@/components/ui/LazyImage";
+import { ServiceCategoryScroller } from "@/components/services/ServiceCategoryScroller";
 
 export default function Home() {
   const { setLoading } = useLoading();
@@ -20,7 +21,7 @@ export default function Home() {
   // Show loading indicator when page loads
   useEffect(() => {
     setLoading(true);
-    const timeout = setTimeout(() => setLoading(false), 300);
+    const timeout = setTimeout(() => setLoading(false), 200);
     return () => clearTimeout(timeout);
   }, [setLoading]);
 
@@ -60,6 +61,11 @@ export default function Home() {
               <ShopByCategory />
             </div>
             
+            {/* Service Categories Scroller */}
+            <div className="mb-8">
+              <ServiceCategoryScroller />
+            </div>
+            
             {/* Trending products */}
             <LikeProvider>
               <div className="mb-8">
@@ -85,6 +91,9 @@ export default function Home() {
           </TabsContent>
           
           <TabsContent value="services">
+            <div className="mb-8">
+              <ServiceCategoryScroller />
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {[
                 { title: "Home Services", image: "/lovable-uploads/97cb18f9-5178-4291-9cae-8a13e8abed4e.png" },

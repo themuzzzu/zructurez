@@ -11,7 +11,7 @@ interface CircularLoaderProps {
 
 export function CircularLoader({ 
   size = 40, 
-  color = "currentColor",
+  color = "#3B82F6", // Default to a nice blue color
   className
 }: CircularLoaderProps) {
   return (
@@ -21,7 +21,7 @@ export function CircularLoader({
         style={{ 
           width: `${size}px`, 
           height: `${size}px`,
-          borderColor: `${color}20`,
+          borderColor: `${color}30`,
           borderTopColor: color
         }}
         animate={{ rotate: 360 }}

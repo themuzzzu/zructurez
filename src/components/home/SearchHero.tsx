@@ -5,10 +5,12 @@ import { Search, Sparkles } from "lucide-react";
 import { useSearch } from "@/hooks/useSearch";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLoading } from "@/providers/LoadingProvider";
 
 export const SearchHero = () => {
   const navigate = useNavigate();
   const suggestionsRef = useRef<HTMLDivElement>(null);
+  const { setLoading } = useLoading();
   
   const {
     query,
@@ -17,7 +19,7 @@ export const SearchHero = () => {
     showSuggestions,
     setShowSuggestions,
     applySuggestion,
-    isLoading
+    isLoading: searchLoading
   } = useSearch({ suggestionsEnabled: true });
 
   // Featured searches for quick access
@@ -28,17 +30,20 @@ export const SearchHero = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
+      setLoading(true);
       navigate(`/search?q=${encodeURIComponent(query)}`);
     }
   };
 
   const handleSuggestionClick = (suggestion: any) => {
     applySuggestion(suggestion);
+    setLoading(true);
     navigate(`/search?q=${encodeURIComponent(suggestion.term)}`);
   };
 
   const handleFeaturedSearch = (term: string) => {
     setQuery(term);
+    setLoading(true);
     navigate(`/search?q=${encodeURIComponent(term)}`);
   };
 
@@ -57,8 +62,8 @@ export const SearchHero = () => {
   }, [setShowSuggestions]);
 
   return (
-    <div className="relative w-full bg-gradient-to-r from-zinc-900 to-zinc-800 text-white">
-      <div className="absolute inset-0 bg-black opacity-10"></div>
+    <div className="relative w-full bg-gradient-to-r from-blue-900 to-blue-800 text-white">
+      <div className="absolute inset-0 bg-black opacity-20"></div>
       <div className="w-full px-4 py-12 md:py-16 relative z-10">
         <div className="max-w-3xl mx-auto text-center mb-6">
           <motion.h1 
@@ -73,7 +78,7 @@ export const SearchHero = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
-            className="text-lg md:text-xl text-zinc-200"
+            className="text-lg md:text-xl text-blue-100"
           >
             Discover the best local businesses, services, and deals around you
           </motion.p>
@@ -94,7 +99,7 @@ export const SearchHero = () => {
                 onChange={(e) => setQuery(e.target.value)}
                 onFocus={() => setShowSuggestions(true)}
                 placeholder="Search businesses, services, products..."
-                className="w-full pl-10 pr-4 py-3 rounded-md border border-zinc-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-zinc-800 dark:focus:ring-zinc-300 text-zinc-800 dark:text-zinc-200 dark:bg-zinc-800"
+                className="w-full pl-10 pr-4 py-3 rounded-md border border-zinc-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 text-zinc-800 dark:text-zinc-200 dark:bg-zinc-800"
               />
               
               <AnimatePresence>
@@ -123,10 +128,10 @@ export const SearchHero = () => {
             
             <Button
               type="submit"
-              className="bg-zinc-900 text-white px-6 py-3 rounded-md hover:bg-zinc-700 transition-colors ml-2"
-              disabled={isLoading}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-md transition-colors ml-2"
+              disabled={searchLoading}
             >
-              {isLoading ? "Searching..." : "Search"}
+              {searchLoading ? "Searching..." : "Search"}
             </Button>
           </form>
 
@@ -138,7 +143,7 @@ export const SearchHero = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.7 + index * 0.1 }}
                 key={term}
-                className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-full text-sm flex items-center transition-colors"
+                className="px-3 py-1.5 bg-blue-500/30 hover:bg-blue-500/50 rounded-full text-sm flex items-center transition-colors"
                 onClick={() => handleFeaturedSearch(term)}
               >
                 <Sparkles className="h-3 w-3 mr-1.5" />
@@ -150,4 +155,4 @@ export const SearchHero = () => {
       </div>
     </div>
   );
-};
+}

@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { queryClient } from "@/lib/react-query";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { LoadingProvider } from "@/providers/LoadingProvider"; 
+import { ProgressLoader } from "@/components/loaders/ProgressLoader";
 import router from "./routes";
 import { CircularLoader } from "@/components/loaders/CircularLoader";
 import { RouterProvider } from "react-router-dom";
@@ -17,7 +18,7 @@ function App() {
     // Reduced loading time for faster initial render
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 150);
+    }, 100);
     
     return () => clearTimeout(timer);
   }, []);
@@ -42,12 +43,13 @@ function App() {
       <ThemeProvider defaultTheme="dark" storageKey="lovable-theme">
         <LoadingProvider>
           <AuthProvider>
+            <ProgressLoader fixed color="#3B82F6" />
             <div className={isLoading ? "hidden" : "app"}>
               {!isLoading && <RouterProvider router={router} />}
             </div>
             {isLoading && (
-              <div className="fixed inset-0 flex items-center justify-center bg-background">
-                <CircularLoader size={48} color="var(--color-primary)" />
+              <div className="fixed inset-0 flex items-center justify-center bg-white dark:bg-background">
+                <CircularLoader size={48} color="#3B82F6" />
               </div>
             )}
             <Toaster />

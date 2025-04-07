@@ -34,10 +34,10 @@ export function ServiceCategoryScroller() {
   const checkArrowVisibility = () => {
     if (!scrollRef.current) return;
     
-    setShowLeftArrow(scrollRef.current.scrollLeft > 0);
+    setShowLeftArrow(scrollRef.current.scrollLeft > 20);
     setShowRightArrow(
       scrollRef.current.scrollLeft < 
-      scrollRef.current.scrollWidth - scrollRef.current.clientWidth - 10
+      scrollRef.current.scrollWidth - scrollRef.current.clientWidth - 20
     );
   };
 
@@ -63,7 +63,7 @@ export function ServiceCategoryScroller() {
   const scroll = (direction: 'left' | 'right') => {
     if (!scrollRef.current) return;
     
-    const scrollAmount = 200;
+    const scrollAmount = 300;
     const newScrollLeft = direction === 'left' 
       ? scrollRef.current.scrollLeft - scrollAmount 
       : scrollRef.current.scrollLeft + scrollAmount;
@@ -96,14 +96,19 @@ export function ServiceCategoryScroller() {
         
         <div 
           ref={scrollRef} 
-          className="flex gap-2 overflow-x-auto scrollbar-hide pb-2 px-1"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          className="flex gap-2 overflow-x-auto pb-4 px-1 scrollbar-hide"
+          style={{ 
+            scrollbarWidth: 'none', 
+            msOverflowStyle: 'none',
+            WebkitOverflowScrolling: 'touch',
+            scrollSnapType: 'x mandatory'
+          }}
         >
           {categories.map(category => (
             <Button
               key={category.id}
               variant="outline"
-              className="flex-shrink-0 whitespace-nowrap"
+              className="flex-shrink-0 whitespace-nowrap scroll-snap-align-start"
               onClick={() => handleCategoryClick(category.id)}
             >
               {category.name}
