@@ -1,139 +1,110 @@
 
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { BusinessCard } from "@/components/BusinessCard";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card } from "@/components/ui/card";
-import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
-import { useMemo } from "react";
+import { BusinessCard } from "@/components/BusinessCard";
+import { Sparkles } from "lucide-react";
 
-// Define a simple interface for business data
-interface BusinessType {
+interface LocalBusiness {
   id: string;
   name: string;
   description: string;
-  logo_url?: string;
-  image_url?: string;
-  category?: string;
-  location?: string;
-  rating?: number;
-  reviews?: number;
-  contact?: string;
-  hours?: string;
-  is_open?: boolean;
-  wait_time?: string;
-  closure_reason?: string;
-  verified?: boolean;
+  image_url: string;
+  category: string;
+  location: string;
+  verified: boolean;
 }
 
-interface LocalBusinessSpotlightProps {
-  businessType?: string;
-}
-
-export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightProps) => {
-  // Create stable query key
-  const queryKey = useMemo(() => 
-    ['local-businesses', businessType], 
-    [businessType]
-  );
+export const LocalBusinessSpotlight = () => {
+  const [currentBusinessIndex, setCurrentBusinessIndex] = useState(0);
   
-  // Define a type-safe fetch function with explicit return type
-  const fetchBusinesses = async (): Promise<BusinessType[]> => {
-    try {
-      let query = supabase
-        .from('businesses')
-        .select('id, name, description, image_url, category, location, contact, hours, is_open, wait_time, closure_reason, verified');
+  // Fetch local businesses
+  const { data: localBusinesses, isLoading } = useQuery({
+    queryKey: ["local-businesses"],
+    queryFn: async () => {
+      try {
+        const { data, error } = await supabase
+          .from("businesses")
+          .select("*")
+          .limit(5);
         
-      // Apply businessType filter if provided
-      if (businessType) {
-        query = query.eq('business_type', businessType);
+        if (error) throw error;
+        return data as LocalBusiness[];
+      } catch (err) {
+        console.error("Error fetching local businesses:", err);
+        return [] as LocalBusiness[];
       }
-      
-      // Add limit to reduce data transfer
-      query = query.order('created_at', { ascending: false })
-        .limit(4);
-      
-      const { data, error } = await query;
-      
-      if (error) throw error;
-      
-      if (!data) return [];
-
-      // Map raw data to the BusinessType interface
-      return data.map(item => ({
-        id: item.id,
-        name: item.name,
-        description: item.description || "",
-        image_url: item.image_url,
-        category: item.category,
-        location: item.location,
-        is_open: item.is_open,
-        wait_time: item.wait_time,
-        closure_reason: item.closure_reason,
-        verified: item.verified,
-        contact: item.contact,
-        hours: item.hours
-      }));
-    } catch (err) {
-      console.error("Error fetching local businesses:", err);
-      return [];
-    }
-  };
-
-  // Use optimized query with longer cache time
-  const { data: businesses, isLoading } = useOptimizedQuery({
-    queryKey,
-    queryFn: fetchBusinesses,
-    staleTime: 15 * 60 * 1000, // 15 minutes
-    gcTime: 30 * 60 * 1000  // 30 minutes
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
-
-  // Loading state
+  
+  // Auto-rotate businesses
+  useEffect(() => {
+    if (!localBusinesses || localBusinesses.length === 0) return;
+    
+    const interval = setInterval(() => {
+      setCurrentBusinessIndex((prevIndex) => 
+        (prevIndex + 1) % localBusinesses.length
+      );
+    }, 10000); // Change every 10 seconds
+    
+    return () => clearInterval(interval);
+  }, [localBusinesses]);
+  
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {[...Array(4)].map((_, i) => (
-          <Card key={i} className="overflow-hidden">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-yellow-500" />
+            <span>Local Business Spotlight</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="w-full">
             <Skeleton className="h-48 w-full" />
-            <div className="p-4">
-              <Skeleton className="h-6 w-3/4 mb-2" />
+            <div className="space-y-2 mt-3">
+              <Skeleton className="h-4 w-2/3" />
               <Skeleton className="h-4 w-1/2" />
+              <Skeleton className="h-4 w-full" />
             </div>
-          </Card>
-        ))}
-      </div>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
-
-  // No results - explicitly check for array properties
-  if (!businesses || businesses.length === 0) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-muted-foreground">No local businesses found.</p>
-      </div>
-    );
+  
+  if (!localBusinesses || localBusinesses.length === 0) {
+    return null;
   }
-
+  
+  const currentBusiness = localBusinesses[currentBusinessIndex];
+  
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {businesses.map((business) => (
-        <BusinessCard 
-          key={business.id}
-          id={business.id}
-          name={business.name}
-          description={business.description || ""}
-          image={business.image_url || ""}
-          category={business.category || ""}
-          location={business.location || ""}
-          rating={business.rating || 4.0}
-          reviews={business.reviews || 0}
-          contact={business.contact || ""}
-          hours={business.hours || ""}
-          verified={business.verified || false}
-          is_open={business.is_open}
-          wait_time={business.wait_time}
-          closure_reason={business.closure_reason}
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Sparkles className="h-5 w-5 text-yellow-500" />
+          <span>Local Business Spotlight</span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <BusinessCard
+          id={currentBusiness.id}
+          name={currentBusiness.name}
+          description={currentBusiness.description}
+          image={currentBusiness.image_url}
+          category={currentBusiness.category}
+          location={currentBusiness.location}
+          rating={4.5} // Default rating
+          reviews={10} // Default reviews count
+          verified={currentBusiness.verified || false}
+          contact=""
+          hours=""
         />
-      ))}
-    </div>
+      </CardContent>
+    </Card>
   );
 };

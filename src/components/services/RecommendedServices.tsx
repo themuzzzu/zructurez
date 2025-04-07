@@ -9,6 +9,22 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
 
+interface Service {
+  id: string;
+  title: string;
+  description: string;
+  image_url: string;
+  price: number;
+  user_id: string;
+  category: string;
+  location: string;
+  availability?: string;
+  contact_info?: string;
+  created_at?: string;
+  is_open?: boolean;
+  views?: number;
+}
+
 interface RecommendedServicesProps {
   limit?: number;
   showTitle?: boolean;
@@ -31,10 +47,10 @@ export const RecommendedServices = ({
           .limit(limit);
 
         if (error) throw error;
-        return data || [];
+        return data as Service[] || [];
       } catch (err) {
         console.error("Error fetching recommended services:", err);
-        return [];
+        return [] as Service[];
       }
     },
     staleTime: 5 * 60 * 1000, // 5 minutes

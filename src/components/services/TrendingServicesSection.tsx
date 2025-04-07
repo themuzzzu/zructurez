@@ -4,7 +4,7 @@ import { ServiceCard } from "@/components/service-card/ServiceCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
 import { getTrendingServicesInArea } from "@/services/serviceService";
-import { TrendingUp } from "lucide-react"; // Fixed the import
+import { TrendingUp } from "lucide-react"; // Using TrendingUp instead of Trending
 
 interface TrendingServicesSectionProps {
   location?: string;

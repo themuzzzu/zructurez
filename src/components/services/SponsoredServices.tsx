@@ -9,6 +9,22 @@ import { Button } from "@/components/ui/button";
 import { ExternalLink, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
+interface Service {
+  id: string;
+  title: string;
+  description: string;
+  image_url: string;
+  price: number;
+  user_id: string;
+  category: string;
+  location: string;
+  availability?: string;
+  contact_info?: string;
+  created_at?: string;
+  is_open?: boolean;
+  views?: number;
+}
+
 interface SponsoredServicesProps {
   limit?: number;
   showTitle?: boolean;
@@ -32,10 +48,10 @@ export const SponsoredServices = ({
           .limit(limit);
 
         if (error) throw error;
-        return data || [];
+        return data as Service[] || [];
       } catch (err) {
         console.error("Error fetching sponsored services:", err);
-        return [];
+        return [] as Service[];
       }
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
