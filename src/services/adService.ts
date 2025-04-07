@@ -31,10 +31,10 @@ export const fetchActiveAds = async (type?: AdType, format: string = "banner", l
 
 export const incrementAdView = async (adId: string): Promise<void> => {
   try {
-    // Using a simple update instead of RPC since the RPC doesn't exist
+    // Using direct update since RPC doesn't exist
     const { error } = await supabase
       .from('advertisements')
-      .update({ impressions: supabase.rpc('increment', { row_id: adId, column_name: 'impressions' }) })
+      .update({ impressions: supabase.rpc('increment_ad_views', { ad_id: adId }) })
       .eq('id', adId);
     
     if (error) {
@@ -47,10 +47,10 @@ export const incrementAdView = async (adId: string): Promise<void> => {
 
 export const incrementAdClick = async (adId: string): Promise<void> => {
   try {
-    // Using a simple update instead of RPC since the RPC doesn't exist
+    // Using direct update since RPC doesn't exist
     const { error } = await supabase
       .from('advertisements')
-      .update({ clicks: supabase.rpc('increment', { row_id: adId, column_name: 'clicks' }) })
+      .update({ clicks: supabase.rpc('increment_ad_clicks', { ad_id: adId }) })
       .eq('id', adId);
     
     if (error) {
