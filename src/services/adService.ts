@@ -86,8 +86,16 @@ export const fetchActiveAds = async (type?: AdType, format: string = "banner", l
       return [];
     }
     
-    // Cast the data to ensure it matches our Advertisement type
-    return (data || []) as Advertisement[];
+    // Transform and ensure all required fields are present
+    const transformedData = (data || []).map(ad => ({
+      ...ad,
+      impressions: ad.impressions || 0, // Add default value if missing
+      type: ad.type as AdType,
+      format: ad.format as AdFormat,
+      status: ad.status as AdStatus
+    })) as Advertisement[];
+    
+    return transformedData;
   } catch (error) {
     console.error("Error in fetchActiveAds:", error);
     return [];
