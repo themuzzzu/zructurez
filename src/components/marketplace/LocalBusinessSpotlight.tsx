@@ -24,7 +24,8 @@ interface LocalBusinessSpotlightProps {
 export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightProps) => {
   const [currentBusinessIndex, setCurrentBusinessIndex] = useState(0);
   
-  const fetchLocalBusinesses = async (): Promise<LocalBusiness[]> => {
+  // Define the query function outside of useQuery to avoid type recursion
+  const fetchLocalBusinesses = async () => {
     try {
       let query = supabase
         .from("businesses")
@@ -45,8 +46,8 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
     }
   };
   
-  // Separate the query function from useQuery to avoid type recursion
-  const { data: localBusinesses, isLoading } = useQuery<LocalBusiness[], Error>({
+  // Fix type instantiation issue by explicitly typing everything
+  const { data: localBusinesses, isLoading } = useQuery({
     queryKey: ["local-businesses", businessType],
     queryFn: fetchLocalBusinesses,
     staleTime: 5 * 60 * 1000, // 5 minutes

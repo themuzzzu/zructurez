@@ -1,12 +1,11 @@
+
 import React, { useState, useEffect, Suspense } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
-import { ServiceBannerCarousel } from "@/components/services/ServiceBannerCarousel";
 import { ServiceCategoryGrid } from "@/components/services/ServiceCategoryGrid";
 import { ServiceGrid } from "@/components/services/ServiceGrid";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -15,6 +14,10 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { LoadingView } from "@/components/LoadingView";
 import { LocalBusinessSpotlight } from "@/components/marketplace/LocalBusinessSpotlight";
 import { TrendingServicesSection } from "@/components/services/TrendingServicesSection";
+import { AutoScrollingBannerAd } from "@/components/ads/AutoScrollingBannerAd";
+import { useAdBanners } from "@/hooks/useAdBanners";
+import { SponsoredServices } from "@/components/services/SponsoredServices";
+import { RecommendedServices } from "@/components/services/RecommendedServices";
 
 const mockServices = [
   {
@@ -89,6 +92,7 @@ const Services = () => {
   const navigate = useNavigate();
   const [gridLayout, setGridLayout] = useState<GridLayoutType>("grid3x3");
   const [initialized, setInitialized] = useState(false);
+  const { ads: bannerAds } = useAdBanners("service", "banner", 3);
 
   useEffect(() => {
     try {
@@ -160,11 +164,19 @@ const Services = () => {
               </Button>
             </div>
 
-            <ServiceBannerCarousel />
+            {/* Banner Ad Carousel */}
+            <div className="mb-8">
+              <AutoScrollingBannerAd ads={bannerAds} />
+            </div>
 
             <div className="mb-8">
               <h2 className="text-2xl font-semibold mb-4">Browse Categories</h2>
               <ServiceCategoryGrid />
+            </div>
+
+            {/* Sponsored Services Section */}
+            <div className="mb-8">
+              <SponsoredServices limit={4} showTitle={true} />
             </div>
 
             <div className="mb-8">
@@ -179,6 +191,11 @@ const Services = () => {
 
             <div className="mb-8">
               <TrendingServicesSection />
+            </div>
+
+            {/* Recommended Services */}
+            <div className="mb-8">
+              <RecommendedServices limit={4} showTitle={true} />
             </div>
 
             <div className="mb-8">
