@@ -107,7 +107,6 @@ export function AdCard({ ad, className }: AdCardProps) {
           className="w-full aspect-square object-cover"
           aspectRatio="square"
           onLoad={handleImageLoad}
-          onError={handleImageError}
         />
         
         <Badge 

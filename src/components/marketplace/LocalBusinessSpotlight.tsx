@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { BusinessCard } from "@/components/BusinessCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
-import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
+import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
 // Define a simple interface for business data
@@ -15,8 +15,6 @@ interface BusinessType {
   image_url?: string;
   category?: string;
   location?: string;
-  rating?: number;
-  reviews?: number;
   contact?: string;
   hours?: string;
   is_open?: boolean;
@@ -68,6 +66,8 @@ export const LocalBusinessSpotlight = ({ businessType, title = "Local Business S
         image_url: item.image_url,
         category: item.category,
         location: item.location,
+        contact: item.contact || "",
+        hours: item.hours || "",
         is_open: item.is_open,
         wait_time: item.wait_time,
         closure_reason: item.closure_reason,
@@ -79,8 +79,8 @@ export const LocalBusinessSpotlight = ({ businessType, title = "Local Business S
     }
   };
 
-  // Use optimized query with longer cache time - fixed function call syntax to use object parameter
-  const { data: businesses, isLoading } = useOptimizedQuery({
+  // Use React Query with proper arguments
+  const { data: businesses, isLoading } = useQuery({
     queryKey,
     queryFn: fetchBusinesses,
     staleTime: 15 * 60 * 1000, // 15 minutes

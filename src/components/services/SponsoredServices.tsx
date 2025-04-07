@@ -3,29 +3,29 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { BusinessCard } from "@/components/BusinessCard";
-import { ThumbsUp, ChevronLeft, ChevronRight } from "lucide-react";
+import { ServiceCard } from "@/components/service-card/ServiceCard";
+import { Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useRef } from "react";
 
-export const RecommendedBusinesses = () => {
+export const SponsoredServices = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   
-  const { data: businesses, isLoading } = useQuery({
-    queryKey: ['recommended-businesses'],
+  const { data: services, isLoading } = useQuery({
+    queryKey: ['sponsored-services'],
     queryFn: async () => {
       try {
-        // For demonstration purposes, get businesses with highest views
         const { data, error } = await supabase
-          .from('businesses')
-          .select('*, business_analytics(page_views)')
+          .from('services')
+          .select('*')
+          .eq('sponsored', true)
           .order('created_at', { ascending: false })
           .limit(6);
           
         if (error) throw error;
         return data || [];
       } catch (err) {
-        console.error("Error fetching recommended businesses:", err);
+        console.error("Error fetching sponsored services:", err);
         return [];
       }
     }
@@ -48,8 +48,8 @@ export const RecommendedBusinesses = () => {
     return (
       <div className="space-y-4 mb-8">
         <h3 className="text-xl md:text-2xl font-bold flex items-center gap-2 px-1">
-          <ThumbsUp className="h-5 w-5 text-green-500" />
-          Recommended For You
+          <Sparkles className="h-5 w-5 text-yellow-500" />
+          Sponsored Services
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 px-1">
           {[1, 2, 3].map((i) => (
@@ -66,7 +66,7 @@ export const RecommendedBusinesses = () => {
     );
   }
   
-  if (!businesses || businesses.length === 0) {
+  if (!services || services.length === 0) {
     return null;
   }
   
@@ -74,8 +74,8 @@ export const RecommendedBusinesses = () => {
     <div className="space-y-4 mb-8 relative">
       <div className="flex justify-between items-center px-1">
         <h3 className="text-xl md:text-2xl font-bold flex items-center gap-2">
-          <ThumbsUp className="h-5 w-5 text-green-500" />
-          Recommended For You
+          <Sparkles className="h-5 w-5 text-yellow-500" />
+          Sponsored Services
         </h3>
       </div>
       
@@ -96,21 +96,20 @@ export const RecommendedBusinesses = () => {
           className="flex overflow-x-auto gap-3 pb-2 pt-1 px-1 no-scrollbar snap-x snap-mandatory scroll-smooth"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          {businesses.map((business) => (
-            <div key={business.id} className="min-w-[250px] sm:min-w-[280px] w-[70vw] max-w-[320px] flex-shrink-0 snap-start">
+          {services.map((service) => (
+            <div key={service.id} className="min-w-[250px] sm:min-w-[280px] w-[70vw] max-w-[320px] flex-shrink-0 snap-start">
               <div className="relative h-full">
-                <BusinessCard 
-                  id={business.id}
-                  name={business.name}
-                  description={business.description}
-                  image={business.image_url}
-                  rating={4.5}
-                  reviews={8}
-                  verified={business.verified}
-                  category={business.category}
-                  location={business.location}
-                  contact={business.contact || ""}
-                  hours={business.hours || ""}
+                <ServiceCard 
+                  id={service.id}
+                  title={service.title}
+                  description={service.description}
+                  image_url={service.image_url}
+                  price={service.price}
+                  providerId={service.user_id}
+                  category={service.category}
+                  location={service.location}
+                  views={service.views}
+                  sponsored={true}
                 />
               </div>
             </div>

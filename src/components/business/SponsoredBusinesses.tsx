@@ -134,7 +134,8 @@ export const SponsoredBusinesses = () => {
                   verified={business.verified}
                   category={business.category}
                   location={business.location}
-                  sponsored={true}
+                  contact={business.contact || ""}
+                  hours={business.hours || ""}
                 />
               </div>
             </div>

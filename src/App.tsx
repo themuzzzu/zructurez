@@ -1,25 +1,35 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { Home } from './pages/Home';
 import MarketplaceIndex from './pages/marketplace';
 import ProductDetails from './pages/ProductDetails';
-import CategoryPage from './pages/CategoryPage';
-import CheckoutPage from './pages/CheckoutPage';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import ProfilePage from './pages/ProfilePage';
-import CreateProduct from './pages/CreateProduct';
-import EditProduct from './pages/EditProduct';
 import Search from './pages/search';
 import Services from './pages/Services';
 import ServiceDetails from './pages/ServiceDetails';
-import CreateService from './pages/CreateService';
-import EditService from './pages/EditService';
 import BusinessDetails from './pages/BusinessDetails';
-import CreateBusiness from './pages/CreateBusiness';
-import EditBusiness from './pages/EditBusiness';
 import OptimizedMarketplace from './pages/marketplace/OptimizedMarketplace';
 import BusinessesPage from "./pages/BusinessesPage";
+
+// Define placeholder components for missing pages
+const PlaceholderPage = ({ pageName }: { pageName: string }) => (
+  <div className="container mx-auto p-8">
+    <h1 className="text-2xl font-bold mb-4">{pageName}</h1>
+    <p>This page is under construction.</p>
+  </div>
+);
+
+const Home = () => <PlaceholderPage pageName="Home" />;
+const CategoryPage = () => <PlaceholderPage pageName="Category Page" />;
+const CheckoutPage = () => <PlaceholderPage pageName="Checkout Page" />;
+const LoginPage = () => <PlaceholderPage pageName="Login Page" />;
+const RegisterPage = () => <PlaceholderPage pageName="Register Page" />;
+const ProfilePage = () => <PlaceholderPage pageName="Profile Page" />;
+const CreateProduct = () => <PlaceholderPage pageName="Create Product" />;
+const EditProduct = () => <PlaceholderPage pageName="Edit Product" />;
+const CreateService = () => <PlaceholderPage pageName="Create Service" />;
+const EditService = () => <PlaceholderPage pageName="Edit Service" />;
+const CreateBusiness = () => <PlaceholderPage pageName="Create Business" />;
+const EditBusiness = () => <PlaceholderPage pageName="Edit Business" />;
 
 const routes = [
   { path: "/", element: <Home /> },

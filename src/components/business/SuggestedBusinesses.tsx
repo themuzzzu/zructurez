@@ -109,6 +109,8 @@ export const SuggestedBusinesses = () => {
                   verified={business.verified}
                   category={business.category}
                   location={business.location}
+                  contact={business.contact || ""}
+                  hours={business.hours || ""}
                 />
               </div>
             </div>

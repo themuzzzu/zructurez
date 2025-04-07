@@ -5,7 +5,7 @@ import { ServiceCard } from '@/components/service-card/ServiceCard';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card } from '@/components/ui/card';
-import { ChevronRight, Trending } from 'lucide-react';
+import { ChevronRight, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export const TrendingServicesSection = () => {
@@ -40,7 +40,7 @@ export const TrendingServicesSection = () => {
       <div>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold flex items-center gap-2">
-            <Trending className="h-5 w-5 text-red-500" />
+            <TrendingUp className="h-5 w-5 text-red-500" />
             Trending Services
           </h2>
           <Button variant="outline" onClick={handleViewAll}>View All</Button>
@@ -70,7 +70,7 @@ export const TrendingServicesSection = () => {
     <div>
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold flex items-center gap-2">
-          <Trending className="h-5 w-5 text-red-500" />
+          <TrendingUp className="h-5 w-5 text-red-500" />
           Trending Services
         </h2>
         <Button variant="outline" onClick={handleViewAll}>

@@ -52,17 +52,17 @@ export default function BusinessesPage() {
               />
             </div>
 
-            {/* Sponsored Businesses - NEW */}
+            {/* Sponsored Businesses */}
             <div className="mb-8">
               <SponsoredBusinesses />
             </div>
 
-            {/* Recommended Businesses - NEW */}
+            {/* Recommended Businesses */}
             <div className="mb-8">
               <RecommendedBusinesses />
             </div>
 
-            {/* Suggested Businesses - NEW */}
+            {/* Suggested Businesses */}
             <div className="mb-8">
               <SuggestedBusinesses />
             </div>
