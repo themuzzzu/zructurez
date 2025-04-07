@@ -41,19 +41,19 @@ export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps
       
       if (error) throw error;
       
-      // Explicitly map the results to ensure they conform to ServiceType
-      return (data || []).map(service => ({
-        id: service.id,
-        title: service.title,
-        description: service.description,
-        image_url: service.image_url || undefined,
-        price: service.price,
-        user_id: service.user_id,
-        category: service.category || undefined,
-        location: service.location || undefined,
-        contact_info: service.contact_info || undefined,
+      // Map database results to the ServiceType interface
+      return (data || []).map(item => ({
+        id: item.id,
+        title: item.title,
+        description: item.description,
+        image_url: item.image_url || undefined,
+        price: item.price,
+        user_id: item.user_id,
+        category: item.category || undefined,
+        location: item.location || undefined,
+        contact_info: item.contact_info || undefined,
         is_sponsored: true
-      })) as ServiceType[];
+      }));
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
