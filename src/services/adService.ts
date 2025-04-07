@@ -22,7 +22,7 @@ export interface Advertisement {
   end_date: string;
   budget: number;
   clicks: number;
-  impressions?: number; 
+  impressions: number; // Explicitly define impressions property
   format: string;
   video_url?: string;
   user_id: string;
@@ -49,9 +49,9 @@ export interface AdPlacement {
   priority: number;
   max_size_kb: number;
   created_at?: string;
-  impressions: number;
-  clicks: number;
-  revenue: number;
+  impressions: number; // Explicitly define impressions property
+  clicks: number;      // Explicitly define clicks property
+  revenue: number;     // Explicitly define revenue property
 }
 
 export const getAdPlacements = async (): Promise<AdPlacement[]> => {
@@ -80,10 +80,10 @@ export const getAdPlacements = async (): Promise<AdPlacement[]> => {
       priority: item.priority || 1,
       max_size_kb: item.max_size_kb || 1024,
       created_at: item.created_at,
-      // Add these properties if they don't exist in the raw data
-      impressions: item.impressions || 0,
-      clicks: item.clicks || 0,
-      revenue: item.revenue || 0
+      // Add missing properties with default values
+      impressions: typeof item.impressions === 'number' ? item.impressions : 0,
+      clicks: typeof item.clicks === 'number' ? item.clicks : 0,
+      revenue: typeof item.revenue === 'number' ? item.revenue : 0
     }));
   } catch (error) {
     console.error("Error in getAdPlacements:", error);
@@ -129,7 +129,7 @@ export const fetchActiveAds = async (
       ...ad,
       carousel_images: Array.isArray(ad.carousel_images) ? ad.carousel_images.map(String) : [],
       clicks: ad.clicks || 0,
-      impressions: ad.impressions || 0,
+      impressions: typeof ad.impressions === 'number' ? ad.impressions : 0,
       reach: ad.reach || 0,
       targeting_locations: Array.isArray(ad.targeting_locations) ? ad.targeting_locations.map(String) : [],
       targeting_interests: Array.isArray(ad.targeting_interests) ? ad.targeting_interests.map(String) : []
@@ -162,7 +162,7 @@ export const fetchUserAds = async (): Promise<Advertisement[]> => {
       ...ad,
       carousel_images: Array.isArray(ad.carousel_images) ? ad.carousel_images.map(String) : [],
       clicks: ad.clicks || 0,
-      impressions: 0, // Handle missing impressions field
+      impressions: typeof ad.impressions === 'number' ? ad.impressions : 0, // Handle missing impressions field
       reach: ad.reach || 0,
       targeting_locations: Array.isArray(ad.targeting_locations) ? ad.targeting_locations.map(String) : [],
       targeting_interests: Array.isArray(ad.targeting_interests) ? ad.targeting_interests.map(String) : []
@@ -202,7 +202,7 @@ export const getAdvertisementsByLocation = async (
       ...ad,
       carousel_images: Array.isArray(ad.carousel_images) ? ad.carousel_images.map(String) : [],
       clicks: ad.clicks || 0,
-      impressions: 0, // Handle missing impressions field
+      impressions: typeof ad.impressions === 'number' ? ad.impressions : 0, // Handle missing impressions field
       reach: ad.reach || 0,
       targeting_locations: Array.isArray(ad.targeting_locations) ? ad.targeting_locations.map(String) : [],
       targeting_interests: Array.isArray(ad.targeting_interests) ? ad.targeting_interests.map(String) : []
