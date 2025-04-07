@@ -2,7 +2,6 @@
 import { ReactNode, useEffect, useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Sidebar } from "@/components/Sidebar";
-import { AIAssistant } from "@/components/ai-support/AIAssistant";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useTheme } from "@/components/ThemeProvider";
 import { MobileNav } from "@/components/navbar/MobileNav";
@@ -36,7 +35,7 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden">
+    <div className="min-h-screen bg-background">
       <Navbar />
       <div className="flex pt-16 w-full">
         {!hideSidebar && !isMobile && (
@@ -48,9 +47,9 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
           </div>
         )}
         <main 
-          className="flex-1 transition-all duration-300 w-full overflow-y-auto scrollbar-hide overflow-x-hidden pb-16 sm:pb-6"
+          className="flex-1 transition-all duration-300 w-full overflow-y-auto scrollbar-hide"
           style={{ 
-            marginLeft: hideSidebar || isMobile ? 0 : sidebarWidth + 'px', 
+            marginLeft: hideSidebar || isMobile ? 0 : sidebarWidth + 'px',
             paddingBottom: isMobile ? '5rem' : '', 
             maxHeight: 'calc(100vh - 64px)',
             padding: isMobile ? '0.5rem' : '0 24px', 
@@ -60,11 +59,8 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
         </main>
       </div>
       
-      {/* AI Components */}
-      <AIAssistant />
-      
       {/* Mobile Navigation - should render on ALL mobile device views */}
       <MobileNav />
     </div>
   );
-};
+}

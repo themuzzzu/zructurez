@@ -2515,9 +2515,7 @@ export type Database = {
     }
     Functions: {
       check_search_suggestion_exists: {
-        Args: {
-          term_param: string
-        }
+        Args: { term_param: string }
         Returns: boolean
       }
       cleanup_expired_messages: {
@@ -2529,10 +2527,7 @@ export type Database = {
         Returns: undefined
       }
       create_search_suggestion: {
-        Args: {
-          term_param: string
-          category_param: string
-        }
+        Args: { term_param: string; category_param: string }
         Returns: string
       }
       create_test_user: {
@@ -2546,37 +2541,26 @@ export type Database = {
         Returns: string
       }
       delete_business_cascade: {
-        Args: {
-          business_id_param: string
-        }
+        Args: { business_id_param: string }
         Returns: boolean
       }
       delete_product_safely: {
-        Args: {
-          product_id_param: string
-          is_business_product?: boolean
-        }
+        Args: { product_id_param: string; is_business_product?: boolean }
         Returns: boolean
       }
       delete_service_safely: {
-        Args: {
-          service_id_param: string
-        }
+        Args: { service_id_param: string }
         Returns: boolean
       }
       get_group_members: {
-        Args: {
-          group_id: string
-        }
+        Args: { group_id: string }
         Returns: {
           count: number
           members: string[]
         }[]
       }
       get_image_search_url: {
-        Args: {
-          image_id_param: string
-        }
+        Args: { image_id_param: string }
         Returns: Json
       }
       get_sample_user_id: {
@@ -2584,71 +2568,47 @@ export type Database = {
         Returns: string
       }
       get_user_presence: {
-        Args: {
-          user_id: string
-        }
+        Args: { user_id: string }
         Returns: Json
       }
       get_voice_recording_url: {
-        Args: {
-          recording_id_param: string
-        }
+        Args: { recording_id_param: string }
         Returns: Json
       }
       increment_ad_clicks: {
-        Args: {
-          ad_id: string
-        }
+        Args: { ad_id: string }
         Returns: undefined
       }
       increment_ad_views: {
-        Args: {
-          ad_id: string
-        }
+        Args: { ad_id: string }
         Returns: undefined
       }
       increment_business_views: {
-        Args: {
-          business_id_param: string
-        }
+        Args: { business_id_param: string }
         Returns: undefined
       }
       increment_post_views: {
-        Args: {
-          post_id_param: string
-        }
+        Args: { post_id_param: string }
         Returns: undefined
       }
       increment_product_views: {
-        Args: {
-          product_id_param: string
-        }
+        Args: { product_id_param: string }
         Returns: undefined
       }
       increment_search_suggestion: {
-        Args: {
-          term_param: string
-        }
+        Args: { term_param: string }
         Returns: undefined
       }
       increment_service_views: {
-        Args: {
-          service_id_param: string
-        }
+        Args: { service_id_param: string }
         Returns: undefined
       }
       increment_views: {
-        Args: {
-          table_name: string
-          record_id: string
-        }
+        Args: { table_name: string; record_id: string }
         Returns: undefined
       }
       insert_image_search: {
-        Args: {
-          user_id_param: string
-          image_url_param: string
-        }
+        Args: { user_id_param: string; image_url_param: string }
         Returns: string
       }
       insert_image_search_with_description: {
@@ -2670,10 +2630,7 @@ export type Database = {
         Returns: string
       }
       insert_voice_recording: {
-        Args: {
-          user_id_param: string
-          audio_url_param: string
-        }
+        Args: { user_id_param: string; audio_url_param: string }
         Returns: string
       }
       insert_voice_recording_with_transcription: {
@@ -2698,24 +2655,15 @@ export type Database = {
         Returns: string
       }
       update_image_search_description: {
-        Args: {
-          image_id_param: string
-          description_param: string
-        }
+        Args: { image_id_param: string; description_param: string }
         Returns: undefined
       }
       update_user_presence: {
-        Args: {
-          user_id: string
-          last_seen_time: string
-        }
+        Args: { user_id: string; last_seen_time: string }
         Returns: boolean
       }
       update_voice_recording_transcription: {
-        Args: {
-          recording_id_param: string
-          transcription_param: string
-        }
+        Args: { recording_id_param: string; transcription_param: string }
         Returns: undefined
       }
     }
@@ -2728,27 +2676,29 @@ export type Database = {
   }
 }
 
-type PublicSchema = Database[Extract<keyof Database, "public">]
+type DefaultSchema = Database[Extract<keyof Database, "public">]
 
 export type Tables<
-  PublicTableNameOrOptions extends
-    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-        Database[PublicTableNameOrOptions["schema"]]["Views"])
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
     : never
-  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
-        PublicSchema["Views"])
-    ? (PublicSchema["Tables"] &
-        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -2756,20 +2706,22 @@ export type Tables<
     : never
 
 export type TablesInsert<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
     | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Insert: infer I
       }
       ? I
@@ -2777,20 +2729,22 @@ export type TablesInsert<
     : never
 
 export type TablesUpdate<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
     | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Update: infer U
       }
       ? U
@@ -2798,21 +2752,23 @@ export type TablesUpdate<
     : never
 
 export type Enums<
-  PublicEnumNameOrOptions extends
-    | keyof PublicSchema["Enums"]
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
     | { schema: keyof Database },
-  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = PublicEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
-    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+> = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof PublicSchema["CompositeTypes"]
+    | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof Database },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof Database
@@ -2821,6 +2777,12 @@ export type CompositeTypes<
     : never = never,
 > = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
   ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
-    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
+
+export const Constants = {
+  public: {
+    Enums: {},
+  },
+} as const

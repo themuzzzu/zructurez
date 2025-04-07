@@ -59,7 +59,7 @@ export const SearchHero = () => {
   return (
     <div className="relative w-full bg-gradient-to-r from-zinc-900 to-zinc-800 text-white">
       <div className="absolute inset-0 bg-black opacity-10"></div>
-      <div className="w-full px-4 py-12 md:py-20 relative z-10">
+      <div className="w-full px-4 py-12 md:py-16 relative z-10">
         <div className="max-w-3xl mx-auto text-center mb-6">
           <motion.h1 
             initial={{ opacity: 0, y: -10 }}
@@ -85,8 +85,8 @@ export const SearchHero = () => {
           transition={{ delay: 0.6 }}
           className="max-w-2xl mx-auto"
         >
-          <form onSubmit={handleSearch} className="bg-white dark:bg-zinc-800 rounded-lg shadow-lg p-2 flex flex-col md:flex-row relative">
-            <div className="relative flex-1 mb-2 md:mb-0 md:mr-2">
+          <form onSubmit={handleSearch} className="bg-white dark:bg-zinc-800 rounded-lg shadow-lg p-2 flex relative">
+            <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400" size={20} />
               <input
                 type="text"
@@ -123,7 +123,7 @@ export const SearchHero = () => {
             
             <Button
               type="submit"
-              className="bg-zinc-900 text-white px-6 py-3 rounded-md hover:bg-zinc-700 transition-colors flex-shrink-0"
+              className="bg-zinc-900 text-white px-6 py-3 rounded-md hover:bg-zinc-700 transition-colors ml-2"
               disabled={isLoading}
             >
               {isLoading ? "Searching..." : "Search"}

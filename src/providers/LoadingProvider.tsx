@@ -1,5 +1,6 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { CircularLoader } from '@/components/loaders/CircularLoader';
 
 interface LoadingContextType {
   isLoading: boolean;
@@ -42,6 +43,19 @@ export const LoadingProvider = ({ children }: { children: ReactNode }) => {
       return () => clearTimeout(resetTimeout);
     }
   };
+
+  // Render a loading overlay when isLoading is true
+  const renderLoadingOverlay = () => {
+    if (!isLoading) return null;
+    
+    return (
+      <div className="fixed inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-50">
+        <div className="flex flex-col items-center">
+          <CircularLoader size={48} color="var(--color-primary)" />
+        </div>
+      </div>
+    );
+  };
   
   return (
     <LoadingContext.Provider 
@@ -51,6 +65,7 @@ export const LoadingProvider = ({ children }: { children: ReactNode }) => {
         progress
       }}
     >
+      {renderLoadingOverlay()}
       {children}
     </LoadingContext.Provider>
   );

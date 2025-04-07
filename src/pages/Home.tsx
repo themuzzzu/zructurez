@@ -25,16 +25,16 @@ export default function Home() {
   }, [setLoading]);
 
   return (
-    <Layout>
+    <Layout hideSidebar={false}>
       {/* Hero search section */}
       <SearchHero />
 
-      <div className="container max-w-7xl mx-auto px-4 py-8">
+      <div className="container max-w-7xl mx-auto px-4 py-8 overflow-visible">
         {/* Category navigation */}
         <Tabs defaultValue="all" className="w-full mb-8" value={activeTab} onValueChange={setActiveTab}>
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold">Explore Categories</h2>
-            <TabsList>
+            <TabsList className="overflow-x-auto">
               <TabsTrigger value="all">All</TabsTrigger>
               <TabsTrigger value="products">Products</TabsTrigger>
               <TabsTrigger value="businesses">Businesses</TabsTrigger>

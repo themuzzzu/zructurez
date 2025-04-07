@@ -7,7 +7,7 @@ import { queryClient } from "@/lib/react-query";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { LoadingProvider } from "@/providers/LoadingProvider"; 
 import router from "./routes";
-import { PageLoader } from "@/components/loaders/PageLoader";
+import { CircularLoader } from "@/components/loaders/CircularLoader";
 import { RouterProvider } from "react-router-dom";
 
 function App() {
@@ -46,7 +46,9 @@ function App() {
               {!isLoading && <RouterProvider router={router} />}
             </div>
             {isLoading && (
-              <PageLoader type="shimmer" />
+              <div className="fixed inset-0 flex items-center justify-center bg-background">
+                <CircularLoader size={48} color="var(--color-primary)" />
+              </div>
             )}
             <Toaster />
           </AuthProvider>
