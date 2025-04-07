@@ -42,16 +42,6 @@ const LazySection = ({ children, fallbackCount = 4, className = "" }: { children
   </ErrorBoundary>
 );
 
-// Lazy load the FlashSale component with proper error handling
-const FlashSale = lazy(() => 
-  import('@/components/marketplace/FlashSale')
-    .then(mod => ({ default: mod.FlashSale || mod.default }))
-    .catch(error => {
-      console.error("Failed to load FlashSale component:", error);
-      return { default: () => <div className="p-4 bg-gray-100 rounded">Flash Sale items loading failed</div> };
-    })
-);
-
 export const OptimizedMarketplace = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -223,16 +213,10 @@ export const OptimizedMarketplace = () => {
         </div>
       </LazySection>
       
-      {/* Flash Sale Section */}
+      {/* Sponsored Products Section - Emphasized as per request */}
       <LazySection>
         <div className="mb-4 sm:mb-8">
-          <FlashSale />
-        </div>
-      </LazySection>
-      
-      {/* Sponsored Products Section */}
-      <LazySection>
-        <div className="mb-4 sm:mb-8">
+          <h2 className="text-2xl font-bold mb-4">Sponsored Products</h2>
           <SponsoredProducts gridLayout={gridLayout} />
         </div>
       </LazySection>
