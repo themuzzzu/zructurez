@@ -109,13 +109,13 @@ export default function MarketplaceIndex() {
       {/* Featured Products Sections - using our optimized component */}
       <ProductsSection 
         title="New Arrivals" 
-        sortBy="created_at" 
+        sortBy="newest" 
         limit={8} 
       />
       
       <ProductsSection 
         title="Popular Products" 
-        sortBy="views" 
+        sortBy="popular" 
         limit={8} 
       />
 
@@ -155,7 +155,7 @@ export default function MarketplaceIndex() {
             <div className="space-y-8">
               <ProductsSection 
                 title="Trending Products" 
-                sortBy="views" 
+                sortBy="popular" 
                 limit={12}
                 showViewAll={false} 
               />

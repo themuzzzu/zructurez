@@ -1,6 +1,6 @@
 
 import React, { useMemo } from "react";
-import { useOptimizedQuery } from "@/hooks/useOptimizedQuery";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductGrid } from "@/components/products/ProductGrid";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,28 @@ import { GridLayoutType } from "@/components/products/types/ProductTypes";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
+
+// Define an interface for your products data
+interface ProductsData {
+  products: Array<{
+    id: string;
+    title: string;
+    name?: string;
+    price: number;
+    image_url?: string;
+    imageUrl?: string;
+    category?: string;
+    is_discounted?: boolean;
+    discount_percentage?: number;
+    original_price?: number;
+    brand_name?: string;
+    brand?: string;
+    condition?: string;
+    views?: number;
+    rating?: number;
+    rating_count?: number;
+  }>;
+}
 
 interface ProductsSectionProps {
   title: string;
@@ -22,7 +44,7 @@ interface ProductsSectionProps {
 export const ProductsSection = ({
   title,
   category,
-  sortBy = "created_at",
+  sortBy = "newest",
   limit = 8,
   showViewAll = true,
   visibleOnMobile = true,
@@ -34,36 +56,53 @@ export const ProductsSection = ({
     [category, sortBy, limit]
   );
 
-  const { data: products, isLoading } = useOptimizedQuery(
+  const { data, isLoading } = useQuery({
     queryKey,
-    async () => {
+    queryFn: async (): Promise<ProductsData> => {
       try {
         let query = supabase
           .from("products")
           .select(
-            "id, title, price, image_url, category, is_discounted, discount_percentage, original_price"
+            "id, title, price, image_url, category, is_discounted, discount_percentage, original_price, brand_name, views, rating, rating_count"
           );
 
         if (category) {
           query = query.eq("category", category);
         }
+        
+        // Map sortBy values to database column names
+        let orderColumn = "created_at";
+        let ascending = false;
+        
+        if (sortBy === "price-asc") {
+          orderColumn = "price";
+          ascending = true;
+        } else if (sortBy === "price-desc") {
+          orderColumn = "price";
+          ascending = false;
+        } else if (sortBy === "popular") {
+          orderColumn = "views";
+          ascending = false;
+        } else {
+          // Default is newest
+          orderColumn = "created_at";
+          ascending = false;
+        }
 
         const { data, error } = await query
-          .order(sortBy, { ascending: false })
+          .order(orderColumn, { ascending })
           .limit(limit);
 
         if (error) throw error;
-        return data || [];
+        return { products: data || [] };
       } catch (err) {
         console.error("Error fetching products:", err);
-        return [];
+        return { products: [] };
       }
     },
-    {
-      staleTime: 15 * 60 * 1000,
-      cacheTime: 30 * 60 * 1000,
-    }
-  );
+    staleTime: 15 * 60 * 1000,
+    gcTime: 30 * 60 * 1000, // Changed from cacheTime
+  });
 
   if (!visibleOnMobile && typeof window !== "undefined" && window.innerWidth < 640) {
     return null;
@@ -110,7 +149,7 @@ export const ProductsSection = ({
           transition={{ duration: 0.4 }}
         >
           <ProductGrid 
-            products={products || []} 
+            products={data?.products || []} 
             layout={layout} 
             onLayoutChange={setLayout}
           />

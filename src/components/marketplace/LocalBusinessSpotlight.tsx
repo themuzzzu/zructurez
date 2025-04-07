@@ -70,6 +70,8 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
         wait_time: item.wait_time,
         closure_reason: item.closure_reason,
         verified: item.verified,
+        contact: item.contact,
+        hours: item.hours
       }));
     } catch (err) {
       console.error("Error fetching local businesses:", err);
@@ -77,12 +79,12 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
     }
   };
 
-  // Use optimized query with longer cache time - fixed function call syntax
+  // Use optimized query with longer cache time
   const { data: businesses, isLoading } = useOptimizedQuery({
     queryKey,
     queryFn: fetchBusinesses,
     staleTime: 15 * 60 * 1000, // 15 minutes
-    cacheTime: 30 * 60 * 1000  // 30 minutes
+    gcTime: 30 * 60 * 1000  // 30 minutes
   });
 
   // Loading state
@@ -103,7 +105,7 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
   }
 
   // No results - explicitly check for array properties
-  if (!businesses || (businesses as BusinessType[]).length === 0) {
+  if (!businesses || businesses.length === 0) {
     return (
       <div className="text-center py-8">
         <p className="text-muted-foreground">No local businesses found.</p>
@@ -113,7 +115,7 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {(businesses as BusinessType[]).map((business) => (
+      {businesses.map((business) => (
         <BusinessCard 
           key={business.id}
           id={business.id}
@@ -122,8 +124,8 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
           image={business.image_url || ""}
           category={business.category || ""}
           location={business.location || ""}
-          rating={4.0}
-          reviews={0}
+          rating={business.rating || 4.0}
+          reviews={business.reviews || 0}
           contact={business.contact || ""}
           hours={business.hours || ""}
           verified={business.verified || false}
