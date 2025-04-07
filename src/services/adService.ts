@@ -35,8 +35,8 @@ export interface Advertisement {
   reach?: number;
 }
 
-// Updated AdPlacement type to include the missing properties
-export type AdPlacement = {
+// Updated AdPlacement type to include all required properties
+export interface AdPlacement {
   id: string;
   name: string;
   description: string;
@@ -49,10 +49,10 @@ export type AdPlacement = {
   priority: number;
   max_size_kb: number;
   created_at?: string;
-  impressions: number; // Added as required by the code
-  clicks: number;      // Added as required by the code
-  revenue: number;     // Added as required by the code
-};
+  impressions: number;
+  clicks: number;
+  revenue: number;
+}
 
 export const getAdPlacements = async (): Promise<AdPlacement[]> => {
   try {
@@ -66,7 +66,7 @@ export const getAdPlacements = async (): Promise<AdPlacement[]> => {
       return [];
     }
 
-    // Ensure all returned data conforms to the AdPlacement type
+    // Ensure all returned data conforms to the AdPlacement interface
     return (data || []).map(item => ({
       ...item,
       impressions: item.impressions || 0,
