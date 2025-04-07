@@ -40,7 +40,12 @@ export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps
         .limit(6);
       
       if (error) throw error;
-      return data || [];
+      
+      // Ensure that the returned data matches the ServiceType interface by explicitly mapping it
+      return (data || []).map(service => ({
+        ...service,
+        is_sponsored: true
+      })) as ServiceType[];
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
@@ -92,15 +97,13 @@ export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps
           <ServiceCard 
             key={service.id}
             id={service.id}
-            title={service.title}
+            name={service.title}
             description={service.description}
-            image_url={service.image_url}
-            price={service.price}
+            image={service.image_url || ''}
+            price={`$${service.price.toFixed(2)}`}
             providerId={service.user_id}
-            category={service.category}
-            location={service.location}
+            providerName="Service Provider"
             contact_info={service.contact_info}
-            sponsored={true}
           />
         ))}
       </div>

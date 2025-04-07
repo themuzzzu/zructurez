@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -58,9 +57,10 @@ export const SuggestedServices = ({ layout = "grid3x3" }: SuggestedServicesProps
       }
       
       // Otherwise get personalized recommendations
-      return await getRecommendedServices(user.id);
+      const recommendedServices = await getRecommendedServices(user.id);
+      return recommendedServices;
     },
-    enabled: !!user?.id,
+    enabled: true, // Allow this to run even without a user ID
   });
   
   const getGridClasses = () => {
@@ -110,15 +110,13 @@ export const SuggestedServices = ({ layout = "grid3x3" }: SuggestedServicesProps
           <ServiceCard 
             key={service.id}
             id={service.id}
-            title={service.title}
+            name={service.title}
             description={service.description}
-            image_url={service.image_url}
-            price={service.price}
+            image={service.image_url || ''}
+            price={`$${service.price.toFixed(2)}`}
             providerId={service.user_id}
-            category={service.category}
-            location={service.location}
-            contact_info={service.contact_info}
             providerName={service.profiles?.username || "Service Provider"}
+            contact_info={service.contact_info}
           />
         ))}
       </div>

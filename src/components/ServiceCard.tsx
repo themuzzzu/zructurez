@@ -15,7 +15,7 @@ interface ServiceCardProps {
   price: string;
   providerName: string;
   providerId: string;
-  contact_info?: string; // Optional contact info for direct messaging/calling
+  contact_info?: string; // Added contact_info property
 }
 
 export const ServiceCard = ({
