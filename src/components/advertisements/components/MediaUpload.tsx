@@ -136,10 +136,20 @@ export const MediaUpload = ({
     );
   }
   
-  // Fallback case if none of the formats match
+  // For popup, sidebar, and inline formats
   return (
-    <div className="p-4 text-center">
-      <p>Unsupported format: {format}</p>
+    <div className="space-y-4">
+      <ImageUpload
+        selectedImage={imageUrl}
+        onImageSelect={onImageChange}
+        label="Upload Image"
+        accept="image/*"
+      />
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
     </div>
   );
 };

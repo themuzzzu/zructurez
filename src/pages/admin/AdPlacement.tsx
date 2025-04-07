@@ -2,15 +2,15 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AdPlacement as AdPlacementType } from '@/services/adService';
+import { AdPlacement } from '@/services/adService';
 
 export default function AdPlacementPage() {
-  const [placements, setPlacements] = useState<AdPlacementType[]>([]);
+  const [placements, setPlacements] = useState<AdPlacement[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
     // Mock data for ad placements
-    const mockPlacements: AdPlacementType[] = [
+    const mockPlacements: AdPlacement[] = [
       { 
         id: '1', 
         name: 'Homepage Banner', 
@@ -89,11 +89,11 @@ export default function AdPlacementPage() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">CPC Rate:</span>
-                    <span>${placement.cpc_rate.toFixed(2)}</span>
+                    <span>${placement.cpc_rate?.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">CPM Rate:</span>
-                    <span>${placement.cpm_rate.toFixed(2)}</span>
+                    <span>${placement.cpm_rate?.toFixed(2)}</span>
                   </div>
                 </div>
                 

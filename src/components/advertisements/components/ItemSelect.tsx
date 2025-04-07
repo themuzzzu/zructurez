@@ -26,13 +26,13 @@ export const ItemSelect = ({
   posts = []
 }: ItemSelectProps) => {
   // Check if we need to render this component
-  const isBoostedPost = format === 'boosted_post';
+  const isBoostingPostFormat = format === 'boosted_post' as AdFormat;
   const hasItems = 
     (type === "business" && businesses && businesses.length > 0) ||
     (type === "service" && services && services.length > 0) ||
     (type === "product" && products && products.length > 0) ||
-    (isBoostedPost && posts && posts.length > 0) ||
-    type === "sponsored";
+    (isBoostingPostFormat && posts && posts.length > 0) ||
+    type === "sponsored" as AdType;
 
   if (!hasItems) return null;
 
@@ -96,7 +96,7 @@ export const ItemSelect = ({
           </div>
         )}
 
-        {isBoostedPost && posts && posts.length > 0 && (
+        {isBoostingPostFormat && posts && posts.length > 0 && (
           <div>
             <Label htmlFor="post-select">Select Post to Boost</Label>
             <Select value={selectedItemId} onValueChange={onChange}>
@@ -114,7 +114,7 @@ export const ItemSelect = ({
           </div>
         )}
 
-        {type === "sponsored" && (
+        {type === "sponsored" as AdType && (
           <div>
             <Label htmlFor="url-input">External URL</Label>
             <input

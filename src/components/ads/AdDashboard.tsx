@@ -228,7 +228,7 @@ interface AdCardProps {
 }
 
 function AdCard({ ad }: AdCardProps) {
-  const getStatusColor = (status?: AdStatus) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
       case 'active': return 'bg-green-100 text-green-800';
       case 'paused': return 'bg-yellow-100 text-yellow-800';
@@ -244,36 +244,30 @@ function AdCard({ ad }: AdCardProps) {
       <div 
         className="h-40 bg-cover bg-center relative"
         style={{ 
-          backgroundImage: ad.image_url ? `url(${ad.image_url})` : 'url(/placeholders/image-placeholder.jpg)' 
+          backgroundImage: ad.image_url ? `url(${ad.image_url})` : 'url(https://via.placeholder.com/300x150?text=No+Image)'
         }}
       >
-        <div className={`absolute top-2 right-2 px-2 py-1 rounded text-xs font-medium ${getStatusColor(ad.status)}`}>
-          {ad.status}
+        <div className="absolute top-2 right-2">
+          <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(ad.status)}`}>
+            {ad.status}
+          </span>
         </div>
       </div>
-      
       <CardContent className="p-4">
-        <h3 className="font-medium mb-1">{ad.title}</h3>
-        <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-          {ad.description || 'No description provided'}
-        </p>
-        
-        <div className="grid grid-cols-2 gap-2 text-xs">
+        <h3 className="font-semibold truncate">{ad.title}</h3>
+        <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{ad.description}</p>
+        <div className="grid grid-cols-2 gap-2 mt-3 text-xs">
           <div>
-            <div className="text-muted-foreground">Budget</div>
-            <div className="font-medium">${ad.budget?.toFixed(2) || '0.00'}</div>
+            <span className="text-muted-foreground">Type:</span> {ad.type}
           </div>
           <div>
-            <div className="text-muted-foreground">Type</div>
-            <div className="font-medium capitalize">{ad.type}</div>
+            <span className="text-muted-foreground">Format:</span> {ad.format}
           </div>
           <div>
-            <div className="text-muted-foreground">Impressions</div>
-            <div className="font-medium">{ad.impressions?.toLocaleString() || '0'}</div>
+            <span className="text-muted-foreground">Clicks:</span> {ad.clicks}
           </div>
           <div>
-            <div className="text-muted-foreground">Clicks</div>
-            <div className="font-medium">{ad.clicks?.toLocaleString() || '0'}</div>
+            <span className="text-muted-foreground">Impressions:</span> {ad.impressions}
           </div>
         </div>
       </CardContent>

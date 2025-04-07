@@ -1,7 +1,6 @@
 
 import { useQuery } from "@tanstack/react-query";
-import { fetchActiveAds } from "@/services/adService";
-import type { AdType, Advertisement } from "@/services/adService";
+import { fetchActiveAds, AdType, Advertisement } from "@/services/adService";
 
 export const useAdBanners = (type?: AdType | string, format: string = "banner", limit: number = 5) => {
   const { data: ads = [], isLoading } = useQuery({
@@ -30,7 +29,7 @@ export const useAdBanners = (type?: AdType | string, format: string = "banner", 
 // Fallback ads in case the API fails or returns empty
 const getFallbackAds = (type?: AdType): Advertisement[] => {
   // Generic banners
-  const genericBanners = [
+  const genericBanners: Advertisement[] = [
     {
       id: "fallback-banner-1",
       title: "Discover Premium Products",
@@ -49,7 +48,8 @@ const getFallbackAds = (type?: AdType): Advertisement[] => {
       end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
       created_at: new Date().toISOString(),
       video_url: null,
-      carousel_images: null
+      carousel_images: null,
+      reach: 8000
     },
     {
       id: "fallback-banner-2",
@@ -69,12 +69,13 @@ const getFallbackAds = (type?: AdType): Advertisement[] => {
       end_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
       created_at: new Date().toISOString(),
       video_url: null,
-      carousel_images: null
+      carousel_images: null,
+      reach: 5500
     }
   ];
   
   // Service-specific banners
-  const serviceBanners = [
+  const serviceBanners: Advertisement[] = [
     {
       id: "fallback-service-1",
       title: "Professional Cleaning Services",
@@ -93,7 +94,8 @@ const getFallbackAds = (type?: AdType): Advertisement[] => {
       end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
       created_at: new Date().toISOString(),
       video_url: null,
-      carousel_images: null
+      carousel_images: null,
+      reach: 3200
     },
     {
       id: "fallback-service-2",
@@ -113,12 +115,13 @@ const getFallbackAds = (type?: AdType): Advertisement[] => {
       end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
       created_at: new Date().toISOString(),
       video_url: null,
-      carousel_images: null
+      carousel_images: null,
+      reach: 2900
     }
   ];
   
   // Business-specific banners
-  const businessBanners = [
+  const businessBanners: Advertisement[] = [
     {
       id: "fallback-business-1",
       title: "Grow Your Business",
@@ -137,7 +140,8 @@ const getFallbackAds = (type?: AdType): Advertisement[] => {
       end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
       created_at: new Date().toISOString(),
       video_url: null,
-      carousel_images: null
+      carousel_images: null,
+      reach: 4200
     },
     {
       id: "fallback-business-2",
@@ -157,7 +161,8 @@ const getFallbackAds = (type?: AdType): Advertisement[] => {
       end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
       created_at: new Date().toISOString(),
       video_url: null,
-      carousel_images: null
+      carousel_images: null,
+      reach: 3500
     }
   ];
   

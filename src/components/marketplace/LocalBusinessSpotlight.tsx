@@ -46,12 +46,14 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
     }
   };
   
-  // Fix type instantiation issue by properly typing the query
-  const { data: localBusinesses, isLoading } = useQuery({
+  // Fix type instantiation issue by using properly typed options
+  const queryResult = useQuery({
     queryKey: ["local-businesses", businessType],
     queryFn: fetchLocalBusinesses,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
+  
+  const { data: localBusinesses, isLoading } = queryResult;
   
   // Auto-rotate businesses
   useEffect(() => {

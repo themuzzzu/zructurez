@@ -6,7 +6,8 @@ export type AdType =
   | "service"
   | "business"
   | "event"
-  | "general";
+  | "general"
+  | "sponsored"; // Add "sponsored" type
 
 export interface Advertisement {
   id: string;
@@ -14,9 +15,9 @@ export interface Advertisement {
   description: string;
   image_url: string | null;
   type: AdType;
-  format: string;
+  format: AdFormat;
   reference_id: string;
-  status: string;
+  status: AdStatus;
   user_id: string;
   location: string;
   budget: number;
@@ -28,6 +29,7 @@ export interface Advertisement {
   video_url: string | null;
   carousel_images: any;
   business_id?: string;
+  reach?: number; // Add optional reach property
 }
 
 export type AdFormat = 
@@ -36,22 +38,33 @@ export type AdFormat =
   | "popup"
   | "inline"
   | "carousel"
-  | "video";
+  | "video"
+  | "standard"     // Add these additional formats
+  | "boosted_post" // that are used in the components
+  | "card"
+  | "featured";
 
 export type AdStatus = 
   | "active"
   | "pending"
   | "rejected"
   | "expired"
-  | "paused";
+  | "paused"
+  | "completed"; // Add "completed" status
 
-export type AdPlacement =
-  | "homepage"
-  | "marketplace"
-  | "services"
-  | "businesses"
-  | "profile"
-  | "search";
+export interface AdPlacement {
+  id: string;
+  name: string;
+  location: string;
+  type: string;
+  size?: string;
+  cpc_rate?: number;
+  cpm_rate?: number;
+  description?: string;
+  active?: boolean;
+  max_size_kb?: number;
+  priority?: number;
+}
 
 export const fetchActiveAds = async (type?: AdType, format: string = "banner", limit: number = 3): Promise<Advertisement[]> => {
   try {
@@ -73,7 +86,8 @@ export const fetchActiveAds = async (type?: AdType, format: string = "banner", l
       return [];
     }
     
-    return data || [];
+    // Cast the data to ensure it matches our Advertisement type
+    return (data || []) as Advertisement[];
   } catch (error) {
     console.error("Error in fetchActiveAds:", error);
     return [];

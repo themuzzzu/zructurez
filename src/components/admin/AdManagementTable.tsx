@@ -42,7 +42,7 @@ export function AdManagementTable({ ads, onStatusChange, onDelete }: AdManagemen
     }
   };
   
-  const getStatusColor = (status: AdStatus | undefined) => {
+  const getStatusColor = (status: string | undefined) => {
     switch (status) {
       case 'active':
         return 'bg-green-500';
