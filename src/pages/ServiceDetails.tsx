@@ -235,13 +235,7 @@ const ServiceDetails = () => {
               />
 
               {/* Recommended Services component */}
-              <div className="mt-12">
-                <h3 className="text-xl font-semibold mb-4">You Might Also Like</h3>
-                <RecommendedServices 
-                  userId={user?.id}
-                  limit={4}
-                />
-              </div>
+              <RecommendedServices userLocation={service.location} />
             </div>
           </div>
         </div>

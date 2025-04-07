@@ -1,142 +1,184 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { Json } from "@/integrations/supabase/types";
 
-export type AdType = 
-  | "product"
-  | "service"
-  | "business"
-  | "event"
-  | "general"
-  | "sponsored"; // Add "sponsored" type
+// Define the ad types as an enum for type safety
+export type AdType = "product" | "business" | "service" | "sponsored" | "post";
+export type AdFormat = "standard" | "banner" | "video" | "carousel" | "recommendation" | "boosted_post";
 
+// Define the Advertisement type to match the database schema
 export interface Advertisement {
   id: string;
+  user_id?: string;
   title: string;
   description: string;
-  image_url: string | null;
   type: AdType;
-  format: AdFormat;
   reference_id: string;
-  status: AdStatus;
-  user_id: string;
-  location: string;
+  location?: string;
   budget: number;
-  clicks: number;
-  impressions: number; // Make sure this is always required
-  start_date: string;
-  end_date: string;
-  created_at: string;
-  video_url: string | null;
-  carousel_images: any;
+  start_date?: string;
+  end_date?: string;
+  status: "active" | "pending" | "rejected" | "expired";
+  created_at?: string;
+  updated_at?: string;
+  image_url: string | null;
+  video_url?: string;
+  carousel_images?: Json;
+  format?: AdFormat;
+  targeting_locations?: Json;
+  targeting_interests?: Json;
+  targeting_age_min?: number;
+  targeting_age_max?: number;
+  targeting_gender?: string;
+  impressions?: number;
+  clicks?: number;
+  ctr?: number;
   business_id?: string;
-  reach?: number; // Add optional reach property
+  reach?: number;
 }
-
-export type AdFormat = 
-  | "banner"
-  | "sidebar"
-  | "popup"
-  | "inline"
-  | "carousel"
-  | "video"
-  | "standard"     // Add these additional formats
-  | "boosted_post" // that are used in the components
-  | "card"
-  | "featured";
-
-export type AdStatus = 
-  | "active"
-  | "pending"
-  | "rejected"
-  | "expired"
-  | "paused"
-  | "completed"; // Add "completed" status
 
 export interface AdPlacement {
   id: string;
   name: string;
-  location: string;
   type: string;
+  location: string;
+  cpm_rate: number;
+  cpc_rate: number;
+  description: string;
+  active: boolean;
+  created_at: string;
   size?: string;
-  cpc_rate?: number;
-  cpm_rate?: number;
-  description?: string;
-  active?: boolean;
   max_size_kb?: number;
   priority?: number;
+  impressions?: number;
+  clicks?: number;
+  revenue?: number;
 }
 
-export const fetchActiveAds = async (type?: AdType, format: string = "banner", limit: number = 3): Promise<Advertisement[]> => {
+// Fetch active ads for display
+export const fetchActiveAds = async (
+  type?: AdType,
+  format?: AdFormat,
+  limit: number = 10
+): Promise<Advertisement[]> => {
   try {
     let query = supabase
-      .from("advertisements")
-      .select("*")
-      .eq("status", "active")
-      .eq("format", format)
-      .gte("end_date", new Date().toISOString());
+      .from('advertisements')
+      .select('*')
+      .eq('status', 'active')
+      .lt('end_date', new Date().toISOString());
     
     if (type) {
-      query = query.eq("type", type);
+      query = query.eq('type', type);
     }
     
-    const { data, error } = await query.limit(limit);
-    
-    if (error) {
-      console.error("Error fetching ads:", error);
-      return [];
+    if (format) {
+      query = query.eq('format', format);
     }
     
-    // Transform and ensure all required fields are present
-    const transformedData = (data || []).map(ad => ({
-      ...ad,
-      impressions: ad.impressions || ad.reach || 0, // Use reach as fallback for impressions
-      clicks: ad.clicks || 0, // Add default for clicks too
-      type: (ad.type || "general") as AdType,
-      format: (ad.format || "banner") as AdFormat,
-      status: (ad.status || "active") as AdStatus
-    })) as Advertisement[];
+    const { data, error } = await query
+      .order('budget', { ascending: false })
+      .limit(limit);
     
-    return transformedData;
+    if (error) throw error;
+    
+    // Cast the data to ensure it matches our Advertisement type
+    return (data || []) as Advertisement[];
   } catch (error) {
-    console.error("Error in fetchActiveAds:", error);
+    console.error('Error fetching advertisements:', error);
     return [];
   }
 };
 
-export const incrementAdView = async (adId: string): Promise<void> => {
+// Fetch ads for a specific user
+export const fetchUserAds = async (): Promise<Advertisement[]> => {
   try {
-    // Check if adId is a valid UUID
-    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(adId)) {
-      console.warn("Invalid UUID format for adId:", adId);
-      return;
-    }
-
-    // Call the increment_ad_views function directly
-    const { error } = await supabase.rpc('increment_ad_views', { ad_id: adId });
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
     
-    if (error) {
-      console.error("Error incrementing ad view:", error);
-    }
+    const { data, error } = await supabase
+      .from('advertisements')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    
+    return (data || []) as Advertisement[];
   } catch (error) {
-    console.error("Error in incrementAdView:", error);
+    console.error('Error fetching user advertisements:', error);
+    return [];
   }
 };
 
+// Increment ad views
+export const incrementAdView = async (adId: string): Promise<void> => {
+  try {
+    // We'll use the ad_analytics table
+    const { data, error } = await supabase
+      .from('ad_analytics')
+      .select('impressions')
+      .eq('ad_id', adId)
+      .single();
+    
+    if (error && error.code !== 'PGRST116') throw error;
+    
+    if (!data) {
+      // Insert new record if it doesn't exist
+      await supabase
+        .from('ad_analytics')
+        .insert({
+          ad_id: adId,
+          impressions: 1
+        });
+    } else {
+      // Update existing record
+      await supabase
+        .from('ad_analytics')
+        .update({ impressions: data.impressions + 1 })
+        .eq('ad_id', adId);
+    }
+    
+    // Also update the advertisement reach counter directly
+    await supabase.rpc('increment_ad_views', { ad_id: adId });
+    
+  } catch (error) {
+    console.error('Error incrementing ad view:', error);
+  }
+};
+
+// Increment ad clicks
 export const incrementAdClick = async (adId: string): Promise<void> => {
   try {
-    // Check if adId is a valid UUID
-    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(adId)) {
-      console.warn("Invalid UUID format for adId:", adId);
-      return;
+    // We'll use the ad_analytics table
+    const { data, error } = await supabase
+      .from('ad_analytics')
+      .select('clicks')
+      .eq('ad_id', adId)
+      .single();
+    
+    if (error && error.code !== 'PGRST116') throw error;
+    
+    if (!data) {
+      // Insert new record if it doesn't exist
+      await supabase
+        .from('ad_analytics')
+        .insert({
+          ad_id: adId,
+          clicks: 1
+        });
+    } else {
+      // Update existing record
+      await supabase
+        .from('ad_analytics')
+        .update({ clicks: data.clicks + 1 })
+        .eq('ad_id', adId);
     }
     
-    // Call the increment_ad_clicks function directly
-    const { error } = await supabase.rpc('increment_ad_clicks', { ad_id: adId });
+    // Also update the advertisement clicks counter directly using RPC properly
+    await supabase.rpc('increment_ad_clicks', { ad_id: adId });
     
-    if (error) {
-      console.error("Error incrementing ad click:", error);
-    }
   } catch (error) {
-    console.error("Error in incrementAdClick:", error);
+    console.error('Error incrementing ad click:', error);
   }
 };

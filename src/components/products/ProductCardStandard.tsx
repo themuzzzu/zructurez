@@ -1,3 +1,4 @@
+
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -7,7 +8,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatPrice } from "@/utils/productUtils";
-import { Product, ProductType } from "./types/ProductTypes";
+import { ProductType } from "./types/ProductTypes";
+import { Product } from "@/types/product";
 import { ProductCardRating } from "./ProductCardRating";
 import { ProductLikeButton } from "./ProductLikeButton";
 

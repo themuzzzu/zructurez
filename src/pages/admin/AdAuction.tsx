@@ -1,249 +1,316 @@
 
-import { useEffect, useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Advertisement } from '@/services/adService';
+import React, { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Advertisement } from "@/services/adService";
+import { toast } from "sonner";
+import { format } from "date-fns";
 
-interface AdAuction {
+interface Auction {
   id: string;
-  keyword: string;
   category: string;
   min_bid: number;
   current_bid: number;
+  status: string;
+  keyword: string;
+  created_at: string;
+  updated_at: string;
   winning_ad_id: string | null;
-  status: 'active' | 'completed' | 'canceled';
+  placement_name?: string;
 }
 
-export default function AdAuctionPage() {
-  const [auctions, setAuctions] = useState<AdAuction[]>([]);
-  const [ads, setAds] = useState<Advertisement[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  
-  useEffect(() => {
-    // Mock data
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-        
-        // Mock auctions
-        const mockAuctions: AdAuction[] = [
-          {
-            id: 'auction-1',
-            keyword: 'local business',
-            category: 'business',
-            min_bid: 50,
-            current_bid: 120,
-            winning_ad_id: 'ad-2',
-            status: 'active'
-          },
-          {
-            id: 'auction-2',
-            keyword: 'home services',
-            category: 'service',
-            min_bid: 40,
-            current_bid: 85,
-            winning_ad_id: 'ad-3',
-            status: 'active'
-          },
-          {
-            id: 'auction-3',
-            keyword: 'handmade products',
-            category: 'product',
-            min_bid: 60,
-            current_bid: 60,
-            winning_ad_id: null,
-            status: 'active'
-          },
-          {
-            id: 'auction-4',
-            keyword: 'tech gadgets',
-            category: 'product',
-            min_bid: 100,
-            current_bid: 250,
-            winning_ad_id: 'ad-1',
-            status: 'completed'
-          }
-        ];
-        
-        // Mock ads as Advertisement objects
-        const mockAds: Advertisement[] = [
-          {
-            id: 'ad-1',
-            title: 'Tech Gadget Sale',
-            type: 'product',
-            format: 'banner',
-            reference_id: 'prod-123',
-            budget: 500,
-            status: 'active',
-            user_id: 'user-123',
-            start_date: '2023-06-01',
-            end_date: '2023-08-31',
-            impressions: 1240,
-            clicks: 56,
-            image_url: 'https://example.com/ads/gadget-sale.jpg',
-            description: 'Latest tech gadgets on sale',
-            location: 'Global',
-            video_url: null,
-            carousel_images: null,
-            created_at: '2023-05-15',
-            business_id: 'business-1'
-          },
-          {
-            id: 'ad-2',
-            title: 'Local Business Promotion',
-            type: 'business',
-            format: 'standard',
-            reference_id: 'biz-456',
-            budget: 300,
-            status: 'active',
-            user_id: 'user-456',
-            start_date: '2023-05-15',
-            end_date: '2023-07-15',
-            impressions: 840,
-            clicks: 32,
-            image_url: 'https://example.com/ads/local-business.jpg',
-            description: 'Support local businesses',
-            location: 'Local',
-            video_url: null,
-            carousel_images: null,
-            created_at: '2023-05-10',
-            business_id: 'business-2'
-          },
-          {
-            id: 'ad-3',
-            title: 'Home Services',
-            type: 'service',
-            format: 'standard',
-            reference_id: 'serv-789',
-            budget: 200,
-            status: 'active',
-            user_id: 'user-789',
-            start_date: '2023-04-01',
-            end_date: '2023-06-30',
-            impressions: 620,
-            clicks: 45,
-            image_url: 'https://example.com/ads/home-services.jpg',
-            description: 'Professional home services',
-            location: 'Regional',
-            video_url: null,
-            carousel_images: null,
-            created_at: '2023-03-20',
-            business_id: 'business-3'
-          }
-        ];
-        
-        setAuctions(mockAuctions);
-        setAds(mockAds);
-      } catch (error) {
-        console.error('Error fetching auction data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    fetchData();
-  }, []);
-  
-  const getWinningAdTitle = (auctionId: string) => {
-    const auction = auctions.find(a => a.id === auctionId);
-    if (!auction || !auction.winning_ad_id) return 'No bids';
-    
-    const ad = ads.find(a => a.id === auction.winning_ad_id);
-    return ad ? ad.title : 'Unknown Ad';
+interface AdPlacement {
+  id: string;
+  name: string;
+  type: string;
+  location: string;
+  cpm_rate: number;
+  cpc_rate: number;
+  description: string;
+}
+
+export default function AdAuction() {
+  const [auctionId, setAuctionId] = useState("");
+  const [adId, setAdId] = useState("");
+  const [bidAmount, setBidAmount] = useState("");
+
+  // Separate queries for auctions and placements
+  const { data: auctions, isLoading: auctionsLoading } = useQuery({
+    queryKey: ["auctions"],
+    queryFn: async () => {
+      const { data: auctionsData, error: auctionsError } = await supabase
+        .from("ad_auctions")
+        .select("*");
+
+      if (auctionsError) throw auctionsError;
+      
+      // Since ad_auctions doesn't have an ad_placement_id field, we'll assign a default placement name
+      // In a real app, you would need to establish the actual relationship between auctions and placements
+      return auctionsData.map((auction) => ({
+        ...auction,
+        placement_name: auction.category || "General Auction"
+      })) as Auction[];
+    },
+  });
+
+  const { data: adPlacements, isLoading: placementsLoading } = useQuery({
+    queryKey: ["ad-placements"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ad_placements")
+        .select("*")
+        .eq("active", true);
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: ads, isLoading: adsLoading } = useQuery({
+    queryKey: ["user-ads"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      const { data, error } = await supabase
+        .from("advertisements")
+        .select("*")
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+      return data as Advertisement[];
+    },
+  });
+
+  const handleSubmitBid = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!auctionId || !adId || !bidAmount) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    try {
+      // Update advertisement to reference the auction
+      const { error } = await supabase
+        .from("advertisements")
+        .update({ 
+          status: "pending", 
+          reference_id: auctionId 
+        })
+        .eq("id", adId);
+
+      if (error) throw error;
+
+      toast.success("Bid submitted successfully");
+      setBidAmount("");
+    } catch (error) {
+      console.error("Error submitting bid:", error);
+      toast.error("Failed to submit bid");
+    }
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Ad Auctions</h1>
-        <Button>Create New Auction</Button>
+    <div className="container mx-auto py-6 px-4 md:px-6 space-y-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Ad Auction</h1>
+          <p className="text-muted-foreground mt-1">Bid on premium ad slots for your advertisements</p>
+        </div>
       </div>
-      
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Auction Performance</CardTitle>
-          <CardDescription>Current active ad auctions and their performance</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-2xl font-bold">{auctions.filter(a => a.status === 'active').length}</div>
-                <p className="text-muted-foreground">Active Auctions</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-2xl font-bold">${auctions.reduce((total, auction) => 
-                  total + (auction.status === 'active' ? auction.current_bid : 0), 0)}</div>
-                <p className="text-muted-foreground">Current Value</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-2xl font-bold">{auctions.filter(a => a.winning_ad_id).length}</div>
-                <p className="text-muted-foreground">Active Bids</p>
-              </CardContent>
-            </Card>
-          </div>
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>All Auctions</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="text-center py-8">Loading auctions...</div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Keyword</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Current Bid</TableHead>
-                  <TableHead>Min. Bid</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Winning Ad</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {auctions.map((auction) => (
-                  <TableRow key={auction.id}>
-                    <TableCell className="font-medium">{auction.keyword}</TableCell>
-                    <TableCell className="capitalize">{auction.category}</TableCell>
-                    <TableCell>${auction.current_bid}</TableCell>
-                    <TableCell>${auction.min_bid}</TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={auction.status === 'active' ? 'success' : 
-                                auction.status === 'completed' ? 'secondary' : 'destructive'}
-                      >
-                        {auction.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{getWinningAdTitle(auction.id)}</TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm">Details</Button>
-                        {auction.status === 'active' && (
-                          <Button variant="outline" size="sm" className="text-red-500 hover:text-red-700">
-                            End
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
+
+      <Tabs defaultValue="active-auctions" className="w-full">
+        <TabsList className="grid w-full md:w-auto grid-cols-2 md:grid-cols-3">
+          <TabsTrigger value="active-auctions">Active Auctions</TabsTrigger>
+          <TabsTrigger value="place-bid">Place Bid</TabsTrigger>
+          <TabsTrigger value="my-bids" className="hidden md:block">My Bids</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="active-auctions" className="space-y-4 mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Available Auction Slots</CardTitle>
+              <CardDescription>
+                Bid on these placements to showcase your advertisements
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="overflow-auto">
+              <Table>
+                <TableCaption>A list of active ad placement auctions</TableCaption>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[180px]">Ad Placement</TableHead>
+                    <TableHead>Start Date</TableHead>
+                    <TableHead>End Date</TableHead>
+                    <TableHead>Min Bid</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Action</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+                </TableHeader>
+                <TableBody>
+                  {!auctionsLoading && auctions ? (
+                    auctions.map((auction) => (
+                      <TableRow key={auction.id}>
+                        <TableCell className="font-medium">{auction.placement_name}</TableCell>
+                        <TableCell>
+                          {format(new Date(auction.created_at), "MMM d, yyyy")}
+                        </TableCell>
+                        <TableCell>
+                          {format(new Date(auction.updated_at), "MMM d, yyyy")}
+                        </TableCell>
+                        <TableCell>${auction.min_bid.toFixed(2)}</TableCell>
+                        <TableCell>
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                              auction.status === "active"
+                                ? "bg-green-100 text-green-800"
+                                : auction.status === "pending"
+                                ? "bg-yellow-100 text-yellow-800"
+                                : "bg-red-100 text-red-800"
+                            }`}
+                          >
+                            {auction.status}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setAuctionId(auction.id);
+                              setBidAmount(auction.min_bid.toString());
+                              document.getElementById("place-bid-tab")?.click();
+                            }}
+                          >
+                            Place Bid
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-8">
+                        {auctionsLoading ? "Loading..." : "No auctions available"}
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="place-bid" id="place-bid-tab" className="space-y-4 mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Submit Your Bid</CardTitle>
+              <CardDescription>
+                Enter your bid details for the selected ad placement
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmitBid} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="auction-slot">Auction Slot</Label>
+                    <select
+                      id="auction-slot"
+                      value={auctionId}
+                      onChange={(e) => setAuctionId(e.target.value)}
+                      className="w-full p-2 border rounded-md"
+                      required
+                    >
+                      <option value="">Select an auction slot</option>
+                      {!auctionsLoading &&
+                        auctions?.map((auction) => (
+                          <option key={auction.id} value={auction.id}>
+                            {auction.placement_name} (${auction.min_bid} min)
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="advertisement">Your Advertisement</Label>
+                    <select
+                      id="advertisement"
+                      value={adId}
+                      onChange={(e) => setAdId(e.target.value)}
+                      className="w-full p-2 border rounded-md"
+                      required
+                    >
+                      <option value="">Select your advertisement</option>
+                      {!adsLoading &&
+                        ads?.map((ad) => (
+                          <option key={ad.id} value={ad.id}>
+                            {ad.title}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="bid-amount">Bid Amount ($)</Label>
+                  <Input
+                    id="bid-amount"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={bidAmount}
+                    onChange={(e) => setBidAmount(e.target.value)}
+                    placeholder="Enter your bid amount"
+                    className="w-full"
+                    required
+                  />
+                </div>
+
+                <Button type="submit" className="w-full md:w-auto">
+                  Submit Bid
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="my-bids" className="space-y-4 mt-6">
+          {/* My bids content here */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Your Active Bids</CardTitle>
+              <CardDescription>
+                Track the status of your bids on ad placements
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {/* Bids table would go here */}
+              <div className="text-center py-10 text-muted-foreground">
+                No active bids found
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

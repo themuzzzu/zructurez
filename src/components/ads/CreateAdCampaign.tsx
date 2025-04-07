@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -117,6 +118,7 @@ export const CreateAdCampaign = ({ businessId, onSuccess, onCancel }: CreateAdCa
     try {
       setIsSubmitting(true);
 
+      // Get the current authenticated user
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         toast.error("You need to be logged in to create an ad campaign");
@@ -128,7 +130,7 @@ export const CreateAdCampaign = ({ businessId, onSuccess, onCancel }: CreateAdCa
 
       const adData = {
         business_id: businessId,
-        user_id: user.id,
+        user_id: user.id, // Add the required user_id field
         title,
         description,
         type: selectedSlot?.type || 'sponsored_product',
@@ -227,9 +229,10 @@ export const CreateAdCampaign = ({ businessId, onSuccess, onCancel }: CreateAdCa
                   <div className="flex items-center gap-2 border rounded-md p-3">
                     <CalendarIcon className="h-4 w-4 text-muted-foreground" />
                     <DateRangePicker 
-                      date={dateRange}
-                      onChange={(range) => {
-                        if (range.from && range.to) setDateRange(range);
+                      initialDateFrom={dateRange.from}
+                      initialDateTo={dateRange.to}
+                      onUpdate={({ from, to }) => {
+                        if (from && to) setDateRange({ from, to });
                       }}
                     />
                   </div>

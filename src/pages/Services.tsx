@@ -1,220 +1,250 @@
 
-import React, { useState, useEffect, Suspense } from "react";
-import { Layout } from "@/components/layout/Layout";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { Button, } from "@/components/ui/button";
+import { Plus, Phone } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { ServiceCard } from "@/components/service-card/ServiceCard";
+import { CreateServiceForm } from "@/components/service-form/CreateServiceForm";
 import { supabase } from "@/integrations/supabase/client";
+import { Spinner } from "@/components/common/Spinner";
+import { Layout } from "@/components/layout/Layout";
+import { GridLayoutSelector } from "@/components/marketplace/GridLayoutSelector";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
-import { ServiceCategoryGrid } from "@/components/services/ServiceCategoryGrid";
-import { ServiceGrid } from "@/components/services/ServiceGrid";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { MarketplaceBanner } from "@/components/marketplace/MarketplaceBanner";
+import { ServiceCategoryFilter } from "@/components/ServiceCategoryFilter";
+import { SponsoredServices } from "@/components/service-marketplace/SponsoredServices";
+import { TrendingServices } from "@/components/service-marketplace/TrendingServices";
+import { RecommendedServices } from "@/components/service-marketplace/RecommendedServices";
+import { TopServices } from "@/components/service-marketplace/TopServices";
+import { ServiceIconGrid } from "@/components/service-marketplace/ServiceIconGrid";
+import { SearchInput } from "@/components/SearchInput";
+import { ServiceBannerAd } from "@/components/ads/ServiceBannerAd";
 import { ServiceRankings } from "@/components/rankings/ServiceRankings";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { LoadingView } from "@/components/LoadingView";
-import { LocalBusinessSpotlight } from "@/components/marketplace/LocalBusinessSpotlight";
-import { TrendingServicesSection } from "@/components/services/TrendingServicesSection";
-import { AutoScrollingBannerAd } from "@/components/ads/AutoScrollingBannerAd";
-import { useAdBanners } from "@/hooks/useAdBanners";
-import { SponsoredServices } from "@/components/services/SponsoredServices";
-import { RecommendedServices } from "@/components/services/RecommendedServices";
 
-const mockServices = [
-  {
-    id: "service-1",
-    title: "Professional Cleaning",
-    description: "Comprehensive cleaning services for homes and offices",
-    price: 2500,
-    image_url: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=300&q=80",
-    category: "home",
-    rating: 4.5,
-    rating_count: 38,
-    created_at: new Date().toISOString()
-  },
-  {
-    id: "service-2",
-    title: "Plumbing Services",
-    description: "Expert plumbing repair and installation",
-    price: 1200,
-    image_url: "https://images.unsplash.com/photo-1606321022034-31968bb41e4c?auto=format&fit=crop&w=300&q=80",
-    category: "home",
-    rating: 4.7,
-    rating_count: 42,
-    created_at: new Date().toISOString()
-  },
-  {
-    id: "service-3",
-    title: "Electrical Repairs",
-    description: "Residential and commercial electrical services",
-    price: 1500,
-    image_url: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=300&q=80",
-    category: "home",
-    rating: 4.6,
-    rating_count: 29,
-    created_at: new Date().toISOString()
-  },
-  {
-    id: "service-4",
-    title: "Interior Design",
-    description: "Transform your space with professional design services",
-    price: 5000,
-    image_url: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=300&q=80",
-    category: "home",
-    rating: 4.8,
-    rating_count: 56,
-    created_at: new Date().toISOString()
-  },
-  {
-    id: "service-5",
-    title: "Lawn Care",
-    description: "Professional lawn maintenance and landscaping",
-    price: 1800,
-    image_url: "https://images.unsplash.com/photo-1589923188900-85dae523342b?auto=format&fit=crop&w=300&q=80",
-    category: "outdoor",
-    rating: 4.4,
-    rating_count: 31,
-    created_at: new Date().toISOString()
-  },
-  {
-    id: "service-6",
-    title: "IT Support",
-    description: "Technical support for all your computer needs",
-    price: 3500,
-    image_url: "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=300&q=80",
-    category: "tech",
-    rating: 4.9,
-    rating_count: 48,
-    created_at: new Date().toISOString()
-  }
-];
-
-const Services = () => {
-  const navigate = useNavigate();
+export default function Services() {
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [userServices, setUserServices] = useState([]);
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
   const [gridLayout, setGridLayout] = useState<GridLayoutType>("grid3x3");
-  const [initialized, setInitialized] = useState(false);
-  const { ads: bannerAds } = useAdBanners("service", "banner", 3);
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    try {
-      const savedLayout = localStorage.getItem('serviceGridLayout') as GridLayoutType | null;
-      if (savedLayout && ["grid2x2", "grid3x3", "grid4x4", "grid1x1"].includes(savedLayout)) {
-        setGridLayout(savedLayout);
+    const checkUserAuth = async () => {
+      const { data } = await supabase.auth.getUser();
+      setIsUserLoggedIn(!!data.user);
+      
+      if (data.user) {
+        fetchUserServices(data.user.id);
       }
-      setInitialized(true);
-    } catch (error) {
-      console.error("Error initializing layout:", error);
-      setInitialized(true);
-    }
-  }, []);
+    };
+    
+    const fetchServices = async () => {
+      setLoading(true);
+      try {
+        let query = supabase
+          .from('services')
+          .select('*')
+          .order('created_at', { ascending: false });
 
-  const { data: services, isLoading } = useQuery({
-    queryKey: ['services'],
-    queryFn: async () => {
+        if (selectedCategory !== "all") {
+          query = query.eq('category', selectedCategory);
+        }
+
+        if (searchQuery) {
+          query = query.ilike('title', `%${searchQuery}%`);
+        }
+          
+        const { data, error } = await query.limit(12);
+          
+        if (error) throw error;
+        setServices(data || []);
+      } catch (err) {
+        console.error('Error fetching services:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    const fetchUserServices = async (userId) => {
       try {
         const { data, error } = await supabase
           .from('services')
-          .select('*');
-
-        if (error) {
-          console.error('Error fetching services:', error);
-          return mockServices;
-        }
-
-        return data && data.length > 0 ? data : mockServices;
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false });
+          
+        if (error) throw error;
+        setUserServices(data || []);
       } catch (err) {
-        console.error("Fetch error:", err);
-        return mockServices;
+        console.error('Error fetching user services:', err);
       }
-    },
-    staleTime: 60000,
-    enabled: initialized,
-    retry: 1,
-    retryDelay: 1000,
-  });
-
-  const handleLayoutChange = (newLayout: GridLayoutType) => {
-    try {
-      setGridLayout(newLayout);
-      localStorage.setItem('serviceGridLayout', newLayout);
-    } catch (error) {
-      console.error("Error saving layout:", error);
-    }
+    };
+    
+    checkUserAuth();
+    fetchServices();
+  }, [selectedCategory, searchQuery]);
+  
+  const handleCategoryChange = (category) => {
+    setSelectedCategory(category);
   };
 
-  const handleCreateService = () => {
-    navigate('/create-service');
+  const handleCreateSuccess = () => {
+    setIsDialogOpen(false);
+    window.location.reload();
+  };
+
+  const getGridClasses = () => {
+    switch (gridLayout) {
+      case "grid4x4":
+        return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4";
+      case "grid2x2":
+        return "grid grid-cols-1 sm:grid-cols-2 gap-4";
+      case "list":
+        return "flex flex-col gap-4";
+      case "grid1x1":
+        return "grid grid-cols-1 gap-4";
+      case "single":
+        return "grid grid-cols-1 gap-4 max-w-3xl mx-auto";
+      case "grid3x3":
+      default:
+        return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4";
+    }
   };
 
   return (
     <Layout>
-      <ErrorBoundary fallback={
-        <div className="container mx-auto py-10 text-center">
-          <h1 className="text-3xl font-bold mb-6">Services</h1>
-          <p className="text-red-500 mb-4">There was an error loading the services page.</p>
-          <Button onClick={() => window.location.reload()}>Try Again</Button>
-        </div>
-      }>
-        <Suspense fallback={<LoadingView />}>
-          <div className="container mx-auto py-6">
-            <div className="flex flex-col md:flex-row justify-between items-center mb-6">
-              <h1 className="text-3xl font-bold">Services Marketplace</h1>
-              <Button onClick={handleCreateService} className="mt-4 md:mt-0">
-                <Plus className="h-4 w-4 mr-2" />
+      <div className="container max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold">Services</h1>
+          <div className="flex items-center gap-4 w-full sm:w-auto">
+            <GridLayoutSelector 
+              layout={gridLayout} 
+              onChange={(layout) => setGridLayout(layout)} 
+            />
+            {isUserLoggedIn && (
+              <Button onClick={() => setIsDialogOpen(true)} className="ml-auto sm:ml-0">
+                <Plus className="mr-2 h-4 w-4" />
                 Create Service
               </Button>
-            </div>
+            )}
+          </div>
+        </div>
 
-            {/* Banner Ad Carousel */}
-            <div className="mb-8">
-              <AutoScrollingBannerAd ads={bannerAds} />
-            </div>
+        {/* Search Bar */}
+        <div className="mb-6">
+          <SearchInput 
+            placeholder="Search for services..." 
+            value={searchQuery} 
+            onChange={setSearchQuery} 
+            className="w-full max-w-3xl mx-auto"
+          />
+        </div>
+        
+        {/* Banner Ad - Added below search */}
+        <ServiceBannerAd />
+        
+        {/* Banner */}
+        <div className="mb-6">
+          <MarketplaceBanner />
+        </div>
+        
+        {/* Service Categories Icon Grid */}
+        <div className="mb-6">
+          <ServiceIconGrid onCategorySelect={handleCategoryChange} />
+        </div>
+        
+        {/* Sponsored Services */}
+        <div className="mb-8">
+          <SponsoredServices />
+        </div>
 
-            <div className="mb-8">
-              <h2 className="text-2xl font-semibold mb-4">Browse Categories</h2>
-              <ServiceCategoryGrid />
-            </div>
+        {/* Trending Services */}
+        <div className="mb-8">
+          <TrendingServices />
+        </div>
+        
+        {/* Rankings - Added new section */}
+        <div className="mb-8">
+          <ServiceRankings />
+        </div>
 
-            {/* Sponsored Services Section */}
-            <div className="mb-8">
-              <SponsoredServices limit={4} showTitle={true} />
-            </div>
+        {/* Top Services */}
+        <div className="mb-8">
+          <TopServices />
+        </div>
 
-            <div className="mb-8">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-semibold">Featured Service Providers</h2>
-                <Button variant="outline" onClick={() => navigate('/businesses')}>
-                  View All
-                </Button>
-              </div>
-              <LocalBusinessSpotlight />
-            </div>
-
-            <div className="mb-8">
-              <TrendingServicesSection />
-            </div>
-
-            {/* Recommended Services */}
-            <div className="mb-8">
-              <RecommendedServices limit={4} showTitle={true} />
-            </div>
-
-            <div className="mb-8">
-              <ServiceGrid 
-                services={services || []} 
-                isLoading={isLoading}
-                layout={gridLayout}
-                onLayoutChange={handleLayoutChange}
-              />
-            </div>
-
-            <div className="mb-8">
-              <ServiceRankings />
+        {/* Recommended Services */}
+        <div className="mb-8">
+          <RecommendedServices />
+        </div>
+        
+        {/* Category Filter - Moved below recommended services */}
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold mb-4">Filter by Category</h2>
+          <ServiceCategoryFilter onCategoryChange={handleCategoryChange} />
+        </div>
+        
+        {isUserLoggedIn && userServices.length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-xl font-semibold mb-4">Your Services</h2>
+            <div className={getGridClasses()}>
+              {userServices.map((service) => (
+                <ServiceCard 
+                  key={service.id}
+                  id={service.id}
+                  title={service.title}
+                  description={service.description}
+                  image_url={service.image_url}
+                  price={service.price}
+                  providerName="You"
+                  providerId={service.user_id}
+                  category={service.category}
+                  location={service.location}
+                />
+              ))}
             </div>
           </div>
-        </Suspense>
-      </ErrorBoundary>
+        )}
+        
+        <h2 className="text-xl font-semibold mb-4">All Services</h2>
+        
+        {loading ? (
+          <div className="flex justify-center items-center py-12">
+            <Spinner size="lg" />
+          </div>
+        ) : services.length > 0 ? (
+          <div className={getGridClasses()}>
+            {services.map((service) => (
+              <ServiceCard 
+                key={service.id}
+                id={service.id}
+                title={service.title}
+                description={service.description}
+                image_url={service.image_url}
+                price={service.price}
+                providerId={service.user_id}
+                category={service.category}
+                location={service.location}
+                views={service.views}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">No services found</p>
+          </div>
+        )}
+        
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent className="sm:max-w-[600px] h-[90vh] overflow-y-auto">
+            <h2 className="text-xl font-bold mb-4">Create a New Service</h2>
+            <CreateServiceForm onSuccess={handleCreateSuccess} onCancel={() => setIsDialogOpen(false)} />
+          </DialogContent>
+        </Dialog>
+      </div>
     </Layout>
   );
-};
-
-export default Services;
+}

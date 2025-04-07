@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useQuery } from "@tanstack/react-query";
@@ -6,7 +7,7 @@ import { ProductCard } from "@/components/products/ProductCard";
 import { Loader2, Search, ShoppingBag, XCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Product } from "@/components/products/types/ProductTypes";
+import { ProductType } from "@/components/products/types/ProductTypes";
 import { Card } from "@/components/ui/card";
 
 export const ProductWishlist = () => {
@@ -30,8 +31,16 @@ export const ProductWishlist = () => {
         return [];
       }
       
-      // Transform Supabase data to match Product interface
-      return data || [];
+      // Transform Supabase data to match ProductType
+      return (data || []).map(product => {
+        const transformedProduct: ProductType = {
+          ...product,
+          title: product.title || '',
+          imageUrl: product.image_url || '',
+        };
+        
+        return transformedProduct;
+      });
     },
     enabled: wishlistItems.length > 0,
   });

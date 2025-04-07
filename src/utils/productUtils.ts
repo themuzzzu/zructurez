@@ -17,7 +17,7 @@ export const formatPrice = (price?: number | string): string => {
     style: 'currency',
     currency: 'INR',
     minimumFractionDigits: 0,
-    maximumFractionDigits: 0
+    maximumFractionDigits: 2
   }).format(numericPrice);
 };
 
@@ -53,37 +53,4 @@ export const hasValidDiscount = (product: any): boolean => {
   }
   
   return false;
-};
-
-/**
- * Formats a number as Indian rupees with commas in the appropriate places for thousands, lakhs, crores
- */
-export const formatIndianCurrency = (amount: number): string => {
-  const formatter = new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    minimumFractionDigits: 0
-  });
-  
-  return formatter.format(amount);
-};
-
-/**
- * Convert price to smaller units for display based on value
- * e.g. 10000 -> ₹10K, 1000000 -> ₹10L, 10000000 -> ₹1Cr
- */
-export const formatCompactPrice = (price?: number): string => {
-  if (price === undefined || price === null || isNaN(price)) {
-    return "₹0";
-  }
-  
-  if (price >= 10000000) {
-    return `₹${(price / 10000000).toFixed(1)}Cr`;
-  } else if (price >= 100000) {
-    return `₹${(price / 100000).toFixed(1)}L`;
-  } else if (price >= 1000) {
-    return `₹${(price / 1000).toFixed(1)}K`;
-  }
-  
-  return formatPrice(price);
 };

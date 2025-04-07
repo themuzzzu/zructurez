@@ -7,84 +7,72 @@ import Business from "./pages/Business";
 import BusinessDetails from "./pages/BusinessDetails";
 import { lazy, Suspense } from "react";
 import { LoadingView } from "@/components/LoadingView";
-import Index from "./pages/Index";
 
-// Use more reliable dynamic imports with error boundaries
-const lazyImport = (importFn) => {
-  const Component = lazy(async () => {
-    try {
-      return await importFn();
-    } catch (error) {
-      console.error("Error loading component:", error);
-      return { default: () => <LoadingView text="Failed to load component. Please refresh." /> };
-    }
-  });
-  
-  return (props) => (
+// Lazily loaded components
+const Marketplace = lazy(() => import("@/pages/Marketplace"));
+const Auth = lazy(() => import("@/pages/Auth"));
+const Events = lazy(() => import("@/pages/Events"));
+const Jobs = lazy(() => import("@/pages/Jobs"));
+const CategoryPage = lazy(() => import("@/pages/marketplace/CategoryPage"));
+const ProductDetails = lazy(() => import("@/pages/ProductDetails"));
+const Services = lazy(() => import("@/pages/Services"));
+const ServiceDetails = lazy(() => import("@/pages/ServiceDetails"));
+const Profile = lazy(() => import("@/pages/Profile"));
+const Settings = lazy(() => import("@/pages/Settings"));
+const Wishlist = lazy(() => import("@/pages/Wishlist"));
+const Maps = lazy(() => import("@/pages/Maps"));
+const Communities = lazy(() => import("@/pages/Communities"));
+const MessagesPage = lazy(() => import("@/pages/messages"));
+const Search = lazy(() => import("@/pages/search"));
+const Orders = lazy(() => import("@/pages/orders"));
+const Checkout = lazy(() => import("@/pages/checkout"));
+const OrderSuccess = lazy(() => import("@/pages/order-success"));
+const AdDashboard = lazy(() => import("@/pages/admin/AdDashboard"));
+const AdAnalytics = lazy(() => import("@/pages/admin/AdAnalytics"));
+const AdPlacement = lazy(() => import("@/pages/admin/AdPlacement"));
+const AdAuction = lazy(() => import("@/pages/admin/AdAuction"));
+const Dashboard = lazy(() => import("@/pages/dashboard"));
+const Pricing = lazy(() => import("@/pages/Pricing"));
+const BusinessRegistrationForm = lazy(() => import("@/components/business-registration/BusinessRegistrationForm").then(m => ({ default: m.BusinessRegistrationForm })));
+
+// This function wraps each component with Suspense
+const withSuspense = (Component) => {
+  return (
     <Suspense fallback={<LoadingView />}>
-      <Component {...props} />
+      <Component />
     </Suspense>
   );
 };
-
-// Lazily loaded components with error handling
-const Marketplace = lazyImport(() => import("@/pages/Marketplace"));
-const Auth = lazyImport(() => import("@/pages/Auth"));
-const Events = lazyImport(() => import("@/pages/Events"));
-const Jobs = lazyImport(() => import("@/pages/Jobs"));
-const CategoryPage = lazyImport(() => import("@/pages/marketplace/CategoryPage"));
-const ProductDetails = lazyImport(() => import("@/pages/ProductDetails"));
-const Services = lazyImport(() => import("@/pages/Services"));
-const ServiceDetails = lazyImport(() => import("@/pages/ServiceDetails"));
-const Profile = lazyImport(() => import("@/pages/Profile"));
-const Settings = lazyImport(() => import("@/pages/Settings"));
-const Wishlist = lazyImport(() => import("@/pages/Wishlist"));
-const Maps = lazyImport(() => import("@/pages/Maps"));
-const Communities = lazyImport(() => import("@/pages/Communities"));
-const MessagesPage = lazyImport(() => import("@/pages/messages"));
-const Search = lazyImport(() => import("@/pages/search"));
-const Orders = lazyImport(() => import("@/pages/orders"));
-const Checkout = lazyImport(() => import("@/pages/checkout"));
-const OrderSuccess = lazyImport(() => import("@/pages/order-success"));
-const AdDashboard = lazyImport(() => import("@/pages/admin/AdDashboard"));
-const AdAnalytics = lazyImport(() => import("@/pages/admin/AdAnalytics"));
-const AdPlacement = lazyImport(() => import("@/pages/admin/AdPlacement"));
-const AdAuction = lazyImport(() => import("@/pages/admin/AdAuction"));
-const Dashboard = lazyImport(() => import("@/pages/dashboard"));
-const Pricing = lazyImport(() => import("@/pages/Pricing"));
-const BusinessRegistrationForm = lazyImport(() => 
-  import("@/components/business-registration/BusinessRegistrationForm").then(m => ({ default: () => <m.BusinessRegistrationForm /> }))
-);
 
 // This file includes route definitions for the application
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Index />
+    element: withSuspense(Marketplace)
   },
   {
     path: "/auth",
-    element: <Auth />
+    element: withSuspense(Auth)
   },
   {
     path: "/events",
-    element: <Events />
+    element: withSuspense(Events)
   },
   {
     path: "/jobs",
-    element: <Jobs />
+    element: withSuspense(Jobs)
   },
   {
     path: "/marketplace",
-    element: <Marketplace />
+    element: withSuspense(Marketplace)
   },
   {
     path: "/marketplace/category/:categoryId",
-    element: <CategoryPage />
+    element: withSuspense(CategoryPage)
   },
   {
     path: "/marketplace/category/:categoryId/:subcategoryId",
-    element: <CategoryPage />
+    element: withSuspense(CategoryPage)
   },
   {
     path: "/marketplace/search",
@@ -92,7 +80,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/products",
-    element: <Marketplace />
+    element: withSuspense(Marketplace)
   },
   {
     path: "/businesses",
@@ -104,99 +92,99 @@ const router = createBrowserRouter([
   },
   {
     path: "/register-business",
-    element: <BusinessRegistrationForm />
+    element: withSuspense(BusinessRegistrationForm)
   },
   {
     path: "/products/:id",
-    element: <ProductDetails />
+    element: withSuspense(ProductDetails)
   },
   {
     path: "/product/:id",
-    element: <ProductDetails />
+    element: withSuspense(ProductDetails)
   },
   {
     path: "/services",
-    element: <Services />
+    element: withSuspense(Services)
   },
   {
     path: "/services/:id",
-    element: <ServiceDetails />
+    element: withSuspense(ServiceDetails)
   },
   {
     path: "/profile",
-    element: <Profile />
+    element: withSuspense(Profile)
   },
   {
     path: "/profile/:id",
-    element: <Profile />
+    element: withSuspense(Profile)
   },
   {
     path: "/settings",
-    element: <Settings />
+    element: withSuspense(Settings)
   },
   {
     path: "/settings/pricing",
-    element: <Pricing />
+    element: withSuspense(Pricing)
   },
   {
     path: "/pricing",
-    element: <Pricing />
+    element: withSuspense(Pricing)
   },
   {
     path: "/wishlist",
-    element: <Wishlist />
+    element: withSuspense(Wishlist)
   },
   {
     path: "/maps",
-    element: <Maps />
+    element: withSuspense(Maps)
   },
   {
     path: "/communities",
-    element: <Communities />
+    element: withSuspense(Communities)
   },
   {
     path: "/messages/*",
-    element: <MessagesPage />
+    element: withSuspense(MessagesPage)
   },
   {
     path: "/messages",
-    element: <MessagesPage />
+    element: withSuspense(MessagesPage)
   },
   {
     path: "/search",
-    element: <Search />
+    element: withSuspense(Search)
   },
   {
     path: "/orders",
-    element: <Orders />
+    element: withSuspense(Orders)
   },
   {
     path: "/checkout",
-    element: <Checkout />
+    element: withSuspense(Checkout)
   },
   {
     path: "/order-success",
-    element: <OrderSuccess />
+    element: withSuspense(OrderSuccess)
   },
   {
     path: "/admin/ads",
-    element: <AdDashboard />
+    element: withSuspense(AdDashboard)
   },
   {
     path: "/admin/analytics",
-    element: <AdAnalytics />
+    element: withSuspense(AdAnalytics)
   },
   {
     path: "/admin/placement",
-    element: <AdPlacement />
+    element: withSuspense(AdPlacement)
   },
   {
     path: "/admin/auction",
-    element: <AdAuction />
+    element: withSuspense(AdAuction)
   },
   {
     path: "/dashboard",
-    element: <Dashboard />
+    element: withSuspense(Dashboard)
   },
   {
     path: "*",

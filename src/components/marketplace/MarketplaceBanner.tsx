@@ -1,9 +1,8 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
-import { ImageFallback } from '@/components/ui/image-fallback';
 
 interface MarketplaceBannerProps {
   title?: string;
@@ -20,7 +19,6 @@ export const MarketplaceBanner = ({
   onAction,
   imageSrc = "https://images.unsplash.com/photo-1472851294608-062f824d29cc?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1200&h=400&q=80"
 }: MarketplaceBannerProps) => {
-  const [imageLoaded, setImageLoaded] = useState(false);
   
   const handleAction = () => {
     if (onAction) {
@@ -28,25 +26,14 @@ export const MarketplaceBanner = ({
     }
   };
   
-  const handleImageLoad = () => {
-    setImageLoaded(true);
-  };
-  
   return (
     <Card className="overflow-hidden border-0">
       <CardContent className="relative p-0 h-[200px] md:h-[300px]">
-        <div className="absolute inset-0 bg-gradient-to-r from-gray-900 to-gray-800 animate-pulse" 
-             style={{ opacity: imageLoaded ? 0 : 1, transition: 'opacity 0.5s ease-in-out' }}>
-        </div>
         <div className="absolute inset-0">
-          <ImageFallback
+          <img
             src={imageSrc}
             alt="Marketplace banner"
             className="w-full h-full object-cover"
-            fallbackSrc="/placeholders/image-placeholder.jpg"
-            onLoad={handleImageLoad}
-            aspectRatio="wide"
-            priority={true}
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-transparent" />
         </div>

@@ -1,123 +1,187 @@
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { BusinessCard } from "@/components/BusinessCard";
-import { Sparkles } from "lucide-react";
-import { LikeProvider } from "@/components/products/LikeContext";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { MapPin, Store, Star, ArrowRightCircle } from "lucide-react";
 
 interface LocalBusiness {
   id: string;
   name: string;
   description: string;
-  image_url: string;
-  category: string;
-  location: string;
-  verified: boolean;
+  image_url?: string | null;
+  rating: number;
+  distance: number;
+  location: string | null;
 }
 
-interface LocalBusinessSpotlightProps {
-  businessType?: string;
-}
+export const LocalBusinessSpotlight = () => {
+  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [locationPermission, setLocationPermission] = useState<'granted' | 'denied' | 'pending'>('pending');
 
-export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightProps) => {
-  const [currentBusinessIndex, setCurrentBusinessIndex] = useState(0);
-  
-  // Fix infinite type instantiation by explicitly defining the query function return type
-  const { data: localBusinesses, isLoading } = useQuery({
-    queryKey: ["local-businesses", businessType],
-    queryFn: async (): Promise<LocalBusiness[]> => {
-      try {
-        let query = supabase
-          .from("businesses")
-          .select("*");
-          
-        // Filter by type if provided
-        if (businessType) {
-          query = query.eq("type", businessType);
-        }
-        
-        const { data, error } = await query.limit(5);
-        
-        if (error) throw error;
-        return data as LocalBusiness[];
-      } catch (err) {
-        console.error("Error fetching local businesses:", err);
-        return [];
-      }
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
-  
-  // Auto-rotate businesses
   useEffect(() => {
-    if (!localBusinesses || localBusinesses.length === 0) return;
-    
-    const interval = setInterval(() => {
-      setCurrentBusinessIndex((prevIndex) => 
-        (prevIndex + 1) % localBusinesses.length
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          });
+          setLocationPermission('granted');
+        },
+        () => {
+          setLocationPermission('denied');
+        }
       );
-    }, 10000); // Change every 10 seconds
-    
-    return () => clearInterval(interval);
-  }, [localBusinesses]);
-  
-  if (isLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-yellow-500" />
-            <span>Local Business Spotlight</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="w-full">
-            <Skeleton className="h-48 w-full" />
-            <div className="space-y-2 mt-3">
-              <Skeleton className="h-4 w-2/3" />
-              <Skeleton className="h-4 w-1/2" />
-              <Skeleton className="h-4 w-full" />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-  
-  if (!localBusinesses || localBusinesses.length === 0) {
-    return null;
-  }
-  
-  const currentBusiness = localBusinesses[currentBusinessIndex];
-  
+    } else {
+      setLocationPermission('denied');
+    }
+  }, []);
+
+  const { data: businessesData = [], isLoading } = useQuery({
+    queryKey: ['local-businesses', userLocation],
+    queryFn: async () => {
+      if (!userLocation) return [];
+
+      const { data, error } = await supabase
+        .from('businesses')
+        .select('*')
+        .limit(4);
+
+      if (error) throw error;
+      
+      // Transform business data to match LocalBusiness interface
+      return data.map((business): LocalBusiness => ({
+        id: business.id,
+        name: business.name,
+        description: business.description,
+        image_url: business.image_url,
+        rating: 4.5, // Mock rating
+        distance: Math.round(Math.random() * 10) / 10, // Mock distance
+        location: business.location
+      }));
+    },
+    enabled: !!userLocation,
+  });
+
+  const requestLocationPermission = () => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          });
+          setLocationPermission('granted');
+        },
+        () => {
+          setLocationPermission('denied');
+        }
+      );
+    }
+  };
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-yellow-500" />
-          <span>Local Business Spotlight</span>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <LikeProvider>
-          <BusinessCard
-            id={currentBusiness.id}
-            name={currentBusiness.name}
-            description={currentBusiness.description}
-            image={currentBusiness.image_url}
-            category={currentBusiness.category}
-            location={currentBusiness.location}
-            rating={4.5} // Default rating
-            reviews={10} // Default reviews count
-            verified={currentBusiness.verified || false}
-            contact=""
-            hours=""
-          />
-        </LikeProvider>
-      </CardContent>
-    </Card>
+    <div className="my-8 mobile-container">
+      <div className="flex justify-between items-center mb-4">
+        <div className="flex items-center gap-2">
+          <Store className="h-5 w-5 text-emerald-600" />
+          <h2 className="text-xl font-semibold">Local Business Spotlight</h2>
+        </div>
+        <Button variant="link" className="text-blue-600 font-medium flex items-center gap-1">
+          View All <ArrowRightCircle size={16} />
+        </Button>
+      </div>
+
+      {locationPermission === 'pending' && (
+        <Card className="p-6 text-center">
+          <p className="mb-4">Allow location access to discover businesses near you</p>
+          <Button onClick={requestLocationPermission} className="bg-emerald-600 hover:bg-emerald-700">
+            Enable Location
+          </Button>
+        </Card>
+      )}
+
+      {locationPermission === 'denied' && (
+        <Card className="p-6 text-center">
+          <p className="mb-2">Location access is required to show nearby businesses</p>
+          <p className="text-sm text-muted-foreground mb-4">
+            Please enable location services in your browser settings
+          </p>
+          <Button onClick={requestLocationPermission} variant="outline">
+            Try Again
+          </Button>
+        </Card>
+      )}
+
+      {locationPermission === 'granted' && isLoading && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <Card key={index} className="animate-pulse">
+              <div className="h-40 bg-slate-200 dark:bg-slate-700"></div>
+              <div className="p-4">
+                <div className="h-5 w-3/4 bg-slate-200 dark:bg-slate-700 rounded mb-2"></div>
+                <div className="h-4 w-1/2 bg-slate-200 dark:bg-slate-700 rounded mb-2"></div>
+                <div className="h-4 w-1/4 bg-slate-200 dark:bg-slate-700 rounded"></div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {locationPermission === 'granted' && !isLoading && businessesData.length === 0 && (
+        <Card className="p-6 text-center">
+          <p className="mb-2">No local businesses found near your location</p>
+          <p className="text-sm text-muted-foreground">Try searching in a different area</p>
+        </Card>
+      )}
+
+      {locationPermission === 'granted' && !isLoading && businessesData.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {businessesData.map((business) => (
+            <Card key={business.id} className="overflow-hidden transition-all hover:shadow-lg">
+              <div className="h-40 bg-slate-100 dark:bg-slate-800 relative">
+                {business.image_url ? (
+                  <img
+                    src={business.image_url}
+                    alt={business.name}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-emerald-100 dark:bg-emerald-900">
+                    <Store size={40} className="text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                )}
+              </div>
+              <div className="p-4">
+                <h3 className="font-semibold text-lg mb-1 truncate">{business.name}</h3>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center">
+                    <Star size={16} className="text-yellow-500 fill-yellow-500 mr-1" />
+                    <span className="text-sm">{business.rating}</span>
+                  </div>
+                  <div className="flex items-center text-sm text-muted-foreground">
+                    <MapPin size={14} className="mr-1" />
+                    <span>{business.distance}km</span>
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground line-clamp-2">
+                  {business.description || "Local business offering quality products and services."}
+                </p>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full mt-3 border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 dark:border-emerald-800 dark:hover:bg-emerald-950"
+                >
+                  View Business
+                </Button>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
   );
 };

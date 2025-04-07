@@ -1,8 +1,9 @@
 
 import { useQuery } from "@tanstack/react-query";
-import { fetchActiveAds, incrementAdView } from "@/services/adService";
+import { fetchActiveAds } from "@/services/adService";
 import { SponsoredPost } from "@/components/ads/SponsoredPost";
 import { useEffect } from "react";
+import { incrementAdView } from "@/services/adService";
 
 export const SponsoredPosts = () => {
   const { data: ads = [] } = useQuery({

@@ -1,10 +1,13 @@
 
-import { useEffect } from 'react';
-import { Card } from "@/components/ui/card";
-import { Link } from 'react-router-dom';
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Calendar, Heart, MapPin, Clock, Star, ExternalLink, Phone } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { trackServiceView, trackContactClick } from "@/services/serviceService";
-import { Button } from '@/components/ui/button';
-import { Phone } from 'lucide-react';
+import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface ServiceCardProps {
   id: string;
@@ -13,15 +16,15 @@ interface ServiceCardProps {
   image_url?: string;
   price: number;
   providerName?: string;
-  providerId?: string;
+  providerId: string;
   category?: string;
   location?: string;
-  rating?: number;
   views?: number;
+  rating?: number;
   sponsored?: boolean;
 }
 
-export function ServiceCard({
+export const ServiceCard = ({
   id,
   title,
   description,
@@ -31,105 +34,160 @@ export function ServiceCard({
   providerId,
   category,
   location,
-  rating = 4.5,
   views,
-  sponsored,
-}: ServiceCardProps) {
-  // Track view when card is rendered
-  useEffect(() => {
-    trackServiceView(id);
-  }, [id]);
+  rating = 4.5,
+  sponsored = false
+}: ServiceCardProps) => {
+  const navigate = useNavigate();
+  const [isLiked, setIsLiked] = useState(false);
+  const [animating, setAnimating] = useState(false);
 
-  // Handle contact click
-  const handleContactClick = () => {
+  const handleClick = () => {
+    trackServiceView(id); // Track the view
+    navigate(`/services/${id}`);
+  };
+
+  const handleProviderClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/businesses/${providerId}`);
+  };
+
+  const toggleLike = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsLiked(!isLiked);
+    setAnimating(true);
+    
+    // Reset animation state after animation completes
+    setTimeout(() => setAnimating(false), 1000);
+    
+    toast.success(isLiked ? "Removed from favorites" : "Added to favorites");
+  };
+
+  const handleCallClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
     trackContactClick(id);
+    toast.success("Contact details shared! A provider will call you shortly.");
   };
 
   return (
-    <Card className="overflow-hidden hover:shadow-md transition-shadow">
-      <Link to={`/services/${id}`} className="block">
-        <div className="relative">
-          {image_url ? (
-            <img 
-              src={image_url} 
-              alt={title} 
-              className="w-full h-48 object-cover"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = "/placeholders/service-placeholder.jpg";
-              }}
+    <Card className="overflow-hidden transition-all duration-300 hover:shadow-md h-full flex flex-col">
+      <div className="relative h-48 overflow-hidden cursor-pointer" onClick={handleClick}>
+        <img 
+          src={image_url || '/placeholder-service.jpg'}
+          alt={title}
+          className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+        />
+        {sponsored && (
+          <Badge 
+            variant="secondary" 
+            className="absolute top-2 right-2 bg-blue-500/80 text-white hover:bg-blue-600 border-none"
+          >
+            Sponsored
+          </Badge>
+        )}
+      </div>
+      
+      <CardContent className="flex-1 p-4 space-y-2 cursor-pointer" onClick={handleClick}>
+        <div className="flex justify-between items-start">
+          <h3 className="font-semibold line-clamp-1">{title}</h3>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8 relative"
+            onClick={toggleLike}
+          >
+            <Heart 
+              className={`h-4 w-4 z-10 ${isLiked ? 'fill-red-500 text-red-500' : ''} ${isLiked && animating ? 'scale-110' : ''}`} 
             />
-          ) : (
-            <div className="w-full h-48 bg-muted flex items-center justify-center text-muted-foreground">
-              No Image
-            </div>
+            
+            {/* Heart animation on like */}
+            <AnimatePresence>
+              {animating && isLiked && (
+                <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
+                  {[...Array(6)].map((_, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ scale: 0, opacity: 0.7 }}
+                      animate={{ 
+                        scale: 1.5, 
+                        opacity: 0,
+                        x: Math.random() * 20 - 10,
+                        y: Math.random() * -30 - 10
+                      }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.8, ease: "easeOut" }}
+                      className="absolute w-3 h-3 rounded-full bg-red-400"
+                    />
+                  ))}
+                  <motion.div
+                    initial={{ scale: 0, opacity: 0.7 }}
+                    animate={{ scale: 1.8, opacity: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="absolute w-8 h-8 rounded-full bg-red-200"
+                  />
+                </div>
+              )}
+            </AnimatePresence>
+          </Button>
+        </div>
+        
+        {providerName && (
+          <Badge 
+            variant="outline" 
+            className="text-xs bg-transparent cursor-pointer hover:bg-secondary"
+            onClick={handleProviderClick}
+          >
+            {providerName}
+          </Badge>
+        )}
+        
+        <p className="text-sm text-muted-foreground line-clamp-2">{description}</p>
+        
+        <div className="flex items-center gap-2">
+          <span className="font-bold">₹{price.toLocaleString()}</span>
+        </div>
+        
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+          {location && (
+            <span className="flex items-center gap-1">
+              <MapPin className="h-3 w-3" />
+              {location}
+            </span>
           )}
-          
           {category && (
-            <span className="absolute top-2 right-2 bg-primary/80 text-primary-foreground text-xs px-2 py-1 rounded">
+            <span className="flex items-center gap-1">
+              <ExternalLink className="h-3 w-3" />
               {category}
             </span>
           )}
-
-          {sponsored && (
-            <span className="absolute top-2 left-2 bg-yellow-500/80 text-white text-xs px-2 py-1 rounded">
-              Sponsored
-            </span>
-          )}
+          <span className="flex items-center gap-1">
+            <Star className="h-3 w-3 text-yellow-500" />
+            {rating}
+          </span>
         </div>
-        
-        <div className="p-4">
-          <h3 className="font-medium mb-1 line-clamp-1">{title}</h3>
-          
-          <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-            {description}
-          </p>
-          
-          <div className="flex items-center justify-between">
-            <div className="text-sm">
-              <span className="font-semibold text-primary">₹{price}</span>
-              {location && (
-                <span className="text-xs text-muted-foreground ml-2">
-                  {location}
-                </span>
-              )}
-            </div>
-            
-            <div className="flex items-center gap-2">
-              {views !== undefined && (
-                <span className="text-xs text-muted-foreground">
-                  {views} views
-                </span>
-              )}
-              
-              {rating && (
-                <div className="flex items-center gap-1 text-xs">
-                  <span className="text-yellow-500">★</span>
-                  <span>{rating.toFixed(1)}</span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </Link>
-
-      <div className="px-4 pb-4 border-t mt-2 pt-3">
-        <div className="flex items-center justify-between">
-          {providerName && (
-            <span className="text-xs text-muted-foreground">
-              By {providerName}
-            </span>
-          )}
-          
-          <Button 
-            size="sm" 
-            onClick={handleContactClick}
-            className="gap-1"
-          >
-            <Phone className="h-3 w-3" />
-            Contact
-          </Button>
-        </div>
-      </div>
+      </CardContent>
+      
+      <CardFooter className="p-4 pt-0 flex gap-2">
+        <Button 
+          className="flex-1 gap-2" 
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/services/${id}/book`);
+          }}
+        >
+          <Calendar className="h-4 w-4" />
+          Book Now
+        </Button>
+        <Button 
+          variant="outline"
+          className="flex-1 gap-2" 
+          onClick={handleCallClick}
+        >
+          <Phone className="h-4 w-4" />
+          Call
+        </Button>
+      </CardFooter>
     </Card>
   );
-}
+};

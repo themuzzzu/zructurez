@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import {
+  Home,
   Store,
   Wrench,
   Users,
@@ -24,8 +25,8 @@ export const Sidebar = ({ className }: React.HTMLAttributes<HTMLDivElement>) => 
   const navigate = useNavigate();
   const location = useLocation();
   const [activeItem, setActiveItem] = useState(() => {
-    // Initialize with current path or default to marketplace
-    return location.pathname || "/marketplace";
+    // Initialize with current path or default to home
+    return location.pathname || "/";
   });
   const [isCollapsed, setIsCollapsed] = useState(localStorage.getItem("sidebarCollapsed") === "true");
   const { theme, setTheme } = useTheme();
@@ -46,6 +47,7 @@ export const Sidebar = ({ className }: React.HTMLAttributes<HTMLDivElement>) => 
   }, [location.pathname]);
 
   const routes = [
+    { name: "Home", path: "/", icon: Home },
     { name: "Marketplace", path: "/marketplace", icon: ShoppingBag },
     { name: "Services", path: "/services", icon: Wrench },
     { name: "Business", path: "/businesses", icon: Building },

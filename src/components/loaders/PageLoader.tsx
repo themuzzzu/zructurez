@@ -1,62 +1,61 @@
 
 import React from "react";
 import { cn } from "@/lib/utils";
-import { UnifiedLoader } from "./UnifiedLoader";
 import { Shimmer } from "@/components/ui/shimmer";
+import { motion } from "framer-motion";
 
 interface PageLoaderProps {
-  type?: "shimmer" | "dots" | "pulse";
-  fullScreen?: boolean;
+  type?: "spinner" | "dots" | "shimmer";
   className?: string;
-  text?: string;
+  fullScreen?: boolean;
 }
 
 export function PageLoader({
-  type = "dots",
-  fullScreen = true,
+  type = "shimmer",
   className,
-  text
+  fullScreen = true
 }: PageLoaderProps) {
-  if (type === "shimmer") {
-    return (
-      <div className={cn(
-        "w-full h-full flex items-center justify-center",
-        fullScreen && "fixed inset-0 bg-background z-50",
-        className
-      )}>
-        <div className="w-full max-w-3xl p-4">
-          <div className="space-y-4">
-            {/* Header shimmer */}
-            <Shimmer className="h-8 w-3/4 mx-auto" />
-            
-            {/* Content shimmer */}
-            <Shimmer className="h-20 w-full" />
-            
-            {/* Grid of cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-6">
-              {Array(8).fill(0).map((_, i) => (
-                <div key={i} className="flex flex-col space-y-2">
-                  <Shimmer className="aspect-square w-full rounded-md" />
-                  <Shimmer className="h-4 w-3/4" />
-                  <Shimmer className="h-4 w-1/2" />
-                </div>
-              ))}
-            </div>
-          </div>
-          
-          {text && <p className="text-center mt-4 text-sm text-muted-foreground">{text}</p>}
-        </div>
-      </div>
-    );
-  }
-  
   return (
-    <UnifiedLoader
-      type={type}
-      size="lg"
-      isFullScreen={fullScreen}
-      className={className}
-      text={text}
-    />
+    <div className={cn(
+      "flex flex-col items-center justify-center",
+      fullScreen ? "fixed inset-0 z-50 bg-background/80 backdrop-blur-sm" : "w-full py-12",
+      className
+    )}>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        {type === "shimmer" && (
+          <div className="flex flex-col gap-4 w-48">
+            <Shimmer height="12px" rounded className="w-3/4 mx-auto" />
+            <Shimmer height="12px" rounded className="w-full" />
+            <Shimmer height="12px" rounded className="w-5/6 mx-auto" />
+          </div>
+        )}
+        
+        {type === "spinner" && (
+          <div className="h-12 w-12 rounded-full border-4 border-muted-foreground/30 border-t-primary animate-spin" />
+        )}
+        
+        {type === "dots" && (
+          <div className="flex space-x-2">
+            {[0, 1, 2].map((i) => (
+              <motion.div
+                key={i}
+                className="h-3 w-3 bg-primary rounded-full"
+                animate={{ scale: [0.8, 1.2, 0.8] }}
+                transition={{ 
+                  duration: 1.5,
+                  repeat: Infinity, 
+                  delay: i * 0.2,
+                  ease: "easeInOut" 
+                }}
+              />
+            ))}
+          </div>
+        )}
+      </motion.div>
+    </div>
   );
 }

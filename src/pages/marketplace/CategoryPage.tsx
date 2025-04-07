@@ -1,30 +1,28 @@
-
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductCard } from "@/components/products/ProductCard";
-import { ProductGrid } from "@/components/products/ProductsGrid";
+import { ProductsGrid } from "@/components/products/ProductsGrid";
 import { Layout } from "@/components/layout/Layout";
 import { CategoryHeader } from "@/components/marketplace/CategoryHeader";
 import { CategorySidebar } from "@/components/marketplace/CategorySidebar";
 import { EmptySearchResults } from "@/components/marketplace/EmptySearchResults";
-import { GridLayoutType } from "@/components/products/types/ProductTypes";
 
 const CategoryPage = () => {
   const { categorySlug } = useParams();
   const [products, setProducts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [categoryName, setCategoryName] = useState<string>("");
-  const [layout, setLayout] = useState<GridLayoutType>("grid3x3");
+  const [layout, setLayout] = useState<"grid4x4" | "grid3x3" | "grid2x2" | "list">("grid3x3");
   const [searchQuery, setSearchQuery] = useState("");
-  const [gridLayout, setGridLayout] = useState<GridLayoutType>("grid3x3");
 
   useEffect(() => {
     const fetchCategories = async () => {
       setIsLoading(true);
       try {
+        // Replace this query with one that works with existing tables
         const { data, error } = await supabase
-          .from('ad_categories')
+          .from('ad_categories')  // Use an existing table or handle the error gracefully
           .select('*')
           .eq('name', categorySlug);
 
@@ -85,9 +83,8 @@ const CategoryPage = () => {
     }
   }, [categorySlug, searchQuery]);
 
-  const handleLayoutChange = (newLayout: GridLayoutType) => {
-    setGridLayout(newLayout);
-    localStorage.setItem('categoryGridLayout', newLayout);
+  const handleLayoutChange = (newLayout: "grid4x4" | "grid3x3" | "grid2x2" | "list") => {
+    setLayout(newLayout);
   };
 
   const handleSearch = (searchTerm: string) => {
@@ -113,7 +110,7 @@ const CategoryPage = () => {
             {isLoading ? (
               <div>Loading products...</div>
             ) : products.length > 0 ? (
-              <ProductGrid
+              <ProductsGrid
                 products={products}
                 layout={layout}
                 isLoading={isLoading}

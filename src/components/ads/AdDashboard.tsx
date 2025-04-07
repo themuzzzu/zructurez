@@ -1,276 +1,192 @@
 
-import { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Advertisement, AdStatus, AdFormat } from '@/services/adService';
+import { useState } from "react";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { AdForm } from "./AdForm";
+import { useQuery } from "@tanstack/react-query";
+import { fetchUserAds, Advertisement } from "@/services/adService";
+import { Badge } from "@/components/ui/badge";
+import { Clock, Eye, MousePointer, Plus } from "lucide-react";
+import { format } from "date-fns";
 
-export function AdDashboard() {
-  const [ads, setAds] = useState<Advertisement[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'all' | AdStatus>('all');
-
-  useEffect(() => {
-    // Simulate fetching user ads
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-        
-        // Mock data for demonstration
-        const mockAds: Advertisement[] = [
-          {
-            id: '1',
-            title: 'Summer Sale',
-            type: 'product',
-            reference_id: 'prod-123',
-            budget: 500,
-            status: 'active',
-            start_date: '2023-06-01',
-            end_date: '2023-08-31',
-            impressions: 1240,
-            clicks: 56,
-            format: 'banner',
-            image_url: 'https://example.com/ads/summer-sale.jpg',
-            description: 'Summer sale with discounts up to 50%',
-            user_id: 'user-123',
-            location: 'Global',
-            video_url: null,
-            carousel_images: null,
-            created_at: '2023-05-15',
-            reach: 5000
-          },
-          {
-            id: '2',
-            title: 'Business Promotion',
-            type: 'business',
-            reference_id: 'biz-456',
-            budget: 300,
-            status: 'paused',
-            start_date: '2023-05-15',
-            end_date: '2023-07-15',
-            impressions: 840,
-            clicks: 32,
-            format: 'standard',
-            image_url: 'https://example.com/ads/business-promo.jpg',
-            description: 'Promote your local business',
-            user_id: 'user-123',
-            location: 'Local',
-            video_url: null,
-            carousel_images: null,
-            created_at: '2023-05-10',
-            reach: 2500
-          },
-          {
-            id: '3',
-            title: 'Service Spotlight',
-            type: 'service',
-            reference_id: 'serv-789',
-            budget: 200,
-            status: 'completed',
-            start_date: '2023-04-01',
-            end_date: '2023-05-01',
-            impressions: 3600,
-            clicks: 120,
-            format: 'standard',
-            image_url: 'https://example.com/ads/service-spotlight.jpg',
-            description: 'Showcase your professional services',
-            user_id: 'user-123',
-            location: 'Regional',
-            video_url: null,
-            carousel_images: null,
-            created_at: '2023-03-20',
-            reach: 8000
-          }
-        ];
-        
-        setAds(mockAds);
-      } catch (error) {
-        console.error('Error fetching ads:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+export const AdDashboard = () => {
+  const [selectedTab, setSelectedTab] = useState("active");
+  const [isCreateAdOpen, setIsCreateAdOpen] = useState(false);
+  
+  const { data: userAds = [], refetch: refetchAds } = useQuery({
+    queryKey: ['user-ads'],
+    queryFn: fetchUserAds,
+  });
+  
+  const filteredAds = userAds.filter(ad => {
+    const now = new Date();
+    const startDate = new Date(ad.start_date);
+    const endDate = new Date(ad.end_date);
     
-    fetchData();
-  }, []);
+    switch (selectedTab) {
+      case "active":
+        return ad.status === "active" && now >= startDate && now <= endDate;
+      case "scheduled":
+        return ad.status === "active" && now < startDate;
+      case "completed":
+        return ad.status === "expired" || (ad.status === "active" && now > endDate);
+      case "all":
+      default:
+        return true;
+    }
+  });
   
-  const filteredAds = activeTab === 'all' 
-    ? ads 
-    : ads.filter(ad => ad.status === activeTab);
+  const getAdPerformance = (ad: Advertisement) => {
+    const clicks = ad.clicks || 0;
+    const views = ad.reach || 0;
+    const ctr = views > 0 ? (clicks / views * 100).toFixed(2) : 0;
+    
+    return { clicks, views, ctr };
+  };
   
-  const activeAdsCount = ads.filter(ad => ad.status === 'active').length;
-  const pausedAdsCount = ads.filter(ad => ad.status === 'paused').length;
-  const completedAdsCount = ads.filter(ad => ad.status === 'completed').length;
-  const totalSpend = ads.reduce((total, ad) => total + (ad.budget || 0), 0);
-  const totalImpressions = ads.reduce((total, ad) => total + (ad.impressions || 0), 0);
-  const totalClicks = ads.reduce((total, ad) => total + (ad.clicks || 0), 0);
-  const avgCTR = totalImpressions > 0 
-    ? ((totalClicks / totalImpressions) * 100).toFixed(2) 
-    : '0.00';
+  const getStatusColor = (ad: Advertisement) => {
+    const now = new Date();
+    const startDate = new Date(ad.start_date);
+    const endDate = new Date(ad.end_date);
+    
+    if (ad.status === "pending") return "bg-yellow-500";
+    if (ad.status === "rejected") return "bg-red-500";
+    if (now < startDate) return "bg-blue-500";
+    if (now > endDate) return "bg-gray-500";
+    return "bg-green-500";
+  };
+  
+  const getStatusText = (ad: Advertisement) => {
+    const now = new Date();
+    const startDate = new Date(ad.start_date);
+    const endDate = new Date(ad.end_date);
+    
+    if (ad.status === "pending") return "Pending";
+    if (ad.status === "rejected") return "Rejected";
+    if (now < startDate) return "Scheduled";
+    if (now > endDate) return "Completed";
+    return "Active";
+  };
   
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Active Campaigns
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{activeAdsCount}</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Spent
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">${totalSpend.toFixed(2)}</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Impressions
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalImpressions.toLocaleString()}</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Average CTR
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{avgCTR}%</div>
-          </CardContent>
-        </Card>
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        <h2 className="text-2xl font-semibold">Ad Dashboard</h2>
+        <Dialog open={isCreateAdOpen} onOpenChange={setIsCreateAdOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Create Ad
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[600px] h-[90vh]">
+            <DialogHeader>
+              <DialogTitle>Create Advertisement</DialogTitle>
+            </DialogHeader>
+            <ScrollArea className="h-full pr-4">
+              <AdForm 
+                onSuccess={() => {
+                  setIsCreateAdOpen(false);
+                  refetchAds();
+                }} 
+              />
+            </ScrollArea>
+          </DialogContent>
+        </Dialog>
       </div>
       
-      <Tabs defaultValue="all" onValueChange={(v) => setActiveTab(v as any)}>
-        <TabsList>
-          <TabsTrigger value="all">All ({ads.length})</TabsTrigger>
-          <TabsTrigger value="active">Active ({activeAdsCount})</TabsTrigger>
-          <TabsTrigger value="paused">Paused ({pausedAdsCount})</TabsTrigger>
-          <TabsTrigger value="completed">Completed ({completedAdsCount})</TabsTrigger>
+      <Tabs value={selectedTab} onValueChange={setSelectedTab}>
+        <TabsList className="mb-4">
+          <TabsTrigger value="active">Active</TabsTrigger>
+          <TabsTrigger value="scheduled">Scheduled</TabsTrigger>
+          <TabsTrigger value="completed">Completed</TabsTrigger>
+          <TabsTrigger value="all">All Ads</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="all" className="mt-4">
-          {isLoading ? (
-            <div className="text-center py-8">Loading your ads...</div>
-          ) : filteredAds.length === 0 ? (
-            <div className="text-center py-8">No ads found</div>
+        <TabsContent value={selectedTab} className="space-y-4">
+          {filteredAds.length === 0 ? (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-10">
+                <p className="text-muted-foreground mb-4">No advertisements found</p>
+                <Button onClick={() => setIsCreateAdOpen(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create your first ad
+                </Button>
+              </CardContent>
+            </Card>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredAds.map(ad => (
-                <AdCard key={ad.id} ad={ad} />
-              ))}
-            </div>
-          )}
-        </TabsContent>
-        
-        <TabsContent value="active" className="mt-4">
-          {isLoading ? (
-            <div className="text-center py-8">Loading active ads...</div>
-          ) : filteredAds.length === 0 ? (
-            <div className="text-center py-8">No active ads found</div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredAds.map(ad => (
-                <AdCard key={ad.id} ad={ad} />
-              ))}
-            </div>
-          )}
-        </TabsContent>
-        
-        <TabsContent value="paused" className="mt-4">
-          {isLoading ? (
-            <div className="text-center py-8">Loading paused ads...</div>
-          ) : filteredAds.length === 0 ? (
-            <div className="text-center py-8">No paused ads found</div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredAds.map(ad => (
-                <AdCard key={ad.id} ad={ad} />
-              ))}
-            </div>
-          )}
-        </TabsContent>
-        
-        <TabsContent value="completed" className="mt-4">
-          {isLoading ? (
-            <div className="text-center py-8">Loading completed ads...</div>
-          ) : filteredAds.length === 0 ? (
-            <div className="text-center py-8">No completed ads found</div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredAds.map(ad => (
-                <AdCard key={ad.id} ad={ad} />
-              ))}
-            </div>
+            filteredAds.map(ad => {
+              const { clicks, views, ctr } = getAdPerformance(ad);
+              return (
+                <Card key={ad.id}>
+                  <CardHeader>
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start">
+                      <div>
+                        <CardTitle className="text-lg">{ad.title}</CardTitle>
+                        <CardDescription>
+                          {ad.type.charAt(0).toUpperCase() + ad.type.slice(1)} Advertisement
+                        </CardDescription>
+                      </div>
+                      <Badge className={getStatusColor(ad)}>
+                        {getStatusText(ad)}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      {ad.image_url && (
+                        <div className="relative h-40 rounded-md overflow-hidden">
+                          <img 
+                            src={ad.image_url} 
+                            alt={ad.title} 
+                            className="absolute inset-0 w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+                      <div className="space-y-4">
+                        <p className="text-sm">{ad.description}</p>
+                        
+                        <div className="grid grid-cols-3 gap-2">
+                          <div className="flex flex-col items-center justify-center p-2 bg-muted rounded-md">
+                            <Eye className="h-4 w-4 mb-1" />
+                            <span className="text-sm font-medium">{views}</span>
+                            <span className="text-xs text-muted-foreground">Views</span>
+                          </div>
+                          <div className="flex flex-col items-center justify-center p-2 bg-muted rounded-md">
+                            <MousePointer className="h-4 w-4 mb-1" />
+                            <span className="text-sm font-medium">{clicks}</span>
+                            <span className="text-xs text-muted-foreground">Clicks</span>
+                          </div>
+                          <div className="flex flex-col items-center justify-center p-2 bg-muted rounded-md">
+                            <span className="text-sm font-medium">{ctr}%</span>
+                            <span className="text-xs text-muted-foreground">CTR</span>
+                          </div>
+                        </div>
+                        
+                        <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            <span>
+                              {format(new Date(ad.start_date), "MMM d")} - {format(new Date(ad.end_date), "MMM d, yyyy")}
+                            </span>
+                          </div>
+                          <span>•</span>
+                          <span>Budget: ₹{ad.budget}</span>
+                          <span>•</span>
+                          <span>{ad.location}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })
           )}
         </TabsContent>
       </Tabs>
     </div>
   );
-}
-
-interface AdCardProps {
-  ad: Advertisement;
-}
-
-function AdCard({ ad }: AdCardProps) {
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active': return 'bg-green-100 text-green-800';
-      case 'paused': return 'bg-yellow-100 text-yellow-800';
-      case 'completed': return 'bg-blue-100 text-blue-800';
-      case 'pending': return 'bg-gray-100 text-gray-800';
-      case 'rejected': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-  
-  return (
-    <Card className="overflow-hidden">
-      <div 
-        className="h-40 bg-cover bg-center relative"
-        style={{ 
-          backgroundImage: ad.image_url ? `url(${ad.image_url})` : 'url(https://via.placeholder.com/300x150?text=No+Image)'
-        }}
-      >
-        <div className="absolute top-2 right-2">
-          <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(ad.status)}`}>
-            {ad.status}
-          </span>
-        </div>
-      </div>
-      <CardContent className="p-4">
-        <h3 className="font-semibold truncate">{ad.title}</h3>
-        <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{ad.description}</p>
-        <div className="grid grid-cols-2 gap-2 mt-3 text-xs">
-          <div>
-            <span className="text-muted-foreground">Type:</span> {ad.type}
-          </div>
-          <div>
-            <span className="text-muted-foreground">Format:</span> {ad.format}
-          </div>
-          <div>
-            <span className="text-muted-foreground">Clicks:</span> {ad.clicks}
-          </div>
-          <div>
-            <span className="text-muted-foreground">Impressions:</span> {ad.impressions}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
+};

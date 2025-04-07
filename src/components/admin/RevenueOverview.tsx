@@ -27,7 +27,7 @@ export function RevenueOverview({ ads }: RevenueOverviewProps) {
   const estimatedRevenue = ads.reduce((total, ad) => {
     if (ad.status !== "active") return total;
     
-    const impressions = ad.impressions || 0;
+    const impressions = ad.reach || 0;
     const clicks = ad.clicks || 0;
     
     // CPM revenue (₹15 per 1000 impressions)
@@ -41,7 +41,7 @@ export function RevenueOverview({ ads }: RevenueOverviewProps) {
   
   // Get top performing ads by revenue
   const adRevenues = ads.map(ad => {
-    const impressions = ad.impressions || 0;
+    const impressions = ad.reach || 0;
     const clicks = ad.clicks || 0;
     
     // Calculate estimated revenue
@@ -112,7 +112,7 @@ export function RevenueOverview({ ads }: RevenueOverviewProps) {
                   <TableCell>
                     {formatDistanceToNow(ad.startDate, { addSuffix: true })}
                   </TableCell>
-                  <TableCell>{ad.impressions?.toLocaleString() || 0}</TableCell>
+                  <TableCell>{ad.reach?.toLocaleString() || 0}</TableCell>
                   <TableCell>{ad.clicks?.toLocaleString() || 0}</TableCell>
                   <TableCell className="font-medium">
                     ₹{Math.round(ad.revenue).toLocaleString()}

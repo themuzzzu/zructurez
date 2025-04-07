@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/carousel";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
-import { LikeProvider } from "@/components/products/LikeContext";
 
 export const DealsSection = () => {
   const { data: products, isLoading } = useQuery({
@@ -50,22 +49,20 @@ export const DealsSection = () => {
   }
   
   return (
-    <LikeProvider>
-      <Carousel className="w-full">
-        <CarouselContent>
-          {products.map((product) => (
-            <CarouselItem key={product.id} className="sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
-              <div className="p-1">
-                <ProductCard product={product} />
-              </div>
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-        <div className="hidden sm:flex justify-end gap-2 mt-2">
-          <CarouselPrevious className="static translate-y-0 bg-blue-600 text-white hover:bg-blue-700 hover:text-white" />
-          <CarouselNext className="static translate-y-0 bg-blue-600 text-white hover:bg-blue-700 hover:text-white" />
-        </div>
-      </Carousel>
-    </LikeProvider>
+    <Carousel className="w-full">
+      <CarouselContent>
+        {products.map((product) => (
+          <CarouselItem key={product.id} className="sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
+            <div className="p-1">
+              <ProductCard product={product} />
+            </div>
+          </CarouselItem>
+        ))}
+      </CarouselContent>
+      <div className="hidden sm:flex justify-end gap-2 mt-2">
+        <CarouselPrevious className="static translate-y-0 bg-blue-600 text-white hover:bg-blue-700 hover:text-white" />
+        <CarouselNext className="static translate-y-0 bg-blue-600 text-white hover:bg-blue-700 hover:text-white" />
+      </div>
+    </Carousel>
   );
 };

@@ -1,95 +1,181 @@
 
-// Add utility for tracking views and formatting count numbers
+import { supabase } from "@/integrations/supabase/client";
 
-export const incrementViewCount = async (entityType: 'product' | 'business' | 'service' | 'post', entityId: string) => {
+/**
+ * Increments the view count for a specific entity
+ * @param entityType The type of entity ('product', 'business', 'service', 'post')
+ * @param entityId The UUID of the entity
+ */
+export const incrementViewCount = async (
+  entityType: 'product' | 'business' | 'service' | 'post',
+  entityId: string
+): Promise<void> => {
   try {
-    // This is a stub function - in a real app this would call an API
-    console.log(`Tracking view for ${entityType} with ID ${entityId}`);
-    return true;
-  } catch (error) {
-    console.error(`Error tracking view for ${entityType}:`, error);
-    return false;
-  }
-};
-
-export const trackEntityView = async (entityType: 'product' | 'business' | 'service' | 'post', entityId: string) => {
-  try {
-    // This is a stub function - in a real app this would call an API
-    console.log(`Tracking entity view for ${entityType} with ID ${entityId}`);
-    return await incrementViewCount(entityType, entityId);
-  } catch (error) {
-    console.error(`Error tracking entity view for ${entityType}:`, error);
-    return false;
-  }
-};
-
-export const formatCountNumber = (count?: number): string => {
-  if (count === undefined || count === null) {
-    return '0';
-  }
-  
-  if (count < 1000) {
-    return count.toString();
-  } else if (count < 1000000) {
-    return (count / 1000).toFixed(1) + 'k';
-  } else {
-    return (count / 1000000).toFixed(1) + 'm';
-  }
-};
-
-// Add the missing fetchBusinessAnalytics function
-export const fetchBusinessAnalytics = async (userId?: string) => {
-  if (!userId) {
-    return null;
-  }
-  
-  try {
-    console.log(`Fetching business analytics for user ${userId}`);
+    // Check if user has viewed this entity in the last hour (to prevent spam)
+    const sessionKey = `viewed_${entityType}_${entityId}`;
+    const lastViewed = localStorage.getItem(sessionKey);
     
-    // This is a stub function that returns mock data
-    // In a real app, this would make an API call to get actual analytics data
+    if (lastViewed) {
+      const lastViewedTime = parseInt(lastViewed, 10);
+      const oneHourAgo = Date.now() - 3600000; // 1 hour in milliseconds
+      
+      if (lastViewedTime > oneHourAgo) {
+        // User has viewed this entity within the last hour
+        return;
+      }
+    }
+    
+    // Mark this entity as viewed in this session
+    localStorage.setItem(sessionKey, Date.now().toString());
+    
+    // Increment the view count based on entity type
+    let error;
+    
+    // Use the appropriate function based on entity type
+    if (entityType === 'product') {
+      const result = await supabase.rpc('increment_product_views', { product_id_param: entityId });
+      error = result.error;
+    } else if (entityType === 'business') {
+      const result = await supabase.rpc('increment_business_views', { business_id_param: entityId });
+      error = result.error;
+    } else if (entityType === 'service') {
+      const result = await supabase.rpc('increment_service_views', { service_id_param: entityId });
+      error = result.error;
+    } else if (entityType === 'post') {
+      const result = await supabase.rpc('increment_post_views', { post_id_param: entityId });
+      error = result.error;
+    }
+    
+    if (error) {
+      console.error(`Error incrementing ${entityType} views:`, error);
+    }
+  } catch (error) {
+    console.error(`Failed to increment ${entityType} view:`, error);
+  }
+};
+
+/**
+ * Hook to fetch analytics data for a business owner
+ * @param userId The user ID of the business owner
+ * @returns Analytics data for the dashboard
+ */
+export const fetchBusinessAnalytics = async (userId: string | undefined) => {
+  if (!userId) return null;
+  
+  try {
+    // Fetch business ID
+    const { data: businessData, error: businessError } = await supabase
+      .from('businesses')
+      .select('id')
+      .eq('user_id', userId)
+      .single();
+      
+    if (businessError || !businessData) {
+      return null;
+    }
+    
+    const businessId = businessData.id;
+    
+    // Fetch business analytics
+    const { data: analyticsData, error: analyticsError } = await supabase
+      .from('business_analytics')
+      .select('*')
+      .eq('business_id', businessId)
+      .single();
+      
+    if (analyticsError) {
+      console.error('Error fetching business analytics:', analyticsError);
+      return null;
+    }
+    
+    // Fetch product view counts
+    const { data: products, error: productsError } = await supabase
+      .from('products')
+      .select('id, title, views')
+      .eq('user_id', userId)
+      .order('views', { ascending: false });
+      
+    if (productsError) {
+      console.error('Error fetching product analytics:', productsError);
+    }
+    
+    // Fetch service view counts
+    const { data: services, error: servicesError } = await supabase
+      .from('services')
+      .select('id, title, views')
+      .eq('user_id', userId)
+      .order('views', { ascending: false });
+      
+    // Handle services data with proper default values
+    const serviceAnalytics = servicesError || !services 
+      ? [] 
+      : services.map(service => ({
+          id: service.id,
+          title: service.title,
+          views: service.views || 0
+        }));
+    
+    if (servicesError) {
+      console.error('Error fetching service analytics:', servicesError);
+    }
+    
+    // Fetch post view counts
+    const { data: posts, error: postsError } = await supabase
+      .from('posts')
+      .select('id, content, views')
+      .eq('user_id', userId)
+      .order('views', { ascending: false });
+      
+    if (postsError) {
+      console.error('Error fetching post analytics:', postsError);
+    }
+    
+    // Return combined analytics data
     return {
-      businessViews: 1240,
-      productAnalytics: [
-        {
-          id: 'product-1',
-          title: 'Product 1',
-          views: 346
-        },
-        {
-          id: 'product-2',
-          title: 'Product 2',
-          views: 289
-        },
-        {
-          id: 'product-3',
-          title: 'Product 3',
-          views: 215
-        }
-      ],
-      serviceAnalytics: [
-        {
-          id: 'service-1',
-          title: 'Service 1',
-          views: 178
-        },
-        {
-          id: 'service-2',
-          title: 'Service 2',
-          views: 132
-        }
-      ],
-      postAnalytics: [
-        {
-          id: 'post-1',
-          content: 'First post',
-          views: 80
-        }
-      ],
-      lastUpdated: new Date().toISOString()
+      businessViews: analyticsData?.page_views || 0,
+      productAnalytics: products || [],
+      serviceAnalytics: serviceAnalytics,
+      postAnalytics: posts || [],
+      lastUpdated: analyticsData?.last_updated || new Date().toISOString()
     };
   } catch (error) {
-    console.error('Error fetching business analytics:', error);
+    console.error('Error in fetchBusinessAnalytics:', error);
     return null;
+  }
+};
+
+/**
+ * Track a view for a specific entity and update the UI
+ * @param entityType The type of entity
+ * @param entityId The ID of the entity
+ */
+export const trackEntityView = async (
+  entityType: 'product' | 'business' | 'service' | 'post',
+  entityId: string
+): Promise<void> => {
+  // Don't track views if the entity ID is not valid
+  if (!entityId) return;
+  
+  try {
+    await incrementViewCount(entityType, entityId);
+  } catch (error) {
+    console.error(`Error tracking ${entityType} view:`, error);
+  }
+};
+
+/**
+ * Format large numbers for display
+ * @param num The number to format
+ * @returns Formatted number as string (e.g. 1.2k, 3.4M)
+ */
+export const formatCountNumber = (num: number): string => {
+  if (num >= 1000000) {
+    return (num / 1000000).toFixed(1) + 'M';
+  } else if (num >= 10000) {
+    return Math.floor(num / 1000) + 'k';
+  } else if (num >= 1000) {
+    return (num / 1000).toFixed(1) + 'k';
+  } else {
+    return num.toString();
   }
 };

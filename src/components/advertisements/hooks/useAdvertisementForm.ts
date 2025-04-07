@@ -9,7 +9,7 @@ import { AdFormValues } from "../types";
 export const useAdvertisementForm = (onClose: () => void) => {
   const [loading, setLoading] = useState(false);
   const [type, setType] = useState<AdType>("business");
-  const [format, setFormat] = useState<AdFormat>("banner");
+  const [format, setFormat] = useState<AdFormat>("standard");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
@@ -82,7 +82,7 @@ export const useAdvertisementForm = (onClose: () => void) => {
         .order('created_at', { ascending: false });
       return data || [];
     },
-    enabled: format === 'boosted_post' as AdFormat
+    enabled: format === 'boosted_post'
   });
 
   // Carousel image management

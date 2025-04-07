@@ -1,217 +1,296 @@
 
-import React from 'react';
-import { Card } from "@/components/ui/card";
+import { useState } from "react";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Heart, Eye } from "lucide-react";
-import { Product, GridLayoutType } from "./types/ProductTypes";
-import { Link } from "react-router-dom";
-import { formatCountNumber } from "@/utils/viewsTracking";
-import { trackEntityView } from "@/utils/viewsTracking";
-import { useLikes } from "./LikeContext";
+import { useNavigate } from "react-router-dom";
+import { formatPrice } from "@/utils/productUtils";
+import { ProductLikeButton } from "./ProductLikeButton";
+import { Skeleton } from "@/components/ui/skeleton";
+import { GridLayoutType } from "./types/ProductTypes";
+import { LikeProvider } from "./LikeContext";
 import { motion } from "framer-motion";
 
-// Update the interface to include sponsored property
-export interface ProductCardProps {
-  product: Product;
-  layout?: "grid1x1" | "grid2x1" | "list" | GridLayoutType;
-  badge?: string;
-  rank?: number;
+interface ProductCardProps {
+  product: any;
+  layout?: GridLayoutType;
   sponsored?: boolean;
 }
 
-export const ProductCard = ({ 
-  product, 
-  layout = "grid1x1",
-  badge,
-  rank,
-  sponsored = false
-}: ProductCardProps) => {
-  const { isLiked, toggleLike } = useLikes();
-  const liked = isLiked(product.id);
+export const ProductCard = ({ product, layout = "grid4x4", sponsored = false }: ProductCardProps) => {
+  const navigate = useNavigate();
+  const [imageLoaded, setImageLoaded] = useState(false);
   
-  const handleClick = () => {
-    // Track the product view when card is clicked
-    trackEntityView('product', product.id);
+  const handleCardClick = () => {
+    navigate(`/products/${product.id}`);
+  };
+  
+  const price = formatPrice(product.price);
+  
+  const originalPrice = product.is_discounted && product.discount_percentage 
+    ? formatPrice(product.price / (1 - product.discount_percentage / 100))
+    : null;
+  
+  // Helper function to determine highlight tag badge color
+  const getTagColor = (tag: string) => {
+    switch(tag.toLowerCase()) {
+      case 'bestseller':
+        return 'bg-amber-500 text-white border-amber-600';
+      case 'new':
+        return 'bg-blue-500 text-white border-blue-600';
+      case 'hot deal':
+        return 'bg-red-500 text-white border-red-600';
+      case 'trending':
+        return 'bg-purple-500 text-white border-purple-600';
+      case 'limited':
+        return 'bg-orange-500 text-white border-orange-600';
+      default:
+        return 'bg-gray-500 text-white border-gray-600';
+    }
   };
 
-  // Card layout classes based on layout prop
-  const getCardClasses = () => {
-    switch (layout) {
-      case "list":
-        return "flex flex-row h-auto";
-      case "grid1x1":
-        return "flex flex-col h-full";
-      case "grid2x2":
-      case "grid3x3":
-      case "grid4x4":
-      default:
-        return "flex flex-col h-full";
-    }
+  // Helper function to determine discount badge color based on percentage
+  const getDiscountBadgeColor = (percentage?: number) => {
+    if (!percentage) return 'bg-red-500';
+    if (percentage >= 50) return 'bg-green-500 text-white';
+    if (percentage >= 30) return 'bg-amber-500 text-white';
+    return 'bg-red-500 text-white';
   };
   
-  // Image container classes based on layout
-  const getImageContainerClasses = () => {
-    switch (layout) {
-      case "list":
-        return "w-1/3 min-w-[120px]";
-      case "grid1x1":
-      case "grid2x2":
-      case "grid3x3":
-      case "grid4x4":
-      default:
-        return "w-full aspect-square";
-    }
-  };
-  
-  // Content container classes based on layout
-  const getContentClasses = () => {
-    switch (layout) {
-      case "list":
-        return "flex-1 p-3";
-      case "grid1x1":
-      case "grid2x2":
-      case "grid3x3":
-      case "grid4x4":
-      default:
-        return "p-3 flex-1 flex flex-col";
-    }
-  };
-  
-  return (
-    <Link to={`/product/${product.id}`} onClick={handleClick}>
-      <motion.div
+  // Render different layouts based on the grid type
+  if (layout === "grid1x1") {
+    return (
+      <motion.div 
         whileHover={{ y: -5, transition: { duration: 0.2 } }}
-        whileTap={{ scale: 0.98 }}
+        className="h-full"
       >
-        <Card className={cn(
-          getCardClasses(),
-          "overflow-hidden hover:shadow-md transition-shadow duration-300"
-        )}>
-          <div className={cn(
-            getImageContainerClasses(),
-            "relative overflow-hidden"
-          )}>
+        <Card 
+          className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer border-border flex flex-col md:flex-row h-full"
+          onClick={handleCardClick}
+        >
+          <div className="w-full md:w-1/3 aspect-square md:h-auto relative">
+            {!imageLoaded && (
+              <div className="w-full h-full bg-gray-200 dark:bg-gray-800 animate-pulse"></div>
+            )}
             <img 
-              src={product.image_url || product.imageUrl || ""} 
-              alt={product.title || product.name || "Product image"} 
-              className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+              src={product.imageUrl || product.image_url || "https://via.placeholder.com/300x300"} 
+              alt={product.title || product.name} 
+              className={`w-full h-full object-cover transition-all duration-300 ${imageLoaded ? 'img-loaded' : 'img-loading'}`}
+              onLoad={() => setImageLoaded(true)}
               loading="lazy"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = "https://placehold.co/300x300/EEE/31343C?text=Image"; 
-              }}
             />
             
-            {/* Indicator section - discount badge, rank, sponsored tag, etc */}
-            <div className="absolute top-2 left-2 flex flex-col gap-1">
-              {product.is_discounted && (
-                <Badge variant="destructive" className="text-xs font-semibold">
-                  {product.discount_percentage ? `-${product.discount_percentage}%` : 'SALE'}
-                </Badge>
-              )}
-              
-              {badge && (
-                <Badge variant="secondary" className="text-xs">
-                  {badge}
-                </Badge>
-              )}
-              
-              {rank && (
-                <Badge className="bg-amber-500 hover:bg-amber-600 text-white text-xs">
-                  #{rank}
-                </Badge>
-              )}
-              
-              {sponsored && (
-                <Badge variant="outline" className="bg-white/80 text-xs font-normal">
-                  Sponsored
-                </Badge>
-              )}
-              
-              {product.highlight_tags && product.highlight_tags.length > 0 && (
-                <Badge className="bg-blue-500 hover:bg-blue-600 text-white text-xs">
-                  {product.highlight_tags[0]}
-                </Badge>
-              )}
-            </div>
-            
-            {/* Like button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute top-2 right-2 bg-white/80 hover:bg-white h-8 w-8 rounded-full shadow-sm"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                toggleLike(product.id);
-              }}
-            >
-              <Heart 
-                className={cn(
-                  "h-4 w-4", 
-                  liked ? "fill-red-500 text-red-500" : "text-gray-600"
-                )} 
-              />
-            </Button>
+            {/* Highlight tags */}
+            {product.highlight_tags && product.highlight_tags.length > 0 && (
+              <div className="absolute bottom-2 left-2 flex flex-wrap gap-1">
+                {product.highlight_tags.map((tag: string, index: number) => (
+                  <Badge 
+                    key={index}
+                    className={`${getTagColor(tag)} text-xs font-semibold shadow-sm`}
+                  >
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            )}
           </div>
           
-          <div className={getContentClasses()}>
-            <h3 className="font-medium text-sm sm:text-base mb-1 line-clamp-2">
-              {product.title || product.name || ""}
-            </h3>
-            
-            <div className="mt-auto pt-2">
-              <div className="flex items-center justify-between">
-                <div className="font-semibold">
-                  ${product.price?.toFixed(2)}
-                  {product.is_discounted && product.original_price && (
-                    <span className="text-xs line-through text-muted-foreground ml-1">
-                      ${product.original_price.toFixed(2)}
-                    </span>
-                  )}
-                </div>
-                
-                <div className="flex items-center text-xs text-muted-foreground">
-                  {typeof product.views === 'number' && (
-                    <div className="flex items-center mr-2">
-                      <Eye className="h-3 w-3 mr-1" />
-                      {formatCountNumber(product.views)}
-                    </div>
-                  )}
-                  {typeof product.wishlist_count === 'number' && (
-                    <div className="flex items-center">
-                      <Heart className="h-3 w-3 mr-1" />
-                      {formatCountNumber(product.wishlist_count)}
-                    </div>
-                  )}
-                </div>
+          <div className="flex flex-col flex-1 p-4">
+            <div className="flex justify-between items-start">
+              <div>
+                <h2 className="text-xl font-semibold">{product.title || product.name}</h2>
+                {product.category && (
+                  <Badge variant="outline" className="mt-1">
+                    {product.category}
+                  </Badge>
+                )}
               </div>
               
-              {(product.rating !== undefined || product.ratings !== undefined) && (
-                <div className="flex items-center mt-1">
-                  <div className="flex text-yellow-400 text-xs">
-                    {[...Array(5)].map((_, i) => (
-                      <span key={i}>
-                        {i < Math.floor((product.rating || product.ratings || 0)) ? "★" : "☆"}
-                      </span>
-                    ))}
-                  </div>
-                  {(product.rating_count || product.reviews_count) && (
-                    <span className="text-xs ml-1 text-muted-foreground">
-                      ({product.rating_count || product.reviews_count})
-                    </span>
-                  )}
-                </div>
+              <div className="flex items-center">
+                <LikeProvider>
+                  <ProductLikeButton productId={product.id} />
+                </LikeProvider>
+                
+                {sponsored && (
+                  <Badge variant="outline" className="ml-2 bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                    Sponsored
+                  </Badge>
+                )}
+              </div>
+            </div>
+            
+            <p className="text-sm text-muted-foreground my-4 line-clamp-3">
+              {product.description}
+            </p>
+            
+            <div className="mt-auto flex justify-between items-center">
+              <div>
+                <span className="text-2xl font-bold">{price}</span>
+                {originalPrice && (
+                  <span className="text-sm text-muted-foreground line-through ml-2">
+                    {originalPrice}
+                  </span>
+                )}
+              </div>
+              
+              {product.is_discounted && product.discount_percentage && (
+                <Badge className={`${getDiscountBadgeColor(product.discount_percentage)} text-white`}>
+                  {Math.round(product.discount_percentage)}% OFF
+                </Badge>
               )}
             </div>
           </div>
         </Card>
       </motion.div>
-    </Link>
+    );
+  }
+  
+  if (layout === "grid2x2") {
+    return (
+      <motion.div 
+        whileHover={{ y: -5, transition: { duration: 0.2 } }}
+        className="h-full"
+      >
+        <Card 
+          className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer border-border h-full flex flex-col"
+          onClick={handleCardClick}
+        >
+          <div className="relative w-full aspect-video">
+            {!imageLoaded && (
+              <div className="w-full h-full bg-gray-200 dark:bg-gray-800 animate-pulse"></div>
+            )}
+            <img 
+              src={product.imageUrl || product.image_url || "https://via.placeholder.com/300x300"} 
+              alt={product.title || product.name} 
+              className={`w-full h-full object-cover transition-all duration-300 ${imageLoaded ? 'img-loaded hover:scale-105' : 'img-loading'}`}
+              onLoad={() => setImageLoaded(true)}
+              loading="lazy"
+            />
+            
+            {product.is_discounted && product.discount_percentage && (
+              <Badge className={`absolute top-2 left-2 ${getDiscountBadgeColor(product.discount_percentage)}`}>
+                {Math.round(product.discount_percentage)}% OFF
+              </Badge>
+            )}
+            
+            {sponsored && (
+              <Badge variant="outline" className="absolute top-2 right-2 bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                Sponsored
+              </Badge>
+            )}
+            
+            {/* Highlight tags */}
+            {product.highlight_tags && product.highlight_tags.length > 0 && (
+              <div className="absolute bottom-2 left-2 flex flex-wrap gap-1">
+                {product.highlight_tags.map((tag: string, index: number) => (
+                  <Badge 
+                    key={index}
+                    className={`${getTagColor(tag)} text-xs font-semibold shadow-sm`}
+                  >
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          <CardContent className="flex-1 p-4 pt-3">
+            <div className="flex justify-between">
+              <h3 className="font-medium line-clamp-1">{product.title || product.name}</h3>
+              <LikeProvider>
+                <ProductLikeButton productId={product.id} size="sm" />
+              </LikeProvider>
+            </div>
+            
+            <p className="text-sm text-muted-foreground mt-1 mb-2 line-clamp-2">
+              {product.description}
+            </p>
+            
+            {product.category && (
+              <Badge variant="outline" className="text-xs mt-1">
+                {product.category}
+              </Badge>
+            )}
+            
+            <div className="mt-2 pt-2 border-t flex justify-between items-center">
+              <span className="font-bold">{price}</span>
+              {originalPrice && (
+                <span className="text-sm text-muted-foreground line-through">
+                  {originalPrice}
+                </span>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+    );
+  }
+  
+  // Default grid4x4 (compact) view
+  return (
+    <motion.div 
+      whileHover={{ y: -5, transition: { duration: 0.2 } }}
+      className="h-full"
+    >
+      <Card 
+        className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer border-border h-full flex flex-col"
+        onClick={handleCardClick}
+      >
+        <div className="relative w-full aspect-square">
+          {!imageLoaded && (
+            <div className="w-full h-full bg-gray-200 dark:bg-gray-800 animate-pulse"></div>
+          )}
+          <img 
+            src={product.imageUrl || product.image_url || "https://via.placeholder.com/300x300"} 
+            alt={product.title || product.name} 
+            className={`w-full h-full object-cover transition-all duration-300 ${imageLoaded ? 'img-loaded hover:scale-105' : 'img-loading'}`}
+            onLoad={() => setImageLoaded(true)}
+            loading="lazy"
+          />
+          
+          {product.is_discounted && product.discount_percentage && (
+            <Badge className={`absolute top-2 left-2 ${getDiscountBadgeColor(product.discount_percentage)} text-xs shadow-sm`}>
+              {Math.round(product.discount_percentage)}% OFF
+            </Badge>
+          )}
+          
+          <div className="absolute top-2 right-2">
+            <LikeProvider>
+              <ProductLikeButton productId={product.id} size="sm" />
+            </LikeProvider>
+          </div>
+          
+          {sponsored && (
+            <Badge variant="outline" className="absolute bottom-2 right-2 text-xs bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+              Sponsored
+            </Badge>
+          )}
+          
+          {/* Highlight tags */}
+          {product.highlight_tags && product.highlight_tags.length > 0 && (
+            <div className="absolute bottom-2 left-2 flex flex-wrap gap-1">
+              {product.highlight_tags.map((tag: string, index: number) => (
+                <Badge 
+                  key={index}
+                  className={`${getTagColor(tag)} text-xs font-semibold shadow-sm`}
+                >
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          )}
+        </div>
+        
+        <CardContent className="flex-1 p-3 pt-2">
+          <h3 className="font-medium text-sm line-clamp-1 mb-1">{product.title || product.name}</h3>
+          
+          <div className="flex items-baseline justify-between">
+            <p className="font-bold text-sm">{price}</p>
+            {originalPrice && (
+              <p className="text-xs text-muted-foreground line-through">{originalPrice}</p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
-};
-
-// Helper function to conditionally apply classnames
-const cn = (...classes: (string | boolean | undefined)[]) => {
-  return classes.filter(Boolean).join(' ');
 };

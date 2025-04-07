@@ -1,35 +1,30 @@
 
 import { cn } from "@/lib/utils";
-import { HTMLAttributes } from "react";
 
-export interface ShimmerProps extends HTMLAttributes<HTMLDivElement> {
-  className?: string;
-  shimmerWidth?: string;
-  shimmerColor?: string;
+interface ShimmerProps extends React.HTMLAttributes<HTMLDivElement> {
+  width?: string;
+  height?: string;
   rounded?: boolean;
   circle?: boolean;
 }
 
-export function Shimmer({
-  className,
-  shimmerWidth = "50%",
-  shimmerColor = "rgba(255, 255, 255, 0.2)",
-  rounded = false,
-  circle = false,
-  ...props
+export function Shimmer({ 
+  width = "100%", 
+  height = "100%", 
+  rounded = false, 
+  circle = false, 
+  className, 
+  ...props 
 }: ShimmerProps) {
   return (
-    <div 
+    <div
       className={cn(
-        "animate-pulse bg-gradient-to-r from-transparent via-gray-200 to-transparent bg-[length:200%_100%] dark:via-gray-700",
+        "animate-pulse bg-gradient-to-r from-muted/50 via-muted to-muted/50 bg-[length:400%_400%] animate-shimmer",
         rounded && "rounded-md",
         circle && "rounded-full",
         className
       )}
-      style={{
-        backgroundSize: "200% 100%",
-        animation: "shimmer 1.5s infinite"
-      }}
+      style={{ width, height }}
       {...props}
     />
   );

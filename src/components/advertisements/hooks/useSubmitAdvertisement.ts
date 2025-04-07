@@ -3,7 +3,6 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AdFormValues } from "../types";
-import { AdFormat } from "@/services/adService";
 
 export const useSubmitAdvertisement = (
   formValues: AdFormValues,

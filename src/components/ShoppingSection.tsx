@@ -1,6 +1,6 @@
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { ProductGrid } from './products/ProductsGrid';
+import { ProductsGrid } from './products/ProductsGrid';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { GridLayoutType } from './products/types/ProductTypes';
@@ -9,9 +9,6 @@ import { Skeleton } from './ui/skeleton';
 import { ShoppingCardSkeleton } from './ShoppingCardSkeleton';
 import { LoadingView } from './LoadingView';
 import { Progress } from './ui/progress';
-import { LikeProvider } from './products/LikeContext';
-import { GridLayoutSelector } from './marketplace/GridLayoutSelector';
-import { formatPrice } from '@/utils/productUtils';
 
 interface ShoppingSectionProps {
   searchQuery: string;
@@ -36,6 +33,7 @@ export const ShoppingSection = ({
   gridLayout = 'grid4x4',
   title = 'Products'
 }: ShoppingSectionProps) => {
+  // Local state for filters
   const [localCategory, setLocalCategory] = useState(selectedCategory);
   const [localShowDiscounted, setLocalShowDiscounted] = useState(showDiscounted);
   const [localShowUsed, setLocalShowUsed] = useState(showUsed);
@@ -46,16 +44,14 @@ export const ShoppingSection = ({
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
   
+  // Progress reference for loading animation
   const loadingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   
-  // Update local grid layout when prop changes
-  useEffect(() => {
-    setLocalGridLayout(gridLayout);
-  }, [gridLayout]);
-  
+  // Fetch products based on filters
   const { data: products, isLoading, error } = useQuery({
     queryKey: ['products', searchQuery, localCategory, localShowDiscounted, localShowUsed, localShowBranded, localSortOption, localPriceRange],
     queryFn: async () => {
+      // Start loading progress animation
       startLoadingProgress();
       
       let query = supabase.from('products').select('*');
@@ -80,20 +76,14 @@ export const ShoppingSection = ({
         query = query.eq('is_branded', true);
       }
       
-      switch (localSortOption) {
-        case 'price-low':
-          query = query.order('price', { ascending: true });
-          break;
-        case 'price-high':
-          query = query.order('price', { ascending: false });
-          break;
-        case 'most-viewed':
-          query = query.order('views', { ascending: false });
-          break;
-        case 'newest':
-        default:
-          query = query.order('created_at', { ascending: false });
-          break;
+      if (localSortOption === 'price-low') {
+        query = query.order('price', { ascending: true });
+      } else if (localSortOption === 'price-high') {
+        query = query.order('price', { ascending: false });
+      } else if (localSortOption === 'most-viewed') {
+        query = query.order('views', { ascending: false });
+      } else {
+        query = query.order('created_at', { ascending: false });
       }
       
       if (localPriceRange !== 'all') {
@@ -106,24 +96,29 @@ export const ShoppingSection = ({
         
         if (error) {
           console.error('Error fetching products:', error);
+          // If the table doesn't exist or there's an error, return mock data
           return getMockProducts(localCategory);
         }
         
         if (!data || data.length === 0) {
+          // If no data, return mock products
           return getMockProducts(localCategory);
         }
         
         return data;
       } catch (err) {
         console.error('Error in products fetch:', err);
+        // Return mock data on error
         return getMockProducts(localCategory);
       } finally {
+        // Complete the loading animation
         completeLoadingProgress();
       }
     },
-    staleTime: 60000,
+    staleTime: 60000, // 1 minute
   });
   
+  // Start loading animation
   const startLoadingProgress = () => {
     setLoadingProgress(0);
     if (loadingIntervalRef.current) {
@@ -132,6 +127,7 @@ export const ShoppingSection = ({
     
     loadingIntervalRef.current = setInterval(() => {
       setLoadingProgress(prev => {
+        // Slow down as it approaches 100%
         const increment = prev < 60 ? 10 : prev < 80 ? 5 : 1;
         const newProgress = Math.min(prev + increment, 95);
         return newProgress;
@@ -139,6 +135,7 @@ export const ShoppingSection = ({
     }, 100);
   };
   
+  // Complete loading animation
   const completeLoadingProgress = () => {
     if (loadingIntervalRef.current) {
       clearInterval(loadingIntervalRef.current);
@@ -147,10 +144,12 @@ export const ShoppingSection = ({
     setLoadingProgress(100);
   };
   
+  // Reset to first page when filters change
   useEffect(() => {
     setLocalCategory(selectedCategory);
   }, [selectedCategory]);
   
+  // Clean up interval on unmount
   useEffect(() => {
     return () => {
       if (loadingIntervalRef.current) {
@@ -159,6 +158,7 @@ export const ShoppingSection = ({
     };
   }, []);
   
+  // Reset filters function
   const resetFilters = useCallback(() => {
     setLocalCategory('');
     setLocalShowDiscounted(false);
@@ -168,6 +168,7 @@ export const ShoppingSection = ({
     setLocalPriceRange('all');
   }, []);
   
+  // Generate mock products for when database doesn't have data
   const getMockProducts = (category: string = '') => {
     const categoryNames = ['Electronics', 'Fashion', 'Home', 'Sports', 'Books', 'Toys'];
     const selectedCat = category || categoryNames[Math.floor(Math.random() * categoryNames.length)];
@@ -176,7 +177,7 @@ export const ShoppingSection = ({
       id: `mock-${index}`,
       title: `${selectedCat} Product ${index + 1}`,
       description: `This is a mock product in the ${selectedCat} category.`,
-      price: Math.floor(Math.random() * 10000) + 500, // Price in rupees
+      price: Math.floor(Math.random() * 100) + 10,
       image_url: `https://picsum.photos/seed/${selectedCat}${index}/300/300`,
       category: selectedCat.toLowerCase(),
       is_discounted: Math.random() > 0.7,
@@ -185,10 +186,6 @@ export const ShoppingSection = ({
       rating_count: Math.floor(Math.random() * 100) + 5,
       created_at: new Date().toISOString(),
     }));
-  };
-  
-  const handleLayoutChange = (layout: GridLayoutType) => {
-    setLocalGridLayout(layout);
   };
   
   return (
@@ -202,6 +199,7 @@ export const ShoppingSection = ({
       )}
       
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {/* Filters - Desktop */}
         <div className="hidden md:block">
           <ProductFilters 
             selectedCategory={localCategory}
@@ -220,15 +218,11 @@ export const ShoppingSection = ({
           />
         </div>
         
+        {/* Products Grid */}
         <div className="md:col-span-3">
-          <div className="flex justify-between items-center mb-4 md:hidden">
-            <h3 className="text-sm font-medium">View</h3>
-            <GridLayoutSelector layout={localGridLayout} onChange={handleLayoutChange} />
-          </div>
-          
           {isLoading ? (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {[...Array(8)].map((_, i) => (
                   <ShoppingCardSkeleton key={i} />
                 ))}
@@ -239,15 +233,13 @@ export const ShoppingSection = ({
               An error occurred while loading products. Please try again.
             </div>
           ) : (
-            <LikeProvider>
-              <ProductGrid 
-                products={products || []} 
-                isLoading={isLoading} 
-                layout={localGridLayout}
-                onLayoutChange={handleLayoutChange}
-                searchQuery={searchQuery}
-              />
-            </LikeProvider>
+            <ProductsGrid 
+              products={products || []} 
+              isLoading={isLoading} 
+              layout={localGridLayout}
+              onLayoutChange={setLocalGridLayout}
+              searchQuery={searchQuery}
+            />
           )}
         </div>
       </div>

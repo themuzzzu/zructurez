@@ -1,106 +1,202 @@
 
-import React, { useState } from 'react';
-import { ProductsSection } from '@/components/marketplace/ProductsSection';
-import { SponsoredProducts } from '@/components/marketplace/SponsoredProducts';
-import { TrendingProducts } from '@/components/marketplace/TrendingProducts';
-import { RecommendedProducts } from '@/components/marketplace/RecommendedProducts';
-import { CategoryFilter } from "@/components/marketplace/CategoryFilter";
-import { SortFilter } from "@/components/marketplace/SortFilter";
+import { useState, useEffect, Suspense } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { GridLayoutType } from "@/components/products/types/ProductTypes";
+import { AutocompleteSearch } from "@/components/marketplace/AutocompleteSearch";
+import { BannerCarousel } from "@/components/marketplace/BannerCarousel";
+import { CrazyDeals } from "@/components/marketplace/CrazyDeals";
+import { SponsoredProducts } from "@/components/marketplace/SponsoredProducts";
+import { ShopByCategory } from "@/components/marketplace/ShopByCategory";
+import { TrendingProducts } from "@/components/marketplace/TrendingProducts"; 
 import { PersonalizedRecommendations } from "@/components/marketplace/PersonalizedRecommendations";
-import { Separator } from "@/components/ui/separator";
-import { AutoScrollingBannerAd } from '@/components/ads/AutoScrollingBannerAd';
-import { useAdBanners } from '@/hooks/useAdBanners';
-import { LikeProvider } from '@/components/products/LikeContext';
+import { ProductRankings } from "@/components/rankings/ProductRankings";
+import { BrowseTabContent } from "@/components/marketplace/BrowseTabContent";
+import { SkeletonCard } from "@/components/loaders";
+import { useLoading } from "@/providers/LoadingProvider";
+import { FlashSale } from "@/components/marketplace/FlashSale";
 
-// Define type for sort options
-type SortOption = "newest" | "price-asc" | "price-desc" | "popular";
+const LazySection = ({ children, fallbackCount = 4 }) => (
+  <Suspense fallback={
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      {Array.from({ length: fallbackCount }).map((_, i) => (
+        <SkeletonCard key={i} />
+      ))}
+    </div>
+  }>
+    {children}
+  </Suspense>
+);
 
 export const OptimizedMarketplace = () => {
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [sortBy, setSortBy] = useState<SortOption>("newest");
-  const { ads: bannerAds } = useAdBanners("product", "banner", 3);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const queryParam = searchParams.get("q") || "";
+  const categoryParam = searchParams.get("category") || "all";
+  const subcategoryParam = searchParams.get("subcategory") || "";
   
-  // Log for debugging
-  console.log("OptimizedMarketplace rendered with layout: grid4x4");
+  // State for search and cart
+  const [searchQuery, setSearchQuery] = useState(queryParam);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [cartItemCount, setCartItemCount] = useState(0);
   
-  // Handle category change
-  const handleCategoryChange = (category: string | null) => {
-    setSelectedCategory(category);
+  // State for filters and layout
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(categoryParam);
+  const [selectedSubcategory, setSelectedSubcategory] = useState(subcategoryParam);
+  const [showDiscounted, setShowDiscounted] = useState(false);
+  const [showUsed, setShowUsed] = useState(false);
+  const [showBranded, setShowBranded] = useState(false);
+  const [sortOption, setSortOption] = useState("newest");
+  const [priceRange, setPriceRange] = useState("all");
+  const [gridLayout, setGridLayout] = useState<GridLayoutType>("grid4x4");
+  
+  const { setLoading } = useLoading();
+  
+  // Show loading indicator when page loads
+  useEffect(() => {
+    setLoading(true);
+    const timeout = setTimeout(() => setLoading(false), 800);
+    return () => clearTimeout(timeout);
+  }, [setLoading]);
+  
+  // Update state when URL parameters change
+  useEffect(() => {
+    if (categoryParam) {
+      setSelectedCategory(categoryParam);
+    }
+    
+    if (subcategoryParam) {
+      setSelectedSubcategory(subcategoryParam);
+    }
+    
+    if (queryParam) {
+      setSearchQuery(queryParam);
+    }
+  }, [categoryParam, subcategoryParam, queryParam]);
+  
+  const resetFilters = () => {
+    setSelectedCategory("all");
+    setSelectedSubcategory("");
+    setShowDiscounted(false);
+    setShowUsed(false);
+    setShowBranded(false);
+    setSortOption("newest");
+    setPriceRange("all");
   };
   
-  // Handle sort change
-  const handleSortChange = (sort: SortOption) => {
-    setSortBy(sort);
+  // Handle search selection from autocomplete
+  const handleSearchSelect = (query: string) => {
+    setSearchQuery(query);
+    navigate(`/search?q=${encodeURIComponent(query)}`);
+  };
+  
+  // Update URL when category changes
+  const handleCategoryChange = (category: string, subcategory?: string) => {
+    setSelectedCategory(category);
+    if (subcategory) {
+      setSelectedSubcategory(subcategory);
+    } else {
+      setSelectedSubcategory("");
+    }
+    
+    const newSearchParams = new URLSearchParams();
+    if (searchQuery) {
+      newSearchParams.set("q", searchQuery);
+    }
+    
+    if (category !== "all") {
+      newSearchParams.set("category", category);
+      
+      if (subcategory) {
+        newSearchParams.set("subcategory", subcategory);
+      }
+    }
+    
+    navigate({
+      pathname: location.pathname,
+      search: newSearchParams.toString()
+    });
   };
   
   return (
-    <div className="container mx-auto px-4 py-6">
-      {/* Auto-scrolling Banner Ad */}
-      <div className="mb-8">
-        <AutoScrollingBannerAd ads={bannerAds} autoScrollInterval={3000} />
+    <div className="container max-w-[1400px] mx-auto px-3 sm:px-4 py-4 sm:py-6">
+      {/* Single Search Bar at the top with improved design */}
+      <div className="mb-4 sm:mb-6">
+        <AutocompleteSearch 
+          value={searchQuery}
+          onChange={setSearchQuery}
+          onSearchSelect={handleSearchSelect}
+          placeholder="Search for products, services, or businesses..."
+          className="w-full max-w-3xl mx-auto"
+        />
       </div>
       
-      {/* Personalized Recommendations (only visible to returning users) */}
-      <PersonalizedRecommendations />
+      {/* Banner carousel below search */}
+      <LazySection fallbackCount={1}>
+        <div className="mb-4 sm:mb-6">
+          <BannerCarousel />
+        </div>
+      </LazySection>
       
-      <LikeProvider>
-        {/* Sponsored Products Carousel */}
-        <SponsoredProducts />
-        
-        {/* Category & Sort Selection */}
-        <div className="flex flex-col sm:flex-row justify-between mb-4 gap-4">
-          <CategoryFilter 
-            selectedCategory={selectedCategory} 
-            onCategoryChange={handleCategoryChange} 
-          />
-          <SortFilter 
-            selectedSort={sortBy}
-            onSortChange={handleSortChange}
+      {/* New Shop by Category section */}
+      <div className="mb-4 sm:mb-6">
+        <ShopByCategory onCategorySelect={handleCategoryChange} />
+      </div>
+      
+      {/* Real-time Product Rankings */}
+      <LazySection>
+        <div className="mb-4 sm:mb-8">
+          <ProductRankings />
+        </div>
+      </LazySection>
+      
+      {/* Flash Sale Section */}
+      <LazySection>
+        <div className="mb-4 sm:mb-8">
+          <FlashSale />
+        </div>
+      </LazySection>
+      
+      {/* Sponsored Products Section */}
+      <LazySection>
+        <div className="mb-4 sm:mb-8">
+          <SponsoredProducts gridLayout={gridLayout} />
+        </div>
+      </LazySection>
+      
+      {/* Trending Products */}
+      <LazySection>
+        <div className="mb-4 sm:mb-8">
+          <TrendingProducts gridLayout={gridLayout} />
+        </div>
+      </LazySection>
+      
+      {/* Personalized Recommendations */}
+      <LazySection>
+        <div className="mb-4 sm:mb-8">
+          <PersonalizedRecommendations />
+        </div>
+      </LazySection>
+      
+      {/* Crazy Deals Section */}
+      <LazySection>
+        <div className="mb-4 sm:mb-8">
+          <CrazyDeals />
+        </div>
+      </LazySection>
+      
+      {/* Main content - Browse All */}
+      <LazySection>
+        <div className="mt-4 sm:mt-8">
+          <BrowseTabContent 
+            searchTerm={searchQuery}
+            onCategorySelect={handleCategoryChange}
           />
         </div>
-        
-        {/* This is the main products section that will show filtered results */}
-        <ProductsSection
-          title="Latest Products"
-          category={selectedCategory || undefined}
-          sortBy={sortBy}
-          limit={8}
-        />
-        
-        <Separator className="my-8" />
-        
-        {/* Trending Products Section - always shows most viewed */}
-        <TrendingProducts />
-        
-        <Separator className="my-8" />
-        
-        {/* Categories Sections */}
-        <div className="space-y-12">
-          {/* Electronics */}
-          <ProductsSection
-            title="Electronics"
-            category="electronics"
-            sortBy="newest"
-            limit={4}
-          />
-          
-          {/* Clothing */}
-          <ProductsSection
-            title="Fashion"
-            category="clothing"
-            sortBy="newest"
-            limit={4}
-          />
-          
-          {/* Home & Garden */}
-          <ProductsSection
-            title="Home & Garden"
-            category="home"
-            sortBy="popular"
-            limit={4}
-          />
-        </div>
-      </LikeProvider>
+      </LazySection>
     </div>
   );
 };
+
+export default OptimizedMarketplace;

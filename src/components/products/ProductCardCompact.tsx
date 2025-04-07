@@ -7,8 +7,10 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatPrice } from "@/utils/productUtils";
-import { Product, ProductType } from "./types/ProductTypes";
+import { ProductType } from "./types/ProductTypes";
+import { Product } from "@/types/product";
 import { ProductLikeButton } from "./ProductLikeButton";
+import { LikeProvider } from "./LikeContext";
 
 interface ProductCardCompactProps {
   product: Product | ProductType;
@@ -144,12 +146,14 @@ export const ProductCardCompact = ({
             <div>
               <div className="flex justify-between">
                 <h3 className="font-medium text-sm line-clamp-1">{product.title}</h3>
-                <ProductLikeButton 
-                  productId={product.id}
-                  size="sm"
-                  variant="ghost"
-                  className="ml-auto"
-                />
+                <LikeProvider>
+                  <ProductLikeButton 
+                    productId={product.id}
+                    size="sm"
+                    variant="ghost"
+                    className="ml-auto"
+                  />
+                </LikeProvider>
               </div>
               
               <div className="flex items-center mt-1 mb-1.5">

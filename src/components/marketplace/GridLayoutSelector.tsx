@@ -1,51 +1,59 @@
 
+import { LayoutGrid, Grid2X2, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { LayoutGrid, Rows, Columns, TableProperties } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
+import { useEffect } from "react";
 
 interface GridLayoutSelectorProps {
   layout: GridLayoutType;
   onChange: (layout: GridLayoutType) => void;
-  className?: string;
 }
 
-export function GridLayoutSelector({ layout, onChange, className }: GridLayoutSelectorProps) {
+export const GridLayoutSelector = ({ layout, onChange }: GridLayoutSelectorProps) => {
+  // Log when layout changes
+  useEffect(() => {
+    console.log("GridLayoutSelector received layout:", layout);
+  }, [layout]);
+  
+  const handleLayoutChange = (newLayout: GridLayoutType) => {
+    console.log("Changing layout to:", newLayout);
+    onChange(newLayout);
+    
+    // Save layout preference to localStorage
+    localStorage.setItem("preferredGridLayout", newLayout);
+  };
+
   return (
-    <div className={cn("inline-flex gap-1 bg-muted/30 p-1 rounded-md", className)}>
+    <div className="flex items-center gap-1">
       <Button
-        variant={layout === "grid2x2" ? "default" : "ghost"}
-        size="sm"
-        className={cn(
-          "h-8 w-8 p-0", 
-          layout === "grid2x2" ? "bg-white dark:bg-zinc-800" : "bg-transparent"
-        )}
-        onClick={() => onChange("grid2x2")}
-      >
-        <Rows className="h-4 w-4" />
-      </Button>
-      <Button
-        variant={layout === "grid3x3" ? "default" : "ghost"}
-        size="sm"
-        className={cn(
-          "h-8 w-8 p-0", 
-          layout === "grid3x3" ? "bg-white dark:bg-zinc-800" : "bg-transparent"
-        )}
-        onClick={() => onChange("grid3x3")}
-      >
-        <Columns className="h-4 w-4" />
-      </Button>
-      <Button
-        variant={layout === "grid4x4" ? "default" : "ghost"}
-        size="sm"
-        className={cn(
-          "h-8 w-8 p-0", 
-          layout === "grid4x4" ? "bg-white dark:bg-zinc-800" : "bg-transparent"
-        )}
-        onClick={() => onChange("grid4x4")}
+        size="icon"
+        variant={layout === "grid4x4" ? "default" : "outline"}
+        className="h-8 w-8"
+        onClick={() => handleLayoutChange("grid4x4")}
+        title="4×4 Grid"
       >
         <LayoutGrid className="h-4 w-4" />
       </Button>
+      
+      <Button
+        size="icon"
+        variant={layout === "grid2x2" ? "default" : "outline"}
+        className="h-8 w-8"
+        onClick={() => handleLayoutChange("grid2x2")}
+        title="2×2 Grid"
+      >
+        <Grid2X2 className="h-4 w-4" />
+      </Button>
+      
+      <Button
+        size="icon"
+        variant={layout === "list" ? "default" : "outline"}
+        className="h-8 w-8"
+        onClick={() => handleLayoutChange("list")}
+        title="List View"
+      >
+        <List className="h-4 w-4" />
+      </Button>
     </div>
   );
-}
+};

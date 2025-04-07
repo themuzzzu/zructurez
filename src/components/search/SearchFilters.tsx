@@ -11,13 +11,11 @@ import { SearchFilters as SearchFiltersType } from "@/types/search";
 
 interface SearchFiltersProps {
   filters: SearchFiltersType;
-  onFilterChange: (newFilters: Partial<SearchFiltersType>) => void;
-  onReset?: () => void;
-  onTypeChange?: (newType: string) => void;
-  selectedType?: string;
+  onChange: (newFilters: Partial<SearchFiltersType>) => void;
+  onReset: () => void;
 }
 
-export function SearchFilters({ filters, onFilterChange, onReset, onTypeChange, selectedType }: SearchFiltersProps) {
+export function SearchFilters({ filters, onChange, onReset }: SearchFiltersProps) {
   const [priceRange, setPriceRange] = useState<[number, number]>([
     filters.priceMin || 0,
     filters.priceMax || 10000
@@ -28,7 +26,7 @@ export function SearchFilters({ filters, onFilterChange, onReset, onTypeChange, 
   };
   
   const applyPriceRange = () => {
-    onFilterChange({
+    onChange({
       priceMin: priceRange[0],
       priceMax: priceRange[1]
     });
@@ -51,10 +49,10 @@ export function SearchFilters({ filters, onFilterChange, onReset, onTypeChange, 
           onCheckedChange={(checked) => {
             if (checked) {
               const newCategories = [...(filters.categories || []), category.id];
-              onFilterChange({ categories: newCategories });
+              onChange({ categories: newCategories });
             } else {
               const newCategories = filters.categories?.filter(id => id !== category.id) || [];
-              onFilterChange({ categories: newCategories });
+              onChange({ categories: newCategories });
             }
           }}
         />
@@ -62,14 +60,6 @@ export function SearchFilters({ filters, onFilterChange, onReset, onTypeChange, 
       </div>
     ));
   };
-
-  // Define content types if onTypeChange is provided
-  const contentTypes = [
-    { id: 'all', label: 'All Content' },
-    { id: 'product', label: 'Products' },
-    { id: 'service', label: 'Services' },
-    { id: 'business', label: 'Businesses' }
-  ];
   
   // Define the valid sort options as a type
   type SortOption = 'relevance' | 'price-asc' | 'price-desc' | 'newest';
@@ -80,31 +70,12 @@ export function SearchFilters({ filters, onFilterChange, onReset, onTypeChange, 
         <CardTitle>Filters</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Content Type - Only show if onTypeChange is provided */}
-        {onTypeChange && (
-          <div>
-            <h3 className="font-medium mb-2">Content Type</h3>
-            <RadioGroup 
-              value={selectedType || 'all'} 
-              onValueChange={(value) => onTypeChange(value)}
-            >
-              {contentTypes.map(type => (
-                <div key={type.id} className="flex items-center space-x-2">
-                  <RadioGroupItem value={type.id} id={`type-${type.id}`} />
-                  <Label htmlFor={`type-${type.id}`}>{type.label}</Label>
-                </div>
-              ))}
-            </RadioGroup>
-            <Separator className="mt-4" />
-          </div>
-        )}
-        
         {/* Sort By */}
         <div>
           <h3 className="font-medium mb-2">Sort By</h3>
           <RadioGroup 
             value={filters.sortBy || 'relevance'} 
-            onValueChange={(value: SortOption) => onFilterChange({ sortBy: value as SortOption })}
+            onValueChange={(value: SortOption) => onChange({ sortBy: value as SortOption })}
           >
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="relevance" id="sort-relevance" />
@@ -169,22 +140,20 @@ export function SearchFilters({ filters, onFilterChange, onReset, onTypeChange, 
               <Checkbox
                 id="show-sponsored"
                 checked={filters.includeSponsored}
-                onCheckedChange={(checked) => onFilterChange({ includeSponsored: !!checked })}
+                onCheckedChange={(checked) => onChange({ includeSponsored: !!checked })}
               />
               <Label htmlFor="show-sponsored">Show sponsored results</Label>
             </div>
           </div>
         </div>
         
-        {onReset && (
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={onReset}
-          >
-            Reset All Filters
-          </Button>
-        )}
+        <Button
+          variant="outline"
+          className="w-full"
+          onClick={onReset}
+        >
+          Reset All Filters
+        </Button>
       </CardContent>
     </Card>
   );

@@ -1,4 +1,3 @@
-
 import { Input } from "../../ui/input";
 import { Textarea } from "../../ui/textarea";
 import { Label } from "../../ui/label";
@@ -75,6 +74,8 @@ export const StaffFormFields = ({
         <ImageUpload
           selectedImage={image_url}
           onImageSelect={handleImageSelect}
+          initialScale={1}
+          initialPosition={{ x: 50, y: 50 }}
           skipAutoSave={true}
         />
       </div>

@@ -1,108 +1,146 @@
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Camera, X } from "lucide-react";
-import { toast } from "sonner";
+import { useCallback } from "react";
+import { useImageUploadState } from "./hooks/useImageUploadState";
+import { useImageUploadHandlers } from "./hooks/useImageUploadHandlers";
+import { ImagePreview } from "./ImagePreview";
+import { ImageControls } from "./ImageControls";
+import { UploadButtons } from "./UploadButtons";
+import { Button } from "../ui/button";
+import type { ImageUploadProps } from "./types";
 
-interface ImagePosition {
-  x: number;
-  y: number;
-}
-
-interface ImageUploadProps {
-  selectedImage: string | null;
-  onImageSelect: (image: string | null) => void;
-  label?: string;
-  accept?: string;
-  buttonText?: React.ReactNode;
-  initialScale?: number;
-  initialPosition?: ImagePosition;
-  onScaleChange?: (scale: number) => void;
-  onPositionChange?: (position: ImagePosition) => void;
-  skipAutoSave?: boolean;
-}
-
-export const ImageUpload = ({ 
-  selectedImage, 
-  onImageSelect, 
-  label = "Upload Image", 
-  accept = "image/*",
-  buttonText,
-  initialScale,
-  initialPosition,
+export const ImageUpload = ({
+  selectedImage,
+  onImageSelect,
+  initialScale = 1,
+  initialPosition = { x: 50, y: 50 },
   onScaleChange,
   onPositionChange,
-  skipAutoSave
-}: ImageUploadProps) => {
-  const [loading, setLoading] = useState(false);
+  skipAutoSave = false,
+  buttonText,
+}: ImageUploadProps & { buttonText?: string }) => {
+  const {
+    scale,
+    setScale,
+    position,
+    setPosition,
+    previewImage,
+    setPreviewImage,
+    isDragging,
+    setIsDragging,
+    dragStart,
+    setDragStart,
+    pendingImage,
+    setPendingImage,
+    handleSave,
+  } = useImageUploadState(
+    selectedImage,
+    initialScale,
+    initialPosition,
+    onImageSelect,
+    onScaleChange,
+    onPositionChange,
+    skipAutoSave
+  );
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const { handleFileUpload, handleCameraCapture } = useImageUploadHandlers({
+    setPreviewImage,
+    setScale,
+    setPosition,
+    onImageSelect,
+    onScaleChange,
+    onPositionChange,
+    skipAutoSave,
+  });
 
-    // Check file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Image size should be less than 5MB");
-      return;
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    setIsDragging(true);
+    setDragStart({
+      x: e.clientX - position.x,
+      y: e.clientY - position.y,
+    });
+  }, [position, setDragStart, setIsDragging]);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!isDragging) return;
+    
+    const newX = Math.max(0, Math.min(100, e.clientX - dragStart.x));
+    const newY = Math.max(0, Math.min(100, e.clientY - dragStart.y));
+    
+    setPosition({ x: newX, y: newY });
+  }, [isDragging, dragStart, setPosition]);
+
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false);
+  }, [setIsDragging]);
+
+  const handleCancel = useCallback(() => {
+    if (pendingImage) {
+      setPreviewImage(selectedImage);
+      setScale(initialScale);
+      setPosition(initialPosition);
+      setPendingImage(null);
     }
-
-    setLoading(true);
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      onImageSelect(reader.result as string);
-      setLoading(false);
-    };
-    reader.onerror = () => {
-      toast.error("Failed to read the image file");
-      setLoading(false);
-    };
-    reader.readAsDataURL(file);
-  };
+  }, [pendingImage, selectedImage, initialScale, initialPosition, setPendingImage, setPreviewImage, setScale, setPosition]);
 
   return (
-    <div className="space-y-2">
-      {label && (
-        <div className="text-sm font-medium mb-2">{label}</div>
-      )}
+    <div className="space-y-4">
+      <UploadButtons 
+        onCameraCapture={handleCameraCapture}
+        onFileSelect={handleFileUpload}
+        buttonText={buttonText}
+      />
 
-      {selectedImage ? (
-        <div className="relative group">
-          <img
-            src={selectedImage}
-            alt="Selected"
-            className="w-full h-64 object-cover rounded-md border"
+      {previewImage && (
+        <div className="space-y-4">
+          <ImagePreview
+            previewImage={previewImage}
+            scale={scale}
+            position={position}
+            onImageRemove={() => {
+              setPreviewImage(null);
+              onImageSelect(null);
+              setPendingImage(null);
+            }}
+            isDragging={isDragging}
+            onDragStart={handleMouseDown}
+            onDragMove={handleMouseMove}
+            onDragEnd={handleMouseUp}
+            onPositionChange={(newPosition) => {
+              setPosition(newPosition);
+              if (!skipAutoSave) {
+                onPositionChange?.(newPosition);
+              }
+            }}
           />
-          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => onImageSelect(null)}
-              className="absolute top-2 right-2"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      ) : (
-        <div className="border-2 border-dashed rounded-md p-4 text-center">
-          <input
-            type="file"
-            accept={accept}
-            onChange={handleFileUpload}
-            className="hidden"
-            id="image-upload"
+
+          <ImageControls
+            scale={scale}
+            onScaleChange={(newScale) => {
+              setScale(newScale);
+              if (!skipAutoSave) {
+                onScaleChange?.(newScale);
+              }
+            }}
+            onPositionChange={(x, y) => {
+              const newPosition = { x, y };
+              setPosition(newPosition);
+              if (!skipAutoSave) {
+                onPositionChange?.(newPosition);
+              }
+            }}
+            onSave={handleSave}
           />
-          <label htmlFor="image-upload" className="cursor-pointer">
-            <div className="flex flex-col items-center gap-2 py-4">
-              <Camera className="h-10 w-10 text-muted-foreground" />
-              <div className="font-medium">
-                {loading ? "Uploading..." : buttonText || "Upload Image"}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Click to browse (Max: 5MB)
-              </p>
+
+          {(pendingImage || skipAutoSave) && (
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={handleCancel}>
+                Cancel
+              </Button>
+              <Button onClick={handleSave}>
+                Save Changes
+              </Button>
             </div>
-          </label>
+          )}
         </div>
       )}
     </div>

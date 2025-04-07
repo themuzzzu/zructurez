@@ -1,5 +1,6 @@
 
-import { AdType, AdFormat } from "@/services/adService";
+import { AdFormat, AdType } from "@/services/adService";
+import { MouseEventHandler } from "react";
 
 export interface AdFormValues {
   type: AdType;
@@ -35,11 +36,33 @@ export interface AdvertisementFormatSelectProps {
   onChange: (value: AdFormat) => void;
 }
 
+export interface ItemSelectProps {
+  type: AdType;
+  format: AdFormat;
+  selectedItemId: string;
+  onChange: (value: string) => void;
+  businesses?: any[];
+  services?: any[];
+  products?: any[];
+  posts?: any[];
+}
+
 export interface DateSelectorProps {
   startDate?: Date;
   endDate?: Date;
-  onStartDateChange: (date: Date) => void;
-  onEndDateChange: (date: Date) => void;
+  onStartDateChange: (date?: Date) => void;
+  onEndDateChange: (date?: Date) => void;
+}
+
+export interface MediaUploadProps {
+  format: AdFormat;
+  imageUrl: string | null;
+  setImageUrl: (url: string | null) => void;
+  videoUrl: string;
+  setVideoUrl: (url: string) => void;
+  carouselImages: string[];
+  addCarouselImage: (url: string) => void;
+  removeCarouselImage: (index: number) => void;
 }
 
 export interface TargetingOptionsProps {
