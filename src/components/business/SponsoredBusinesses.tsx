@@ -34,8 +34,8 @@ export function SponsoredBusinesses() {
             is_open: true,
             average_rating: 4.5,
             reviews_count: 48,
-            wait_time: null,
-            closure_reason: null
+            wait_time: '',
+            closure_reason: ''
           }));
         }
         
@@ -48,8 +48,8 @@ export function SponsoredBusinesses() {
             ...business,
             average_rating: averageRating,
             reviews_count: ratings.length,
-            wait_time: business.wait_time || null,
-            closure_reason: business.closure_reason || null
+            wait_time: business.wait_time || '',
+            closure_reason: business.closure_reason || ''
           };
         });
       } catch (err) {
@@ -114,8 +114,8 @@ export function SponsoredBusinesses() {
                     category={business.category}
                     is_open={business.is_open}
                     verified={business.verified || false}
-                    wait_time={business.wait_time || null}
-                    closure_reason={business.closure_reason || null}
+                    wait_time={business.wait_time}
+                    closure_reason={business.closure_reason}
                   />
                 </div>
               </div>

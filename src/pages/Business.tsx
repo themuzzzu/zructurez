@@ -162,10 +162,14 @@ const BusinessPage = () => {
     return hours;
   };
 
+  const handleCategorySelect = (category: string) => {
+    setSelectedCategory(category);
+    navigate(`/businesses?category=${category}`);
+  };
+  
   const handleSubcategorySelect = (category: { id: string, name: string, icon: string }) => {
     const newCategory = `${category.id}`;
     setSelectedCategory(newCategory);
-    
     navigate(`/businesses?category=${category.id}`);
   };
 
@@ -252,7 +256,7 @@ const BusinessPage = () => {
         {/* Category Subcategories Grid */}
         <div className="mt-8 mb-6">
           <h2 className="text-2xl font-bold mb-4">Browse by Category</h2>
-          <CategorySubcategoryGrid onCategorySelect={handleSubcategorySelect} />
+          <CategorySubcategoryGrid onCategorySelect={handleCategorySelect} />
         </div>
         
         {/* Business Category Scroller */}

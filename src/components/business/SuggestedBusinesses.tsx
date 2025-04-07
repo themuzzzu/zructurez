@@ -13,7 +13,7 @@ export function SuggestedBusinesses() {
     queryKey: ['suggested-businesses'],
     queryFn: async () => {
       try {
-        // Try to fetch businesses with high ratings
+        // In a real app, this would use the user's preferences or location
         const { data, error } = await supabase
           .from('businesses')
           .select(`
@@ -26,17 +26,17 @@ export function SuggestedBusinesses() {
         if (error || !data || data.length === 0) {
           // Return mock data if no real data
           return Array(4).fill(null).map((_, i) => ({
-            id: `mock-${i}`,
+            id: `suggested-${i}`,
             name: `Suggested Business ${i + 1}`,
-            description: 'This business is recommended based on your interests and location.',
-            category: ['Service', 'Education', 'Entertainment', 'Finance'][i % 4],
-            image_url: `https://source.unsplash.com/random/300x300?shop&sig=${i}`,
+            description: 'This business might interest you based on your preferences.',
+            category: ['Cafe', 'Fitness', 'Electronics', 'Books'][i % 4],
+            image_url: `https://source.unsplash.com/random/300x300?local&sig=${i}`,
             verified: i % 2 === 0,
-            is_open: i % 3 !== 0,
-            average_rating: 4.3,
-            reviews_count: 27,
-            wait_time: null,
-            closure_reason: null
+            is_open: true,
+            average_rating: 4.2,
+            reviews_count: 36,
+            wait_time: '',
+            closure_reason: ''
           }));
         }
         
@@ -49,8 +49,8 @@ export function SuggestedBusinesses() {
             ...business,
             average_rating: averageRating,
             reviews_count: ratings.length,
-            wait_time: business.wait_time || null,
-            closure_reason: business.closure_reason || null
+            wait_time: business.wait_time || '',
+            closure_reason: business.closure_reason || ''
           };
         });
       } catch (err) {
@@ -115,8 +115,8 @@ export function SuggestedBusinesses() {
                     category={business.category}
                     is_open={business.is_open}
                     verified={business.verified || false}
-                    wait_time={business.wait_time || null}
-                    closure_reason={business.closure_reason || null}
+                    wait_time={business.wait_time}
+                    closure_reason={business.closure_reason}
                   />
                 </div>
               </div>
