@@ -24,29 +24,31 @@ interface LocalBusinessSpotlightProps {
 export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightProps) => {
   const [currentBusinessIndex, setCurrentBusinessIndex] = useState(0);
   
-  // Fix: Explicitly type everything to avoid recursive type inference
+  const fetchLocalBusinesses = async (): Promise<LocalBusiness[]> => {
+    try {
+      let query = supabase
+        .from("businesses")
+        .select("*");
+        
+      // Filter by type if provided
+      if (businessType) {
+        query = query.eq("type", businessType);
+      }
+      
+      const { data, error } = await query.limit(5);
+      
+      if (error) throw error;
+      return data as LocalBusiness[];
+    } catch (err) {
+      console.error("Error fetching local businesses:", err);
+      return [] as LocalBusiness[];
+    }
+  };
+  
+  // Separate the query function from useQuery to avoid type recursion
   const { data: localBusinesses, isLoading } = useQuery<LocalBusiness[], Error>({
     queryKey: ["local-businesses", businessType],
-    queryFn: async (): Promise<LocalBusiness[]> => {
-      try {
-        let query = supabase
-          .from("businesses")
-          .select("*");
-          
-        // Filter by type if provided
-        if (businessType) {
-          query = query.eq("type", businessType);
-        }
-        
-        const { data, error } = await query.limit(5);
-        
-        if (error) throw error;
-        return data as LocalBusiness[];
-      } catch (err) {
-        console.error("Error fetching local businesses:", err);
-        return [] as LocalBusiness[];
-      }
-    },
+    queryFn: fetchLocalBusinesses,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
   
