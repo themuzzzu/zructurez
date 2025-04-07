@@ -16,7 +16,7 @@ export const AdDashboard = () => {
   const [selectedTab, setSelectedTab] = useState("active");
   const [isCreateAdOpen, setIsCreateAdOpen] = useState(false);
   
-  const { data: userAds = [], refetch: refetchAds } = useQuery({
+  const { data: userAds = [], refetch: refetchAds } = useQuery<Advertisement[]>({
     queryKey: ['user-ads'],
     queryFn: fetchUserAds,
   });

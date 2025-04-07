@@ -34,7 +34,9 @@ export function SuggestedBusinesses() {
             verified: i % 2 === 0,
             is_open: i % 3 !== 0,
             average_rating: 4.3,
-            reviews_count: 27
+            reviews_count: 27,
+            wait_time: null,
+            closure_reason: null
           }));
         }
         
@@ -46,7 +48,9 @@ export function SuggestedBusinesses() {
           return {
             ...business,
             average_rating: averageRating,
-            reviews_count: ratings.length
+            reviews_count: ratings.length,
+            wait_time: business.wait_time || null,
+            closure_reason: business.closure_reason || null
           };
         });
       } catch (err) {

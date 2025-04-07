@@ -28,12 +28,12 @@ export function ItemSelect({
     if (format === 'boosted_post') return posts;
     
     switch (type) {
-      case 'business':
+      case "business":
         return businesses;
-      case 'service':
+      case "service":
         return services;
-      case 'product':
-      case 'sponsored':
+      case "product":
+      case "sponsored":
         return products;
       default:
         return [];
@@ -44,12 +44,12 @@ export function ItemSelect({
     if (format === 'boosted_post') return item.content?.substring(0, 30) + '...';
     
     switch (type) {
-      case 'business':
+      case "business":
         return item.name;
-      case 'service':
+      case "service":
         return item.title;
-      case 'product':
-      case 'sponsored':
+      case "product":
+      case "sponsored":
         return item.title;
       default:
         return '';

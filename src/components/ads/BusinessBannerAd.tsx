@@ -1,8 +1,8 @@
 
 import { useState, useEffect } from "react";
-import { Advertisement, incrementAdClick, incrementAdView } from "@/services/adService";
+import { Advertisement } from "@/services/adService";
 import { useQuery } from "@tanstack/react-query";
-import { fetchActiveAds } from "@/services/adService";
+import { fetchActiveAds, incrementAdClick, incrementAdView } from "@/services/adService";
 import { BannerAd } from "@/components/ads/BannerAd";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -30,6 +30,10 @@ export function BusinessBannerAd() {
   }
 
   if (!ads.length) {
+    const now = new Date();
+    const future = new Date();
+    future.setDate(future.getDate() + 30);
+    
     const fallbackAd: Advertisement = {
       id: "fallback-business",
       title: "Promote Your Local Business",
@@ -39,6 +43,14 @@ export function BusinessBannerAd() {
       budget: 0,
       status: "active",
       image_url: "https://via.placeholder.com/1200x300/22C55E/FFFFFF?text=Advertise+Your+Business+Here",
+      location: "business",
+      start_date: now.toISOString(),
+      end_date: future.toISOString(),
+      clicks: 0,
+      impressions: 0,
+      format: "banner",
+      user_id: "system",
+      created_at: now.toISOString()
     };
     
     return (

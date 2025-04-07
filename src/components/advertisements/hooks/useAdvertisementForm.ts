@@ -1,15 +1,13 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { AdFormat, AdType } from "@/services/adService";
 import { toast } from "sonner";
 import { AdFormValues } from "../types";
 
 export const useAdvertisementForm = (onClose: () => void) => {
   const [loading, setLoading] = useState(false);
-  const [type, setType] = useState<AdType>("business");
-  const [format, setFormat] = useState<AdFormat>("standard");
+  const [type, setType] = useState<string>("business");
+  const [format, setFormat] = useState<string>("standard");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
@@ -85,7 +83,6 @@ export const useAdvertisementForm = (onClose: () => void) => {
     enabled: format === 'boosted_post'
   });
 
-  // Carousel image management
   const addCarouselImage = (imageUrl: string) => {
     if (carouselImages.length < 5) {
       setCarouselImages([...carouselImages, imageUrl]);
@@ -100,7 +97,6 @@ export const useAdvertisementForm = (onClose: () => void) => {
     setCarouselImages(updatedImages);
   };
 
-  // Targeting location management
   const addTargetingLocation = () => {
     if (newLocation && !targetingLocations.includes(newLocation)) {
       setTargetingLocations([...targetingLocations, newLocation]);
@@ -114,7 +110,6 @@ export const useAdvertisementForm = (onClose: () => void) => {
     setTargetingLocations(updatedLocations);
   };
 
-  // Targeting interest management
   const addTargetingInterest = () => {
     if (newInterest && !targetingInterests.includes(newInterest)) {
       setTargetingInterests([...targetingInterests, newInterest]);

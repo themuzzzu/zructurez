@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { AdvertisementFormatSelectProps } from "../types";
-import { AdFormat } from "@/services/adService";
 
 export function AdvertisementFormatSelect({ value, onChange }: AdvertisementFormatSelectProps) {
   return (
@@ -16,7 +15,7 @@ export function AdvertisementFormatSelect({ value, onChange }: AdvertisementForm
       <Label>Advertisement Format</Label>
       <Select 
         value={value} 
-        onValueChange={(newValue: AdFormat) => onChange(newValue)}
+        onValueChange={(newValue: string) => onChange(newValue)}
       >
         <SelectTrigger>
           <SelectValue placeholder="Select format" />

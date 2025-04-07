@@ -1,10 +1,9 @@
 
-import { AdFormat, AdType } from "@/services/adService";
 import { MouseEventHandler } from "react";
 
 export interface AdFormValues {
-  type: AdType;
-  format: AdFormat;
+  type: string;
+  format: string;
   title: string;
   description: string;
   location: string;
@@ -27,18 +26,18 @@ export interface AdvertisementFormProps {
 }
 
 export interface AdvertisementTypeSelectProps {
-  value: AdType;
-  onChange: (value: AdType) => void;
+  value: string;
+  onChange: (value: string) => void;
 }
 
 export interface AdvertisementFormatSelectProps {
-  value: AdFormat;
-  onChange: (value: AdFormat) => void;
+  value: string;
+  onChange: (value: string) => void;
 }
 
 export interface ItemSelectProps {
-  type: AdType;
-  format: AdFormat;
+  type: string;
+  format: string;
   selectedItemId: string;
   onChange: (value: string) => void;
   businesses?: any[];
@@ -55,7 +54,7 @@ export interface DateSelectorProps {
 }
 
 export interface MediaUploadProps {
-  format: AdFormat;
+  format: string;
   imageUrl: string | null;
   setImageUrl: (url: string | null) => void;
   videoUrl: string;

@@ -1,7 +1,6 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AdType, AdFormat, Advertisement } from "@/services/adService";
+import { Advertisement } from "@/services/adService";
 import {
   Carousel,
   CarouselContent,
@@ -21,11 +20,18 @@ const sampleBannerAds: Advertisement[] = [
     description: "Sleek. Slim. Stunning. Up to 40% Off. Next-gen BLDC fans. 10% Instant Discount on Credit Card & EMI Transactions.",
     image_url: "/lovable-uploads/a727b8a0-84a4-45b2-88da-392010b1b66c.png",
     business_id: "orient-electric",
-    type: "product" as AdType,
+    type: "product",
     reference_id: "fan-collection",
     budget: 5000,
-    format: "banner" as AdFormat,
-    status: "active"
+    format: "banner",
+    status: "active",
+    location: "home",
+    start_date: new Date().toISOString(),
+    end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    clicks: 0,
+    impressions: 0,
+    user_id: "system",
+    created_at: new Date().toISOString()
   },
   {
     id: "2",
@@ -37,7 +43,14 @@ const sampleBannerAds: Advertisement[] = [
     reference_id: "summer-collection",
     budget: 3500,
     format: "banner",
-    status: "active"
+    status: "active",
+    location: "home",
+    start_date: new Date().toISOString(),
+    end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    clicks: 0,
+    impressions: 0,
+    user_id: "system",
+    created_at: new Date().toISOString()
   },
   {
     id: "3",
@@ -49,7 +62,14 @@ const sampleBannerAds: Advertisement[] = [
     reference_id: "electronics-sale",
     budget: 4000,
     format: "banner",
-    status: "active"
+    status: "active",
+    location: "home",
+    start_date: new Date().toISOString(),
+    end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    clicks: 0,
+    impressions: 0,
+    user_id: "system",
+    created_at: new Date().toISOString()
   },
   {
     id: "4",
@@ -61,7 +81,14 @@ const sampleBannerAds: Advertisement[] = [
     reference_id: "home-collection",
     budget: 3000,
     format: "banner",
-    status: "active"
+    status: "active",
+    location: "home",
+    start_date: new Date().toISOString(),
+    end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    clicks: 0,
+    impressions: 0,
+    user_id: "system",
+    created_at: new Date().toISOString()
   },
   {
     id: "5",
@@ -73,7 +100,14 @@ const sampleBannerAds: Advertisement[] = [
     reference_id: "fitness-program",
     budget: 2500,
     format: "banner",
-    status: "active"
+    status: "active",
+    location: "home",
+    start_date: new Date().toISOString(),
+    end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    clicks: 0,
+    impressions: 0,
+    user_id: "system",
+    created_at: new Date().toISOString()
   },
   {
     id: "6",
@@ -85,7 +119,14 @@ const sampleBannerAds: Advertisement[] = [
     reference_id: "food-festival",
     budget: 2000,
     format: "banner",
-    status: "active"
+    status: "active",
+    location: "home",
+    start_date: new Date().toISOString(),
+    end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    clicks: 0,
+    impressions: 0,
+    user_id: "system",
+    created_at: new Date().toISOString()
   },
   {
     id: "7",
@@ -97,7 +138,14 @@ const sampleBannerAds: Advertisement[] = [
     reference_id: "travel-packages",
     budget: 4500,
     format: "banner",
-    status: "active"
+    status: "active",
+    location: "home",
+    start_date: new Date().toISOString(),
+    end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    clicks: 0,
+    impressions: 0,
+    user_id: "system",
+    created_at: new Date().toISOString()
   },
   {
     id: "8",
@@ -109,7 +157,14 @@ const sampleBannerAds: Advertisement[] = [
     reference_id: "beauty-collection",
     budget: 3000,
     format: "banner",
-    status: "active"
+    status: "active",
+    location: "home",
+    start_date: new Date().toISOString(),
+    end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    clicks: 0,
+    impressions: 0,
+    user_id: "system",
+    created_at: new Date().toISOString()
   },
   {
     id: "9",
@@ -121,7 +176,14 @@ const sampleBannerAds: Advertisement[] = [
     reference_id: "jewelry-sale",
     budget: 5500,
     format: "banner",
-    status: "active"
+    status: "active",
+    location: "home",
+    start_date: new Date().toISOString(),
+    end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    clicks: 0,
+    impressions: 0,
+    user_id: "system",
+    created_at: new Date().toISOString()
   },
   {
     id: "10",
@@ -133,7 +195,14 @@ const sampleBannerAds: Advertisement[] = [
     reference_id: "book-fair",
     budget: 2000,
     format: "banner",
-    status: "active"
+    status: "active",
+    location: "home",
+    start_date: new Date().toISOString(),
+    end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    clicks: 0,
+    impressions: 0,
+    user_id: "system",
+    created_at: new Date().toISOString()
   }
 ];
 

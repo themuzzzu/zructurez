@@ -33,7 +33,9 @@ export function SponsoredBusinesses() {
             verified: true,
             is_open: true,
             average_rating: 4.5,
-            reviews_count: 48
+            reviews_count: 48,
+            wait_time: null,
+            closure_reason: null
           }));
         }
         
@@ -45,7 +47,9 @@ export function SponsoredBusinesses() {
           return {
             ...business,
             average_rating: averageRating,
-            reviews_count: ratings.length
+            reviews_count: ratings.length,
+            wait_time: business.wait_time || null,
+            closure_reason: business.closure_reason || null
           };
         });
       } catch (err) {
