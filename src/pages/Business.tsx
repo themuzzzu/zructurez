@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -245,7 +244,7 @@ const BusinessPage = () => {
         {/* Categories Icon Grid */}
         <div className="mb-6">
           <h2 className="text-xl font-bold mb-4">Browse by Category</h2>
-          <CategoryIconGrid onCategorySelect={handleCategorySelect} />
+          <CategoryIconGrid onCategorySelect={handleSubcategorySelect} />
         </div>
         
         {/* Sponsored Businesses Section */}

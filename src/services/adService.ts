@@ -64,14 +64,20 @@ export const getAdPlacements = async (): Promise<AdPlacement[]> => {
       return [];
     }
 
-    return data || [];
+    // Ensure all returned data conforms to the AdPlacement type
+    return (data || []).map(item => ({
+      ...item,
+      impressions: item.impressions || 0,
+      clicks: item.clicks || 0,
+      revenue: item.revenue || 0
+    }));
   } catch (error) {
     console.error("Error in getAdPlacements:", error);
     return [];
   }
 };
 
-// Add the missing fetchActiveAds function
+// Fetch active ads function
 export const fetchActiveAds = async (
   type?: string,
   format?: string,
@@ -104,15 +110,15 @@ export const fetchActiveAds = async (
       return getFallbackAds("home", "banner");
     }
 
-    // Ensure all required properties are present and handle any type conversion
+    // Properly transform the data to match the Advertisement interface
     return (data || []).map(ad => ({
       ...ad,
-      carousel_images: Array.isArray(ad.carousel_images) ? ad.carousel_images : [],
+      carousel_images: Array.isArray(ad.carousel_images) ? ad.carousel_images.map(String) : [],
       clicks: ad.clicks || 0,
-      impressions: ad.impressions || 0,
+      impressions: 0, // Handle missing impressions field
       reach: ad.reach || 0,
-      targeting_locations: Array.isArray(ad.targeting_locations) ? ad.targeting_locations : [],
-      targeting_interests: Array.isArray(ad.targeting_interests) ? ad.targeting_interests : []
+      targeting_locations: Array.isArray(ad.targeting_locations) ? ad.targeting_locations.map(String) : [],
+      targeting_interests: Array.isArray(ad.targeting_interests) ? ad.targeting_interests.map(String) : []
     }));
   } catch (error) {
     console.error("Error in fetchActiveAds:", error);
@@ -120,7 +126,7 @@ export const fetchActiveAds = async (
   }
 };
 
-// Add the missing fetchUserAds function
+// Add fetchUserAds function
 export const fetchUserAds = async (): Promise<Advertisement[]> => {
   try {
     const { data: { user } } = await supabase.auth.getUser();
@@ -137,14 +143,15 @@ export const fetchUserAds = async (): Promise<Advertisement[]> => {
       return [];
     }
 
+    // Transform data to match Advertisement interface
     return (data || []).map(ad => ({
       ...ad,
-      carousel_images: Array.isArray(ad.carousel_images) ? ad.carousel_images : [],
+      carousel_images: Array.isArray(ad.carousel_images) ? ad.carousel_images.map(String) : [],
       clicks: ad.clicks || 0,
-      impressions: ad.impressions || 0,
+      impressions: 0, // Handle missing impressions field
       reach: ad.reach || 0,
-      targeting_locations: Array.isArray(ad.targeting_locations) ? ad.targeting_locations : [],
-      targeting_interests: Array.isArray(ad.targeting_interests) ? ad.targeting_interests : []
+      targeting_locations: Array.isArray(ad.targeting_locations) ? ad.targeting_locations.map(String) : [],
+      targeting_interests: Array.isArray(ad.targeting_interests) ? ad.targeting_interests.map(String) : []
     }));
   } catch (error) {
     console.error("Error in fetchUserAds:", error);
@@ -176,15 +183,15 @@ export const getAdvertisementsByLocation = async (
       return getFallbackAds(location, "banner");
     }
 
-    // Ensure all required properties are present and handle any type conversion
+    // Transform data to match Advertisement interface
     return (data || []).map(ad => ({
       ...ad,
-      carousel_images: Array.isArray(ad.carousel_images) ? ad.carousel_images : [],
+      carousel_images: Array.isArray(ad.carousel_images) ? ad.carousel_images.map(String) : [],
       clicks: ad.clicks || 0,
-      impressions: ad.impressions || 0,
+      impressions: 0, // Handle missing impressions field
       reach: ad.reach || 0,
-      targeting_locations: Array.isArray(ad.targeting_locations) ? ad.targeting_locations : [],
-      targeting_interests: Array.isArray(ad.targeting_interests) ? ad.targeting_interests : []
+      targeting_locations: Array.isArray(ad.targeting_locations) ? ad.targeting_locations.map(String) : [],
+      targeting_interests: Array.isArray(ad.targeting_interests) ? ad.targeting_interests.map(String) : []
     })).sort((a, b) => b.budget - a.budget);
   } catch (error) {
     console.error(`Error in getAdvertisementsByLocation for ${location}:`, error);
@@ -200,7 +207,7 @@ export const createAdvertisement = async (
       ...adData,
       id: uuidv4(),
       clicks: 0,
-      impressions: 0,
+      // Don't include impressions as it doesn't exist in the table
       status: "pending",
       reach: 0,
     }).select();
@@ -215,41 +222,34 @@ export const createAdvertisement = async (
   }
 };
 
-// Add the missing incrementAdView function
+// Implement incrementAdView function directly without using RPC
 export const incrementAdView = async (adId: string): Promise<boolean> => {
   try {
-    // Check if the advertisements table has the impressions column
-    const { data, error } = await supabase
-      .rpc('increment_ad_view', { ad_id: adId });
+    // Get current data first since we can't use RPC
+    const { data: adData, error: fetchError } = await supabase
+      .from("advertisements")
+      .select("reach")
+      .eq("id", adId)
+      .single();
+      
+    if (fetchError) {
+      console.error("Error fetching ad for view increment:", fetchError);
+      return false;
+    }
+    
+    // Update with incremented values - only use reach since impressions doesn't exist
+    const currentReach = adData?.reach !== undefined ? adData.reach : 0;
+    
+    const { error: updateError } = await supabase
+      .from("advertisements")
+      .update({ 
+        reach: currentReach + 1 
+      })
+      .eq("id", adId);
 
-    // If RPC fails, fall back to manual update
-    if (error) {
-      console.log("Falling back to manual update for incrementAdView");
-      
-      // Get current data first
-      const { data: adData } = await supabase
-        .from("advertisements")
-        .select("impressions, reach")
-        .eq("id", adId)
-        .single();
-      
-      // Check if the impressions and reach fields exist and have values
-      const currentImpressions = adData?.impressions !== undefined ? adData.impressions : 0;
-      const currentReach = adData?.reach !== undefined ? adData.reach : 0;
-      
-      // Update with incremented values
-      const { error: updateError } = await supabase
-        .from("advertisements")
-        .update({ 
-          impressions: currentImpressions + 1, 
-          reach: currentReach + 1 
-        })
-        .eq("id", adId);
-
-      if (updateError) {
-        console.error("Error updating ad impression:", updateError);
-        return false;
-      }
+    if (updateError) {
+      console.error("Error updating ad view:", updateError);
+      return false;
     }
 
     return true;
@@ -259,37 +259,33 @@ export const incrementAdView = async (adId: string): Promise<boolean> => {
   }
 };
 
-// Add the missing incrementAdClick function
+// Implement incrementAdClick function directly without using RPC
 export const incrementAdClick = async (adId: string): Promise<boolean> => {
   try {
-    // Check if the advertisements table has the clicks column
-    const { data, error } = await supabase
-      .rpc('increment_ad_click', { ad_id: adId });
+    // Get current data first since we can't use RPC
+    const { data: adData, error: fetchError } = await supabase
+      .from("advertisements")
+      .select("clicks")
+      .eq("id", adId)
+      .single();
+    
+    if (fetchError) {
+      console.error("Error fetching ad for click increment:", fetchError);
+      return false;
+    }
+    
+    // Check if clicks field exists and has a value
+    const currentClicks = adData?.clicks !== undefined ? adData.clicks : 0;
+    
+    // Update with incremented value
+    const { error: updateError } = await supabase
+      .from("advertisements")
+      .update({ clicks: currentClicks + 1 })
+      .eq("id", adId);
 
-    // If RPC fails, fall back to manual update
-    if (error) {
-      console.log("Falling back to manual update for incrementAdClick");
-      
-      // Get current data first
-      const { data: adData } = await supabase
-        .from("advertisements")
-        .select("clicks")
-        .eq("id", adId)
-        .single();
-      
-      // Check if clicks field exists and has a value
-      const currentClicks = adData?.clicks !== undefined ? adData.clicks : 0;
-      
-      // Update with incremented value
-      const { error: updateError } = await supabase
-        .from("advertisements")
-        .update({ clicks: currentClicks + 1 })
-        .eq("id", adId);
-
-      if (updateError) {
-        console.error("Error updating ad click:", updateError);
-        return false;
-      }
+    if (updateError) {
+      console.error("Error updating ad click:", updateError);
+      return false;
     }
 
     return true;
@@ -326,4 +322,3 @@ export const getFallbackAds = (location: AdLocation, type: string): Advertisemen
     }
   ];
 };
-

@@ -114,8 +114,8 @@ export function SponsoredBusinesses() {
                     category={business.category}
                     is_open={business.is_open}
                     verified={business.verified || false}
-                    wait_time={business.wait_time}
-                    closure_reason={business.closure_reason}
+                    wait_time={business.wait_time || null}
+                    closure_reason={business.closure_reason || null}
                   />
                 </div>
               </div>
