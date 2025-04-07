@@ -1,6 +1,6 @@
 
 import React from "react";
-import { BrowserRouter, RouterProvider } from "react-router-dom";
+import { RouterProvider } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import router from "./routes";
 

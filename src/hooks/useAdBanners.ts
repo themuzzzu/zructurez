@@ -1,6 +1,7 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { fetchActiveAds } from "@/services/adService";
-import { AdType, Advertisement } from "@/types/advertising";
+import type { AdType, Advertisement } from "@/types/advertising";
 
 export const useAdBanners = (type?: AdType | string, format: string = "banner", limit: number = 5) => {
   const { data: ads = [], isLoading } = useQuery({

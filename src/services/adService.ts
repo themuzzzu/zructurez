@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { AdType, Advertisement } from "@/types/advertising";
+import type { AdType, Advertisement, AdFormat, AdStatus, AdPlacement } from "@/types/advertising";
 
 export const fetchActiveAds = async (type?: AdType, format: string = "banner", limit: number = 3): Promise<Advertisement[]> => {
   try {
@@ -31,7 +31,11 @@ export const fetchActiveAds = async (type?: AdType, format: string = "banner", l
 
 export const incrementAdView = async (adId: string): Promise<void> => {
   try {
-    const { error } = await supabase.rpc('increment_ad_view', { ad_id: adId });
+    // Using a simple update instead of RPC since the RPC doesn't exist
+    const { error } = await supabase
+      .from('advertisements')
+      .update({ impressions: supabase.rpc('increment', { row_id: adId, column_name: 'impressions' }) })
+      .eq('id', adId);
     
     if (error) {
       console.error("Error incrementing ad view:", error);
@@ -43,7 +47,11 @@ export const incrementAdView = async (adId: string): Promise<void> => {
 
 export const incrementAdClick = async (adId: string): Promise<void> => {
   try {
-    const { error } = await supabase.rpc('increment_ad_click', { ad_id: adId });
+    // Using a simple update instead of RPC since the RPC doesn't exist
+    const { error } = await supabase
+      .from('advertisements')
+      .update({ clicks: supabase.rpc('increment', { row_id: adId, column_name: 'clicks' }) })
+      .eq('id', adId);
     
     if (error) {
       console.error("Error incrementing ad click:", error);
@@ -53,4 +61,4 @@ export const incrementAdClick = async (adId: string): Promise<void> => {
   }
 };
 
-export { type AdType, type Advertisement };
+export { type AdType, type Advertisement, type AdFormat, type AdStatus, type AdPlacement };

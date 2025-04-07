@@ -42,11 +42,11 @@ export const LocalBusinessSpotlight = ({ businessType }: LocalBusinessSpotlightP
       return data as LocalBusiness[];
     } catch (err) {
       console.error("Error fetching local businesses:", err);
-      return [] as LocalBusiness[];
+      return [];
     }
   };
   
-  // Fix type instantiation issue by explicitly typing everything
+  // Fix type instantiation issue by explicitly typing the query result
   const { data: localBusinesses, isLoading } = useQuery<LocalBusiness[], Error>({
     queryKey: ["local-businesses", businessType],
     queryFn: fetchLocalBusinesses,

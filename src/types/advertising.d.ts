@@ -27,3 +27,26 @@ export interface Advertisement {
   carousel_images: any;
   business_id?: string;
 }
+
+export type AdFormat = 
+  | "banner"
+  | "sidebar"
+  | "popup"
+  | "inline"
+  | "carousel"
+  | "video";
+
+export type AdStatus = 
+  | "active"
+  | "pending"
+  | "rejected"
+  | "expired"
+  | "paused";
+
+export type AdPlacement =
+  | "homepage"
+  | "marketplace"
+  | "services"
+  | "businesses"
+  | "profile"
+  | "search";
