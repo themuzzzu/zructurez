@@ -1,18 +1,16 @@
+
 import { useNavigate } from "react-router-dom";
 import { 
-  Wrench, 
-  GraduationCap, 
-  Heart, 
-  Scissors, 
-  Car, 
-  Briefcase, 
-  PartyPopper, 
+  Store, 
+  Smartphone, 
+  Stethoscope, 
   Utensils, 
+  Package, 
   Home, 
+  Factory, 
+  Truck, 
   Building, 
-  ShoppingBag,
-  UserPlus,
-  Phone
+  ShoppingBag
 } from "lucide-react";
 
 export const BusinessCategoryGrid = () => {
@@ -20,88 +18,84 @@ export const BusinessCategoryGrid = () => {
 
   const categories = [
     { 
-      id: "home-services", 
-      name: "Home Services", 
-      icon: <Wrench className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
-      subcategories: ["Plumbers", "Electricians", "Cleaners", "Painters"],
-      color: "from-blue-500 to-blue-600"
+      id: "retail-local-shops", 
+      name: "Retail & Local Shops", 
+      icon: <Store className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
+      subcategories: ["Convenience Stores", "Gift Shops", "Stationery", "General Stores"],
+      color: "from-blue-500 to-blue-600",
+      image: "1.png"
     },
     { 
-      id: "education", 
-      name: "Education", 
-      icon: <GraduationCap className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
-      subcategories: ["Schools", "Colleges", "Coaching", "Online Courses"],
-      color: "from-purple-500 to-purple-600" 
+      id: "electronics-mobile", 
+      name: "Electronics & Mobile", 
+      icon: <Smartphone className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
+      subcategories: ["Phones", "Computers", "Accessories", "Repairs"],
+      color: "from-purple-500 to-purple-600",
+      image: "2.png"
     },
     { 
-      id: "health", 
-      name: "Health & Fitness", 
-      icon: <Heart className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
-      subcategories: ["Doctors", "Gyms", "Yoga Centers", "Dietitians"],
-      color: "from-red-500 to-red-600" 
+      id: "healthcare-medical", 
+      name: "Healthcare & Medical", 
+      icon: <Stethoscope className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
+      subcategories: ["Hospitals", "Clinics", "Pharmacies", "Diagnostics"],
+      color: "from-red-500 to-red-600",
+      image: "3.png"
     },
     { 
-      id: "beauty", 
-      name: "Beauty & Grooming", 
-      icon: <Scissors className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
-      subcategories: ["Salons", "Spas", "Makeup Artists", "Barbers"],
-      color: "from-pink-500 to-pink-600" 
-    },
-    { 
-      id: "rental", 
-      name: "Rent & Hire", 
-      icon: <Car className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
-      subcategories: ["Car Rentals", "Equipment", "Party Space", "Electronics"],
-      color: "from-yellow-500 to-yellow-600" 
-    },
-    { 
-      id: "b2b", 
-      name: "B2B Services", 
-      icon: <Briefcase className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
-      subcategories: ["Supply Chain", "Manufacturing", "Wholesale", "Consultancy"],
-      color: "from-green-500 to-green-600" 
-    },
-    { 
-      id: "events", 
-      name: "Event Services", 
-      icon: <PartyPopper className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
-      subcategories: ["Wedding", "Birthday", "Corporate", "Photography"],
-      color: "from-indigo-500 to-indigo-600" 
-    },
-    { 
-      id: "food", 
-      name: "Food & Dining", 
+      id: "food-beverage", 
+      name: "Food & Beverage", 
       icon: <Utensils className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
-      subcategories: ["Restaurants", "Catering", "Cloud Kitchens", "Bakeries"],
-      color: "from-orange-500 to-orange-600" 
+      subcategories: ["Restaurants", "Cafes", "Bakeries", "Food Delivery"],
+      color: "from-pink-500 to-pink-600",
+      image: "4.png"
+    },
+    { 
+      id: "wholesale-distributors", 
+      name: "Wholesale & Distributors", 
+      icon: <Package className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
+      subcategories: ["FMCG", "Electronics", "Fashion", "Food & Beverage"],
+      color: "from-yellow-500 to-yellow-600",
+      image: "5.png"
+    },
+    { 
+      id: "home-living", 
+      name: "Home & Living", 
+      icon: <Home className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
+      subcategories: ["Furniture", "Decor", "Kitchen", "Appliances"],
+      color: "from-green-500 to-green-600",
+      image: "6.png"
+    },
+    { 
+      id: "industrial-b2b", 
+      name: "Industrial & B2B", 
+      icon: <Factory className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
+      subcategories: ["Manufacturing", "Construction", "Machinery", "Chemicals"],
+      color: "from-indigo-500 to-indigo-600",
+      image: "7.png"
+    },
+    { 
+      id: "auto-transport", 
+      name: "Auto & Transport", 
+      icon: <Truck className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
+      subcategories: ["Cars", "Bikes", "Parts & Service", "Rentals"],
+      color: "from-orange-500 to-orange-600",
+      image: "8.png"
     },
     { 
       id: "real-estate", 
       name: "Real Estate", 
-      icon: <Home className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
-      subcategories: ["Buy", "Rent", "PG/Hostels", "Commercial"],
-      color: "from-cyan-500 to-cyan-600" 
-    },
-    { 
-      id: "hotels", 
-      name: "Hotels & Travel", 
       icon: <Building className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
-      subcategories: ["Hotels", "Travel Agents", "Tour Packages", "Homestays"],
-      color: "from-teal-500 to-teal-600" 
+      subcategories: ["Residential", "Commercial", "Plots", "PG/Hostel"],
+      color: "from-cyan-500 to-cyan-600",
+      image: "9.png"
     },
     { 
-      id: "shopping", 
-      name: "Shopping", 
+      id: "fashion-lifestyle", 
+      name: "Fashion & Lifestyle", 
       icon: <ShoppingBag className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
-      subcategories: ["Electronics", "Fashion", "Groceries", "Home Decor"],
-      color: "from-rose-500 to-rose-600" 
-    },
-    { 
-      id: "services", 
-      name: "Other Services", 
-      icon: <Phone className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
-      subcategories: ["Legal", "Financial", "IT Services", "Security"],
-      color: "from-gray-500 to-gray-600" 
+      subcategories: ["Clothing", "Footwear", "Accessories", "Cosmetics"],
+      color: "from-teal-500 to-teal-600",
+      image: "10.png"
     }
   ];
 
@@ -121,15 +115,19 @@ export const BusinessCategoryGrid = () => {
         </button>
       </div>
       
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
         {categories.map((category) => (
           <div 
             key={category.id}
             onClick={() => handleCategoryClick(category.id)}
             className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow cursor-pointer overflow-hidden"
           >
-            <div className={`bg-gradient-to-r ${category.color} p-3 text-white flex justify-center`}>
-              {category.icon}
+            <div className="aspect-video w-full overflow-hidden">
+              <img 
+                src={`/images/categories/${category.image}`} 
+                alt={category.name}
+                className="w-full h-full object-cover"
+              />
             </div>
             <div className="p-3">
               <h3 className="font-medium text-center mb-2">{category.name}</h3>

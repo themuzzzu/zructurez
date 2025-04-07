@@ -14,12 +14,27 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Reduced loading time for much faster initial render
+    // Reduced loading time for faster initial render
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 250);
+    }, 150);
     
     return () => clearTimeout(timer);
+  }, []);
+
+  // Preload critical resources
+  useEffect(() => {
+    // Preload images
+    const preloadImages = [
+      '/images/categories/1.png',
+      '/images/categories/2.png',
+      '/images/categories/3.png',
+    ];
+    
+    preloadImages.forEach(image => {
+      const img = new Image();
+      img.src = image;
+    });
   }, []);
 
   return (
