@@ -108,7 +108,7 @@ export const RecommendedServices = () => {
                   category={service.category}
                   location={service.location}
                   views={service.views}
-                  rating={service.rating || 4.5}
+                  rating={service.rating ? Number(service.rating) : 4.5}
                 />
               </div>
             </div>

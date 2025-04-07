@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { TrendingServicesSection } from "@/components/services/TrendingServicesSection";
 import { ServiceBannerAd } from "@/components/ads/ServiceBannerAd";
@@ -9,6 +9,12 @@ import { RecommendedServices } from "@/components/services/RecommendedServices";
 import { SuggestedServices } from "@/components/services/SuggestedServices";
 
 const Services = () => {
+  const [selectedCategory, setSelectedCategory] = useState("all");
+
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
+  };
+
   return (
     <Layout>
       <div className="container mx-auto py-6 px-4">
@@ -21,7 +27,7 @@ const Services = () => {
         
         {/* Service Category Filter */}
         <div className="mb-8">
-          <ServiceCategoryFilter />
+          <ServiceCategoryFilter onCategoryChange={handleCategoryChange} />
         </div>
         
         {/* Sponsored Services */}

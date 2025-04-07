@@ -1,152 +1,187 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
-import { supabase } from "@/integrations/supabase/client";
-import { ShoppingCard } from "@/components/ShoppingCard";
-import { ShoppingCardSkeleton } from "@/components/ShoppingCardSkeleton";
-import { Button } from "@/components/ui/button";
-import { GridLayoutType } from '@/components/products/types/ProductTypes';
-import { GridLayoutSelector } from './GridLayoutSelector';
-import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
+import { ProductGrid } from '../products/ProductGrid';
+import { Skeleton } from '../ui/skeleton';
+import { Button } from '../ui/button';
+
+interface ProductsData {
+  products: Product[];
+  totalCount: number;
+}
 
 interface ProductsSectionProps {
-  title: string;
-  subtitle?: string;
-  sortBy?: string;
+  category?: string;
+  featured?: boolean;
   limit?: number;
+  title?: string;
   showViewAll?: boolean;
-  className?: string;
-  gridLayout?: GridLayoutType;
+  sortBy?: 'newest' | 'price-asc' | 'price-desc' | 'popular';
+  layout?: 'grid' | 'carousel';
+  hideCategory?: boolean;
 }
 
-export interface Product {
+interface Product {
   id: string;
-  title: string;
+  name: string;
   description: string;
   price: number;
-  image_url?: string;
-  category?: string;
-  subcategory?: string;
-  user_id?: string;
-  created_at?: string;
-  views?: number;
+  image_url: string;
+  category: string;
+  seller_id: string;
+  created_at: string;
+  views: number;
+  rating: number;
+  quantity: number;
+  is_featured: boolean;
+  discount_percent: number;
+  tags: string[];
 }
 
-export const ProductsSection = ({ 
-  title, 
-  subtitle,
-  sortBy = "created_at", 
-  limit = 4,
+export function ProductsSection({
+  category,
+  featured = false,
+  limit = 8,
+  title = 'Products',
   showViewAll = true,
-  className,
-  gridLayout = "grid3x3" 
-}: ProductsSectionProps) => {
-  const navigate = useNavigate();
-  const [layout, setLayout] = useState<GridLayoutType>(gridLayout);
-  
-  const { data: products, isLoading } = useQuery({
-    queryKey: ['products', sortBy, limit],
-    queryFn: async (): Promise<Product[]> => {
-      try {
-        let query = supabase
-          .from('products')
-          .select('*');
+  sortBy = 'newest',
+  layout = 'grid',
+  hideCategory = false,
+}: ProductsSectionProps) {
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const pageSize = limit;
 
-        // Sort by the requested field
-        if (sortBy === 'price') {
-          query = query.order('price', { ascending: true });
-        } else if (sortBy === 'views') {
-          query = query.order('views', { ascending: false });
-        } else {
-          query = query.order('created_at', { ascending: false });
-        }
+  // Function to fetch products
+  const fetchProducts = async ({ pageParam = 1 }): Promise<ProductsData> => {
+    try {
+      let query = supabase.from('products').select('*', { count: 'exact' });
 
-        // Add limit
-        query = query.limit(limit);
-
-        const { data, error } = await query;
-
-        if (error) throw error;
-        return data || []; 
-      } catch (err) {
-        console.error(`Error fetching ${title} products:`, err);
-        return [];
+      // Apply filters
+      if (category) {
+        query = query.eq('category', category);
       }
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
 
-  const getGridClass = () => {
-    switch (layout) {
-      case "grid1x1":
-        return "grid-cols-1";
-      case "grid2x2":
-        return "grid-cols-1 sm:grid-cols-2";
-      case "grid4x4":
-        return "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4";
-      case "grid3x3":
-      default:
-        return "grid-cols-1 sm:grid-cols-2 md:grid-cols-3";
+      if (featured) {
+        query = query.eq('is_featured', true);
+      }
+
+      // Apply sorting
+      switch (sortBy) {
+        case 'price-asc':
+          query = query.order('price', { ascending: true });
+          break;
+        case 'price-desc':
+          query = query.order('price', { ascending: false });
+          break;
+        case 'popular':
+          query = query.order('views', { ascending: false });
+          break;
+        case 'newest':
+        default:
+          query = query.order('created_at', { ascending: false });
+      }
+
+      // Apply pagination
+      const from = (pageParam - 1) * pageSize;
+      const to = from + pageSize - 1;
+      
+      query = query.range(from, to);
+
+      const { data, error, count } = await query;
+
+      if (error) throw error;
+
+      return {
+        products: data || [],
+        totalCount: count || 0,
+      };
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      return { products: [], totalCount: 0 };
     }
   };
 
-  const handleViewAll = () => {
-    navigate(`/products?sort=${sortBy}`);
+  // Use tanstack query
+  const { data, isLoading, isFetching, fetchNextPage } = useQuery({
+    queryKey: ['products', category, featured, sortBy, limit, page],
+    queryFn: () => fetchProducts({ pageParam: page }),
+    keepPreviousData: true,
+  });
+
+  // Update hasMore state when data changes
+  useEffect(() => {
+    if (data) {
+      const productsAvailable = data.totalCount || 0;
+      const productsShown = page * pageSize;
+      setHasMore(productsShown < productsAvailable);
+    }
+  }, [data, page, pageSize]);
+
+  // Handle loading more products
+  const handleLoadMore = () => {
+    if (hasMore && !isFetching) {
+      setPage(prev => prev + 1);
+    }
+  };
+
+  // Convert number to string for id
+  const getProductId = (id: number | string): string => {
+    return String(id);
   };
 
   if (isLoading) {
     return (
-      <div className={cn("space-y-4", className)}>
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold">{title}</h2>
-            {subtitle && <p className="text-muted-foreground">{subtitle}</p>}
-          </div>
-          <GridLayoutSelector layout={layout} onChange={setLayout} />
-        </div>
-        <div className={cn("grid gap-4", getGridClass())}>
+      <div>
+        <h2 className="text-2xl font-bold mb-4">{title}</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {Array(limit).fill(0).map((_, i) => (
-            <ShoppingCardSkeleton key={i} />
+            <div key={i} className="bg-white dark:bg-zinc-800 p-4 rounded-lg shadow">
+              <Skeleton className="h-40 w-full mb-2" />
+              <Skeleton className="h-5 w-3/4 mb-1" />
+              <Skeleton className="h-4 w-1/2 mb-4" />
+              <Skeleton className="h-6 w-1/3" />
+            </div>
           ))}
         </div>
       </div>
     );
   }
 
-  if (!products || products.length === 0) {
-    return null;
+  const displayProducts = data?.products || [];
+
+  if (displayProducts.length === 0) {
+    return (
+      <div>
+        <h2 className="text-2xl font-bold mb-4">{title}</h2>
+        <div className="py-10 text-center">
+          <p className="text-muted-foreground">No products found</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className={cn("space-y-4", className)}>
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">{title}</h2>
-          {subtitle && <p className="text-muted-foreground">{subtitle}</p>}
+    <div>
+      <h2 className="text-2xl font-bold mb-4">{title}</h2>
+      <ProductGrid 
+        products={displayProducts} 
+        hideCategory={hideCategory}
+        getProductId={getProductId}
+      />
+      {showViewAll && hasMore && (
+        <div className="mt-6 text-center">
+          <Button
+            onClick={handleLoadMore}
+            disabled={isFetching}
+            variant="outline"
+            className="px-6"
+          >
+            {isFetching ? 'Loading...' : 'Load more'}
+          </Button>
         </div>
-        <div className="flex items-center gap-4">
-          {showViewAll && (
-            <Button variant="outline" onClick={handleViewAll}>
-              View All
-            </Button>
-          )}
-          <GridLayoutSelector layout={layout} onChange={setLayout} />
-        </div>
-      </div>
-      <div className={cn("grid gap-4", getGridClass())}>
-        {products.map((product) => (
-          <ShoppingCard
-            key={product.id}
-            id={product.id}
-            name={product.title}
-            description={product.description}
-            price={product.price}
-            image={product.image_url || ""}
-            category={product.category || ""}
-          />
-        ))}
-      </div>
+      )}
     </div>
   );
-};
+}

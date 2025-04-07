@@ -6,7 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { BusinessCard } from "@/components/BusinessCard";
 import { ThumbsUp, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState, useRef } from "react";
+import { useRef } from "react";
 
 export const RecommendedBusinesses = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);

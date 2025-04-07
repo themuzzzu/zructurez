@@ -9,6 +9,7 @@ import ServiceDetails from './pages/ServiceDetails';
 import BusinessDetails from './pages/BusinessDetails';
 import OptimizedMarketplace from './pages/marketplace/OptimizedMarketplace';
 import BusinessesPage from "./pages/BusinessesPage";
+import Index from './pages/Index';
 
 // Define placeholder components for missing pages
 const PlaceholderPage = ({ pageName }: { pageName: string }) => (
@@ -32,7 +33,7 @@ const CreateBusiness = () => <PlaceholderPage pageName="Create Business" />;
 const EditBusiness = () => <PlaceholderPage pageName="Edit Business" />;
 
 const routes = [
-  { path: "/", element: <Home /> },
+  { path: "/", element: <Index /> },
   { path: "/marketplace", element: <OptimizedMarketplace /> },
   { path: "/products/:id", element: <ProductDetails /> },
   { path: "/categories/:category", element: <CategoryPage /> },

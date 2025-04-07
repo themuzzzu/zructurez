@@ -6,8 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { BusinessCard } from "@/components/BusinessCard";
 import { Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState, useRef } from "react";
-import { generateMockAds } from "@/services/adService";
+import { useRef } from "react";
 
 export const SponsoredBusinesses = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);

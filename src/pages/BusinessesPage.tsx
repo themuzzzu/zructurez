@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { LocalBusinessSpotlight } from '@/components/marketplace/LocalBusinessSpotlight';
 import { SponsoredBusinesses } from '@/components/business/SponsoredBusinesses';

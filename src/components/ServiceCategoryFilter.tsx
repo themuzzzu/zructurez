@@ -51,11 +51,11 @@ const categories = [
   { id: "healthcare", name: "Healthcare", icon: Stethoscope }
 ];
 
-interface ServiceCategoryFilterProps {
+export interface ServiceCategoryFilterProps {
   onCategoryChange: (category: string) => void;
 }
 
-export const ServiceCategoryFilter = ({ onCategoryChange }: ServiceCategoryFilterProps) => {
+export const ServiceCategoryFilter = ({ onCategoryChange = () => {} }: ServiceCategoryFilterProps) => {
   const [selectedCategory, setSelectedCategory] = useState("all");
 
   const handleCategoryClick = (categoryId: string) => {

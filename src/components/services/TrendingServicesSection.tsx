@@ -5,7 +5,7 @@ import { ServiceCard } from '@/components/service-card/ServiceCard';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card } from '@/components/ui/card';
-import { ChevronRight, TrendingUp } from 'lucide-react';
+import { TrendingUp, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export const TrendingServicesSection = () => {

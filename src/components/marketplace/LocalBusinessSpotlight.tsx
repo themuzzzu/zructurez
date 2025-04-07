@@ -84,7 +84,7 @@ export const LocalBusinessSpotlight = ({ businessType, title = "Local Business S
     queryKey,
     queryFn: fetchBusinesses,
     staleTime: 15 * 60 * 1000, // 15 minutes
-    cacheTime: 30 * 60 * 1000  // 30 minutes
+    gcTime: 30 * 60 * 1000  // 30 minutes - renamed from cacheTime
   });
 
   // Loading state
