@@ -28,10 +28,7 @@ interface ServiceType {
   is_sponsored: boolean;
 }
 
-// Define a type for the raw data from Supabase to avoid deep type inference
-type RawServiceData = Record<string, any>;
-
-// Function to fetch sponsored services with explicit typing to break deep inference
+// Function to fetch sponsored services with manual type casting to avoid deep inference
 const fetchSponsoredServices = async (): Promise<ServiceType[]> => {
   try {
     const { data, error } = await supabase
@@ -42,11 +39,8 @@ const fetchSponsoredServices = async (): Promise<ServiceType[]> => {
     
     if (error) throw error;
     
-    // Explicitly cast data to a simple type first to break deep inference
-    const rawData = (data || []) as RawServiceData[];
-    
-    // Then manually map to our ServiceType
-    return rawData.map(item => ({
+    // Cast data to simple array and map to our type
+    return (data || []).map((item: any): ServiceType => ({
       id: item.id || '',
       title: item.title || '',
       description: item.description || '',
@@ -67,8 +61,8 @@ const fetchSponsoredServices = async (): Promise<ServiceType[]> => {
 export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps) => {
   const navigate = useNavigate();
   
-  // Use the query with explicit typing to avoid deep inference issues
-  const { data: services = [], isLoading, isError } = useQuery<ServiceType[]>({
+  // Use the query with explicit typing
+  const { data: services = [], isLoading, isError } = useQuery({
     queryKey: ['sponsored-services'],
     queryFn: fetchSponsoredServices,
     staleTime: 5 * 60 * 1000, // 5 minutes

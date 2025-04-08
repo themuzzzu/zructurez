@@ -20,8 +20,12 @@ import { SponsoredServices } from "@/components/service-marketplace/SponsoredSer
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 
-// Lazy load components to improve initial loading time
-const LazyBrowseTabContent = lazy(() => import("@/pages/marketplace/BrowseTabContent"));
+// Fix lazy import to use default export for BrowseTabContent
+const LazyBrowseTabContent = lazy(() => 
+  import("@/pages/marketplace/BrowseTabContent").then(module => ({ 
+    default: module.BrowseTabContent 
+  }))
+);
 
 const LazySection = ({ children, type, fallbackCount = 4 }) => (
   <Suspense fallback={<LoadingView type={type} />}>
