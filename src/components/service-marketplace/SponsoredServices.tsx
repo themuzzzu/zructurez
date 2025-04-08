@@ -29,6 +29,19 @@ interface Service {
   is_sponsored: boolean;
 }
 
+// Define a type for raw Supabase data
+type SupabaseServiceData = {
+  id: string;
+  title: string;
+  description: string;
+  image_url?: string;
+  price: number;
+  user_id: string;
+  category?: string;
+  location?: string;
+  contact_info?: string;
+};
+
 /**
  * Fetches sponsored services from Supabase
  */
@@ -42,8 +55,8 @@ const fetchSponsoredServices = async (): Promise<Service[]> => {
       
     if (error) throw error;
     
-    // Map the raw data to our Service interface with explicit typing
-    return (data || []).map(service => ({
+    // First cast to the raw data type, then map to our Service interface
+    const services: Service[] = (data || []).map((service: SupabaseServiceData) => ({
       id: service.id,
       title: service.title,
       description: service.description,
@@ -55,6 +68,8 @@ const fetchSponsoredServices = async (): Promise<Service[]> => {
       contact_info: service.contact_info,
       is_sponsored: true
     }));
+    
+    return services;
   } catch (error) {
     console.error("Error fetching sponsored services:", error);
     return [];
