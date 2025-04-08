@@ -30,9 +30,9 @@ interface ServiceType {
 export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps) => {
   const navigate = useNavigate();
   
-  const { data: services, isLoading } = useQuery<ServiceType[]>({
+  const { data: services, isLoading } = useQuery({
     queryKey: ['sponsored-services'],
-    queryFn: async () => {
+    queryFn: async (): Promise<ServiceType[]> => {
       const { data, error } = await supabase
         .from('services')
         .select('*')
@@ -41,8 +41,11 @@ export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps
       
       if (error) throw error;
       
-      // Map raw data to ServiceType without complex typing
-      return (data || []).map((item: any): ServiceType => ({
+      // Explicitly cast to any array first to avoid deep type inference issues
+      const rawData: any[] = data || [];
+      
+      // Map raw data to ServiceType 
+      return rawData.map(item => ({
         id: item.id,
         title: item.title,
         description: item.description,
