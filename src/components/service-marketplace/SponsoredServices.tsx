@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -32,7 +31,7 @@ interface Service {
 /**
  * Fetches sponsored services from Supabase
  */
-async function fetchSponsoredServices(): Promise<Service[]> {
+async function fetchSponsoredServices() {
   try {
     const { data, error } = await supabase
       .from('services')
@@ -46,27 +45,25 @@ async function fetchSponsoredServices(): Promise<Service[]> {
     return (data || []).map(service => ({
       ...service,
       is_sponsored: true
-    })) as Service[];
+    }));
   } catch (error) {
     console.error("Error fetching sponsored services:", error);
-    return [] as Service[];
+    return [];
   }
 }
 
 export function SponsoredServices({ layout = "grid3x3" }: SponsoredServicesProps) {
   const navigate = useNavigate();
   
-  // Fix: Use properly typed useQuery with explicit typing
+  // Remove explicit type parameters and let TypeScript infer them
   const { 
     data = [], 
     isLoading, 
     isError 
-  } = useQuery<Service[], Error>({
+  } = useQuery({
     queryKey: ['sponsored-services'],
     queryFn: fetchSponsoredServices
   });
-  
-  const services = data;
   
   // Handle error state
   if (isError) {
@@ -122,7 +119,7 @@ export function SponsoredServices({ layout = "grid3x3" }: SponsoredServicesProps
     );
   }
   
-  if (services.length === 0) {
+  if (data.length === 0) {
     return null;
   }
   
@@ -130,7 +127,7 @@ export function SponsoredServices({ layout = "grid3x3" }: SponsoredServicesProps
     <div className="space-y-4 mb-8">
       <h2 className="text-2xl font-bold">Sponsored Services</h2>
       <div className={getGridClasses()}>
-        {services.map((service) => (
+        {data.map((service) => (
           <ServiceCard 
             key={service.id}
             id={service.id}
