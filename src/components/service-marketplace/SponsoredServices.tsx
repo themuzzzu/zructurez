@@ -15,7 +15,7 @@ interface SponsoredServicesProps {
   layout?: GridLayoutType;
 }
 
-// Define a simple service interface with required properties
+// Define a simple service interface
 interface Service {
   id: string;
   title: string;
@@ -29,8 +29,8 @@ interface Service {
   is_sponsored: boolean;
 }
 
-// Define the raw database type to avoid deep instantiation issues
-interface SupabaseService {
+// Type definition for raw database response
+type SupabaseServiceData = {
   id: string;
   title: string;
   description: string;
@@ -56,11 +56,11 @@ const fetchSponsoredServices = async (): Promise<Service[]> => {
       
     if (error) throw error;
     
-    // Explicitly cast the response data to our intermediate type
-    const rawData = data as SupabaseService[];
+    // Use type assertion for the raw data
+    const rawData = data as SupabaseServiceData[];
     
-    // Map from the raw data to our Service interface
-    const services: Service[] = rawData.map(item => ({
+    // Map the raw data to our Service interface
+    return rawData.map(item => ({
       id: item.id,
       title: item.title,
       description: item.description,
@@ -72,8 +72,6 @@ const fetchSponsoredServices = async (): Promise<Service[]> => {
       contact_info: item.contact_info,
       is_sponsored: true
     }));
-    
-    return services;
   } catch (error) {
     console.error("Error fetching sponsored services:", error);
     return [];
