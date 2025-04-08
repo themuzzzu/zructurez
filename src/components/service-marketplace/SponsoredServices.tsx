@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
@@ -32,7 +31,7 @@ export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps
   
   const { data: services, isLoading } = useQuery<ServiceType[], Error>({
     queryKey: ['sponsored-services'],
-    queryFn: async () => {
+    queryFn: async (): Promise<ServiceType[]> => {
       const { data, error } = await supabase
         .from('services')
         .select('*')
@@ -41,25 +40,20 @@ export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps
       
       if (error) throw error;
       
-      // Cast to any array to avoid type inference issues
       const rawData = (data || []) as any[];
       
-      // Map to properly typed objects
-      return rawData.map((item) => {
-        const service: ServiceType = {
-          id: item.id,
-          title: item.title,
-          description: item.description,
-          image_url: item.image_url,
-          price: item.price,
-          user_id: item.user_id,
-          category: item.category,
-          location: item.location,
-          contact_info: item.contact_info,
-          is_sponsored: true
-        };
-        return service;
-      });
+      return rawData.map((item): ServiceType => ({
+        id: item.id,
+        title: item.title,
+        description: item.description,
+        image_url: item.image_url,
+        price: item.price,
+        user_id: item.user_id,
+        category: item.category,
+        location: item.location,
+        contact_info: item.contact_info,
+        is_sponsored: true
+      }));
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
