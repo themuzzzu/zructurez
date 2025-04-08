@@ -30,7 +30,7 @@ interface ServiceType {
 export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps) => {
   const navigate = useNavigate();
   
-  const { data: services, isLoading } = useQuery({
+  const { data: services, isLoading } = useQuery<ServiceType[]>({
     queryKey: ['sponsored-services'],
     queryFn: async () => {
       const { data, error } = await supabase
