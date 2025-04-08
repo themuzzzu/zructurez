@@ -8,10 +8,23 @@ import { ThumbsUp, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useRef } from "react";
 
+// Define the service type
+interface ServiceType {
+  id: string;
+  title: string;
+  description: string;
+  image_url?: string;
+  price: number;
+  user_id: string;
+  category?: string;
+  location?: string;
+  contact_info?: string;
+}
+
 export const RecommendedServices = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   
-  const { data: services, isLoading } = useQuery({
+  const { data: services, isLoading } = useQuery<ServiceType[]>({
     queryKey: ['recommended-services'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -20,7 +33,7 @@ export const RecommendedServices = () => {
         .limit(6);
       
       if (error) throw error;
-      return data;
+      return data || [];
     }
   });
   
@@ -99,9 +112,10 @@ export const RecommendedServices = () => {
                   image_url={service.image_url}
                   price={service.price}
                   providerId={service.user_id}
+                  providerName="Service Provider"
                   category={service.category}
                   location={service.location}
-                  views={service.views}
+                  contact_info={service.contact_info}
                 />
               </div>
             </div>

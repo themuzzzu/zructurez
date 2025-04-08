@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
@@ -25,7 +24,6 @@ interface ServiceType {
   category?: string;
   location?: string;
   contact_info?: string;
-  views?: number;
 }
 
 export const TrendingServices = ({ layout = "grid3x3" }: TrendingServicesProps) => {
@@ -117,9 +115,9 @@ export const TrendingServices = ({ layout = "grid3x3" }: TrendingServicesProps) 
               image_url={service.image_url}
               price={service.price}
               providerId={service.user_id}
+              providerName="Service Provider"
               category={service.category}
               location={service.location}
-              views={service.views}
               contact_info={service.contact_info}
             />
           ))}
@@ -183,9 +181,9 @@ export const TrendingServices = ({ layout = "grid3x3" }: TrendingServicesProps) 
                   image_url={service.image_url}
                   price={service.price}
                   providerId={service.user_id}
+                  providerName="Service Provider"
                   category={service.category}
                   location={service.location}
-                  views={service.views}
                   contact_info={service.contact_info}
                 />
               </div>

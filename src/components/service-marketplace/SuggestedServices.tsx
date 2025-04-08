@@ -24,7 +24,6 @@ interface ServiceType {
   category?: string;
   location?: string;
   contact_info?: string;
-  views?: number;
   profiles?: {
     username?: string;
     avatar_url?: string;
@@ -110,10 +109,10 @@ export const SuggestedServices = ({ layout = "grid3x3" }: SuggestedServicesProps
           <ServiceCard 
             key={service.id}
             id={service.id}
-            name={service.title}
+            title={service.title}
             description={service.description}
-            image={service.image_url || ''}
-            price={`$${service.price.toFixed(2)}`}
+            image_url={service.image_url}
+            price={service.price}
             providerId={service.user_id}
             providerName={service.profiles?.username || "Service Provider"}
             contact_info={service.contact_info}

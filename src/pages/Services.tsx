@@ -30,7 +30,6 @@ interface ServiceType {
   user_id: string;
   category?: string;
   location?: string;
-  views?: number;
   contact_info?: string;
   created_at?: string;
 }
@@ -271,9 +270,9 @@ export default function Services() {
                   image_url={service.image_url}
                   price={service.price}
                   providerId={service.user_id}
+                  providerName="Service Provider"
                   category={service.category}
                   location={service.location}
-                  views={service.views}
                   contact_info={service.contact_info}
                 />
               ))}

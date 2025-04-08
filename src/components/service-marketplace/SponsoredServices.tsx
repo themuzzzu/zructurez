@@ -14,7 +14,7 @@ interface SponsoredServicesProps {
   layout?: GridLayoutType;
 }
 
-// Define the service type
+// Define a simple interface for services
 interface ServiceType {
   id: string;
   title: string;
@@ -28,21 +28,7 @@ interface ServiceType {
   is_sponsored: boolean;
 }
 
-// Simple interface for raw data to avoid deep inference
-interface RawServiceData {
-  id: string;
-  title: string;
-  description: string;
-  image_url?: string;
-  price: number;
-  user_id: string;
-  category?: string;
-  location?: string;
-  contact_info?: string;
-  is_sponsored: boolean;
-}
-
-// Function to fetch sponsored services with strict typing
+// Function to fetch sponsored services with explicit return type
 const fetchSponsoredServices = async (): Promise<ServiceType[]> => {
   try {
     const { data, error } = await supabase
@@ -53,24 +39,10 @@ const fetchSponsoredServices = async (): Promise<ServiceType[]> => {
     
     if (error) throw error;
     
-    // Safely handle potentially undefined data
+    // Return empty array if no data
     if (!data) return [];
     
-    // Map directly to our type with proper type assertions
-    const services: ServiceType[] = data.map((item: any) => ({
-      id: item.id || '',
-      title: item.title || '',
-      description: item.description || '',
-      image_url: item.image_url,
-      price: item.price || 0,
-      user_id: item.user_id || '',
-      category: item.category,
-      location: item.location,
-      contact_info: item.contact_info,
-      is_sponsored: true
-    }));
-    
-    return services;
+    return data as ServiceType[];
   } catch (error) {
     console.error("Error fetching sponsored services:", error);
     return [];
@@ -80,13 +52,13 @@ const fetchSponsoredServices = async (): Promise<ServiceType[]> => {
 export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps) => {
   const navigate = useNavigate();
   
-  // Use explicit generic type parameters to avoid deep inference
+  // Use explicit type parameters for useQuery
   const { data: services, isLoading, isError } = useQuery<ServiceType[], Error>({
     queryKey: ['sponsored-services'],
     queryFn: fetchSponsoredServices,
     staleTime: 5 * 60 * 1000, // 5 minutes
-    retry: 1, // Limit retries to prevent infinite loading attempts
-    refetchOnWindowFocus: false, // Prevent unnecessary refetches
+    retry: 1, // Limit retries
+    refetchOnWindowFocus: false
   });
   
   // Handle error state

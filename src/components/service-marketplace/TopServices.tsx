@@ -8,10 +8,23 @@ import { Award, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRef } from "react";
 
+// Define the service type
+interface ServiceType {
+  id: string;
+  title: string;
+  description: string;
+  image_url?: string;
+  price: number;
+  user_id: string;
+  category?: string;
+  location?: string;
+  contact_info?: string;
+}
+
 export const TopServices = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   
-  const { data: services, isLoading } = useQuery({
+  const { data: services, isLoading } = useQuery<ServiceType[]>({
     queryKey: ['top-services'],
     queryFn: async () => {
       // For top services, we could base this on highest ratings
@@ -23,7 +36,7 @@ export const TopServices = () => {
         .limit(6);
       
       if (error) throw error;
-      return data;
+      return data || [];
     }
   });
   
@@ -102,9 +115,10 @@ export const TopServices = () => {
                   image_url={service.image_url}
                   price={service.price}
                   providerId={service.user_id}
+                  providerName="Service Provider"
                   category={service.category}
                   location={service.location}
-                  views={service.views}
+                  contact_info={service.contact_info}
                 />
               </div>
             </div>

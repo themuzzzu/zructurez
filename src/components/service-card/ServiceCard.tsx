@@ -19,6 +19,7 @@ interface ServiceCardProps {
   contact_info?: string;
   category?: string;
   location?: string;
+  // We don't need views in the interface if we're not using it
 }
 
 export const ServiceCard = ({
@@ -70,10 +71,10 @@ export const ServiceCard = ({
     }
   };
 
-  // Format price for display
+  // Format price for display - fixed the "toString" issue
   const formattedPrice = typeof price === 'number' 
     ? `$${price.toFixed(2)}` 
-    : price?.toString() || '$0.00';
+    : '$0.00';
 
   return (
     <Card className="overflow-hidden transition-all duration-300 hover:shadow-md h-full flex flex-col">
