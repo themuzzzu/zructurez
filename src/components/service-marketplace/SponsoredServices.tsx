@@ -79,13 +79,10 @@ const fetchSponsoredServices = async (): Promise<ServiceType[]> => {
 export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps) => {
   const navigate = useNavigate();
   
-  // Fix: Remove the type parameters completely and let TypeScript infer them
+  // Fix: Declare the query with explicit type annotation on the useQuery call
   const { data: services, isLoading, isError } = useQuery({
     queryKey: ['sponsored-services'],
-    queryFn: fetchSponsoredServices,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    retry: 1, // Limit retries
-    refetchOnWindowFocus: false
+    queryFn: fetchSponsoredServices
   });
   
   // Handle error state
