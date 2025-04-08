@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
@@ -29,7 +30,7 @@ interface ServiceType {
 export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps) => {
   const navigate = useNavigate();
   
-  const { data: services, isLoading } = useQuery({
+  const { data: services, isLoading } = useQuery<ServiceType[], Error>({
     queryKey: ['sponsored-services'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -40,22 +41,25 @@ export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps
       
       if (error) throw error;
       
-      // Use type assertion to avoid deep inference
-      const services = (data || []) as Array<any>;
+      // Cast to any array to avoid type inference issues
+      const rawData = (data || []) as any[];
       
-      // Map the data to our ServiceType interface
-      return services.map((item): ServiceType => ({
-        id: item.id,
-        title: item.title,
-        description: item.description,
-        image_url: item.image_url || undefined,
-        price: item.price,
-        user_id: item.user_id,
-        category: item.category || undefined,
-        location: item.location || undefined,
-        contact_info: item.contact_info || undefined,
-        is_sponsored: true
-      }));
+      // Map to properly typed objects
+      return rawData.map((item) => {
+        const service: ServiceType = {
+          id: item.id,
+          title: item.title,
+          description: item.description,
+          image_url: item.image_url,
+          price: item.price,
+          user_id: item.user_id,
+          category: item.category,
+          location: item.location,
+          contact_info: item.contact_info,
+          is_sponsored: true
+        };
+        return service;
+      });
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
