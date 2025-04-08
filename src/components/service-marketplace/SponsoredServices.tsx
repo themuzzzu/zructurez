@@ -30,8 +30,7 @@ interface ServiceType {
 export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps) => {
   const navigate = useNavigate();
   
-  // Using a more explicit approach to avoid type inference issues
-  const { data: services, isLoading } = useQuery({
+  const { data: services, isLoading } = useQuery<ServiceType[]>({
     queryKey: ['sponsored-services'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -42,8 +41,8 @@ export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps
       
       if (error) throw error;
       
-      // Convert the raw data to ServiceType to avoid deep type inference issues
-      return (data || []).map((item) => ({
+      // Map raw data to ServiceType without complex typing
+      return (data || []).map((item: any): ServiceType => ({
         id: item.id,
         title: item.title,
         description: item.description,
@@ -54,7 +53,7 @@ export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps
         location: item.location || undefined,
         contact_info: item.contact_info || undefined,
         is_sponsored: true
-      })) as ServiceType[];
+      }));
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
