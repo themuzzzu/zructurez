@@ -32,7 +32,7 @@ interface Service {
 /**
  * Fetches sponsored services from Supabase
  */
-async function fetchSponsoredServices(): Promise<Service[]> {
+const fetchSponsoredServices = async (): Promise<Service[]> => {
   try {
     const { data, error } = await supabase
       .from('services')
@@ -51,13 +51,17 @@ async function fetchSponsoredServices(): Promise<Service[]> {
     console.error("Error fetching sponsored services:", error);
     return [];
   }
-}
+};
 
 export function SponsoredServices({ layout = "grid3x3" }: SponsoredServicesProps) {
   const navigate = useNavigate();
   
-  // Fix: Provide explicit type parameters to useQuery to avoid deep instantiation
-  const { data: services = [], isLoading, isError } = useQuery<Service[], Error>({
+  // Define explicit return type for useQuery to avoid deep type instantiation
+  const { 
+    data: services = [], 
+    isLoading, 
+    isError 
+  } = useQuery({
     queryKey: ['sponsored-services'],
     queryFn: fetchSponsoredServices
   });
