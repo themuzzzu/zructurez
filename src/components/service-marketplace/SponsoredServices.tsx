@@ -26,8 +26,8 @@ interface ServiceType {
   is_sponsored: boolean;
 }
 
-// Function to fetch sponsored services
-async function fetchSponsoredServices(): Promise<ServiceType[]> {
+// Function to fetch sponsored services with explicit typing
+async function fetchSponsoredServices() {
   const { data, error } = await supabase
     .from('services')
     .select('*')
@@ -36,31 +36,28 @@ async function fetchSponsoredServices(): Promise<ServiceType[]> {
   
   if (error) throw error;
   
-  // Use simple type casting to avoid deep type inference
-  const rawData = data as any[] || [];
+  // Cast to a simple array to avoid type inference issues
+  const services: ServiceType[] = (data || []).map(item => ({
+    id: item.id,
+    title: item.title,
+    description: item.description,
+    image_url: item.image_url,
+    price: item.price,
+    user_id: item.user_id,
+    category: item.category,
+    location: item.location,
+    contact_info: item.contact_info,
+    is_sponsored: true
+  }));
   
-  // Map the raw data to our ServiceType
-  return rawData.map(item => {
-    return {
-      id: item.id,
-      title: item.title,
-      description: item.description,
-      image_url: item.image_url,
-      price: item.price,
-      user_id: item.user_id,
-      category: item.category,
-      location: item.location,
-      contact_info: item.contact_info,
-      is_sponsored: true
-    } as ServiceType;
-  });
+  return services;
 }
 
 export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps) => {
   const navigate = useNavigate();
   
-  // Use explicit typing for the query
-  const { data: services, isLoading } = useQuery<ServiceType[], Error>({
+  // Use the query with simplifying the type inference
+  const { data: services, isLoading } = useQuery({
     queryKey: ['sponsored-services'],
     queryFn: fetchSponsoredServices,
     staleTime: 5 * 60 * 1000, // 5 minutes
