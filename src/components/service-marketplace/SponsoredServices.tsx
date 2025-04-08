@@ -14,7 +14,7 @@ interface SponsoredServicesProps {
   layout?: GridLayoutType;
 }
 
-// Define a simple interface for services
+// Define service type without recursive references
 interface ServiceType {
   id: string;
   title: string;
@@ -28,7 +28,7 @@ interface ServiceType {
   is_sponsored: boolean;
 }
 
-// Function to fetch sponsored services with explicit return type
+// Function to fetch sponsored services
 const fetchSponsoredServices = async (): Promise<ServiceType[]> => {
   try {
     const { data, error } = await supabase
@@ -42,7 +42,11 @@ const fetchSponsoredServices = async (): Promise<ServiceType[]> => {
     // Return empty array if no data
     if (!data) return [];
     
-    return data as ServiceType[];
+    // Map the raw data to include is_sponsored property explicitly
+    return data.map(service => ({
+      ...service,
+      is_sponsored: true
+    })) as ServiceType[];
   } catch (error) {
     console.error("Error fetching sponsored services:", error);
     return [];
