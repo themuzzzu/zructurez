@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
@@ -31,7 +32,7 @@ export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps
   
   const { data: services, isLoading } = useQuery({
     queryKey: ['sponsored-services'],
-    queryFn: async (): Promise<ServiceType[]> => {
+    queryFn: async () => {
       const { data, error } = await supabase
         .from('services')
         .select('*')
@@ -40,8 +41,8 @@ export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps
       
       if (error) throw error;
       
-      // Convert the raw data to our ServiceType
-      return (data || []).map((item: any) => ({
+      // Convert the raw data to ServiceType to avoid deep type inference issues
+      const typedData: ServiceType[] = (data || []).map((item: any) => ({
         id: item.id,
         title: item.title,
         description: item.description,
@@ -53,6 +54,8 @@ export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps
         contact_info: item.contact_info || undefined,
         is_sponsored: true
       }));
+      
+      return typedData;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
