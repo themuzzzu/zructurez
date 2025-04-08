@@ -29,10 +29,23 @@ interface Service {
   is_sponsored: boolean;
 }
 
+// Define the shape of data returned from Supabase to avoid inference issues
+type SupabaseService = {
+  id: string;
+  title: string;
+  description: string;
+  image_url?: string;
+  price: number;
+  user_id: string;
+  category?: string;
+  location?: string;
+  contact_info?: string;
+};
+
 /**
  * Fetches sponsored services from Supabase
  */
-const fetchSponsoredServices = async (): Promise<Service[]> => {
+async function fetchSponsoredServices(): Promise<Service[]> {
   try {
     const { data, error } = await supabase
       .from('services')
@@ -42,21 +55,22 @@ const fetchSponsoredServices = async (): Promise<Service[]> => {
       
     if (error) throw error;
     
-    // Map the data to match our Service interface
-    return (data || []).map(service => ({
+    // Explicitly map data to the Service interface to avoid type inference issues
+    const services: Service[] = (data || []).map((service: SupabaseService) => ({
       ...service,
       is_sponsored: true
     }));
+    
+    return services;
   } catch (error) {
     console.error("Error fetching sponsored services:", error);
     return [];
   }
-};
+}
 
 export function SponsoredServices({ layout = "grid3x3" }: SponsoredServicesProps) {
   const navigate = useNavigate();
   
-  // Use the useQuery hook without explicit generic parameters
   const { 
     data, 
     isLoading, 
