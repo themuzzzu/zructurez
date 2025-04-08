@@ -28,7 +28,21 @@ interface ServiceType {
   is_sponsored: boolean;
 }
 
-// Function to fetch sponsored services with manual type casting to avoid deep inference
+// Simple interface for raw data to avoid deep inference
+interface RawServiceData {
+  id: string;
+  title: string;
+  description: string;
+  image_url?: string;
+  price: number;
+  user_id: string;
+  category?: string;
+  location?: string;
+  contact_info?: string;
+  is_sponsored: boolean;
+}
+
+// Function to fetch sponsored services with strict typing
 const fetchSponsoredServices = async (): Promise<ServiceType[]> => {
   try {
     const { data, error } = await supabase
@@ -39,8 +53,11 @@ const fetchSponsoredServices = async (): Promise<ServiceType[]> => {
     
     if (error) throw error;
     
-    // Cast data to simple array and map to our type
-    return (data || []).map((item: any): ServiceType => ({
+    // Safely handle potentially undefined data
+    if (!data) return [];
+    
+    // Map directly to our type with proper type assertions
+    const services: ServiceType[] = data.map((item: any) => ({
       id: item.id || '',
       title: item.title || '',
       description: item.description || '',
@@ -52,6 +69,8 @@ const fetchSponsoredServices = async (): Promise<ServiceType[]> => {
       contact_info: item.contact_info,
       is_sponsored: true
     }));
+    
+    return services;
   } catch (error) {
     console.error("Error fetching sponsored services:", error);
     return [];
@@ -61,8 +80,8 @@ const fetchSponsoredServices = async (): Promise<ServiceType[]> => {
 export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps) => {
   const navigate = useNavigate();
   
-  // Use the query with explicit typing
-  const { data: services = [], isLoading, isError } = useQuery({
+  // Use explicit generic type parameters to avoid deep inference
+  const { data: services, isLoading, isError } = useQuery<ServiceType[], Error>({
     queryKey: ['sponsored-services'],
     queryFn: fetchSponsoredServices,
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -124,7 +143,10 @@ export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps
     );
   }
   
-  if (!services || services.length === 0) {
+  // Safely handle undefined data with an empty array fallback
+  const serviceItems = services || [];
+  
+  if (serviceItems.length === 0) {
     return null;
   }
   
@@ -132,7 +154,7 @@ export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps
     <div className="space-y-4 mb-8">
       <h2 className="text-2xl font-bold">Sponsored Services</h2>
       <div className={getGridClasses()}>
-        {services.map((service) => (
+        {serviceItems.map((service) => (
           <ServiceCard 
             key={service.id}
             id={service.id}
@@ -141,7 +163,7 @@ export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps
             image_url={service.image_url}
             price={service.price}
             providerId={service.user_id}
-            providerName="Service Provider"
+            providerName="Service Provider" 
             contact_info={service.contact_info}
             category={service.category}
             location={service.location}

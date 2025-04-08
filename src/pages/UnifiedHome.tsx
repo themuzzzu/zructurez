@@ -20,7 +20,8 @@ import { SponsoredServices } from "@/components/service-marketplace/SponsoredSer
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 
-// Fix lazy import to use default export for BrowseTabContent
+// Import BrowseTabContent properly to avoid type errors
+// We need to import the named export and convert it to a default export for lazy loading
 const LazyBrowseTabContent = lazy(() => 
   import("@/pages/marketplace/BrowseTabContent").then(module => ({ 
     default: module.BrowseTabContent 
