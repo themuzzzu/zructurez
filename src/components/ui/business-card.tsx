@@ -66,7 +66,7 @@ const BusinessCardImage = React.forwardRef<
             onLoad={() => setIsLoaded(true)}
             onError={(e) => {
               setHasError(true);
-              const target = e.target as HTMLImageElement;
+              const target = e.currentTarget as HTMLImageElement;
               target.src = '/placeholder.svg';
               setIsLoaded(true);
             }}
