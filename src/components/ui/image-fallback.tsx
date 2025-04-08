@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { BlurImage } from "./blur-image";
+import { Skeleton } from "./skeleton";
 
 export interface ImageFallbackProps {
   src: string;
@@ -40,6 +41,7 @@ export const ImageFallback = ({
     if (priority && src) {
       const img = new Image();
       img.src = src;
+      img.fetchPriority = 'high';
       img.onload = () => setIsLoaded(true);
       img.onerror = () => setError(true);
     }
@@ -47,26 +49,48 @@ export const ImageFallback = ({
   
   const imageSrc = src && !error ? src : fallbackSrc;
   
+  if (!imageSrc) {
+    return <Skeleton className={cn("w-full h-full", className)} />;
+  }
+  
   return (
     <div className={cn("relative overflow-hidden", className)}>
       {!isLoaded && (
         <div className="absolute inset-0 bg-gray-200 dark:bg-gray-800 animate-pulse" />
       )}
-      <BlurImage
-        src={imageSrc}
-        alt={alt}
-        blurDataUrl={blurDataUrl}
-        className={cn(
-          "transition-opacity duration-300", 
-          isLoaded ? "opacity-100" : "opacity-0",
-          error && fallbackClassName
-        )}
-        aspectRatio={aspectRatio}
-        loading={priority ? "eager" : (lazyLoad ? "lazy" : "eager")}
-        onLoad={() => setIsLoaded(true)}
-        onError={() => setError(true)}
-        onClick={onClick}
-      />
+      {blurDataUrl ? (
+        <BlurImage
+          src={imageSrc}
+          alt={alt}
+          blurDataUrl={blurDataUrl}
+          className={cn(
+            "transition-opacity duration-500", 
+            isLoaded ? "opacity-100" : "opacity-0",
+            error && fallbackClassName
+          )}
+          aspectRatio={aspectRatio}
+          loading={priority ? "eager" : (lazyLoad ? "lazy" : "eager")}
+          decoding="async"
+          onLoad={() => setIsLoaded(true)}
+          onError={() => setError(true)}
+          onClick={onClick}
+        />
+      ) : (
+        <img
+          src={imageSrc}
+          alt={alt}
+          className={cn(
+            "w-full h-full object-cover transition-opacity duration-500", 
+            isLoaded ? "opacity-100" : "opacity-0",
+            error && fallbackClassName
+          )}
+          loading={priority ? "eager" : (lazyLoad ? "lazy" : "eager")}
+          decoding="async"
+          onLoad={() => setIsLoaded(true)}
+          onError={() => setError(true)}
+          onClick={onClick}
+        />
+      )}
     </div>
   );
 };

@@ -7,6 +7,7 @@ import { ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
 import { LoadingView } from "@/components/LoadingView";
+import { useQuery } from "@tanstack/react-query";
 
 // Import Supabase client directly
 import { supabase } from "@/integrations/supabase/client";
@@ -32,37 +33,36 @@ interface Service {
 /**
  * Fetches sponsored services from Supabase
  */
-async function fetchSponsoredServices(): Promise<Service[]> {
-  try {
-    const { data, error } = await supabase
-      .from('services')
-      .select('*')
-      .eq('is_sponsored', true)
-      .limit(6);
-    
-    if (error) throw error;
-    
-    // Return empty array if no data
-    return data || [];
-    
-  } catch (error) {
-    console.error("Error fetching sponsored services:", error);
-    return [];
-  }
+function fetchSponsoredServices(): Promise<Service[]> {
+  return supabase
+    .from('services')
+    .select('*')
+    .eq('is_sponsored', true)
+    .limit(6)
+    .then(({ data, error }) => {
+      if (error) throw error;
+      // Add is_sponsored field to match Service interface
+      return (data || []).map(service => ({
+        ...service,
+        is_sponsored: true
+      }));
+    })
+    .catch(error => {
+      console.error("Error fetching sponsored services:", error);
+      return [];
+    });
 }
 
 export function SponsoredServices({ layout = "grid3x3" }: SponsoredServicesProps) {
   const navigate = useNavigate();
   
-  // Use the hook without complex typing, then manually type the result
-  const { data, isLoading, isError } = {
-    data: [] as Service[],
-    isLoading: true,
-    isError: false,
-    ...useQuery({
-      queryKey: ['sponsored-services'],
-      queryFn: fetchSponsoredServices
-    })
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['sponsored-services'],
+    queryFn: fetchSponsoredServices
+  }) as { 
+    data: Service[] | undefined, 
+    isLoading: boolean, 
+    isError: boolean 
   };
   
   // Use the typed data

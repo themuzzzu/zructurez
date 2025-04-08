@@ -16,6 +16,9 @@ export function LazyImage({ src, alt, className, width, height, priority = false
   const [error, setError] = useState(false);
   const [inView, setInView] = useState(priority);
 
+  // Generate a safe ID from the src
+  const safeId = src.replace(/\W+/g, '-');
+
   useEffect(() => {
     // Skip if already loaded or priority is true (load immediately)
     if (loaded || priority) return;
@@ -29,10 +32,10 @@ export function LazyImage({ src, alt, className, width, height, priority = false
           }
         });
       },
-      { threshold: 0.1 }
+      { threshold: 0.1, rootMargin: "200px" } // Increased rootMargin for earlier loading
     );
 
-    const currentRef = document.getElementById(`lazy-image-${src.replace(/\W+/g, '-')}`);
+    const currentRef = document.getElementById(`lazy-image-${safeId}`);
     if (currentRef) {
       observer.observe(currentRef);
     }
@@ -42,16 +45,28 @@ export function LazyImage({ src, alt, className, width, height, priority = false
         observer.unobserve(currentRef);
       }
     };
-  }, [src, loaded, priority]);
+  }, [src, loaded, priority, safeId]);
 
   useEffect(() => {
     if (!inView) return;
 
     const img = new Image();
     img.src = src;
+    
+    // Add loading event listener
     img.onload = () => setLoaded(true);
     img.onerror = () => setError(true);
-  }, [src, inView]);
+
+    // Preload with higher priority for critical images
+    if (priority) {
+      img.fetchPriority = 'high';
+    }
+
+    return () => {
+      img.onload = null;
+      img.onerror = null;
+    };
+  }, [src, inView, priority]);
 
   if (error) {
     return (
@@ -62,7 +77,7 @@ export function LazyImage({ src, alt, className, width, height, priority = false
   }
 
   return (
-    <div id={`lazy-image-${src.replace(/\W+/g, '-')}`} className={`relative ${className}`}>
+    <div id={`lazy-image-${safeId}`} className={`relative ${className}`}>
       {!loaded && <Skeleton className={className || `w-full h-full`} />}
       {(loaded || inView) && (
         <img 
@@ -72,6 +87,7 @@ export function LazyImage({ src, alt, className, width, height, priority = false
           width={width} 
           height={height}
           loading={priority ? "eager" : "lazy"}
+          decoding="async"
           onLoad={() => setLoaded(true)}
           onError={() => setError(true)}
         />

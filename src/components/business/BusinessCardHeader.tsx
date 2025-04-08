@@ -75,9 +75,9 @@ export const BusinessCardHeader = ({
         )}
       </div>
       
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1 min-h-[2.5rem]">
         <span className="text-sm text-gray-300 line-clamp-1">{category}</span>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 mt-1">
           {statusDetails && (
             <TooltipProvider>
               <Tooltip>
@@ -118,11 +118,11 @@ export const BusinessCardHeader = ({
         </div>
         
         {!is_open && wait_time && (
-          <div className="flex items-center gap-2 text-sm text-gray-300">
-            <Clock className="h-4 w-4" />
-            <span>Available in {wait_time}</span>
+          <div className="flex items-center gap-2 text-sm text-gray-300 mt-1">
+            <Clock className="h-4 w-4 flex-shrink-0" />
+            <span className="truncate">Available in {wait_time}</span>
             {closure_reason && (
-              <span className="text-gray-400 line-clamp-1">({getReasonLabel(closure_reason)})</span>
+              <span className="text-gray-400 truncate hidden sm:inline-block">({getReasonLabel(closure_reason)})</span>
             )}
           </div>
         )}
