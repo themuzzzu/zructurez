@@ -1,3 +1,4 @@
+
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -31,7 +32,7 @@ interface Service {
 /**
  * Fetches sponsored services from Supabase
  */
-async function fetchSponsoredServices() {
+async function fetchSponsoredServices(): Promise<Service[]> {
   try {
     const { data, error } = await supabase
       .from('services')
@@ -55,15 +56,17 @@ async function fetchSponsoredServices() {
 export function SponsoredServices({ layout = "grid3x3" }: SponsoredServicesProps) {
   const navigate = useNavigate();
   
-  // Remove explicit type parameters and let TypeScript infer them
+  // Use the generic type parameter explicitly but in a simpler way
   const { 
-    data = [], 
+    data, 
     isLoading, 
     isError 
   } = useQuery({
     queryKey: ['sponsored-services'],
     queryFn: fetchSponsoredServices
   });
+  
+  const services = data || [];
   
   // Handle error state
   if (isError) {
@@ -119,7 +122,7 @@ export function SponsoredServices({ layout = "grid3x3" }: SponsoredServicesProps
     );
   }
   
-  if (data.length === 0) {
+  if (services.length === 0) {
     return null;
   }
   
@@ -127,7 +130,7 @@ export function SponsoredServices({ layout = "grid3x3" }: SponsoredServicesProps
     <div className="space-y-4 mb-8">
       <h2 className="text-2xl font-bold">Sponsored Services</h2>
       <div className={getGridClasses()}>
-        {data.map((service) => (
+        {services.map((service) => (
           <ServiceCard 
             key={service.id}
             id={service.id}
