@@ -31,7 +31,7 @@ interface ServiceType {
 /**
  * Fetches sponsored services from Supabase
  */
-const fetchSponsoredServices = async (): Promise<ServiceType[]> => {
+async function fetchSponsoredServices(): Promise<ServiceType[]> {
   try {
     const { data, error } = await supabase
       .from('services')
@@ -61,21 +61,21 @@ const fetchSponsoredServices = async (): Promise<ServiceType[]> => {
     console.error("Error fetching sponsored services:", error);
     return [];
   }
-};
+}
 
-export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps) => {
+export function SponsoredServices({ layout = "grid3x3" }: SponsoredServicesProps) {
   const navigate = useNavigate();
   
-  // Fix the type instantiation issue by explicitly specifying the generic types
-  // and avoiding deep type inference
-  const { data: services = [], isLoading, isError } = useQuery({
+  // Avoid complex type inference by using a simpler approach with basic types
+  const query = useQuery({
     queryKey: ['sponsored-services'],
     queryFn: fetchSponsoredServices
-  }) as { 
-    data: ServiceType[]; 
-    isLoading: boolean; 
-    isError: boolean 
-  };
+  });
+  
+  // Manually extract and type the values we need
+  const services: ServiceType[] = query.data || [];
+  const isLoading: boolean = query.isLoading;
+  const isError: boolean = query.isError;
   
   // Handle error state
   if (isError) {
@@ -168,4 +168,4 @@ export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps
       </div>
     </div>
   );
-};
+}
