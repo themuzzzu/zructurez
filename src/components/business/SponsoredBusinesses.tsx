@@ -7,6 +7,22 @@ import { ArrowRightCircle, Store } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { BusinessCardHeader } from './BusinessCardHeader';
 import { BusinessCardRating } from './BusinessCardRating';
+import { LazyImage } from '../ui/LazyImage';
+
+// Simple business type definition to avoid complex typing
+interface BusinessType {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  image_url?: string;
+  verified: boolean;
+  is_open: boolean;
+  average_rating: number;
+  reviews_count: number;
+  wait_time: string;
+  closure_reason: string;
+}
 
 export function SponsoredBusinesses() {
   const { data: businesses = [], isLoading } = useQuery({
@@ -36,7 +52,7 @@ export function SponsoredBusinesses() {
             reviews_count: 48,
             wait_time: '',
             closure_reason: ''
-          }));
+          })) as BusinessType[];
         }
         
         return data.map(business => {
@@ -51,7 +67,7 @@ export function SponsoredBusinesses() {
             wait_time: business.wait_time || '',
             closure_reason: business.closure_reason || ''
           };
-        });
+        }) as BusinessType[];
       } catch (err) {
         console.error('Error fetching sponsored businesses:', err);
         return [];
@@ -96,8 +112,8 @@ export function SponsoredBusinesses() {
             <Card className="overflow-hidden h-full bg-black text-white">
               <div className="relative">
                 {business.image_url ? (
-                  <div className="h-32 w-full overflow-hidden">
-                    <img 
+                  <div className="h-32 w-full overflow-hidden relative">
+                    <LazyImage 
                       src={business.image_url} 
                       alt={business.name} 
                       className="w-full h-full object-cover"
@@ -108,7 +124,7 @@ export function SponsoredBusinesses() {
                   <div className="h-32 w-full bg-zinc-900" />
                 )}
                 
-                <div className="absolute bottom-0 left-0 right-0 p-3">
+                <div className="absolute bottom-0 left-0 right-0 p-3 z-10">
                   <BusinessCardHeader 
                     name={business.name}
                     category={business.category}

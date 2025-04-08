@@ -13,6 +13,7 @@ import {
   ShoppingBag,
   BookOpen
 } from "lucide-react";
+import { LazyImage } from "@/components/ui/LazyImage";
 
 export const BusinessCategoryGrid = () => {
   const navigate = useNavigate();
@@ -129,18 +130,21 @@ export const BusinessCategoryGrid = () => {
           <div 
             key={category.id}
             onClick={() => handleCategoryClick(category.id)}
-            className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow cursor-pointer overflow-hidden"
+            className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow cursor-pointer overflow-hidden h-full"
           >
-            <div className="aspect-video w-full overflow-hidden">
-              <img 
+            <div className="relative aspect-video w-full overflow-hidden">
+              <LazyImage 
                 src={category.image} 
                 alt={category.name}
                 className="w-full h-full object-cover"
+                width={300}
+                height={200}
               />
+              <div className="absolute inset-0 bg-black bg-opacity-10"></div>
             </div>
             <div className="p-3">
-              <h3 className="font-medium text-center mb-2">{category.name}</h3>
-              <div className="text-xs text-muted-foreground">
+              <h3 className="font-medium text-center mb-2 line-clamp-1">{category.name}</h3>
+              <div className="text-xs text-muted-foreground line-clamp-1">
                 {category.subcategories.slice(0, 2).join(", ")}
                 {category.subcategories.length > 2 && "..."}
               </div>

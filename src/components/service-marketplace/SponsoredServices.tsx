@@ -1,6 +1,4 @@
 
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -10,12 +8,15 @@ import { Button } from "@/components/ui/button";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
 import { LoadingView } from "@/components/LoadingView";
 
+// Import Supabase client directly
+import { supabase } from "@/integrations/supabase/client";
+
 interface SponsoredServicesProps {
   layout?: GridLayoutType;
 }
 
-// Define a completely standalone service type with no references to other types
-interface ServiceType {
+// Define a simple standalone service type with all required properties
+interface Service {
   id: string;
   title: string;
   description: string;
@@ -31,7 +32,7 @@ interface ServiceType {
 /**
  * Fetches sponsored services from Supabase
  */
-async function fetchSponsoredServices(): Promise<ServiceType[]> {
+async function fetchSponsoredServices(): Promise<Service[]> {
   try {
     const { data, error } = await supabase
       .from('services')
@@ -42,21 +43,8 @@ async function fetchSponsoredServices(): Promise<ServiceType[]> {
     if (error) throw error;
     
     // Return empty array if no data
-    if (!data) return [];
+    return data || [];
     
-    // Transform data to ensure it matches the ServiceType
-    return data.map(service => ({
-      id: service.id,
-      title: service.title,
-      description: service.description,
-      image_url: service.image_url,
-      price: service.price,
-      user_id: service.user_id,
-      category: service.category,
-      location: service.location,
-      contact_info: service.contact_info,
-      is_sponsored: true
-    }));
   } catch (error) {
     console.error("Error fetching sponsored services:", error);
     return [];
@@ -66,16 +54,19 @@ async function fetchSponsoredServices(): Promise<ServiceType[]> {
 export function SponsoredServices({ layout = "grid3x3" }: SponsoredServicesProps) {
   const navigate = useNavigate();
   
-  // Avoid complex type inference by using a simpler approach with basic types
-  const query = useQuery({
-    queryKey: ['sponsored-services'],
-    queryFn: fetchSponsoredServices
-  });
+  // Use the hook without complex typing, then manually type the result
+  const { data, isLoading, isError } = {
+    data: [] as Service[],
+    isLoading: true,
+    isError: false,
+    ...useQuery({
+      queryKey: ['sponsored-services'],
+      queryFn: fetchSponsoredServices
+    })
+  };
   
-  // Manually extract and type the values we need
-  const services: ServiceType[] = query.data || [];
-  const isLoading: boolean = query.isLoading;
-  const isError: boolean = query.isError;
+  // Use the typed data
+  const services = data || [];
   
   // Handle error state
   if (isError) {

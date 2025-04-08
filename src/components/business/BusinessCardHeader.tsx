@@ -65,9 +65,9 @@ export const BusinessCardHeader = ({
   const statusDetails = getStatusDetails(is_open, wait_time, closure_reason);
   
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 z-10 relative">
       <div className="relative">
-        <h3 className="font-semibold text-xl pr-8">{name}</h3>
+        <h3 className="font-semibold text-lg line-clamp-1 pr-8">{name}</h3>
         {name.length > 25 && (
           <div className="absolute top-1/2 right-0 -translate-y-1/2 bg-gradient-to-l from-black/95 to-transparent px-2">
             <ChevronDown className="h-4 w-4 text-gray-400" />
@@ -76,7 +76,7 @@ export const BusinessCardHeader = ({
       </div>
       
       <div className="flex flex-col gap-1">
-        <span className="text-sm text-gray-300">{category}</span>
+        <span className="text-sm text-gray-300 line-clamp-1">{category}</span>
         <div className="flex flex-wrap items-center gap-2">
           {statusDetails && (
             <TooltipProvider>
@@ -122,7 +122,7 @@ export const BusinessCardHeader = ({
             <Clock className="h-4 w-4" />
             <span>Available in {wait_time}</span>
             {closure_reason && (
-              <span className="text-gray-400">({getReasonLabel(closure_reason)})</span>
+              <span className="text-gray-400 line-clamp-1">({getReasonLabel(closure_reason)})</span>
             )}
           </div>
         )}

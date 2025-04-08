@@ -21,27 +21,42 @@ BusinessCard.displayName = "BusinessCard"
 
 const BusinessCardImage = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & { src: string, alt: string }
->(({ className, src, alt, ...props }, ref) => (
-  <div className="relative w-full">
-    <AspectRatio 
-      ratio={16/9} 
-      className={cn("bg-muted", className)} 
-      {...props}
-    >
-      <img 
-        src={src || '/placeholder.svg'} 
-        alt={alt} 
-        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-        ref={ref as React.Ref<HTMLImageElement>}
-        onError={(e) => {
-          const target = e.target as HTMLImageElement;
-          target.src = '/placeholder.svg';
-        }}
-      />
-    </AspectRatio>
-  </div>
-))
+  React.HTMLAttributes<HTMLDivElement> & { src: string, alt: string, priority?: boolean }
+>(({ className, src, alt, priority = false, ...props }, ref) => {
+  const [isLoaded, setIsLoaded] = React.useState(false);
+  const [hasError, setHasError] = React.useState(false);
+
+  return (
+    <div className="relative w-full">
+      <AspectRatio 
+        ratio={16/9} 
+        className={cn("bg-muted overflow-hidden", className)} 
+        {...props}
+      >
+        {!isLoaded && !hasError && (
+          <div className="absolute inset-0 bg-gray-800 animate-pulse" />
+        )}
+        <img 
+          src={src || '/placeholder.svg'} 
+          alt={alt} 
+          className={cn(
+            "w-full h-full object-cover transition-all duration-300",
+            isLoaded ? "opacity-100" : "opacity-0"
+          )}
+          ref={ref as React.Ref<HTMLImageElement>}
+          loading={priority ? "eager" : "lazy"}
+          onLoad={() => setIsLoaded(true)}
+          onError={(e) => {
+            setHasError(true);
+            const target = e.target as HTMLImageElement;
+            target.src = '/placeholder.svg';
+            setIsLoaded(true);
+          }}
+        />
+      </AspectRatio>
+    </div>
+  );
+})
 BusinessCardImage.displayName = "BusinessCardImage"
 
 const BusinessCardContent = React.forwardRef<
@@ -50,7 +65,7 @@ const BusinessCardContent = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("p-4 space-y-3 flex-1 flex flex-col", className)}
+    className={cn("p-4 space-y-3 flex-1 flex flex-col z-10 relative", className)}
     {...props}
   />
 ))
