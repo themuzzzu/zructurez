@@ -32,6 +32,7 @@ interface Service {
 /**
  * Fetches sponsored services from Supabase
  */
+// Fix: Add explicit return type to the function
 async function fetchSponsoredServices(): Promise<Service[]> {
   try {
     const { data, error } = await supabase
@@ -56,7 +57,7 @@ async function fetchSponsoredServices(): Promise<Service[]> {
 export function SponsoredServices({ layout = "grid3x3" }: SponsoredServicesProps) {
   const navigate = useNavigate();
   
-  // Fix the TypeScript error by explicitly defining query options without generic type parameters
+  // Fix: Remove generic type parameters completely
   const { 
     data, 
     isLoading, 
