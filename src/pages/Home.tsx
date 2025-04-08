@@ -18,21 +18,23 @@ export default function Home() {
   const { setLoading } = useLoading();
   const [activeTab, setActiveTab] = useState("all");
 
-  // Show loading indicator when page loads - reduced loading time significantly
+  // Show loading indicator when page loads - reduced loading time to 100ms
   useEffect(() => {
     setLoading(true);
-    const timeout = setTimeout(() => setLoading(false), 200); // Reduced from 500ms to 200ms
+    const timeout = setTimeout(() => setLoading(false), 100);
     return () => clearTimeout(timeout);
   }, [setLoading]);
 
   return (
     <Layout hideSidebar={false}>
-      {/* Hero search section */}
-      <SearchHero />
+      {/* Hero search section - fixed padding and scrolling */}
+      <div className="pt-2">
+        <SearchHero />
+      </div>
 
-      <div className="container max-w-7xl mx-auto px-2 sm:px-4 pt-0 pb-8 overflow-visible">
-        {/* Category navigation */}
-        <Tabs defaultValue="all" className="w-full mb-6" value={activeTab} onValueChange={setActiveTab}>
+      <div className="container max-w-7xl mx-auto px-1 sm:px-4 pt-3 pb-8 overflow-visible">
+        {/* Category navigation - improved spacing */}
+        <Tabs defaultValue="all" className="w-full mb-4 sm:mb-6" value={activeTab} onValueChange={setActiveTab}>
           <div className="flex justify-between items-center mb-4 overflow-visible">
             <h2 className="text-2xl font-bold">Explore Categories</h2>
             <TabsList className="overflow-x-auto">
@@ -44,43 +46,43 @@ export default function Home() {
           </div>
           
           <TabsContent value="all" className="mt-0">
-            {/* Featured carousel */}
-            <div className="mb-6">
+            {/* Featured carousel - improved spacing */}
+            <div className="mb-4 sm:mb-6">
               <BannerCarousel />
             </div>
             
-            {/* Featured business categories */}
-            <div className="mb-6">
+            {/* Featured business categories - improved spacing */}
+            <div className="mb-4 sm:mb-6">
               <h2 className="text-2xl font-bold mb-4">Business Categories</h2>
               <BusinessCategoryGrid />
             </div>
             
-            {/* Featured product categories */}
-            <div className="mb-6">
+            {/* Featured product categories - improved spacing */}
+            <div className="mb-4 sm:mb-6">
               <h2 className="text-2xl font-bold mb-4">Shop Products</h2>
               <ShopByCategory />
             </div>
             
-            {/* Service Categories Scroller */}
-            <div className="mb-6">
+            {/* Service Categories Scroller - improved spacing */}
+            <div className="mb-4 sm:mb-6">
               <ServiceCategoryScroller />
             </div>
             
-            {/* Trending products */}
+            {/* Trending products - improved spacing */}
             <LikeProvider>
-              <div className="mb-6">
+              <div className="mb-4 sm:mb-6">
                 <TrendingProducts />
               </div>
             </LikeProvider>
           </TabsContent>
           
           <TabsContent value="products" className="mt-0">
-            <div className="mb-6">
+            <div className="mb-4 sm:mb-6">
               <ShopByCategory />
             </div>
             <LikeProvider>
               <SponsoredProducts />
-              <div className="mt-6">
+              <div className="mt-4 sm:mt-6">
                 <TrendingProducts />
               </div>
             </LikeProvider>
@@ -91,7 +93,7 @@ export default function Home() {
           </TabsContent>
           
           <TabsContent value="services" className="mt-0">
-            <div className="mb-6">
+            <div className="mb-4 sm:mb-6">
               <ServiceCategoryScroller />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">

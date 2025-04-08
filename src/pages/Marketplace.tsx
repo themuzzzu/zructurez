@@ -13,10 +13,10 @@ const Marketplace = () => {
     return <NotFound />;
   }
   
-  // Render the marketplace with the proper layout - updated padding for better mobile view
+  // Render the marketplace with the proper layout - added proper padding for top area and mobile
   return (
     <Layout>
-      <div className="container max-w-7xl mx-auto px-2 sm:px-4 py-0 sm:py-4 overflow-visible">
+      <div className="container max-w-7xl mx-auto px-1 sm:px-4 pt-3 sm:pt-6 pb-16 overflow-visible">
         <OptimizedMarketplace />
       </div>
     </Layout>

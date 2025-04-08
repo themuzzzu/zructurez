@@ -1,5 +1,5 @@
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, lazy } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
 import { AutocompleteSearch } from "@/components/marketplace/AutocompleteSearch";
@@ -15,11 +15,11 @@ import { SkeletonCard } from "@/components/loaders";
 import { useLoading } from "@/providers/LoadingProvider";
 import { FlashSale } from "@/components/marketplace/FlashSale";
 
-// Optimized LazySection for better performance
-const LazySection = ({ children, fallbackCount = 4 }) => (
+// Optimized LazySection for better performance - reduced loading skeleton count
+const LazySection = ({ children, fallbackCount = 2 }) => (
   <Suspense fallback={
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-4">
-      {Array.from({ length: Math.min(fallbackCount, 2) }).map((_, i) => (
+    <div className="grid grid-cols-2 sm:grid-cols-2 gap-2">
+      {Array.from({ length: fallbackCount }).map((_, i) => (
         <SkeletonCard key={i} />
       ))}
     </div>
@@ -54,10 +54,10 @@ export const OptimizedMarketplace = () => {
   
   const { setLoading } = useLoading();
   
-  // Show loading indicator when page loads - significantly reduced loading time
+  // Show loading indicator when page loads - significantly reduced loading time to 100ms
   useEffect(() => {
     setLoading(true);
-    const timeout = setTimeout(() => setLoading(false), 200);
+    const timeout = setTimeout(() => setLoading(false), 100);
     return () => clearTimeout(timeout);
   }, [setLoading]);
   
@@ -111,9 +111,9 @@ export const OptimizedMarketplace = () => {
   };
   
   return (
-    <div className="container max-w-[1400px] mx-auto px-2 sm:px-4 pt-0 pb-4 sm:py-6 overflow-visible">
-      {/* Single Search Bar at the top with improved design */}
-      <div className="mb-3 sm:mb-4">
+    <div className="pt-2 sm:pt-0">
+      {/* Single Search Bar at the top with improved design - fixed padding */}
+      <div className="mb-4 sm:mb-6">
         <AutocompleteSearch 
           value={searchQuery}
           onChange={setSearchQuery}
@@ -123,63 +123,63 @@ export const OptimizedMarketplace = () => {
         />
       </div>
       
-      {/* Banner carousel below search */}
+      {/* Banner carousel below search - fixed styling for better scrolling */}
       <LazySection fallbackCount={1}>
-        <div className="mb-3 sm:mb-4">
+        <div className="mb-4 sm:mb-6">
           <BannerCarousel />
         </div>
       </LazySection>
       
-      {/* New Shop by Category section */}
-      <div className="mb-3 sm:mb-4">
+      {/* New Shop by Category section - improved spacing */}
+      <div className="mb-4 sm:mb-6">
         <ShopByCategory onCategorySelect={handleCategoryChange} />
       </div>
       
-      {/* Real-time Product Rankings */}
+      {/* Real-time Product Rankings - improved spacing */}
       <LazySection>
-        <div className="mb-3 sm:mb-6">
+        <div className="mb-4 sm:mb-6">
           <ProductRankings />
         </div>
       </LazySection>
       
-      {/* Flash Sale Section */}
+      {/* Flash Sale Section - improved spacing */}
       <LazySection>
-        <div className="mb-3 sm:mb-6">
+        <div className="mb-4 sm:mb-6">
           <FlashSale />
         </div>
       </LazySection>
       
-      {/* Sponsored Products Section */}
+      {/* Sponsored Products Section - improved spacing */}
       <LazySection>
-        <div className="mb-3 sm:mb-6">
+        <div className="mb-4 sm:mb-6">
           <SponsoredProducts gridLayout={gridLayout} />
         </div>
       </LazySection>
       
-      {/* Trending Products */}
+      {/* Trending Products - improved spacing */}
       <LazySection>
-        <div className="mb-3 sm:mb-6">
+        <div className="mb-4 sm:mb-6">
           <TrendingProducts gridLayout={gridLayout} />
         </div>
       </LazySection>
       
-      {/* Personalized Recommendations */}
+      {/* Personalized Recommendations - improved spacing */}
       <LazySection>
-        <div className="mb-3 sm:mb-6">
+        <div className="mb-4 sm:mb-6">
           <PersonalizedRecommendations />
         </div>
       </LazySection>
       
-      {/* Crazy Deals Section */}
+      {/* Crazy Deals Section - improved spacing */}
       <LazySection>
-        <div className="mb-3 sm:mb-6">
+        <div className="mb-4 sm:mb-6">
           <CrazyDeals />
         </div>
       </LazySection>
       
       {/* Main content - Browse All */}
       <LazySection>
-        <div className="mt-3 sm:mt-6">
+        <div className="mt-4 sm:mt-6">
           <BrowseTabContent 
             searchTerm={searchQuery}
             onCategorySelect={handleCategoryChange}
