@@ -14,7 +14,7 @@ interface SponsoredServicesProps {
   layout?: GridLayoutType;
 }
 
-// Define service type without circular references
+// Define service type to avoid circular references
 interface ServiceType {
   id: string;
   title: string;
@@ -31,7 +31,7 @@ interface ServiceType {
 /**
  * Fetches sponsored services from Supabase
  */
-async function fetchSponsoredServices(): Promise<ServiceType[]> {
+async function fetchSponsoredServices() {
   try {
     const { data, error } = await supabase
       .from('services')
@@ -66,13 +66,11 @@ async function fetchSponsoredServices(): Promise<ServiceType[]> {
 export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps) => {
   const navigate = useNavigate();
   
-  // Use query without type parameters, let TypeScript infer types
-  const query = useQuery({
+  // Use React Query without type parameters to avoid type issues
+  const { data: services = [], isLoading, isError } = useQuery({
     queryKey: ['sponsored-services'],
     queryFn: fetchSponsoredServices
   });
-  
-  const { data: services, isLoading, isError } = query;
   
   // Handle error state
   if (isError) {
@@ -128,10 +126,7 @@ export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps
     );
   }
   
-  // Safely handle undefined data with an empty array fallback
-  const serviceItems = services || [];
-  
-  if (serviceItems.length === 0) {
+  if (services.length === 0) {
     return null;
   }
   
@@ -139,7 +134,7 @@ export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps
     <div className="space-y-4 mb-8">
       <h2 className="text-2xl font-bold">Sponsored Services</h2>
       <div className={getGridClasses()}>
-        {serviceItems.map((service) => (
+        {services.map((service) => (
           <ServiceCard 
             key={service.id}
             id={service.id}
@@ -148,7 +143,7 @@ export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps
             image_url={service.image_url}
             price={service.price}
             providerId={service.user_id}
-            providerName="Service Provider" 
+            providerName="Service Provider"
             contact_info={service.contact_info}
             category={service.category}
             location={service.location}
