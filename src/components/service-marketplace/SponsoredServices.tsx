@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
@@ -29,10 +30,10 @@ interface ServiceType {
 export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps) => {
   const navigate = useNavigate();
   
-  // Fix: Use a simpler approach to type the query result
-  const { data: services, isLoading } = useQuery({
+  // Fix: Explicitly specify the return type of queryFn to avoid inference issues
+  const { data: services, isLoading } = useQuery<ServiceType[]>({
     queryKey: ['sponsored-services'],
-    queryFn: async () => {
+    queryFn: async (): Promise<ServiceType[]> => {
       const { data, error } = await supabase
         .from('services')
         .select('*')
