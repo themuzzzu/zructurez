@@ -31,7 +31,7 @@ interface ServiceType {
 /**
  * Fetches sponsored services from Supabase
  */
-async function fetchSponsoredServices() {
+const fetchSponsoredServices = async () => {
   try {
     const { data, error } = await supabase
       .from('services')
@@ -44,29 +44,18 @@ async function fetchSponsoredServices() {
     // Return empty array if no data
     if (!data) return [];
     
-    // Map the raw data to ServiceType
-    return data.map(service => ({
-      id: service.id,
-      title: service.title,
-      description: service.description,
-      image_url: service.image_url,
-      price: service.price,
-      user_id: service.user_id,
-      category: service.category,
-      location: service.location,
-      contact_info: service.contact_info,
-      is_sponsored: true
-    }));
+    // Return the raw data
+    return data as ServiceType[];
   } catch (error) {
     console.error("Error fetching sponsored services:", error);
     return [];
   }
-}
+};
 
 export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps) => {
   const navigate = useNavigate();
   
-  // Use React Query without type parameters to avoid type issues
+  // Simplify the query to avoid type complications
   const { data: services = [], isLoading, isError } = useQuery({
     queryKey: ['sponsored-services'],
     queryFn: fetchSponsoredServices
