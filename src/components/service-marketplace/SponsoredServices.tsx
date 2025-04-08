@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
@@ -26,35 +27,40 @@ interface ServiceType {
   is_sponsored: boolean;
 }
 
+// Function to fetch sponsored services outside of the component to avoid deep type inference
+const fetchSponsoredServices = async (): Promise<ServiceType[]> => {
+  const { data, error } = await supabase
+    .from('services')
+    .select('*')
+    .eq('is_sponsored', true)
+    .limit(6);
+  
+  if (error) throw error;
+  
+  // Use a simple any[] cast to avoid TypeScript inference issues
+  const rawServices = (data || []) as any[];
+  
+  return rawServices.map(item => ({
+    id: item.id,
+    title: item.title,
+    description: item.description,
+    image_url: item.image_url,
+    price: item.price,
+    user_id: item.user_id,
+    category: item.category,
+    location: item.location,
+    contact_info: item.contact_info,
+    is_sponsored: true
+  }));
+};
+
 export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps) => {
   const navigate = useNavigate();
   
-  const { data: services, isLoading } = useQuery<ServiceType[], Error>({
+  // Use the separate fetch function to avoid deep type inference
+  const { data: services, isLoading } = useQuery({
     queryKey: ['sponsored-services'],
-    queryFn: async (): Promise<ServiceType[]> => {
-      const { data, error } = await supabase
-        .from('services')
-        .select('*')
-        .eq('is_sponsored', true)
-        .limit(6);
-      
-      if (error) throw error;
-      
-      const rawData = (data || []) as any[];
-      
-      return rawData.map((item): ServiceType => ({
-        id: item.id,
-        title: item.title,
-        description: item.description,
-        image_url: item.image_url,
-        price: item.price,
-        user_id: item.user_id,
-        category: item.category,
-        location: item.location,
-        contact_info: item.contact_info,
-        is_sponsored: true
-      }));
-    },
+    queryFn: fetchSponsoredServices,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
   
