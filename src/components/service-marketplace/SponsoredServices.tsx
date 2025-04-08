@@ -32,7 +32,7 @@ interface Service {
 /**
  * Fetches sponsored services from Supabase
  */
-const fetchSponsoredServices = async (): Promise<Service[]> => {
+async function fetchSponsoredServices() {
   try {
     const { data, error } = await supabase
       .from('services')
@@ -46,22 +46,18 @@ const fetchSponsoredServices = async (): Promise<Service[]> => {
     return (data || []).map(service => ({
       ...service,
       is_sponsored: true
-    }));
+    })) as Service[];
   } catch (error) {
     console.error("Error fetching sponsored services:", error);
-    return [];
+    return [] as Service[];
   }
-};
+}
 
 export function SponsoredServices({ layout = "grid3x3" }: SponsoredServicesProps) {
   const navigate = useNavigate();
   
-  // Define explicit return type for useQuery to avoid deep type instantiation
-  const { 
-    data: services = [], 
-    isLoading, 
-    isError 
-  } = useQuery({
+  // Simplified query with proper type inference
+  const { data: services = [], isLoading, isError } = useQuery({
     queryKey: ['sponsored-services'],
     queryFn: fetchSponsoredServices
   });
