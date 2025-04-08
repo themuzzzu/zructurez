@@ -14,7 +14,7 @@ interface SponsoredServicesProps {
   layout?: GridLayoutType;
 }
 
-// Define service type without recursive references
+// Define service type
 interface ServiceType {
   id: string;
   title: string;
@@ -80,8 +80,8 @@ const fetchSponsoredServices = async (): Promise<ServiceType[]> => {
 export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps) => {
   const navigate = useNavigate();
   
-  // Use explicit type parameters for useQuery
-  const { data: services, isLoading, isError } = useQuery<ServiceType[], Error>({
+  // Use explicit non-generic type for useQuery to prevent deep instantiation error
+  const { data: services, isLoading, isError } = useQuery({
     queryKey: ['sponsored-services'],
     queryFn: fetchSponsoredServices,
     staleTime: 5 * 60 * 1000, // 5 minutes
