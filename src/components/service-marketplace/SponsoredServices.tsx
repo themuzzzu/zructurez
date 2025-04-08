@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
@@ -27,20 +26,7 @@ interface ServiceType {
   is_sponsored: boolean;
 }
 
-// Explicitly define the raw data type from Supabase
-interface RawServiceData {
-  id: string;
-  title: string;
-  description: string;
-  image_url?: string;
-  price: number;
-  user_id: string;
-  category?: string;
-  location?: string;
-  contact_info?: string;
-}
-
-// Function to fetch sponsored services with explicit return type
+// Function to fetch sponsored services
 async function fetchSponsoredServices(): Promise<ServiceType[]> {
   const { data, error } = await supabase
     .from('services')
@@ -50,28 +36,30 @@ async function fetchSponsoredServices(): Promise<ServiceType[]> {
   
   if (error) throw error;
   
-  // Type the raw data explicitly
-  const rawData = (data || []) as RawServiceData[];
+  // Use simple type casting to avoid deep type inference
+  const rawData = data as any[] || [];
   
-  // Transform to our service type
-  return rawData.map(item => ({
-    id: item.id,
-    title: item.title,
-    description: item.description,
-    image_url: item.image_url,
-    price: item.price,
-    user_id: item.user_id,
-    category: item.category,
-    location: item.location,
-    contact_info: item.contact_info,
-    is_sponsored: true
-  }));
+  // Map the raw data to our ServiceType
+  return rawData.map(item => {
+    return {
+      id: item.id,
+      title: item.title,
+      description: item.description,
+      image_url: item.image_url,
+      price: item.price,
+      user_id: item.user_id,
+      category: item.category,
+      location: item.location,
+      contact_info: item.contact_info,
+      is_sponsored: true
+    } as ServiceType;
+  });
 }
 
 export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps) => {
   const navigate = useNavigate();
   
-  // Use the query with explicit typings
+  // Use explicit typing for the query
   const { data: services, isLoading } = useQuery<ServiceType[], Error>({
     queryKey: ['sponsored-services'],
     queryFn: fetchSponsoredServices,
