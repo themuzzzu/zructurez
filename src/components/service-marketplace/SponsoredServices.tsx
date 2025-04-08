@@ -29,6 +29,20 @@ interface Service {
   is_sponsored: boolean;
 }
 
+// Define the raw database type to avoid deep instantiation issues
+interface SupabaseService {
+  id: string;
+  title: string;
+  description: string;
+  image_url?: string;
+  price: number;
+  user_id: string;
+  category?: string;
+  location?: string;
+  contact_info?: string;
+  is_sponsored?: boolean;
+}
+
 /**
  * Fetches sponsored services from Supabase
  */
@@ -42,17 +56,20 @@ const fetchSponsoredServices = async (): Promise<Service[]> => {
       
     if (error) throw error;
     
-    // Convert the raw data to our Service interface with explicit type assertions
-    const services = (data || []).map(item => ({
-      id: item.id as string,
-      title: item.title as string,
-      description: item.description as string,
-      image_url: item.image_url as string | undefined,
-      price: item.price as number,
-      user_id: item.user_id as string,
-      category: item.category as string | undefined,
-      location: item.location as string | undefined,
-      contact_info: item.contact_info as string | undefined,
+    // Explicitly cast the response data to our intermediate type
+    const rawData = data as SupabaseService[];
+    
+    // Map from the raw data to our Service interface
+    const services: Service[] = rawData.map(item => ({
+      id: item.id,
+      title: item.title,
+      description: item.description,
+      image_url: item.image_url,
+      price: item.price,
+      user_id: item.user_id,
+      category: item.category,
+      location: item.location,
+      contact_info: item.contact_info,
       is_sponsored: true
     }));
     
