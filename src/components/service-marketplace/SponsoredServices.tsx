@@ -15,7 +15,7 @@ interface SponsoredServicesProps {
   layout?: GridLayoutType;
 }
 
-// Define a simple standalone service type with all required properties
+// Define a simple service interface with required properties
 interface Service {
   id: string;
   title: string;
@@ -28,19 +28,6 @@ interface Service {
   contact_info?: string;
   is_sponsored: boolean;
 }
-
-// Define a type for raw Supabase data
-type SupabaseServiceData = {
-  id: string;
-  title: string;
-  description: string;
-  image_url?: string;
-  price: number;
-  user_id: string;
-  category?: string;
-  location?: string;
-  contact_info?: string;
-};
 
 /**
  * Fetches sponsored services from Supabase
@@ -55,17 +42,17 @@ const fetchSponsoredServices = async (): Promise<Service[]> => {
       
     if (error) throw error;
     
-    // First cast to the raw data type, then map to our Service interface
-    const services: Service[] = (data || []).map((service: SupabaseServiceData) => ({
-      id: service.id,
-      title: service.title,
-      description: service.description,
-      image_url: service.image_url,
-      price: service.price,
-      user_id: service.user_id,
-      category: service.category,
-      location: service.location,
-      contact_info: service.contact_info,
+    // Convert the raw data to our Service interface with explicit type assertions
+    const services = (data || []).map(item => ({
+      id: item.id as string,
+      title: item.title as string,
+      description: item.description as string,
+      image_url: item.image_url as string | undefined,
+      price: item.price as number,
+      user_id: item.user_id as string,
+      category: item.category as string | undefined,
+      location: item.location as string | undefined,
+      contact_info: item.contact_info as string | undefined,
       is_sponsored: true
     }));
     
