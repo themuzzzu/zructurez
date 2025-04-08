@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
@@ -42,7 +43,7 @@ export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps
       if (error) throw error;
       
       // Explicitly cast and transform the data to avoid deep type inference
-      return (data || []) as any[]).map(item => ({
+      return ((data || []) as any[]).map(item => ({
         id: item.id,
         title: item.title,
         description: item.description,
@@ -53,7 +54,7 @@ export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps
         location: item.location || undefined,
         contact_info: item.contact_info || undefined,
         is_sponsored: true
-      }) as ServiceType);
+      })) as ServiceType[];
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
