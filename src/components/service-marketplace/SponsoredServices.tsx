@@ -30,9 +30,10 @@ interface ServiceType {
 export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps) => {
   const navigate = useNavigate();
   
-  const { data: services, isLoading } = useQuery<ServiceType[]>({
+  // Specify the exact return type for queryFn to avoid deep inference issues
+  const { data: services, isLoading } = useQuery({
     queryKey: ['sponsored-services'],
-    queryFn: async () => {
+    queryFn: async (): Promise<ServiceType[]> => {
       const { data, error } = await supabase
         .from('services')
         .select('*')
