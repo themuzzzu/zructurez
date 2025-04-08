@@ -32,7 +32,7 @@ interface Service {
 /**
  * Fetches sponsored services from Supabase
  */
-async function fetchSponsoredServices() {
+async function fetchSponsoredServices(): Promise<Service[]> {
   try {
     const { data, error } = await supabase
       .from('services')
@@ -56,11 +56,17 @@ async function fetchSponsoredServices() {
 export function SponsoredServices({ layout = "grid3x3" }: SponsoredServicesProps) {
   const navigate = useNavigate();
   
-  // Simplified query with proper type inference
-  const { data: services = [], isLoading, isError } = useQuery({
+  // Fix: Use properly typed useQuery with explicit typing
+  const { 
+    data = [], 
+    isLoading, 
+    isError 
+  } = useQuery<Service[], Error>({
     queryKey: ['sponsored-services'],
     queryFn: fetchSponsoredServices
   });
+  
+  const services = data;
   
   // Handle error state
   if (isError) {
