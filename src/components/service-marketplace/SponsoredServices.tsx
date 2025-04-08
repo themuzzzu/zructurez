@@ -14,7 +14,7 @@ interface SponsoredServicesProps {
   layout?: GridLayoutType;
 }
 
-// Define a simple service type explicitly to avoid circular references
+// Define a completely standalone service type with no references to other types
 interface ServiceType {
   id: string;
   title: string;
@@ -66,7 +66,7 @@ const fetchSponsoredServices = async (): Promise<ServiceType[]> => {
 export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps) => {
   const navigate = useNavigate();
   
-  // Use React Query with explicit type annotation to prevent deep type inference
+  // Use explicit non-generic type parameters to avoid deep inference issues
   const { data: services = [], isLoading, isError } = useQuery<ServiceType[], Error>({
     queryKey: ['sponsored-services'],
     queryFn: fetchSponsoredServices
