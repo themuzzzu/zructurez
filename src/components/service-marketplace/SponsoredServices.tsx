@@ -56,7 +56,7 @@ async function fetchSponsoredServices(): Promise<Service[]> {
 export function SponsoredServices({ layout = "grid3x3" }: SponsoredServicesProps) {
   const navigate = useNavigate();
   
-  // Fix: Remove generic type parameters and let TypeScript infer the types
+  // Fix the TypeScript error by explicitly defining query options without generic type parameters
   const { 
     data, 
     isLoading, 
