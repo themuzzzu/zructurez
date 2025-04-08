@@ -32,7 +32,7 @@ interface Service {
 /**
  * Fetches sponsored services from Supabase
  */
-async function fetchSponsoredServices() {
+const fetchSponsoredServices = async (): Promise<Service[]> => {
   try {
     const { data, error } = await supabase
       .from('services')
@@ -42,21 +42,21 @@ async function fetchSponsoredServices() {
       
     if (error) throw error;
     
-    // Add is_sponsored field to match Service interface
+    // Map the data to match our Service interface
     return (data || []).map(service => ({
       ...service,
       is_sponsored: true
-    })) as Service[];
+    }));
   } catch (error) {
     console.error("Error fetching sponsored services:", error);
-    return [] as Service[];
+    return [];
   }
-}
+};
 
 export function SponsoredServices({ layout = "grid3x3" }: SponsoredServicesProps) {
   const navigate = useNavigate();
   
-  // Use the useQuery hook with a simpler approach
+  // Use the useQuery hook without explicit generic parameters
   const { 
     data, 
     isLoading, 
