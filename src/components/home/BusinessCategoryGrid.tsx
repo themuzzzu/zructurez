@@ -10,7 +10,8 @@ import {
   Factory, 
   Truck, 
   Building, 
-  ShoppingBag
+  ShoppingBag,
+  BookOpen
 } from "lucide-react";
 
 export const BusinessCategoryGrid = () => {
@@ -23,7 +24,7 @@ export const BusinessCategoryGrid = () => {
       icon: <Store className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
       subcategories: ["Convenience Stores", "Gift Shops", "Stationery", "General Stores"],
       color: "from-blue-500 to-blue-600",
-      image: "1.png"
+      image: "/lovable-uploads/190ab2dc-3b85-46f2-b3ad-6c9b98561d92.png"
     },
     { 
       id: "electronics-mobile", 
@@ -31,7 +32,7 @@ export const BusinessCategoryGrid = () => {
       icon: <Smartphone className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
       subcategories: ["Phones", "Computers", "Accessories", "Repairs"],
       color: "from-purple-500 to-purple-600",
-      image: "2.png"
+      image: "/lovable-uploads/77c3d77a-46df-4214-968b-9d2783cd1650.png"
     },
     { 
       id: "healthcare-medical", 
@@ -39,7 +40,7 @@ export const BusinessCategoryGrid = () => {
       icon: <Stethoscope className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
       subcategories: ["Hospitals", "Clinics", "Pharmacies", "Diagnostics"],
       color: "from-red-500 to-red-600",
-      image: "3.png"
+      image: "/lovable-uploads/c45ae2e8-68e5-4bc7-8f40-e38499c1964b.png"
     },
     { 
       id: "food-beverage", 
@@ -47,7 +48,7 @@ export const BusinessCategoryGrid = () => {
       icon: <Utensils className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
       subcategories: ["Restaurants", "Cafes", "Bakeries", "Food Delivery"],
       color: "from-pink-500 to-pink-600",
-      image: "4.png"
+      image: "/lovable-uploads/a55a0c88-8c54-4214-af9b-501db058737f.png"
     },
     { 
       id: "wholesale-distributors", 
@@ -55,7 +56,7 @@ export const BusinessCategoryGrid = () => {
       icon: <Package className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
       subcategories: ["FMCG", "Electronics", "Fashion", "Food & Beverage"],
       color: "from-yellow-500 to-yellow-600",
-      image: "5.png"
+      image: "/lovable-uploads/231c1ad6-3dfd-4f14-a708-a3460b9775c1.png"
     },
     { 
       id: "home-living", 
@@ -63,7 +64,7 @@ export const BusinessCategoryGrid = () => {
       icon: <Home className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
       subcategories: ["Furniture", "Decor", "Kitchen", "Appliances"],
       color: "from-green-500 to-green-600",
-      image: "6.png"
+      image: "/lovable-uploads/f84cb2fc-de67-4e88-a601-6751b32c8a01.png"
     },
     { 
       id: "industrial-b2b", 
@@ -71,7 +72,7 @@ export const BusinessCategoryGrid = () => {
       icon: <Factory className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
       subcategories: ["Manufacturing", "Construction", "Machinery", "Chemicals"],
       color: "from-indigo-500 to-indigo-600",
-      image: "7.png"
+      image: "/images/categories/7.png"
     },
     { 
       id: "auto-transport", 
@@ -79,7 +80,7 @@ export const BusinessCategoryGrid = () => {
       icon: <Truck className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
       subcategories: ["Cars", "Bikes", "Parts & Service", "Rentals"],
       color: "from-orange-500 to-orange-600",
-      image: "8.png"
+      image: "/images/categories/8.png"
     },
     { 
       id: "real-estate", 
@@ -87,7 +88,7 @@ export const BusinessCategoryGrid = () => {
       icon: <Building className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
       subcategories: ["Residential", "Commercial", "Plots", "PG/Hostel"],
       color: "from-cyan-500 to-cyan-600",
-      image: "9.png"
+      image: "/lovable-uploads/8f516986-3dcb-4e92-a83e-12eda46b3aca.png"
     },
     { 
       id: "fashion-lifestyle", 
@@ -95,7 +96,15 @@ export const BusinessCategoryGrid = () => {
       icon: <ShoppingBag className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
       subcategories: ["Clothing", "Footwear", "Accessories", "Cosmetics"],
       color: "from-teal-500 to-teal-600",
-      image: "10.png"
+      image: "/lovable-uploads/67df8df3-8c7e-4dc3-98e9-9ffddf31e4d9.png"
+    },
+    { 
+      id: "books-education", 
+      name: "Books & Education", 
+      icon: <BookOpen className="h-6 w-6 mb-2 stroke-black dark:stroke-white" />, 
+      subcategories: ["Academic Books", "Fiction", "Stationery", "Educational Tools"],
+      color: "from-amber-500 to-amber-600",
+      image: "/lovable-uploads/c6e9ffef-faa6-429d-812c-338d60300316.png"
     }
   ];
 
@@ -124,7 +133,7 @@ export const BusinessCategoryGrid = () => {
           >
             <div className="aspect-video w-full overflow-hidden">
               <img 
-                src={`/images/categories/${category.image}`} 
+                src={category.image} 
                 alt={category.name}
                 className="w-full h-full object-cover"
               />
