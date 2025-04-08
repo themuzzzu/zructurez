@@ -29,23 +29,10 @@ interface Service {
   is_sponsored: boolean;
 }
 
-// Define the shape of raw data returned from Supabase
-interface SupabaseServiceData {
-  id: string;
-  title: string;
-  description: string;
-  image_url?: string;
-  price: number;
-  user_id: string;
-  category?: string;
-  location?: string;
-  contact_info?: string;
-}
-
 /**
  * Fetches sponsored services from Supabase
  */
-async function fetchSponsoredServices(): Promise<Service[]> {
+const fetchSponsoredServices = async (): Promise<Service[]> => {
   try {
     const { data, error } = await supabase
       .from('services')
@@ -55,19 +42,24 @@ async function fetchSponsoredServices(): Promise<Service[]> {
       
     if (error) throw error;
     
-    // Type the raw data first as an array of SupabaseServiceData
-    const rawData = (data || []) as SupabaseServiceData[];
-    
-    // Then map it to our Service interface
-    return rawData.map(service => ({
-      ...service,
+    // Map the raw data to our Service interface with explicit typing
+    return (data || []).map(service => ({
+      id: service.id,
+      title: service.title,
+      description: service.description,
+      image_url: service.image_url,
+      price: service.price,
+      user_id: service.user_id,
+      category: service.category,
+      location: service.location,
+      contact_info: service.contact_info,
       is_sponsored: true
     }));
   } catch (error) {
     console.error("Error fetching sponsored services:", error);
-    return [] as Service[];
+    return [];
   }
-}
+};
 
 export function SponsoredServices({ layout = "grid3x3" }: SponsoredServicesProps) {
   const navigate = useNavigate();
