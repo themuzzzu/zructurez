@@ -27,8 +27,8 @@ interface ServiceType {
   is_sponsored: boolean;
 }
 
-// Function to fetch sponsored services outside of the component to avoid deep type inference
-const fetchSponsoredServices = async (): Promise<ServiceType[]> => {
+// Function to fetch sponsored services with explicit typing to avoid nested inference
+async function fetchSponsoredServices(): Promise<ServiceType[]> {
   const { data, error } = await supabase
     .from('services')
     .select('*')
@@ -37,10 +37,11 @@ const fetchSponsoredServices = async (): Promise<ServiceType[]> => {
   
   if (error) throw error;
   
-  // Use a simple any[] cast to avoid TypeScript inference issues
-  const rawServices = (data || []) as any[];
+  // Define the raw data as any[] to avoid complex type inference
+  const services: any[] = data || [];
   
-  return rawServices.map(item => ({
+  // Map to our expected type structure
+  return services.map(item => ({
     id: item.id,
     title: item.title,
     description: item.description,
@@ -52,13 +53,13 @@ const fetchSponsoredServices = async (): Promise<ServiceType[]> => {
     contact_info: item.contact_info,
     is_sponsored: true
   }));
-};
+}
 
 export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps) => {
   const navigate = useNavigate();
   
-  // Use the separate fetch function to avoid deep type inference
-  const { data: services, isLoading } = useQuery({
+  // Explicitly type the query result to avoid inference issues
+  const { data: services, isLoading } = useQuery<ServiceType[], Error>({
     queryKey: ['sponsored-services'],
     queryFn: fetchSponsoredServices,
     staleTime: 5 * 60 * 1000, // 5 minutes
