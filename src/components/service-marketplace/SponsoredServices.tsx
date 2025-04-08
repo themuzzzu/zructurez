@@ -28,6 +28,22 @@ interface ServiceType {
   is_sponsored: boolean;
 }
 
+// Define the raw service data type from the database
+interface RawServiceData {
+  id: string;
+  title: string;
+  description: string;
+  image_url?: string;
+  price: number;
+  user_id: string;
+  category?: string;
+  location?: string;
+  contact_info?: string;
+  is_open?: boolean;
+  views?: number;
+  created_at?: string;
+}
+
 // Function to fetch sponsored services
 const fetchSponsoredServices = async (): Promise<ServiceType[]> => {
   try {
@@ -43,10 +59,18 @@ const fetchSponsoredServices = async (): Promise<ServiceType[]> => {
     if (!data) return [];
     
     // Map the raw data to include is_sponsored property explicitly
-    return data.map(service => ({
-      ...service,
+    return data.map((service: RawServiceData) => ({
+      id: service.id,
+      title: service.title,
+      description: service.description,
+      image_url: service.image_url,
+      price: service.price,
+      user_id: service.user_id,
+      category: service.category,
+      location: service.location,
+      contact_info: service.contact_info,
       is_sponsored: true
-    })) as ServiceType[];
+    }));
   } catch (error) {
     console.error("Error fetching sponsored services:", error);
     return [];
