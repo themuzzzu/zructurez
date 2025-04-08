@@ -31,7 +31,7 @@ interface ServiceType {
 /**
  * Fetches sponsored services from Supabase
  */
-const fetchSponsoredServices = async () => {
+const fetchSponsoredServices = async (): Promise<ServiceType[]> => {
   try {
     const { data, error } = await supabase
       .from('services')
@@ -66,7 +66,7 @@ const fetchSponsoredServices = async () => {
 export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps) => {
   const navigate = useNavigate();
   
-  // Use React Query without explicit type parameters
+  // Use React Query with explicit return type to avoid deep type inference
   const { data: services = [], isLoading, isError } = useQuery({
     queryKey: ['sponsored-services'],
     queryFn: fetchSponsoredServices
