@@ -56,7 +56,7 @@ async function fetchSponsoredServices(): Promise<Service[]> {
 export function SponsoredServices({ layout = "grid3x3" }: SponsoredServicesProps) {
   const navigate = useNavigate();
   
-  // Use the generic type parameter explicitly but in a simpler way
+  // Fix the TypeScript error by removing generic type parameters
   const { 
     data, 
     isLoading, 
@@ -66,6 +66,7 @@ export function SponsoredServices({ layout = "grid3x3" }: SponsoredServicesProps
     queryFn: fetchSponsoredServices
   });
   
+  // Handle optional data
   const services = data || [];
   
   // Handle error state
