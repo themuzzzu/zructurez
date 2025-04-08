@@ -14,7 +14,7 @@ interface SponsoredServicesProps {
   layout?: GridLayoutType;
 }
 
-// Define service type to avoid circular references
+// Define service type without circular references
 interface ServiceType {
   id: string;
   title: string;
@@ -44,8 +44,19 @@ const fetchSponsoredServices = async () => {
     // Return empty array if no data
     if (!data) return [];
     
-    // Return the raw data
-    return data as ServiceType[];
+    // Transform data to ensure it matches the ServiceType
+    return data.map(service => ({
+      id: service.id,
+      title: service.title,
+      description: service.description,
+      image_url: service.image_url,
+      price: service.price,
+      user_id: service.user_id,
+      category: service.category,
+      location: service.location,
+      contact_info: service.contact_info,
+      is_sponsored: true
+    }));
   } catch (error) {
     console.error("Error fetching sponsored services:", error);
     return [];
@@ -55,7 +66,7 @@ const fetchSponsoredServices = async () => {
 export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps) => {
   const navigate = useNavigate();
   
-  // Simplify the query to avoid type complications
+  // Use React Query without explicit type parameters
   const { data: services = [], isLoading, isError } = useQuery({
     queryKey: ['sponsored-services'],
     queryFn: fetchSponsoredServices

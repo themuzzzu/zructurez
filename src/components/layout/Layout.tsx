@@ -33,20 +33,8 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
     };
   }, []);
 
-  // Improve scrolling by fixing body height 
-  useEffect(() => {
-    // Fix body overflow
-    document.body.style.overflowY = "hidden";
-    document.body.style.height = "100vh";
-    
-    return () => {
-      document.body.style.overflowY = "";
-      document.body.style.height = "";
-    };
-  }, []);
-
   return (
-    <div className="min-h-screen bg-background overflow-hidden flex flex-col">
+    <div className="min-h-screen bg-background">
       <Navbar />
       <div className="flex flex-1 w-full h-[calc(100vh-4rem)]">
         {!hideSidebar && !isMobile && (
@@ -63,7 +51,7 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
             marginLeft: hideSidebar || isMobile ? 0 : sidebarWidth + 'px',
             paddingBottom: isMobile ? '6rem' : '2rem', 
             height: 'calc(100vh - 64px)',
-            padding: isMobile ? '0 0.5rem 6rem 0.5rem' : '0 1.5rem 2rem 1.5rem',
+            padding: isMobile ? '0 0 6rem 0' : '0 0.5rem 2rem 0.5rem',
           }}
         >
           {children}

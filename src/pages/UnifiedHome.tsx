@@ -21,7 +21,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 
 // Import BrowseTabContent properly to avoid type errors
-// We need to import the named export and convert it to a default export for lazy loading
 const LazyBrowseTabContent = lazy(() => 
   import("@/pages/marketplace/BrowseTabContent").then(module => ({ 
     default: module.BrowseTabContent 
@@ -51,13 +50,13 @@ export const UnifiedHome = () => {
   
   const { setLoading } = useLoading();
   
-  // Show loading indicator when page loads
+  // Show loading indicator when page loads - reduce loading time significantly
   useEffect(() => {
     setLoading(true);
     const timeout = setTimeout(() => {
       setLoading(false);
       setIsPageLoading(false);
-    }, 500); // Reduced loading time for faster initial render
+    }, 200); // Reduced from 500ms to 200ms
     return () => clearTimeout(timeout);
   }, [setLoading]);
   
@@ -112,9 +111,10 @@ export const UnifiedHome = () => {
   
   return (
     <Layout>
-      <div className="container max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
+      {/* Reduced padding on mobile, fixed top scrolling issues */}
+      <div className="container max-w-7xl mx-auto px-2 sm:px-4 pt-0 pb-4 sm:py-6 overflow-visible">
         {/* Single Search Bar at the top with improved design */}
-        <div className="mb-4 sm:mb-6">
+        <div className="mb-3 sm:mb-4">
           <AutocompleteSearch 
             value={searchQuery}
             onChange={setSearchQuery}
@@ -125,8 +125,8 @@ export const UnifiedHome = () => {
         </div>
         
         {/* Tabs for navigating between Marketplace, Businesses, and Services */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-          <TabsList className="w-full sm:w-auto mb-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4">
+          <TabsList className="w-full sm:w-auto mb-3">
             <TabsTrigger value="marketplace">Marketplace</TabsTrigger>
             <TabsTrigger value="businesses">Businesses</TabsTrigger>
             <TabsTrigger value="services">Services</TabsTrigger>
@@ -138,66 +138,67 @@ export const UnifiedHome = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
+            className="overflow-visible"
           >
             {/* Marketplace Tab Content */}
-            <TabsContent value="marketplace">
+            <TabsContent value="marketplace" className="mt-0">
               {/* Banner carousel below search */}
               <LazySection type="default" fallbackCount={1}>
-                <div className="mb-4 sm:mb-6">
+                <div className="mb-3 sm:mb-4">
                   <BannerCarousel />
                 </div>
               </LazySection>
               
               {/* Shop by Category section */}
-              <div className="mb-4 sm:mb-6">
+              <div className="mb-3 sm:mb-4">
                 <ShopByCategory onCategorySelect={handleCategoryChange} />
               </div>
               
               {/* Flash Sale Section */}
               <LazySection type="default">
-                <div className="mb-4 sm:mb-8">
+                <div className="mb-3 sm:mb-6">
                   <FlashSale />
                 </div>
               </LazySection>
               
               {/* Product Rankings */}
               <LazySection type="default">
-                <div className="mb-4 sm:mb-8">
+                <div className="mb-3 sm:mb-6">
                   <ProductRankings />
                 </div>
               </LazySection>
               
               {/* Sponsored Products Section */}
               <LazySection type="default">
-                <div className="mb-4 sm:mb-8">
+                <div className="mb-3 sm:mb-6">
                   <SponsoredProducts />
                 </div>
               </LazySection>
               
               {/* Trending Products */}
               <LazySection type="default">
-                <div className="mb-4 sm:mb-8">
+                <div className="mb-3 sm:mb-6">
                   <TrendingProducts />
                 </div>
               </LazySection>
               
               {/* Personalized Recommendations */}
               <LazySection type="default">
-                <div className="mb-4 sm:mb-8">
+                <div className="mb-3 sm:mb-6">
                   <PersonalizedRecommendations />
                 </div>
               </LazySection>
               
               {/* Crazy Deals Section */}
               <LazySection type="default">
-                <div className="mb-4 sm:mb-8">
+                <div className="mb-3 sm:mb-6">
                   <CrazyDeals />
                 </div>
               </LazySection>
               
               {/* Main content - Browse All */}
               <LazySection type="default">
-                <div className="mt-4 sm:mt-8">
+                <div className="mt-3 sm:mt-6">
                   <LazyBrowseTabContent 
                     searchTerm={searchQuery}
                     onCategorySelect={handleCategoryChange}
@@ -207,15 +208,15 @@ export const UnifiedHome = () => {
             </TabsContent>
             
             {/* Businesses Tab Content */}
-            <TabsContent value="businesses">
+            <TabsContent value="businesses" className="mt-0">
               {/* Business Banner Ad */}
-              <div className="mb-6">
+              <div className="mb-4">
                 <BusinessBannerAd />
               </div>
               
               {/* Business Categories Grid with Images */}
               <LazySection type="business">
-                <div className="mb-8">
+                <div className="mb-6">
                   <BusinessCategoryGrid />
                 </div>
               </LazySection>
@@ -228,15 +229,15 @@ export const UnifiedHome = () => {
             </TabsContent>
             
             {/* Services Tab Content */}
-            <TabsContent value="services">
+            <TabsContent value="services" className="mt-0">
               {/* Service Banner Ad */}
-              <div className="mb-6">
+              <div className="mb-4">
                 <ServiceBannerAd />
               </div>
               
               {/* Sponsored Services */}
               <LazySection type="service">
-                <div className="mb-8">
+                <div className="mb-6">
                   <SponsoredServices layout="grid3x3" />
                 </div>
               </LazySection>

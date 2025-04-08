@@ -18,10 +18,10 @@ export default function Home() {
   const { setLoading } = useLoading();
   const [activeTab, setActiveTab] = useState("all");
 
-  // Show loading indicator when page loads
+  // Show loading indicator when page loads - reduced loading time significantly
   useEffect(() => {
     setLoading(true);
-    const timeout = setTimeout(() => setLoading(false), 200);
+    const timeout = setTimeout(() => setLoading(false), 200); // Reduced from 500ms to 200ms
     return () => clearTimeout(timeout);
   }, [setLoading]);
 
@@ -30,10 +30,10 @@ export default function Home() {
       {/* Hero search section */}
       <SearchHero />
 
-      <div className="container max-w-7xl mx-auto px-4 py-8 overflow-visible">
+      <div className="container max-w-7xl mx-auto px-2 sm:px-4 pt-0 pb-8 overflow-visible">
         {/* Category navigation */}
-        <Tabs defaultValue="all" className="w-full mb-8" value={activeTab} onValueChange={setActiveTab}>
-          <div className="flex justify-between items-center mb-4">
+        <Tabs defaultValue="all" className="w-full mb-6" value={activeTab} onValueChange={setActiveTab}>
+          <div className="flex justify-between items-center mb-4 overflow-visible">
             <h2 className="text-2xl font-bold">Explore Categories</h2>
             <TabsList className="overflow-x-auto">
               <TabsTrigger value="all">All</TabsTrigger>
@@ -43,55 +43,55 @@ export default function Home() {
             </TabsList>
           </div>
           
-          <TabsContent value="all">
+          <TabsContent value="all" className="mt-0">
             {/* Featured carousel */}
-            <div className="mb-8">
+            <div className="mb-6">
               <BannerCarousel />
             </div>
             
             {/* Featured business categories */}
-            <div className="mb-8">
+            <div className="mb-6">
               <h2 className="text-2xl font-bold mb-4">Business Categories</h2>
               <BusinessCategoryGrid />
             </div>
             
             {/* Featured product categories */}
-            <div className="mb-8">
+            <div className="mb-6">
               <h2 className="text-2xl font-bold mb-4">Shop Products</h2>
               <ShopByCategory />
             </div>
             
             {/* Service Categories Scroller */}
-            <div className="mb-8">
+            <div className="mb-6">
               <ServiceCategoryScroller />
             </div>
             
             {/* Trending products */}
             <LikeProvider>
-              <div className="mb-8">
+              <div className="mb-6">
                 <TrendingProducts />
               </div>
             </LikeProvider>
           </TabsContent>
           
-          <TabsContent value="products">
-            <div className="mb-8">
+          <TabsContent value="products" className="mt-0">
+            <div className="mb-6">
               <ShopByCategory />
             </div>
             <LikeProvider>
               <SponsoredProducts />
-              <div className="mt-8">
+              <div className="mt-6">
                 <TrendingProducts />
               </div>
             </LikeProvider>
           </TabsContent>
           
-          <TabsContent value="businesses">
+          <TabsContent value="businesses" className="mt-0">
             <BusinessCategoryGrid />
           </TabsContent>
           
-          <TabsContent value="services">
-            <div className="mb-8">
+          <TabsContent value="services" className="mt-0">
+            <div className="mb-6">
               <ServiceCategoryScroller />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
