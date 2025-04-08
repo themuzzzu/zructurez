@@ -29,8 +29,8 @@ interface Service {
   is_sponsored: boolean;
 }
 
-// Define the shape of data returned from Supabase to avoid inference issues
-type SupabaseService = {
+// Define the shape of raw data returned from Supabase
+interface SupabaseServiceData {
   id: string;
   title: string;
   description: string;
@@ -40,7 +40,7 @@ type SupabaseService = {
   category?: string;
   location?: string;
   contact_info?: string;
-};
+}
 
 /**
  * Fetches sponsored services from Supabase
@@ -55,16 +55,17 @@ async function fetchSponsoredServices(): Promise<Service[]> {
       
     if (error) throw error;
     
-    // Explicitly map data to the Service interface to avoid type inference issues
-    const services: Service[] = (data || []).map((service: SupabaseService) => ({
+    // Type the raw data first as an array of SupabaseServiceData
+    const rawData = (data || []) as SupabaseServiceData[];
+    
+    // Then map it to our Service interface
+    return rawData.map(service => ({
       ...service,
       is_sponsored: true
     }));
-    
-    return services;
   } catch (error) {
     console.error("Error fetching sponsored services:", error);
-    return [];
+    return [] as Service[];
   }
 }
 
