@@ -56,14 +56,11 @@ async function fetchSponsoredServices(): Promise<Service[]> {
 export function SponsoredServices({ layout = "grid3x3" }: SponsoredServicesProps) {
   const navigate = useNavigate();
   
-  // Use explicit type parameters to avoid deep instantiation
-  const { data, isLoading, isError } = useQuery({
+  // Fix: Provide explicit type parameters to useQuery to avoid deep instantiation
+  const { data: services = [], isLoading, isError } = useQuery<Service[], Error>({
     queryKey: ['sponsored-services'],
     queryFn: fetchSponsoredServices
   });
-  
-  // Use the typed data
-  const services = data || [];
   
   // Handle error state
   if (isError) {
