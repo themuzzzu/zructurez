@@ -27,7 +27,20 @@ interface ServiceType {
   is_sponsored: boolean;
 }
 
-// Function to fetch sponsored services with explicit typing to avoid nested inference
+// Explicitly define the raw data type from Supabase
+interface RawServiceData {
+  id: string;
+  title: string;
+  description: string;
+  image_url?: string;
+  price: number;
+  user_id: string;
+  category?: string;
+  location?: string;
+  contact_info?: string;
+}
+
+// Function to fetch sponsored services with explicit return type
 async function fetchSponsoredServices(): Promise<ServiceType[]> {
   const { data, error } = await supabase
     .from('services')
@@ -37,11 +50,11 @@ async function fetchSponsoredServices(): Promise<ServiceType[]> {
   
   if (error) throw error;
   
-  // Define the raw data as any[] to avoid complex type inference
-  const services: any[] = data || [];
+  // Type the raw data explicitly
+  const rawData = (data || []) as RawServiceData[];
   
-  // Map to our expected type structure
-  return services.map(item => ({
+  // Transform to our service type
+  return rawData.map(item => ({
     id: item.id,
     title: item.title,
     description: item.description,
@@ -58,7 +71,7 @@ async function fetchSponsoredServices(): Promise<ServiceType[]> {
 export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps) => {
   const navigate = useNavigate();
   
-  // Explicitly type the query result to avoid inference issues
+  // Use the query with explicit typings
   const { data: services, isLoading } = useQuery<ServiceType[], Error>({
     queryKey: ['sponsored-services'],
     queryFn: fetchSponsoredServices,
