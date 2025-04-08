@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
@@ -7,6 +8,7 @@ import { ServiceCard } from "@/components/service-card/ServiceCard";
 import { ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
+import { LoadingView } from "@/components/LoadingView";
 
 interface SponsoredServicesProps {
   layout?: GridLayoutType;
@@ -26,42 +28,69 @@ interface ServiceType {
   is_sponsored: boolean;
 }
 
-// Function to fetch sponsored services with explicit typing
-async function fetchSponsoredServices() {
-  const { data, error } = await supabase
-    .from('services')
-    .select('*')
-    .eq('is_sponsored', true)
-    .limit(6);
-  
-  if (error) throw error;
-  
-  // Cast to a simple array to avoid type inference issues
-  const services: ServiceType[] = (data || []).map(item => ({
-    id: item.id,
-    title: item.title,
-    description: item.description,
-    image_url: item.image_url,
-    price: item.price,
-    user_id: item.user_id,
-    category: item.category,
-    location: item.location,
-    contact_info: item.contact_info,
-    is_sponsored: true
-  }));
-  
-  return services;
-}
+// Define a type for the raw data from Supabase to avoid deep type inference
+type RawServiceData = Record<string, any>;
+
+// Function to fetch sponsored services with explicit typing to break deep inference
+const fetchSponsoredServices = async (): Promise<ServiceType[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('services')
+      .select('*')
+      .eq('is_sponsored', true)
+      .limit(6);
+    
+    if (error) throw error;
+    
+    // Explicitly cast data to a simple type first to break deep inference
+    const rawData = (data || []) as RawServiceData[];
+    
+    // Then manually map to our ServiceType
+    return rawData.map(item => ({
+      id: item.id || '',
+      title: item.title || '',
+      description: item.description || '',
+      image_url: item.image_url,
+      price: item.price || 0,
+      user_id: item.user_id || '',
+      category: item.category,
+      location: item.location,
+      contact_info: item.contact_info,
+      is_sponsored: true
+    }));
+  } catch (error) {
+    console.error("Error fetching sponsored services:", error);
+    return [];
+  }
+};
 
 export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps) => {
   const navigate = useNavigate();
   
-  // Use the query with simplifying the type inference
-  const { data: services, isLoading } = useQuery({
+  // Use the query with explicit typing to avoid deep inference issues
+  const { data: services = [], isLoading, isError } = useQuery<ServiceType[]>({
     queryKey: ['sponsored-services'],
     queryFn: fetchSponsoredServices,
     staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 1, // Limit retries to prevent infinite loading attempts
+    refetchOnWindowFocus: false, // Prevent unnecessary refetches
   });
+  
+  // Handle error state
+  if (isError) {
+    return (
+      <div className="p-6 text-center">
+        <p className="text-red-500">Failed to load sponsored services.</p>
+        <Button 
+          onClick={() => window.location.reload()}
+          className="mt-4"
+          variant="outline"
+        >
+          Retry
+        </Button>
+      </div>
+    );
+  }
   
   const getGridClasses = () => {
     switch (layout) {
@@ -84,13 +113,15 @@ export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps
   if (isLoading) {
     return (
       <div className="space-y-4 mb-8">
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <h2 className="text-2xl font-bold">Sponsored Services</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {[1, 2, 3].map((i) => (
             <Card key={i} className="overflow-hidden">
               <Skeleton className="h-48 w-full" />
               <div className="p-3">
                 <Skeleton className="h-4 w-3/4 mb-2" />
                 <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-10 w-full mt-4" />
               </div>
             </Card>
           ))}
@@ -105,6 +136,7 @@ export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps
   
   return (
     <div className="space-y-4 mb-8">
+      <h2 className="text-2xl font-bold">Sponsored Services</h2>
       <div className={getGridClasses()}>
         {services.map((service) => (
           <ServiceCard 

@@ -1,5 +1,5 @@
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, lazy } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { AutocompleteSearch } from "@/components/marketplace/AutocompleteSearch";
@@ -10,24 +10,21 @@ import { ShopByCategory } from "@/components/marketplace/ShopByCategory";
 import { TrendingProducts } from "@/components/marketplace/TrendingProducts";
 import { PersonalizedRecommendations } from "@/components/marketplace/PersonalizedRecommendations";
 import { ProductRankings } from "@/components/rankings/ProductRankings";
-import { SkeletonCard } from "@/components/loaders";
+import { LoadingView } from "@/components/LoadingView";
 import { useLoading } from "@/providers/LoadingProvider";
 import { FlashSale } from "@/components/marketplace/FlashSale";
 import { BusinessCategoryGrid } from "@/components/home/BusinessCategoryGrid";
 import { BusinessBannerAd } from "@/components/ads/BusinessBannerAd";
 import { ServiceBannerAd } from "@/components/ads/ServiceBannerAd";
+import { SponsoredServices } from "@/components/service-marketplace/SponsoredServices";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
-import { BrowseTabContent } from "@/pages/marketplace/BrowseTabContent";
 
-const LazySection = ({ children, fallbackCount = 4 }) => (
-  <Suspense fallback={
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      {Array.from({ length: fallbackCount }).map((_, i) => (
-        <SkeletonCard key={i} />
-      ))}
-    </div>
-  }>
+// Lazy load components to improve initial loading time
+const LazyBrowseTabContent = lazy(() => import("@/pages/marketplace/BrowseTabContent"));
+
+const LazySection = ({ children, type, fallbackCount = 4 }) => (
+  <Suspense fallback={<LoadingView type={type} />}>
     {children}
   </Suspense>
 );
@@ -45,13 +42,17 @@ export const UnifiedHome = () => {
   const [searchQuery, setSearchQuery] = useState(queryParam);
   const [selectedCategory, setSelectedCategory] = useState(categoryParam);
   const [selectedSubcategory, setSelectedSubcategory] = useState(subcategoryParam);
+  const [isPageLoading, setIsPageLoading] = useState(true);
   
   const { setLoading } = useLoading();
   
   // Show loading indicator when page loads
   useEffect(() => {
     setLoading(true);
-    const timeout = setTimeout(() => setLoading(false), 500); // Reduced loading time for faster initial render
+    const timeout = setTimeout(() => {
+      setLoading(false);
+      setIsPageLoading(false);
+    }, 500); // Reduced loading time for faster initial render
     return () => clearTimeout(timeout);
   }, [setLoading]);
   
@@ -136,7 +137,7 @@ export const UnifiedHome = () => {
             {/* Marketplace Tab Content */}
             <TabsContent value="marketplace">
               {/* Banner carousel below search */}
-              <LazySection fallbackCount={1}>
+              <LazySection type="default" fallbackCount={1}>
                 <div className="mb-4 sm:mb-6">
                   <BannerCarousel />
                 </div>
@@ -148,51 +149,51 @@ export const UnifiedHome = () => {
               </div>
               
               {/* Flash Sale Section */}
-              <LazySection>
+              <LazySection type="default">
                 <div className="mb-4 sm:mb-8">
                   <FlashSale />
                 </div>
               </LazySection>
               
               {/* Product Rankings */}
-              <LazySection>
+              <LazySection type="default">
                 <div className="mb-4 sm:mb-8">
                   <ProductRankings />
                 </div>
               </LazySection>
               
               {/* Sponsored Products Section */}
-              <LazySection>
+              <LazySection type="default">
                 <div className="mb-4 sm:mb-8">
                   <SponsoredProducts />
                 </div>
               </LazySection>
               
               {/* Trending Products */}
-              <LazySection>
+              <LazySection type="default">
                 <div className="mb-4 sm:mb-8">
                   <TrendingProducts />
                 </div>
               </LazySection>
               
               {/* Personalized Recommendations */}
-              <LazySection>
+              <LazySection type="default">
                 <div className="mb-4 sm:mb-8">
                   <PersonalizedRecommendations />
                 </div>
               </LazySection>
               
               {/* Crazy Deals Section */}
-              <LazySection>
+              <LazySection type="default">
                 <div className="mb-4 sm:mb-8">
                   <CrazyDeals />
                 </div>
               </LazySection>
               
               {/* Main content - Browse All */}
-              <LazySection>
+              <LazySection type="default">
                 <div className="mt-4 sm:mt-8">
-                  <BrowseTabContent 
+                  <LazyBrowseTabContent 
                     searchTerm={searchQuery}
                     onCategorySelect={handleCategoryChange}
                   />
@@ -208,9 +209,11 @@ export const UnifiedHome = () => {
               </div>
               
               {/* Business Categories Grid with Images */}
-              <div className="mb-8">
-                <BusinessCategoryGrid />
-              </div>
+              <LazySection type="business">
+                <div className="mb-8">
+                  <BusinessCategoryGrid />
+                </div>
+              </LazySection>
               
               {/* Load Business BrowseTabContent or similar component here */}
               <div>
@@ -225,6 +228,13 @@ export const UnifiedHome = () => {
               <div className="mb-6">
                 <ServiceBannerAd />
               </div>
+              
+              {/* Sponsored Services */}
+              <LazySection type="service">
+                <div className="mb-8">
+                  <SponsoredServices layout="grid3x3" />
+                </div>
+              </LazySection>
               
               {/* Service Categories Grid - can be implemented in future */}
               <div>
