@@ -80,7 +80,7 @@ const fetchSponsoredServices = async (): Promise<ServiceType[]> => {
 export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps) => {
   const navigate = useNavigate();
   
-  // Use explicit non-generic type for useQuery to prevent deep instantiation error
+  // Fix: Remove generic type parameters and use type assertion instead
   const { data: services, isLoading, isError } = useQuery({
     queryKey: ['sponsored-services'],
     queryFn: fetchSponsoredServices,
