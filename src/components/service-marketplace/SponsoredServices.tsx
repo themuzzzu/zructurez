@@ -66,19 +66,11 @@ const fetchSponsoredServices = async (): Promise<ServiceType[]> => {
 export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps) => {
   const navigate = useNavigate();
   
-  // Use type assertion with a more direct approach to avoid deep type inference
-  const { 
-    data: services = [], 
-    isLoading, 
-    isError 
-  } = useQuery({
+  // Fix the type instantiation issue by using type parameters directly
+  const { data: services = [], isLoading, isError } = useQuery<ServiceType[], Error>({
     queryKey: ['sponsored-services'],
     queryFn: fetchSponsoredServices
-  }) as {
-    data: ServiceType[];
-    isLoading: boolean;
-    isError: boolean;
-  };
+  });
   
   // Handle error state
   if (isError) {
