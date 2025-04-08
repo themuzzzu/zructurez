@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
@@ -13,7 +14,7 @@ interface SponsoredServicesProps {
   layout?: GridLayoutType;
 }
 
-// Define service type
+// Define service type without circular references
 interface ServiceType {
   id: string;
   title: string;
@@ -27,24 +28,10 @@ interface ServiceType {
   is_sponsored: boolean;
 }
 
-// Define the raw service data type from the database
-interface RawServiceData {
-  id: string;
-  title: string;
-  description: string;
-  image_url?: string;
-  price: number;
-  user_id: string;
-  category?: string;
-  location?: string;
-  contact_info?: string;
-  is_open?: boolean;
-  views?: number;
-  created_at?: string;
-}
-
-// Function to fetch sponsored services
-const fetchSponsoredServices = async (): Promise<ServiceType[]> => {
+/**
+ * Fetches sponsored services from Supabase
+ */
+async function fetchSponsoredServices(): Promise<ServiceType[]> {
   try {
     const { data, error } = await supabase
       .from('services')
@@ -57,8 +44,8 @@ const fetchSponsoredServices = async (): Promise<ServiceType[]> => {
     // Return empty array if no data
     if (!data) return [];
     
-    // Map the raw data to include is_sponsored property explicitly
-    return data.map((service: RawServiceData) => ({
+    // Map the raw data to ServiceType
+    return data.map(service => ({
       id: service.id,
       title: service.title,
       description: service.description,
@@ -74,16 +61,18 @@ const fetchSponsoredServices = async (): Promise<ServiceType[]> => {
     console.error("Error fetching sponsored services:", error);
     return [];
   }
-};
+}
 
 export const SponsoredServices = ({ layout = "grid3x3" }: SponsoredServicesProps) => {
   const navigate = useNavigate();
   
-  // Fix: Declare the query with explicit type annotation on the useQuery call
-  const { data: services, isLoading, isError } = useQuery({
+  // Use query without type parameters, let TypeScript infer types
+  const query = useQuery({
     queryKey: ['sponsored-services'],
     queryFn: fetchSponsoredServices
   });
+  
+  const { data: services, isLoading, isError } = query;
   
   // Handle error state
   if (isError) {
