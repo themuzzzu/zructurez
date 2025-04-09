@@ -5,17 +5,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
+import { ProductImage } from "@/types/product";
 
 interface ProductImagesProps {
   productId: string;
   mainImageUrl?: string | null;
-}
-
-interface ProductImage {
-  id: string;
-  product_id: string;
-  image_url: string;
-  display_order: number;
 }
 
 export const ProductImages = ({ productId, mainImageUrl }: ProductImagesProps) => {

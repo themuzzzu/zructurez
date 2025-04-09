@@ -1,9 +1,10 @@
+
 import { useState, useEffect } from "react";
 import { ProductCard } from "@/components/products/ProductCard";
 import { ProductsGrid } from "@/components/products/ProductsGrid";
-import { SectionTitle } from "@/components/ui/SectionTitle";
 import { supabase } from "@/integrations/supabase/client";
 import type { Product } from "@/types/product";
+import { Heading } from "@/components/ui/heading";
 
 const ServicesPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -43,8 +44,8 @@ const ServicesPage = () => {
   
   return (
     <>
-      <SectionTitle title="Our Services" />
-      <ProductsGrid layout="grid3x3" />
+      <Heading>Our Services</Heading>
+      <ProductsGrid layout="grid3x3" products={products} />
     </>
   );
 };

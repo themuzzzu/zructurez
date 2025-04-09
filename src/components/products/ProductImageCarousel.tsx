@@ -6,9 +6,16 @@ import { cn } from "@/lib/utils";
 interface ProductImageCarouselProps {
   images: string[];
   className?: string;
+  aspectRatio?: number;
+  fallbackImage?: string;
 }
 
-export const ProductImageCarousel = ({ images, className }: ProductImageCarouselProps) => {
+export const ProductImageCarousel = ({ 
+  images, 
+  className, 
+  aspectRatio = 1,
+  fallbackImage = "/placeholder.svg" 
+}: ProductImageCarouselProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // Handle when images array changes
@@ -19,7 +26,7 @@ export const ProductImageCarousel = ({ images, className }: ProductImageCarousel
   // If no images, return placeholder
   if (!images || images.length === 0) {
     return (
-      <div className={cn("relative aspect-square w-full bg-muted", className)}>
+      <div className={cn(`relative aspect-[${aspectRatio}] w-full bg-muted`, className)}>
         <div className="absolute inset-0 flex items-center justify-center">
           <span className="text-muted-foreground">No image available</span>
         </div>
@@ -40,11 +47,11 @@ export const ProductImageCarousel = ({ images, className }: ProductImageCarousel
   };
 
   return (
-    <div className={cn("relative aspect-square w-full overflow-hidden rounded-md", className)}>
+    <div className={cn(`relative aspect-[${aspectRatio}] w-full overflow-hidden rounded-md`, className)}>
       {/* Image */}
       <div className="relative h-full w-full">
         <img
-          src={images[currentIndex]}
+          src={images[currentIndex] || fallbackImage}
           alt={`Product image ${currentIndex + 1}`}
           className="h-full w-full object-cover transition-opacity duration-300"
         />

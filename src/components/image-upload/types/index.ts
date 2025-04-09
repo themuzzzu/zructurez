@@ -5,3 +5,5 @@ export interface Position {
 }
 
 export type ImagePosition = Position;
+export { ImagePosition as ImagePosition };
+
