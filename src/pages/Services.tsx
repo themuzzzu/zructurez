@@ -5,6 +5,8 @@ import { ProductsGrid } from "@/components/products/ProductsGrid";
 import { supabase } from "@/integrations/supabase/client";
 import type { Product } from "@/types/product";
 import { Heading } from "@/components/ui/heading";
+import { ServiceBannerAd } from "@/components/ads/ServiceBannerAd";
+import { SponsoredServices } from "@/components/service-marketplace/SponsoredServices";
 
 const ServicesPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -35,7 +37,7 @@ const ServicesPage = () => {
   }, []);
 
   if (loading) {
-    return <div>Loading products...</div>;
+    return <div>Loading services...</div>;
   }
 
   if (error) {
@@ -45,6 +47,14 @@ const ServicesPage = () => {
   return (
     <>
       <Heading>Our Services</Heading>
+      
+      {/* Service-specific banner ad */}
+      <ServiceBannerAd />
+      
+      {/* Display sponsored services */}
+      <SponsoredServices />
+      
+      {/* Regular service listings */}
       <ProductsGrid layout="grid3x3" products={products} />
     </>
   );
