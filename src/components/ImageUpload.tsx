@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { ImagePreview } from "./image-upload/ImagePreview";
 import { ImageControls } from "./image-upload/ImageControls";
 import { UploadButtons } from "./image-upload/UploadButtons";
 import { Button } from "./ui/button";
+import type { ImageUploadProps } from "./types";
 
 export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 export const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
@@ -21,6 +22,7 @@ export interface ImageUploadProps {
   onScaleChange?: (scale: number) => void;
   onPositionChange?: (position: ImagePosition) => void;
   skipAutoSave?: boolean;
+  buttonText?: string; // Added buttonText prop
 }
 
 export const ImageUpload = ({
@@ -31,156 +33,78 @@ export const ImageUpload = ({
   onScaleChange,
   onPositionChange,
   skipAutoSave = false,
+  buttonText,
 }: ImageUploadProps) => {
-  const [scale, setScale] = useState(initialScale);
-  const [position, setPosition] = useState(initialPosition);
-  const [previewImage, setPreviewImage] = useState<string | null>(selectedImage);
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [pendingImage, setPendingImage] = useState<string | null>(null);
-  const [pendingScale, setPendingScale] = useState(initialScale);
-  const [pendingPosition, setPendingPosition] = useState(initialPosition);
+  const {
+    scale,
+    setScale,
+    position,
+    setPosition,
+    previewImage,
+    setPreviewImage,
+    isDragging,
+    setIsDragging,
+    dragStart,
+    setDragStart,
+    pendingImage,
+    setPendingImage,
+    handleSave,
+  } = useImageUploadState(
+    selectedImage,
+    initialScale,
+    initialPosition,
+    onImageSelect,
+    onScaleChange,
+    onPositionChange,
+    skipAutoSave
+  );
 
-  useEffect(() => {
-    setPreviewImage(selectedImage);
-  }, [selectedImage]);
+  const { handleFileUpload, handleCameraCapture } = useImageUploadHandlers({
+    setPreviewImage,
+    setScale,
+    setPosition,
+    onImageSelect,
+    onScaleChange,
+    onPositionChange,
+    skipAutoSave,
+  });
 
-  useEffect(() => {
-    setScale(initialScale);
-  }, [initialScale]);
-
-  useEffect(() => {
-    setPosition(initialPosition);
-  }, [initialPosition]);
-
-  const handleFileUpload = (file: File) => {
-    if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
-      toast.error("Please upload a valid image file (JPEG, PNG, or WebP)");
-      return;
-    }
-
-    if (file.size > MAX_FILE_SIZE) {
-      toast.error("Image size should be less than 5MB");
-      return;
-    }
-    
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const result = e.target?.result as string;
-      setPendingImage(result);
-      setPendingScale(1);
-      setPendingPosition({ x: 50, y: 50 });
-      setPreviewImage(result);
-      setScale(1);
-      setPosition({ x: 50, y: 50 });
-      
-      if (!skipAutoSave) {
-        onImageSelect(result);
-        onScaleChange?.(1);
-        onPositionChange?.({ x: 50, y: 50 });
-      }
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleCameraCapture = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      const video = document.createElement('video');
-      video.srcObject = stream;
-      
-      await new Promise((resolve) => {
-        video.onloadedmetadata = () => {
-          video.play();
-          resolve(true);
-        };
-      });
-
-      const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      const context = canvas.getContext('2d');
-      
-      if (!context) {
-        throw new Error("Could not get canvas context");
-      }
-
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
-      
-      canvas.toBlob((blob) => {
-        if (blob) {
-          handleFileUpload(new File([blob], "camera-capture.jpg", { type: "image/jpeg" }));
-        }
-      }, "image/jpeg");
-
-      stream.getTracks().forEach(track => track.stop());
-    } catch (error) {
-      console.error('Error accessing camera:', error);
-      toast.error("Could not access camera. Please check permissions.");
-    }
-  };
-
-  const handleMouseDown = (e: React.MouseEvent) => {
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
     setIsDragging(true);
     setDragStart({
       x: e.clientX - position.x,
       y: e.clientY - position.y,
     });
-  };
+  }, [position, setDragStart, setIsDragging]);
 
-  const handleMouseMove = (e: React.MouseEvent) => {
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!isDragging) return;
     
     const newX = Math.max(0, Math.min(100, e.clientX - dragStart.x));
     const newY = Math.max(0, Math.min(100, e.clientY - dragStart.y));
     
-    const newPosition = { x: newX, y: newY };
-    setPosition(newPosition);
-  };
+    setPosition({ x: newX, y: newY });
+  }, [isDragging, dragStart, setPosition]);
 
-  const handleMouseUp = () => {
+  const handleMouseUp = useCallback(() => {
     setIsDragging(false);
-  };
+  }, [setIsDragging]);
 
-  const handleSave = () => {
-    onImageSelect(previewImage);
-    onScaleChange?.(scale);
-    onPositionChange?.(position);
-    if (!skipAutoSave) {
-      toast.success("Image settings saved!");
-    }
-  };
-
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     if (pendingImage) {
       setPreviewImage(selectedImage);
       setScale(initialScale);
       setPosition(initialPosition);
       setPendingImage(null);
-      setPendingScale(initialScale);
-      setPendingPosition(initialPosition);
     }
-  };
-
-  const handleScaleChange = (newScale: number) => {
-    setScale(newScale);
-    if (!skipAutoSave) {
-      onScaleChange?.(newScale);
-    }
-  };
-
-  const handlePositionChange = (newPosition: ImagePosition) => {
-    setPosition(newPosition);
-    if (!skipAutoSave) {
-      onPositionChange?.(newPosition);
-    }
-  };
+  }, [pendingImage, selectedImage, initialScale, initialPosition, setPendingImage, setPreviewImage, setScale, setPosition]);
 
   return (
     <div className="space-y-4">
       <UploadButtons 
         onCameraCapture={handleCameraCapture}
         onFileSelect={handleFileUpload}
+        buttonText={buttonText}
       />
 
       {previewImage && (
@@ -198,12 +122,190 @@ export const ImageUpload = ({
             onDragStart={handleMouseDown}
             onDragMove={handleMouseMove}
             onDragEnd={handleMouseUp}
-            onPositionChange={handlePositionChange}
+            onPositionChange={(newPosition) => {
+              setPosition(newPosition);
+              if (!skipAutoSave) {
+                onPositionChange?.(newPosition);
+              }
+            }}
           />
 
           <ImageControls
             scale={scale}
-            onScaleChange={handleScaleChange}
+            onScaleChange={(newScale) => {
+              setScale(newScale);
+              if (!skipAutoSave) {
+                onScaleChange?.(newScale);
+              }
+            }}
+            onPositionChange={(x, y) => {
+              const newPosition = { x, y };
+              setPosition(newPosition);
+              if (!skipAutoSave) {
+                onPositionChange?.(newPosition);
+              }
+            }}
+            onSave={handleSave}
+          />
+
+          {(pendingImage || skipAutoSave) && (
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={handleCancel}>
+                Cancel
+              </Button>
+              <Button onClick={handleSave}>
+                Save Changes
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+import { useState, useEffect, useCallback } from "react";
+import { toast } from "sonner";
+import { ImagePreview } from "./image-upload/ImagePreview";
+import { ImageControls } from "./image-upload/ImageControls";
+import { UploadButtons } from "./image-upload/UploadButtons";
+import { Button } from "./ui/button";
+import type { ImageUploadProps } from "./types";
+import { useImageUploadState } from "./hooks/useImageUploadState";
+import { useImageUploadHandlers } from "./hooks/useImageUploadHandlers";
+
+export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+export const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+
+interface ImagePosition {
+  x: number;
+  y: number;
+}
+
+export interface ImageUploadProps {
+  selectedImage: string | null;
+  onImageSelect: (image: string | null) => void;
+  initialScale?: number;
+  initialPosition?: ImagePosition;
+  onScaleChange?: (scale: number) => void;
+  onPositionChange?: (position: ImagePosition) => void;
+  skipAutoSave?: boolean;
+  buttonText?: string;
+}
+
+export const ImageUpload = ({
+  selectedImage,
+  onImageSelect,
+  initialScale = 1,
+  initialPosition = { x: 50, y: 50 },
+  onScaleChange,
+  onPositionChange,
+  skipAutoSave = false,
+  buttonText,
+}: ImageUploadProps) => {
+  const {
+    scale,
+    setScale,
+    position,
+    setPosition,
+    previewImage,
+    setPreviewImage,
+    isDragging,
+    setIsDragging,
+    dragStart,
+    setDragStart,
+    pendingImage,
+    setPendingImage,
+    handleSave,
+  } = useImageUploadState(
+    selectedImage,
+    initialScale,
+    initialPosition,
+    onImageSelect,
+    onScaleChange,
+    onPositionChange,
+    skipAutoSave
+  );
+
+  const { handleFileUpload, handleCameraCapture } = useImageUploadHandlers({
+    setPreviewImage,
+    setScale,
+    setPosition,
+    onImageSelect,
+    onScaleChange,
+    onPositionChange,
+    skipAutoSave,
+  });
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    setIsDragging(true);
+    setDragStart({
+      x: e.clientX - position.x,
+      y: e.clientY - position.y,
+    });
+  }, [position, setDragStart, setIsDragging]);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!isDragging) return;
+    
+    const newX = Math.max(0, Math.min(100, e.clientX - dragStart.x));
+    const newY = Math.max(0, Math.min(100, e.clientY - dragStart.y));
+    
+    setPosition({ x: newX, y: newY });
+  }, [isDragging, dragStart, setPosition]);
+
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false);
+  }, [setIsDragging]);
+
+  const handleCancel = useCallback(() => {
+    if (pendingImage) {
+      setPreviewImage(selectedImage);
+      setScale(initialScale);
+      setPosition(initialPosition);
+      setPendingImage(null);
+    }
+  }, [pendingImage, selectedImage, initialScale, initialPosition, setPendingImage, setPreviewImage, setScale, setPosition]);
+
+  return (
+    <div className="space-y-4">
+      <UploadButtons 
+        onCameraCapture={handleCameraCapture}
+        onFileSelect={handleFileUpload}
+        buttonText={buttonText}
+      />
+
+      {previewImage && (
+        <div className="space-y-4">
+          <ImagePreview
+            previewImage={previewImage}
+            scale={scale}
+            position={position}
+            onImageRemove={() => {
+              setPreviewImage(null);
+              onImageSelect(null);
+              setPendingImage(null);
+            }}
+            isDragging={isDragging}
+            onDragStart={handleMouseDown}
+            onDragMove={handleMouseMove}
+            onDragEnd={handleMouseUp}
+            onPositionChange={(newPosition) => {
+              setPosition(newPosition);
+              if (!skipAutoSave) {
+                onPositionChange?.(newPosition);
+              }
+            }}
+          />
+
+          <ImageControls
+            scale={scale}
+            onScaleChange={(newScale) => {
+              setScale(newScale);
+              if (!skipAutoSave) {
+                onScaleChange?.(newScale);
+              }
+            }}
             onPositionChange={(x, y) => {
               const newPosition = { x, y };
               setPosition(newPosition);

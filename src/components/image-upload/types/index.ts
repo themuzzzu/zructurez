@@ -5,5 +5,4 @@ export interface Position {
 }
 
 export type ImagePosition = Position;
-// Export ImagePosition once and correctly
-export { ImagePosition };
+// Remove the conflicting export line
