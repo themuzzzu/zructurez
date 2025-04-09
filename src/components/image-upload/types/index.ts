@@ -4,5 +4,5 @@ export interface Position {
   y: number;
 }
 
+// Use 'export type' when re-exporting types in isolated modules mode
 export type ImagePosition = Position;
-// Remove the conflicting export line
