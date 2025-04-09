@@ -56,7 +56,7 @@ export const ProductSpecifications = ({ product }: ProductSpecificationsProps) =
                         ? attribute.value
                         : typeof attribute === 'string' && attribute && attribute.includes(':')
                           ? attribute.split(':')[1]
-                          : attribute
+                          : typeof attribute === 'string' ? attribute : '-'
                       }
                     </span>
                   </div>

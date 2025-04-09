@@ -9,7 +9,7 @@ export interface ImageUploadProps {
   onScaleChange?: (scale: number) => void;
   onPositionChange?: (position: ImagePosition) => void;
   skipAutoSave?: boolean;
-  buttonText?: string;
+  buttonText?: string; // Added buttonText prop
 }
 
 export interface UploadButtonsProps {

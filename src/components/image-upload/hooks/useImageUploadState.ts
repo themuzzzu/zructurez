@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { ImagePosition } from "../types";
+import { ImagePosition } from "../types/index";
 
 export const useImageUploadState = (
   selectedImage: string | null,

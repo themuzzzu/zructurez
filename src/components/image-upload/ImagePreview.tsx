@@ -1,6 +1,7 @@
+
 import { X } from "lucide-react";
 import { Button } from "../ui/button";
-import { ImagePosition } from "./types";
+import { ImagePosition } from "./types/index";
 
 interface ImagePreviewProps {
   previewImage: string;

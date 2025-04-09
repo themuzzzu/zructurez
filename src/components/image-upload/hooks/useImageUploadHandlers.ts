@@ -1,6 +1,6 @@
 
 import { toast } from "sonner";
-import { ImagePosition } from "../types";
+import { ImagePosition } from "../types/index";
 
 // Maximum file size: 5MB
 export const MAX_FILE_SIZE = 5 * 1024 * 1024;
