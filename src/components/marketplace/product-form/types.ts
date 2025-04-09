@@ -7,6 +7,7 @@ export interface ProductFormData {
   subcategory: string;
   stock: string;
   image: string | null;
+  images?: (string | null)[];
   is_discounted: boolean;
   discount_percentage: string;
   is_used: boolean;
@@ -15,13 +16,10 @@ export interface ProductFormData {
   brand_name: string;
   model: string;
   size: string;
-  labels: ProductLabelFormData[];
-}
-
-export interface ProductLabelFormData {
-  id?: string;
-  name: string;
-  attributes: string[];
+  labels: {
+    name: string;
+    attributes: string[];
+  }[];
 }
 
 export interface ProductFormProps {

@@ -1,0 +1,82 @@
+
+import { useState, useEffect } from "react";
+import { ProductImageCarousel } from "./ProductImageCarousel";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card } from "@/components/ui/card";
+
+interface ProductImagesProps {
+  productId: string;
+  mainImageUrl?: string | null;
+}
+
+interface ProductImage {
+  id: string;
+  product_id: string;
+  image_url: string;
+  display_order: number;
+}
+
+export const ProductImages = ({ productId, mainImageUrl }: ProductImagesProps) => {
+  const { data: productImages, isLoading } = useQuery({
+    queryKey: ['product-images', productId],
+    queryFn: async () => {
+      // Fetch additional product images
+      const { data, error } = await supabase
+        .from('product_images')
+        .select('*')
+        .eq('product_id', productId)
+        .order('display_order', { ascending: true });
+        
+      if (error) throw error;
+      return data as ProductImage[];
+    }
+  });
+  
+  const [allImages, setAllImages] = useState<string[]>([]);
+  
+  useEffect(() => {
+    const images: string[] = [];
+    
+    // Add main image first if available
+    if (mainImageUrl) {
+      images.push(mainImageUrl);
+    }
+    
+    // Add additional images
+    if (productImages && productImages.length > 0) {
+      productImages.forEach(img => {
+        if (img.image_url) {
+          images.push(img.image_url);
+        }
+      });
+    }
+    
+    setAllImages(images);
+  }, [mainImageUrl, productImages]);
+  
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-64 w-full" />
+        <div className="flex gap-2">
+          <Skeleton className="h-16 w-16" />
+          <Skeleton className="h-16 w-16" />
+          <Skeleton className="h-16 w-16" />
+        </div>
+      </div>
+    );
+  }
+  
+  // If no images at all, show placeholder
+  if (allImages.length === 0) {
+    return (
+      <Card className="h-64 flex items-center justify-center">
+        <span className="text-muted-foreground">No images available</span>
+      </Card>
+    );
+  }
+  
+  return <ProductImageCarousel images={allImages} aspectRatio={1} />;
+};

@@ -1,12 +1,12 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ImageUpload } from "@/components/ImageUpload";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, X } from "lucide-react";
+import { MultipleImageUpload } from "@/components/MultipleImageUpload";
 import { Card } from "@/components/ui/card";
 
 interface ServiceProductFormProps {
@@ -21,26 +21,8 @@ export const ServiceProductForm = ({ serviceId, onSuccess }: ServiceProductFormP
     description: "",
     price: "",
     stock: "0",
-    images: [] as string[],
+    images: [] as (string | null)[],
   });
-
-  const handleImageAdd = (image: string | null) => {
-    if (image && formData.images.length < 4) {
-      setFormData(prev => ({
-        ...prev,
-        images: [...prev.images, image]
-      }));
-    } else if (formData.images.length >= 4) {
-      toast.error("Maximum 4 images allowed");
-    }
-  };
-
-  const handleImageRemove = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      images: prev.images.filter((_, i) => i !== index)
-    }));
-  };
 
   const uploadImage = async (imageBase64: string) => {
     const base64Data = imageBase64.split(',')[1];
@@ -74,13 +56,38 @@ export const ServiceProductForm = ({ serviceId, onSuccess }: ServiceProductFormP
       return;
     }
 
+    if (formData.images.length === 0) {
+      toast.error("Please upload at least one product image");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      // Upload all images first
-      const imageUrls = await Promise.all(formData.images.map(uploadImage));
+      // Filter out null images and only upload valid base64 images
+      const validImages = formData.images.filter(img => img && img.startsWith('data:'));
+      
+      if (validImages.length === 0) {
+        toast.error("Please provide at least one valid image");
+        setLoading(false);
+        return;
+      }
+      
+      // Upload all images
+      const imageUrls = await Promise.all(
+        validImages.map(img => img ? uploadImage(img) : Promise.resolve(""))
+      );
+      
+      // Filter out any empty strings
+      const filteredImageUrls = imageUrls.filter(url => url);
+      
+      if (filteredImageUrls.length === 0) {
+        toast.error("Failed to upload images");
+        setLoading(false);
+        return;
+      }
 
-      // Create the service product
+      // Create the service product with the first image as main image
       const { data: product, error: productError } = await supabase
         .from('service_products')
         .insert([{
@@ -89,25 +96,28 @@ export const ServiceProductForm = ({ serviceId, onSuccess }: ServiceProductFormP
           description: formData.description,
           price: parseFloat(formData.price),
           stock: parseInt(formData.stock),
-          image_url: imageUrls[0], // Use first image as main image
+          image_url: filteredImageUrls[0], // Use first image as main image
         }])
         .select()
         .single();
 
       if (productError) throw productError;
 
-      // Create product images entries
-      if (imageUrls.length > 0) {
+      // Create product images entries for additional images
+      if (filteredImageUrls.length > 1) {
+        const additionalImages = filteredImageUrls.slice(1).map((url, index) => ({
+          service_product_id: product.id,
+          image_url: url,
+          display_order: index + 1, // Start from 1
+        }));
+        
         const { error: imagesError } = await supabase
-          .from('product_images')
-          .insert(
-            imageUrls.map(url => ({
-              product_id: product.id,
-              image_url: url,
-            }))
-          );
+          .from('service_product_images')
+          .insert(additionalImages);
 
-        if (imagesError) throw imagesError;
+        if (imagesError) {
+          console.error("Error inserting additional images:", imagesError);
+        }
       }
 
       toast.success("Product added successfully!");
@@ -176,35 +186,12 @@ export const ServiceProductForm = ({ serviceId, onSuccess }: ServiceProductFormP
       </div>
 
       <div className="space-y-2">
-        <Label>Product Images (Max 4)</Label>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {formData.images.map((image, index) => (
-            <Card key={index} className="relative group">
-              <img
-                src={image}
-                alt={`Product image ${index + 1}`}
-                className="w-full h-32 object-cover rounded-lg"
-              />
-              <Button
-                type="button"
-                variant="destructive"
-                size="icon"
-                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                onClick={() => handleImageRemove(index)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </Card>
-          ))}
-          {formData.images.length < 4 && (
-            <div className="border-2 border-dashed rounded-lg p-4 flex items-center justify-center">
-              <ImageUpload
-                selectedImage={null}
-                onImageSelect={handleImageAdd}
-              />
-            </div>
-          )}
-        </div>
+        <Label>Product Images (Up to 3) *</Label>
+        <MultipleImageUpload
+          selectedImages={formData.images}
+          onImagesChange={(images) => setFormData({ ...formData, images })}
+          maxImages={3}
+        />
       </div>
 
       <Button type="submit" className="w-full" disabled={loading}>

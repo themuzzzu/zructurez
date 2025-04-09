@@ -6,12 +6,14 @@ import { Badge } from "./ui/badge";
 import { ShoppingBag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ProductLikeButton } from "./products/ProductLikeButton";
+import { ProductImageCarousel } from "./products/ProductImageCarousel";
 
 interface ShoppingCardProps {
   id: string;
   title: string;
   description: string;
   image: string;
+  images?: string[];
   price?: string;
   originalPrice?: string;
   discountPercentage?: number;
@@ -24,6 +26,7 @@ export const ShoppingCard = ({
   title,
   description,
   image,
+  images = [],
   price,
   originalPrice,
   discountPercentage,
@@ -31,6 +34,11 @@ export const ShoppingCard = ({
   type
 }: ShoppingCardProps) => {
   const navigate = useNavigate();
+  
+  // Combine main image with additional images, removing duplicates
+  const allImages = [image, ...images].filter(Boolean).filter((value, index, self) => 
+    self.indexOf(value) === index
+  );
 
   const handleClick = () => {
     if (type === 'product') {
@@ -45,10 +53,10 @@ export const ShoppingCard = ({
   return (
     <Card className="overflow-hidden transition-all duration-300 hover:shadow-md h-full flex flex-col">
       <div className="relative h-48 overflow-hidden">
-        <img 
-          src={image || '/placeholder-image.jpg'}
-          alt={title}
-          className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+        <ProductImageCarousel 
+          images={allImages} 
+          aspectRatio={4/3}
+          fallbackImage="/placeholder-image.jpg"
         />
         {discountPercentage && (
           <Badge className="absolute top-2 right-2 bg-red-500">

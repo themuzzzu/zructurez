@@ -2,14 +2,8 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart } from "lucide-react";
-import { 
-  Carousel, 
-  CarouselContent, 
-  CarouselItem, 
-  CarouselNext, 
-  CarouselPrevious 
-} from "@/components/ui/carousel";
 import { ProductLikeButton } from "@/components/products/ProductLikeButton";
+import { ProductImageCarousel } from "@/components/products/ProductImageCarousel";
 
 interface ServiceProductCardProps {
   product: any;
@@ -18,46 +12,43 @@ interface ServiceProductCardProps {
 }
 
 export const ServiceProductCard = ({ product, onAddToCart, type }: ServiceProductCardProps) => {
-  const hasMultipleImages = type === 'service' 
-    ? product.service_product_images?.length > 0 
-    : product.product_images?.length > 0;
+  // Convert product images to array of image URLs
+  const images: string[] = [];
   
-  const images = type === 'service' 
-    ? product.service_product_images 
-    : product.product_images;
+  // Add main image if available
+  if (product.image_url) {
+    images.push(product.image_url);
+  }
+  
+  // Add additional images if available
+  if (type === 'service' && product.service_product_images?.length > 0) {
+    product.service_product_images.forEach((img: any) => {
+      if (img.image_url && !images.includes(img.image_url)) {
+        images.push(img.image_url);
+      }
+    });
+  } else if (type === 'marketplace' && product.product_images?.length > 0) {
+    product.product_images.forEach((img: any) => {
+      if (img.image_url && !images.includes(img.image_url)) {
+        images.push(img.image_url);
+      }
+    });
+  }
   
   const name = type === 'service' ? product.name : product.title;
   const description = product.description;
   const price = product.price;
-  const mainImage = type === 'service' ? product.image_url : product.image_url;
 
   return (
     <Card className="p-4 space-y-2">
-      {hasMultipleImages ? (
-        <Carousel className="w-full">
-          <CarouselContent>
-            {images.map((image: any, index: number) => (
-              <CarouselItem key={index}>
-                <img
-                  src={image.image_url}
-                  alt={`${name} - Image ${index + 1}`}
-                  className="w-full h-48 object-cover rounded-lg"
-                />
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
-        </Carousel>
-      ) : (
-        mainImage && (
-          <img
-            src={mainImage}
-            alt={name}
-            className="w-full h-48 object-cover rounded-lg"
-          />
-        )
-      )}
+      <div className="h-48">
+        <ProductImageCarousel 
+          images={images} 
+          aspectRatio={16/9} 
+          fallbackImage="/placeholder.svg" 
+        />
+      </div>
+      
       <div className="flex items-center gap-2">
         <h3 className="font-semibold">{name}</h3>
         {type === 'marketplace' && (

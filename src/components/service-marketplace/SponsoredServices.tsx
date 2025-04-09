@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -29,19 +28,6 @@ interface Service {
   is_sponsored: boolean;
 }
 
-// Define the raw data type from Supabase
-interface SupabaseServiceData {
-  id: string;
-  title: string;
-  description: string;
-  image_url?: string;
-  price: number;
-  user_id: string;
-  category?: string;
-  location?: string;
-  contact_info?: string;
-}
-
 /**
  * Fetches sponsored services from Supabase
  */
@@ -57,8 +43,8 @@ const fetchSponsoredServices = async (): Promise<Service[]> => {
     
     if (!data) return [];
     
-    // Convert the raw data to our Service interface
-    const services: Service[] = (data as SupabaseServiceData[]).map(item => ({
+    // Map the raw data to our Service interface
+    const services: Service[] = data.map(item => ({
       id: item.id,
       title: item.title,
       description: item.description,

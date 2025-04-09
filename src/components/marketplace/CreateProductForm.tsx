@@ -1,7 +1,5 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ImageUpload } from "@/components/ImageUpload";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,6 +8,7 @@ import { PricingInfo } from "./product-form/PricingInfo";
 import { ProductDetails } from "./product-form/ProductDetails";
 import { BrandInfo } from "./product-form/BrandInfo";
 import { LabelsAttributes } from "./product-form/LabelsAttributes";
+import { MultipleImageUpload } from "@/components/MultipleImageUpload";
 import type { ProductFormData } from "./product-form/types";
 
 interface CreateProductFormProps {
@@ -19,7 +18,7 @@ interface CreateProductFormProps {
 
 export const CreateProductForm = ({ onSuccess, businessId }: CreateProductFormProps) => {
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState<ProductFormData>({
+  const [formData, setFormData] = useState<ProductFormData & { images: (string | null)[] }>({
     title: "",
     description: "",
     price: "",
@@ -27,6 +26,7 @@ export const CreateProductForm = ({ onSuccess, businessId }: CreateProductFormPr
     subcategory: "",
     stock: "1",
     image: null,
+    images: [],
     is_discounted: false,
     discount_percentage: "",
     is_used: false,
@@ -59,6 +59,12 @@ export const CreateProductForm = ({ onSuccess, businessId }: CreateProductFormPr
       toast.error("Please select product condition");
       return;
     }
+    
+    // Ensure at least one image is present
+    if (!formData.image && (!formData.images || formData.images.length === 0)) {
+      toast.error("Please upload at least one product image");
+      return;
+    }
 
     setLoading(true);
 
@@ -66,9 +72,21 @@ export const CreateProductForm = ({ onSuccess, businessId }: CreateProductFormPr
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("User not authenticated");
 
-      let imageUrl = null;
-      if (formData.image) {
-        const base64Data = formData.image.split(',')[1];
+      // Keep track of all images to upload
+      const imagesToUpload = formData.images.filter(img => img && img.startsWith('data:'));
+      
+      // Add main image to images array if it's not null and not already in the array
+      if (formData.image && !formData.images.includes(formData.image)) {
+        imagesToUpload.push(formData.image);
+      }
+      
+      // Upload all images
+      const imageUrls: string[] = [];
+      
+      for (const imageBase64 of imagesToUpload) {
+        if (!imageBase64) continue;
+        
+        const base64Data = imageBase64.split(',')[1];
         const byteCharacters = atob(base64Data);
         const byteNumbers = new Array(byteCharacters.length);
         for (let i = 0; i < byteCharacters.length; i++) {
@@ -88,9 +106,12 @@ export const CreateProductForm = ({ onSuccess, businessId }: CreateProductFormPr
           .from('product-images')
           .getPublicUrl(fileName);
 
-        imageUrl = publicUrl;
+        imageUrls.push(publicUrl);
       }
 
+      // Use the first image as the main product image
+      const mainImageUrl = imageUrls.length > 0 ? imageUrls[0] : null;
+      
       const originalPrice = parseFloat(formData.price);
       const discountedPrice = formData.is_discounted 
         ? originalPrice - (originalPrice * (parseFloat(formData.discount_percentage) / 100))
@@ -108,7 +129,7 @@ export const CreateProductForm = ({ onSuccess, businessId }: CreateProductFormPr
           discount_percentage: formData.is_discounted ? parseFloat(formData.discount_percentage) : null,
           category: formData.category,
           subcategory: formData.subcategory || null,
-          image_url: imageUrl,
+          image_url: mainImageUrl,
           stock: parseInt(formData.stock),
           is_discounted: formData.is_discounted,
           is_used: formData.is_used,
@@ -123,10 +144,30 @@ export const CreateProductForm = ({ onSuccess, businessId }: CreateProductFormPr
 
       if (error) throw error;
       
+      // Insert additional product images if any
+      const productId = product[0].id;
+      
+      if (imageUrls.length > 1) {
+        // Skip the first one as it's already set as the main image
+        const additionalImages = imageUrls.slice(1).map((url, index) => ({
+          product_id: productId,
+          image_url: url,
+          display_order: index + 1, // Start from 1 since 0 is the main image
+        }));
+        
+        if (additionalImages.length > 0) {
+          const { error: imagesError } = await supabase
+            .from('product_images')
+            .insert(additionalImages);
+            
+          if (imagesError) {
+            console.error("Error inserting additional images:", imagesError);
+          }
+        }
+      }
+      
       // If we have labels, insert them as well
       if (formData.labels.length > 0 && product) {
-        const productId = product[0].id;
-        
         // Insert labels
         const labelsToInsert = formData.labels.map(label => ({
           product_id: productId,
@@ -163,10 +204,11 @@ export const CreateProductForm = ({ onSuccess, businessId }: CreateProductFormPr
       <LabelsAttributes formData={formData} onChange={handleChange} />
 
       <div className="space-y-2">
-        <Label>Product Image</Label>
-        <ImageUpload
-          selectedImage={formData.image}
-          onImageSelect={(image) => handleChange("image", image)}
+        <Label>Product Images (Up to 3)</Label>
+        <MultipleImageUpload
+          selectedImages={formData.images}
+          onImagesChange={(images) => handleChange("images", images)}
+          maxImages={3}
         />
       </div>
 
