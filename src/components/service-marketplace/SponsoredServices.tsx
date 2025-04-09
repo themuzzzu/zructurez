@@ -42,11 +42,10 @@ const fetchSponsoredServices = async (): Promise<Service[]> => {
       
     if (error) throw error;
     
-    // Type assertion with safer approach
     if (!data) return [];
     
-    // Map the raw data to our Service interface
-    return data.map(item => ({
+    // Explicitly map the raw data to ensure type safety
+    const services: Service[] = data.map(item => ({
       id: item.id,
       title: item.title,
       description: item.description,
@@ -58,6 +57,8 @@ const fetchSponsoredServices = async (): Promise<Service[]> => {
       contact_info: item.contact_info,
       is_sponsored: true
     }));
+    
+    return services;
   } catch (error) {
     console.error("Error fetching sponsored services:", error);
     return [];
