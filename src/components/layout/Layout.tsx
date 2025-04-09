@@ -58,8 +58,8 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
         </main>
       </div>
       
-      {/* Mobile Navigation - should render on ALL mobile device views */}
-      <MobileNav />
+      {/* Mobile Navigation - will render on ALL mobile device views */}
+      {isMobile && <MobileNav />}
     </div>
   );
 }

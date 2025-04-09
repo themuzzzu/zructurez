@@ -7,6 +7,9 @@ import type { Product } from "@/types/product";
 import { Heading } from "@/components/ui/heading";
 import { ServiceBannerAd } from "@/components/ads/ServiceBannerAd";
 import { SponsoredServices } from "@/components/service-marketplace/SponsoredServices";
+import { SuggestedServices } from "@/components/service-marketplace/SuggestedServices";
+import { TopServices } from "@/components/service-marketplace/TopServices";
+import { RecommendedServices } from "@/components/service-marketplace/RecommendedServices";
 
 const ServicesPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -37,26 +40,38 @@ const ServicesPage = () => {
   }, []);
 
   if (loading) {
-    return <div>Loading services...</div>;
+    return <div className="p-4">Loading services...</div>;
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return <div className="p-4">Error: {error}</div>;
   }
   
   return (
-    <>
-      <Heading>Our Services</Heading>
+    <div className="container px-4 py-6 max-w-7xl mx-auto">
+      <Heading>Services</Heading>
       
       {/* Service-specific banner ad */}
       <ServiceBannerAd />
       
+      {/* Display recommended services - horizontal scrollable */}
+      <RecommendedServices />
+      
       {/* Display sponsored services */}
       <SponsoredServices />
       
+      {/* Display top services */}
+      <TopServices />
+      
+      {/* Display suggested services */}
+      <SuggestedServices />
+      
       {/* Regular service listings */}
-      <ProductsGrid layout="grid3x3" products={products} />
-    </>
+      <div className="mt-8">
+        <h2 className="text-xl font-semibold mb-4">All Services</h2>
+        <ProductsGrid layout="grid3x3" products={products} />
+      </div>
+    </div>
   );
 };
 

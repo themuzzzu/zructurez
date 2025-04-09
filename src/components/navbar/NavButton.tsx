@@ -5,7 +5,7 @@ import {
   Home, ShoppingBag, 
   CalendarClock, Briefcase, 
   Heart, MessageSquare,
-  Map, BadgeDollarSign
+  Map, BadgeDollarSign, Wrench
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -19,8 +19,9 @@ export const NavButton = forwardRef<HTMLDivElement, NavButtonProps>(
     const links = [
       { title: "Home", href: "/", icon: Home },
       { title: "Marketplace", href: "/marketplace", icon: ShoppingBag },
-      { title: "Events", href: "/events", icon: CalendarClock },
+      { title: "Services", href: "/services", icon: Wrench },
       { title: "Businesses", href: "/businesses", icon: Briefcase },
+      { title: "Events", href: "/events", icon: CalendarClock },
       { title: "Pricing", href: "/pricing", icon: BadgeDollarSign },
       { title: "Wishlist", href: "/wishlist", icon: Heart },
       { title: "Messages", href: "/messages", icon: MessageSquare },
