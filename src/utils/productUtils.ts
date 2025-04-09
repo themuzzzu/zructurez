@@ -1,56 +1,14 @@
 
 /**
- * Format price with currency symbol
+ * Formats a price value to display as currency
  */
-export const formatPrice = (price?: number | string): string => {
+export const formatPrice = (price: number | string | undefined, currency: string = '$'): string => {
   if (price === undefined || price === null) {
-    return "₹0";
+    return `${currency}0.00`;
   }
   
   const numericPrice = typeof price === 'string' ? parseFloat(price) : price;
   
-  if (isNaN(numericPrice)) {
-    return "₹0";
-  }
-  
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2
-  }).format(numericPrice);
-};
-
-/**
- * Calculate discount percentage between original and sale price
- */
-export const calculateDiscountPercentage = (originalPrice: number, salePrice: number): number => {
-  if (!originalPrice || !salePrice || originalPrice <= salePrice) {
-    return 0;
-  }
-  
-  const discount = ((originalPrice - salePrice) / originalPrice) * 100;
-  return Math.round(discount);
-};
-
-/**
- * Determine if a product has a valid discount
- */
-export const hasValidDiscount = (product: any): boolean => {
-  if (!product) return false;
-  
-  // Check if product has explicit discount flag
-  if (product.is_discounted) return true;
-  
-  // Check if product has both original and current price
-  if (product.original_price && product.price && product.original_price > product.price) {
-    return true;
-  }
-  
-  // Check if product has discount percentage
-  if (product.discount_percentage && product.discount_percentage > 0) {
-    return true;
-  }
-  
-  return false;
+  // Use Intl.NumberFormat for proper formatting
+  return currency + numericPrice.toFixed(2);
 };

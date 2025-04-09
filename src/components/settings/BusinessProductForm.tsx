@@ -7,7 +7,23 @@ import { Label } from "@/components/ui/label";
 import { ImageUpload } from "@/components/ImageUpload";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { BusinessProduct } from "@/types/business";
+
+// Standard product categories that most businesses would use
+const PRODUCT_CATEGORIES = [
+  { value: "food", label: "Food & Beverages" },
+  { value: "electronics", label: "Electronics" },
+  { value: "fashion", label: "Fashion & Apparel" },
+  { value: "health", label: "Health & Beauty" },
+  { value: "home", label: "Home & Decor" },
+  { value: "toys", label: "Toys & Games" },
+  { value: "sports", label: "Sports & Outdoors" },
+  { value: "books", label: "Books & Media" },
+  { value: "art", label: "Art & Crafts" },
+  { value: "jewelry", label: "Jewelry & Accessories" },
+  { value: "other", label: "Other" }
+];
 
 interface BusinessProductFormProps {
   businessId: string;
@@ -23,6 +39,7 @@ export const BusinessProductForm = ({ businessId, product, onSuccess }: Business
     price: "",
     stock: "0",
     image: null as string | null,
+    category: "" as string
   });
 
   useEffect(() => {
@@ -33,6 +50,7 @@ export const BusinessProductForm = ({ businessId, product, onSuccess }: Business
         price: product.price?.toString() || "",
         stock: product.stock?.toString() || "0",
         image: product.image_url || null,
+        category: product.category || ""
       });
     }
   }, [product]);
@@ -85,6 +103,7 @@ export const BusinessProductForm = ({ businessId, product, onSuccess }: Business
             price: parseFloat(formData.price),
             stock: parseInt(formData.stock),
             image_url: imageUrl,
+            category: formData.category || null
           })
           .eq('id', product.id);
 
@@ -102,6 +121,7 @@ export const BusinessProductForm = ({ businessId, product, onSuccess }: Business
             price: parseFloat(formData.price),
             stock: parseInt(formData.stock),
             image_url: imageUrl,
+            category: formData.category || null
           }]);
 
         if (error) throw error;
@@ -119,6 +139,7 @@ export const BusinessProductForm = ({ businessId, product, onSuccess }: Business
           price: "",
           stock: "0",
           image: null,
+          category: ""
         });
       }
     } catch (error) {
@@ -140,6 +161,25 @@ export const BusinessProductForm = ({ businessId, product, onSuccess }: Business
           placeholder="Enter product name"
           required
         />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="category">Category</Label>
+        <Select
+          value={formData.category}
+          onValueChange={(value) => setFormData({ ...formData, category: value })}
+        >
+          <SelectTrigger id="category">
+            <SelectValue placeholder="Select a category" />
+          </SelectTrigger>
+          <SelectContent>
+            {PRODUCT_CATEGORIES.map((category) => (
+              <SelectItem key={category.value} value={category.value}>
+                {category.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="space-y-2">
@@ -182,6 +222,7 @@ export const BusinessProductForm = ({ businessId, product, onSuccess }: Business
         <ImageUpload
           selectedImage={formData.image}
           onImageSelect={(image) => setFormData({ ...formData, image })}
+          buttonText="Choose product image"
         />
       </div>
 

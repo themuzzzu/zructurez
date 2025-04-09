@@ -44,7 +44,7 @@ export const ProductSpecifications = ({ product }: ProductSpecificationsProps) =
                 {label.attributes.map((attribute, index) => (
                   <div key={index} className="grid grid-cols-2 gap-2">
                     <span className="font-medium">
-                      {typeof attribute === 'object' 
+                      {typeof attribute === 'object' && attribute !== null
                         ? attribute.name || 'Attribute' 
                         : typeof attribute === 'string' && attribute.includes(':')
                           ? attribute.split(':')[0]
@@ -52,7 +52,7 @@ export const ProductSpecifications = ({ product }: ProductSpecificationsProps) =
                       }
                     </span>
                     <span>
-                      {typeof attribute === 'object' 
+                      {typeof attribute === 'object' && attribute !== null
                         ? attribute.value || '-' 
                         : typeof attribute === 'string' && attribute.includes(':')
                           ? attribute.split(':')[1]

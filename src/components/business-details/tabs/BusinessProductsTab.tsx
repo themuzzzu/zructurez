@@ -3,10 +3,10 @@ import { BusinessContent } from "@/components/business-details/BusinessContent";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import type { Business, BusinessProduct } from "@/types/business";
 import { Button } from "@/components/ui/button";
-import { Trash, Edit, Plus } from "lucide-react";
+import { Trash, Edit, Plus, Filter } from "lucide-react";
 import { 
   Dialog,
   DialogContent,
@@ -18,6 +18,23 @@ import { useProductDeletion } from "@/hooks/useProductDeletion";
 import { DeleteConfirmDialog } from "@/components/DeleteConfirmDialog";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+
+// Standard product categories that most businesses would use
+const PRODUCT_CATEGORIES = [
+  { value: "all", label: "All Categories" },
+  { value: "food", label: "Food & Beverages" },
+  { value: "electronics", label: "Electronics" },
+  { value: "fashion", label: "Fashion & Apparel" },
+  { value: "health", label: "Health & Beauty" },
+  { value: "home", label: "Home & Decor" },
+  { value: "toys", label: "Toys & Games" },
+  { value: "sports", label: "Sports & Outdoors" },
+  { value: "books", label: "Books & Media" },
+  { value: "art", label: "Art & Crafts" },
+  { value: "jewelry", label: "Jewelry & Accessories" },
+  { value: "other", label: "Other" },
+  { value: "uncategorized", label: "Uncategorized" }
+];
 
 interface BusinessProductsTabProps {
   businessId: string;
@@ -32,19 +49,26 @@ export const BusinessProductsTab = ({ businessId, isOwner, products, onSuccess }
     const categories = new Set<string>();
     
     // Add "All" category and extract unique categories
-    categories.add("All");
+    categories.add("all");
     products?.forEach(product => {
       if (product.category) {
         categories.add(product.category);
       } else {
-        categories.add("Uncategorized");
+        categories.add("uncategorized");
       }
     });
     
-    return Array.from(categories);
+    // Sort categories to match the predefined order
+    const sortedCategories = Array.from(categories).sort((a, b) => {
+      const aIndex = PRODUCT_CATEGORIES.findIndex(c => c.value === a);
+      const bIndex = PRODUCT_CATEGORIES.findIndex(c => c.value === b);
+      return aIndex - bIndex;
+    });
+    
+    return sortedCategories;
   }, [products]);
   
-  const [activeCategory, setActiveCategory] = useState<string>("All");
+  const [activeCategory, setActiveCategory] = useState<string>("all");
   const [isAddProductDialogOpen, setIsAddProductDialogOpen] = useState(false);
   const [isEditProductDialogOpen, setIsEditProductDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -94,16 +118,21 @@ export const BusinessProductsTab = ({ businessId, isOwner, products, onSuccess }
   };
   
   const filteredProducts = useMemo(() => {
-    if (activeCategory === "All") {
+    if (activeCategory === "all") {
       return products;
     }
     
-    if (activeCategory === "Uncategorized") {
+    if (activeCategory === "uncategorized") {
       return products?.filter(product => !product.category);
     }
     
     return products?.filter(product => product.category === activeCategory);
   }, [products, activeCategory]);
+
+  const getCategoryLabel = (value: string) => {
+    const category = PRODUCT_CATEGORIES.find(c => c.value === value);
+    return category ? category.label : value;
+  };
 
   return (
     <Card className="p-4 animate-fade-in">
@@ -131,7 +160,7 @@ export const BusinessProductsTab = ({ businessId, isOwner, products, onSuccess }
                     activeCategory === category ? "bg-primary text-primary-foreground" : ""
                   }`}
                 >
-                  {category}
+                  {getCategoryLabel(category)}
                 </TabsTrigger>
               ))}
             </TabsList>
@@ -153,6 +182,15 @@ export const BusinessProductsTab = ({ businessId, isOwner, products, onSuccess }
                 )}
                 <h3 className="font-semibold text-lg mb-1">{product.name}</h3>
                 <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{product.description}</p>
+                
+                <div className="flex flex-wrap gap-2 mt-1 mb-2">
+                  {product.category && (
+                    <span className="text-xs px-2 py-1 bg-muted rounded-full">
+                      {getCategoryLabel(product.category)}
+                    </span>
+                  )}
+                </div>
+                
                 <p className="font-medium mb-3">${product.price}</p>
                 <div className="mt-auto pt-3 flex space-x-2">
                   <Button
@@ -195,7 +233,7 @@ export const BusinessProductsTab = ({ businessId, isOwner, products, onSuccess }
           business_products={filteredProducts}
           business_portfolio={[]}
           onSuccess={onSuccess}
-          activeCategory={activeCategory !== "All" && activeCategory !== "Uncategorized" ? activeCategory : undefined}
+          activeCategory={activeCategory !== "all" && activeCategory !== "uncategorized" ? activeCategory : undefined}
         />
       )}
       

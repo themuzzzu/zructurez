@@ -1,13 +1,13 @@
 
-import { Position } from "./types/index";
+import { ImagePosition } from "./types/index";
 
 export interface ImageUploadProps {
   selectedImage: string | null;
   onImageSelect: (image: string | null) => void;
   initialScale?: number;
-  initialPosition?: Position;
+  initialPosition?: ImagePosition;
   onScaleChange?: (scale: number) => void;
-  onPositionChange?: (position: Position) => void;
+  onPositionChange?: (position: ImagePosition) => void;
   skipAutoSave?: boolean;
   buttonText?: string;
 }

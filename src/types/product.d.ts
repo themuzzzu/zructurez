@@ -27,6 +27,7 @@ export interface Product {
   brand?: string;
   rating?: number;
   rating_count?: number;
+  labels?: ProductLabel[];
 }
 
 export interface ProductCardProps {
@@ -34,4 +35,12 @@ export interface ProductCardProps {
   layout?: "grid1x1" | "grid2x1" | "list";
   badge?: string;
   rank?: number;
+}
+
+export interface ProductImage {
+  id: string;
+  image_url: string;
+  product_id: string;
+  created_at: string;
+  display_order?: number;
 }
