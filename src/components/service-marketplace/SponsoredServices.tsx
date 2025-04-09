@@ -29,20 +29,6 @@ interface Service {
   is_sponsored: boolean;
 }
 
-// Type definition for raw database response
-type SupabaseServiceData = {
-  id: string;
-  title: string;
-  description: string;
-  image_url?: string;
-  price: number;
-  user_id: string;
-  category?: string;
-  location?: string;
-  contact_info?: string;
-  is_sponsored?: boolean;
-}
-
 /**
  * Fetches sponsored services from Supabase
  */
@@ -56,11 +42,11 @@ const fetchSponsoredServices = async (): Promise<Service[]> => {
       
     if (error) throw error;
     
-    // Use type assertion for the raw data
-    const rawData = data as SupabaseServiceData[];
+    // Type assertion with safer approach
+    if (!data) return [];
     
     // Map the raw data to our Service interface
-    return rawData.map(item => ({
+    return data.map(item => ({
       id: item.id,
       title: item.title,
       description: item.description,
