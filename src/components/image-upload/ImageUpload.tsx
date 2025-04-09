@@ -17,7 +17,7 @@ export const ImageUpload = ({
   onPositionChange,
   skipAutoSave = false,
   buttonText,
-}: ImageUploadProps & { buttonText?: string }) => {
+}: ImageUploadProps) => {
   const {
     scale,
     setScale,

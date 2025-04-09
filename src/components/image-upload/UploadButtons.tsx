@@ -1,46 +1,45 @@
 
+import { Button } from "@/components/ui/button";
 import { Camera, Upload } from "lucide-react";
-import { Button } from "../ui/button";
-
-interface UploadButtonsProps {
-  onCameraCapture: () => void;
-  onFileSelect: (file: File) => void;
-  buttonText?: string;
-}
+import { UploadButtonsProps } from "./types";
 
 export const UploadButtons = ({ 
-  onCameraCapture, 
-  onFileSelect,
-  buttonText = "Upload" 
+  onFileSelect, 
+  onCameraCapture,
+  buttonText = "Upload Image"
 }: UploadButtonsProps) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      onFileSelect(file);
+    }
+  };
+
   return (
-    <div className="flex gap-2">
+    <div className="flex flex-col sm:flex-row gap-2">
       <Button
-        type="button"
-        variant="outline"
-        className="flex-1"
-        onClick={() => {
-          const input = document.createElement("input");
-          input.type = "file";
-          input.accept = "image/*";
-          input.onchange = (e) => {
-            const file = (e.target as HTMLInputElement).files?.[0];
-            if (file) onFileSelect(file);
-          };
-          input.click();
-        }}
+        variant="secondary"
+        className="flex-1 flex items-center gap-2" 
+        onClick={() => document.getElementById("image-upload")?.click()}
       >
-        <Upload className="mr-2 h-4 w-4" />
+        <Upload className="h-4 w-4" />
         {buttonText}
       </Button>
+      <input
+        id="image-upload"
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
+        className="hidden"
+      />
       <Button
         type="button"
         variant="outline"
-        className="flex-1"
+        className="flex-1 flex items-center gap-2"
         onClick={onCameraCapture}
       >
-        <Camera className="mr-2 h-4 w-4" />
-        Camera
+        <Camera className="h-4 w-4" />
+        Use Camera
       </Button>
     </div>
   );

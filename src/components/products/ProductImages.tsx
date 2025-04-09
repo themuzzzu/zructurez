@@ -30,7 +30,14 @@ export const ProductImages = ({ productId, mainImageUrl }: ProductImagesProps) =
         .order('display_order', { ascending: true });
         
       if (error) throw error;
-      return data as ProductImage[];
+      
+      // Convert Supabase response to match ProductImage interface
+      return (data as Array<any>).map(item => ({
+        id: item.id,
+        product_id: item.product_id,
+        image_url: item.image_url,
+        display_order: item.display_order || 0 // Provide default value if missing
+      })) as ProductImage[];
     }
   });
   
