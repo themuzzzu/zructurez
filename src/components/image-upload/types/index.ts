@@ -5,5 +5,5 @@ export interface Position {
 }
 
 export type ImagePosition = Position;
-export { ImagePosition as ImagePosition };
-
+// Use correct export syntax for re-exporting with isolatedModules
+export type { ImagePosition };

@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 interface ProductImageCarouselProps {
   images: string[];
   className?: string;
-  aspectRatio?: number;
+  aspectRatio?: number | string;
   fallbackImage?: string;
 }
 

@@ -23,12 +23,17 @@ export interface Product {
   rating?: number;
   rating_count?: number;
   labels?: ProductLabel[];
+  model?: string;
+  size?: string;
 }
 
 export interface ProductLabel {
   id?: string;
   name: string;
-  attributes: string[];
+  attributes: Array<{
+    name: string;
+    value: string;
+  } | string>;
   product_id?: string;
 }
 
@@ -37,5 +42,13 @@ export interface SavedLabel {
   name: string;
   attributes: string[];
   user_id: string;
+  created_at?: string;
+}
+
+export interface ProductImage {
+  id: string;
+  product_id: string;
+  image_url: string;
+  display_order?: number;
   created_at?: string;
 }
