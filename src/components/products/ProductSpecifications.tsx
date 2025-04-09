@@ -1,105 +1,95 @@
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import React from "react";
+import { Product } from "@/types/product";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
-type ProductProps = {
-  product: {
-    id: string;
-    title: string;
-    price: number;
-    description: string;
-    category?: string;
-    subcategory?: string;
-    brand_name?: string;
-    condition?: string;
-    model?: string;
-    size?: string;
-    stock?: number;
-    [key: string]: any;
-  };
-};
+interface ProductSpecificationsProps {
+  product: Product;
+}
 
-export const ProductSpecifications = ({ product }: ProductProps) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-  
-  // Generate specifications from product data
-  const generateSpecifications = () => {
-    const specs = [
-      { 
-        category: "General",
-        items: [
-          { name: "Brand", value: product.brand_name || "Not specified" },
-          { name: "Model", value: product.model || "Not specified" },
-          { name: "Type", value: product.subcategory || product.category || "Not specified" },
-          { name: "Condition", value: product.condition || (product.is_used ? "Used" : "New") }
-        ]
-      },
-      {
-        category: "Dimensions",
-        items: [
-          { name: "Size", value: product.size || "Not specified" },
-          { name: "Weight", value: product.weight || "Not specified" }
-        ]
-      }
-    ];
-    
-    // If we have product-specific specs in the data, add them
-    if (product.specifications) {
-      return [...specs, ...product.specifications];
-    }
-    
-    return specs;
+export const ProductSpecifications = ({ product }: ProductSpecificationsProps) => {
+  // Create specs from product data
+  const generalSpecs = {
+    "Category": product.category || "General",
+    "Brand": product.brand_name || product.brand || "Not specified",
+    "Model": product.model || "Not specified",
+    "Condition": product.condition || (product.is_used ? "Used" : "New"),
   };
-  
-  const specifications = generateSpecifications();
-  const displaySpecifications = isExpanded 
-    ? specifications 
-    : specifications.slice(0, 2);
-  
+
+  // Get product labels if available
+  const productLabels = product.labels || [];
+
   return (
-    <div className="space-y-6">
-      {displaySpecifications.map((specGroup, groupIndex) => (
-        <div key={groupIndex}>
-          <h3 className="font-medium mb-3 text-foreground">{specGroup.category}</h3>
-          <div className="bg-muted rounded-md overflow-hidden">
-            {specGroup.items.map((spec, specIndex) => (
-              <div 
-                key={specIndex} 
-                className={`grid grid-cols-3 p-3 text-sm ${
-                  specIndex % 2 === 0 ? 'bg-muted' : 'bg-muted/50'
-                }`}
-              >
-                <span className="text-muted-foreground col-span-1">{spec.name}</span>
-                <span className="font-medium col-span-2">{spec.value}</span>
+    <div>
+      <Accordion type="single" collapsible className="w-full">
+        <AccordionItem value="general">
+          <AccordionTrigger>General</AccordionTrigger>
+          <AccordionContent>
+            <div className="space-y-2">
+              {Object.entries(generalSpecs).map(([key, value]) => (
+                <div key={key} className="grid grid-cols-2 gap-2">
+                  <span className="font-medium">{key}</span>
+                  <span>{value}</span>
+                </div>
+              ))}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+        
+        {productLabels.map((label) => (
+          <AccordionItem key={label.id || label.name} value={label.name}>
+            <AccordionTrigger>{label.name}</AccordionTrigger>
+            <AccordionContent>
+              <div className="space-y-2">
+                {label.attributes.map((attribute, index) => (
+                  <div key={index} className="grid grid-cols-2 gap-2">
+                    <span className="font-medium">
+                      {typeof attribute === 'object' 
+                        ? attribute.name || 'Attribute' 
+                        : typeof attribute === 'string' && attribute.includes(':')
+                          ? attribute.split(':')[0]
+                          : 'Feature'
+                      }
+                    </span>
+                    <span>
+                      {typeof attribute === 'object' 
+                        ? attribute.value || '-' 
+                        : typeof attribute === 'string' && attribute.includes(':')
+                          ? attribute.split(':')[1]
+                          : attribute
+                      }
+                    </span>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
-      ))}
-      
-      {specifications.length > 2 && (
-        <div className="flex justify-center">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="flex items-center gap-1"
-          >
-            {isExpanded ? (
-              <>
-                <ChevronUp className="h-4 w-4" />
-                Show Less
-              </>
-            ) : (
-              <>
-                <ChevronDown className="h-4 w-4" />
-                Show More
-              </>
-            )}
-          </Button>
-        </div>
-      )}
+            </AccordionContent>
+          </AccordionItem>
+        ))}
+
+        <AccordionItem value="additional">
+          <AccordionTrigger>Additional Information</AccordionTrigger>
+          <AccordionContent>
+            <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-2">
+                <span className="font-medium">Stock</span>
+                <span>{product.stock || 0} available</span>
+              </div>
+              {product.size && (
+                <div className="grid grid-cols-2 gap-2">
+                  <span className="font-medium">Size</span>
+                  <span>{product.size}</span>
+                </div>
+              )}
+              {product.discount_percentage && (
+                <div className="grid grid-cols-2 gap-2">
+                  <span className="font-medium">Discount</span>
+                  <span>{product.discount_percentage}% off</span>
+                </div>
+              )}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
     </div>
   );
 };

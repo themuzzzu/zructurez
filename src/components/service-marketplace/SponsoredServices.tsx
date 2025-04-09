@@ -1,31 +1,75 @@
-
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ServiceCard } from "@/components/service-card/ServiceCard";
-import { ChevronRight } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { GridLayoutType } from "@/components/products/types/ProductTypes";
+import { ShoppingCart } from "lucide-react";
+import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
-
-// Import Supabase client directly
 import { supabase } from "@/integrations/supabase/client";
 
-interface SponsoredServicesProps {
-  layout?: GridLayoutType;
-}
+/**
+ * Component to display sponsored services
+ */
+export const SponsoredServices = () => {
+  const navigate = useNavigate();
+  const { data: services, isLoading, error } = useQuery({ 
+    queryKey: ['sponsored-services'],
+    queryFn: fetchSponsoredServices
+  });
 
-// Define a simple service interface
+  if (isLoading) return <ServicesSkeleton />;
+  if (error) return <div>Error loading sponsored services</div>;
+  if (!services || services.length === 0) return null;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold">Sponsored Services</h2>
+        <Badge>Sponsored</Badge>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {services.map((service) => (
+          <Card key={service.id} className="p-4 space-y-2">
+            <div className="h-32 overflow-hidden rounded-md">
+              <img
+                src={service.imageUrl || "/placeholder.svg"}
+                alt={service.title}
+                className="object-cover w-full h-full"
+              />
+            </div>
+            <h3 className="font-semibold">{service.title}</h3>
+            <p className="text-sm text-muted-foreground line-clamp-2">
+              {service.description}
+            </p>
+            <div className="flex items-center justify-between">
+              <span className="font-semibold">₹{service.price}</span>
+              <Button
+                size="sm"
+                onClick={() => {
+                  toast.success("Added to cart!");
+                }}
+              >
+                <ShoppingCart className="h-4 w-4 mr-2" />
+                Add to Cart
+              </Button>
+            </div>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// Define interfaces
 interface Service {
   id: string;
   title: string;
   description: string;
-  image_url?: string;
+  imageUrl?: string;
   price: number;
-  user_id: string;
   category?: string;
   location?: string;
-  contact_info?: string;
   is_sponsored: boolean;
 }
 
@@ -45,16 +89,14 @@ interface SupabaseServiceData {
 /**
  * Fetches sponsored services from Supabase
  */
-const fetchSponsoredServices = async (): Promise<Service[]> => {
+async function fetchSponsoredServices(): Promise<Service[]> {
   try {
     const { data, error } = await supabase
       .from('services')
       .select('*')
-      .eq('is_sponsored', true)
-      .limit(6);
-      
+      .limit(4);
+
     if (error) throw error;
-    
     if (!data) return [];
     
     // Map the raw data to our Service interface
@@ -62,126 +104,41 @@ const fetchSponsoredServices = async (): Promise<Service[]> => {
       id: item.id,
       title: item.title,
       description: item.description,
-      image_url: item.image_url,
+      imageUrl: item.image_url,
       price: item.price,
-      user_id: item.user_id,
       category: item.category,
       location: item.location,
-      contact_info: item.contact_info,
-      is_sponsored: true
+      is_sponsored: true, // These are all sponsored
     }));
-    
+
     return services;
   } catch (error) {
-    console.error("Error fetching sponsored services:", error);
+    console.error('Error fetching sponsored services:', error);
     return [];
   }
-};
-
-export function SponsoredServices({ layout = "grid3x3" }: SponsoredServicesProps) {
-  const navigate = useNavigate();
-  
-  const { 
-    data, 
-    isLoading, 
-    isError 
-  } = useQuery({
-    queryKey: ['sponsored-services'],
-    queryFn: fetchSponsoredServices
-  });
-  
-  // Handle optional data safely
-  const services = data || [];
-  
-  // Handle error state
-  if (isError) {
-    return (
-      <div className="p-6 text-center">
-        <p className="text-red-500">Failed to load sponsored services.</p>
-        <Button 
-          onClick={() => window.location.reload()}
-          className="mt-4"
-          variant="outline"
-        >
-          Retry
-        </Button>
-      </div>
-    );
-  }
-  
-  const getGridClasses = () => {
-    switch (layout) {
-      case "grid4x4":
-        return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4";
-      case "grid2x2":
-        return "grid grid-cols-1 sm:grid-cols-2 gap-4";
-      case "list":
-        return "flex flex-col gap-4";
-      case "grid1x1":
-        return "grid grid-cols-1 gap-4";
-      case "single":
-        return "grid grid-cols-1 gap-4 max-w-3xl mx-auto";
-      case "grid3x3":
-      default:
-        return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4";
-    }
-  };
-  
-  if (isLoading) {
-    return (
-      <div className="space-y-4 mb-8">
-        <h2 className="text-2xl font-bold">Sponsored Services</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {[1, 2, 3].map((i) => (
-            <Card key={i} className="overflow-hidden">
-              <Skeleton className="h-48 w-full" />
-              <div className="p-3">
-                <Skeleton className="h-4 w-3/4 mb-2" />
-                <Skeleton className="h-4 w-1/2" />
-                <Skeleton className="h-10 w-full mt-4" />
-              </div>
-            </Card>
-          ))}
-        </div>
-      </div>
-    );
-  }
-  
-  if (services.length === 0) {
-    return null;
-  }
-  
-  return (
-    <div className="space-y-4 mb-8">
-      <h2 className="text-2xl font-bold">Sponsored Services</h2>
-      <div className={getGridClasses()}>
-        {services.map((service) => (
-          <ServiceCard 
-            key={service.id}
-            id={service.id}
-            title={service.title}
-            description={service.description}
-            image_url={service.image_url}
-            price={service.price}
-            providerId={service.user_id}
-            providerName="Service Provider"
-            contact_info={service.contact_info}
-            category={service.category}
-            location={service.location}
-            sponsored={service.is_sponsored}
-          />
-        ))}
-      </div>
-      
-      <div className="flex justify-center mt-4">
-        <Button 
-          variant="outline" 
-          onClick={() => navigate('/services?sponsored=true')}
-          className="gap-1"
-        >
-          View More <ChevronRight className="h-4 w-4" />
-        </Button>
-      </div>
-    </div>
-  );
 }
+
+/**
+ * Skeleton loader for services
+ */
+const ServicesSkeleton = () => (
+  <div className="space-y-4">
+    <div className="flex items-center justify-between">
+      <h2 className="text-xl font-semibold">Sponsored Services</h2>
+      <Badge>Sponsored</Badge>
+    </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {[...Array(4)].map((_, i) => (
+        <Card key={i} className="p-4 space-y-2">
+          <Skeleton className="h-32 w-full rounded-md" />
+          <Skeleton className="h-5 w-3/4" />
+          <Skeleton className="h-4 w-1/2" />
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-4 w-1/4" />
+            <Skeleton className="h-8 w-1/3 rounded-md" />
+          </div>
+        </Card>
+      ))}
+    </div>
+  </div>
+);

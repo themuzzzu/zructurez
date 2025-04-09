@@ -1,41 +1,19 @@
 
-export interface ImagePosition {
-  x: number;
-  y: number;
-}
+import { Position } from "./types/index";
 
 export interface ImageUploadProps {
   selectedImage: string | null;
   onImageSelect: (image: string | null) => void;
   initialScale?: number;
-  initialPosition?: ImagePosition;
+  initialPosition?: Position;
   onScaleChange?: (scale: number) => void;
-  onPositionChange?: (position: ImagePosition) => void;
+  onPositionChange?: (position: Position) => void;
   skipAutoSave?: boolean;
   buttonText?: string;
 }
 
-export interface ImagePreviewProps {
-  previewImage: string;
-  scale: number;
-  position: ImagePosition;
-  onPositionChange: (position: ImagePosition) => void;
-  onImageRemove: () => void;
-  isDragging: boolean;
-  onDragStart: (e: React.MouseEvent) => void;
-  onDragMove: (e: React.MouseEvent) => void;
-  onDragEnd: () => void;
-}
-
-export interface ImageControlsProps {
-  scale: number;
-  onScaleChange: (scale: number) => void;
-  onPositionChange: (x: number, y: number) => void;
-  onSave: () => void;
-}
-
 export interface UploadButtonsProps {
-  onCameraCapture: () => void;
   onFileSelect: (file: File) => void;
+  onCameraCapture: () => void;
   buttonText?: string;
 }
