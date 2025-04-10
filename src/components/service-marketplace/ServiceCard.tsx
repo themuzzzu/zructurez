@@ -18,7 +18,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
     <Card className="overflow-hidden h-full flex flex-col">
       <div className="h-40 overflow-hidden">
         <img
-          src={service.imageUrl || "/placeholder.svg"}
+          src={service.imageUrl || service.image_url || "/placeholder.svg"}
           alt={service.title}
           className="object-cover w-full h-full"
           onError={(e) => {

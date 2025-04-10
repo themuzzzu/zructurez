@@ -32,8 +32,17 @@ const ServicesPage = () => {
           throw error;
         }
 
-        setServices(data || []);
-        setFilteredServices(data || []);
+        // Transform the data to ensure availability is always an array
+        const transformedData = data?.map(item => ({
+          ...item,
+          // If availability is a string, parse it as JSON if it starts with [, otherwise make it an array with one item
+          availability: typeof item.availability === 'string' ? 
+            (item.availability.startsWith('[') ? JSON.parse(item.availability) : [item.availability]) 
+            : item.availability || []
+        })) || [];
+
+        setServices(transformedData);
+        setFilteredServices(transformedData);
       } catch (err: any) {
         setError(err.message || "Failed to load services");
         console.error("Error fetching services:", err);
