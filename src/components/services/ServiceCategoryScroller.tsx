@@ -1,132 +1,67 @@
 
-import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { 
+  Wrench, 
+  Zap, 
+  Computer, 
+  Scissors, 
+  Home, 
+  Truck, 
+  PaintBucket,
+  Bug, 
+  Camera, 
+  Shirt, 
+  Heart, 
+  Dog 
+} from 'lucide-react';
+import { motion } from "framer-motion";
 
 export function ServiceCategoryScroller() {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [showLeftArrow, setShowLeftArrow] = useState(false);
-  const [showRightArrow, setShowRightArrow] = useState(true);
   const navigate = useNavigate();
 
   const categories = [
-    { id: 'cleaning', name: 'Cleaning' },
-    { id: 'plumbing', name: 'Plumbing' },
-    { id: 'electrician', name: 'Electrician' },
-    { id: 'carpentry', name: 'Carpentry' },
-    { id: 'painting', name: 'Painting' },
-    { id: 'gardening', name: 'Gardening' },
-    { id: 'tutoring', name: 'Tutoring' },
-    { id: 'pet-care', name: 'Pet Care' },
-    { id: 'beauty', name: 'Beauty' },
-    { id: 'fitness', name: 'Fitness' },
-    { id: 'photography', name: 'Photography' },
-    { id: 'graphic-design', name: 'Design' },
-    { id: 'web-development', name: 'Web Dev' },
-    { id: 'legal', name: 'Legal' },
-    { id: 'accounting', name: 'Accounting' },
-    { id: 'marketing', name: 'Marketing' },
-    { id: 'event-planning', name: 'Events' },
-    { id: 'catering', name: 'Catering' }
+    { id: 'cleaning', name: 'Cleaning', icon: <Home className="h-4 w-4" />, image: "/placeholder.svg" },
+    { id: 'plumbing', name: 'Plumbing', icon: <Wrench className="h-4 w-4" />, image: "/placeholder.svg" },
+    { id: 'electrician', name: 'Electrician', icon: <Zap className="h-4 w-4" />, image: "/placeholder.svg" },
+    { id: 'computer-repair', name: 'Computer Repair', icon: <Computer className="h-4 w-4" />, image: "/placeholder.svg" },
+    { id: 'beauty', name: 'Beauty Services', icon: <Scissors className="h-4 w-4" />, image: "/placeholder.svg" },
+    { id: 'moving', name: 'Moving Services', icon: <Truck className="h-4 w-4" />, image: "/placeholder.svg" },
+    { id: 'painting', name: 'Painting', icon: <PaintBucket className="h-4 w-4" />, image: "/placeholder.svg" },
+    { id: 'pest-control', name: 'Pest Control', icon: <Bug className="h-4 w-4" />, image: "/placeholder.svg" },
+    { id: 'photography', name: 'Photography', icon: <Camera className="h-4 w-4" />, image: "/placeholder.svg" },
+    { id: 'laundry', name: 'Laundry', icon: <Shirt className="h-4 w-4" />, image: "/placeholder.svg" },
+    { id: 'wellness', name: 'Wellness', icon: <Heart className="h-4 w-4" />, image: "/placeholder.svg" },
+    { id: 'pet-care', name: 'Pet Care', icon: <Dog className="h-4 w-4" />, image: "/placeholder.svg" },
   ];
-
-  const checkArrowVisibility = () => {
-    if (!scrollRef.current) return;
-    
-    setShowLeftArrow(scrollRef.current.scrollLeft > 20);
-    setShowRightArrow(
-      scrollRef.current.scrollLeft < 
-      scrollRef.current.scrollWidth - scrollRef.current.clientWidth - 20
-    );
-  };
-
-  useEffect(() => {
-    const scrollElement = scrollRef.current;
-    if (scrollElement) {
-      scrollElement.addEventListener('scroll', checkArrowVisibility);
-      // Check on initial load
-      checkArrowVisibility();
-      
-      // Check on window resize
-      window.addEventListener('resize', checkArrowVisibility);
-    }
-    
-    return () => {
-      if (scrollElement) {
-        scrollElement.removeEventListener('scroll', checkArrowVisibility);
-      }
-      window.removeEventListener('resize', checkArrowVisibility);
-    };
-  }, []);
-
-  const scroll = (direction: 'left' | 'right') => {
-    if (!scrollRef.current) return;
-    
-    const scrollAmount = 300;
-    const newScrollLeft = direction === 'left' 
-      ? scrollRef.current.scrollLeft - scrollAmount 
-      : scrollRef.current.scrollLeft + scrollAmount;
-      
-    scrollRef.current.scrollTo({
-      left: newScrollLeft,
-      behavior: 'smooth'
-    });
-  };
 
   const handleCategoryClick = (categoryId: string) => {
     navigate(`/services?category=${categoryId}`);
   };
 
   return (
-    <div className="relative mb-8">
-      <h2 className="text-xl font-bold mb-4">Browse by Category</h2>
-      
-      <div className="relative">
-        {showLeftArrow && (
-          <Button 
-            variant="secondary" 
-            size="icon" 
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 shadow-md" 
-            onClick={() => scroll('left')}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-        )}
-        
-        <div 
-          ref={scrollRef} 
-          className="flex gap-2 overflow-x-auto pb-4 px-1 scrollbar-hide"
-          style={{ 
-            scrollbarWidth: 'none', 
-            msOverflowStyle: 'none',
-            WebkitOverflowScrolling: 'touch',
-            scrollSnapType: 'x mandatory'
-          }}
-        >
-          {categories.map(category => (
-            <Button
+    <div className="bg-white dark:bg-zinc-900 rounded-lg p-4 shadow-sm">
+      <h3 className="text-lg font-semibold mb-3">Service Categories</h3>
+      <ScrollArea className="w-full">
+        <div className="flex gap-3 pb-4">
+          {categories.map((category) => (
+            <motion.div
               key={category.id}
-              variant="outline"
-              className="flex-shrink-0 whitespace-nowrap scroll-snap-align-start"
               onClick={() => handleCategoryClick(category.id)}
+              className="flex flex-col items-center cursor-pointer min-w-[100px] group"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ duration: 0.2 }}
             >
-              {category.name}
-            </Button>
+              <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-2">
+                {category.icon}
+              </div>
+              <span className="text-xs text-center line-clamp-2">{category.name}</span>
+            </motion.div>
           ))}
         </div>
-        
-        {showRightArrow && (
-          <Button 
-            variant="secondary" 
-            size="icon" 
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 shadow-md" 
-            onClick={() => scroll('right')}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        )}
-      </div>
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
     </div>
   );
 }
