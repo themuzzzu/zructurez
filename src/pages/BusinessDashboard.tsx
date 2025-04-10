@@ -26,7 +26,8 @@ import {
   Clock,
   DollarSign,
   Target,
-  LineChart
+  LineChart,
+  Calendar
 } from "lucide-react";
 import { toast } from "sonner";
 import { ChartContainer } from "@/components/ui/chart";
@@ -39,6 +40,7 @@ import { PerformanceMetricsCards } from "@/components/dashboard/PerformanceMetri
 import { UpgradeAIFeaturesCard } from "@/components/dashboard/UpgradeAIFeaturesCard";
 import { useBusinessAnalytics } from "@/components/performance/hooks/useBusinessAnalytics";
 import { BusinessAnalyticsCharts } from "@/components/performance/components/BusinessAnalyticsCharts";
+import { BusinessBookingsTimeline } from "@/components/bookings/BusinessBookingsTimeline";
 
 const BusinessDashboard = () => {
   const { user } = useAuth();
@@ -171,7 +173,20 @@ const BusinessDashboard = () => {
         </Card>
       ) : (
         <>
-          {/* Business Analytics Section */}
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>Booking Timeline</CardTitle>
+              <CardDescription>
+                Manage your customer appointments
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {businessData?.id && (
+                <BusinessBookingsTimeline businessId={businessData.id} />
+              )}
+            </CardContent>
+          </Card>
+
           <Card className="mb-6">
             <CardHeader>
               <CardTitle>Business Analytics</CardTitle>
@@ -248,6 +263,10 @@ const BusinessDashboard = () => {
                 <ShoppingCart className="h-4 w-4 mr-2" />
                 Sales
               </TabsTrigger>
+              <TabsTrigger value="bookings" className="inline-flex">
+                <Calendar className="h-4 w-4 mr-2" />
+                Bookings
+              </TabsTrigger>
               <TabsTrigger value="inventory" className="inline-flex">
                 <BarChart3 className="h-4 w-4 mr-2" />
                 Inventory
@@ -273,6 +292,20 @@ const BusinessDashboard = () => {
                     salesData={salesData || []} 
                     isLoading={salesLoading} 
                   />
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="bookings">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Appointment Management</CardTitle>
+                  <CardDescription>View and manage customer bookings</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {businessData?.id && (
+                    <BusinessBookingsTimeline businessId={businessData.id} />
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
