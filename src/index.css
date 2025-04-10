@@ -113,3 +113,13 @@
 .text-brown-500 {
   color: hsl(var(--brown));
 }
+
+/* Aliases for scrollbar utilities */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

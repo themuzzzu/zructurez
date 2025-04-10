@@ -2,7 +2,6 @@
 import { Layout } from "@/components/layout/Layout";
 import { SearchHero } from "@/components/home/SearchHero";
 import { PopularCategories } from "@/components/home/PopularCategories";
-import { LocalAreas } from "@/components/home/LocalAreas";
 import { TopRatedBusinesses } from "@/components/home/TopRatedBusinesses";
 import { FeaturedBusinesses } from "@/components/home/FeaturedBusinesses";
 import { ServiceCategoryScroller } from "@/components/services/ServiceCategoryScroller";
@@ -24,14 +23,13 @@ export default function Home() {
           <BusinessCategoryScroller />
         </section>
         
-        {/* Popular Categories */}
-        <PopularCategories />
-        
         {/* Browse Services */}
         <section>
-          <h2 className="text-2xl font-bold mb-4">Browse Services</h2>
           <ServiceCategoryScroller />
         </section>
+        
+        {/* Popular Categories */}
+        <PopularCategories />
         
         {/* Top Rated Businesses */}
         <TopRatedBusinesses />
@@ -41,9 +39,6 @@ export default function Home() {
         
         {/* Trending Services */}
         <TrendingServices />
-        
-        {/* Local Areas */}
-        <LocalAreas />
         
         {/* Deals Section */}
         <DealsSection />
