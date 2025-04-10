@@ -1,9 +1,9 @@
 
-import { useQuery } from '@tanstack/react-query';
+import { useState, useRef } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
-import { ArrowRightCircle, Store } from 'lucide-react';
+import { ArrowRightCircle, Store, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { BusinessCardHeader } from './BusinessCardHeader';
 import { BusinessCardRating } from './BusinessCardRating';
@@ -25,6 +25,10 @@ interface BusinessType {
 }
 
 export function SponsoredBusinesses() {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [showLeftScroll, setShowLeftScroll] = useState(false);
+  const [showRightScroll, setShowRightScroll] = useState(true);
+  
   const { data: businesses = [], isLoading } = useQuery({
     queryKey: ['sponsored-businesses'],
     queryFn: async () => {
@@ -76,13 +80,37 @@ export function SponsoredBusinesses() {
     staleTime: 60000, // 1 minute
   });
 
+  // Handle scrolling functions
+  const checkScrollPosition = () => {
+    if (scrollContainerRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+      setShowLeftScroll(scrollLeft > 10);
+      setShowRightScroll(scrollLeft < scrollWidth - clientWidth - 10);
+    }
+  };
+  
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = 300;
+      const currentScroll = scrollContainerRef.current.scrollLeft;
+      
+      scrollContainerRef.current.scrollTo({
+        left: direction === 'left' ? currentScroll - scrollAmount : currentScroll + scrollAmount,
+        behavior: 'smooth'
+      });
+      
+      // Check scroll position after animation
+      setTimeout(() => checkScrollPosition(), 300);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="mb-8">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">Sponsored Businesses</h2>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {Array(4).fill(0).map((_, i) => (
             <Card key={i} className="h-48 animate-pulse bg-muted" />
           ))}
@@ -102,50 +130,82 @@ export function SponsoredBusinesses() {
           View All <ArrowRightCircle size={16} />
         </Button>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-        {businesses.map((business) => (
-          <Link
-            key={business.id}
-            to={`/businesses/${business.id}`}
-            className="block h-full transition-transform hover:-translate-y-1 duration-200"
+      
+      <div className="relative group">
+        {showLeftScroll && (
+          <Button 
+            variant="outline"
+            size="icon"
+            className="absolute -left-3 top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm shadow-sm border"
+            onClick={() => scroll('left')}
           >
-            <Card className="overflow-hidden h-full bg-black text-white">
-              <div className="relative">
-                {business.image_url ? (
-                  <div className="h-32 w-full overflow-hidden relative">
-                    <LazyImage 
-                      src={business.image_url} 
-                      alt={business.name} 
-                      className="w-full h-full object-cover"
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+        )}
+        
+        <div 
+          ref={scrollContainerRef}
+          className="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory scroll-smooth"
+          onScroll={checkScrollPosition}
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {businesses.map((business) => (
+            <Link
+              key={business.id}
+              to={`/businesses/${business.id}`}
+              className="flex-none w-[275px] sm:w-[300px] max-w-[85vw] snap-start transition-transform hover:-translate-y-1 duration-200"
+            >
+              <Card className="overflow-hidden h-[200px] bg-black text-white">
+                <div className="relative h-32">
+                  {business.image_url ? (
+                    <div className="h-full w-full overflow-hidden relative">
+                      <LazyImage 
+                        src={business.image_url} 
+                        alt={business.name} 
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-80" />
+                    </div>
+                  ) : (
+                    <div className="h-full w-full bg-zinc-900">
+                      <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-80" />
+                    </div>
+                  )}
+                  
+                  <div className="absolute bottom-0 left-0 right-0 p-3 z-10">
+                    <BusinessCardHeader 
+                      name={business.name}
+                      category={business.category}
+                      is_open={business.is_open}
+                      verified={business.verified || false}
+                      wait_time={business.wait_time}
+                      closure_reason={business.closure_reason}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-80" />
                   </div>
-                ) : (
-                  <div className="h-32 w-full bg-zinc-900" />
-                )}
+                </div>
                 
-                <div className="absolute bottom-0 left-0 right-0 p-3 z-10">
-                  <BusinessCardHeader 
-                    name={business.name}
-                    category={business.category}
-                    is_open={business.is_open}
-                    verified={business.verified || false}
-                    wait_time={business.wait_time}
-                    closure_reason={business.closure_reason}
+                <div className="p-3">
+                  <BusinessCardRating 
+                    rating={business.average_rating || 0}
+                    reviews={business.reviews_count || 0}
+                    businessId={business.id}
                   />
                 </div>
-              </div>
-              
-              <div className="p-3">
-                <BusinessCardRating 
-                  rating={business.average_rating || 0}
-                  reviews={business.reviews_count || 0}
-                  businessId={business.id}
-                />
-              </div>
-            </Card>
-          </Link>
-        ))}
+              </Card>
+            </Link>
+          ))}
+        </div>
+        
+        {showRightScroll && (
+          <Button 
+            variant="outline"
+            size="icon"
+            className="absolute -right-3 top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm shadow-sm border"
+            onClick={() => scroll('right')}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        )}
       </div>
     </div>
   );

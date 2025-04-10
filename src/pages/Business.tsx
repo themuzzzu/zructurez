@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,6 @@ import { BusinessCardRating } from "@/components/business/BusinessCardRating";
 import { BusinessCardActions } from "@/components/business/BusinessCardActions";
 import { Card } from "@/components/ui/card";
 import { CategoryIconGrid } from "@/components/marketplace/CategoryIconGrid";
-import { CategorySubcategoryGrid } from "@/components/marketplace/CategorySubcategoryGrid";
 import { BusinessBannerCarousel } from "@/components/business/BusinessBannerCarousel";
 import { SponsoredBusinesses } from "@/components/business/SponsoredBusinesses";
 import { SuggestedBusinesses } from "@/components/business/SuggestedBusinesses";
@@ -248,11 +248,6 @@ const BusinessPage = () => {
         
         <SuggestedBusinesses />
         
-        <div className="mt-8 mb-6">
-          <h2 className="text-2xl font-bold mb-4">Browse by Category</h2>
-          <CategorySubcategoryGrid onCategorySelect={handleCategorySelect} />
-        </div>
-        
         <BusinessCategoryScroller />
         
         <div className="mt-8">
@@ -296,16 +291,21 @@ const BusinessPage = () => {
                     <Card className="overflow-hidden h-full bg-black text-white flex flex-col">
                       <div className="relative">
                         {business.image_url ? (
-                          <div className="h-48 w-full overflow-hidden">
+                          <div className="h-40 w-full overflow-hidden">
                             <img 
                               src={business.image_url} 
                               alt={business.name} 
                               className="w-full h-full object-cover"
+                              loading="lazy"
+                              onError={(e) => {
+                                // Fallback if image fails to load
+                                (e.target as HTMLImageElement).src = '/placeholder.svg';
+                              }}
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-80" />
                           </div>
                         ) : (
-                          <div className="h-48 w-full bg-zinc-900">
+                          <div className="h-40 w-full bg-zinc-900">
                             <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-80" />
                           </div>
                         )}
