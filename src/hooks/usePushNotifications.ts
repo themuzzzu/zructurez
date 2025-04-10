@@ -91,11 +91,13 @@ export const usePushNotifications = () => {
     
     try {
       // Check if token already exists for this user
-      const { data: existingTokens } = await supabase
+      const { data: existingTokens, error: fetchError } = await supabase
         .from('user_device_tokens')
         .select('*')
         .eq('user_id', user.id)
         .eq('device_token', token);
+      
+      if (fetchError) throw fetchError;
       
       if (existingTokens && existingTokens.length > 0) {
         // Token already exists, no need to insert
@@ -103,7 +105,7 @@ export const usePushNotifications = () => {
       }
       
       // Insert new token
-      const { error } = await supabase
+      const { error: insertError } = await supabase
         .from('user_device_tokens')
         .insert({
           user_id: user.id,
@@ -111,7 +113,7 @@ export const usePushNotifications = () => {
           platform: 'web'
         });
       
-      if (error) throw error;
+      if (insertError) throw insertError;
       
     } catch (err) {
       console.error('Error saving device token:', err);

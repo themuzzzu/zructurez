@@ -1,7 +1,8 @@
 
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.6'
-import * as firebase from 'https://cdn.skypack.dev/firebase-admin@11.11.0'
+// Use firebase-admin without the problematic google-gax dependency
+import * as admin from 'https://cdn.jsdelivr.net/npm/firebase-admin@11.11.0/+esm'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -36,8 +37,10 @@ serve(async (req: Request) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
     
     // Initialize Firebase Admin if not already initialized
+    let firebaseInitialized = false
     try {
-      firebase.getApp()
+      admin.app()
+      firebaseInitialized = true
     } catch (error) {
       const firebaseConfig = JSON.parse(Deno.env.get('FIREBASE_SERVICE_ACCOUNT') || '{}')
       
@@ -45,9 +48,10 @@ serve(async (req: Request) => {
         throw new Error('Missing Firebase service account configuration')
       }
       
-      firebase.initializeApp({
-        credential: firebase.credential.cert(firebaseConfig),
+      admin.initializeApp({
+        credential: admin.credential.cert(firebaseConfig),
       })
+      firebaseInitialized = true
     }
     
     // Parse request body
@@ -117,10 +121,10 @@ serve(async (req: Request) => {
     
     if (topic) {
       message.topic = topic
-      response = await firebase.messaging().send(message)
+      response = await admin.messaging().send(message)
     } else {
       message.tokens = deviceTokens
-      response = await firebase.messaging().sendMulticast(message)
+      response = await admin.messaging().sendMulticast(message)
     }
     
     // Save notification to database for history (optional)
