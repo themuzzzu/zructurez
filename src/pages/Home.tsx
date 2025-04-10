@@ -9,11 +9,18 @@ import { TrendingServices } from "@/components/home/TrendingServices";
 import { DealsSection } from "@/components/home/DealsSection";
 import { QuickAccessServices } from "@/components/home/QuickAccessServices";
 import { BusinessCategoryScroller } from "@/components/home/BusinessCategoryScroller";
+import { NotificationPermission } from "@/components/notifications/NotificationPermission";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Home() {
+  const { user } = useAuth();
+  
   return (
     <Layout>
       <div className="container mx-auto px-4 space-y-10 pb-16 max-w-7xl">
+        {/* Notification Permission Component - only show when user is logged in */}
+        {user && <NotificationPermission className="mb-6" />}
+        
         {/* Hero Section */}
         <SearchHero />
         

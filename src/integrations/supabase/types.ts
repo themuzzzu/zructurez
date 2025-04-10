@@ -2435,6 +2435,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_device_tokens: {
+        Row: {
+          created_at: string
+          device_token: string
+          id: string
+          platform: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          device_token: string
+          id?: string
+          platform: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          device_token?: string
+          id?: string
+          platform?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_presence: {
         Row: {
           is_online: boolean | null
