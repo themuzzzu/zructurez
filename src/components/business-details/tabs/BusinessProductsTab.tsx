@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState, useMemo, useEffect } from "react";
 import type { Business, BusinessProduct } from "@/types/business";
 import { Button } from "@/components/ui/button";
-import { Trash, Edit, Plus, Filter } from "lucide-react";
+import { Trash, Edit, Plus } from "lucide-react";
 import { 
   Dialog,
   DialogContent,
@@ -21,19 +21,19 @@ import { supabase } from "@/integrations/supabase/client";
 
 // Standard product categories that most businesses would use
 const PRODUCT_CATEGORIES = [
-  { value: "all", label: "All Categories" },
-  { value: "food", label: "Food & Beverages" },
-  { value: "electronics", label: "Electronics" },
-  { value: "fashion", label: "Fashion & Apparel" },
-  { value: "health", label: "Health & Beauty" },
-  { value: "home", label: "Home & Decor" },
-  { value: "toys", label: "Toys & Games" },
-  { value: "sports", label: "Sports & Outdoors" },
-  { value: "books", label: "Books & Media" },
-  { value: "art", label: "Art & Crafts" },
-  { value: "jewelry", label: "Jewelry & Accessories" },
-  { value: "other", label: "Other" },
-  { value: "uncategorized", label: "Uncategorized" }
+  { value: "all", label: "All Categories", icon: "layers" },
+  { value: "food", label: "Food & Beverages", icon: "utensils" },
+  { value: "electronics", label: "Electronics", icon: "smartphone" },
+  { value: "fashion", label: "Fashion & Apparel", icon: "shirt" },
+  { value: "health", label: "Health & Beauty", icon: "heart" },
+  { value: "home", label: "Home & Decor", icon: "home" },
+  { value: "toys", label: "Toys & Games", icon: "toy" },
+  { value: "sports", label: "Sports & Outdoors", icon: "dumbbell" },
+  { value: "books", label: "Books & Media", icon: "book-open" },
+  { value: "art", label: "Art & Crafts", icon: "palette" },
+  { value: "jewelry", label: "Jewelry & Accessories", icon: "gem" },
+  { value: "other", label: "Other", icon: "more-horizontal" },
+  { value: "uncategorized", label: "Uncategorized", icon: "help-circle" }
 ];
 
 interface BusinessProductsTabProps {
@@ -102,6 +102,7 @@ export const BusinessProductsTab = ({ businessId, isOwner, products, onSuccess }
           price: parseFloat(productData.price),
           stock: parseInt(productData.stock),
           image_url: productData.image_url || editingProduct.image_url,
+          category: productData.category || null
         })
         .eq('id', editingProduct.id);
         
@@ -149,7 +150,7 @@ export const BusinessProductsTab = ({ businessId, isOwner, products, onSuccess }
       
       {productCategories.length > 1 && (
         <div className="mb-4 border border-border/30 rounded-md p-1">
-          <ScrollArea className="pb-1">
+          <ScrollArea className="pb-1 scrollbar-none">
             <TabsList className="flex w-full min-w-fit bg-transparent justify-start">
               {productCategories.map(category => (
                 <TabsTrigger
@@ -221,14 +222,13 @@ export const BusinessProductsTab = ({ businessId, isOwner, products, onSuccess }
         </div>
       ) : (
         <BusinessContent
-          // Create a complete Business object with required properties
           business={{ 
             id: businessId,
             name: "", 
             description: "",
             category: "",
-            user_id: "", // Adding required property
-            created_at: new Date().toISOString() // Adding required property
+            user_id: "",
+            created_at: new Date().toISOString() 
           }}
           business_products={filteredProducts}
           business_portfolio={[]}
