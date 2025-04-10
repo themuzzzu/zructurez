@@ -10,8 +10,8 @@ import { SponsoredServices } from "@/components/service-marketplace/SponsoredSer
 import { SuggestedServices } from "@/components/service-marketplace/SuggestedServices";
 import { TopServices } from "@/components/service-marketplace/TopServices";
 import { RecommendedServices } from "@/components/service-marketplace/RecommendedServices";
-import { SearchInput } from "@/components/SearchInput";
 import { AdvancedSearch } from "@/components/marketplace/AdvancedSearch";
+import { Layout } from "@/components/layout/Layout";
 
 const ServicesPage = () => {
   const [services, setServices] = useState<Service[]>([]);
@@ -75,54 +75,65 @@ const ServicesPage = () => {
   };
 
   if (loading) {
-    return <div className="p-4">Loading services...</div>;
+    return (
+      <Layout>
+        <div className="p-4">Loading services...</div>
+      </Layout>
+    );
   }
 
   if (error) {
-    return <div className="p-4">Error: {error}</div>;
+    return (
+      <Layout>
+        <div className="p-4">Error: {error}</div>
+      </Layout>
+    );
   }
   
   return (
-    <div className="container px-4 py-6 max-w-7xl mx-auto">
-      <Heading>Services</Heading>
-      
-      {/* Search functionality */}
-      <div className="mb-6">
-        <AdvancedSearch 
-          className="w-full" 
-          onSearch={handleSearch}
-        />
+    <Layout>
+      <div className="container px-4 py-6 max-w-7xl mx-auto">
+        <Heading>Services</Heading>
+        
+        {/* Service-specific search functionality */}
+        <div className="mb-6">
+          <AdvancedSearch 
+            className="w-full" 
+            onSearch={handleSearch}
+            placeholder="Find services like plumbing, cleaning, repairs..."
+          />
+        </div>
+        
+        {/* Service-specific banner ad */}
+        <ServiceBannerAd />
+        
+        {/* Display recommended services - horizontal scrollable */}
+        <RecommendedServices />
+        
+        {/* Display sponsored services */}
+        <SponsoredServices />
+        
+        {/* Display top services */}
+        <TopServices />
+        
+        {/* Display suggested services */}
+        <SuggestedServices />
+        
+        {/* Regular service listings */}
+        <div className="mt-8">
+          <h2 className="text-xl font-semibold mb-4">
+            {searchQuery ? `Search Results (${filteredServices.length})` : "All Services"}
+          </h2>
+          {filteredServices.length > 0 ? (
+            <ServicesGrid layout="grid3x3" services={filteredServices} />
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">No services found matching "{searchQuery}"</p>
+            </div>
+          )}
+        </div>
       </div>
-      
-      {/* Service-specific banner ad */}
-      <ServiceBannerAd />
-      
-      {/* Display recommended services - horizontal scrollable */}
-      <RecommendedServices />
-      
-      {/* Display sponsored services */}
-      <SponsoredServices />
-      
-      {/* Display top services */}
-      <TopServices />
-      
-      {/* Display suggested services */}
-      <SuggestedServices />
-      
-      {/* Regular service listings */}
-      <div className="mt-8">
-        <h2 className="text-xl font-semibold mb-4">
-          {searchQuery ? `Search Results (${filteredServices.length})` : "All Services"}
-        </h2>
-        {filteredServices.length > 0 ? (
-          <ServicesGrid layout="grid3x3" services={filteredServices} />
-        ) : (
-          <div className="text-center py-8">
-            <p className="text-muted-foreground">No services found matching "{searchQuery}"</p>
-          </div>
-        )}
-      </div>
-    </div>
+    </Layout>
   );
 };
 

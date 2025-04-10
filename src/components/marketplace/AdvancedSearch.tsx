@@ -9,9 +9,10 @@ import { useState } from "react";
 interface AdvancedSearchProps {
   className?: string;
   onSearch?: (query: string) => void;
+  placeholder?: string;
 }
 
-export function AdvancedSearch({ className, onSearch }: AdvancedSearchProps) {
+export function AdvancedSearch({ className, onSearch, placeholder }: AdvancedSearchProps) {
   const navigate = useNavigate();
   const [searchValue, setSearchValue] = useState("");
   
@@ -31,13 +32,29 @@ export function AdvancedSearch({ className, onSearch }: AdvancedSearchProps) {
     setSearchValue(value);
   };
   
-  const popularSearches = [
-    "Electronics",
-    "Women's Fashion",
-    "Home Decor", 
-    "Books",
-    "Sports Equipment"
-  ];
+  const getPopularSearches = () => {
+    // Return service-specific popular searches if the placeholder suggests we're in services
+    if (placeholder?.toLowerCase().includes("service")) {
+      return [
+        "Plumbing",
+        "Cleaning",
+        "Electrician", 
+        "Home Repair",
+        "Computer Repair"
+      ];
+    }
+    
+    // Default popular searches for marketplace
+    return [
+      "Electronics",
+      "Women's Fashion",
+      "Home Decor", 
+      "Books",
+      "Sports Equipment"
+    ];
+  };
+  
+  const popularSearches = getPopularSearches();
   
   return (
     <div className={className}>
@@ -45,7 +62,7 @@ export function AdvancedSearch({ className, onSearch }: AdvancedSearchProps) {
         <div className="relative">
           <SearchBar
             onSearch={handleSearch}
-            placeholder="What are you looking for today?"
+            placeholder={placeholder || "What are you looking for today?"}
             autoFocus={false}
           />
           
