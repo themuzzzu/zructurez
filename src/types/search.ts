@@ -14,17 +14,15 @@ export interface SearchResult {
   title: string;
   description: string;
   imageUrl?: string;
-  image_url?: string; // Added for backwards compatibility
   category?: string;
   price?: number;
   type: string;
   url: string;
   isSponsored?: boolean;
-  isDiscounted?: boolean;
-  discount_percentage?: number;
-  original_price?: number;
   relevanceScore?: number;
   highlight_tags?: string[];
+  isDiscounted?: boolean;
+  discount_percentage?: number;
   // Include both formats for backward compatibility
   is_discounted?: boolean;
 }

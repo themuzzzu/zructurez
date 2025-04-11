@@ -1,52 +1,98 @@
 
-import { useState } from "react";
-import { Layout } from "@/components/layout/Layout";
-import { Heading } from "@/components/ui/heading";
-import { AdvancedSearch } from "@/components/marketplace/AdvancedSearch";
-import { ServiceBannerAd } from "@/components/ads/ServiceBannerAd";
-import { ServiceSection } from "@/components/service/ServiceSection";
-import { BusinessSection } from "@/components/business/BusinessSection";
+import { useState, useEffect } from "react";
+import { ServiceCard } from "@/components/service-marketplace/ServiceCard";
 import { ServicesGrid } from "@/components/service-marketplace/ServicesGrid";
-import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import type { Service } from "@/types/service";
+import { Heading } from "@/components/ui/heading";
+import { ServiceBannerAd } from "@/components/ads/ServiceBannerAd";
+import { SponsoredServices } from "@/components/service-marketplace/SponsoredServices";
+import { SuggestedServices } from "@/components/service-marketplace/SuggestedServices";
+import { TopServices } from "@/components/service-marketplace/TopServices";
+import { RecommendedServices } from "@/components/service-marketplace/RecommendedServices";
+import { AdvancedSearch } from "@/components/marketplace/AdvancedSearch";
+import { Layout } from "@/components/layout/Layout";
 
 const ServicesPage = () => {
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  
-  const { data: services = [], isLoading } = useQuery({
-    queryKey: ['services', searchQuery],
-    queryFn: async () => {
+  const [filteredServices, setFilteredServices] = useState<Service[]>([]);
+
+  useEffect(() => {
+    const fetchServices = async () => {
       try {
-        let query = supabase.from("services").select("*");
-        
-        if (searchQuery) {
-          query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,category.ilike.%${searchQuery}%`);
+        const { data, error } = await supabase
+          .from("services")
+          .select("*")
+          .limit(12);
+
+        if (error) {
+          throw error;
         }
-        
-        const { data } = await query.limit(12);
-        
+
         // Transform the data to ensure availability is always an array
-        return data?.map(item => ({
+        const transformedData = data?.map(item => ({
           ...item,
           // If availability is a string, parse it as JSON if it starts with [, otherwise make it an array with one item
           availability: typeof item.availability === 'string' ? 
             (item.availability.startsWith('[') ? JSON.parse(item.availability) : [item.availability]) 
             : item.availability || []
         })) || [];
-      } catch (err) {
+
+        setServices(transformedData);
+        setFilteredServices(transformedData);
+      } catch (err: any) {
+        setError(err.message || "Failed to load services");
         console.error("Error fetching services:", err);
-        return [];
+      } finally {
+        setLoading(false);
       }
+    };
+
+    fetchServices();
+  }, []);
+
+  // Filter services based on search query
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredServices(services);
+      return;
     }
-  });
+    
+    const filtered = services.filter(service => 
+      service.title?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      service.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      service.category?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    
+    setFilteredServices(filtered);
+  }, [searchQuery, services]);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
   };
 
+  if (loading) {
+    return (
+      <Layout>
+        <div className="p-4">Loading services...</div>
+      </Layout>
+    );
+  }
+
+  if (error) {
+    return (
+      <Layout>
+        <div className="p-4">Error: {error}</div>
+      </Layout>
+    );
+  }
+  
   return (
     <Layout>
-      <div className="container px-3 py-4 max-w-7xl mx-auto">
+      <div className="container px-4 py-6 max-w-7xl mx-auto">
         <Heading>Services</Heading>
         
         {/* Service-specific search functionality */}
@@ -61,38 +107,25 @@ const ServicesPage = () => {
         {/* Service-specific banner ad */}
         <ServiceBannerAd />
         
-        {!searchQuery && (
-          <div className="mt-6 space-y-6">
-            {/* Trending services section */}
-            <ServiceSection type="trending" />
-            
-            {/* Sponsored services section */}
-            <ServiceSection type="sponsored" />
-            
-            {/* Suggested services section */}
-            <ServiceSection type="suggested" />
-            
-            {/* Related businesses section */}
-            <div className="pt-4 border-t">
-              <h2 className="text-lg font-bold mb-3">Related Businesses</h2>
-              <BusinessSection type="trending" />
-            </div>
-          </div>
-        )}
+        {/* Display recommended services - horizontal scrollable */}
+        <RecommendedServices />
         
-        {/* Search results or all services */}
+        {/* Display sponsored services */}
+        <SponsoredServices />
+        
+        {/* Display top services */}
+        <TopServices />
+        
+        {/* Display suggested services */}
+        <SuggestedServices />
+        
+        {/* Regular service listings */}
         <div className="mt-8">
           <h2 className="text-xl font-semibold mb-4">
-            {searchQuery ? `Search Results (${services.length})` : "All Services"}
+            {searchQuery ? `Search Results (${filteredServices.length})` : "All Services"}
           </h2>
-          {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {Array(6).fill(0).map((_, i) => (
-                <div key={i} className="h-48 animate-pulse bg-muted rounded-md" />
-              ))}
-            </div>
-          ) : services.length > 0 ? (
-            <ServicesGrid layout="grid3x3" services={services} />
+          {filteredServices.length > 0 ? (
+            <ServicesGrid layout="grid3x3" services={filteredServices} />
           ) : (
             <div className="text-center py-8">
               <p className="text-muted-foreground">No services found matching "{searchQuery}"</p>
@@ -102,6 +135,6 @@ const ServicesPage = () => {
       </div>
     </Layout>
   );
-}
+};
 
 export default ServicesPage;

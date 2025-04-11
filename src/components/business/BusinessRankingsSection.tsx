@@ -142,7 +142,7 @@ export const BusinessRankingsSection = () => {
                   name={business.name}
                   category={business.category}
                   description={business.description || ""}
-                  image={business.image_url || ""}
+                  image_url={business.image_url}
                   location={business.location}
                   rating={4.5} // Default rating for now
                   reviews={10} // Default reviews count
@@ -168,7 +168,7 @@ export const BusinessRankingsSection = () => {
                   name={business.name}
                   category={business.category}
                   description={business.description || ""}
-                  image={business.image_url || ""}
+                  image_url={business.image_url}
                   location={business.location}
                   rating={4.5} // Default rating for now
                   reviews={10} // Default reviews count
@@ -194,7 +194,7 @@ export const BusinessRankingsSection = () => {
                   name={business.name}
                   category={business.category}
                   description={business.description || ""}
-                  image={business.image_url || ""}
+                  image_url={business.image_url}
                   location={business.location}
                   rating={4.5} // Default rating for now
                   reviews={10} // Default reviews count

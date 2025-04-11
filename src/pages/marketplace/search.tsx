@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
@@ -470,10 +471,15 @@ export default function MarketplaceSearch() {
                           title: result.title,
                           description: result.description,
                           price: result.price || 0,
-                          image_url: result.imageUrl, // Using imageUrl from SearchResult
+                          imageUrl: result.imageUrl || '',
                           category: result.category || '',
-                          is_discounted: result.isDiscounted || false,
-                          discount_percentage: result.discount_percentage
+                          highlight_tags: result.highlight_tags || 
+                            (Math.random() > 0.7 ? 
+                              [['Bestseller', 'New', 'Hot Deal', 'Trending', 'Limited'][Math.floor(Math.random() * 5)]] 
+                              : []),
+                          is_discounted: result.isDiscounted || result.is_discounted || false,
+                          discount_percentage: result.discount_percentage || 
+                            ((result.isDiscounted || result.is_discounted) ? Math.floor(Math.random() * 50) + 10 : undefined)
                         }}
                         layout={gridLayout}
                         sponsored={result.isSponsored}
