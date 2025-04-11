@@ -8,7 +8,8 @@ import {
   Hammer, 
   Home, 
   ShieldCheck,
-  Smartphone 
+  Smartphone,
+  ArrowRight
 } from "lucide-react";
 
 export const QuickAccessServices = () => {
