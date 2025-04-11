@@ -49,6 +49,37 @@
     --input: 240 3.7% 15.9%;
     --ring: 240 4.9% 83.9%;
   }
+  
+  /* UI color theme overrides */
+  .ui-purple {
+    --primary: 270 70% 60%;
+    --primary-foreground: 0 0% 98%;
+    --ring: 270 70% 60%;
+  }
+  
+  .ui-red {
+    --primary: 0 72% 51%;
+    --primary-foreground: 0 0% 98%;
+    --ring: 0 72% 51%;
+  }
+  
+  .ui-yellow {
+    --primary: 38 92% 50%;
+    --primary-foreground: 0 0% 12%;
+    --ring: 38 92% 50%;
+  }
+  
+  .ui-green {
+    --primary: 142 72% 29%;
+    --primary-foreground: 0 0% 98%;
+    --ring: 142 72% 29%;
+  }
+  
+  .ui-blue {
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 98%;
+    --ring: 217 91% 60%;
+  }
 }
  
 @layer base {
@@ -58,5 +89,20 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* UI transitions for smooth theme changes */
+@layer utilities {
+  .transition-colors {
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 300ms;
+  }
+
+  .transition-all {
+    transition-property: all;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 300ms;
   }
 }

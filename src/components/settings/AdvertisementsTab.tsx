@@ -1,6 +1,6 @@
 
 import { useState, Suspense, lazy } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -10,9 +10,6 @@ import { AdvertisingTab } from "./AdvertisingTab";
 // Lazy load heavy components
 const LazyAdDashboard = lazy(() => import("@/components/ads/AdDashboard").then(
   module => ({ default: module.AdDashboard })
-));
-const LazyAIAdRecommendations = lazy(() => import("@/components/ads/AIAdRecommendations").then(
-  module => ({ default: module.AIAdRecommendations })
 ));
 const LazyPerformanceMetricsDashboard = lazy(() => import("@/components/performance/PerformanceMetricsDashboard").then(
   module => ({ default: module.PerformanceMetricsDashboard })
@@ -27,7 +24,6 @@ export const AdvertisementsTab = ({ businessId }: { businessId?: string }) => {
         <TabsList>
           <TabsTrigger value="dashboard">Ads Dashboard</TabsTrigger>
           <TabsTrigger value="create">Create Ads</TabsTrigger>
-          <TabsTrigger value="recommendations">AI Recommendations</TabsTrigger>
           <TabsTrigger value="performance">Performance</TabsTrigger>
         </TabsList>
         
@@ -35,6 +31,7 @@ export const AdvertisementsTab = ({ businessId }: { businessId?: string }) => {
           <Card>
             <CardHeader>
               <CardTitle>Advertisement Management</CardTitle>
+              <CardDescription>Manage your ad campaigns and view performance metrics</CardDescription>
             </CardHeader>
             <CardContent>
               <Suspense fallback={<Skeleton className="h-[500px] w-full" />}>
@@ -48,6 +45,7 @@ export const AdvertisementsTab = ({ businessId }: { businessId?: string }) => {
           <Card>
             <CardHeader>
               <CardTitle>Create & Manage Ads</CardTitle>
+              <CardDescription>Design new ad campaigns for your products and services</CardDescription>
             </CardHeader>
             <CardContent>
               <AdvertisingTab businessId={businessId} />
@@ -55,16 +53,11 @@ export const AdvertisementsTab = ({ businessId }: { businessId?: string }) => {
           </Card>
         </TabsContent>
         
-        <TabsContent value="recommendations" className="mt-6">
-          <Suspense fallback={<Skeleton className="h-[400px] w-full rounded-lg" />}>
-            <LazyAIAdRecommendations />
-          </Suspense>
-        </TabsContent>
-        
         <TabsContent value="performance" className="mt-6">
           <Card>
             <CardHeader>
               <CardTitle>Ad Performance Analytics</CardTitle>
+              <CardDescription>View detailed metrics about your ad performance</CardDescription>
             </CardHeader>
             <CardContent>
               <Suspense fallback={<Skeleton className="h-[500px] w-full" />}>

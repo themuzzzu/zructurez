@@ -6,11 +6,13 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Slider } from "@/components/ui/slider";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { toast } from "sonner";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useProfile } from "@/hooks/useProfile";
 import { useTheme } from "@/components/ThemeProvider";
 import { type Theme } from "@/components/ThemeProvider";
-import { Loader2, Check } from "lucide-react";
+import { Loader2, Check, ArrowRightLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { debounce } from "lodash";
 
 export const GeneralSettings = () => {
   const { theme, setTheme } = useTheme();
@@ -42,35 +44,60 @@ export const GeneralSettings = () => {
     }
   }, [profile?.theme_preference, setTheme]);
   
-  // Apply font size to the document root when it changes
-  useEffect(() => {
-    document.documentElement.style.fontSize = `${fontSize}%`;
-    localStorage.setItem("appFontSize", fontSize.toString());
-  }, [fontSize]);
+  // Debounced font size update to prevent excessive DOM operations
+  const applyFontSize = useCallback(
+    debounce((size: number) => {
+      document.documentElement.style.fontSize = `${size}%`;
+      localStorage.setItem("appFontSize", size.toString());
+      
+      // Update profile preferences without triggering a save notification
+      if (profile && updateProfile) {
+        updateProfile({
+          display_preferences: {
+            ...profile.display_preferences,
+            font_size: size
+          }
+        });
+      }
+    }, 200),
+    [profile, updateProfile]
+  );
+  
+  // Handle font size change
+  const handleFontSizeChange = (value: number[]) => {
+    const newSize = value[0];
+    setFontSize(newSize);
+    applyFontSize(newSize);
+  };
   
   // Apply UI color changes
-  useEffect(() => {
+  const applyUiColor = useCallback((color: string) => {
     // Remove existing color classes
     document.documentElement.classList.remove("ui-purple", "ui-red", "ui-yellow", "ui-green", "ui-blue");
     
     // Add the selected color class if not default
-    if (uiColor !== "default") {
-      document.documentElement.classList.add(`ui-${uiColor}`);
+    if (color !== "default") {
+      document.documentElement.classList.add(`ui-${color}`);
     }
     
-    localStorage.setItem("appUiColor", uiColor);
+    localStorage.setItem("appUiColor", color);
     
     // If the profile exists, update display preferences
     if (profile && updateProfile) {
       updateProfile({
         display_preferences: {
           ...profile.display_preferences,
-          ui_color: uiColor
+          ui_color: color
         }
       });
     }
-  }, [uiColor, profile, updateProfile]);
+  }, [profile, updateProfile]);
 
+  // Apply UI color when it changes
+  useEffect(() => {
+    applyUiColor(uiColor);
+  }, [uiColor, applyUiColor]);
+  
   const handleThemeChange = async (value: Theme) => {
     setTheme(value);
     if (updateThemePreference) {
@@ -90,21 +117,6 @@ export const GeneralSettings = () => {
     toast.success(`Messages view ${checked ? 'separated' : 'combined'}`);
   };
   
-  const handleFontSizeChange = (value: number[]) => {
-    const newSize = value[0];
-    setFontSize(newSize);
-    
-    // Save font size preference to profile
-    if (updateProfile) {
-      updateProfile({
-        display_preferences: {
-          ...profile?.display_preferences,
-          font_size: newSize
-        }
-      });
-    }
-  };
-  
   const handleUiColorChange = (value: string) => {
     if (!value) return;
     
@@ -120,6 +132,30 @@ export const GeneralSettings = () => {
         <span>UI color set to {previewColor === "default" ? "default" : previewColor}</span>
       </div>
     );
+  };
+  
+  // Get color classes for preview
+  const getColorClasses = useMemo(() => (color: string) => {
+    switch(color) {
+      case "purple": return "bg-purple-500 text-white hover:text-white hover:bg-purple-600 data-[state=on]:bg-purple-700";
+      case "red": return "bg-red-500 text-white hover:text-white hover:bg-red-600 data-[state=on]:bg-red-700";
+      case "yellow": return "bg-amber-400 text-black hover:text-black hover:bg-amber-500 data-[state=on]:bg-amber-600";
+      case "green": return "bg-green-500 text-white hover:text-white hover:bg-green-600 data-[state=on]:bg-green-700";
+      case "blue": return "bg-blue-500 text-white hover:text-white hover:bg-blue-600 data-[state=on]:bg-blue-700";
+      default: return "";
+    }
+  }, []);
+  
+  // Get preview background color
+  const getPreviewBg = (color: string) => {
+    switch(color) {
+      case "purple": return "bg-purple-500";
+      case "red": return "bg-red-500";
+      case "yellow": return "bg-amber-400";
+      case "green": return "bg-green-500";
+      case "blue": return "bg-blue-500";
+      default: return "bg-primary";
+    }
   };
 
   if (loading) {
@@ -162,7 +198,7 @@ export const GeneralSettings = () => {
         
         <div className="space-y-4">
           <h3 className="text-lg font-semibold">Font Size</h3>
-          <div className="space-y-6">
+          <div className="space-y-4">
             <div className="flex justify-between">
               <span>Small</span>
               <span>Normal</span>
@@ -181,6 +217,15 @@ export const GeneralSettings = () => {
                 Current size: {fontSize}%
               </span>
             </div>
+            
+            {/* Font size preview */}
+            <div className="rounded-lg border p-4 mt-2">
+              <p className="text-sm font-medium mb-2">Preview</p>
+              <div style={{ fontSize: `${fontSize}%` }} className="transition-all">
+                <p className="mb-2">This is how text will appear at {fontSize}% size.</p>
+                <p className="text-sm text-muted-foreground">This is smaller text for reference.</p>
+              </div>
+            </div>
           </div>
         </div>
         
@@ -196,43 +241,62 @@ export const GeneralSettings = () => {
               <ToggleGroupItem value="default" className="px-3 py-2">
                 Default
               </ToggleGroupItem>
-              <ToggleGroupItem value="purple" className="px-3 py-2 bg-purple-500 text-white hover:text-white hover:bg-purple-600 data-[state=on]:bg-purple-700">
+              <ToggleGroupItem value="purple" className={`px-3 py-2 ${getColorClasses("purple")}`}>
                 Purple
               </ToggleGroupItem>
-              <ToggleGroupItem value="red" className="px-3 py-2 bg-red-500 text-white hover:text-white hover:bg-red-600 data-[state=on]:bg-red-700">
+              <ToggleGroupItem value="red" className={`px-3 py-2 ${getColorClasses("red")}`}>
                 Red
               </ToggleGroupItem>
-              <ToggleGroupItem value="yellow" className="px-3 py-2 bg-amber-400 text-black hover:text-black hover:bg-amber-500 data-[state=on]:bg-amber-600">
+              <ToggleGroupItem value="yellow" className={`px-3 py-2 ${getColorClasses("yellow")}`}>
                 Golden
               </ToggleGroupItem>
-              <ToggleGroupItem value="green" className="px-3 py-2 bg-green-500 text-white hover:text-white hover:bg-green-600 data-[state=on]:bg-green-700">
+              <ToggleGroupItem value="green" className={`px-3 py-2 ${getColorClasses("green")}`}>
                 Green
               </ToggleGroupItem>
-              <ToggleGroupItem value="blue" className="px-3 py-2 bg-blue-500 text-white hover:text-white hover:bg-blue-600 data-[state=on]:bg-blue-700">
+              <ToggleGroupItem value="blue" className={`px-3 py-2 ${getColorClasses("blue")}`}>
                 Blue
               </ToggleGroupItem>
             </ToggleGroup>
             
-            {/* Preview area */}
+            {/* Preview area with side-by-side comparison */}
             <div className="mt-4 p-4 rounded-lg border border-border">
-              <h4 className="font-medium mb-2">Preview</h4>
-              <div className={`p-4 rounded-lg ${
-                previewColor === "default" ? "bg-primary" : 
-                previewColor === "purple" ? "bg-purple-500" :
-                previewColor === "red" ? "bg-red-500" :
-                previewColor === "yellow" ? "bg-amber-400" :
-                previewColor === "green" ? "bg-green-500" :
-                "bg-blue-500"
-              } text-white`}>
-                <p>This is how buttons and accents will look</p>
+              <h4 className="font-medium mb-4">Preview</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <p className="text-sm font-medium">Current UI Color</p>
+                  <div className={`p-4 rounded-lg ${getPreviewBg(uiColor)} text-white`}>
+                    <p>Current button style</p>
+                  </div>
+                  <Button className="w-full">Default Button</Button>
+                </div>
+                
+                <div className="space-y-3">
+                  <p className="text-sm font-medium">New UI Color</p>
+                  <div className={`p-4 rounded-lg ${getPreviewBg(previewColor)} text-white`}>
+                    <p>New button style</p>
+                  </div>
+                  <Button 
+                    onClick={applyPreviewColor}
+                    className="w-full"
+                  >
+                    Apply {previewColor === "default" ? "default" : previewColor} color
+                  </Button>
+                </div>
               </div>
               
-              <button 
-                onClick={applyPreviewColor}
-                className="mt-3 px-4 py-2 bg-background border border-border rounded-md hover:bg-muted transition-colors"
-              >
-                Apply this color
-              </button>
+              {uiColor !== previewColor && (
+                <div className="mt-3 flex justify-center">
+                  <Button 
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPreviewColor(uiColor)}
+                    className="flex items-center gap-1"
+                  >
+                    <ArrowRightLeft className="h-3.5 w-3.5" />
+                    Reset preview
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -252,12 +316,12 @@ export const GeneralSettings = () => {
         <div className="space-y-4">
           <h3 className="text-lg font-semibold">Other Preferences</h3>
           <div className="flex items-center justify-between">
-            <Label htmlFor="email-notifications">Show online status</Label>
-            <Switch id="email-notifications" />
+            <Label htmlFor="online-status">Show online status</Label>
+            <Switch id="online-status" />
           </div>
           <div className="flex items-center justify-between">
-            <Label htmlFor="marketing-emails">Enable sound effects</Label>
-            <Switch id="marketing-emails" />
+            <Label htmlFor="sound-effects">Enable sound effects</Label>
+            <Switch id="sound-effects" />
           </div>
         </div>
       </CardContent>
