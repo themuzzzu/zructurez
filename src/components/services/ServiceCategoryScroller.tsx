@@ -18,8 +18,14 @@ import {
 } from 'lucide-react';
 import { motion } from "framer-motion";
 import { LazyImage } from "@/components/ui/LazyImage";
+import { useTrackRender } from "@/utils/performanceUtils";
+import { prefetchData } from "@/utils/apiPerformance";
+import { useEffect } from 'react';
 
 export function ServiceCategoryScroller() {
+  // Track render performance
+  useTrackRender("ServiceCategoryScroller");
+
   const navigate = useNavigate();
 
   const categories = [
@@ -37,33 +43,55 @@ export function ServiceCategoryScroller() {
     { id: 'photography', name: 'Photography', icon: <Camera className="h-4 w-4 text-amber-500" /> },
   ];
 
+  // Prefetch popular service data
+  useEffect(() => {
+    // Prefetch data for most common service categories
+    const topCategories = ['ac-repair', 'plumbing', 'cleaning'];
+    
+    topCategories.forEach(category => {
+      prefetchData(
+        `services-${category}`,
+        `services:${category}`,
+        5 * 60 * 1000, // 5 minute cache
+        async () => {
+          // This would be replaced with your actual data fetching logic
+          return { data: [], status: "success" };
+        },
+        'low' // Low priority prefetch
+      );
+    });
+  }, []);
+
   const handleCategoryClick = (categoryId: string) => {
     navigate(`/services?category=${categoryId}`);
   };
 
   return (
-    <div className="bg-[#1f2937] dark:bg-zinc-900 rounded-lg p-4 mb-6">
-      <h3 className="text-lg font-semibold mb-3 text-white">Services</h3>
-      <ScrollArea className="w-full">
+    <div className="bg-[#1f2937] dark:bg-zinc-900 rounded-lg p-3 mb-5">
+      <h3 className="text-lg font-semibold mb-2 text-white">Services</h3>
+      <ScrollArea className="w-full overflow-hidden">
         <div className="flex gap-2 pb-2">
           {categories.map((category) => (
             <motion.div
               key={category.id}
               onClick={() => handleCategoryClick(category.id)}
-              className="flex flex-col items-center cursor-pointer group min-w-[70px] bg-[#1b2430] rounded-lg p-2"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              transition={{ duration: 0.2 }}
+              className="flex flex-col items-center cursor-pointer group min-w-[65px] bg-[#1b2430] rounded-lg p-2"
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              transition={{ duration: 0.15 }}
             >
-              <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mb-2">
+              <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mb-1">
                 {category.icon}
               </div>
               <span className="text-xs text-center text-white line-clamp-1">{category.name}</span>
             </motion.div>
           ))}
         </div>
-        <ScrollBar orientation="horizontal" />
+        <ScrollBar orientation="horizontal" className="h-2" />
       </ScrollArea>
     </div>
   );
 }
+
+// Export as named and default export for flexibility with dynamic imports
+export default ServiceCategoryScroller;

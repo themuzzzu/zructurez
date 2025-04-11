@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
@@ -15,30 +15,70 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Reduced loading time for faster initial render
+    // Use requestIdleCallback for non-critical initialization
+    const idleCallback = 
+      window.requestIdleCallback || 
+      ((cb) => setTimeout(cb, 50));
+    
+    // Faster initial render by removing loading screen after critical content is visible
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 50);
+    }, 20); // Reduced from 50ms to 20ms
     
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Preload critical resources
-  useEffect(() => {
-    // Preload images
-    const preloadImages = [
-      '/images/categories/1.png',
-      '/images/categories/2.png',
-      '/images/categories/3.png',
-    ];
-    
-    preloadImages.forEach(image => {
-      const img = new Image();
-      img.src = image;
+    // Use idle time to preload critical resources in the background
+    idleCallback(() => {
+      // Prefetch common queries (from react-query.ts)
+      import("@/lib/react-query").then(({ prefetchCommonQueries }) => {
+        prefetchCommonQueries();
+      });
+      
+      // Preload common routes
+      const preloadRoutes = async () => {
+        // Import fast-loading components in sequence
+        await import("./pages/Home");
+        // Then load others during idle time
+        if ('requestIdleCallback' in window) {
+          window.requestIdleCallback(() => {
+            import("./pages/marketplace/OptimizedMarketplace");
+            import("./components/products/ProductCardImage");
+          });
+        }
+      };
+      
+      preloadRoutes().catch(console.error);
     });
     
-    // Fix scrolling issues
+    return () => {
+      clearTimeout(timer);
+      if ('cancelIdleCallback' in window) {
+        window.cancelIdleCallback as any;
+      }
+    };
+  }, []);
+
+  // Fix scrolling issues and optimize CSS performance
+  useEffect(() => {
     document.body.style.overflowX = "hidden";
+    
+    // Add passive event listeners for better scroll performance
+    const supportsPassive = (() => {
+      let result = false;
+      try {
+        const opts = Object.defineProperty({}, 'passive', {
+          get: function() { result = true; return true; }
+        });
+        window.addEventListener('testPassive', null as any, opts);
+        window.removeEventListener('testPassive', null as any, opts);
+      } catch (e) {}
+      return result;
+    })();
+    
+    const options = supportsPassive ? { passive: true } : false;
+    document.addEventListener('touchstart', () => {}, options as any);
+    
+    return () => {
+      document.removeEventListener('touchstart', () => {}, options as any);
+    };
   }, []);
 
   return (
@@ -52,7 +92,7 @@ function App() {
             </div>
             {isLoading && (
               <div className="fixed inset-0 flex items-center justify-center bg-white dark:bg-background z-50">
-                <CircularLoader size={48} color="#3B82F6" />
+                <CircularLoader size={40} color="#3B82F6" />
               </div>
             )}
             <Toaster />
