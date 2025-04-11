@@ -15,6 +15,7 @@ interface ProductCardProps {
     description?: string;
     price: number;
     image_url?: string;
+    imageUrl?: string; // Add imageUrl for compatibility with SearchResult
     category?: string;
     is_discounted?: boolean;
     discount_percentage?: number;
@@ -38,6 +39,9 @@ export function ProductCard({
     navigate(`/marketplace/product/${product.id}`);
   };
   
+  // Use either image_url or imageUrl, preferring image_url if available
+  const imageSource = product.image_url || product.imageUrl;
+  
   return (
     <Card 
       className="overflow-hidden transition-all hover:shadow-md h-full flex flex-col cursor-pointer"
@@ -45,7 +49,7 @@ export function ProductCard({
     >
       <div className={`relative ${isCompact ? 'h-20' : 'h-36'} overflow-hidden`}>
         <img 
-          src={product.image_url || '/placeholder.svg'} 
+          src={imageSource || '/placeholder.svg'} 
           alt={product.title}
           className="w-full h-full object-cover"
           onError={(e) => {
