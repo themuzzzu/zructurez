@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
@@ -141,3 +140,6 @@ export const TopRatedBusinesses = () => {
     </div>
   );
 };
+
+// Add this default export
+export default TopRatedBusinesses;

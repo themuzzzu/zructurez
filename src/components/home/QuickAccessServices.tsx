@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { 
   AirVent, 
@@ -54,3 +53,5 @@ export const QuickAccessServices = () => {
     </section>
   );
 };
+
+export default QuickAccessServices;

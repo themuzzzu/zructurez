@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Tag, Clock } from "lucide-react";
@@ -170,3 +169,6 @@ export const DealsSection = () => {
     </section>
   );
 };
+
+// Add this default export
+export default DealsSection;

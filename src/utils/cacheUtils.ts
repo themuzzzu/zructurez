@@ -133,6 +133,37 @@ export class GlobalCache {
 // Create a singleton instance
 export const globalCache = new GlobalCache();
 
+/**
+ * Higher-order function that wraps an API call with caching
+ * @param fn The function to cache
+ * @param cacheKey The key to use for caching
+ * @param ttlMs Time-to-live in milliseconds
+ * @returns A cached version of the function
+ */
+export function withCache<T>(
+  fn: () => Promise<T>,
+  cacheKey: string,
+  ttlMs: number = 60000
+): () => Promise<T> {
+  return async () => {
+    // Check if data is in cache
+    const cachedData = globalCache.get<T>(cacheKey);
+    if (cachedData !== null) {
+      console.debug(`Cache hit for ${cacheKey}`);
+      return cachedData;
+    }
+
+    // If not in cache, call the original function
+    console.debug(`Cache miss for ${cacheKey}, fetching data...`);
+    const result = await fn();
+    
+    // Store result in cache
+    globalCache.set(cacheKey, result, ttlMs);
+    
+    return result;
+  };
+}
+
 // Register cache monitoring for debug purposes
 if (process.env.NODE_ENV === 'development') {
   (window as any).globalCache = globalCache;

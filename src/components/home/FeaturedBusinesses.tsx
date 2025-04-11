@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Award, Star, MapPin, Clock } from "lucide-react";
@@ -223,3 +222,5 @@ export const FeaturedBusinesses = () => {
     </section>
   );
 };
+
+export default FeaturedBusinesses;

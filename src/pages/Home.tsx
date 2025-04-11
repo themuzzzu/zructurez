@@ -5,8 +5,8 @@ import { SearchHero } from "@/components/home/SearchHero";
 import { PopularCategories } from "@/components/home/PopularCategories";
 import { ServiceCategoryScroller } from "@/components/services/ServiceCategoryScroller";
 import { BusinessCategoryScroller } from "@/components/business/BusinessCategoryScroller";
-import { NotificationPermission } from "@/components/notifications/NotificationPermission";
 import { MarketplaceCategoryScroller } from "@/components/marketplace/MarketplaceCategoryScroller";
+import { NotificationPermission } from "@/components/notifications/NotificationPermission";
 import { useAuth } from "@/hooks/useAuth";
 import { Skeleton } from "@/components/ui/skeleton";
 
