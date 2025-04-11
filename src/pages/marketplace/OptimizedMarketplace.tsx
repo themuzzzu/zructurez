@@ -1,193 +1,108 @@
 
-import { useState, useEffect, Suspense, lazy } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { GridLayoutType } from "@/components/products/types/ProductTypes";
-import { AutocompleteSearch } from "@/components/marketplace/AutocompleteSearch";
-import { BannerCarousel } from "@/components/marketplace/BannerCarousel";
-import { CrazyDeals } from "@/components/marketplace/CrazyDeals";
-import { SponsoredProducts } from "@/components/marketplace/SponsoredProducts";
-import { ShopByCategory } from "@/components/marketplace/ShopByCategory";
-import { TrendingProducts } from "@/components/marketplace/TrendingProducts"; 
-import { PersonalizedRecommendations } from "@/components/marketplace/PersonalizedRecommendations";
-import { ProductRankings } from "@/components/rankings/ProductRankings";
-import { BrowseTabContent } from "@/components/marketplace/BrowseTabContent";
-import { SkeletonCard } from "@/components/loaders";
-import { useLoading } from "@/providers/LoadingProvider";
-import { FlashSale } from "@/components/marketplace/FlashSale";
+import { useState } from "react";
+import { SearchHero } from "@/components/home/SearchHero";
+import { MarketplaceSection } from "@/components/marketplace/MarketplaceSection";
+import { BusinessSection } from "@/components/business/BusinessSection";
+import { ServiceSection } from "@/components/service/ServiceSection";
+import { ShoppingSection } from "@/components/ShoppingSection";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Filter } from "lucide-react";
 
-// Optimized LazySection for better performance - reduced loading skeleton count
-const LazySection = ({ children, fallbackCount = 2 }) => (
-  <Suspense fallback={
-    <div className="grid grid-cols-2 sm:grid-cols-2 gap-2">
-      {Array.from({ length: fallbackCount }).map((_, i) => (
-        <SkeletonCard key={i} />
-      ))}
-    </div>
-  }>
-    {children}
-  </Suspense>
-);
-
-export const OptimizedMarketplace = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const searchParams = new URLSearchParams(location.search);
-  const queryParam = searchParams.get("q") || "";
-  const categoryParam = searchParams.get("category") || "all";
-  const subcategoryParam = searchParams.get("subcategory") || "";
+export default function OptimizedMarketplace() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [selectedTab, setSelectedTab] = useState("products");
   
-  // State for search and cart
-  const [searchQuery, setSearchQuery] = useState(queryParam);
-  const [isCartOpen, setIsCartOpen] = useState(false);
-  const [cartItemCount, setCartItemCount] = useState(0);
-  
-  // State for filters and layout
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState(categoryParam);
-  const [selectedSubcategory, setSelectedSubcategory] = useState(subcategoryParam);
-  const [showDiscounted, setShowDiscounted] = useState(false);
-  const [showUsed, setShowUsed] = useState(false);
-  const [showBranded, setShowBranded] = useState(false);
-  const [sortOption, setSortOption] = useState("newest");
-  const [priceRange, setPriceRange] = useState("all");
-  const [gridLayout, setGridLayout] = useState<GridLayoutType>("grid4x4");
-  
-  const { setLoading } = useLoading();
-  
-  // Show loading indicator when page loads - significantly reduced loading time to 100ms
-  useEffect(() => {
-    setLoading(true);
-    const timeout = setTimeout(() => setLoading(false), 100);
-    return () => clearTimeout(timeout);
-  }, [setLoading]);
-  
-  // Update state when URL parameters change
-  useEffect(() => {
-    if (categoryParam) {
-      setSelectedCategory(categoryParam);
-    }
-    
-    if (subcategoryParam) {
-      setSelectedSubcategory(subcategoryParam);
-    }
-    
-    if (queryParam) {
-      setSearchQuery(queryParam);
-    }
-  }, [categoryParam, subcategoryParam, queryParam]);
-  
-  // Handle search selection from autocomplete
-  const handleSearchSelect = (query: string) => {
+  const handleSearch = (query: string) => {
     setSearchQuery(query);
-    navigate(`/search?q=${encodeURIComponent(query)}`);
-  };
-  
-  // Update URL when category changes
-  const handleCategoryChange = (category: string, subcategory?: string) => {
-    setSelectedCategory(category);
-    if (subcategory) {
-      setSelectedSubcategory(subcategory);
-    } else {
-      setSelectedSubcategory("");
-    }
-    
-    const newSearchParams = new URLSearchParams();
-    if (searchQuery) {
-      newSearchParams.set("q", searchQuery);
-    }
-    
-    if (category !== "all") {
-      newSearchParams.set("category", category);
-      
-      if (subcategory) {
-        newSearchParams.set("subcategory", subcategory);
-      }
-    }
-    
-    navigate({
-      pathname: location.pathname,
-      search: newSearchParams.toString()
-    });
   };
   
   return (
-    <div className="pt-2 sm:pt-0">
-      {/* Single Search Bar at the top with improved design - fixed padding */}
-      <div className="mb-4 sm:mb-6">
-        <AutocompleteSearch 
-          value={searchQuery}
-          onChange={setSearchQuery}
-          onSearchSelect={handleSearchSelect}
-          placeholder="Search for products, services, or businesses..."
-          className="w-full max-w-3xl mx-auto"
-        />
-      </div>
+    <div className="space-y-4">
+      <SearchHero onSearch={handleSearch} />
       
-      {/* Banner carousel below search - fixed styling for better scrolling */}
-      <LazySection fallbackCount={1}>
-        <div className="mb-4 sm:mb-6">
-          <BannerCarousel />
+      <Tabs 
+        defaultValue="products" 
+        className="w-full" 
+        onValueChange={(value) => setSelectedTab(value)}
+      >
+        <div className="flex justify-between items-center mb-2">
+          <TabsList>
+            <TabsTrigger value="products" className="text-xs px-3 py-1.5">Products</TabsTrigger>
+            <TabsTrigger value="businesses" className="text-xs px-3 py-1.5">Businesses</TabsTrigger>
+            <TabsTrigger value="services" className="text-xs px-3 py-1.5">Services</TabsTrigger>
+          </TabsList>
+          
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="text-xs flex items-center gap-1 h-7"
+            onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+          >
+            <Filter className="h-3 w-3" />
+            Filters
+          </Button>
         </div>
-      </LazySection>
-      
-      {/* New Shop by Category section - improved spacing */}
-      <div className="mb-4 sm:mb-6">
-        <ShopByCategory onCategorySelect={handleCategoryChange} />
-      </div>
-      
-      {/* Real-time Product Rankings - improved spacing */}
-      <LazySection>
-        <div className="mb-4 sm:mb-6">
-          <ProductRankings />
-        </div>
-      </LazySection>
-      
-      {/* Flash Sale Section - improved spacing */}
-      <LazySection>
-        <div className="mb-4 sm:mb-6">
-          <FlashSale />
-        </div>
-      </LazySection>
-      
-      {/* Sponsored Products Section - improved spacing */}
-      <LazySection>
-        <div className="mb-4 sm:mb-6">
-          <SponsoredProducts gridLayout={gridLayout} />
-        </div>
-      </LazySection>
-      
-      {/* Trending Products - improved spacing */}
-      <LazySection>
-        <div className="mb-4 sm:mb-6">
-          <TrendingProducts gridLayout={gridLayout} />
-        </div>
-      </LazySection>
-      
-      {/* Personalized Recommendations - improved spacing */}
-      <LazySection>
-        <div className="mb-4 sm:mb-6">
-          <PersonalizedRecommendations />
-        </div>
-      </LazySection>
-      
-      {/* Crazy Deals Section - improved spacing */}
-      <LazySection>
-        <div className="mb-4 sm:mb-6">
-          <CrazyDeals />
-        </div>
-      </LazySection>
-      
-      {/* Main content - Browse All */}
-      <LazySection>
-        <div className="mt-4 sm:mt-6">
-          <BrowseTabContent 
-            searchTerm={searchQuery}
-            onCategorySelect={handleCategoryChange}
-          />
-        </div>
-      </LazySection>
+        
+        {searchQuery && (
+          <div className="mb-4 mt-2">
+            <h2 className="text-lg font-bold">Search results for "{searchQuery}"</h2>
+          </div>
+        )}
+        
+        <TabsContent value="products" className="space-y-5 mt-4">
+          {!searchQuery && (
+            <>
+              <MarketplaceSection type="trending" />
+              <MarketplaceSection type="sponsored" />
+              <MarketplaceSection type="suggested" />
+              
+              <div className="pt-5">
+                <ShoppingSection
+                  searchQuery={searchQuery}
+                  gridLayout="grid2x2"
+                  title="All Products"
+                />
+              </div>
+            </>
+          )}
+          
+          {searchQuery && (
+            <ShoppingSection searchQuery={searchQuery} gridLayout="grid3x3" />
+          )}
+        </TabsContent>
+        
+        <TabsContent value="businesses" className="space-y-5 mt-4">
+          {!searchQuery ? (
+            <>
+              <BusinessSection type="trending" />
+              <BusinessSection type="sponsored" />
+              <BusinessSection type="suggested" />
+            </>
+          ) : (
+            <div className="text-center py-10">
+              <h3 className="text-lg font-medium">Business search results for "{searchQuery}"</h3>
+              <p className="text-sm text-muted-foreground mt-2">Please use the search filters to refine your results</p>
+            </div>
+          )}
+        </TabsContent>
+        
+        <TabsContent value="services" className="space-y-5 mt-4">
+          {!searchQuery ? (
+            <>
+              <ServiceSection type="trending" />
+              <ServiceSection type="sponsored" />
+              <ServiceSection type="suggested" />
+            </>
+          ) : (
+            <div className="text-center py-10">
+              <h3 className="text-lg font-medium">Service search results for "{searchQuery}"</h3>
+              <p className="text-sm text-muted-foreground mt-2">Please use the search filters to refine your results</p>
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
-};
-
-export default OptimizedMarketplace;
+}
