@@ -1,4 +1,5 @@
 
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -6,11 +7,13 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Slider } from "@/components/ui/slider";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { toast } from "sonner";
-import { useState, useEffect } from "react";
 import { useProfile } from "@/hooks/useProfile";
 import { useTheme } from "@/components/ThemeProvider";
 import { type Theme } from "@/components/ThemeProvider";
-import { Loader2, Check } from "lucide-react";
+import { Loader2, Check, Info } from "lucide-react";
+import { debounce } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export const GeneralSettings = () => {
   const { theme, setTheme } = useTheme();
@@ -26,6 +29,9 @@ export const GeneralSettings = () => {
     return savedFontSize ? parseInt(savedFontSize) : 100;
   });
   
+  // Internal UI state to prevent unnecessary reloads
+  const [displayedFontSize, setDisplayedFontSize] = useState(fontSize);
+  
   // UI color state
   const [uiColor, setUiColor] = useState(() => {
     const savedColor = localStorage.getItem("appUiColor");
@@ -34,6 +40,10 @@ export const GeneralSettings = () => {
 
   // Preview color state
   const [previewColor, setPreviewColor] = useState(uiColor);
+  const [showColorPreview, setShowColorPreview] = useState(false);
+  
+  // Create a ref to track if this is initial mount
+  const initialMount = useRef(true);
 
   // Sync theme with profile preference on component mount
   useEffect(() => {
@@ -41,11 +51,32 @@ export const GeneralSettings = () => {
       setTheme(profile.theme_preference as Theme);
     }
   }, [profile?.theme_preference, setTheme]);
+
+  // Debounced function to update font size
+  const debouncedFontSizeUpdate = useRef(
+    debounce((size: number) => {
+      document.documentElement.style.fontSize = `${size}%`;
+      localStorage.setItem("appFontSize", size.toString());
+      setFontSize(size);
+      
+      // Save font size preference to profile without causing a reload
+      if (updateProfile) {
+        updateProfile({
+          display_preferences: {
+            ...profile?.display_preferences,
+            font_size: size
+          }
+        });
+      }
+    }, 400)
+  ).current;
   
-  // Apply font size to the document root when it changes
+  // Apply font size immediately on initial load, but use debounce for changes
   useEffect(() => {
-    document.documentElement.style.fontSize = `${fontSize}%`;
-    localStorage.setItem("appFontSize", fontSize.toString());
+    if (initialMount.current) {
+      document.documentElement.style.fontSize = `${fontSize}%`;
+      initialMount.current = false;
+    }
   }, [fontSize]);
   
   // Apply UI color changes
@@ -92,34 +123,32 @@ export const GeneralSettings = () => {
   
   const handleFontSizeChange = (value: number[]) => {
     const newSize = value[0];
-    setFontSize(newSize);
-    
-    // Save font size preference to profile
-    if (updateProfile) {
-      updateProfile({
-        display_preferences: {
-          ...profile?.display_preferences,
-          font_size: newSize
-        }
-      });
-    }
+    setDisplayedFontSize(newSize);
+    debouncedFontSizeUpdate(newSize);
   };
   
   const handleUiColorChange = (value: string) => {
     if (!value) return;
     
-    // Set preview color first
+    // Set preview color
     setPreviewColor(value);
+    setShowColorPreview(true);
   };
   
   const applyPreviewColor = () => {
     setUiColor(previewColor);
+    setShowColorPreview(false);
     toast.success(
       <div className="flex items-center gap-2">
         <Check className="h-4 w-4" />
         <span>UI color set to {previewColor === "default" ? "default" : previewColor}</span>
       </div>
     );
+  };
+  
+  const cancelPreviewColor = () => {
+    setPreviewColor(uiColor);
+    setShowColorPreview(false);
   };
 
   if (loading) {
@@ -161,35 +190,50 @@ export const GeneralSettings = () => {
         </div>
         
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Font Size</h3>
-          <div className="space-y-6">
-            <div className="flex justify-between">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Font Size</h3>
+            <span className="text-sm bg-muted px-2 py-1 rounded">
+              {displayedFontSize}%
+            </span>
+          </div>
+          <div className="space-y-3">
+            <div className="flex justify-between text-sm text-muted-foreground">
               <span>Small</span>
               <span>Normal</span>
               <span>Large</span>
             </div>
             <Slider
-              value={[fontSize]}
+              value={[displayedFontSize]}
               min={75}
               max={150}
               step={5}
               onValueChange={handleFontSizeChange}
               className="w-full"
             />
-            <div className="text-center">
-              <span className="text-sm text-muted-foreground">
-                Current size: {fontSize}%
-              </span>
-            </div>
           </div>
         </div>
         
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold">UI Color</h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">UI Color</h3>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <Info className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Changes the accent color of the application</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+          
           <div className="space-y-4">
             <ToggleGroup 
               type="single" 
-              value={previewColor}
+              value={showColorPreview ? previewColor : uiColor}
               onValueChange={handleUiColorChange}
               className="justify-start flex-wrap gap-2"
             >
@@ -213,27 +257,37 @@ export const GeneralSettings = () => {
               </ToggleGroupItem>
             </ToggleGroup>
             
-            {/* Preview area */}
-            <div className="mt-4 p-4 rounded-lg border border-border">
-              <h4 className="font-medium mb-2">Preview</h4>
-              <div className={`p-4 rounded-lg ${
-                previewColor === "default" ? "bg-primary" : 
-                previewColor === "purple" ? "bg-purple-500" :
-                previewColor === "red" ? "bg-red-500" :
-                previewColor === "yellow" ? "bg-amber-400" :
-                previewColor === "green" ? "bg-green-500" :
-                "bg-blue-500"
-              } text-white`}>
-                <p>This is how buttons and accents will look</p>
+            {/* Preview area - only shown when selecting a new color */}
+            {showColorPreview && (
+              <div className="mt-4 p-4 rounded-lg border border-border animate-fade-in">
+                <h4 className="font-medium mb-2">Color Preview</h4>
+                <div className={`p-4 rounded-lg ${
+                  previewColor === "default" ? "bg-primary" : 
+                  previewColor === "purple" ? "bg-purple-500" :
+                  previewColor === "red" ? "bg-red-500" :
+                  previewColor === "yellow" ? "bg-amber-400" :
+                  previewColor === "green" ? "bg-green-500" :
+                  "bg-blue-500"
+                } text-white`}>
+                  <p>This is how buttons and accents will look</p>
+                </div>
+                
+                <div className="flex gap-2 mt-3">
+                  <Button 
+                    onClick={applyPreviewColor}
+                    className="flex-1"
+                  >
+                    Apply this color
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={cancelPreviewColor}
+                  >
+                    Cancel
+                  </Button>
+                </div>
               </div>
-              
-              <button 
-                onClick={applyPreviewColor}
-                className="mt-3 px-4 py-2 bg-background border border-border rounded-md hover:bg-muted transition-colors"
-              >
-                Apply this color
-              </button>
-            </div>
+            )}
           </div>
         </div>
 
@@ -252,12 +306,12 @@ export const GeneralSettings = () => {
         <div className="space-y-4">
           <h3 className="text-lg font-semibold">Other Preferences</h3>
           <div className="flex items-center justify-between">
-            <Label htmlFor="email-notifications">Show online status</Label>
-            <Switch id="email-notifications" />
+            <Label htmlFor="online-status">Show online status</Label>
+            <Switch id="online-status" />
           </div>
           <div className="flex items-center justify-between">
-            <Label htmlFor="marketing-emails">Enable sound effects</Label>
-            <Switch id="marketing-emails" />
+            <Label htmlFor="sound-effects">Enable sound effects</Label>
+            <Switch id="sound-effects" />
           </div>
         </div>
       </CardContent>

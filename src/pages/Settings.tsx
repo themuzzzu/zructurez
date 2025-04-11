@@ -1,9 +1,9 @@
 
 import { ProfileView } from "@/components/ProfileView";
 import { SettingsNav } from "@/components/SettingsNav";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { GeneralSettings } from "@/components/GeneralSettings";
-import { NotificationSettings } from "@/components/NotificationSettings";
+import { NotificationSettings } from "@/components/notifications/NotificationSettings";
 import { PrivacySettings } from "@/components/PrivacySettings";
 import { ProductsTab } from "@/components/settings/ProductsTab";
 import { BusinessSettings } from "@/components/settings/BusinessSettings";
@@ -19,13 +19,34 @@ import { AdvertisementPricingTab } from "@/components/settings/AdvertisementPric
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Home, ChevronLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams, useNavigationType } from "react-router-dom";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { useAuth } from "@/hooks/useAuth";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Lock } from "lucide-react";
 
 const Settings = () => {
-  const [activeTab, setActiveTab] = useState("profile");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get("tab") || "profile";
   const navigate = useNavigate();
+  const navigationType = useNavigationType();
   const isMobile = useMediaQuery("(max-width: 768px)");
+  const { user } = useAuth();
+  
+  // Check if user has admin privileges (simplified for now)
+  const isAdmin = user?.app_metadata?.role === "admin";
+  
+  // Set active tab without causing full page reload
+  const setActiveTab = (tab: string) => {
+    setSearchParams({ tab }, { replace: true });
+  };
+  
+  // Update URL when tab changes
+  useEffect(() => {
+    if (!searchParams.get("tab")) {
+      setSearchParams({ tab: activeTab }, { replace: true });
+    }
+  }, []);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -34,7 +55,11 @@ const Settings = () => {
       case "notifications":
         return <NotificationSettings />;
       case "privacy":
-        return <PrivacySettings />;
+        return isAdmin ? (
+          <PrivacySettings />
+        ) : (
+          <LockedSettingsView title="Privacy Settings" message="Privacy settings are currently locked by administrators." />
+        );
       case "orders":
         return <OrdersTab />;
       case "appointments":
@@ -50,7 +75,11 @@ const Settings = () => {
       case "ad-pricing":
         return <AdvertisementPricingTab />;
       case "subscribed":
-        return <SubscribedBusinessesTab />;
+        return isAdmin ? (
+          <SubscribedBusinessesTab />
+        ) : (
+          <LockedSettingsView title="Subscription Settings" message="Subscription management is currently locked by administrators." />
+        );
       case "pricing":
         return <PricingTab />;
       case "testing":
@@ -64,7 +93,7 @@ const Settings = () => {
 
   return (
     <Layout hideSidebar>
-      <div className="container max-w-[1400px] py-6 px-4">
+      <div className="container max-w-[1400px] py-4 px-2 md:px-4">
         {!isMobile && (
           <Button 
             variant="outline" 
@@ -76,13 +105,31 @@ const Settings = () => {
             Back to Home
           </Button>
         )}
-        <div className="flex flex-col md:flex-row gap-6">
-          <SettingsNav activeTab={activeTab} setActiveTab={setActiveTab} />
-          <div className="flex-1">{renderContent()}</div>
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="md:w-64 w-full sticky top-0">
+            <SettingsNav activeTab={activeTab} setActiveTab={setActiveTab} />
+          </div>
+          <div className="flex-1 overflow-hidden">
+            <div className="transition-all duration-300">{renderContent()}</div>
+          </div>
         </div>
       </div>
     </Layout>
   );
 };
+
+// Component to show when settings are locked
+const LockedSettingsView = ({ title, message }: { title: string, message: string }) => (
+  <div className="py-8 px-4 text-center">
+    <Alert variant="default" className="border-amber-500/50 bg-amber-500/10">
+      <Lock className="h-6 w-6 text-amber-500" />
+      <AlertTitle className="text-lg font-semibold">{title} Locked</AlertTitle>
+      <AlertDescription className="text-muted-foreground">{message}</AlertDescription>
+    </Alert>
+    <div className="mt-8">
+      <p className="text-muted-foreground">Please contact your administrator to request access to these settings.</p>
+    </div>
+  </div>
+);
 
 export default Settings;

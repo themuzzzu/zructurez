@@ -11,9 +11,6 @@ import { AdvertisingTab } from "./AdvertisingTab";
 const LazyAdDashboard = lazy(() => import("@/components/ads/AdDashboard").then(
   module => ({ default: module.AdDashboard })
 ));
-const LazyAIAdRecommendations = lazy(() => import("@/components/ads/AIAdRecommendations").then(
-  module => ({ default: module.AIAdRecommendations })
-));
 const LazyPerformanceMetricsDashboard = lazy(() => import("@/components/performance/PerformanceMetricsDashboard").then(
   module => ({ default: module.PerformanceMetricsDashboard })
 ));
@@ -27,7 +24,6 @@ export const AdvertisementsTab = ({ businessId }: { businessId?: string }) => {
         <TabsList>
           <TabsTrigger value="dashboard">Ads Dashboard</TabsTrigger>
           <TabsTrigger value="create">Create Ads</TabsTrigger>
-          <TabsTrigger value="recommendations">AI Recommendations</TabsTrigger>
           <TabsTrigger value="performance">Performance</TabsTrigger>
         </TabsList>
         
@@ -53,12 +49,6 @@ export const AdvertisementsTab = ({ businessId }: { businessId?: string }) => {
               <AdvertisingTab businessId={businessId} />
             </CardContent>
           </Card>
-        </TabsContent>
-        
-        <TabsContent value="recommendations" className="mt-6">
-          <Suspense fallback={<Skeleton className="h-[400px] w-full rounded-lg" />}>
-            <LazyAIAdRecommendations />
-          </Suspense>
         </TabsContent>
         
         <TabsContent value="performance" className="mt-6">
