@@ -152,8 +152,9 @@ export default function MarketplaceIndex() {
 
           <TabsContent value="trending">
             <div className="space-y-8">
-              <SponsoredProducts />
               <TrendingProducts />
+              {/* Changed second trending products to sponsored products */}
+              <SponsoredProducts />
             </div>
           </TabsContent>
         </motion.div>

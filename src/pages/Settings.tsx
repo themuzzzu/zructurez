@@ -19,7 +19,7 @@ import { AdvertisementPricingTab } from "@/components/settings/AdvertisementPric
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Home, ChevronLeft, Lock } from "lucide-react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { Card } from "@/components/ui/card";
 
@@ -28,14 +28,23 @@ const Settings = () => {
   const initialTab = searchParams.get('tab') || "profile";
   const [activeTab, setActiveTab] = useState(initialTab);
   const navigate = useNavigate();
+  const location = useLocation();
   const isMobile = useMediaQuery("(max-width: 768px)");
 
   // Update URL when tab changes without page reload
   useEffect(() => {
-    const url = new URL(window.location.toString());
+    const url = new URL(window.location.href);
     url.searchParams.set('tab', activeTab);
     window.history.replaceState({}, '', url);
   }, [activeTab]);
+
+  // Handle direct navigation to settings pages
+  useEffect(() => {
+    const tabFromParams = searchParams.get('tab');
+    if (tabFromParams && tabFromParams !== activeTab) {
+      setActiveTab(tabFromParams);
+    }
+  }, [searchParams, location]);
 
   const renderContent = () => {
     switch (activeTab) {
