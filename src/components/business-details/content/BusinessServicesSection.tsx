@@ -33,9 +33,9 @@ export const BusinessServicesSection = ({ business }: BusinessServicesSectionPro
   if (services.length === 0) {
     return (
       <Card>
-        <CardContent className="p-6">
-          <h3 className="text-xl font-semibold mb-4">Services</h3>
-          <p className="text-muted-foreground text-center py-4">
+        <CardContent className="p-4 sm:p-5">
+          <h3 className="text-lg font-semibold mb-3">Services</h3>
+          <p className="text-muted-foreground text-sm text-center py-3">
             No services available for this business yet.
           </p>
         </CardContent>
@@ -46,27 +46,28 @@ export const BusinessServicesSection = ({ business }: BusinessServicesSectionPro
   return (
     <>
       <Card>
-        <CardContent className="p-6">
-          <h3 className="text-xl font-semibold mb-4">Services</h3>
-          <div className="grid gap-4">
+        <CardContent className="p-4 sm:p-5">
+          <h3 className="text-lg font-semibold mb-3">Services</h3>
+          <div className="grid gap-3">
             {services.map((service, index) => (
-              <div key={index} className="border rounded-lg p-4 flex flex-col sm:flex-row justify-between gap-4">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <h4 className="font-medium">{service?.name}</h4>
-                    <Badge variant="outline">Popular</Badge>
+              <div key={index} className="border rounded-lg p-3 flex flex-col sm:flex-row justify-between gap-3">
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <h4 className="font-medium text-sm">{service?.name}</h4>
+                    <Badge variant="outline" className="text-[9px]">Popular</Badge>
                   </div>
-                  <p className="text-sm text-muted-foreground">{service?.description}</p>
-                  <p className="font-bold">₹{service?.price}</p>
+                  <p className="text-xs text-muted-foreground">{service?.description}</p>
+                  <p className="font-bold text-sm">₹{service?.price?.toLocaleString('en-IN')}</p>
                 </div>
                 <Button 
-                  className="shrink-0 self-start sm:self-center"
+                  className="shrink-0 self-start sm:self-center h-8 text-xs"
+                  size="sm"
                   onClick={() => service && setBookingService({
                     name: service.name,
                     cost: service.price
                   })}
                 >
-                  <Calendar className="mr-2 h-4 w-4" />
+                  <Calendar className="mr-1.5 h-3.5 w-3.5" />
                   Book Now
                 </Button>
               </div>

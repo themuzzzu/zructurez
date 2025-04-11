@@ -51,41 +51,41 @@ export const ShoppingCard = ({
   };
 
   return (
-    <Card className="overflow-hidden transition-all duration-300 hover:shadow-md h-full flex flex-col">
-      <div className="relative h-48 overflow-hidden">
+    <Card className="overflow-hidden transition-all duration-300 hover:shadow-sm h-full flex flex-col">
+      <div className="relative h-36 overflow-hidden">
         <ProductImageCarousel 
           images={allImages} 
           aspectRatio={4/3}
           fallbackImage="/placeholder-image.jpg"
         />
         {discountPercentage && (
-          <Badge className="absolute top-2 right-2 bg-red-500">
+          <Badge className="absolute top-1.5 right-1.5 bg-red-500 text-xs py-0 px-1.5">
             {discountPercentage}% OFF
           </Badge>
         )}
       </div>
       
-      <CardContent className="flex-1 p-4 space-y-2" onClick={handleClick}>
+      <CardContent className="flex-1 p-3 space-y-1.5" onClick={handleClick}>
         <div className="flex justify-between items-start">
-          <h3 className="font-semibold line-clamp-1">{title}</h3>
+          <h3 className="font-medium text-sm line-clamp-1">{title}</h3>
           {type === 'product' && (
-            <ProductLikeButton productId={id} />
+            <ProductLikeButton productId={id} size="sm" />
           )}
         </div>
         
         {category && (
-          <Badge variant="outline" className="text-xs bg-transparent">
+          <Badge variant="outline" className="text-[9px] bg-transparent h-4 px-1">
             {category}
           </Badge>
         )}
         
-        <p className="text-sm text-muted-foreground line-clamp-2">{description}</p>
+        <p className="text-[11px] text-muted-foreground line-clamp-2">{description}</p>
         
         {price && (
-          <div className="flex items-center gap-2">
-            <span className="font-bold">{price}</span>
+          <div className="flex items-center gap-1.5">
+            <span className="font-bold text-xs">{price}</span>
             {originalPrice && (
-              <span className="text-sm line-through text-muted-foreground">
+              <span className="text-[9px] line-through text-muted-foreground">
                 {originalPrice}
               </span>
             )}
@@ -93,9 +93,10 @@ export const ShoppingCard = ({
         )}
       </CardContent>
       
-      <CardFooter className="p-4 pt-0">
+      <CardFooter className="p-3 pt-0">
         <Button 
-          className="w-full gap-2" 
+          className="w-full gap-1.5 text-xs py-1 h-auto" 
+          size="sm"
           variant={type === 'business' ? "outline" : "default"}
           onClick={(e) => {
             e.stopPropagation();
@@ -108,7 +109,7 @@ export const ShoppingCard = ({
         >
           {type === 'product' ? (
             <>
-              <ShoppingBag className="h-4 w-4" />
+              <ShoppingBag className="h-3.5 w-3.5" />
               Add to Cart
             </>
           ) : type === 'business' ? (
