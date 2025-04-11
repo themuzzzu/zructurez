@@ -8,8 +8,9 @@ import { ServiceCategoryScroller } from "@/components/services/ServiceCategorySc
 import { TrendingServices } from "@/components/home/TrendingServices";
 import { DealsSection } from "@/components/home/DealsSection";
 import { QuickAccessServices } from "@/components/home/QuickAccessServices";
-import { BusinessCategoryScroller } from "@/components/home/BusinessCategoryScroller";
+import { BusinessCategoryScroller } from "@/components/business/BusinessCategoryScroller";
 import { NotificationPermission } from "@/components/notifications/NotificationPermission";
+import { MarketplaceCategoryScroller } from "@/components/marketplace/MarketplaceCategoryScroller";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function Home() {
@@ -17,7 +18,7 @@ export default function Home() {
   
   return (
     <Layout>
-      <div className="container mx-auto px-4 space-y-10 pb-16 max-w-7xl">
+      <div className="container mx-auto px-4 space-y-6 pb-16 max-w-7xl">
         {/* Notification Permission Component - only show when user is logged in */}
         {user && <NotificationPermission className="mb-6" />}
         
@@ -28,6 +29,12 @@ export default function Home() {
         <section>
           <h2 className="text-2xl font-bold mb-4">Explore Businesses</h2>
           <BusinessCategoryScroller />
+        </section>
+        
+        {/* Marketplace Categories Scroller - New addition below business categories */}
+        <section>
+          <h2 className="text-2xl font-bold mb-4">Shop Marketplace</h2>
+          <MarketplaceCategoryScroller />
         </section>
         
         {/* Browse Services */}

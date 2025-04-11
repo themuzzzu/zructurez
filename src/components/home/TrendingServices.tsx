@@ -2,6 +2,8 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, TrendingUp } from "lucide-react";
+import { LazyImage } from "@/components/ui/LazyImage";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 export const TrendingServices = () => {
   const navigate = useNavigate();
@@ -18,27 +20,6 @@ export const TrendingServices = () => {
     { id: "food-delivery", name: "Food Delivery", searches: "520+", image: "/placeholder.svg" },
     { id: "home-tutors", name: "Home Tutors", searches: "490+", image: "/placeholder.svg" }
   ];
-
-  const scroll = (direction: 'left' | 'right') => {
-    if (scrollRef.current) {
-      const { current } = scrollRef;
-      const scrollAmount = 300;
-      
-      if (direction === 'left') {
-        current.scrollLeft -= scrollAmount;
-      } else {
-        current.scrollLeft += scrollAmount;
-      }
-      
-      setShowLeftScroll(current.scrollLeft > 0);
-    }
-  };
-
-  const handleScroll = () => {
-    if (scrollRef.current) {
-      setShowLeftScroll(scrollRef.current.scrollLeft > 0);
-    }
-  };
 
   const handleServiceClick = (serviceId: string) => {
     navigate(`/search?q=${serviceId}`);
@@ -59,47 +40,30 @@ export const TrendingServices = () => {
         </button>
       </div>
       
-      <div className="relative">
-        {showLeftScroll && (
-          <button 
-            onClick={() => scroll('left')}
-            className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-white dark:bg-gray-800 rounded-full shadow-md p-2"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-        )}
-        
-        <div 
-          ref={scrollRef}
-          onScroll={handleScroll}
-          className="flex overflow-x-auto space-x-4 py-2 scrollbar-none scroll-smooth"
-        >
+      <ScrollArea className="w-full">
+        <div className="flex space-x-3 py-2">
           {trendingServices.map((service) => (
             <div 
               key={service.id}
               onClick={() => handleServiceClick(service.id)}
-              className="flex-shrink-0 w-44 bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer overflow-hidden"
+              className="flex-shrink-0 w-40 bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer overflow-hidden"
             >
-              <img 
-                src={service.image} 
-                alt={service.name} 
-                className="w-full h-28 object-cover"
-              />
+              <div className="h-24 relative">
+                <LazyImage 
+                  src={service.image} 
+                  alt={service.name} 
+                  className="w-full h-full object-cover"
+                />
+              </div>
               <div className="p-3">
-                <h3 className="font-medium">{service.name}</h3>
-                <p className="text-xs text-muted-foreground">{service.searches} searches this week</p>
+                <h3 className="font-medium text-sm">{service.name}</h3>
+                <p className="text-xs text-muted-foreground">{service.searches} searches</p>
               </div>
             </div>
           ))}
         </div>
-        
-        <button 
-          onClick={() => scroll('right')}
-          className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-white dark:bg-gray-800 rounded-full shadow-md p-2"
-        >
-          <ChevronRight className="h-5 w-5" />
-        </button>
-      </div>
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
     </section>
   );
 };

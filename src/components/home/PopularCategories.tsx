@@ -2,6 +2,7 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Star } from "lucide-react";
+import { LazyImage } from "@/components/ui/LazyImage";
 
 export const PopularCategories = () => {
   const navigate = useNavigate();
@@ -72,19 +73,19 @@ export const PopularCategories = () => {
         <div 
           ref={scrollRef}
           onScroll={handleScroll}
-          className="flex overflow-x-auto space-x-4 py-2 scrollbar-none scroll-smooth"
+          className="flex overflow-x-auto space-x-4 py-2 scrollbar-hide scroll-smooth"
         >
           {popularCategories.map((category) => (
             <div 
               key={category.id}
               onClick={() => handleCategoryClick(category.id)}
-              className="flex-shrink-0 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer overflow-hidden"
+              className="flex-shrink-0 w-44 bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer overflow-hidden"
             >
               <div className="relative">
-                <img 
+                <LazyImage 
                   src={category.image} 
                   alt={category.name} 
-                  className="w-full h-32 object-cover"
+                  className="w-full h-28 object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 p-3 text-white">
