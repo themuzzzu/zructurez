@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
@@ -38,7 +37,6 @@ export const CrazyDeals = () => {
     }
   });
   
-  // Auto-scroll effect for carousel
   useEffect(() => {
     if (!api || !autoScrollEnabled || !products || products.length <= 1) return;
     

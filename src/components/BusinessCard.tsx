@@ -12,6 +12,7 @@ interface BusinessCardProps {
   category: string;
   description: string;
   image: string;
+  image_url?: string; // Added to handle both image and image_url props
   rating?: number;
   reviews?: number;
   location?: string;
@@ -32,6 +33,7 @@ export const BusinessCard = ({
   category,
   description,
   image,
+  image_url,
   rating = 0,
   reviews = 0,
   location,
@@ -45,6 +47,7 @@ export const BusinessCard = ({
   size = "medium"
 }: BusinessCardProps) => {
   const navigate = useNavigate();
+  const imageSource = image || image_url || "/placeholder.svg";
 
   const handleClick = () => {
     navigate(`/businesses/${id}`);
@@ -61,7 +64,7 @@ export const BusinessCard = ({
     >
       <div className={`relative ${imageHeight} overflow-hidden`}>
         <img 
-          src={image} 
+          src={imageSource} 
           alt={name}
           className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
           onError={(e) => {

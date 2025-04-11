@@ -22,12 +22,14 @@ interface ProductCardProps {
   };
   layout?: GridLayoutType | "compact";
   showAddToCart?: boolean;
+  sponsored?: boolean;
 }
 
 export function ProductCard({ 
   product, 
   layout = "grid4x4",
-  showAddToCart = true
+  showAddToCart = true,
+  sponsored = false
 }: ProductCardProps) {
   const navigate = useNavigate();
   const isCompact = layout === "compact";
@@ -56,6 +58,15 @@ export function ProductCard({
             className={`absolute top-1.5 right-1.5 bg-red-500 text-white font-medium ${isCompact ? 'text-[9px] py-0 h-4 px-1' : 'text-xs'}`}
           >
             {product.discount_percentage}% OFF
+          </Badge>
+        )}
+        
+        {sponsored && (
+          <Badge 
+            variant="outline" 
+            className="absolute top-1.5 left-1.5 bg-yellow-500/90 text-white text-xs"
+          >
+            Ad
           </Badge>
         )}
       </div>
