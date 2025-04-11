@@ -44,8 +44,8 @@ export const SettingsNav = ({ activeTab, setActiveTab }: SettingsNavProps) => {
   // Handle tab change
   const handleTabChange = (tabId: string) => {
     setActiveTab(tabId);
-    // Update URL without full page reload
-    const url = new URL(window.location);
+    // Update URL without full page reload - Fixed: Convert location to string
+    const url = new URL(window.location.href);
     url.searchParams.set('tab', tabId);
     window.history.pushState({}, '', url);
   };

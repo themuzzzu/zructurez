@@ -18,7 +18,7 @@ import { PricingTab } from "@/components/settings/PricingTab";
 import { AdvertisementPricingTab } from "@/components/settings/AdvertisementPricingTab";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
-import { Home, ChevronLeft } from "lucide-react";
+import { Home, ChevronLeft, Lock } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { Card } from "@/components/ui/card";
