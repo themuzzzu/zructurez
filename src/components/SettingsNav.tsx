@@ -15,6 +15,14 @@ interface SettingsNavProps {
   setActiveTab: (tab: string) => void;
 }
 
+// Define an interface for the tab items
+interface TabItem {
+  id: string;
+  label: string;
+  icon: React.ComponentType<any>;
+  locked?: boolean;
+}
+
 export const SettingsNav = ({ activeTab, setActiveTab }: SettingsNavProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -24,20 +32,20 @@ export const SettingsNav = ({ activeTab, setActiveTab }: SettingsNavProps) => {
   const isAdmin = user?.app_metadata?.role === "admin";
   
   // Base tabs available to all users
-  const baseTabs = [
+  const baseTabs: TabItem[] = [
     { id: "profile", label: "Profile", icon: User },
     { id: "general", label: "General", icon: Settings },
     { id: "notifications", label: "Notifications", icon: Bell },
   ];
   
   // Restricted tabs that need admin permission
-  const restrictedTabs = [
+  const restrictedTabs: TabItem[] = [
     { id: "privacy", label: "Privacy", icon: Shield, locked: !isAdmin },
     { id: "subscribed", label: "Subscriptions", icon: Heart, locked: !isAdmin },
   ];
   
   // Business and product related tabs
-  const businessTabs = [
+  const businessTabs: TabItem[] = [
     { id: "appointments", label: "Appointments", icon: Calendar },
     { id: "orders", label: "Orders", icon: ShoppingBag },
     { id: "business", label: "Business", icon: Briefcase },
