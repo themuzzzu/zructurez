@@ -1,6 +1,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { isZructuresAvailable } from '@/utils/locationUtils';
+import { checkCityAvailability, DEFAULT_CITY } from '@/utils/cityAvailabilityUtils';
+import { supabase } from '@/integrations/supabase/client';
 
 interface LocationContextType {
   currentLocation: string;
@@ -16,21 +17,29 @@ const LocationContext = createContext<LocationContextType | undefined>(undefined
 
 export function LocationProvider({ children }: { children: ReactNode }) {
   const [currentLocation, setCurrentLocation] = useState<string>(
-    localStorage.getItem('userLocation') || 'All India'
+    localStorage.getItem('userLocation') || DEFAULT_CITY
   );
-  const [isLocationAvailable, setIsLocationAvailable] = useState<boolean>(
-    isZructuresAvailable(currentLocation)
-  );
+  const [isLocationAvailable, setIsLocationAvailable] = useState<boolean>(false);
   const [isFirstVisit, setIsFirstVisit] = useState<boolean>(
     localStorage.getItem('locationPromptShown') !== 'true'
   );
   const [showLocationPicker, setShowLocationPicker] = useState<boolean>(isFirstVisit);
 
+  // Check city availability on mount and when location changes
+  useEffect(() => {
+    const checkAvailability = async () => {
+      const isAvailable = await checkCityAvailability(currentLocation);
+      setIsLocationAvailable(isAvailable);
+    };
+    
+    checkAvailability();
+  }, [currentLocation]);
+
   useEffect(() => {
     const handleLocationUpdated = (event: CustomEvent) => {
       if (event.detail.location) {
         setCurrentLocation(event.detail.location);
-        setIsLocationAvailable(isZructuresAvailable(event.detail.location));
+        setIsLocationAvailable(event.detail.isAvailable);
       }
     };
 
@@ -41,9 +50,25 @@ export function LocationProvider({ children }: { children: ReactNode }) {
     };
   }, []);
   
+  // Subscribe to real-time updates of city_availability table
   useEffect(() => {
-    // Check availability whenever location changes
-    setIsLocationAvailable(isZructuresAvailable(currentLocation));
+    const subscription = supabase
+      .channel('city_availability_changes')
+      .on('postgres_changes', { 
+        event: 'UPDATE', 
+        schema: 'public', 
+        table: 'city_availability',
+        filter: `city_name=eq.${currentLocation}` 
+      }, (payload) => {
+        if (payload.new && payload.new.is_available !== undefined) {
+          setIsLocationAvailable(payload.new.is_available);
+        }
+      })
+      .subscribe();
+      
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [currentLocation]);
   
   const resetFirstVisit = () => {

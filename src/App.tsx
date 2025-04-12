@@ -11,7 +11,7 @@ import { ProgressLoader } from "@/components/loaders/ProgressLoader";
 import router from "./routes";
 import { CircularLoader } from "@/components/loaders/CircularLoader";
 import { RouterProvider } from "react-router-dom";
-import { LocationPickerModal } from "@/components/location/LocationPickerModal";
+import { SimplifiedLocationPicker } from "@/components/location/SimplifiedLocationPicker";
 import { useLocation } from "@/providers/LocationProvider";
 
 function LocationModalHandler() {
@@ -30,7 +30,7 @@ function LocationModalHandler() {
   };
   
   return (
-    <LocationPickerModal
+    <SimplifiedLocationPicker
       open={showLocationPicker}
       onOpenChange={handleOpenChange}
       firstVisit={isFirstVisit}

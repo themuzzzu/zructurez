@@ -16,10 +16,6 @@ export function LocationAvailabilityStatus({
 }: LocationAvailabilityStatusProps) {
   const { currentLocation, isLocationAvailable, setShowLocationPicker } = useLocation();
   
-  if (currentLocation === "All India") {
-    return null;
-  }
-  
   if (compact) {
     return (
       <div className={`flex items-center gap-2 ${className}`}>

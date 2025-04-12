@@ -911,6 +911,33 @@ export type Database = {
           },
         ]
       }
+      city_availability: {
+        Row: {
+          city_name: string
+          created_at: string | null
+          district: string | null
+          id: number
+          is_available: boolean | null
+          region: string | null
+        }
+        Insert: {
+          city_name: string
+          created_at?: string | null
+          district?: string | null
+          id?: number
+          is_available?: boolean | null
+          region?: string | null
+        }
+        Update: {
+          city_name?: string
+          created_at?: string | null
+          district?: string | null
+          id?: number
+          is_available?: boolean | null
+          region?: string | null
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           content: string
