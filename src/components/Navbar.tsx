@@ -7,7 +7,7 @@ import {
   SheetContent,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation as useRouterLocation, useNavigate } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 import { CartButton } from "./navbar/CartButton";
 import { UserMenu } from "./navbar/UserMenu";
@@ -26,71 +26,31 @@ import {
 import { EnhancedLocationSelector } from "./location/EnhancedLocationSelector";
 import { Badge } from "./ui/badge";
 import { useGeolocation } from "@/hooks/useGeolocation";
+import { useLocation } from "@/providers/LocationProvider";
+import { handleLocationUpdate, isZructuresAvailable } from "@/utils/locationUtils";
 
 export const Navbar = () => {
-  const location = useLocation();
+  const routerLocation = useRouterLocation();
   const navigate = useNavigate();
-  const isHomePage = location.pathname === "/";
+  const isHomePage = routerLocation.pathname === "/";
   const { theme } = useTheme();
-  const [currentLocation, setCurrentLocation] = useState(localStorage.getItem('userLocation') || "All India");
   const [locationPopoverOpen, setLocationPopoverOpen] = useState(false);
-  const { requestGeolocation, loading } = useGeolocation();
-
-  // Listen for location updates
-  useEffect(() => {
-    const handleLocationUpdated = (event: CustomEvent) => {
-      if (event.detail.location) {
-        setCurrentLocation(event.detail.location);
-      }
-    };
-
-    window.addEventListener('locationUpdated', handleLocationUpdated as EventListener);
-    
-    return () => {
-      window.removeEventListener('locationUpdated', handleLocationUpdated as EventListener);
-    };
-  }, []);
-
-  const { data: profile } = useQuery({
-    queryKey: ['profile'],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return null;
-
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-  });
+  const { loading } = useGeolocation();
+  const { 
+    currentLocation, 
+    isLocationAvailable,
+    setShowLocationPicker
+  } = useLocation();
 
   const isBusinessOrServices = () => {
-    return location.pathname.includes('/business') || 
-           location.pathname.includes('/services') ||
-           location.pathname.includes('/marketplace');
+    return routerLocation.pathname.includes('/business') || 
+           routerLocation.pathname.includes('/services') ||
+           routerLocation.pathname.includes('/marketplace');
   };
 
   const handleLocationChange = (newLocation: string) => {
-    setCurrentLocation(newLocation);
-    localStorage.setItem('userLocation', newLocation);
-    
-    // Dispatch custom event
-    window.dispatchEvent(new CustomEvent('locationUpdated', { 
-      detail: { location: newLocation } 
-    }));
-    
+    handleLocationUpdate(newLocation);
     setLocationPopoverOpen(false);
-
-    // Toast notification
-    window.setTimeout(() => {
-      import('sonner').then(({ toast }) => {
-        toast.success(`Location updated to ${newLocation}`);
-      });
-    }, 100);
   };
 
   return (
@@ -123,53 +83,25 @@ export const Navbar = () => {
               <PopoverTrigger asChild>
                 <Button 
                   variant="ghost" 
-                  size="icon"
-                  className="relative group"
+                  size="sm"
+                  className="relative group flex items-center gap-1.5 px-2 py-1 h-9"
                   aria-label="Select location"
+                  onClick={() => setShowLocationPicker(true)}
                 >
-                  {loading ? <Locate className="h-5 w-5 animate-spin" /> : <MapPin className="h-5 w-5" />}
-                  <Badge className="absolute -bottom-1 -right-1 h-4 w-4 p-0 flex items-center justify-center">
-                    <span className="sr-only">Location set</span>
-                  </Badge>
+                  {loading ? (
+                    <Locate className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <MapPin className="h-4 w-4" />
+                  )}
+                  <span className="max-w-28 truncate text-sm">
+                    {currentLocation === "All India" ? "Select location" : currentLocation}
+                  </span>
+                  <Badge 
+                    variant={isLocationAvailable ? "success" : "warning"} 
+                    className="h-2 w-2 rounded-full p-0"
+                  />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-80 p-4">
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <h3 className="font-medium">Your Location</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {currentLocation || "Select location"}
-                    </p>
-                  </div>
-                  
-                  <EnhancedLocationSelector
-                    value={currentLocation}
-                    onChange={handleLocationChange}
-                    className="w-full"
-                  />
-                  
-                  <div className="flex justify-between pt-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => {
-                        setLocationPopoverOpen(false);
-                        navigate("/settings?tab=location");
-                      }}
-                    >
-                      More Settings
-                    </Button>
-                    <Button 
-                      size="sm"
-                      onClick={() => {
-                        setLocationPopoverOpen(false);
-                      }}
-                    >
-                      Done
-                    </Button>
-                  </div>
-                </div>
-              </PopoverContent>
             </Popover>
 
             {isBusinessOrServices() && (

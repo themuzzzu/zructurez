@@ -18,6 +18,8 @@ import { NearbyBusinesses } from "@/components/location/NearbyBusinesses";
 import { NearMeFilter } from "@/components/location/NearMeFilter";
 import { Badge } from "@/components/ui/badge";
 import { useGeolocation } from "@/hooks/useGeolocation";
+import { useLocation } from "@/providers/LocationProvider";
+import { LocationAvailabilityStatus } from "@/components/location/LocationAvailabilityStatus";
 
 // Lazy-loaded components
 const TopRatedBusinesses = lazy(() => import("@/components/home/TopRatedBusinesses"));
@@ -39,57 +41,57 @@ const SectionSkeleton = () => (
   </div>
 );
 
+// Component to show when location is not available
+const LocationUnavailableView = () => {
+  const { currentLocation, setShowLocationPicker } = useLocation();
+  
+  return (
+    <div className="flex flex-col items-center justify-center py-16 text-center">
+      <div className="bg-amber-100 dark:bg-amber-900/20 rounded-full p-5 mb-4">
+        <MapPin className="h-12 w-12 text-amber-600 dark:text-amber-400" />
+      </div>
+      <h2 className="text-2xl font-bold mb-2">Coming Soon to {currentLocation}</h2>
+      <p className="text-muted-foreground max-w-md mx-auto mb-6">
+        We're expanding rapidly and will be available in your area soon. 
+        In the meantime, you can browse in limited mode or select a different location.
+      </p>
+      <div className="flex flex-wrap gap-3 justify-center">
+        <Button 
+          variant="default" 
+          onClick={() => setShowLocationPicker(true)}
+        >
+          Change Location
+        </Button>
+        <Button 
+          variant="outline"
+          onClick={() => navigate("/maps")}
+        >
+          <Map className="h-4 w-4 mr-2" />
+          Explore Map
+        </Button>
+      </div>
+    </div>
+  );
+};
+
 export default function Home() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [hasLocation, setHasLocation] = useState(false);
-  const [preciseLocation, setPreciseLocation] = useState<any>(null);
   const [nearMeFilter, setNearMeFilter] = useState({ enabled: false, radius: 5 });
   const { requestGeolocation } = useGeolocation();
-  
-  useEffect(() => {
-    const location = localStorage.getItem('userLocation');
-    setHasLocation(!!location && location !== "All India");
-    
-    // Check for precise location
-    const preciseLocationData = localStorage.getItem('userPreciseLocation');
-    if (preciseLocationData) {
-      try {
-        setPreciseLocation(JSON.parse(preciseLocationData));
-      } catch (e) {
-        console.error("Error parsing precise location data", e);
-      }
-    }
-  }, []);
-  
-  // Listen for location updates
-  useEffect(() => {
-    const handleLocationUpdated = (event: CustomEvent) => {
-      setHasLocation(!!event.detail.location && event.detail.location !== "All India");
-      
-      if (event.detail.latitude && event.detail.longitude) {
-        setPreciseLocation({
-          latitude: event.detail.latitude,
-          longitude: event.detail.longitude
-        });
-      }
-    };
-
-    window.addEventListener('locationUpdated', handleLocationUpdated as EventListener);
-    
-    return () => {
-      window.removeEventListener('locationUpdated', handleLocationUpdated as EventListener);
-    };
-  }, []);
+  const { currentLocation, isLocationAvailable } = useLocation();
   
   const handleNearMeFilterChange = (filter: {enabled: boolean, radius: number}) => {
     setNearMeFilter(filter);
     
-    if (filter.enabled && !preciseLocation) {
+    if (filter.enabled) {
       // Request location if we don't have it yet
       requestGeolocation();
     }
   };
+  
+  // Only show content if we have a location and it's available
+  const showFullContent = currentLocation !== "All India";
   
   return (
     <Layout>
@@ -103,119 +105,143 @@ export default function Home() {
         {/* Location Display */}
         <LocationDisplay className="mb-4" />
         
-        {/* Near Me Filter */}
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex items-center gap-2">
-            <h2 className="text-lg font-bold">Explore</h2>
-            {hasLocation && (
-              <Badge variant="outline" className="font-normal">
-                {localStorage.getItem('userLocation')}
-              </Badge>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            <NearMeFilter 
-              onFilterChange={handleNearMeFilterChange} 
-              compact 
-            />
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-1.5"
-              onClick={() => navigate('/maps')}
-            >
-              <Map className="h-4 w-4" />
-              <span className="hidden sm:inline">View Map</span>
-            </Button>
-          </div>
-        </div>
+        {/* Location Availability Status */}
+        {currentLocation !== "All India" && (
+          <LocationAvailabilityStatus className="mb-4" />
+        )}
         
-        {/* Show local business spotlight when a specific location is set */}
-        {hasLocation && (
+        {showFullContent && !isLocationAvailable ? (
+          <LocationUnavailableView />
+        ) : showFullContent && (
           <>
+            {/* Near Me Filter */}
+            <div className="flex justify-between items-center mb-4">
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg font-bold">Explore</h2>
+                {currentLocation !== "All India" && (
+                  <Badge variant="outline" className="font-normal">
+                    {currentLocation}
+                  </Badge>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <NearMeFilter 
+                  onFilterChange={handleNearMeFilterChange} 
+                  compact 
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-1.5"
+                  onClick={() => navigate('/maps')}
+                >
+                  <Map className="h-4 w-4" />
+                  <span className="hidden sm:inline">View Map</span>
+                </Button>
+              </div>
+            </div>
+            
             {/* Nearby Businesses */}
             <NearbyBusinesses className="mb-4" />
             
             {/* Local Business Spotlight */}
             <LocalBusinessSpotlight />
+            
+            {/* Business Categories Scroller */}
+            <section>
+              <div className="flex justify-between items-center mb-3">
+                <h2 className="text-lg font-bold">Explore Businesses</h2>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-xs text-primary flex items-center gap-1"
+                  onClick={() => navigate('/businesses?view=categories')}
+                >
+                  View All <ArrowRight className="h-3 w-3" />
+                </Button>
+              </div>
+              <BusinessCategoryScroller />
+            </section>
+            
+            {/* Marketplace Categories Scroller */}
+            <section>
+              <div className="flex justify-between items-center mb-3">
+                <h2 className="text-lg font-bold">Shop Marketplace</h2>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-xs text-primary flex items-center gap-1"
+                  onClick={() => navigate('/marketplace?view=categories')}
+                >
+                  View All <ArrowRight className="h-3 w-3" />
+                </Button>
+              </div>
+              <MarketplaceCategoryScroller />
+            </section>
+            
+            {/* Browse Services */}
+            <section>
+              <div className="flex justify-between items-center mb-3">
+                <h2 className="text-lg font-bold">Browse Services</h2>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-xs text-primary flex items-center gap-1"
+                  onClick={() => navigate('/services?view=categories')}
+                >
+                  View All <ArrowRight className="h-3 w-3" />
+                </Button>
+              </div>
+              <ServiceCategoryScroller />
+            </section>
+            
+            {/* Popular Categories */}
+            <PopularCategories />
+            
+            {/* Top Rated Businesses */}
+            <Suspense fallback={<SectionSkeleton />}>
+              <TopRatedBusinesses />
+            </Suspense>
+            
+            {/* Featured Businesses */}
+            <Suspense fallback={<SectionSkeleton />}>
+              <FeaturedBusinesses />
+            </Suspense>
+            
+            {/* Trending Services */}
+            <Suspense fallback={<SectionSkeleton />}>
+              <TrendingServices />
+            </Suspense>
+            
+            {/* Deals Section */}
+            <Suspense fallback={<SectionSkeleton />}>
+              <DealsSection />
+            </Suspense>
+            
+            {/* Quick Access Services */}
+            <Suspense fallback={<SectionSkeleton />}>
+              <QuickAccessServices />
+            </Suspense>
           </>
         )}
         
-        {/* Business Categories Scroller */}
-        <section>
-          <div className="flex justify-between items-center mb-3">
-            <h2 className="text-lg font-bold">Explore Businesses</h2>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="text-xs text-primary flex items-center gap-1"
-              onClick={() => navigate('/businesses?view=categories')}
-            >
-              View All <ArrowRight className="h-3 w-3" />
+        {/* Show a welcome message if no location is set yet */}
+        {currentLocation === "All India" && (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="bg-primary-50 dark:bg-primary-900/20 rounded-full p-5 mb-4">
+              <MapPin className="h-12 w-12 text-primary" />
+            </div>
+            <h2 className="text-2xl font-bold mb-2">Choose Your Location</h2>
+            <p className="text-muted-foreground max-w-md mx-auto mb-6">
+              To see businesses, services and products in your area, 
+              please select your location.
+            </p>
+            <Button onClick={() => navigate('/maps')}>
+              <MapPin className="h-4 w-4 mr-2" />
+              Set My Location
             </Button>
           </div>
-          <BusinessCategoryScroller />
-        </section>
-        
-        {/* Marketplace Categories Scroller */}
-        <section>
-          <div className="flex justify-between items-center mb-3">
-            <h2 className="text-lg font-bold">Shop Marketplace</h2>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="text-xs text-primary flex items-center gap-1"
-              onClick={() => navigate('/marketplace?view=categories')}
-            >
-              View All <ArrowRight className="h-3 w-3" />
-            </Button>
-          </div>
-          <MarketplaceCategoryScroller />
-        </section>
-        
-        {/* Browse Services */}
-        <section>
-          <div className="flex justify-between items-center mb-3">
-            <h2 className="text-lg font-bold">Browse Services</h2>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="text-xs text-primary flex items-center gap-1"
-              onClick={() => navigate('/services?view=categories')}
-            >
-              View All <ArrowRight className="h-3 w-3" />
-            </Button>
-          </div>
-          <ServiceCategoryScroller />
-        </section>
-        
-        {/* Popular Categories */}
-        <PopularCategories />
-        
-        {/* Top Rated Businesses */}
-        <Suspense fallback={<SectionSkeleton />}>
-          <TopRatedBusinesses />
-        </Suspense>
-        
-        {/* Featured Businesses */}
-        <Suspense fallback={<SectionSkeleton />}>
-          <FeaturedBusinesses />
-        </Suspense>
-        
-        {/* Trending Services */}
-        <Suspense fallback={<SectionSkeleton />}>
-          <TrendingServices />
-        </Suspense>
-        
-        {/* Deals Section */}
-        <Suspense fallback={<SectionSkeleton />}>
-          <DealsSection />
-        </Suspense>
-        
-        {/* Quick Access Services */}
-        <Suspense fallback={<SectionSkeleton />}>
-          <QuickAccessServices />
-        </Suspense>
+        )}
       </div>
     </Layout>
   );

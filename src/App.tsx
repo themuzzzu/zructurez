@@ -6,10 +6,37 @@ import { Toaster } from "@/components/ui/toaster";
 import { queryClient } from "@/lib/react-query";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { LoadingProvider } from "@/providers/LoadingProvider"; 
+import { LocationProvider } from "@/providers/LocationProvider";
 import { ProgressLoader } from "@/components/loaders/ProgressLoader";
 import router from "./routes";
 import { CircularLoader } from "@/components/loaders/CircularLoader";
 import { RouterProvider } from "react-router-dom";
+import { LocationPickerModal } from "@/components/location/LocationPickerModal";
+import { useLocation } from "@/providers/LocationProvider";
+
+function LocationModalHandler() {
+  const { showLocationPicker, setShowLocationPicker, isFirstVisit, resetFirstVisit } = useLocation();
+  
+  // Handle closing the modal for first-time users
+  const handleOpenChange = (open: boolean) => {
+    if (isFirstVisit && !open) {
+      // Don't allow closing on first visit
+      return;
+    }
+    setShowLocationPicker(open);
+    if (!open && isFirstVisit) {
+      resetFirstVisit();
+    }
+  };
+  
+  return (
+    <LocationPickerModal
+      open={showLocationPicker}
+      onOpenChange={handleOpenChange}
+      firstVisit={isFirstVisit}
+    />
+  );
+}
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -86,16 +113,23 @@ function App() {
       <ThemeProvider defaultTheme="dark" storageKey="lovable-theme">
         <LoadingProvider>
           <AuthProvider>
-            <ProgressLoader fixed color="#3B82F6" height={3} />
-            <div className={isLoading ? "hidden" : "app"}>
-              {!isLoading && <RouterProvider router={router} />}
-            </div>
-            {isLoading && (
-              <div className="fixed inset-0 flex items-center justify-center bg-white dark:bg-background z-50">
-                <CircularLoader size={40} color="#3B82F6" />
+            <LocationProvider>
+              <ProgressLoader fixed color="#3B82F6" height={3} />
+              <div className={isLoading ? "hidden" : "app"}>
+                {!isLoading && (
+                  <>
+                    <RouterProvider router={router} />
+                    <LocationModalHandler />
+                  </>
+                )}
               </div>
-            )}
-            <Toaster />
+              {isLoading && (
+                <div className="fixed inset-0 flex items-center justify-center bg-white dark:bg-background z-50">
+                  <CircularLoader size={40} color="#3B82F6" />
+                </div>
+              )}
+              <Toaster />
+            </LocationProvider>
           </AuthProvider>
         </LoadingProvider>
       </ThemeProvider>

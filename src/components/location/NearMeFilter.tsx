@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/popover";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
+import { useLocation } from "@/providers/LocationProvider";
 
 interface NearMeFilterProps {
   onFilterChange: (filter: {enabled: boolean, radius: number}) => void;
@@ -30,6 +31,7 @@ export function NearMeFilter({
   const [radius, setRadius] = useState(defaultRadius);
   const [popoverOpen, setPopoverOpen] = useState(false);
   const { requestGeolocation, loading, position } = useGeolocation();
+  const { currentLocation, isLocationAvailable } = useLocation();
   
   useEffect(() => {
     // Load saved preferences
@@ -60,6 +62,11 @@ export function NearMeFilter({
   }, [enabled, radius, onFilterChange]);
   
   const toggleFilter = () => {
+    if (currentLocation === "All India") {
+      toast.error("Please select a location first");
+      return;
+    }
+    
     if (!enabled && !position) {
       requestGeolocation();
     }
@@ -78,7 +85,7 @@ export function NearMeFilter({
         size="sm"
         className={`${className} ${enabled ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
         onClick={toggleFilter}
-        disabled={loading}
+        disabled={loading || currentLocation === "All India"}
       >
         {loading ? (
           <Navigation className="h-3.5 w-3.5 mr-1 animate-spin" />
@@ -103,7 +110,7 @@ export function NearMeFilter({
                   variant={enabled ? "default" : "outline"}
                   size="sm"
                   className={enabled ? "bg-primary text-primary-foreground" : "text-muted-foreground"}
-                  disabled={loading}
+                  disabled={loading || currentLocation === "All India"}
                 >
                   {loading ? (
                     <Navigation className="h-4 w-4 mr-1.5 animate-spin" />
