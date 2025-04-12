@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { MapPin, ArrowRight, Navigation } from "lucide-react";
+import { MapPin, ArrowRight, Navigation, LocateFixed, Locate } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { useGeolocation } from "@/hooks/useGeolocation";
@@ -32,6 +32,20 @@ export function NearMeFilter({
   const { requestGeolocation, loading, position } = useGeolocation();
   
   useEffect(() => {
+    // Load saved preferences
+    const savedEnabled = localStorage.getItem('nearMeFilterEnabled') === 'true';
+    const savedRadius = Number(localStorage.getItem('nearMeRadius') || defaultRadius);
+    
+    setEnabled(savedEnabled);
+    setRadius(savedRadius);
+    
+    // If filter was enabled, request location if needed
+    if (savedEnabled && !position) {
+      requestGeolocation();
+    }
+  }, []);
+  
+  useEffect(() => {
     if (enabled && !position) {
       requestGeolocation();
     }
@@ -39,6 +53,10 @@ export function NearMeFilter({
   
   useEffect(() => {
     onFilterChange({ enabled, radius });
+    
+    // Save preferences
+    localStorage.setItem('nearMeFilterEnabled', String(enabled));
+    localStorage.setItem('nearMeRadius', String(radius));
   }, [enabled, radius, onFilterChange]);
   
   const toggleFilter = () => {
@@ -64,6 +82,8 @@ export function NearMeFilter({
       >
         {loading ? (
           <Navigation className="h-3.5 w-3.5 mr-1 animate-spin" />
+        ) : enabled ? (
+          <LocateFixed className="h-3.5 w-3.5 mr-1" />
         ) : (
           <MapPin className="h-3.5 w-3.5 mr-1" />
         )}
@@ -87,6 +107,8 @@ export function NearMeFilter({
                 >
                   {loading ? (
                     <Navigation className="h-4 w-4 mr-1.5 animate-spin" />
+                  ) : enabled ? (
+                    <LocateFixed className="h-4 w-4 mr-1.5" />
                   ) : (
                     <MapPin className="h-4 w-4 mr-1.5" />
                   )}
