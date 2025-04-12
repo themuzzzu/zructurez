@@ -1,4 +1,3 @@
-
 import { Suspense, lazy, useEffect, useState } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { SearchHero } from "@/components/home/SearchHero";
@@ -44,6 +43,7 @@ const SectionSkeleton = () => (
 // Component to show when location is not available
 const LocationUnavailableView = () => {
   const { currentLocation, setShowLocationPicker } = useLocation();
+  const navigate = useNavigate();
   
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">

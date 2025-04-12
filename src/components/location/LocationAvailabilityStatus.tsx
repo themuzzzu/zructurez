@@ -3,7 +3,7 @@ import { useLocation } from "@/providers/LocationProvider";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, MapOff } from "lucide-react";
+import { MapPin, AlertTriangle } from "lucide-react";
 
 interface LocationAvailabilityStatusProps {
   className?: string;
@@ -44,7 +44,7 @@ export function LocationAvailabilityStatus({
           {isLocationAvailable ? (
             <MapPin className="h-5 w-5 shrink-0" />
           ) : (
-            <MapOff className="h-5 w-5 shrink-0" />
+            <AlertTriangle className="h-5 w-5 shrink-0" />
           )}
           <div>
             <h3 className="font-medium">
