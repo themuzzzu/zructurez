@@ -10,12 +10,16 @@ import { NotificationPermission } from "@/components/notifications/NotificationP
 import { useAuth } from "@/hooks/useAuth";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Map, Navigation, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { LocationDisplay } from "@/components/home/LocationDisplay";
 import { LocalBusinessSpotlight } from "@/components/marketplace/LocalBusinessSpotlight";
+import { NearbyBusinesses } from "@/components/location/NearbyBusinesses";
+import { NearMeFilter } from "@/components/location/NearMeFilter";
+import { Badge } from "@/components/ui/badge";
+import { useGeolocation } from "@/hooks/useGeolocation";
 
-// Lazy-loaded components - moved from eager loading to lazy loading
+// Lazy-loaded components
 const TopRatedBusinesses = lazy(() => import("@/components/home/TopRatedBusinesses"));
 const FeaturedBusinesses = lazy(() => import("@/components/home/FeaturedBusinesses"));
 const TrendingServices = lazy(() => import("@/components/home/TrendingServices"));
@@ -39,16 +43,36 @@ export default function Home() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [hasLocation, setHasLocation] = useState(false);
+  const [preciseLocation, setPreciseLocation] = useState<any>(null);
+  const [nearMeFilter, setNearMeFilter] = useState({ enabled: false, radius: 5 });
+  const { requestGeolocation } = useGeolocation();
   
   useEffect(() => {
     const location = localStorage.getItem('userLocation');
     setHasLocation(!!location && location !== "All India");
+    
+    // Check for precise location
+    const preciseLocationData = localStorage.getItem('userPreciseLocation');
+    if (preciseLocationData) {
+      try {
+        setPreciseLocation(JSON.parse(preciseLocationData));
+      } catch (e) {
+        console.error("Error parsing precise location data", e);
+      }
+    }
   }, []);
   
   // Listen for location updates
   useEffect(() => {
     const handleLocationUpdated = (event: CustomEvent) => {
       setHasLocation(!!event.detail.location && event.detail.location !== "All India");
+      
+      if (event.detail.latitude && event.detail.longitude) {
+        setPreciseLocation({
+          latitude: event.detail.latitude,
+          longitude: event.detail.longitude
+        });
+      }
     };
 
     window.addEventListener('locationUpdated', handleLocationUpdated as EventListener);
@@ -57,6 +81,15 @@ export default function Home() {
       window.removeEventListener('locationUpdated', handleLocationUpdated as EventListener);
     };
   }, []);
+  
+  const handleNearMeFilterChange = (filter: {enabled: boolean, radius: number}) => {
+    setNearMeFilter(filter);
+    
+    if (filter.enabled && !preciseLocation) {
+      // Request location if we don't have it yet
+      requestGeolocation();
+    }
+  };
   
   return (
     <Layout>
@@ -70,10 +103,45 @@ export default function Home() {
         {/* Location Display */}
         <LocationDisplay className="mb-4" />
         
-        {/* Show local business spotlight when a specific location is set */}
-        {hasLocation && <LocalBusinessSpotlight />}
+        {/* Near Me Filter */}
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-bold">Explore</h2>
+            {hasLocation && (
+              <Badge variant="outline" className="font-normal">
+                {localStorage.getItem('userLocation')}
+              </Badge>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <NearMeFilter 
+              onFilterChange={handleNearMeFilterChange} 
+              compact 
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-1.5"
+              onClick={() => navigate('/maps')}
+            >
+              <Map className="h-4 w-4" />
+              <span className="hidden sm:inline">View Map</span>
+            </Button>
+          </div>
+        </div>
         
-        {/* Business Categories Scroller - Horizontal scroll layout */}
+        {/* Show local business spotlight when a specific location is set */}
+        {hasLocation && (
+          <>
+            {/* Nearby Businesses */}
+            <NearbyBusinesses className="mb-4" />
+            
+            {/* Local Business Spotlight */}
+            <LocalBusinessSpotlight />
+          </>
+        )}
+        
+        {/* Business Categories Scroller */}
         <section>
           <div className="flex justify-between items-center mb-3">
             <h2 className="text-lg font-bold">Explore Businesses</h2>
@@ -89,7 +157,7 @@ export default function Home() {
           <BusinessCategoryScroller />
         </section>
         
-        {/* Marketplace Categories Scroller - New addition below business categories */}
+        {/* Marketplace Categories Scroller */}
         <section>
           <div className="flex justify-between items-center mb-3">
             <h2 className="text-lg font-bold">Shop Marketplace</h2>
@@ -124,27 +192,27 @@ export default function Home() {
         {/* Popular Categories */}
         <PopularCategories />
         
-        {/* Top Rated Businesses - Now lazy loaded */}
+        {/* Top Rated Businesses */}
         <Suspense fallback={<SectionSkeleton />}>
           <TopRatedBusinesses />
         </Suspense>
         
-        {/* Featured Businesses - Now lazy loaded */}
+        {/* Featured Businesses */}
         <Suspense fallback={<SectionSkeleton />}>
           <FeaturedBusinesses />
         </Suspense>
         
-        {/* Trending Services - Now lazy loaded */}
+        {/* Trending Services */}
         <Suspense fallback={<SectionSkeleton />}>
           <TrendingServices />
         </Suspense>
         
-        {/* Deals Section - Now lazy loaded */}
+        {/* Deals Section */}
         <Suspense fallback={<SectionSkeleton />}>
           <DealsSection />
         </Suspense>
         
-        {/* Quick Access Services - Now lazy loaded */}
+        {/* Quick Access Services */}
         <Suspense fallback={<SectionSkeleton />}>
           <QuickAccessServices />
         </Suspense>

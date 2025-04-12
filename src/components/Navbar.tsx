@@ -16,14 +16,16 @@ import { SearchBox } from "./search/SearchBox";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTheme } from "./ThemeProvider";
-import { Heart, MapPin } from "lucide-react";
+import { Heart, MapPin, Navigation, Locate, Map } from "lucide-react";
 import { useState, useEffect } from "react";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { LocationSelector } from "./LocationSelector";
+import { EnhancedLocationSelector } from "./location/EnhancedLocationSelector";
+import { Badge } from "./ui/badge";
+import { useGeolocation } from "@/hooks/useGeolocation";
 
 export const Navbar = () => {
   const location = useLocation();
@@ -31,6 +33,8 @@ export const Navbar = () => {
   const isHomePage = location.pathname === "/";
   const { theme } = useTheme();
   const [currentLocation, setCurrentLocation] = useState(localStorage.getItem('userLocation') || "All India");
+  const [locationPopoverOpen, setLocationPopoverOpen] = useState(false);
+  const { requestGeolocation, loading } = useGeolocation();
 
   // Listen for location updates
   useEffect(() => {
@@ -78,6 +82,8 @@ export const Navbar = () => {
     window.dispatchEvent(new CustomEvent('locationUpdated', { 
       detail: { location: newLocation } 
     }));
+    
+    setLocationPopoverOpen(false);
 
     // Toast notification
     window.setTimeout(() => {
@@ -113,7 +119,7 @@ export const Navbar = () => {
 
           <div className="flex items-center gap-2">
             {/* Location selector button */}
-            <Popover>
+            <Popover open={locationPopoverOpen} onOpenChange={setLocationPopoverOpen}>
               <PopoverTrigger asChild>
                 <Button 
                   variant="ghost" 
@@ -121,8 +127,10 @@ export const Navbar = () => {
                   className="relative group"
                   aria-label="Select location"
                 >
-                  <MapPin className="h-5 w-5" />
-                  <span className="absolute -bottom-1 -right-1 h-2 w-2 bg-green-500 rounded-full hidden group-hover:block" />
+                  {loading ? <Locate className="h-5 w-5 animate-spin" /> : <MapPin className="h-5 w-5" />}
+                  <Badge className="absolute -bottom-1 -right-1 h-4 w-4 p-0 flex items-center justify-center">
+                    <span className="sr-only">Location set</span>
+                  </Badge>
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-80 p-4">
@@ -133,25 +141,28 @@ export const Navbar = () => {
                       {currentLocation || "Select location"}
                     </p>
                   </div>
-                  <LocationSelector
+                  
+                  <EnhancedLocationSelector
                     value={currentLocation}
                     onChange={handleLocationChange}
                     className="w-full"
                   />
+                  
                   <div className="flex justify-between pt-2">
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      onClick={() => navigate("/settings?tab=location")}
+                      onClick={() => {
+                        setLocationPopoverOpen(false);
+                        navigate("/settings?tab=location");
+                      }}
                     >
                       More Settings
                     </Button>
                     <Button 
                       size="sm"
                       onClick={() => {
-                        if (document.activeElement instanceof HTMLElement) {
-                          document.activeElement.blur();
-                        }
+                        setLocationPopoverOpen(false);
                       }}
                     >
                       Done

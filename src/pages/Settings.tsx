@@ -18,7 +18,7 @@ import { PricingTab } from "@/components/settings/PricingTab";
 import { AdvertisementPricingTab } from "@/components/settings/AdvertisementPricingTab";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
-import { Home, ChevronLeft, Lock } from "lucide-react";
+import { Home, ChevronLeft } from "lucide-react";
 import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { Card } from "@/components/ui/card";
@@ -88,7 +88,7 @@ const Settings = () => {
     <Card className="p-8 text-center">
       <div className="flex flex-col items-center justify-center gap-4">
         <div className="rounded-full bg-muted p-3">
-          <Lock className="h-6 w-6 text-muted-foreground" />
+          <div className="h-6 w-6 text-muted-foreground">🔒</div>
         </div>
         <h2 className="text-xl font-semibold">{title}</h2>
         <p className="text-muted-foreground max-w-md">
