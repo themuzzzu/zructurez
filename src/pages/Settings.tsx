@@ -22,6 +22,7 @@ import { Home, ChevronLeft, Lock } from "lucide-react";
 import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { Card } from "@/components/ui/card";
+import { LocationSettings } from "@/components/settings/LocationSettings";
 
 const Settings = () => {
   const [searchParams] = useSearchParams();
@@ -44,7 +45,7 @@ const Settings = () => {
     if (tabFromParams && tabFromParams !== activeTab) {
       setActiveTab(tabFromParams);
     }
-  }, [searchParams, location]);
+  }, [searchParams, location, activeTab]);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -76,6 +77,8 @@ const Settings = () => {
         return <TestingTab />;
       case "analytics":
         return <AnalyticsTab />;
+      case "location":
+        return <LocationSettings />;
       default:
         return <ProfileView />;
     }

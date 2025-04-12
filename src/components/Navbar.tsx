@@ -16,13 +16,36 @@ import { SearchBox } from "./search/SearchBox";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTheme } from "./ThemeProvider";
-import { Heart } from "lucide-react";
+import { Heart, MapPin } from "lucide-react";
+import { useState, useEffect } from "react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { LocationSelector } from "./LocationSelector";
 
 export const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const isHomePage = location.pathname === "/";
   const { theme } = useTheme();
+  const [currentLocation, setCurrentLocation] = useState(localStorage.getItem('userLocation') || "All India");
+
+  // Listen for location updates
+  useEffect(() => {
+    const handleLocationUpdated = (event: CustomEvent) => {
+      if (event.detail.location) {
+        setCurrentLocation(event.detail.location);
+      }
+    };
+
+    window.addEventListener('locationUpdated', handleLocationUpdated as EventListener);
+    
+    return () => {
+      window.removeEventListener('locationUpdated', handleLocationUpdated as EventListener);
+    };
+  }, []);
 
   const { data: profile } = useQuery({
     queryKey: ['profile'],
@@ -45,6 +68,23 @@ export const Navbar = () => {
     return location.pathname.includes('/business') || 
            location.pathname.includes('/services') ||
            location.pathname.includes('/marketplace');
+  };
+
+  const handleLocationChange = (newLocation: string) => {
+    setCurrentLocation(newLocation);
+    localStorage.setItem('userLocation', newLocation);
+    
+    // Dispatch custom event
+    window.dispatchEvent(new CustomEvent('locationUpdated', { 
+      detail: { location: newLocation } 
+    }));
+
+    // Toast notification
+    window.setTimeout(() => {
+      import('sonner').then(({ toast }) => {
+        toast.success(`Location updated to ${newLocation}`);
+      });
+    }, 100);
   };
 
   return (
@@ -72,6 +112,55 @@ export const Navbar = () => {
           )}
 
           <div className="flex items-center gap-2">
+            {/* Location selector button */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  className="relative group"
+                  aria-label="Select location"
+                >
+                  <MapPin className="h-5 w-5" />
+                  <span className="absolute -bottom-1 -right-1 h-2 w-2 bg-green-500 rounded-full hidden group-hover:block" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-4">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <h3 className="font-medium">Your Location</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {currentLocation || "Select location"}
+                    </p>
+                  </div>
+                  <LocationSelector
+                    value={currentLocation}
+                    onChange={handleLocationChange}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between pt-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => navigate("/settings?tab=location")}
+                    >
+                      More Settings
+                    </Button>
+                    <Button 
+                      size="sm"
+                      onClick={() => {
+                        if (document.activeElement instanceof HTMLElement) {
+                          document.activeElement.blur();
+                        }
+                      }}
+                    >
+                      Done
+                    </Button>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+
             {isBusinessOrServices() && (
               <Button 
                 variant="ghost" 

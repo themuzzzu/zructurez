@@ -1,5 +1,5 @@
 
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { SearchHero } from "@/components/home/SearchHero";
 import { PopularCategories } from "@/components/home/PopularCategories";
@@ -12,6 +12,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { LocationDisplay } from "@/components/home/LocationDisplay";
+import { LocalBusinessSpotlight } from "@/components/marketplace/LocalBusinessSpotlight";
 
 // Lazy-loaded components - moved from eager loading to lazy loading
 const TopRatedBusinesses = lazy(() => import("@/components/home/TopRatedBusinesses"));
@@ -36,6 +38,25 @@ const SectionSkeleton = () => (
 export default function Home() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [hasLocation, setHasLocation] = useState(false);
+  
+  useEffect(() => {
+    const location = localStorage.getItem('userLocation');
+    setHasLocation(!!location && location !== "All India");
+  }, []);
+  
+  // Listen for location updates
+  useEffect(() => {
+    const handleLocationUpdated = (event: CustomEvent) => {
+      setHasLocation(!!event.detail.location && event.detail.location !== "All India");
+    };
+
+    window.addEventListener('locationUpdated', handleLocationUpdated as EventListener);
+    
+    return () => {
+      window.removeEventListener('locationUpdated', handleLocationUpdated as EventListener);
+    };
+  }, []);
   
   return (
     <Layout>
@@ -45,6 +66,12 @@ export default function Home() {
         
         {/* Hero Section */}
         <SearchHero />
+        
+        {/* Location Display */}
+        <LocationDisplay className="mb-4" />
+        
+        {/* Show local business spotlight when a specific location is set */}
+        {hasLocation && <LocalBusinessSpotlight />}
         
         {/* Business Categories Scroller - Horizontal scroll layout */}
         <section>

@@ -4,7 +4,7 @@ import {
   Settings, Bell, Shield, User, Package, 
   Briefcase, Wrench, Megaphone, ShoppingBag, 
   Calendar, BarChart, Activity, Heart, BadgeDollarSign,
-  DollarSign, TagIcon, Lock
+  DollarSign, TagIcon, Lock, MapPin
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -26,6 +26,7 @@ export const SettingsNav = ({ activeTab, setActiveTab }: SettingsNavProps) => {
   const tabs: TabItem[] = [
     { id: "profile", label: "Profile", icon: User },
     { id: "general", label: "General", icon: Settings },
+    { id: "location", label: "Location", icon: MapPin },
     { id: "notifications", label: "Notifications", icon: Bell },
     { id: "privacy", label: "Privacy", icon: Shield, locked: true },
     { id: "appointments", label: "Appointments", icon: Calendar },

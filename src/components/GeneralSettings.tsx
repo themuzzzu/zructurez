@@ -16,6 +16,7 @@ export function GeneralSettings() {
   const [language, setLanguage] = useState("english");
   const [uiTheme, setUiTheme] = useState("ui-blue");
   const [saving, setSaving] = useState(false);
+  const [previewFont, setPreviewFont] = useState(100);
 
   // UI colors available
   const uiColors = [
@@ -33,44 +34,66 @@ export function GeneralSettings() {
     const savedLanguage = localStorage.getItem("language");
     const savedTheme = localStorage.getItem("uiTheme");
     
-    if (savedFontSize) setFontSize(parseInt(savedFontSize));
+    if (savedFontSize) {
+      const parsedSize = parseInt(savedFontSize);
+      setFontSize(parsedSize);
+      setPreviewFont(parsedSize);
+      document.documentElement.style.fontSize = `${parsedSize}%`;
+    }
+    
     if (savedLanguage) setLanguage(savedLanguage);
+    
     if (savedTheme) {
       setUiTheme(savedTheme);
-      document.documentElement.className = savedTheme;
+      applyTheme(savedTheme);
     }
   }, []);
 
-  // Apply font size changes without reload
-  const handleFontSizeChange = (value: number[]) => {
-    const newSize = value[0];
-    setFontSize(newSize);
-    document.documentElement.style.fontSize = `${newSize}%`;
-  };
-
   // Apply UI theme changes immediately
-  const handleThemeChange = (value: string) => {
-    setUiTheme(value);
-    
+  const applyTheme = (themeId: string) => {
     // Remove all theme classes
     uiColors.forEach(color => {
       document.documentElement.classList.remove(color.id);
     });
     
     // Add the selected theme class
-    document.documentElement.classList.add(value);
+    document.documentElement.classList.add(themeId);
+    
+    // Update CSS variables for theme color
+    const selectedColor = uiColors.find(color => color.id === themeId);
+    if (selectedColor) {
+      const colorClass = selectedColor.class.replace('bg-', '');
+      document.documentElement.style.setProperty('--theme-color', colorClass);
+    }
+  };
+
+  // Preview font size changes without saving
+  const handleFontSizePreview = (value: number[]) => {
+    const newSize = value[0];
+    setPreviewFont(newSize);
+    document.documentElement.style.fontSize = `${newSize}%`;
+  };
+
+  // Handle theme change with immediate preview
+  const handleThemeChange = (value: string) => {
+    setUiTheme(value);
+    applyTheme(value);
   };
 
   // Save settings (debounced)
   const saveSettings = debounce(() => {
     setSaving(true);
     
+    // Apply the preview font size as the actual setting
+    setFontSize(previewFont);
+    
+    // Save to localStorage
+    localStorage.setItem("fontSize", previewFont.toString());
+    localStorage.setItem("language", language);
+    localStorage.setItem("uiTheme", uiTheme);
+    
     // Simulate API call
     setTimeout(() => {
-      localStorage.setItem("fontSize", fontSize.toString());
-      localStorage.setItem("language", language);
-      localStorage.setItem("uiTheme", uiTheme);
-      
       toast.success("Settings saved successfully");
       setSaving(false);
     }, 500);
@@ -90,15 +113,16 @@ export function GeneralSettings() {
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <Label htmlFor="font-size" className="text-base font-medium">Font Size</Label>
-              <span className="text-sm font-medium bg-secondary px-2 py-1 rounded">{fontSize}%</span>
+              <span className="text-sm font-medium bg-secondary px-2 py-1 rounded">{previewFont}%</span>
             </div>
             <Slider 
               id="font-size"
-              defaultValue={[fontSize]} 
+              defaultValue={[previewFont]} 
+              value={[previewFont]}
               max={150} 
               min={75} 
               step={5}
-              onValueChange={handleFontSizeChange}
+              onValueChange={handleFontSizePreview}
               className="py-4"
             />
             <div className="flex justify-between text-xs text-muted-foreground">
@@ -125,15 +149,18 @@ export function GeneralSettings() {
                 </button>
               ))}
             </div>
-            <p className="text-sm text-muted-foreground">
-              Customize the appearance of your interface
-            </p>
+            <div className="mt-2 p-3 border rounded-md bg-background">
+              <p className="text-sm font-medium mb-2">Preview</p>
+              <div className={`p-3 rounded-md ${uiColors.find(c => c.id === uiTheme)?.class.replace('bg-', 'bg-opacity-20 text-')}`}>
+                <p className="text-sm">This is how your selected theme will look</p>
+              </div>
+            </div>
           </div>
           
           {/* Language Selection */}
           <div className="space-y-2">
             <Label htmlFor="language" className="text-base font-medium">Language</Label>
-            <Select defaultValue={language} onValueChange={setLanguage}>
+            <Select value={language} onValueChange={setLanguage}>
               <SelectTrigger>
                 <SelectValue placeholder="Select language" />
               </SelectTrigger>
