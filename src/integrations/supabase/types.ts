@@ -795,7 +795,9 @@ export type Database = {
           image_scale: number | null
           image_url: string | null
           is_open: boolean | null
+          latitude: number | null
           location: string | null
+          longitude: number | null
           membership_plans: Json | null
           name: string
           owners: Json | null
@@ -828,7 +830,9 @@ export type Database = {
           image_scale?: number | null
           image_url?: string | null
           is_open?: boolean | null
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           membership_plans?: Json | null
           name: string
           owners?: Json | null
@@ -861,7 +865,9 @@ export type Database = {
           image_scale?: number | null
           image_url?: string | null
           is_open?: boolean | null
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           membership_plans?: Json | null
           name?: string
           owners?: Json | null
@@ -1913,6 +1919,8 @@ export type Database = {
           is_branded: boolean | null
           is_discounted: boolean | null
           is_used: boolean | null
+          latitude: number | null
+          longitude: number | null
           model: string | null
           original_price: number | null
           price: number
@@ -1937,6 +1945,8 @@ export type Database = {
           is_branded?: boolean | null
           is_discounted?: boolean | null
           is_used?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
           model?: string | null
           original_price?: number | null
           price: number
@@ -1961,6 +1971,8 @@ export type Database = {
           is_branded?: boolean | null
           is_discounted?: boolean | null
           is_used?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
           model?: string | null
           original_price?: number | null
           price?: number
@@ -2334,7 +2346,9 @@ export type Database = {
           id: string
           image_url: string | null
           is_open: boolean | null
+          latitude: number | null
           location: string | null
+          longitude: number | null
           price: number
           title: string
           user_id: string
@@ -2349,7 +2363,9 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_open?: boolean | null
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           price: number
           title: string
           user_id: string
@@ -2364,7 +2380,9 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_open?: boolean | null
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           price?: number
           title?: string
           user_id?: string

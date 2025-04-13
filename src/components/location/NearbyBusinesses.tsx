@@ -40,41 +40,50 @@ export function NearbyBusinesses({ className = "", radius = 5 }: NearbyBusinesse
     queryFn: async () => {
       if (!latitude || !longitude) return [];
       
-      // Query businesses within specified radius
-      // Note: Adding explicit fields in the select to make TypeScript aware of the latitude/longitude fields
-      const { data } = await supabase
-        .from('businesses')
-        .select('id, name, description, image_url, category, latitude, longitude')
-        .not('latitude', 'is', null)
-        .not('longitude', 'is', null)
-        .order('name');
-      
-      if (!data || data.length === 0) return [];
-      
-      // Calculate distance for each business and filter by radius
-      const businessesWithDistance = data
-        .map(business => {
-          // Type guard to ensure latitude and longitude exist
-          if (typeof business.latitude !== 'number' || typeof business.longitude !== 'number') return null;
-          
-          const distance = getDistanceBetweenCoordinates(
-            latitude, 
-            longitude, 
-            business.latitude, 
-            business.longitude
-          );
-          
-          return { 
-            ...business, 
-            distance 
-          };
-        })
-        .filter((b): b is (Business & { distance: number }) => 
-          b !== null && b.distance <= maxDistance
-        )
-        .sort((a, b) => a.distance - b.distance);
-      
-      return businessesWithDistance.slice(0, 10); // Limit to 10 nearest
+      try {
+        // Query businesses within specified radius
+        // Note: Adding explicit fields in the select to make TypeScript aware of the latitude/longitude fields
+        const { data, error } = await supabase
+          .from('businesses')
+          .select('id, name, description, image_url, category, latitude, longitude')
+          .not('latitude', 'is', null)
+          .not('longitude', 'is', null)
+          .order('name');
+        
+        if (error) {
+          console.error("Error fetching businesses:", error);
+          return [];
+        }
+        
+        if (!data || data.length === 0) return [];
+        
+        // Calculate distance for each business and filter by radius
+        const businessesWithDistance = data
+          .filter(business => 
+            typeof business.latitude === 'number' && 
+            typeof business.longitude === 'number'
+          )
+          .map(business => {
+            const distance = getDistanceBetweenCoordinates(
+              latitude, 
+              longitude, 
+              business.latitude!, 
+              business.longitude!
+            );
+            
+            return { 
+              ...business, 
+              distance 
+            };
+          })
+          .filter(b => b.distance <= maxDistance)
+          .sort((a, b) => a.distance - b.distance);
+        
+        return businessesWithDistance.slice(0, 10); // Limit to 10 nearest
+      } catch (error) {
+        console.error("Error processing businesses:", error);
+        return [];
+      }
     },
     enabled
   });

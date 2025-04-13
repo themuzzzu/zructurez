@@ -67,95 +67,105 @@ export default function MapView() {
       
       const items: NearbyItem[] = [];
       
-      // Only fetch businesses if filter is 'all' or 'business'
-      if (activeFilter === 'all' || activeFilter === 'business') {
-        const { data: businesses } = await supabase
-          .from('businesses')
-          .select('id, name, description, image_url, latitude, longitude')
-          .gte('latitude', minLat)
-          .lte('latitude', maxLat)
-          .gte('longitude', minLng)
-          .lte('longitude', maxLng)
-          .not('latitude', 'is', null)
-          .not('longitude', 'is', null);
-          
-        if (businesses) {
-          businesses.forEach(b => {
-            // Only add businesses with valid coordinates
-            if (typeof b.latitude === 'number' && typeof b.longitude === 'number') {
-              items.push({
-                id: b.id,
-                name: b.name,
-                description: b.description,
-                image_url: b.image_url || '',
-                latitude: b.latitude,
-                longitude: b.longitude,
-                type: 'business'
-              });
-            }
-          });
+      try {
+        // Only fetch businesses if filter is 'all' or 'business'
+        if (activeFilter === 'all' || activeFilter === 'business') {
+          const { data: businesses, error: businessError } = await supabase
+            .from('businesses')
+            .select('id, name, description, image_url, latitude, longitude')
+            .gte('latitude', minLat)
+            .lte('latitude', maxLat)
+            .gte('longitude', minLng)
+            .lte('longitude', maxLng)
+            .not('latitude', 'is', null)
+            .not('longitude', 'is', null);
+            
+          if (businessError) {
+            console.error("Error fetching businesses:", businessError);
+          } else if (businesses) {
+            businesses.forEach(b => {
+              // Only add businesses with valid coordinates
+              if (typeof b.latitude === 'number' && typeof b.longitude === 'number') {
+                items.push({
+                  id: b.id,
+                  name: b.name,
+                  description: b.description,
+                  image_url: b.image_url || '',
+                  latitude: b.latitude,
+                  longitude: b.longitude,
+                  type: 'business'
+                });
+              }
+            });
+          }
         }
-      }
-      
-      // Only fetch products if filter is 'all' or 'product'
-      if (activeFilter === 'all' || activeFilter === 'product') {
-        const { data: products } = await supabase
-          .from('products')
-          .select('id, title, description, image_url, latitude, longitude')
-          .gte('latitude', minLat)
-          .lte('latitude', maxLat)
-          .gte('longitude', minLng)
-          .lte('longitude', maxLng)
-          .not('latitude', 'is', null)
-          .not('longitude', 'is', null);
-          
-        if (products) {
-          products.forEach(p => {
-            // Only add products with valid coordinates
-            if (typeof p.latitude === 'number' && typeof p.longitude === 'number') {
-              items.push({
-                id: p.id,
-                name: p.title,
-                description: p.description,
-                image_url: p.image_url || '',
-                latitude: p.latitude,
-                longitude: p.longitude,
-                type: 'product'
-              });
-            }
-          });
+        
+        // Only fetch products if filter is 'all' or 'product'
+        if (activeFilter === 'all' || activeFilter === 'product') {
+          const { data: products, error: productError } = await supabase
+            .from('products')
+            .select('id, title, description, image_url, latitude, longitude')
+            .gte('latitude', minLat)
+            .lte('latitude', maxLat)
+            .gte('longitude', minLng)
+            .lte('longitude', maxLng)
+            .not('latitude', 'is', null)
+            .not('longitude', 'is', null);
+            
+          if (productError) {
+            console.error("Error fetching products:", productError);
+          } else if (products) {
+            products.forEach(p => {
+              // Only add products with valid coordinates
+              if (typeof p.latitude === 'number' && typeof p.longitude === 'number') {
+                items.push({
+                  id: p.id,
+                  name: p.title || '',
+                  description: p.description,
+                  image_url: p.image_url || '',
+                  latitude: p.latitude,
+                  longitude: p.longitude,
+                  type: 'product'
+                });
+              }
+            });
+          }
         }
-      }
-      
-      // Only fetch services if filter is 'all' or 'service'
-      if (activeFilter === 'all' || activeFilter === 'service') {
-        const { data: services } = await supabase
-          .from('services')
-          .select('id, title, description, image_url, latitude, longitude')
-          .gte('latitude', minLat)
-          .lte('latitude', maxLat)
-          .gte('longitude', minLng)
-          .lte('longitude', maxLng)
-          .not('latitude', 'is', null)
-          .not('longitude', 'is', null);
-          
-        if (services) {
-          services.forEach(s => {
-            // Only add services with valid coordinates
-            if (typeof s.latitude === 'number' && typeof s.longitude === 'number') {
-              items.push({
-                id: s.id,
-                name: s.title || '',
-                title: s.title,
-                description: s.description,
-                image_url: s.image_url || '',
-                latitude: s.latitude,
-                longitude: s.longitude,
-                type: 'service'
-              });
-            }
-          });
+        
+        // Only fetch services if filter is 'all' or 'service'
+        if (activeFilter === 'all' || activeFilter === 'service') {
+          const { data: services, error: serviceError } = await supabase
+            .from('services')
+            .select('id, title, description, image_url, latitude, longitude')
+            .gte('latitude', minLat)
+            .lte('latitude', maxLat)
+            .gte('longitude', minLng)
+            .lte('longitude', maxLng)
+            .not('latitude', 'is', null)
+            .not('longitude', 'is', null);
+            
+          if (serviceError) {
+            console.error("Error fetching services:", serviceError);
+          } else if (services) {
+            services.forEach(s => {
+              // Only add services with valid coordinates
+              if (typeof s.latitude === 'number' && typeof s.longitude === 'number') {
+                items.push({
+                  id: s.id,
+                  name: s.title || '',
+                  title: s.title,
+                  description: s.description,
+                  image_url: s.image_url || '',
+                  latitude: s.latitude,
+                  longitude: s.longitude,
+                  type: 'service'
+                });
+              }
+            });
+          }
         }
+      } catch (error) {
+        console.error("Error fetching nearby items:", error);
       }
       
       return items;
