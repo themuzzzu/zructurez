@@ -13,6 +13,7 @@ import { CircularLoader } from "@/components/loaders/CircularLoader";
 import { RouterProvider } from "react-router-dom";
 import { SimplifiedLocationPicker } from "@/components/location/SimplifiedLocationPicker";
 import { useLocation } from "@/providers/LocationProvider";
+import { RedirectHandler } from "@/components/RedirectHandler";
 
 function LocationModalHandler() {
   const { showLocationPicker, setShowLocationPicker, isFirstVisit, resetFirstVisit } = useLocation();
@@ -118,6 +119,7 @@ function App() {
               <div className={isLoading ? "hidden" : "app"}>
                 {!isLoading && (
                   <>
+                    <RedirectHandler />
                     <RouterProvider router={router} />
                     <LocationModalHandler />
                   </>

@@ -1,33 +1,14 @@
 
 import { useState, useEffect } from "react";
-import { 
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { MapPin, Compass, Locate, Search, X, AlertTriangle, CheckCircle } from "lucide-react";
-import { useGeolocation } from "@/hooks/useGeolocation";
-import { Badge } from "@/components/ui/badge";
-import { 
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import { 
-  fetchAllCities, 
-  DEFAULT_CITY,
-  handleCitySelection,
-  findNearestCity,
-  City
-} from "@/utils/cityAvailabilityUtils";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useToast } from "@/components/ui/use-toast";
+import { MapPin, Search, Loader2, MapPinOff } from "lucide-react";
+import { useLocation } from "@/providers/LocationProvider";
+import { fetchAllCities, handleCitySelection, findNearestCity } from "@/utils/cityAvailabilityUtils";
+import type { City } from "@/utils/cityAvailabilityUtils";
 
 interface SimplifiedLocationPickerProps {
   open: boolean;
@@ -38,215 +19,280 @@ interface SimplifiedLocationPickerProps {
 export function SimplifiedLocationPicker({ 
   open, 
   onOpenChange,
-  firstVisit = false
+  firstVisit = false 
 }: SimplifiedLocationPickerProps) {
-  const [selectedLocation, setSelectedLocation] = useState<string>(
-    localStorage.getItem("userLocation") || DEFAULT_CITY
-  );
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isSearching, setIsSearching] = useState(false);
+  const { toast } = useToast();
+  const { currentLocation, setCurrentLocation } = useLocation();
   const [cities, setCities] = useState<City[]>([]);
   const [filteredCities, setFilteredCities] = useState<City[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { requestGeolocation, loading: geoLoading, position } = useGeolocation();
-  
-  // Fetch city data when component mounts
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
+  const [citiesByDistrict, setCitiesByDistrict] = useState<Record<string, City[]>>({});
+
+  // Load cities on component mount
   useEffect(() => {
     const loadCities = async () => {
-      setLoading(true);
-      const cityData = await fetchAllCities();
-      setCities(cityData);
-      setFilteredCities(cityData);
-      setLoading(false);
+      setIsLoading(true);
+      try {
+        const allCities = await fetchAllCities();
+        setCities(allCities);
+        
+        // Group cities by district
+        const groupedCities = allCities.reduce((acc: Record<string, City[]>, city) => {
+          if (!acc[city.district]) {
+            acc[city.district] = [];
+          }
+          acc[city.district].push(city);
+          return acc;
+        }, {});
+        
+        setCitiesByDistrict(groupedCities);
+        setFilteredCities(allCities);
+      } catch (error) {
+        console.error("Error loading cities:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load cities. Please try again later.",
+        });
+      } finally {
+        setIsLoading(false);
+      }
     };
     
-    loadCities();
-  }, []);
-  
-  // Filter cities based on search
+    if (open) {
+      loadCities();
+    }
+  }, [open, toast]);
+
+  // Filter cities based on search query
   useEffect(() => {
-    if (!searchQuery.trim()) {
+    if (searchQuery.trim() === "") {
       setFilteredCities(cities);
       return;
     }
     
-    const lowerQuery = searchQuery.toLowerCase();
+    const query = searchQuery.toLowerCase();
     const filtered = cities.filter(city => 
-      city.city_name.toLowerCase().includes(lowerQuery) ||
-      city.district.toLowerCase().includes(lowerQuery)
+      city.city_name.toLowerCase().includes(query) ||
+      city.district.toLowerCase().includes(query)
     );
     
     setFilteredCities(filtered);
   }, [searchQuery, cities]);
-  
-  // Handle position change to find nearest city
-  useEffect(() => {
-    if (position) {
-      const findCity = async () => {
-        const nearestCity = await findNearestCity(
-          position.latitude, 
-          position.longitude
-        );
-        
-        if (nearestCity) {
-          setSelectedLocation(nearestCity);
-        }
-      };
-      
-      findCity();
-    }
-  }, [position]);
 
-  const handleDetectLocation = async () => {
-    requestGeolocation();
-  };
-
-  const handleCitySelect = (cityName: string) => {
-    setSelectedLocation(cityName);
-  };
-
-  const handleConfirmLocation = async () => {
-    const success = await handleCitySelection(selectedLocation);
-    
-    if (success) {
-      onOpenChange(false);
-      if (firstVisit) {
-        localStorage.setItem('locationPromptShown', 'true');
+  // Handle city selection
+  const selectCity = async (city: City) => {
+    try {
+      const success = await handleCitySelection(city.city_name);
+      if (success) {
+        setCurrentLocation(city.city_name);
+        onOpenChange(false);
       }
+    } catch (error) {
+      console.error("Error selecting city:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update location. Please try again.",
+      });
     }
   };
 
-  // Group cities by district
-  const citiesByDistrict = filteredCities.reduce((acc: Record<string, City[]>, city) => {
-    if (!acc[city.district]) {
-      acc[city.district] = [];
+  // Handle location detection
+  const detectLocation = async () => {
+    if (!navigator.geolocation) {
+      toast({
+        variant: "destructive",
+        title: "Not Supported",
+        description: "Location detection is not supported by your browser.",
+      });
+      return;
     }
-    acc[city.district].push(city);
-    return acc;
-  }, {});
+    
+    setIsDetectingLocation(true);
+    
+    try {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          
+          // Find nearest city in our database
+          const nearestCity = await findNearestCity(latitude, longitude);
+          
+          if (nearestCity) {
+            // Find the city in our list
+            const cityMatch = cities.find(
+              c => c.city_name.toLowerCase() === nearestCity.toLowerCase()
+            );
+            
+            if (cityMatch) {
+              selectCity(cityMatch);
+            } else {
+              toast({
+                variant: "destructive",
+                title: "City Not Found",
+                description: `We couldn't find ${nearestCity} in our database.`,
+              });
+            }
+          } else {
+            toast({
+              variant: "destructive",
+              title: "Location Not Found",
+              description: "We couldn't determine your city. Please select manually.",
+            });
+          }
+          
+          setIsDetectingLocation(false);
+        },
+        (error) => {
+          console.error("Error getting location:", error);
+          let errorMessage = "Failed to get your location. ";
+          
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              errorMessage += "Location permission was denied.";
+              break;
+            case error.POSITION_UNAVAILABLE:
+              errorMessage += "Location information is unavailable.";
+              break;
+            case error.TIMEOUT:
+              errorMessage += "Request timed out.";
+              break;
+            default:
+              errorMessage += "An unknown error occurred.";
+          }
+          
+          toast({
+            variant: "destructive",
+            title: "Location Error",
+            description: errorMessage,
+          });
+          
+          setIsDetectingLocation(false);
+        }
+      );
+    } catch (error) {
+      console.error("Error in location detection:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "An unexpected error occurred while detecting your location.",
+      });
+      
+      setIsDetectingLocation(false);
+    }
+  };
 
   return (
-    <Dialog open={open} onOpenChange={firstVisit ? () => {} : onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md max-h-[90vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <MapPin className="h-5 w-5 text-primary" />
-            Choose your location
-          </DialogTitle>
-          <DialogDescription>
-            Select a city from Rayalaseema region to get started
+          <DialogTitle className="text-center text-xl">Choose your location</DialogTitle>
+          <DialogDescription className="text-center">
+            Zructures is currently available in select cities in the Rayalaseema region
           </DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-6 py-4">
-          <div className="space-y-4">
-            <Button 
-              variant="outline" 
-              className="w-full justify-start gap-2"
-              onClick={handleDetectLocation}
-              disabled={geoLoading}
-            >
-              {geoLoading ? (
-                <Locate className="h-4 w-4 animate-spin" />
-              ) : (
-                <Compass className="h-4 w-4" />
-              )}
-              {geoLoading 
-                ? "Detecting your location..." 
-                : "Detect my current location"}
-            </Button>
-            
-            <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search for a city..."
-                className="pl-8"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            
-            <div className="rounded-md border h-[300px] overflow-y-auto">
-              {loading ? (
-                <div className="flex items-center justify-center h-full">
-                  <Locate className="h-5 w-5 animate-spin" />
-                  <span className="ml-2">Loading cities...</span>
-                </div>
-              ) : (
-                <Command>
-                  <CommandList>
-                    <CommandEmpty>No cities found</CommandEmpty>
-                    
-                    {Object.entries(citiesByDistrict).map(([district, districtCities]) => (
-                      <CommandGroup heading={district} key={district}>
-                        {districtCities.map((city) => (
-                          <CommandItem
-                            key={city.id}
-                            onSelect={() => handleCitySelect(city.city_name)}
-                            className="flex items-center justify-between"
-                          >
-                            <div className="flex items-center">
-                              <MapPin className="mr-2 h-4 w-4" />
-                              <span>{city.city_name}</span>
-                            </div>
-                            {city.is_available ? (
-                              <Badge variant="success" className="text-xs">Available</Badge>
-                            ) : (
-                              <Badge variant="warning" className="text-xs">Coming soon</Badge>
-                            )}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    ))}
-                  </CommandList>
-                </Command>
-              )}
-            </div>
-            
-            {selectedLocation && (
-              <div className="mt-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Selected Location:</span>
-                  <span className="font-semibold">{selectedLocation}</span>
-                </div>
-                
-                <div className="mt-2">
-                  {cities.find(c => c.city_name === selectedLocation)?.is_available ? (
-                    <div className="flex p-3 rounded-md border border-green-100 bg-green-50 dark:bg-green-900/20 dark:border-green-900/30">
-                      <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 mr-2 flex-shrink-0" />
-                      <p className="text-sm text-green-700 dark:text-green-400">
-                        Zructures is available in {selectedLocation}!
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="flex p-3 rounded-md border border-amber-100 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-900/30">
-                      <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 mr-2 flex-shrink-0" />
-                      <div>
-                        <p className="text-sm text-amber-700 dark:text-amber-400">
-                          Zructures is not yet available in {selectedLocation}.
-                        </p>
-                        <p className="text-xs text-amber-600 dark:text-amber-300 mt-1">
-                          We're expanding fast. You can browse, but some features will be limited.
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <DialogFooter>
+        <div className="space-y-4 flex-grow overflow-hidden flex flex-col">
+          {/* Location Detection Button */}
           <Button 
-            variant="default" 
-            onClick={handleConfirmLocation} 
-            className="w-full sm:w-auto"
+            className="w-full flex items-center justify-center gap-2"
+            onClick={detectLocation}
+            disabled={isDetectingLocation}
           >
-            Confirm Location
+            {isDetectingLocation ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" /> 
+                Detecting your location...
+              </>
+            ) : (
+              <>
+                <MapPin className="h-4 w-4" /> 
+                Detect My Current Location
+              </>
+            )}
           </Button>
-        </DialogFooter>
+          
+          {/* Search Input */}
+          <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search for city or district..."
+              className="pl-9"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          
+          {/* City List */}
+          {isLoading ? (
+            <div className="py-8 flex items-center justify-center">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            </div>
+          ) : (
+            <ScrollArea className="flex-grow pr-4">
+              {Object.keys(citiesByDistrict).length > 0 ? (
+                <div className="space-y-4">
+                  {Object.entries(citiesByDistrict).map(([district, districtCities]) => {
+                    // Filter district cities based on search query
+                    const visibleCities = searchQuery.trim() === "" 
+                      ? districtCities 
+                      : districtCities.filter(city => 
+                          city.city_name.toLowerCase().includes(searchQuery.toLowerCase())
+                        );
+                        
+                    if (visibleCities.length === 0) return null;
+                    
+                    return (
+                      <div key={district} className="space-y-2">
+                        <h3 className="font-semibold text-sm text-muted-foreground">{district} District</h3>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {visibleCities.map((city) => (
+                            <Button
+                              key={city.id}
+                              variant="outline"
+                              className={`justify-start h-auto py-3 ${
+                                currentLocation === city.city_name ? "border-primary" : ""
+                              }`}
+                              onClick={() => selectCity(city)}
+                            >
+                              <div className="flex items-center justify-between w-full">
+                                <span className="font-medium">{city.city_name}</span>
+                                {city.is_available ? (
+                                  <span className="text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded">
+                                    Available
+                                  </span>
+                                ) : (
+                                  <span className="text-xs bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-200 px-2 py-1 rounded flex items-center gap-1">
+                                    <MapPinOff className="h-3 w-3" /> Coming soon
+                                  </span>
+                                )}
+                              </div>
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="py-8 text-center text-muted-foreground">
+                  {searchQuery.trim() !== "" 
+                    ? "No cities match your search" 
+                    : "No cities available"}
+                </div>
+              )}
+            </ScrollArea>
+          )}
+        </div>
+        
+        {firstVisit && (
+          <div className="mt-4 text-sm text-center text-muted-foreground">
+            You can change your location anytime from the settings
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
