@@ -1,185 +1,127 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { MapPin, ArrowRight, Navigation, LocateFixed, Locate } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Badge } from "@/components/ui/badge";
-import { useGeolocation } from "@/hooks/useGeolocation";
-import { 
+import {
   Popover,
   PopoverContent,
-  PopoverTrigger
+  PopoverTrigger,
 } from "@/components/ui/popover";
 import { Slider } from "@/components/ui/slider";
-import { toast } from "sonner";
+import { Navigation, MapPin, Check } from "lucide-react";
 import { useLocation } from "@/providers/LocationProvider";
 
 interface NearMeFilterProps {
-  onFilterChange: (filter: {enabled: boolean, radius: number}) => void;
-  className?: string;
-  defaultRadius?: number;
+  onFilterChange: (filter: { enabled: boolean; radius: number }) => void;
   compact?: boolean;
 }
 
-export function NearMeFilter({
+export function NearMeFilter({ 
   onFilterChange,
-  className = "",
-  defaultRadius = 5,
-  compact = false
+  compact = false 
 }: NearMeFilterProps) {
+  const [open, setOpen] = useState(false);
   const [enabled, setEnabled] = useState(false);
-  const [radius, setRadius] = useState(defaultRadius);
-  const [popoverOpen, setPopoverOpen] = useState(false);
-  const { requestGeolocation, loading, position } = useGeolocation();
-  const { currentLocation, isLocationAvailable } = useLocation();
+  const [radius, setRadius] = useState(5); // Default radius in km
+  const { isDetectingLocation, detectLocation } = useLocation();
   
-  useEffect(() => {
-    // Load saved preferences
-    const savedEnabled = localStorage.getItem('nearMeFilterEnabled') === 'true';
-    const savedRadius = Number(localStorage.getItem('nearMeRadius') || defaultRadius);
+  const handleEnableClick = () => {
+    const newEnabledState = !enabled;
+    setEnabled(newEnabledState);
+    onFilterChange({ enabled: newEnabledState, radius });
     
-    setEnabled(savedEnabled);
-    setRadius(savedRadius);
-    
-    // If filter was enabled, request location if needed
-    if (savedEnabled && !position) {
-      requestGeolocation();
+    // Automatically detect location when enabling
+    if (newEnabledState) {
+      detectLocation();
     }
-  }, []);
+  };
   
-  useEffect(() => {
-    if (enabled && !position) {
-      requestGeolocation();
-    }
-  }, [enabled, position]);
-  
-  useEffect(() => {
-    onFilterChange({ enabled, radius });
-    
-    // Save preferences
-    localStorage.setItem('nearMeFilterEnabled', String(enabled));
-    localStorage.setItem('nearMeRadius', String(radius));
-  }, [enabled, radius, onFilterChange]);
-  
-  const toggleFilter = () => {
-    if (currentLocation === "All India") {
-      toast.error("Please select a location first");
-      return;
-    }
-    
-    if (!enabled && !position) {
-      requestGeolocation();
-    }
-    
-    setEnabled(!enabled);
-    
-    if (!enabled) {
-      toast.success(`Showing items within ${radius}km of your location`);
+  const handleRadiusChange = (value: number[]) => {
+    const newRadius = value[0];
+    setRadius(newRadius);
+    if (enabled) {
+      onFilterChange({ enabled, radius: newRadius });
     }
   };
   
   if (compact) {
     return (
-      <Button
-        variant={enabled ? "default" : "outline"}
-        size="sm"
-        className={`${className} ${enabled ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
-        onClick={toggleFilter}
-        disabled={loading || currentLocation === "All India"}
-      >
-        {loading ? (
-          <Navigation className="h-3.5 w-3.5 mr-1 animate-spin" />
-        ) : enabled ? (
-          <LocateFixed className="h-3.5 w-3.5 mr-1" />
-        ) : (
-          <MapPin className="h-3.5 w-3.5 mr-1" />
-        )}
-        Near Me
-      </Button>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant={enabled ? "default" : "outline"}
+            size="sm"
+            className="flex items-center gap-1.5"
+          >
+            {isDetectingLocation ? (
+              <Navigation className="h-4 w-4 animate-spin" />
+            ) : (
+              <Navigation className="h-4 w-4" />
+            )}
+            <span className="hidden sm:inline">Near Me</span>
+            {enabled && <Check className="h-3 w-3 ml-1" />}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-80">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h4 className="font-medium">Near Me Filter</h4>
+              <Button
+                variant={enabled ? "default" : "outline"}
+                size="sm"
+                onClick={handleEnableClick}
+              >
+                {enabled ? "Enabled" : "Disabled"}
+              </Button>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Radius: {radius} km</span>
+              </div>
+              <Slider
+                defaultValue={[radius]}
+                max={25}
+                min={1}
+                step={1}
+                onValueChange={handleRadiusChange}
+                disabled={!enabled}
+              />
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
     );
   }
   
   return (
-    <div className={className}>
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant={enabled ? "default" : "outline"}
-                  size="sm"
-                  className={enabled ? "bg-primary text-primary-foreground" : "text-muted-foreground"}
-                  disabled={loading || currentLocation === "All India"}
-                >
-                  {loading ? (
-                    <Navigation className="h-4 w-4 mr-1.5 animate-spin" />
-                  ) : enabled ? (
-                    <LocateFixed className="h-4 w-4 mr-1.5" />
-                  ) : (
-                    <MapPin className="h-4 w-4 mr-1.5" />
-                  )}
-                  Near Me
-                  {enabled && (
-                    <Badge variant="secondary" className="ml-1.5 bg-primary-foreground text-primary">
-                      {radius}km
-                    </Badge>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-60 p-4">
-                <div className="space-y-4">
-                  <div className="space-y-1">
-                    <h4 className="font-medium">Distance Filter</h4>
-                    <p className="text-xs text-muted-foreground">
-                      Show content within {radius}km of your location
-                    </p>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs">
-                      <span>1km</span>
-                      <span>50km</span>
-                    </div>
-                    <Slider
-                      value={[radius]}
-                      min={1}
-                      max={50}
-                      step={1}
-                      onValueChange={(values) => setRadius(values[0])}
-                    />
-                  </div>
-                  
-                  <div className="flex justify-between pt-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setEnabled(false);
-                        setPopoverOpen(false);
-                      }}
-                    >
-                      Clear
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={() => {
-                        setEnabled(true);
-                        setPopoverOpen(false);
-                      }}
-                    >
-                      Apply
-                    </Button>
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Filter content based on your location</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+    <div className="space-y-4 p-4 border rounded-lg">
+      <div className="flex items-center justify-between">
+        <h3 className="font-medium flex items-center">
+          <MapPin className="h-4 w-4 mr-2" />
+          Near Me
+        </h3>
+        <Button
+          variant={enabled ? "default" : "outline"}
+          size="sm"
+          onClick={handleEnableClick}
+        >
+          {enabled ? "Enabled" : "Disabled"}
+        </Button>
+      </div>
+      
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <span className="text-sm">Radius: {radius} km</span>
+        </div>
+        <Slider
+          defaultValue={[radius]}
+          max={25}
+          min={1}
+          step={1}
+          onValueChange={handleRadiusChange}
+          disabled={!enabled}
+        />
+      </div>
     </div>
   );
 }

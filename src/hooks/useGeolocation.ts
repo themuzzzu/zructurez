@@ -1,6 +1,8 @@
 
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { findNearestCity } from "@/utils/cityAvailabilityUtils";
 
 interface GeolocationPosition {
   latitude: number;
@@ -13,12 +15,25 @@ interface GeolocationState {
   address: string | null;
   loading: boolean;
   error: string | null;
+  cityName: string | null;
+}
+
+interface ReverseGeocodeResult {
+  displayName: string;
+  locality: string | null;
+  neighborhood: string | null;
+  suburb: string | null;
+  city: string | null;
+  town: string | null;
+  state: string | null;
+  country: string | null;
 }
 
 export function useGeolocation() {
   const [state, setState] = useState<GeolocationState>({
     position: null,
     address: null,
+    cityName: null,
     loading: false,
     error: null,
   });
@@ -44,6 +59,30 @@ export function useGeolocation() {
     };
     
     checkPermission();
+  }, []);
+
+  // Load saved position from localStorage on initial mount
+  useEffect(() => {
+    const savedLocation = localStorage.getItem('userPreciseLocation');
+    if (savedLocation) {
+      try {
+        const parsed = JSON.parse(savedLocation);
+        if (parsed.latitude && parsed.longitude) {
+          setState(prev => ({
+            ...prev,
+            position: {
+              latitude: parsed.latitude,
+              longitude: parsed.longitude,
+              accuracy: parsed.accuracy
+            },
+            address: parsed.address || null,
+            cityName: parsed.city || null
+          }));
+        }
+      } catch (e) {
+        console.error("Error parsing saved location:", e);
+      }
+    }
   }, []);
 
   const requestGeolocation = () => {
@@ -74,12 +113,46 @@ export function useGeolocation() {
           setState(prev => ({
             ...prev,
             address: response.displayName,
+            cityName: response.city || response.town || null,
           }));
           
-          // Store in localStorage
+          // Check if we have a city match in our database
+          if (response.city || response.town) {
+            const cityName = response.city || response.town;
+            const nearestCity = await findNearestCity(latitude, longitude);
+            
+            // If we have a city in our database, update the app's location
+            if (nearestCity) {
+              // Check if city is available in our system
+              const { data: cityData } = await supabase
+                .from('city_availability')
+                .select('is_available')
+                .eq('city_name', nearestCity)
+                .single();
+                
+              const isAvailable = cityData?.is_available || false;
+              
+              // Update location in localStorage and dispatch event
+              localStorage.setItem('userLocation', nearestCity);
+              window.dispatchEvent(
+                new CustomEvent('locationUpdated', { 
+                  detail: { 
+                    location: nearestCity,
+                    isAvailable,
+                    latitude, 
+                    longitude,
+                    preciseLocation: response.displayName
+                  } 
+                })
+              );
+            }
+          }
+          
+          // Store complete location info in localStorage
           localStorage.setItem('userPreciseLocation', JSON.stringify({
             latitude, 
             longitude, 
+            accuracy,
             address: response.displayName,
             locality: response.locality || response.neighborhood || response.suburb,
             city: response.city || response.town,
@@ -87,27 +160,6 @@ export function useGeolocation() {
             country: response.country
           }));
           
-          // Set visual location
-          const locationName = response.locality || response.neighborhood || response.suburb || response.city || response.town;
-          if (locationName) {
-            const city = response.city || response.town || '';
-            const displayLocation = city ? `${locationName}, ${city}` : locationName;
-            localStorage.setItem('userLocation', displayLocation);
-            
-            // Dispatch custom event for other components
-            window.dispatchEvent(
-              new CustomEvent('locationUpdated', { 
-                detail: { 
-                  location: displayLocation,
-                  latitude, 
-                  longitude, 
-                  preciseLocation: response.displayName
-                } 
-              })
-            );
-            
-            toast.success(`Location updated to ${displayLocation}`);
-          }
         } catch (error) {
           console.error('Error reverse geocoding:', error);
         }
@@ -129,7 +181,7 @@ export function useGeolocation() {
     );
   };
 
-  const reverseGeocode = async (latitude: number, longitude: number) => {
+  const reverseGeocode = async (latitude: number, longitude: number): Promise<ReverseGeocodeResult> => {
     try {
       // Using OpenStreetMap's Nominatim service for reverse geocoding (free and doesn't require API key)
       const response = await fetch(
@@ -172,9 +224,39 @@ export function useGeolocation() {
     }
   };
 
+  // Function to calculate distance between two coordinates using Haversine formula
+  const getDistanceBetweenCoordinates = (
+    lat1: number, 
+    lon1: number, 
+    lat2: number, 
+    lon2: number
+  ): number => {
+    // Radius of the Earth in kilometers
+    const R = 6371;
+    
+    // Convert degrees to radians
+    const deg2rad = (deg: number) => deg * (Math.PI / 180);
+    
+    // Calculate differences
+    const dLat = deg2rad(lat2 - lat1);
+    const dLon = deg2rad(lon2 - lon1);
+    
+    // Haversine formula calculation
+    const a = 
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    
+    // Distance in kilometers
+    return R * c;
+  };
+
   return { 
     ...state, 
     requestGeolocation, 
-    permissionStatus 
+    permissionStatus,
+    getDistanceBetweenCoordinates
   };
 }

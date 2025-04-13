@@ -1,336 +1,342 @@
 
-import { useState, useEffect, useRef } from 'react';
-import { Layout } from '@/components/layout/Layout';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { MapPin, Search, CornerRightDown, LocateFixed, List } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { NearMeFilter } from '@/components/location/NearMeFilter';
+import { useState, useEffect } from "react";
+import { Layout } from "@/components/layout/Layout";
+import { LocationMap } from "@/components/location/LocationMap";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useLocation } from "@/providers/LocationProvider";
 import { useGeolocation } from "@/hooks/useGeolocation";
+import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { 
+  MapPin, 
+  Locate, 
+  ListFilter, 
+  Store, 
+  ShoppingBag, 
+  Briefcase 
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
-interface Location {
+interface NearbyItem {
   id: string;
   name: string;
-  type: 'business' | 'service' | 'event';
-  category: string;
+  title?: string;
+  description: string;
+  image_url: string;
   latitude: number;
   longitude: number;
-  distance?: number;
+  type: 'business' | 'product' | 'service';
 }
 
-const MapView = () => {
-  const navigate = useNavigate();
-  const mapContainerRef = useRef<HTMLDivElement>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [nearbyLocations, setNearbyLocations] = useState<Location[]>([]);
-  const [filteredLocations, setFilteredLocations] = useState<Location[]>([]);
-  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
-  const [mapLoaded, setMapLoaded] = useState(false);
-  const [visibleRadius, setVisibleRadius] = useState(5);
-  const { position, requestGeolocation } = useGeolocation();
+export default function MapView() {
+  const { currentLocation, isLocationAvailable, setShowLocationPicker } = useLocation();
+  const { requestGeolocation, position, loading: geoLoading } = useGeolocation();
+  const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number } | undefined>(
+    position ? { lat: position.latitude, lng: position.longitude } : undefined
+  );
+  const [activeFilter, setActiveFilter] = useState<'all' | 'business' | 'product' | 'service'>('all');
+  const [selectedItem, setSelectedItem] = useState<NearbyItem | null>(null);
   
-  // Mock data - in a real app this would come from an API
+  // Update map center when position changes
   useEffect(() => {
-    if (!position) return;
-    
-    // Generate mock nearby locations based on user's position
-    const mockLocations: Location[] = [
-      {
-        id: 'b1',
-        name: 'ABC Restaurant',
-        type: 'business',
-        category: 'Food',
-        latitude: position.latitude + 0.001,
-        longitude: position.longitude + 0.002,
-        distance: 0.3
-      },
-      {
-        id: 'b2',
-        name: 'XYZ Electronics',
-        type: 'business',
-        category: 'Electronics',
-        latitude: position.latitude - 0.002,
-        longitude: position.longitude + 0.001,
-        distance: 0.5
-      },
-      {
-        id: 's1',
-        name: 'Home Cleaning Services',
-        type: 'service',
-        category: 'Home Services',
-        latitude: position.latitude + 0.003,
-        longitude: position.longitude - 0.002,
-        distance: 0.7
-      },
-      {
-        id: 's2',
-        name: 'Plumbing Solutions',
-        type: 'service',
-        category: 'Repair',
-        latitude: position.latitude - 0.001,
-        longitude: position.longitude - 0.003,
-        distance: 0.9
-      },
-      {
-        id: 'e1',
-        name: 'Local Food Festival',
-        type: 'event',
-        category: 'Food',
-        latitude: position.latitude + 0.004,
-        longitude: position.longitude + 0.003,
-        distance: 1.2
-      },
-    ];
-    
-    setNearbyLocations(mockLocations);
-    setFilteredLocations(mockLocations);
+    if (position) {
+      setMapCenter({ lat: position.latitude, lng: position.longitude });
+    }
   }, [position]);
-
-  useEffect(() => {
-    // Filter locations based on search and radius
-    if (nearbyLocations.length === 0) return;
-    
-    const filtered = nearbyLocations.filter(location => {
-      const matchesSearch = searchQuery === '' || 
-        location.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-        location.category.toLowerCase().includes(searchQuery.toLowerCase());
-        
-      const withinRadius = location.distance && location.distance <= visibleRadius;
+  
+  // Fetch nearby businesses based on location
+  const { data: nearbyItems = [], isLoading: loadingNearby } = useQuery({
+    queryKey: ['nearby-items', position?.latitude, position?.longitude, activeFilter],
+    queryFn: async () => {
+      if (!position) return [];
       
-      return matchesSearch && withinRadius;
-    });
-    
-    setFilteredLocations(filtered);
-  }, [searchQuery, nearbyLocations, visibleRadius]);
+      const radius = 10; // 10km radius
+      const lat = position.latitude;
+      const lng = position.longitude;
+      
+      // Calculate bounding box for optimization (rough estimate)
+      const latDelta = radius * 0.01; // ~1km = 0.01 degrees latitude
+      const lngDelta = radius * 0.01 / Math.cos(lat * Math.PI / 180);
+      
+      const minLat = lat - latDelta;
+      const maxLat = lat + latDelta;
+      const minLng = lng - lngDelta;
+      const maxLng = lng + lngDelta;
+      
+      const items: NearbyItem[] = [];
+      
+      // Only fetch businesses if filter is 'all' or 'business'
+      if (activeFilter === 'all' || activeFilter === 'business') {
+        const { data: businesses } = await supabase
+          .from('businesses')
+          .select('id, name, description, image_url, location')
+          .gte('latitude', minLat)
+          .lte('latitude', maxLat)
+          .gte('longitude', minLng)
+          .lte('longitude', maxLng)
+          .not('latitude', 'is', null)
+          .not('longitude', 'is', null);
+          
+        if (businesses) {
+          businesses.forEach(b => {
+            items.push({
+              id: b.id,
+              name: b.name,
+              description: b.description,
+              image_url: b.image_url || '',
+              latitude: b.latitude,
+              longitude: b.longitude,
+              type: 'business'
+            });
+          });
+        }
+      }
+      
+      // Only fetch products if filter is 'all' or 'product'
+      if (activeFilter === 'all' || activeFilter === 'product') {
+        const { data: products } = await supabase
+          .from('products')
+          .select('id, title, description, image_url, user_id')
+          .gte('latitude', minLat)
+          .lte('latitude', maxLat)
+          .gte('longitude', minLng)
+          .lte('longitude', maxLng)
+          .not('latitude', 'is', null)
+          .not('longitude', 'is', null);
+          
+        if (products) {
+          products.forEach(p => {
+            items.push({
+              id: p.id,
+              name: p.title,
+              description: p.description,
+              image_url: p.image_url || '',
+              latitude: p.latitude,
+              longitude: p.longitude,
+              type: 'product'
+            });
+          });
+        }
+      }
+      
+      // Only fetch services if filter is 'all' or 'service'
+      if (activeFilter === 'all' || activeFilter === 'service') {
+        const { data: services } = await supabase
+          .from('services')
+          .select('id, title, description, image_url, location')
+          .gte('latitude', minLat)
+          .lte('latitude', maxLat)
+          .gte('longitude', minLng)
+          .lte('longitude', maxLng)
+          .not('latitude', 'is', null)
+          .not('longitude', 'is', null);
+          
+        if (services) {
+          services.forEach(s => {
+            items.push({
+              id: s.id,
+              name: s.title || '',
+              title: s.title,
+              description: s.description,
+              image_url: s.image_url || '',
+              latitude: s.latitude,
+              longitude: s.longitude,
+              type: 'service'
+            });
+          });
+        }
+      }
+      
+      return items;
+    },
+    enabled: !!position
+  });
   
-  useEffect(() => {
-    if (!position) {
-      requestGeolocation();
-    }
-  }, []);
+  // Filter nearby items based on selected filter
+  const filteredNearbyItems = activeFilter === 'all' 
+    ? nearbyItems 
+    : nearbyItems.filter(item => item.type === activeFilter);
   
-  // Simulate map loading
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setMapLoaded(true);
-    }, 1000);
-    
-    return () => clearTimeout(timer);
-  }, []);
-  
-  const handleNearMeFilterChange = (filter: {enabled: boolean, radius: number}) => {
-    if (filter.enabled) {
-      setVisibleRadius(filter.radius);
-    }
+  const handleDetectLocation = () => {
+    requestGeolocation();
+    toast.info("Detecting your location...");
   };
   
-  const handleLocationClick = (location: Location) => {
-    setSelectedLocation(location);
+  const handleMarkerClick = (item: NearbyItem) => {
+    setSelectedItem(item);
+    setMapCenter({ lat: item.latitude, lng: item.longitude });
+  };
+  
+  const handleFilterChange = (filter: 'all' | 'business' | 'product' | 'service') => {
+    setActiveFilter(filter);
   };
 
   return (
     <Layout>
-      <div className="container max-w-7xl py-4">
-        <div className="flex flex-col-reverse lg:flex-row gap-4 h-[calc(100vh-11rem)]">
-          {/* Left sidebar - location listings */}
-          <Card className="w-full lg:w-1/3 overflow-hidden flex flex-col">
-            <div className="p-3 border-b">
-              <div className="flex items-center gap-2 mb-3">
-                <Input
-                  placeholder="Search locations..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="flex-1"
-                />
-                <Button variant="ghost" size="icon">
-                  <Search className="h-4 w-4" />
-                </Button>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-medium">Nearby Locations</h3>
-                <NearMeFilter 
-                  onFilterChange={handleNearMeFilterChange}
-                  compact 
-                  defaultRadius={5}
-                />
-              </div>
-            </div>
-            
-            <div className="overflow-y-auto flex-1">
-              {filteredLocations.length > 0 ? (
-                <div className="divide-y">
-                  {filteredLocations.map((location) => (
-                    <div 
-                      key={location.id}
-                      className={`p-3 hover:bg-muted/50 cursor-pointer ${
-                        selectedLocation?.id === location.id ? 'bg-muted' : ''
-                      }`}
-                      onClick={() => handleLocationClick(location)}
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className={`
-                          h-10 w-10 rounded-full flex items-center justify-center
-                          ${location.type === 'business' ? 'bg-blue-100' : 
-                            location.type === 'service' ? 'bg-green-100' : 'bg-amber-100'}
-                        `}>
-                          <MapPin className={`h-5 w-5 
-                            ${location.type === 'business' ? 'text-blue-600' : 
-                              location.type === 'service' ? 'text-green-600' : 'text-amber-600'}
-                          `} />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-sm font-medium truncate">{location.name}</h4>
-                          <p className="text-xs text-muted-foreground">{location.category}</p>
-                          <div className="flex items-center gap-1 mt-1">
-                            <Badge 
-                              variant="outline" 
-                              className={`text-xs px-1.5 ${
-                                location.type === 'business' ? 'border-blue-200' : 
-                                location.type === 'service' ? 'border-green-200' : 'border-amber-200'
-                              }`}
-                            >
-                              {location.type}
-                            </Badge>
-                            {location.distance !== undefined && (
-                              <Badge variant="secondary" className="text-xs px-1.5">
-                                {location.distance} km
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="p-8 text-center">
-                  <p className="text-sm text-muted-foreground">No locations found</p>
-                  {searchQuery && (
-                    <Button 
-                      variant="link" 
-                      size="sm"
-                      onClick={() => setSearchQuery('')}
-                    >
-                      Clear search
-                    </Button>
-                  )}
-                </div>
-              )}
-            </div>
-          </Card>
-          
-          {/* Right side - Map */}
-          <div className="flex-1 bg-muted rounded-lg overflow-hidden relative">
-            {!mapLoaded ? (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="space-y-2 w-full max-w-md px-8">
-                  <Skeleton className="h-6 w-1/3 mx-auto" />
-                  <Skeleton className="h-64 w-full rounded-lg" />
-                  <div className="flex items-center justify-center gap-2 mt-4">
-                    <Skeleton className="h-8 w-8 rounded-full" />
-                    <Skeleton className="h-4 w-24" />
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="h-full bg-[#f0f0f0] relative">
-                {!position && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-                    <div className="text-center p-6 rounded-lg">
-                      <LocateFixed className="h-10 w-10 mx-auto mb-4 text-primary" />
-                      <h3 className="text-lg font-medium mb-2">Enable location access</h3>
-                      <p className="text-sm text-muted-foreground mb-4 max-w-xs">
-                        We need your location to show nearby places and services on the map
-                      </p>
-                      <Button onClick={requestGeolocation}>
-                        Enable Location
-                      </Button>
-                    </div>
-                  </div>
-                )}
-                
-                {/* Map placeholder - in a real app, this would be replaced by an actual map library */}
-                <div className="h-full bg-[#e8eaed] flex items-center justify-center">
-                  <div className="text-center p-6">
-                    <CornerRightDown className="h-8 w-8 mx-auto mb-4 text-muted-foreground/50" />
+      <div className="container max-w-7xl mx-auto px-4 py-4">
+        <div className="flex flex-col md:flex-row gap-4">
+          {/* Left sidebar */}
+          <div className="w-full md:w-1/3 space-y-4">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xl flex items-center justify-between">
+                  <span>Location</span>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={handleDetectLocation}
+                    disabled={geoLoading}
+                  >
+                    {geoLoading ? (
+                      <Locate className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <Locate className="h-4 w-4 mr-2" />
+                    )}
+                    {geoLoading ? "Detecting..." : "Detect"}
+                  </Button>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center mb-4">
+                  <MapPin className="h-5 w-5 text-primary mr-2" />
+                  <div>
+                    <h3 className="font-medium">{currentLocation}</h3>
                     <p className="text-sm text-muted-foreground">
-                      Map placeholder - In a real app, this would be a map showing the locations.
+                      {isLocationAvailable 
+                        ? "Zructures is available here" 
+                        : "Zructures is coming soon"}
                     </p>
                   </div>
                 </div>
                 
-                {/* Location details panel when a location is selected */}
-                {selectedLocation && (
-                  <div className="absolute top-4 right-4 bg-background shadow-lg rounded-lg w-72 p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-medium">{selectedLocation.name}</h3>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-6 w-6"
-                        onClick={() => setSelectedLocation(null)}
-                      >
-                        <span className="sr-only">Close</span>
-                        &times;
-                      </Button>
-                    </div>
-                    <div className="text-sm mb-3">
-                      <p className="text-muted-foreground">{selectedLocation.category}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Badge 
-                          className={`${
-                            selectedLocation.type === 'business' ? 'bg-blue-100 text-blue-800' : 
-                            selectedLocation.type === 'service' ? 'bg-green-100 text-green-800' : 
-                                                              'bg-amber-100 text-amber-800'
-                          } border-none`}
-                        >
-                          {selectedLocation.type}
-                        </Badge>
-                        <span className="text-xs text-muted-foreground">
-                          {selectedLocation.distance} km away
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button 
-                        variant="default" 
-                        size="sm" 
-                        className="flex-1"
-                        onClick={() => 
-                          navigate(`/${selectedLocation.type}/${selectedLocation.id}`)
-                        }
-                      >
-                        View Details
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        Directions
-                      </Button>
-                    </div>
-                  </div>
-                )}
-                
-                {/* Map controls */}
-                <div className="absolute bottom-4 right-4 flex flex-col gap-2">
+                <Button 
+                  className="w-full" 
+                  onClick={() => setShowLocationPicker(true)}
+                >
+                  Change Location
+                </Button>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg">Filter</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2">
                   <Button 
-                    variant="default" 
-                    size="icon" 
-                    className="h-10 w-10 rounded-full shadow-lg bg-background text-foreground hover:bg-background/90"
-                    onClick={requestGeolocation}
+                    variant={activeFilter === 'all' ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => handleFilterChange('all')}
                   >
-                    <LocateFixed className="h-5 w-5" />
+                    <ListFilter className="h-4 w-4 mr-2" />
+                    All
+                  </Button>
+                  
+                  <Button 
+                    variant={activeFilter === 'business' ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => handleFilterChange('business')}
+                  >
+                    <Store className="h-4 w-4 mr-2" />
+                    Businesses
+                  </Button>
+                  
+                  <Button 
+                    variant={activeFilter === 'product' ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => handleFilterChange('product')}
+                  >
+                    <ShoppingBag className="h-4 w-4 mr-2" />
+                    Products
+                  </Button>
+                  
+                  <Button 
+                    variant={activeFilter === 'service' ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => handleFilterChange('service')}
+                  >
+                    <Briefcase className="h-4 w-4 mr-2" />
+                    Services
                   </Button>
                 </div>
+              </CardContent>
+            </Card>
+            
+            {/* Nearby items list */}
+            <Card className="overflow-hidden">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg">Nearby</CardTitle>
+              </CardHeader>
+              <div className="max-h-[400px] overflow-y-auto p-4 space-y-3">
+                {geoLoading || loadingNearby ? (
+                  <div className="flex justify-center py-8">
+                    <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full"></div>
+                  </div>
+                ) : filteredNearbyItems.length > 0 ? (
+                  filteredNearbyItems.map(item => (
+                    <div 
+                      key={`${item.type}-${item.id}`}
+                      className={`p-3 border rounded-md cursor-pointer transition-colors ${
+                        selectedItem?.id === item.id ? 'border-primary bg-muted/30' : 'hover:bg-muted/10'
+                      }`}
+                      onClick={() => handleMarkerClick(item)}
+                    >
+                      <div className="flex items-center gap-3">
+                        {item.image_url ? (
+                          <img 
+                            src={item.image_url} 
+                            alt={item.name} 
+                            className="w-12 h-12 object-cover rounded-md"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 bg-muted rounded-md flex items-center justify-center">
+                            {item.type === 'business' && <Store className="h-6 w-6 text-muted-foreground" />}
+                            {item.type === 'product' && <ShoppingBag className="h-6 w-6 text-muted-foreground" />}
+                            {item.type === 'service' && <Briefcase className="h-6 w-6 text-muted-foreground" />}
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-medium truncate">{item.name}</h3>
+                          <p className="text-sm text-muted-foreground truncate">{item.description}</p>
+                          <Badge variant="outline" className="mt-1">
+                            {item.type === 'business' && "Business"}
+                            {item.type === 'product' && "Product"}
+                            {item.type === 'service' && "Service"}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : !position ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <MapPin className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p>Please enable location services to see nearby items</p>
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No nearby items found
+                  </div>
+                )}
               </div>
-            )}
+            </Card>
+          </div>
+          
+          {/* Map area */}
+          <div className="w-full md:w-2/3 h-[600px]">
+            <LocationMap 
+              className="w-full h-full" 
+              center={mapCenter}
+              businesses={nearbyItems.filter(item => item.type === 'business')}
+              products={nearbyItems.filter(item => item.type === 'product')}
+              services={nearbyItems.filter(item => item.type === 'service')}
+              onMarkerClick={handleMarkerClick}
+            />
           </div>
         </div>
       </div>
     </Layout>
   );
-};
-
-export default MapView;
+}

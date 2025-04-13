@@ -9,6 +9,8 @@ export interface City {
   district: string;
   region: string;
   is_available: boolean;
+  latitude?: number;
+  longitude?: number;
 }
 
 // Default city when no selection is made
@@ -89,7 +91,23 @@ export const handleCitySelection = async (cityName: string): Promise<boolean> =>
     // If city exists, check if it's available
     if (!cityData.is_available) {
       toast.info(`Zructures is not yet available in ${cityName}. Stay tuned!`);
-      return false;
+      
+      // Update location anyway but inform user of limited functionality
+      localStorage.setItem("userLocation", cityName);
+      
+      // Dispatch custom event for other components
+      window.dispatchEvent(
+        new CustomEvent("locationUpdated", { 
+          detail: { 
+            location: cityName, 
+            isAvailable: false,
+            latitude: cityData.latitude,
+            longitude: cityData.longitude
+          } 
+        })
+      );
+      
+      return true;
     }
     
     // If city is available, update localStorage
@@ -98,7 +116,12 @@ export const handleCitySelection = async (cityName: string): Promise<boolean> =>
     // Dispatch custom event for other components
     window.dispatchEvent(
       new CustomEvent("locationUpdated", { 
-        detail: { location: cityName, isAvailable: true } 
+        detail: { 
+          location: cityName, 
+          isAvailable: true,
+          latitude: cityData.latitude,
+          longitude: cityData.longitude
+        } 
       })
     );
     
@@ -143,7 +166,7 @@ export const findNearestCity = async (
   longitude: number
 ): Promise<string | null> => {
   try {
-    // Use OpenStreetMap's Nominatim service for reverse geocoding
+    // First try to use Nominatim for reverse geocoding
     const response = await fetch(
       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`
     );
@@ -165,21 +188,80 @@ export const findNearestCity = async (
     ].filter(Boolean);
     
     // Get all cities from our database
-    const dbCities = await fetchAllCities();
-    const dbCityNames = dbCities.map(city => city.city_name.toLowerCase());
+    const { data: dbCities, error } = await supabase
+      .from("city_availability")
+      .select("*");
+      
+    if (error || !dbCities) {
+      console.error("Error fetching cities:", error);
+      return null;
+    }
     
-    // Check if any of the potential cities match our database cities
+    // Check for exact matches first
     for (const city of potentialCities) {
-      if (dbCityNames.includes(city.toLowerCase())) {
-        return city;
+      const match = dbCities.find(
+        dbCity => dbCity.city_name.toLowerCase() === city.toLowerCase()
+      );
+      if (match) return match.city_name;
+    }
+    
+    // If no exact match, find the nearest city using coordinates
+    // This requires latitude and longitude fields in the city_availability table
+    const citiesWithCoordinates = dbCities.filter(
+      city => city.latitude && city.longitude
+    );
+    
+    if (citiesWithCoordinates.length > 0) {
+      // Calculate distance to each city
+      const distances = citiesWithCoordinates.map(city => {
+        const distance = getDistanceBetweenCoordinates(
+          latitude, 
+          longitude, 
+          city.latitude!, 
+          city.longitude!
+        );
+        return { city: city.city_name, distance };
+      });
+      
+      // Sort by distance
+      distances.sort((a, b) => a.distance - b.distance);
+      
+      // Return the closest city if within 50km
+      if (distances[0].distance < 50) {
+        return distances[0].city;
       }
     }
     
-    // If no exact match, try to find the closest match
-    // For now, return null as we couldn't find a match
+    // If no match found, return null
     return null;
   } catch (error) {
-    console.error("Error in reverse geocoding:", error);
+    console.error("Error in findNearestCity:", error);
     return null;
   }
+};
+
+// Calculate distance between two points using Haversine formula
+function getDistanceBetweenCoordinates(
+  lat1: number, 
+  lon1: number, 
+  lat2: number, 
+  lon2: number
+): number {
+  // Earth's radius in kilometers
+  const R = 6371;
+  
+  const deg2rad = (deg: number) => deg * (Math.PI/180);
+  
+  const dLat = deg2rad(lat2-lat1);
+  const dLon = deg2rad(lon2-lon1);
+  
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  const distance = R * c; // Distance in kilometers
+  
+  return distance;
 };

@@ -4,6 +4,7 @@ import { MapPin, Layers, Plus, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useGeolocation } from "@/hooks/useGeolocation";
+import { useLocation } from "@/providers/LocationProvider";
 
 interface LocationMapProps {
   className?: string;
@@ -30,6 +31,7 @@ export function LocationMap({
   const { requestGeolocation, position } = useGeolocation();
   const [mapZoom, setMapZoom] = useState(zoom);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
+  const { latitude, longitude } = useLocation();
   
   // Clean up markers when component unmounts
   useEffect(() => {
@@ -40,12 +42,36 @@ export function LocationMap({
 
   // Initialize the map when the component mounts
   useEffect(() => {
+    // Check if Google Maps API is loaded
+    const loadGoogleMaps = () => {
+      if (typeof window !== 'undefined' && !window.google?.maps) {
+        // Create script tag
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyBky_ax9Xw9iNRRWMwbdqXzneYgbO6iarI&callback=initMap`;
+        script.async = true;
+        script.defer = true;
+        
+        // Create global init function
+        window.initMap = () => {
+          // Dispatch event that Google Maps is loaded
+          window.dispatchEvent(new Event('google-maps-loaded'));
+        };
+        
+        // Append script to document
+        document.head.appendChild(script);
+      }
+    };
+    
+    loadGoogleMaps();
+    
+    // Initialize map
     const initMap = () => {
       if (!mapRef.current || !window.google?.maps) return;
       
       const defaultCenter = { lat: 20.5937, lng: 78.9629 }; // Center of India
       const userCenter = center || 
         (position ? { lat: position.latitude, lng: position.longitude } : undefined) ||
+        (latitude && longitude ? { lat: latitude, lng: longitude } : undefined) ||
         defaultCenter;
       
       const map = new window.google.maps.Map(mapRef.current, {
@@ -68,9 +94,13 @@ export function LocationMap({
       setIsMapLoaded(true);
       
       // Add a marker for user's position if available
-      if (position) {
+      if (position || (latitude && longitude)) {
+        const userPosition = position 
+          ? { lat: position.latitude, lng: position.longitude }
+          : { lat: latitude as number, lng: longitude as number };
+            
         new window.google.maps.Marker({
-          position: { lat: position.latitude, lng: position.longitude },
+          position: userPosition,
           map,
           icon: {
             path: window.google.maps.SymbolPath.CIRCLE,
@@ -84,7 +114,7 @@ export function LocationMap({
         });
         
         // Add a circle to show accuracy
-        if (position.accuracy) {
+        if (position?.accuracy) {
           new window.google.maps.Circle({
             strokeColor: "#4285F4",
             strokeOpacity: 0.2,
@@ -92,7 +122,7 @@ export function LocationMap({
             fillColor: "#4285F4",
             fillOpacity: 0.1,
             map,
-            center: { lat: position.latitude, lng: position.longitude },
+            center: userPosition,
             radius: position.accuracy
           });
         }
@@ -107,7 +137,14 @@ export function LocationMap({
         window.removeEventListener('google-maps-loaded', initMap);
       };
     }
-  }, [position, center, mapZoom]);
+  }, [position, center, mapZoom, latitude, longitude]);
+  
+  // Update map center if it changes
+  useEffect(() => {
+    if (mapInstance && center) {
+      mapInstance.panTo(center);
+    }
+  }, [center, mapInstance]);
   
   // Update markers when businesses, services, or products change
   useEffect(() => {
