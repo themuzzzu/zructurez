@@ -71,7 +71,7 @@ export const ProductsCarousel = ({ products, title }: ProductsCarouselProps) => 
                 }
                 discountPercentage={product.discount_percentage}
                 category={product.category}
-                type="product"
+                type="marketplace"
               />
             </div>
           ))}

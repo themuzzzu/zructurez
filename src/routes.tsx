@@ -15,6 +15,7 @@ import ServiceDetails from "./pages/ServiceDetails";
 import Wishlist from "./pages/Wishlist";
 import UnifiedHome from "./pages/UnifiedHome";
 import MapView from "./pages/MapView";
+import ComingSoonPage from "./pages/ComingSoonPage";
 import { RedirectHandler } from "@/components/RedirectHandler";
 import { Outlet } from "react-router-dom";
 import { ErrorView } from "@/components/ErrorView";
@@ -127,4 +128,3 @@ const router = createBrowserRouter([
 ]);
 
 export default router;
-
