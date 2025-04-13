@@ -918,6 +918,8 @@ export type Database = {
           district: string | null
           id: number
           is_available: boolean | null
+          latitude: number | null
+          longitude: number | null
           region: string | null
         }
         Insert: {
@@ -926,6 +928,8 @@ export type Database = {
           district?: string | null
           id?: number
           is_available?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
           region?: string | null
         }
         Update: {
@@ -934,6 +938,8 @@ export type Database = {
           district?: string | null
           id?: number
           is_available?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
           region?: string | null
         }
         Relationships: []

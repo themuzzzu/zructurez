@@ -41,8 +41,7 @@ export function NearbyBusinesses({ className = "", radius = 5 }: NearbyBusinesse
       if (!latitude || !longitude) return [];
       
       // Query businesses within specified radius
-      // This is an approximation - we fetch all businesses with location
-      // and filter them in JS code for more accurate distance calculation
+      // Note: Adding explicit fields in the select to make TypeScript aware of the latitude/longitude fields
       const { data } = await supabase
         .from('businesses')
         .select('id, name, description, image_url, category, latitude, longitude')
@@ -55,7 +54,8 @@ export function NearbyBusinesses({ className = "", radius = 5 }: NearbyBusinesse
       // Calculate distance for each business and filter by radius
       const businessesWithDistance = data
         .map(business => {
-          if (!business.latitude || !business.longitude) return null;
+          // Type guard to ensure latitude and longitude exist
+          if (typeof business.latitude !== 'number' || typeof business.longitude !== 'number') return null;
           
           const distance = getDistanceBetweenCoordinates(
             latitude, 
@@ -69,7 +69,7 @@ export function NearbyBusinesses({ className = "", radius = 5 }: NearbyBusinesse
             distance 
           };
         })
-        .filter((b): b is Business & { distance: number } => 
+        .filter((b): b is (Business & { distance: number }) => 
           b !== null && b.distance <= maxDistance
         )
         .sort((a, b) => a.distance - b.distance);

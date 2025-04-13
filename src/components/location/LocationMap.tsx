@@ -1,10 +1,16 @@
-
 import { useState, useEffect, useRef, useCallback } from "react";
 import { MapPin, Layers, Plus, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { useLocation } from "@/providers/LocationProvider";
+
+declare global {
+  interface Window {
+    google: typeof google;
+    initMap: () => void;
+  }
+}
 
 interface LocationMapProps {
   className?: string;

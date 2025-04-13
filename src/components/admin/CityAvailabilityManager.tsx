@@ -32,7 +32,7 @@ export function CityAvailabilityManager() {
       try {
         const { data, error } = await supabase
           .from("city_availability")
-          .select("*")
+          .select("*, latitude, longitude") // Explicitly include latitude and longitude
           .order("district")
           .order("city_name");
         

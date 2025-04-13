@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -79,7 +78,7 @@ export const handleCitySelection = async (cityName: string): Promise<boolean> =>
     // First check if city exists in our database
     const { data: cityData, error: cityError } = await supabase
       .from("city_availability")
-      .select("*")
+      .select("*, latitude, longitude")
       .eq("city_name", cityName)
       .single();
       
@@ -190,7 +189,7 @@ export const findNearestCity = async (
     // Get all cities from our database
     const { data: dbCities, error } = await supabase
       .from("city_availability")
-      .select("*");
+      .select("*, latitude, longitude");
       
     if (error || !dbCities) {
       console.error("Error fetching cities:", error);
@@ -208,7 +207,7 @@ export const findNearestCity = async (
     // If no exact match, find the nearest city using coordinates
     // This requires latitude and longitude fields in the city_availability table
     const citiesWithCoordinates = dbCities.filter(
-      city => city.latitude && city.longitude
+      city => typeof city.latitude === 'number' && typeof city.longitude === 'number'
     );
     
     if (citiesWithCoordinates.length > 0) {
@@ -264,4 +263,4 @@ function getDistanceBetweenCoordinates(
   const distance = R * c; // Distance in kilometers
   
   return distance;
-};
+}

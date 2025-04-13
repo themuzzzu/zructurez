@@ -71,7 +71,7 @@ export default function MapView() {
       if (activeFilter === 'all' || activeFilter === 'business') {
         const { data: businesses } = await supabase
           .from('businesses')
-          .select('id, name, description, image_url, location')
+          .select('id, name, description, image_url, latitude, longitude')
           .gte('latitude', minLat)
           .lte('latitude', maxLat)
           .gte('longitude', minLng)
@@ -81,15 +81,18 @@ export default function MapView() {
           
         if (businesses) {
           businesses.forEach(b => {
-            items.push({
-              id: b.id,
-              name: b.name,
-              description: b.description,
-              image_url: b.image_url || '',
-              latitude: b.latitude,
-              longitude: b.longitude,
-              type: 'business'
-            });
+            // Only add businesses with valid coordinates
+            if (typeof b.latitude === 'number' && typeof b.longitude === 'number') {
+              items.push({
+                id: b.id,
+                name: b.name,
+                description: b.description,
+                image_url: b.image_url || '',
+                latitude: b.latitude,
+                longitude: b.longitude,
+                type: 'business'
+              });
+            }
           });
         }
       }
@@ -98,7 +101,7 @@ export default function MapView() {
       if (activeFilter === 'all' || activeFilter === 'product') {
         const { data: products } = await supabase
           .from('products')
-          .select('id, title, description, image_url, user_id')
+          .select('id, title, description, image_url, latitude, longitude')
           .gte('latitude', minLat)
           .lte('latitude', maxLat)
           .gte('longitude', minLng)
@@ -108,15 +111,18 @@ export default function MapView() {
           
         if (products) {
           products.forEach(p => {
-            items.push({
-              id: p.id,
-              name: p.title,
-              description: p.description,
-              image_url: p.image_url || '',
-              latitude: p.latitude,
-              longitude: p.longitude,
-              type: 'product'
-            });
+            // Only add products with valid coordinates
+            if (typeof p.latitude === 'number' && typeof p.longitude === 'number') {
+              items.push({
+                id: p.id,
+                name: p.title,
+                description: p.description,
+                image_url: p.image_url || '',
+                latitude: p.latitude,
+                longitude: p.longitude,
+                type: 'product'
+              });
+            }
           });
         }
       }
@@ -125,7 +131,7 @@ export default function MapView() {
       if (activeFilter === 'all' || activeFilter === 'service') {
         const { data: services } = await supabase
           .from('services')
-          .select('id, title, description, image_url, location')
+          .select('id, title, description, image_url, latitude, longitude')
           .gte('latitude', minLat)
           .lte('latitude', maxLat)
           .gte('longitude', minLng)
@@ -135,16 +141,19 @@ export default function MapView() {
           
         if (services) {
           services.forEach(s => {
-            items.push({
-              id: s.id,
-              name: s.title || '',
-              title: s.title,
-              description: s.description,
-              image_url: s.image_url || '',
-              latitude: s.latitude,
-              longitude: s.longitude,
-              type: 'service'
-            });
+            // Only add services with valid coordinates
+            if (typeof s.latitude === 'number' && typeof s.longitude === 'number') {
+              items.push({
+                id: s.id,
+                name: s.title || '',
+                title: s.title,
+                description: s.description,
+                image_url: s.image_url || '',
+                latitude: s.latitude,
+                longitude: s.longitude,
+                type: 'service'
+              });
+            }
           });
         }
       }
