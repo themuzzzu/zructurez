@@ -2,91 +2,45 @@
 import { useEffect, useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, Map } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "@/providers/LocationProvider";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
-import L from "leaflet";
-
-// Fix for Leaflet marker icons
-import icon from 'leaflet/dist/images/marker-icon.png';
-import iconShadow from 'leaflet/dist/images/marker-shadow.png';
-
-let DefaultIcon = L.icon({
-  iconUrl: icon,
-  shadowUrl: iconShadow,
-  iconSize: [25, 41],
-  iconAnchor: [12, 41]
-});
-
-L.Marker.prototype.options.icon = DefaultIcon;
-
-// Component to update map view when coordinates change
-const MapUpdater = ({ center }: { center: [number, number] }) => {
-  const map = useMap();
-  
-  useEffect(() => {
-    if (center) {
-      map.setView(center, 13);
-    }
-  }, [center, map]);
-  
-  return null;
-};
-
-// Component to detect city using Nominatim API
-const CityDetector = ({ 
-  lat, 
-  lng, 
-  onCityDetected 
-}: { 
-  lat: number; 
-  lng: number; 
-  onCityDetected: (city: string) => void 
-}) => {
-  useEffect(() => {
-    const getUserCity = async () => {
-      try {
-        const response = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
-        );
-        const data = await response.json();
-        const city = data.address?.city || data.address?.town || data.address?.village || null;
-        
-        if (city) {
-          onCityDetected(city);
-        }
-      } catch (error) {
-        console.error("Error detecting city:", error);
-      }
-    };
-    
-    getUserCity();
-  }, [lat, lng, onCityDetected]);
-  
-  return null;
-};
 
 const MapView = () => {
   const navigate = useNavigate();
   const { latitude, longitude, currentLocation } = useLocation();
   const [isLoading, setIsLoading] = useState(true);
-  const [center, setCenter] = useState<[number, number]>([14.904093, 77.981401]); // Default to Tadipatri
   const [detectedCity, setDetectedCity] = useState<string | null>(null);
   
   useEffect(() => {
-    if (latitude && longitude) {
-      setCenter([latitude, longitude]);
-    }
-    setIsLoading(false);
+    const getUserCity = async () => {
+      try {
+        if (latitude && longitude) {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+          );
+          const data = await response.json();
+          const city = data.address?.city || data.address?.town || data.address?.village || null;
+          
+          if (city) {
+            setDetectedCity(city);
+          }
+        }
+        
+        // Always set loading to false after 1.5 seconds to prevent infinite loading
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 1500);
+      } catch (error) {
+        console.error("Error detecting city:", error);
+        setIsLoading(false);
+      }
+    };
+    
+    getUserCity();
   }, [latitude, longitude]);
-  
-  const handleCityDetected = (city: string) => {
-    setDetectedCity(city);
-  };
   
   return (
     <div className="min-h-screen bg-background">
@@ -130,34 +84,17 @@ const MapView = () => {
             </Card>
           ) : (
             <div className="w-full h-[600px] rounded-lg overflow-hidden shadow-lg animate-fade-up">
-              <MapContainer 
-                center={center} 
-                zoom={13} 
-                style={{ height: '100%', width: '100%' }}
-                className="z-0"
-              >
-                <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                <Marker position={center}>
-                  <Popup>
-                    <div className="p-2">
-                      <h3 className="font-medium">Your location</h3>
-                      <p className="text-sm">{detectedCity || currentLocation || "Unknown"}</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Lat: {center[0].toFixed(6)}, Lng: {center[1].toFixed(6)}
-                      </p>
-                    </div>
-                  </Popup>
-                </Marker>
-                <MapUpdater center={center} />
-                <CityDetector 
-                  lat={center[0]} 
-                  lng={center[1]} 
-                  onCityDetected={handleCityDetected}
-                />
-              </MapContainer>
+              <iframe 
+                src={`https://www.openstreetmap.org/export/embed.html?bbox=${longitude ? (longitude - 0.02) : 77.96}%2C${latitude ? (latitude - 0.02) : 14.88}%2C${longitude ? (longitude + 0.02) : 78.00}%2C${latitude ? (latitude + 0.02) : 14.92}&layer=mapnik&marker=${latitude || 14.904093}%2C${longitude || 77.981401}`}
+                width="100%" 
+                height="100%" 
+                frameBorder="0" 
+                scrolling="no" 
+                marginHeight={0} 
+                marginWidth={0} 
+                title="OpenStreetMap"
+                style={{ border: 0 }}
+              ></iframe>
             </div>
           )}
           

@@ -3,6 +3,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { checkCityAvailability, DEFAULT_CITY } from '@/utils/cityAvailabilityUtils';
 import { supabase } from '@/integrations/supabase/client';
 import { useGeolocation } from '@/hooks/useGeolocation';
+import { toast } from 'sonner';
 
 interface LocationContextType {
   currentLocation: string;
@@ -54,10 +55,19 @@ export function LocationProvider({ children }: { children: ReactNode }) {
   }, [currentLocation]);
 
   useEffect(() => {
-    const handleLocationUpdated = (event: CustomEvent) => {
+    // Handler for custom events
+    const handleLocationUpdated = (event: CustomEvent<{
+      location?: string;
+      isAvailable?: boolean;
+      latitude?: number;
+      longitude?: number;
+    }>) => {
       if (event.detail.location) {
         setCurrentLocation(event.detail.location);
-        setIsLocationAvailable(event.detail.isAvailable);
+        
+        if (typeof event.detail.isAvailable === 'boolean') {
+          setIsLocationAvailable(event.detail.isAvailable);
+        }
         
         if (event.detail.latitude && event.detail.longitude) {
           setLatitude(event.detail.latitude);
@@ -66,27 +76,34 @@ export function LocationProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    window.addEventListener('locationUpdated', handleLocationUpdated as EventListener);
+    // Type assertion to avoid TypeScript error with CustomEvent
+    window.addEventListener(
+      'locationUpdated', 
+      handleLocationUpdated as EventListener
+    );
     
     return () => {
-      window.removeEventListener('locationUpdated', handleLocationUpdated as EventListener);
+      window.removeEventListener(
+        'locationUpdated', 
+        handleLocationUpdated as EventListener
+      );
     };
   }, []);
   
   // Check for previously stored geolocation and update state
   useEffect(() => {
-    const savedLocation = localStorage.getItem('userPreciseLocation');
-    
-    if (savedLocation) {
-      try {
+    try {
+      const savedLocation = localStorage.getItem('userPreciseLocation');
+      
+      if (savedLocation) {
         const parsedLocation = JSON.parse(savedLocation);
         if (parsedLocation.latitude && parsedLocation.longitude) {
           setLatitude(parsedLocation.latitude);
           setLongitude(parsedLocation.longitude);
         }
-      } catch (e) {
-        console.error('Error parsing stored location:', e);
       }
+    } catch (e) {
+      console.error('Error parsing stored location:', e);
     }
   }, []);
   
@@ -123,7 +140,7 @@ export function LocationProvider({ children }: { children: ReactNode }) {
           table: 'city_availability',
           filter: `city_name=eq.${currentLocation}` 
         }, (payload) => {
-          if (payload.new && payload.new.is_available !== undefined) {
+          if (payload.new && typeof payload.new.is_available !== 'undefined') {
             setIsLocationAvailable(payload.new.is_available);
           }
         })
@@ -145,7 +162,12 @@ export function LocationProvider({ children }: { children: ReactNode }) {
   };
   
   const detectLocation = () => {
-    requestGeolocation();
+    try {
+      requestGeolocation();
+    } catch (error) {
+      console.error("Error detecting location:", error);
+      toast.error("Could not detect your location. Please try again or set your location manually.");
+    }
   };
 
   const contextValue: LocationContextType = {

@@ -114,6 +114,18 @@ export const Navbar = () => {
                 <Heart className="h-5 w-5" />
               </Button>
             )}
+
+            {/* Add map button */}
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => navigate("/maps")}
+              aria-label="View map"
+              className={routerLocation.pathname === "/maps" ? "bg-accent" : ""}
+            >
+              <Map className="h-5 w-5" />
+            </Button>
+
             <CartButton />
             <Separator orientation="vertical" className="h-6 hidden sm:block" />
             <UserMenu />
