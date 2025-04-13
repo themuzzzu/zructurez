@@ -6,9 +6,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "@/providers/LocationProvider";
 import { useGeolocation } from "@/hooks/useGeolocation";
-import { MapPin, Navigation, Store } from "lucide-react";
+import { MapPin, Navigation, Store, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { toast } from "sonner";
 
 interface NearbyBusinessesProps {
   className?: string;
@@ -30,7 +31,7 @@ export function NearbyBusinesses({ className = "", radius = 5 }: NearbyBusinesse
   const navigate = useNavigate();
   const [maxDistance, setMaxDistance] = useState(radius); // in kilometers
   const { currentLocation, latitude, longitude, isLocationAvailable } = useLocation();
-  const { getDistanceBetweenCoordinates } = useGeolocation();
+  const { getDistanceBetweenCoordinates, requestGeolocation } = useGeolocation();
   
   // Skip if location is not available or we don't have coordinates
   const enabled = isLocationAvailable && !!latitude && !!longitude;
@@ -42,7 +43,6 @@ export function NearbyBusinesses({ className = "", radius = 5 }: NearbyBusinesse
       
       try {
         // Query businesses within specified radius
-        // Note: Adding explicit fields in the select to make TypeScript aware of the latitude/longitude fields
         const { data, error } = await supabase
           .from('businesses')
           .select('id, name, description, image_url, category, latitude, longitude')
@@ -57,27 +57,28 @@ export function NearbyBusinesses({ className = "", radius = 5 }: NearbyBusinesse
         
         if (!data || data.length === 0) return [];
         
+        // Filter out entries without proper coordinates
+        const validBusinesses = data.filter(business => 
+          typeof business.latitude === 'number' && 
+          typeof business.longitude === 'number'
+        );
+        
         // Calculate distance for each business and filter by radius
-        const businessesWithDistance = data
-          .filter(business => 
-            typeof business.latitude === 'number' && 
-            typeof business.longitude === 'number'
-          )
-          .map(business => {
-            const distance = getDistanceBetweenCoordinates(
-              latitude, 
-              longitude, 
-              business.latitude!, 
-              business.longitude!
-            );
-            
-            return { 
-              ...business, 
-              distance 
-            };
-          })
-          .filter(b => b.distance <= maxDistance)
-          .sort((a, b) => a.distance - b.distance);
+        const businessesWithDistance = validBusinesses.map(business => {
+          const distance = getDistanceBetweenCoordinates(
+            latitude, 
+            longitude, 
+            business.latitude!, 
+            business.longitude!
+          );
+          
+          return { 
+            ...business, 
+            distance 
+          };
+        })
+        .filter(b => b.distance <= maxDistance)
+        .sort((a, b) => a.distance - b.distance);
         
         return businessesWithDistance.slice(0, 10); // Limit to 10 nearest
       } catch (error) {
@@ -88,7 +89,30 @@ export function NearbyBusinesses({ className = "", radius = 5 }: NearbyBusinesse
     enabled
   });
   
-  if (!enabled) return null;
+  const handleRetryLocation = () => {
+    requestGeolocation();
+    toast.info("Detecting your location...");
+  };
+  
+  if (!enabled) {
+    return (
+      <Card className={`${className}`}>
+        <CardContent className="p-4">
+          <div className="flex flex-col items-center justify-center py-4 text-center">
+            <MapPin className="h-8 w-8 text-muted-foreground mb-2" />
+            <h3 className="font-medium mb-1">Location Required</h3>
+            <p className="text-sm text-muted-foreground mb-3">
+              Allow location access to see nearby businesses
+            </p>
+            <Button size="sm" onClick={handleRetryLocation}>
+              <Navigation className="h-4 w-4 mr-2" />
+              Detect Location
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
   
   if (isLoading) {
     return (
@@ -107,7 +131,24 @@ export function NearbyBusinesses({ className = "", radius = 5 }: NearbyBusinesse
   }
   
   if (businesses.length === 0) {
-    return null;
+    return (
+      <Card className={`${className}`}>
+        <CardContent className="p-4 flex flex-col items-center justify-center text-center">
+          <Store className="h-8 w-8 text-muted-foreground mb-2" />
+          <h3 className="font-medium">No Nearby Businesses</h3>
+          <p className="text-sm text-muted-foreground">
+            We couldn't find any businesses within {maxDistance}km of your location.
+          </p>
+          <Button 
+            variant="link" 
+            size="sm"
+            onClick={() => setMaxDistance(prev => prev + 5)}
+          >
+            Expand search radius to {maxDistance + 5}km
+          </Button>
+        </CardContent>
+      </Card>
+    );
   }
   
   return (
@@ -121,10 +162,11 @@ export function NearbyBusinesses({ className = "", radius = 5 }: NearbyBusinesse
           onClick={() => navigate('/maps')}
         >
           View Map
+          <ChevronRight className="h-4 w-4 ml-1" />
         </Button>
       </div>
       
-      <ScrollArea className="whitespace-nowrap pb-4">
+      <ScrollArea className="w-full pb-4">
         <div className="flex space-x-4">
           {businesses.map((business) => (
             <Card

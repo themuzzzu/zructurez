@@ -17,6 +17,7 @@ import UnifiedHome from "./pages/UnifiedHome";
 import MapView from "./pages/MapView";
 import { RedirectHandler } from "@/components/RedirectHandler";
 import { Outlet } from "react-router-dom";
+import { ErrorView } from "@/components/ErrorView";
 
 // Create a layout component that includes RedirectHandler
 const Layout = () => {
@@ -73,6 +74,11 @@ const router = createBrowserRouter([
         element: <ProductDetails />,
       },
       {
+        path: "/products/:id",
+        element: <ProductDetails />,
+        errorElement: <ErrorView />,
+      },
+      {
         path: "/business",
         element: <Business />,
       },
@@ -101,6 +107,18 @@ const router = createBrowserRouter([
         element: <MapView />,
       },
       {
+        path: "/jobs",
+        element: <ComingSoonPage title="Jobs" message="The Jobs section is coming soon!" />,
+      },
+      {
+        path: "/events",
+        element: <ComingSoonPage title="Events" message="The Events section is coming soon!" />,
+      },
+      {
+        path: "/messaging",
+        element: <ComingSoonPage title="Messaging" message="The Messaging section is coming soon!" />,
+      },
+      {
         path: "*",
         element: <NotFound />,
       },
@@ -109,3 +127,4 @@ const router = createBrowserRouter([
 ]);
 
 export default router;
+
