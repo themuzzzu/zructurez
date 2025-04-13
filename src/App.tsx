@@ -1,5 +1,5 @@
 
-import { useState, useEffect, lazy, Suspense } from "react";
+import { useState, useEffect } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
@@ -11,32 +11,8 @@ import { ProgressLoader } from "@/components/loaders/ProgressLoader";
 import router from "./routes";
 import { CircularLoader } from "@/components/loaders/CircularLoader";
 import { RouterProvider } from "react-router-dom";
-import { SimplifiedLocationPicker } from "@/components/location/SimplifiedLocationPicker";
-import { useLocation } from "@/providers/LocationProvider";
-
-function LocationModalHandler() {
-  const { showLocationPicker, setShowLocationPicker, isFirstVisit, resetFirstVisit } = useLocation();
-  
-  // Handle closing the modal for first-time users
-  const handleOpenChange = (open: boolean) => {
-    if (isFirstVisit && !open) {
-      // Don't allow closing on first visit
-      return;
-    }
-    setShowLocationPicker(open);
-    if (!open && isFirstVisit) {
-      resetFirstVisit();
-    }
-  };
-  
-  return (
-    <SimplifiedLocationPicker
-      open={showLocationPicker}
-      onOpenChange={handleOpenChange}
-      firstVisit={isFirstVisit}
-    />
-  );
-}
+import { LocationModalHandler } from "@/components/location/LocationModalHandler";
+import { Toaster as SonnerToaster } from "sonner";
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -118,7 +94,6 @@ function App() {
               <div className={isLoading ? "hidden" : "app"}>
                 {!isLoading && (
                   <>
-                    {/* RedirectHandler is now inside the RouterProvider */}
                     <RouterProvider router={router} />
                     <LocationModalHandler />
                   </>
@@ -130,6 +105,7 @@ function App() {
                 </div>
               )}
               <Toaster />
+              <SonnerToaster position="top-right" closeButton />
             </LocationProvider>
           </AuthProvider>
         </LoadingProvider>

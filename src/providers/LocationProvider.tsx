@@ -31,7 +31,7 @@ export function LocationProvider({ children }: { children: ReactNode }) {
   const [showLocationPicker, setShowLocationPicker] = useState<boolean>(isFirstVisit);
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
-  const { requestGeolocation, position, loading: isDetectingLocation } = useGeolocation();
+  const { position, loading: isDetectingLocation, requestGeolocation } = useGeolocation();
 
   // Check city availability on mount and when location changes
   useEffect(() => {
