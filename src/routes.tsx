@@ -15,80 +15,97 @@ import ServiceDetails from "./pages/ServiceDetails";
 import Wishlist from "./pages/Wishlist";
 import UnifiedHome from "./pages/UnifiedHome";
 import MapView from "./pages/MapView";
+import { RedirectHandler } from "@/components/RedirectHandler";
+import { Outlet } from "react-router-dom";
+
+// Create a layout component that includes RedirectHandler
+const Layout = () => {
+  return (
+    <>
+      <RedirectHandler />
+      <Outlet />
+    </>
+  );
+};
 
 const router = createBrowserRouter([
   {
-    path: "/",
-    element: <Home />,
-  },
-  {
-    path: "/index",
-    element: <Index />,
-  },
-  {
-    path: "/marketplace",
-    element: <Marketplace />,
-  },
-  {
-    path: "/services",
-    element: <Services />,
-  },
-  {
-    path: "/services/:serviceId",
-    element: <ServiceDetails />,
-  },
-  {
-    path: "/settings",
-    element: <Settings />,
-  },
-  {
-    path: "/auth",
-    element: <Auth />,
-  },
-  {
-    path: "/profile",
-    element: <Profile />,
-  },
-  {
-    path: "/profile/:userId",
-    element: <Profile />,
-  },
-  {
-    path: "/product/:id",
-    element: <ProductDetails />,
-  },
-  {
-    path: "/business",
-    element: <Business />,
-  },
-  {
-    path: "/businesses",
-    element: <Business />,
-  },
-  {
-    path: "/business/:id",
-    element: <BusinessDetails />,
-  },
-  {
-    path: "/businesses/:id",
-    element: <BusinessDetails />,
-  },
-  {
-    path: "/wishlist",
-    element: <Wishlist />,
-  },
-  {
-    path: "/unifiedhome",
-    element: <UnifiedHome />,
-  },
-  {
-    path: "/maps",
-    element: <MapView />,
-  },
-  {
-    path: "*",
-    element: <NotFound />,
-  },
+    element: <Layout />,
+    children: [
+      {
+        path: "/",
+        element: <Home />,
+      },
+      {
+        path: "/index",
+        element: <Index />,
+      },
+      {
+        path: "/marketplace",
+        element: <Marketplace />,
+      },
+      {
+        path: "/services",
+        element: <Services />,
+      },
+      {
+        path: "/services/:serviceId",
+        element: <ServiceDetails />,
+      },
+      {
+        path: "/settings",
+        element: <Settings />,
+      },
+      {
+        path: "/auth",
+        element: <Auth />,
+      },
+      {
+        path: "/profile",
+        element: <Profile />,
+      },
+      {
+        path: "/profile/:userId",
+        element: <Profile />,
+      },
+      {
+        path: "/product/:id",
+        element: <ProductDetails />,
+      },
+      {
+        path: "/business",
+        element: <Business />,
+      },
+      {
+        path: "/businesses",
+        element: <Business />,
+      },
+      {
+        path: "/business/:id",
+        element: <BusinessDetails />,
+      },
+      {
+        path: "/businesses/:id",
+        element: <BusinessDetails />,
+      },
+      {
+        path: "/wishlist",
+        element: <Wishlist />,
+      },
+      {
+        path: "/unifiedhome",
+        element: <UnifiedHome />,
+      },
+      {
+        path: "/maps",
+        element: <MapView />,
+      },
+      {
+        path: "*",
+        element: <NotFound />,
+      },
+    ]
+  }
 ]);
 
 export default router;
