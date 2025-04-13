@@ -15,7 +15,7 @@ import L from "leaflet";
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 
-const DefaultIcon = L.icon({
+let DefaultIcon = L.icon({
   iconUrl: icon,
   shadowUrl: iconShadow,
   iconSize: [25, 41],
@@ -38,7 +38,15 @@ const MapUpdater = ({ center }: { center: [number, number] }) => {
 };
 
 // Component to detect city using Nominatim API
-const CityDetector = ({ lat, lng, onCityDetected }: { lat: number, lng: number, onCityDetected: (city: string) => void }) => {
+const CityDetector = ({ 
+  lat, 
+  lng, 
+  onCityDetected 
+}: { 
+  lat: number; 
+  lng: number; 
+  onCityDetected: (city: string) => void 
+}) => {
   useEffect(() => {
     const getUserCity = async () => {
       try {

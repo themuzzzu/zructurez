@@ -31,13 +31,23 @@ export function LocationProvider({ children }: { children: ReactNode }) {
   const [showLocationPicker, setShowLocationPicker] = useState<boolean>(isFirstVisit);
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
-  const { position, loading: isDetectingLocation, requestGeolocation } = useGeolocation();
+  
+  const { 
+    position, 
+    loading: isDetectingLocation, 
+    requestGeolocation 
+  } = useGeolocation();
 
   // Check city availability on mount and when location changes
   useEffect(() => {
     const checkAvailability = async () => {
-      const isAvailable = await checkCityAvailability(currentLocation);
-      setIsLocationAvailable(isAvailable);
+      try {
+        const isAvailable = await checkCityAvailability(currentLocation);
+        setIsLocationAvailable(isAvailable);
+      } catch (error) {
+        console.error("Error checking city availability:", error);
+        setIsLocationAvailable(false);
+      }
     };
     
     checkAvailability();
@@ -102,22 +112,30 @@ export function LocationProvider({ children }: { children: ReactNode }) {
   
   // Subscribe to real-time updates of city_availability table
   useEffect(() => {
-    const subscription = supabase
-      .channel('city_availability_changes')
-      .on('postgres_changes', { 
-        event: 'UPDATE', 
-        schema: 'public', 
-        table: 'city_availability',
-        filter: `city_name=eq.${currentLocation}` 
-      }, (payload) => {
-        if (payload.new && payload.new.is_available !== undefined) {
-          setIsLocationAvailable(payload.new.is_available);
-        }
-      })
-      .subscribe();
+    let subscription;
+    
+    try {
+      subscription = supabase
+        .channel('city_availability_changes')
+        .on('postgres_changes', { 
+          event: 'UPDATE', 
+          schema: 'public', 
+          table: 'city_availability',
+          filter: `city_name=eq.${currentLocation}` 
+        }, (payload) => {
+          if (payload.new && payload.new.is_available !== undefined) {
+            setIsLocationAvailable(payload.new.is_available);
+          }
+        })
+        .subscribe();
+    } catch (error) {
+      console.error("Error subscribing to city_availability changes:", error);
+    }
       
     return () => {
-      subscription.unsubscribe();
+      if (subscription) {
+        subscription.unsubscribe();
+      }
     };
   }, [currentLocation]);
   
@@ -130,28 +148,28 @@ export function LocationProvider({ children }: { children: ReactNode }) {
     requestGeolocation();
   };
 
+  const contextValue: LocationContextType = {
+    currentLocation,
+    isLocationAvailable,
+    isFirstVisit,
+    showLocationPicker,
+    setShowLocationPicker,
+    setCurrentLocation,
+    resetFirstVisit,
+    latitude,
+    longitude,
+    isDetectingLocation,
+    detectLocation
+  };
+
   return (
-    <LocationContext.Provider
-      value={{
-        currentLocation,
-        isLocationAvailable,
-        isFirstVisit,
-        showLocationPicker,
-        setShowLocationPicker,
-        setCurrentLocation,
-        resetFirstVisit,
-        latitude,
-        longitude,
-        isDetectingLocation,
-        detectLocation
-      }}
-    >
+    <LocationContext.Provider value={contextValue}>
       {children}
     </LocationContext.Provider>
   );
 }
 
-export function useLocation() {
+export function useLocation(): LocationContextType {
   const context = useContext(LocationContext);
   if (context === undefined) {
     throw new Error('useLocation must be used within a LocationProvider');

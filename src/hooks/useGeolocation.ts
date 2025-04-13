@@ -42,6 +42,7 @@ export function useGeolocation() {
     "granted" | "denied" | "prompt" | "unknown"
   >("unknown");
 
+  // Check permission status on mount
   useEffect(() => {
     const checkPermission = async () => {
       if (!("permissions" in navigator)) return;
@@ -119,23 +120,24 @@ export function useGeolocation() {
           // Check if we have a city match in our database
           if (response.city || response.town) {
             const cityName = response.city || response.town;
-            const nearestCity = await findNearestCity(latitude, longitude);
-            
-            // If we have a city in our database, update the app's location
-            if (nearestCity) {
-              // Check if city is available in our system
-              const { data: cityData } = await supabase
-                .from('city_availability')
-                .select('is_available')
-                .eq('city_name', nearestCity)
-                .single();
-                
-              const isAvailable = cityData?.is_available || false;
+            try {
+              const nearestCity = await findNearestCity(latitude, longitude);
               
-              // Update location in localStorage and dispatch event
-              localStorage.setItem('userLocation', nearestCity);
-              window.dispatchEvent(
-                new CustomEvent('locationUpdated', { 
+              // If we have a city in our database, update the app's location
+              if (nearestCity) {
+                // Check if city is available in our system
+                const { data: cityData } = await supabase
+                  .from('city_availability')
+                  .select('is_available')
+                  .eq('city_name', nearestCity)
+                  .single();
+                  
+                const isAvailable = cityData?.is_available || false;
+                
+                // Update location in localStorage and dispatch event
+                localStorage.setItem('userLocation', nearestCity);
+                
+                const event = new CustomEvent('locationUpdated', { 
                   detail: { 
                     location: nearestCity,
                     isAvailable,
@@ -143,8 +145,12 @@ export function useGeolocation() {
                     longitude,
                     preciseLocation: response.displayName
                   } 
-                })
-              );
+                });
+                
+                window.dispatchEvent(event);
+              }
+            } catch (error) {
+              console.error("Error finding nearest city:", error);
             }
           }
           
@@ -193,17 +199,17 @@ export function useGeolocation() {
       }
       
       const data = await response.json();
-      const address = data.address;
+      const address = data.address || {};
       
       return {
-        displayName: data.display_name,
-        locality: address.suburb || address.neighbourhood || address.hamlet,
-        neighborhood: address.neighbourhood || address.hamlet,
-        suburb: address.suburb,
-        city: address.city,
-        town: address.town,
-        state: address.state,
-        country: address.country
+        displayName: data.display_name || "",
+        locality: address.suburb || address.neighbourhood || address.hamlet || null,
+        neighborhood: address.neighbourhood || address.hamlet || null,
+        suburb: address.suburb || null,
+        city: address.city || null,
+        town: address.town || null,
+        state: address.state || null,
+        country: address.country || null
       };
     } catch (error) {
       console.error('Error in reverse geocoding:', error);
@@ -211,7 +217,7 @@ export function useGeolocation() {
     }
   };
 
-  const getGeolocationErrorMessage = (error: GeolocationPositionError) => {
+  const getGeolocationErrorMessage = (error: GeolocationPositionError): string => {
     switch (error.code) {
       case error.PERMISSION_DENIED:
         return "Location permission denied";
