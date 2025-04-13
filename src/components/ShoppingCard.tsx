@@ -13,6 +13,8 @@ interface ShoppingCardProps {
   description: string;
   image: string;
   price: string;
+  originalPrice?: string;
+  discountPercentage?: number;
   category?: string;
   type?: 'marketplace' | 'business' | 'service';
 }
@@ -23,6 +25,8 @@ export function ShoppingCard({
   description,
   image,
   price,
+  originalPrice,
+  discountPercentage,
   category,
   type = 'marketplace',
 }: ShoppingCardProps) {
@@ -65,7 +69,16 @@ export function ShoppingCard({
           {description}
         </p>
         <div className="mt-2 flex items-center justify-between">
-          <div className="font-medium text-sm">{price}</div>
+          <div className="font-medium text-sm">
+            {originalPrice && (
+              <span className="line-through text-muted-foreground mr-2 text-xs">
+                {originalPrice}
+              </span>
+            )}
+            <span className={originalPrice ? "text-red-600" : ""}>
+              {price}
+            </span>
+          </div>
           {category && (
             <Badge variant="secondary" className="text-xs font-normal px-1.5 py-0">
               {category}
