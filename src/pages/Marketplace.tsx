@@ -15,15 +15,15 @@ const OptimizedMarketplace = lazy(() =>
   })
 );
 
-// Loading Placeholder
+// Better loading placeholder with reduced padding on mobile
 const MarketplaceSkeleton = () => (
-  <div className="space-y-4 w-full">
-    <Skeleton className="h-12 w-full max-w-3xl mx-auto rounded-lg" />
-    <Skeleton className="h-64 w-full rounded-lg" />
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+  <div className="space-y-3 w-full px-1 sm:px-4">
+    <Skeleton className="h-10 w-full max-w-3xl mx-auto rounded-lg" />
+    <Skeleton className="h-56 w-full rounded-lg" />
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3">
       {[...Array(8)].map((_, i) => (
-        <div key={i} className="space-y-2">
-          <Skeleton className="h-40 rounded-md w-full" />
+        <div key={i} className="space-y-1">
+          <Skeleton className="h-36 rounded-md w-full" />
           <Skeleton className="h-4 w-2/3" />
           <Skeleton className="h-4 w-1/2" />
         </div>
@@ -39,16 +39,23 @@ const Marketplace = () => {
   useEffect(() => {
     trackPageLoad('/marketplace');
     
-    // Preload critical resources
-    const link = document.createElement('link');
-    link.rel = 'preload';
-    link.as = 'image';
-    link.href = '/lovable-uploads/a727b8a0-84a4-45b2-88da-392010b1b66c.png';
-    document.head.appendChild(link);
+    // Preload critical resources and images for faster loading
+    const resources = [
+      '/lovable-uploads/a727b8a0-84a4-45b2-88da-392010b1b66c.png',
+      '/lovable-uploads/c395d99e-dcf4-4659-9c50-fc50708c858d.png'
+    ];
     
-    return () => {
-      document.head.removeChild(link);
-    };
+    resources.forEach(resource => {
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'image';
+      link.href = resource;
+      document.head.appendChild(link);
+      
+      return () => {
+        document.head.removeChild(link);
+      };
+    });
   }, []);
   
   // If we have a productId parameter, show a 404 since the route should be /product/:productId
@@ -58,7 +65,7 @@ const Marketplace = () => {
   
   return (
     <Layout>
-      <div className="container max-w-7xl mx-auto px-1 sm:px-4 pt-3 sm:pt-6 pb-16 overflow-visible">
+      <div className="container max-w-7xl mx-auto px-1 sm:px-4 pt-2 sm:pt-6 pb-16 overflow-visible">
         <Suspense fallback={<MarketplaceSkeleton />}>
           <OptimizedMarketplace />
         </Suspense>

@@ -78,13 +78,13 @@ export const Navbar = () => {
           )}
 
           <div className="flex items-center gap-2">
-            {/* Location selector button */}
+            {/* Location selector button - only visible on desktop or on homepage */}
             <Popover open={locationPopoverOpen} onOpenChange={setLocationPopoverOpen}>
               <PopoverTrigger asChild>
                 <Button 
                   variant="ghost" 
                   size="sm"
-                  className="relative group flex items-center gap-1.5 px-2 py-1 h-9"
+                  className="relative group flex items-center gap-1.5 px-2 py-1 h-9 hidden sm:flex"
                   aria-label="Select location"
                   onClick={() => setShowLocationPicker(true)}
                 >
@@ -104,24 +104,26 @@ export const Navbar = () => {
               </PopoverTrigger>
             </Popover>
 
+            {/* Wishlist button - only visible on non-homepage desktop */}
             {isBusinessOrServices() && (
               <Button 
                 variant="ghost" 
                 size="icon" 
                 onClick={() => navigate("/wishlist")}
                 aria-label="View wishlist"
+                className="hidden sm:flex"
               >
                 <Heart className="h-5 w-5" />
               </Button>
             )}
 
-            {/* Add map button */}
+            {/* Map button - only visible on desktop */}
             <Button 
               variant="ghost" 
               size="icon" 
               onClick={() => navigate("/maps")}
               aria-label="View map"
-              className={routerLocation.pathname === "/maps" ? "bg-accent" : ""}
+              className={`hidden sm:flex ${routerLocation.pathname === "/maps" ? "bg-accent" : ""}`}
             >
               <Map className="h-5 w-5" />
             </Button>

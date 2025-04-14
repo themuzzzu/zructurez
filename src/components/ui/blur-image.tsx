@@ -11,6 +11,7 @@ interface BlurImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   containerClassName?: string;
   aspectRatio?: "square" | "video" | "portrait" | "wide";
   fill?: boolean;
+  priority?: boolean;
 }
 
 export function BlurImage({
@@ -21,29 +22,55 @@ export function BlurImage({
   containerClassName,
   aspectRatio = "square",
   fill = false,
+  priority = false,
   ...props
 }: BlurImageProps) {
-  const [isLoading, setIsLoading] = useState(true);
-  const [currentSrc, setCurrentSrc] = useState(blurDataUrl || src);
+  const [isLoading, setIsLoading] = useState(!priority);
+  const [currentSrc, setCurrentSrc] = useState(priority ? src : (blurDataUrl || src));
   
   // Create small base64 placeholder if not provided
   const placeholder = blurDataUrl || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+P+/HgAFdwI2QOYvBQAAAABJRU5ErkJggg==';
   
   useEffect(() => {
+    // If priority is true, we don't need to lazy load
+    if (priority) {
+      setIsLoading(false);
+      setCurrentSrc(src);
+      return;
+    }
+    
     // Reset loading state when src changes
     setIsLoading(true);
     
     // Start with placeholder
     setCurrentSrc(placeholder);
     
-    // Preload the actual image
-    const img = new Image();
-    img.src = src;
-    img.onload = () => {
-      setCurrentSrc(src);
-      setIsLoading(false);
+    // Use Intersection Observer for better performance
+    const imgObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // Preload the actual image
+          const img = new Image();
+          img.src = src;
+          img.onload = () => {
+            setCurrentSrc(src);
+            setIsLoading(false);
+            observer.disconnect();
+          };
+        }
+      });
+    }, {
+      rootMargin: "100px" // Load images 100px before they enter viewport
+    });
+    
+    // Create a temporary DOM element to observe
+    const elem = document.createElement('div');
+    imgObserver.observe(elem);
+    
+    return () => {
+      imgObserver.disconnect();
     };
-  }, [src, placeholder]);
+  }, [src, placeholder, priority]);
   
   // Calculate aspect ratio classes
   const aspectRatioClass = {
@@ -69,11 +96,13 @@ export function BlurImage({
         src={currentSrc}
         alt={alt}
         className={cn(
-          "w-full h-full object-cover transition-all duration-700",
+          "w-full h-full object-cover transition-all duration-500",
           isLoading ? "scale-105 blur-sm" : "scale-100 blur-0",
           fill && "absolute inset-0",
           className
         )}
+        loading={priority ? "eager" : "lazy"}
+        decoding={priority ? "sync" : "async"}
         {...props}
       />
     </div>
