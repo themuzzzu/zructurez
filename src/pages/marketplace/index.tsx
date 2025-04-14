@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { SponsoredProducts } from '@/components/marketplace/SponsoredProducts';
+import SponsoredProducts from '@/components/marketplace/SponsoredProducts';
 import { TrendingProducts } from '@/components/marketplace/TrendingProducts';
 import { RecommendedProducts } from '@/components/marketplace/RecommendedProducts';
 import { PersonalizedRecommendations } from '@/components/marketplace/PersonalizedRecommendations';

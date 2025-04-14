@@ -5,7 +5,7 @@ import { GridLayoutType } from "@/components/products/types/ProductTypes";
 import { AutocompleteSearch } from "@/components/marketplace/AutocompleteSearch";
 import { BannerCarousel } from "@/components/marketplace/BannerCarousel";
 import { CrazyDeals } from "@/components/marketplace/CrazyDeals";
-import { SponsoredProducts } from "@/components/marketplace/SponsoredProducts";
+import SponsoredProducts from "@/components/marketplace/SponsoredProducts";
 import { ShopByCategory } from "@/components/marketplace/ShopByCategory";
 import { TrendingProducts } from "@/components/marketplace/TrendingProducts"; 
 import { PersonalizedRecommendations } from "@/components/marketplace/PersonalizedRecommendations";
