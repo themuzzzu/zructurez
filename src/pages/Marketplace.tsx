@@ -5,13 +5,27 @@ import { NotFound } from "@/components/NotFound";
 import { useParams } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { trackPageLoad } from "@/utils/performanceUtils";
-import { SponsoredProducts } from "@/components/marketplace/SponsoredProducts";
+import { ErrorView } from "@/components/ErrorView";
 
-// Lazy load the marketplace component with priority loading
+// Load optimized marketplace with proper error handling
 const OptimizedMarketplace = lazy(() => 
   import("./marketplace/OptimizedMarketplace").then(module => {
-    console.log("OptimizedMarketplace component loaded");
+    console.log("OptimizedMarketplace component loaded successfully");
     return module;
+  }).catch(error => {
+    console.error("Failed to load OptimizedMarketplace:", error);
+    return { default: () => <ErrorView message="Failed to load marketplace content. Please try again." /> };
+  })
+);
+
+// Load sponsored products with proper error handling
+const SponsoredProducts = lazy(() => 
+  import("@/components/marketplace/SponsoredProducts").then(module => {
+    console.log("SponsoredProducts component loaded successfully");
+    return module;
+  }).catch(error => {
+    console.error("Failed to load SponsoredProducts:", error);
+    return { default: () => <div className="py-4 text-center text-muted-foreground">Sponsored content unavailable</div> };
   })
 );
 
@@ -77,19 +91,48 @@ const Marketplace = () => {
     <Layout>
       <div className="container max-w-7xl mx-auto px-1 sm:px-4 pt-2 sm:pt-6 pb-16 overflow-visible">
         <Suspense fallback={<MarketplaceSkeleton />}>
-          <OptimizedMarketplace />
+          <ErrorBoundary fallback={<ErrorView message="There was a problem loading the marketplace. Please try again later." />}>
+            <OptimizedMarketplace />
+          </ErrorBoundary>
         </Suspense>
         
         {/* Add sponsored products section */}
         <div className="mt-6">
           <h2 className="text-xl font-bold mb-4">Sponsored Products</h2>
           <Suspense fallback={<MarketplaceSkeleton />}>
-            <SponsoredProducts />
+            <ErrorBoundary fallback={<div className="py-4 text-center text-muted-foreground">
+              Sponsored products unavailable at the moment
+            </div>}>
+              <SponsoredProducts />
+            </ErrorBoundary>
           </Suspense>
         </div>
       </div>
     </Layout>
   );
 };
+
+// Simple error boundary component
+class ErrorBoundary extends React.Component<{
+  children: React.ReactNode;
+  fallback: React.ReactNode;
+}> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: any, info: any) {
+    console.error("Error in marketplace component:", error, info);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+    return this.props.children;
+  }
+}
 
 export default Marketplace;

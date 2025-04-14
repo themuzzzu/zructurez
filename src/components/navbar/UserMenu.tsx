@@ -6,9 +6,11 @@ import {
   LogOut, 
   Store, 
   Heart, 
-  ShoppingCart,
+  ShoppingBag,
   BadgeDollarSign,
-  ChevronRight
+  ChevronRight,
+  Bell,
+  LifeBuoy
 } from "lucide-react";
 import { 
   DropdownMenu, 
@@ -101,63 +103,109 @@ export const UserMenu = () => {
         <Button variant="ghost" className="relative h-10 w-10 rounded-full">
           <Avatar>
             <AvatarImage src={user?.user_metadata?.avatar_url} />
-            <AvatarFallback>
+            <AvatarFallback className="bg-primary text-primary-foreground">
               {user?.user_metadata?.name 
                 ? getInitials(user.user_metadata.name) 
                 : "U"}
             </AvatarFallback>
           </Avatar>
+          {(wishlistCount > 0 || cartCount > 0) && (
+            <span className="absolute top-0 right-0 h-3 w-3 bg-red-500 rounded-full" />
+          )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-48" align="end">
-        <DropdownMenuLabel>
-          <div className="font-normal text-muted-foreground">Signed in as</div>
-          <div className="truncate font-medium">
-            {user?.email || "Guest"}
-          </div>
-        </DropdownMenuLabel>
+      <DropdownMenuContent className="w-56 bg-card" align="end">
+        <div className="p-2 bg-muted/50 rounded-t-md">
+          <DropdownMenuLabel>
+            <div className="font-normal text-muted-foreground text-xs">Signed in as</div>
+            <div className="truncate font-medium text-sm">
+              {user?.email || "Guest"}
+            </div>
+          </DropdownMenuLabel>
+        </div>
         
         {/* Add current plan info */}
         <UserPlanInfo user={user} onUpgradeClick={() => navigateTo("/pricing")} />
         
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => navigateTo("/profile")}>
-            <User className="mr-2 h-4 w-4" />
+          <DropdownMenuItem 
+            onClick={() => navigateTo("/profile")}
+            className="hover:bg-muted py-2 cursor-pointer"
+          >
+            <User className="mr-3 h-4 w-4" />
             <span>Profile</span>
+            <ChevronRight className="ml-auto h-4 w-4 opacity-50" />
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => navigateTo("/businesses/my-businesses")}>
-            <Store className="mr-2 h-4 w-4" />
+          <DropdownMenuItem 
+            onClick={() => navigateTo("/businesses/my-businesses")}
+            className="hover:bg-muted py-2 cursor-pointer"
+          >
+            <Store className="mr-3 h-4 w-4" />
             <span>My Businesses</span>
+            <ChevronRight className="ml-auto h-4 w-4 opacity-50" />
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => navigateTo("/wishlist")}>
-            <Heart className="mr-2 h-4 w-4" />
+          <DropdownMenuItem 
+            onClick={() => navigateTo("/wishlist")}
+            className="hover:bg-muted py-2 cursor-pointer"
+          >
+            <Heart className="mr-3 h-4 w-4" />
             <span>Wishlist</span>
             {wishlistCount > 0 && (
-              <Badge className="ml-auto px-1 text-xs" variant="secondary">{wishlistCount}</Badge>
+              <Badge className="ml-auto px-1.5 rounded-full text-xs" variant="secondary">
+                {wishlistCount}
+              </Badge>
             )}
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => navigateTo("/cart")}>
-            <ShoppingCart className="mr-2 h-4 w-4" />
+          <DropdownMenuItem 
+            onClick={() => navigateTo("/cart")}
+            className="hover:bg-muted py-2 cursor-pointer"
+          >
+            <ShoppingBag className="mr-3 h-4 w-4" />
             <span>Cart</span>
             {cartCount > 0 && (
-              <Badge className="ml-auto px-1 text-xs" variant="secondary">{cartCount}</Badge>
+              <Badge className="ml-auto px-1.5 rounded-full text-xs" variant="secondary">
+                {cartCount}
+              </Badge>
             )}
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => navigateTo("/pricing")}>
-            <BadgeDollarSign className="mr-2 h-4 w-4" />
+          <DropdownMenuItem 
+            onClick={() => navigateTo("/notifications")}
+            className="hover:bg-muted py-2 cursor-pointer"
+          >
+            <Bell className="mr-3 h-4 w-4" />
+            <span>Notifications</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem 
+            onClick={() => navigateTo("/pricing")}
+            className="hover:bg-muted py-2 cursor-pointer"
+          >
+            <BadgeDollarSign className="mr-3 h-4 w-4" />
             <span>Pricing Plans</span>
-            <ChevronRight className="ml-auto h-4 w-4" />
+            <ChevronRight className="ml-auto h-4 w-4 opacity-50" />
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => navigateTo("/settings")}>
-          <Settings className="mr-2 h-4 w-4" />
+        <DropdownMenuItem 
+          onClick={() => navigateTo("/settings")}
+          className="hover:bg-muted py-2 cursor-pointer"
+        >
+          <Settings className="mr-3 h-4 w-4" />
           <span>Settings</span>
         </DropdownMenuItem>
+        <DropdownMenuItem 
+          onClick={() => navigateTo("/support")}
+          className="hover:bg-muted py-2 cursor-pointer"
+        >
+          <LifeBuoy className="mr-3 h-4 w-4" />
+          <span>Help & Support</span>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleSignOut}>
-          <LogOut className="mr-2 h-4 w-4" />
+        <DropdownMenuItem 
+          onClick={handleSignOut}
+          className="hover:bg-red-100 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 py-2 cursor-pointer"
+        >
+          <LogOut className="mr-3 h-4 w-4" />
           <span>Log out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
