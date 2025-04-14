@@ -1,4 +1,3 @@
-
 import React, { Suspense, lazy, useEffect } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { NotFound } from "@/components/NotFound";
@@ -45,6 +44,29 @@ const MarketplaceSkeleton = () => (
     </div>
   </div>
 );
+
+// Simple error boundary component
+class ErrorBoundary extends React.Component<{
+  children: React.ReactNode;
+  fallback: React.ReactNode;
+}> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: any, info: any) {
+    console.error("Error in marketplace component:", error, info);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+    return this.props.children;
+  }
+}
 
 const Marketplace = () => {
   const params = useParams();
@@ -111,28 +133,5 @@ const Marketplace = () => {
     </Layout>
   );
 };
-
-// Simple error boundary component
-class ErrorBoundary extends React.Component<{
-  children: React.ReactNode;
-  fallback: React.ReactNode;
-}> {
-  state = { hasError: false };
-
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-
-  componentDidCatch(error: any, info: any) {
-    console.error("Error in marketplace component:", error, info);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return this.props.fallback;
-    }
-    return this.props.children;
-  }
-}
 
 export default Marketplace;
