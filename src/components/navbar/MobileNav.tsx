@@ -41,34 +41,25 @@ export const MobileNav = () => {
   const { theme, setTheme } = useTheme();
   const isMobile = useMediaQuery("(max-width: 768px)");
   const isDarkMode = theme === "dark";
-  const isHomePage = location.pathname === "/";
   const { setShowLocationPicker } = useLocationContext();
 
-  // Main navigation items for Home page (modified with location and maps icons)
-  const homeNavItems = [
+  // Common navigation items for all pages
+  const commonNavItems = [
     { icon: Home, label: "Home", path: "/" },
-    { icon: ShoppingBag, label: "Zructs", path: "/marketplace" },
+    { icon: ShoppingBag, label: "Marketplace", path: "/marketplace" },
     { icon: MapPin, label: "Location", path: "/location", onClick: () => setShowLocationPicker(true) },
     { icon: Map, label: "Maps", path: "/maps" },
     { icon: MessageSquare, label: "Messages", path: "/messages" },
   ];
 
-  // Main navigation items for other pages (added wishlist icon left of cart)
-  const otherNavItems = [
-    { icon: Home, label: "Home", path: "/" },
-    { icon: ShoppingBag, label: "Zructs", path: "/marketplace" },
-    { icon: Wrench, label: "Services", path: "/services" },
-    { icon: Heart, label: "Wishlist", path: "/wishlist" },
-    { icon: ShoppingBag, label: "Cart", path: "/cart" },
-  ];
-
   // Additional items for the dropdown menu
   const dropdownItems = [
+    { icon: Wrench, label: "Services", path: "/services" },
     { icon: Building, label: "Business", path: "/businesses" },
+    { icon: Heart, label: "Wishlist", path: "/wishlist" },
     { icon: Briefcase, label: "Jobs", path: "/jobs" },
     { icon: Users, label: "Communities", path: "/communities" },
     { icon: Calendar, label: "Events", path: "/events" },
-    { icon: Map, label: "Maps", path: "/maps" },
   ];
 
   const toggleTheme = () => {
@@ -86,9 +77,6 @@ export const MobileNav = () => {
     }
     return location.pathname.startsWith(itemPath);
   };
-
-  // Select which navigation items to show based on current page
-  const navItems = isHomePage ? homeNavItems : otherNavItems;
   
   const handleNavClick = (item: any) => {
     if (item.onClick) {
@@ -101,7 +89,7 @@ export const MobileNav = () => {
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 py-2 px-1 z-50 animate-fade-in">
       <div className="flex justify-between items-center max-w-md mx-auto">
-        {navItems.map((item) => {
+        {commonNavItems.map((item) => {
           const Icon = item.icon;
           const isActive = checkActivePath(item.path);
           
