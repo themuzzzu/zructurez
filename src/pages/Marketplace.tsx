@@ -5,19 +5,12 @@ import { NotFound } from "@/components/NotFound";
 import { useParams } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { trackPageLoad } from "@/utils/performanceUtils";
+import { SponsoredProducts } from "@/components/marketplace/SponsoredProducts";
 
 // Lazy load the marketplace component with priority loading
 const OptimizedMarketplace = lazy(() => 
   import("./marketplace/OptimizedMarketplace").then(module => {
     console.log("OptimizedMarketplace component loaded");
-    return module;
-  })
-);
-
-// Sponsored products component
-const SponsoredProducts = lazy(() => 
-  import("@/components/marketplace/SponsoredProducts").then(module => {
-    console.log("SponsoredProducts component loaded");
     return module;
   })
 );
