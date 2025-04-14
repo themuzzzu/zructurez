@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/components/ui/use-toast";
-import { MapPin, Search, Loader2, MapPinOff } from "lucide-react";
+import { MapPin, Search, Loader2, MapPinOff, X } from "lucide-react";
 import { useLocation } from "@/providers/LocationProvider";
 import { fetchAllCities, handleCitySelection, findNearestCity } from "@/utils/cityAvailabilityUtils";
 import type { City } from "@/utils/cityAvailabilityUtils";
@@ -185,10 +185,26 @@ export function SimplifiedLocationPicker({
     }
   };
 
+  // Handle dialog close
+  const handleCloseDialog = () => {
+    if (!firstVisit) {
+      onOpenChange(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md max-h-[90vh] flex flex-col">
-        <DialogHeader>
+        <DialogHeader className="relative">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-0 top-0"
+            onClick={handleCloseDialog}
+            disabled={firstVisit}
+          >
+            <X className="h-4 w-4" />
+          </Button>
           <DialogTitle className="text-center text-xl">Choose your location</DialogTitle>
           <DialogDescription className="text-center">
             Zructures is currently available in select cities in the Rayalaseema region

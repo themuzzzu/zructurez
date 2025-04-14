@@ -81,8 +81,8 @@
   }
   
   .container {
-    padding-left: 6px !important;
-    padding-right: 6px !important;
+    padding-left: 4px !important; /* Reduced from 6px */
+    padding-right: 4px !important; /* Reduced from 6px */
     max-width: 100% !important;
     width: 100% !important;
   }
@@ -93,14 +93,14 @@
     max-width: 100% !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
-    padding-left: 6px !important;
-    padding-right: 6px !important;
+    padding-left: 4px !important; /* Reduced from 6px */
+    padding-right: 4px !important; /* Reduced from 6px */
   }
   
   /* Side gap for section containers on mobile */
   .section-container {
-    padding-left: 6px !important;
-    padding-right: 6px !important;
+    padding-left: 4px !important; /* Reduced from 6px */
+    padding-right: 4px !important; /* Reduced from 6px */
   }
 
   /* Prevent horizontal overflow */
@@ -110,18 +110,18 @@
   
   /* Reduce gap in grids on mobile */
   .grid {
-    gap: 4px !important;
+    gap: 2px !important; /* Reduced from 4px */
   }
   
   /* Make cards take up less vertical space */
   .card-content {
-    padding: 6px !important;
+    padding: 4px !important; /* Reduced from 6px */
   }
   
   /* Ensure minimal padding on mobile content */
   .mobile-container {
-    padding-left: 6px !important;
-    padding-right: 6px !important;
+    padding-left: 4px !important; /* Reduced from 6px */
+    padding-right: 4px !important; /* Reduced from 6px */
   }
 }
 
@@ -148,14 +148,12 @@
   max-width: 100%;
   margin-left: 0;
   margin-right: 0;
-  padding-left: 0;
-  padding-right: 0;
 }
 
 /* Mobile spacing utility classes */
 .mobile-container {
-  padding-left: 8px;
-  padding-right: 8px;
+  padding-left: 6px;
+  padding-right: 6px;
 }
 
 .mobile-bottom-padding {
@@ -246,4 +244,16 @@
     transparent
   );
   animation: shimmer 1.5s infinite;
+}
+
+/* Very fast image loading transition */
+.fast-image-transition {
+  transition: opacity 0.15s ease-out;
+}
+
+/* Prevent image flicker */
+.no-flicker {
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  -webkit-font-smoothing: subpixel-antialiased;
 }

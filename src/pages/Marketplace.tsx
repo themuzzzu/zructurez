@@ -14,15 +14,23 @@ const OptimizedMarketplace = lazy(() =>
   })
 );
 
+// Sponsored products component
+const SponsoredProducts = lazy(() => 
+  import("@/components/marketplace/SponsoredProducts").then(module => {
+    console.log("SponsoredProducts component loaded");
+    return module;
+  })
+);
+
 // Better loading placeholder with reduced padding on mobile
 const MarketplaceSkeleton = () => (
-  <div className="space-y-3 w-full px-1 sm:px-4">
+  <div className="space-y-2 w-full px-1 sm:px-4">
     <Skeleton className="h-10 w-full max-w-3xl mx-auto rounded-lg" />
-    <Skeleton className="h-56 w-full rounded-lg" />
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3">
+    <Skeleton className="h-48 w-full rounded-lg" />
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
       {[...Array(8)].map((_, i) => (
         <div key={i} className="space-y-1">
-          <Skeleton className="h-36 rounded-md w-full" />
+          <Skeleton className="h-32 rounded-md w-full" />
           <Skeleton className="h-4 w-2/3" />
           <Skeleton className="h-4 w-1/2" />
         </div>
@@ -50,6 +58,7 @@ const Marketplace = () => {
       link.rel = 'preload';
       link.as = 'image';
       link.href = resource;
+      link.fetchPriority = 'high';
       return link;
     });
     
@@ -77,6 +86,14 @@ const Marketplace = () => {
         <Suspense fallback={<MarketplaceSkeleton />}>
           <OptimizedMarketplace />
         </Suspense>
+        
+        {/* Add sponsored products section */}
+        <div className="mt-6">
+          <h2 className="text-xl font-bold mb-4">Sponsored Products</h2>
+          <Suspense fallback={<MarketplaceSkeleton />}>
+            <SponsoredProducts />
+          </Suspense>
+        </div>
       </div>
     </Layout>
   );

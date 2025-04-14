@@ -26,27 +26,36 @@ export function BlurImage({
   ...props
 }: BlurImageProps) {
   const [isLoading, setIsLoading] = useState(!priority);
-  const [currentSrc, setCurrentSrc] = useState(priority ? src : (blurDataUrl || src));
+  const [currentSrc, setCurrentSrc] = useState(priority ? src : (blurDataUrl || ""));
   const imgRef = useRef<HTMLImageElement>(null);
   
   // Create small base64 placeholder if not provided
   const placeholder = blurDataUrl || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+P+/HgAFdwI2QOYvBQAAAABJRU5ErkJggg==';
   
+  // Immediately set up image preloading for priority images
   useEffect(() => {
-    // If priority is true, we don't need to lazy load
+    // For priority images, preload immediately
     if (priority) {
       setIsLoading(false);
       setCurrentSrc(src);
-      return;
+      
+      // Add preload link for priority images
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'image';
+      link.href = src;
+      document.head.appendChild(link);
+      
+      return () => {
+        if (document.head.contains(link)) {
+          document.head.removeChild(link);
+        }
+      };
     }
     
-    // Reset loading state when src changes
-    setIsLoading(true);
-    
-    // Start with placeholder
+    // For non-priority images, use Intersection Observer
     setCurrentSrc(placeholder);
     
-    // Use Intersection Observer for better performance
     const imgObserver = new IntersectionObserver((entries, observer) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -61,7 +70,8 @@ export function BlurImage({
         }
       });
     }, {
-      rootMargin: "200px" // Load images 200px before they enter viewport (increased from 100px)
+      rootMargin: "300px", // Increased from 200px - load images further before they enter viewport
+      threshold: 0.01
     });
     
     // Observe the actual image element
@@ -84,7 +94,7 @@ export function BlurImage({
   
   return (
     <div className={cn(
-      "overflow-hidden relative",
+      "overflow-hidden relative bg-muted/20",
       !fill && aspectRatioClass[aspectRatio],
       containerClassName
     )}>
@@ -96,10 +106,10 @@ export function BlurImage({
       
       <img
         ref={imgRef}
-        src={currentSrc}
+        src={currentSrc || placeholder}
         alt={alt}
         className={cn(
-          "w-full h-full object-cover transition-all duration-500",
+          "w-full h-full object-cover transition-all duration-300",
           isLoading ? "scale-105 blur-sm" : "scale-100 blur-0",
           fill && "absolute inset-0",
           className

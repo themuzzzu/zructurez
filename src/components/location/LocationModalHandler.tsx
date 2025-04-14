@@ -8,11 +8,10 @@ export function LocationModalHandler() {
   
   // Handle closing the modal for first-time users
   const handleOpenChange = (open: boolean) => {
-    if (isFirstVisit && !open) {
-      // Don't allow closing on first visit
-      return;
-    }
+    // Always allow closing through the onOpenChange handler
     setShowLocationPicker(open);
+    
+    // If we're closing and it's the first visit, mark as no longer first visit
     if (!open && isFirstVisit) {
       resetFirstVisit();
     }
