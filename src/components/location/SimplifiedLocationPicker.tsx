@@ -6,13 +6,34 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogClose
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, MapPin, X } from "lucide-react";
 import { useLocation } from "@/providers/LocationProvider";
-import popularLocations from "@/data/popularLocations";
+
+// Define popular locations directly since we don't have the import file
+const popularLocations = [
+  "Delhi",
+  "Mumbai",
+  "Bengaluru",
+  "Hyderabad", 
+  "Chennai",
+  "Kolkata",
+  "Pune",
+  "Jaipur",
+  "Ahmedabad",
+  "Lucknow",
+  "Surat",
+  "Kanpur",
+  "Nagpur",
+  "Indore",
+  "Thane",
+  "Bhopal",
+  "Visakhapatnam",
+  "Patna",
+  "All India"
+];
 
 interface SimplifiedLocationPickerProps {
   open: boolean;
@@ -22,7 +43,7 @@ interface SimplifiedLocationPickerProps {
 
 export const SimplifiedLocationPicker = ({ open, onOpenChange, firstVisit = false }: SimplifiedLocationPickerProps) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const { currentLocation, updateLocation } = useLocation();
+  const { currentLocation, setCurrentLocation } = useLocation();
   
   const filteredLocations = popularLocations
     .filter(location => 
@@ -31,7 +52,7 @@ export const SimplifiedLocationPicker = ({ open, onOpenChange, firstVisit = fals
     .slice(0, 8); // Limit to 8 results for better UX
   
   const handleSelectLocation = (location: string) => {
-    updateLocation(location);
+    setCurrentLocation(location);
     onOpenChange(false); // Close the dialog after selection
   };
 
@@ -40,10 +61,15 @@ export const SimplifiedLocationPicker = ({ open, onOpenChange, firstVisit = fals
       <DialogContent className="sm:max-w-md">
         <DialogHeader className="flex flex-row items-center justify-between">
           <DialogTitle>Select your location</DialogTitle>
-          <DialogClose className="h-6 w-6 rounded-full opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-6 w-6 rounded-full opacity-70 hover:opacity-100 p-0"
+            onClick={() => onOpenChange(false)}
+          >
             <X className="h-4 w-4" />
             <span className="sr-only">Close</span>
-          </DialogClose>
+          </Button>
         </DialogHeader>
         
         <div className="relative flex items-center mb-4">
