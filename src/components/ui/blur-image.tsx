@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { Shimmer } from "./shimmer";
 
@@ -27,6 +27,7 @@ export function BlurImage({
 }: BlurImageProps) {
   const [isLoading, setIsLoading] = useState(!priority);
   const [currentSrc, setCurrentSrc] = useState(priority ? src : (blurDataUrl || src));
+  const imgRef = useRef<HTMLImageElement>(null);
   
   // Create small base64 placeholder if not provided
   const placeholder = blurDataUrl || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+P+/HgAFdwI2QOYvBQAAAABJRU5ErkJggg==';
@@ -60,12 +61,13 @@ export function BlurImage({
         }
       });
     }, {
-      rootMargin: "100px" // Load images 100px before they enter viewport
+      rootMargin: "200px" // Load images 200px before they enter viewport (increased from 100px)
     });
     
-    // Create a temporary DOM element to observe
-    const elem = document.createElement('div');
-    imgObserver.observe(elem);
+    // Observe the actual image element
+    if (imgRef.current) {
+      imgObserver.observe(imgRef.current);
+    }
     
     return () => {
       imgObserver.disconnect();
@@ -93,6 +95,7 @@ export function BlurImage({
       )}
       
       <img
+        ref={imgRef}
         src={currentSrc}
         alt={alt}
         className={cn(

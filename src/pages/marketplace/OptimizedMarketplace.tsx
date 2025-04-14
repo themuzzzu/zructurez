@@ -14,6 +14,7 @@ import { BrowseTabContent } from "@/components/marketplace/BrowseTabContent";
 import { SkeletonCard } from "@/components/loaders";
 import { useLoading } from "@/providers/LoadingProvider";
 import { FlashSale } from "@/components/marketplace/FlashSale";
+import { SponsoredRecommendations } from "@/components/recommendations/SponsoredRecommendations";
 
 // Optimized LazySection for better performance - reduced loading skeleton count
 const LazySection = ({ children, fallbackCount = 2 }) => (
@@ -60,6 +61,35 @@ export const OptimizedMarketplace = () => {
     const timeout = setTimeout(() => setLoading(false), 100);
     return () => clearTimeout(timeout);
   }, [setLoading]);
+  
+  // Preload critical images and resources for faster loading
+  useEffect(() => {
+    // Create link preload tags for critical resources
+    const preloadImages = [
+      '/lovable-uploads/a727b8a0-84a4-45b2-88da-392010b1b66c.png',
+      '/lovable-uploads/c395d99e-dcf4-4659-9c50-fc50708c858d.png'
+    ];
+    
+    const preloadLinks = preloadImages.map(image => {
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'image';
+      link.href = image;
+      return link;
+    });
+    
+    // Add preload links to document head
+    preloadLinks.forEach(link => document.head.appendChild(link));
+    
+    // Cleanup function to remove preload links
+    return () => {
+      preloadLinks.forEach(link => {
+        if (document.head.contains(link)) {
+          document.head.removeChild(link);
+        }
+      });
+    };
+  }, []);
   
   // Update state when URL parameters change
   useEffect(() => {
@@ -111,7 +141,7 @@ export const OptimizedMarketplace = () => {
   };
   
   return (
-    <div className="pt-2 sm:pt-0">
+    <div className="pt-2 sm:pt-0 px-1 sm:px-2">
       {/* Single Search Bar at the top with improved design - fixed padding */}
       <div className="mb-4 sm:mb-6">
         <AutocompleteSearch 
@@ -139,6 +169,16 @@ export const OptimizedMarketplace = () => {
       <LazySection>
         <div className="mb-4 sm:mb-6">
           <ProductRankings />
+        </div>
+      </LazySection>
+
+      {/* Sponsored Products below rankings - NEW */}
+      <LazySection>
+        <div className="mb-4 sm:mb-6">
+          <SponsoredRecommendations 
+            title="Sponsored Products" 
+            limit={4} 
+          />
         </div>
       </LazySection>
       

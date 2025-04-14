@@ -1,13 +1,12 @@
 
-import React, { Suspense, lazy } from "react";
+import React, { Suspense, lazy, useEffect } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { NotFound } from "@/components/NotFound";
 import { useParams } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { trackPageLoad } from "@/utils/performanceUtils";
-import { useEffect } from "react";
 
-// Lazy load the marketplace component
+// Lazy load the marketplace component with priority loading
 const OptimizedMarketplace = lazy(() => 
   import("./marketplace/OptimizedMarketplace").then(module => {
     console.log("OptimizedMarketplace component loaded");
@@ -35,7 +34,7 @@ const MarketplaceSkeleton = () => (
 const Marketplace = () => {
   const params = useParams();
   
-  // Track page load performance
+  // Track page load performance and preload resources
   useEffect(() => {
     trackPageLoad('/marketplace');
     
@@ -45,17 +44,26 @@ const Marketplace = () => {
       '/lovable-uploads/c395d99e-dcf4-4659-9c50-fc50708c858d.png'
     ];
     
-    resources.forEach(resource => {
+    // Create and add preload links for critical resources
+    const links = resources.map(resource => {
       const link = document.createElement('link');
       link.rel = 'preload';
       link.as = 'image';
       link.href = resource;
-      document.head.appendChild(link);
-      
-      return () => {
-        document.head.removeChild(link);
-      };
+      return link;
     });
+    
+    // Add links to document head
+    links.forEach(link => document.head.appendChild(link));
+    
+    return () => {
+      // Remove links on component unmount
+      links.forEach(link => {
+        if (document.head.contains(link)) {
+          document.head.removeChild(link);
+        }
+      });
+    };
   }, []);
   
   // If we have a productId parameter, show a 404 since the route should be /product/:productId

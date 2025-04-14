@@ -78,7 +78,7 @@ export const Navbar = () => {
           )}
 
           <div className="flex items-center gap-2">
-            {/* Location selector button - only visible on desktop or on homepage */}
+            {/* Location selector button - only visible on desktop */}
             <Popover open={locationPopoverOpen} onOpenChange={setLocationPopoverOpen}>
               <PopoverTrigger asChild>
                 <Button 
@@ -104,7 +104,7 @@ export const Navbar = () => {
               </PopoverTrigger>
             </Popover>
 
-            {/* Wishlist button - only visible on non-homepage desktop */}
+            {/* Wishlist button - only visible on non-homepage desktop in business/services/marketplace sections */}
             {isBusinessOrServices() && (
               <Button 
                 variant="ghost" 
