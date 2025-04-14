@@ -11,29 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, MapPin, X } from "lucide-react";
 import { useLocation } from "@/providers/LocationProvider";
-
-// Define popular locations directly since we don't have the import file
-const popularLocations = [
-  "Delhi",
-  "Mumbai",
-  "Bengaluru",
-  "Hyderabad", 
-  "Chennai",
-  "Kolkata",
-  "Pune",
-  "Jaipur",
-  "Ahmedabad",
-  "Lucknow",
-  "Surat",
-  "Kanpur",
-  "Nagpur",
-  "Indore",
-  "Thane",
-  "Bhopal",
-  "Visakhapatnam",
-  "Patna",
-  "All India"
-];
+import popularLocations from "@/data/popularLocations";
 
 interface SimplifiedLocationPickerProps {
   open: boolean;

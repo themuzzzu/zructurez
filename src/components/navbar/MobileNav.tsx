@@ -1,5 +1,5 @@
 
-import { Home, ShoppingBag, Wrench, Building, MessageSquare, MoreVertical, SunMoon, Users, Briefcase, Calendar, Map, Heart, MapPin, ShoppingCart } from "lucide-react";
+import { Home, ShoppingBag, Wrench, Building, MessageSquare, MoreVertical, SunMoon, Users, Briefcase, Calendar, Map, Heart, MapPin } from "lucide-react";
 import { Button } from "../ui/button";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
@@ -11,7 +11,6 @@ import {
 import { useTheme } from "../ThemeProvider";
 import { cn } from "@/lib/utils";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { toast } from "sonner";
 import { useLocation as useLocationContext } from "@/providers/LocationProvider";
 
 // Create a simplified icon component for mobile nav without dots/circles
@@ -45,7 +44,7 @@ export const MobileNav = () => {
   const isHomePage = location.pathname === "/";
   const { setShowLocationPicker } = useLocationContext();
 
-  // Main navigation items for Home page
+  // Main navigation items for Home page (modified with location and maps icons)
   const homeNavItems = [
     { icon: Home, label: "Home", path: "/" },
     { icon: ShoppingBag, label: "Zructs", path: "/marketplace" },
@@ -54,13 +53,13 @@ export const MobileNav = () => {
     { icon: MessageSquare, label: "Messages", path: "/messages" },
   ];
 
-  // Main navigation items for other pages
+  // Main navigation items for other pages (added wishlist icon left of cart)
   const otherNavItems = [
     { icon: Home, label: "Home", path: "/" },
     { icon: ShoppingBag, label: "Zructs", path: "/marketplace" },
     { icon: Wrench, label: "Services", path: "/services" },
     { icon: Heart, label: "Wishlist", path: "/wishlist" },
-    { icon: ShoppingCart, label: "Cart", path: "/cart" },
+    { icon: ShoppingBag, label: "Cart", path: "/cart" },
   ];
 
   // Additional items for the dropdown menu
