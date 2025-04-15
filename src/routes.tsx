@@ -1,5 +1,4 @@
-
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Home from "./pages/Home";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -20,7 +19,6 @@ import { RedirectHandler } from "@/components/RedirectHandler";
 import { Outlet } from "react-router-dom";
 import { ErrorView } from "@/components/ErrorView";
 
-// Create a layout component that includes RedirectHandler
 const Layout = () => {
   return (
     <>
@@ -148,5 +146,9 @@ const router = createBrowserRouter([
     ]
   }
 ]);
+
+export const Routes = () => {
+  return <RouterProvider router={router} />;
+};
 
 export default router;
