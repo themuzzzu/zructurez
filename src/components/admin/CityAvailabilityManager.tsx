@@ -62,8 +62,8 @@ export function CityAvailabilityManager() {
     return matchesSearch;
   });
   
-  // Group cities by district
-  const citiesByDistrict = filteredCities.reduce((acc: Record<string, City[]>, city) => {
+  // Group cities by district - explicitly typing the accumulator
+  const citiesByDistrict: Record<string, City[]> = filteredCities.reduce((acc: Record<string, City[]>, city) => {
     if (!acc[city.district]) {
       acc[city.district] = [];
     }

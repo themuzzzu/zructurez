@@ -2,6 +2,16 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
+// Define City interface for better type safety
+export interface City {
+  id: number;
+  city_name: string;
+  district: string;
+  is_available: boolean;
+  latitude?: number;
+  longitude?: number;
+}
+
 // Default city to show when no specific city is selected
 export const DEFAULT_CITY = "All India";
 
