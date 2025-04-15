@@ -1,19 +1,10 @@
-
 import { toast } from "sonner";
 
 // List of cities where Zructures is available
 // This could be fetched from an API/database in a real implementation
 export const availableCities = [
-  "Delhi",
-  "Mumbai",
-  "Bengaluru",
-  "Hyderabad",
-  "Chennai",
-  "Kolkata",
-  "Pune",
-  "Ahmedabad",
-  "Jaipur",
-  // Add more cities as needed
+  "Tadipatri",
+  // Other cities will be marked as not available
 ];
 
 // Check if Zructures is available in a given city
@@ -25,8 +16,7 @@ export const isZructuresAvailable = (location: string): boolean => {
   
   // Check if the city is in our list of available cities
   return availableCities.some(city => 
-    cityPart.toLowerCase().includes(city.toLowerCase()) || 
-    city.toLowerCase().includes(cityPart.toLowerCase())
+    cityPart.toLowerCase() === city.toLowerCase()
   );
 };
 
