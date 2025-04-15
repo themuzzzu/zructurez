@@ -1,4 +1,5 @@
-import React, { Suspense, lazy, useEffect } from "react";
+
+import React, { Suspense, lazy, useEffect, useState } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { NotFound } from "@/components/NotFound";
 import { useParams } from "react-router-dom";
@@ -30,7 +31,7 @@ const SponsoredProducts = lazy(() =>
 
 // Better loading placeholder with reduced padding on mobile
 const MarketplaceSkeleton = () => (
-  <div className="space-y-2 w-full px-1 sm:px-4">
+  <div className="space-y-2 w-full px-1 sm:px-4 animate-fade-in">
     <Skeleton className="h-10 w-full max-w-3xl mx-auto rounded-lg" />
     <Skeleton className="h-48 w-full rounded-lg" />
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
@@ -70,6 +71,7 @@ class ErrorBoundary extends React.Component<{
 
 const Marketplace = () => {
   const params = useParams();
+  const [isReady, setIsReady] = useState(false);
   
   // Track page load performance and preload resources
   useEffect(() => {
@@ -94,6 +96,9 @@ const Marketplace = () => {
     // Add links to document head
     links.forEach(link => document.head.appendChild(link));
     
+    // Set ready state after a short delay to prevent animation issues
+    const timer = setTimeout(() => setIsReady(true), 50);
+    
     return () => {
       // Remove links on component unmount
       links.forEach(link => {
@@ -101,6 +106,7 @@ const Marketplace = () => {
           document.head.removeChild(link);
         }
       });
+      clearTimeout(timer);
     };
   }, []);
   
@@ -111,7 +117,7 @@ const Marketplace = () => {
   
   return (
     <Layout>
-      <div className="container max-w-7xl mx-auto px-1 sm:px-4 pt-2 sm:pt-6 pb-16 overflow-visible">
+      <div className={`container max-w-7xl mx-auto px-1 sm:px-4 pt-2 sm:pt-6 pb-16 overflow-visible transition-opacity duration-300 ${isReady ? 'opacity-100' : 'opacity-0'}`}>
         <Suspense fallback={<MarketplaceSkeleton />}>
           <ErrorBoundary fallback={<ErrorView message="There was a problem loading the marketplace. Please try again later." />}>
             <OptimizedMarketplace />

@@ -1,3 +1,4 @@
+
 #root {
   width: 100%;
   margin: 0 auto;
@@ -40,27 +41,43 @@
   color: #888;
 }
 
-/* Mobile navigation animation */
+/* Mobile navigation animation - modified to be less jarring */
 @keyframes slide-up {
   from {
-    transform: translateY(100%);
+    transform: translateY(20px);
+    opacity: 0;
   }
   to {
     transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Prevent horizontal sliding animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 
 .animate-slide-up {
-  animation: slide-up 0.3s ease-out;
+  animation: slide-up 0.2s ease-out;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out;
 }
 
 /* Improved image loading animations */
 @keyframes shimmer {
   0% {
-    background-position: -400% 0;
+    background-position: -200% 0;
   }
   100% {
-    background-position: 400% 0;
+    background-position: 200% 0;
   }
 }
 
@@ -70,7 +87,7 @@
     rgba(255, 255, 255, 0.15),
     rgba(255, 255, 255, 0.05)
   );
-  background-size: 400% 100%;
+  background-size: 200% 100%;
   animation: shimmer 1.5s infinite ease-in-out;
 }
 
@@ -123,6 +140,13 @@
     padding-left: 4px !important; /* Reduced from 6px */
     padding-right: 4px !important; /* Reduced from 6px */
   }
+
+  /* Fix for sliding animations on initial load */
+  .page-transition {
+    transform: none !important;
+    opacity: 1 !important;
+    animation: fade-in 0.2s ease-out;
+  }
 }
 
 /* Utility class to hide scrollbars while allowing scrolling functionality */
@@ -163,20 +187,6 @@
 /* Top gap for services section */
 .services-top-gap {
   margin-top: 24px;
-}
-
-/* Animation for mobile navigation */
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.animate-fade-in {
-  animation: fade-in 0.3s ease-out;
 }
 
 /* Improved button animations */
@@ -256,4 +266,13 @@
   backface-visibility: hidden;
   transform: translateZ(0);
   -webkit-font-smoothing: subpixel-antialiased;
+}
+
+/* Fix for mobile animations on navigation */
+@media (max-width: 768px) {
+  .animate-slide-in, 
+  [class*="slide-"] {
+    transform: none !important;
+    animation: fade-in 0.2s ease-out !important;
+  }
 }

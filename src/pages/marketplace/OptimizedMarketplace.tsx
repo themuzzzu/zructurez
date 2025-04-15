@@ -10,7 +10,7 @@ import { ShopByCategory } from "@/components/marketplace/ShopByCategory";
 import { TrendingProducts } from "@/components/marketplace/TrendingProducts"; 
 import { PersonalizedRecommendations } from "@/components/marketplace/PersonalizedRecommendations";
 import { ProductRankings } from "@/components/rankings/ProductRankings";
-import { BrowseTabContent } from "@/components/marketplace/BrowseTabContent";
+import { BrowseTabContent } from "./BrowseTabContent";
 import { SkeletonCard } from "@/components/loaders";
 import { useLoading } from "@/providers/LoadingProvider";
 import { FlashSale } from "@/components/marketplace/FlashSale";
@@ -19,7 +19,7 @@ import { SponsoredRecommendations } from "@/components/recommendations/Sponsored
 // Optimized LazySection for better performance - reduced loading skeleton count
 const LazySection = ({ children, fallbackCount = 2 }) => (
   <Suspense fallback={
-    <div className="grid grid-cols-2 sm:grid-cols-2 gap-2">
+    <div className="grid grid-cols-2 sm:grid-cols-2 gap-2 animate-fade-in">
       {Array.from({ length: fallbackCount }).map((_, i) => (
         <SkeletonCard key={i} />
       ))}
@@ -52,13 +52,17 @@ export const OptimizedMarketplace = () => {
   const [sortOption, setSortOption] = useState("newest");
   const [priceRange, setPriceRange] = useState("all");
   const [gridLayout, setGridLayout] = useState<GridLayoutType>("grid4x4");
+  const [isPageReady, setIsPageReady] = useState(false);
   
   const { setLoading } = useLoading();
   
   // Show loading indicator when page loads - significantly reduced loading time to 100ms
   useEffect(() => {
     setLoading(true);
-    const timeout = setTimeout(() => setLoading(false), 100);
+    const timeout = setTimeout(() => {
+      setLoading(false);
+      setIsPageReady(true);
+    }, 100);
     return () => clearTimeout(timeout);
   }, [setLoading]);
   
@@ -141,7 +145,7 @@ export const OptimizedMarketplace = () => {
   };
   
   return (
-    <div className="pt-2 sm:pt-0 px-1 sm:px-2">
+    <div className={`pt-2 sm:pt-0 px-1 sm:px-2 transition-opacity duration-200 overflow-x-hidden ${isPageReady ? 'opacity-100' : 'opacity-0'}`}>
       {/* Single Search Bar at the top with improved design - fixed padding */}
       <div className="mb-4 sm:mb-6">
         <AutocompleteSearch 
@@ -193,27 +197,6 @@ export const OptimizedMarketplace = () => {
       <LazySection>
         <div className="mb-4 sm:mb-6">
           <SponsoredProducts gridLayout={gridLayout} />
-        </div>
-      </LazySection>
-      
-      {/* Trending Products - improved spacing */}
-      <LazySection>
-        <div className="mb-4 sm:mb-6">
-          <TrendingProducts gridLayout={gridLayout} />
-        </div>
-      </LazySection>
-      
-      {/* Personalized Recommendations - improved spacing */}
-      <LazySection>
-        <div className="mb-4 sm:mb-6">
-          <PersonalizedRecommendations />
-        </div>
-      </LazySection>
-      
-      {/* Crazy Deals Section - improved spacing */}
-      <LazySection>
-        <div className="mb-4 sm:mb-6">
-          <CrazyDeals />
         </div>
       </LazySection>
       

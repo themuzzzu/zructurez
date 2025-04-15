@@ -19,6 +19,7 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
   
   const isMobile = useMediaQuery("(max-width: 768px)");
   const { theme } = useTheme();
+  const [isLoading, setIsLoading] = useState(true);
 
   // Listen for sidebar state changes
   useEffect(() => {
@@ -28,15 +29,21 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
 
     window.addEventListener('sidebarStateChanged', handleSidebarChange);
     
+    // Set loading to false after a short delay to prevent animation issues
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 50);
+    
     return () => {
       window.removeEventListener('sidebarStateChanged', handleSidebarChange);
+      clearTimeout(timer);
     };
   }, []);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className={`min-h-screen bg-background ${isLoading ? 'overflow-hidden' : ''}`}>
       <Navbar />
-      <div className="flex flex-1 w-full h-[calc(100vh-4rem)] pt-16"> {/* Added pt-16 to account for navbar height */}
+      <div className="flex flex-1 w-full h-[calc(100vh-4rem)] pt-16"> 
         {!hideSidebar && !isMobile && (
           <div 
             style={{ width: sidebarWidth + 'px', minWidth: sidebarWidth + 'px' }} 
@@ -46,7 +53,7 @@ export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
           </div>
         )}
         <main 
-          className="flex-1 overflow-y-auto overflow-x-hidden transition-all duration-300 w-full"
+          className={`flex-1 overflow-y-auto overflow-x-hidden transition-all duration-200 w-full ${isLoading ? 'opacity-0' : 'opacity-100'}`}
           style={{ 
             marginLeft: hideSidebar || isMobile ? 0 : sidebarWidth + 'px',
             paddingBottom: isMobile ? '5rem' : '1rem', 
