@@ -78,6 +78,47 @@ export const Navbar = () => {
           )}
 
           <div className="flex items-center gap-2">
+            {/* Home page specific buttons (location and maps) - visible on mobile */}
+            {isHomePage && (
+              <>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  className="relative group flex items-center gap-1.5 px-2 py-1 h-9 sm:hidden"
+                  aria-label="Select location"
+                  onClick={() => setShowLocationPicker(true)}
+                >
+                  {loading ? (
+                    <Locate className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <MapPin className="h-4 w-4" />
+                  )}
+                </Button>
+                
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={() => navigate("/maps")}
+                  aria-label="View map"
+                  className="sm:hidden"
+                >
+                  <Map className="h-5 w-5" />
+                </Button>
+              </>
+            )}
+            
+            {/* Non-home page specific buttons (wishlist) - visible on mobile */}
+            {!isHomePage && isBusinessOrServices() && (
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => navigate("/wishlist")}
+                aria-label="View wishlist"
+              >
+                <Heart className="h-5 w-5" />
+              </Button>
+            )}
+
             {/* Location selector button - only visible on desktop */}
             <Popover open={locationPopoverOpen} onOpenChange={setLocationPopoverOpen}>
               <PopoverTrigger asChild>
@@ -104,7 +145,7 @@ export const Navbar = () => {
               </PopoverTrigger>
             </Popover>
 
-            {/* Wishlist button - only visible on non-homepage desktop in business/services/marketplace sections */}
+            {/* Wishlist button - only visible on desktop */}
             {isBusinessOrServices() && (
               <Button 
                 variant="ghost" 

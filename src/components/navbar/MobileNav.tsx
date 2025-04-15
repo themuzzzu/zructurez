@@ -43,19 +43,17 @@ export const MobileNav = () => {
   const isDarkMode = theme === "dark";
   const { setShowLocationPicker } = useLocationContext();
 
-  // Common navigation items for all pages
-  const commonNavItems = [
+  // Main navigation items for bottom bar according to the new layout
+  const mainNavItems = [
     { icon: Home, label: "Home", path: "/" },
     { icon: ShoppingBag, label: "Marketplace", path: "/marketplace" },
-    { icon: MapPin, label: "Location", path: "/location", onClick: () => setShowLocationPicker(true) },
-    { icon: Map, label: "Maps", path: "/maps" },
+    { icon: Wrench, label: "Services", path: "/services" },
+    { icon: Building, label: "Business", path: "/businesses" },
     { icon: MessageSquare, label: "Messages", path: "/messages" },
   ];
 
   // Additional items for the dropdown menu
   const dropdownItems = [
-    { icon: Wrench, label: "Services", path: "/services" },
-    { icon: Building, label: "Business", path: "/businesses" },
     { icon: Heart, label: "Wishlist", path: "/wishlist" },
     { icon: Briefcase, label: "Jobs", path: "/jobs" },
     { icon: Users, label: "Communities", path: "/communities" },
@@ -89,7 +87,7 @@ export const MobileNav = () => {
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 py-2 px-1 z-50 animate-fade-in">
       <div className="flex justify-between items-center max-w-md mx-auto">
-        {commonNavItems.map((item) => {
+        {mainNavItems.map((item) => {
           const Icon = item.icon;
           const isActive = checkActivePath(item.path);
           
