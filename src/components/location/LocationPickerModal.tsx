@@ -11,7 +11,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MapPin, Compass, Locate, Search, X } from "lucide-react";
-import { EnhancedLocationSelector } from "./EnhancedLocationSelector";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { isZructuresAvailable, handleLocationUpdate } from "@/utils/locationUtils";
 import { Badge } from "@/components/ui/badge";
@@ -35,12 +34,44 @@ export function LocationPickerModal({
   const { requestGeolocation, loading, position, address } = useGeolocation();
   const [availabilityChecked, setAvailabilityChecked] = useState(!firstVisit);
 
+  // Sample locations based on the image
+  const locations = [
+    "Tadipatri",
+    "Anantapur",
+    "Dharmavaram",
+    "Kadapa",
+    "Kurnool",
+    // Add more from image 1
+    "Delhi",
+    "Mumbai",
+    "Bengaluru",
+    "Hyderabad",
+    "Chennai",
+    "Kolkata",
+    "Pune",
+    "Jaipur"
+  ];
+  
+  const [filteredLocations, setFilteredLocations] = useState(locations);
+
   useEffect(() => {
     if (address) {
       const locationName = address.split(",")[0];
       setSelectedLocation(locationName);
     }
   }, [address]);
+  
+  // Filter locations when search query changes
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredLocations(locations);
+    } else {
+      const filtered = locations.filter(location => 
+        location.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredLocations(filtered);
+    }
+  }, [searchQuery]);
   
   // Update availability status when location changes
   useEffect(() => {
@@ -65,93 +96,89 @@ export function LocationPickerModal({
     onOpenChange(false);
   };
 
+  const handleLocationSelect = (location: string) => {
+    setSelectedLocation(location);
+    setTimeout(() => handleConfirmLocation(), 100);
+  };
+
   const isAvailable = isZructuresAvailable(selectedLocation);
 
   return (
     <Dialog open={open} onOpenChange={firstVisit ? () => {} : onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <MapPin className="h-5 w-5 text-primary" />
-            {firstVisit ? "Welcome! Choose your location" : "Change your location"}
+      <DialogContent className="sm:max-w-[500px] p-6 bg-zinc-900 text-white border-zinc-800">
+        <DialogHeader className="mb-4">
+          <DialogTitle className="flex items-center gap-2 text-2xl font-semibold text-white">
+            <MapPin className="h-7 w-7" />
+            Choose your location
           </DialogTitle>
-          <DialogDescription>
-            {firstVisit 
-              ? "Let us know where you're browsing from to show relevant content."
-              : "Update your location to see businesses and services in your area."}
-          </DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-6 py-4">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="text-sm font-medium">Your location</div>
-              {!firstVisit && (
-                <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)}>
-                  <X className="h-4 w-4 mr-1" />
-                  Cancel
-                </Button>
-              )}
+        <div className="space-y-6">
+          {/* Detect Location Button */}
+          <Button 
+            variant="outline" 
+            className="w-full justify-start gap-2 bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-white"
+            onClick={handleDetectLocation}
+            disabled={loading}
+            size="lg"
+          >
+            <Locate className="h-5 w-5" />
+            {loading || isDetecting ? "Detecting Your Location..." : "Detect My Location"}
+          </Button>
+          
+          {/* Search Input */}
+          <div className="relative">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-zinc-500" />
+            <Input
+              placeholder="Search city or town"
+              className="pl-9 bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          
+          {/* Location List */}
+          <div className="space-y-1">
+            <h3 className="text-lg font-medium text-white mb-2">Or select a city or town</h3>
+            <div className="space-y-3 max-h-64 overflow-y-auto pr-2">
+              {filteredLocations.map((location) => {
+                const isLocationAvailable = isZructuresAvailable(location);
+                
+                return (
+                  <div key={location} className="space-y-1">
+                    <Button 
+                      variant="ghost" 
+                      className="w-full justify-start text-left text-white hover:bg-zinc-800 h-auto py-2"
+                      onClick={() => handleLocationSelect(location)}
+                    >
+                      <MapPin className="h-4 w-4 mr-2 text-zinc-400" />
+                      <span>{location}</span>
+                    </Button>
+                    
+                    {/* Availability Message - Show only for the selected location */}
+                    {selectedLocation === location && !isLocationAvailable && (
+                      <div className="rounded-md p-3 bg-amber-900/30 border border-amber-800/40 text-amber-300 ml-6">
+                        <div className="flex gap-2 items-start">
+                          <span className="text-amber-300 mt-0.5">⚠</span>
+                          <div>
+                            <p className="font-medium">Zructures is not yet available in {location}.</p>
+                            <p className="text-sm text-amber-400/80">We're expanding rapidly! You'll still be able to browse but some features might be limited.</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
-            
-            <div className="flex items-center gap-2">
-              <Button 
-                variant="outline" 
-                className="w-full justify-start gap-2"
-                onClick={handleDetectLocation}
-                disabled={loading}
-              >
-                {loading || isDetecting ? (
-                  <Locate className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Compass className="h-4 w-4" />
-                )}
-                {loading || isDetecting 
-                  ? "Detecting your location..." 
-                  : "Detect my current location"}
-              </Button>
-            </div>
-            
-            <div>
-              <EnhancedLocationSelector 
-                value={selectedLocation}
-                onChange={setSelectedLocation}
-                className="w-full"
-                showDetect={false}
-              />
-            </div>
-            
-            {availabilityChecked && selectedLocation !== "All India" && (
-              <div className={`rounded-lg p-3 ${
-                isAvailable 
-                  ? "bg-green-50 border border-green-100 dark:bg-green-900/20 dark:border-green-900/30" 
-                  : "bg-amber-50 border border-amber-100 dark:bg-amber-900/20 dark:border-amber-900/30"
-              }`}>
-                <div className="flex items-center gap-2">
-                  <Badge variant={isAvailable ? "success" : "warning"} className="h-2 w-2 rounded-full p-0" />
-                  <span className={`text-sm ${
-                    isAvailable ? "text-green-700 dark:text-green-400" : "text-amber-700 dark:text-amber-400"
-                  }`}>
-                    {isAvailable 
-                      ? `Zructures is available in ${selectedLocation}!` 
-                      : `Zructures is not yet available in ${selectedLocation}`}
-                  </span>
-                </div>
-                {!isAvailable && (
-                  <p className="text-xs text-muted-foreground mt-1">
-                    We're expanding rapidly! We'll let you browse but some features might be limited.
-                  </p>
-                )}
-              </div>
-            )}
           </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="mt-6">
           <Button 
             variant="default" 
             onClick={handleConfirmLocation} 
-            className="w-full sm:w-auto"
+            className="w-full sm:w-auto bg-primary hover:bg-primary/90"
             disabled={selectedLocation === "All India" && firstVisit}
           >
             Confirm Location

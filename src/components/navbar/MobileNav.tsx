@@ -1,5 +1,5 @@
 
-import { Home, ShoppingBag, Wrench, Building, MessageSquare, MoreVertical, SunMoon, Users, Briefcase, Calendar, Map, Heart, MapPin } from "lucide-react";
+import { Home, ShoppingBag, Wrench, Building, MessageSquare, MoreVertical, SunMoon, Users, Briefcase, Calendar } from "lucide-react";
 import { Button } from "../ui/button";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
@@ -11,7 +11,6 @@ import {
 import { useTheme } from "../ThemeProvider";
 import { cn } from "@/lib/utils";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { useLocation as useLocationContext } from "@/providers/LocationProvider";
 
 // Create a simplified icon component for mobile nav without dots/circles
 const FilledIcon = ({ Icon }: { Icon: React.ElementType }) => {
@@ -41,7 +40,6 @@ export const MobileNav = () => {
   const { theme, setTheme } = useTheme();
   const isMobile = useMediaQuery("(max-width: 768px)");
   const isDarkMode = theme === "dark";
-  const { setShowLocationPicker } = useLocationContext();
 
   // Main navigation items for bottom bar according to the new layout
   const mainNavItems = [
@@ -54,9 +52,8 @@ export const MobileNav = () => {
 
   // Additional items for the dropdown menu
   const dropdownItems = [
-    { icon: Heart, label: "Wishlist", path: "/wishlist" },
-    { icon: Briefcase, label: "Jobs", path: "/jobs" },
     { icon: Users, label: "Communities", path: "/communities" },
+    { icon: Briefcase, label: "Jobs", path: "/jobs" },
     { icon: Calendar, label: "Events", path: "/events" },
   ];
 
