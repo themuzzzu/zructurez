@@ -9,7 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { toast } from "sonner";
-import { getAccurateAddress, isZructuresAvailable } from "@/utils/locationUtils";
+import { getAccurateAddress, isZructuresAvailable, showLocationAccessPrompt } from "@/utils/locationUtils";
 
 const MapView = () => {
   const navigate = useNavigate();
@@ -35,6 +35,16 @@ const MapView = () => {
       setIsLoading(false);
     }, 2000);
     
+    // Try to show first-time location access prompt
+    const checkFirstTimePrompt = async () => {
+      const shouldRequestLocation = await showLocationAccessPrompt();
+      if (shouldRequestLocation) {
+        requestGeolocation();
+      }
+    };
+    
+    checkFirstTimePrompt();
+    
     // If we already have position data, try to show precise location
     if (position) {
       setIsLoading(false);
@@ -55,7 +65,7 @@ const MapView = () => {
     }
     
     return () => clearTimeout(timeout);
-  }, [position]);
+  }, [position, requestGeolocation]);
 
   // Update detected location when geolocation hook data changes
   useEffect(() => {

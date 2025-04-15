@@ -4,8 +4,9 @@ import { toast } from "sonner";
 import { 
   reverseGeocode, 
   normalizeLocationName, 
-  findNearestAvailableCity,
-  storePreciseLocation 
+  getAccurateAddress,
+  storePreciseLocation,
+  showLocationAccessPrompt
 } from "@/utils/locationUtils";
 import { AVAILABLE_CITIES, normalizeLocationName as normalizeCity } from "@/utils/cityAvailabilityUtils";
 
@@ -68,13 +69,20 @@ export function useGeolocation() {
     checkPermission();
   }, []);
 
-  const requestGeolocation = (forceHighAccuracy: boolean = true) => {
+  const requestGeolocation = async (forceHighAccuracy: boolean = true) => {
     if (!navigator.geolocation) {
       setState(prev => ({
         ...prev,
         error: "Geolocation is not supported by your browser",
       }));
       toast.error("Geolocation is not supported by your browser");
+      return;
+    }
+
+    // Show first-time prompt if needed
+    const shouldProceed = await showLocationAccessPrompt();
+    if (!shouldProceed && localStorage.getItem('locationPromptShown') !== 'true') {
+      // User declined the custom prompt
       return;
     }
 
@@ -105,23 +113,8 @@ export function useGeolocation() {
             const addressInfo = await reverseGeocode(latitude, longitude);
             console.log("Got address info:", addressInfo);
             
-            // Normalize city name to our known list
+            // Use the actual detected city rather than finding nearest city
             let detectedCity = addressInfo.city;
-            
-            // If city is falsy or not in our list of available cities, find nearest city
-            if (!detectedCity || !AVAILABLE_CITIES.some(city => 
-              normalizeCity(detectedCity).toLowerCase() === city.toLowerCase())) {
-                
-              if (accuracy > 1000) {
-                // Low accuracy, find nearest city by coordinates
-                detectedCity = await findNearestAvailableCity(latitude, longitude);
-                console.log("Low accuracy - found nearest city:", detectedCity);
-              } else {
-                // Try to normalize the detected city name
-                detectedCity = normalizeCity(detectedCity);
-                console.log("Normalized city name:", detectedCity);
-              }
-            }
             
             // Store the precise location data
             storePreciseLocation(latitude, longitude, {
@@ -140,7 +133,7 @@ export function useGeolocation() {
               stateName: addressInfo.state,
               fullAddress: addressInfo.displayName,
               neighborhood: addressInfo.neighborhood,
-              address: formatAddress(addressInfo, detectedCity)
+              address: formatAddress(addressInfo)
             }));
             
             if (accuracy > 1000) {
@@ -194,7 +187,7 @@ export function useGeolocation() {
     getPosition(forceHighAccuracy);
   };
   
-  const formatAddress = (addressInfo: any, normalizedCity?: string): string => {
+  const formatAddress = (addressInfo: any): string => {
     let formattedAddress = '';
     
     // Use the neighborhood/suburb first if available
@@ -207,17 +200,16 @@ export function useGeolocation() {
       formattedAddress += formattedAddress ? `, ${addressInfo.street}` : addressInfo.street;
     }
     
-    // Use normalized city if available, otherwise use the one from addressInfo
-    const cityToUse = normalizedCity || addressInfo.city;
-    if (cityToUse) {
-      formattedAddress += formattedAddress ? `, ${cityToUse}` : cityToUse;
+    // Add city if available
+    if (addressInfo.city) {
+      formattedAddress += formattedAddress ? `, ${addressInfo.city}` : addressInfo.city;
     }
     
     if (addressInfo.state) {
       formattedAddress += formattedAddress ? `, ${addressInfo.state}` : addressInfo.state;
     }
     
-    return formattedAddress;
+    return formattedAddress || addressInfo.displayName || '';
   };
 
   const getGeolocationErrorMessage = (error: GeolocationPositionError): string => {

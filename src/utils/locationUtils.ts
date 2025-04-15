@@ -3,6 +3,7 @@ import {
   normalizeLocationName as normalizeCityName, 
   AVAILABLE_CITIES 
 } from './cityAvailabilityUtils';
+import { toast } from 'sonner';
 
 // Export normalizeLocationName from this file
 export const normalizeLocationName = normalizeCityName;
@@ -51,10 +52,7 @@ export const getAccurateAddress = async (latitude: number, longitude: number): P
     // First try with OpenStreetMap
     const osmAddressInfo = await reverseGeocode(latitude, longitude);
     
-    // Normalize the city name to match our known locations
-    const detectedCity = osmAddressInfo.city ? normalizeLocationName(osmAddressInfo.city) : '';
-    
-    // Format the address giving priority to known cities
+    // Format the address using the accurate components
     let formattedAddress = '';
     
     // Add neighborhood if available
@@ -67,26 +65,16 @@ export const getAccurateAddress = async (latitude: number, longitude: number): P
       formattedAddress += formattedAddress ? `, ${osmAddressInfo.street}` : osmAddressInfo.street;
     }
     
-    // Check if the detected city is in our available cities list
-    const isKnownCity = AVAILABLE_CITIES.some(city => 
-      detectedCity.toLowerCase() === city.toLowerCase() ||
-      detectedCity.toLowerCase().includes(city.toLowerCase())
-    );
-    
-    // If it's a known city, use it. Otherwise, find the nearest city
-    if (isKnownCity) {
-      formattedAddress += formattedAddress ? `, ${detectedCity}` : detectedCity;
-    } else {
-      // Find nearest city by coordinates - this would need to be implemented
-      // For now we'll use the detected city as a fallback
-      formattedAddress += formattedAddress ? `, ${detectedCity}` : detectedCity;
+    // Add city if available
+    if (osmAddressInfo.city) {
+      formattedAddress += formattedAddress ? `, ${osmAddressInfo.city}` : osmAddressInfo.city;
     }
     
     if (osmAddressInfo.state) {
       formattedAddress += formattedAddress ? `, ${osmAddressInfo.state}` : osmAddressInfo.state;
     }
     
-    return formattedAddress || "Unknown location";
+    return formattedAddress || osmAddressInfo.displayName || "Unknown location";
   } catch (error) {
     console.error("Error getting accurate address:", error);
     return "Location detection failed";
@@ -114,15 +102,11 @@ export const isZructuresAvailable = (locationName: string): boolean => {
 export const handleLocationUpdate = (location: string): void => {
   if (!location) return;
   
-  // Normalize location name
-  const cityPart = location.split(',')[0].trim();
-  const normalizedCity = normalizeLocationName(cityPart);
-  
   // Store in localStorage
   localStorage.setItem('userLocation', location);
   
   // Check availability
-  const isAvailable = isZructuresAvailable(normalizedCity);
+  const isAvailable = isZructuresAvailable(location);
   
   // Dispatch custom event for other components
   window.dispatchEvent(new CustomEvent('locationUpdated', { 
@@ -133,14 +117,6 @@ export const handleLocationUpdate = (location: string): void => {
   }));
   
   console.log(`Location updated: ${location} (Available: ${isAvailable ? 'Yes' : 'No'})`);
-};
-
-// Find nearest available city based on coordinates
-export const findNearestAvailableCity = async (latitude: number, longitude: number): Promise<string> => {
-  // For now we'll just return the first available city
-  // In a real implementation, this would calculate distances to all cities
-  // and return the nearest one
-  return AVAILABLE_CITIES[0];
 };
 
 // Store precise location data including neighborhood
@@ -187,4 +163,98 @@ export const getStoredPreciseLocation = () => {
     console.error("Error retrieving stored location:", error);
     return null;
   }
+};
+
+// Function to show first-time location access prompt
+export const showLocationAccessPrompt = () => {
+  return new Promise<boolean>((resolve) => {
+    // Check if we've already shown this prompt before
+    if (localStorage.getItem('locationPromptShown') === 'true') {
+      resolve(false);
+      return;
+    }
+    
+    if ('permissions' in navigator) {
+      // Check current permission status
+      navigator.permissions.query({ name: 'geolocation' as PermissionName })
+        .then((permissionStatus) => {
+          if (permissionStatus.state === 'granted') {
+            // Already granted, no need for prompt
+            localStorage.setItem('locationPromptShown', 'true');
+            resolve(false);
+          } else if (permissionStatus.state === 'prompt') {
+            // Need to show our custom prompt first
+            toast(
+              "Allow location access for a better experience",
+              {
+                description: "We use your precise location to show you relevant content nearby.",
+                action: {
+                  label: "Allow",
+                  onClick: () => {
+                    localStorage.setItem('locationPromptShown', 'true');
+                    resolve(true);
+                  }
+                },
+                cancel: {
+                  label: "Not now",
+                  onClick: () => {
+                    resolve(false);
+                  }
+                },
+                duration: 10000,
+              }
+            );
+          } else {
+            // Already denied, just mark as shown
+            localStorage.setItem('locationPromptShown', 'true');
+            resolve(false);
+          }
+        })
+        .catch(() => {
+          // Error checking permissions, just show the prompt
+          toast(
+            "Allow location access for a better experience",
+            {
+              description: "We use your precise location to show you relevant content nearby.",
+              action: {
+                label: "Allow",
+                onClick: () => {
+                  localStorage.setItem('locationPromptShown', 'true');
+                  resolve(true);
+                }
+              },
+              cancel: {
+                label: "Not now",
+                onClick: () => {
+                  resolve(false);
+                }
+              },
+              duration: 10000,
+            }
+          );
+        });
+    } else {
+      // Permissions API not available, just show standard toast
+      toast(
+        "Allow location access for a better experience",
+        {
+          description: "We use your precise location to show you relevant content nearby.",
+          action: {
+            label: "Allow",
+            onClick: () => {
+              localStorage.setItem('locationPromptShown', 'true');
+              resolve(true);
+            }
+          },
+          cancel: {
+            label: "Not now",
+            onClick: () => {
+              resolve(false);
+            }
+          },
+          duration: 10000,
+        }
+      );
+    }
+  });
 };
