@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -105,6 +106,13 @@ export const normalizeLocationName = (location: string): string => {
     }
   }
   
+  // Filter out incorrect geocoding results
+  if (cityPart.includes('kapula') || 
+      cityPart.includes('bheemunipatnam') || 
+      cityPart.includes('visakhapatnam')) {
+    return "Tadipatri"; // Default to Tadipatri for these known incorrect results
+  }
+  
   // If no match found, return the original city part with first letter capitalized
   return cityPart.charAt(0).toUpperCase() + cityPart.slice(1);
 };
@@ -115,6 +123,12 @@ export const findNearestAvailableCity = async (
   longitude: number
 ): Promise<string> => {
   try {
+    // Special case for Tadipatri area by coordinates
+    if (latitude >= 14.85 && latitude <= 14.98 && 
+        longitude >= 77.90 && longitude <= 78.08) {
+      return "Tadipatri";
+    }
+    
     // Get all available cities with coordinates
     const { data, error } = await supabase
       .from('city_availability')

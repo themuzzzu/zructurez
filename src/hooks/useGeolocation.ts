@@ -113,15 +113,33 @@ export function useGeolocation() {
             const addressInfo = await reverseGeocode(latitude, longitude);
             console.log("Got address info:", addressInfo);
             
-            // Use the actual detected city rather than finding nearest city
+            // Check if we're within Tadipatri area by coordinates
+            const isTadipatriArea = 
+              (latitude >= 14.85 && latitude <= 14.98 && 
+               longitude >= 77.90 && longitude <= 78.08);
+            
+            // Use the actual detected city but ensure Tadipatri is correctly identified
             let detectedCity = addressInfo.city;
             
-            // Fix for Tadipatri area detection - ensure we use the correct city name
-            // This is a safeguard against incorrect geocoding results
-            if ((latitude >= 14.89 && latitude <= 14.95 && 
-                longitude >= 77.96 && longitude <= 78.03) || 
-                addressInfo.displayName.toLowerCase().includes('tadipatri')) {
+            // If we're in Tadipatri area by coordinates or address mentions it
+            if (isTadipatriArea || 
+                addressInfo.displayName.toLowerCase().includes('tadipatri') ||
+                (detectedCity && detectedCity.toLowerCase().includes('tadipatri'))) {
               detectedCity = 'Tadipatri';
+            }
+            
+            // Never accept Kapula Uppada or other known incorrect cities
+            if (detectedCity.toLowerCase().includes('kapula') || 
+                detectedCity.toLowerCase().includes('bheemunipatnam') ||
+                detectedCity.toLowerCase().includes('visakhapatnam')) {
+              
+              // If we have coordinates that match Tadipatri area, override with Tadipatri
+              if (isTadipatriArea) {
+                detectedCity = 'Tadipatri';
+              } else {
+                // If we're not in a known area, fall back to the first available city
+                detectedCity = AVAILABLE_CITIES[0];
+              }
             }
             
             // Store the precise location data

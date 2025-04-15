@@ -1,3 +1,4 @@
+
 import { 
   normalizeLocationName as normalizeCityName, 
   AVAILABLE_CITIES 
@@ -15,7 +16,7 @@ export const reverseGeocode = async (lat: number, lon: number) => {
       { 
         headers: { 
           'Accept-Language': 'en',
-          'User-Agent': 'zructures-location-lookup' // Added User-Agent to avoid rate limiting
+          'User-Agent': 'zructures-location-lookup' 
         } 
       }
     );
@@ -29,15 +30,32 @@ export const reverseGeocode = async (lat: number, lon: number) => {
     const addressParts = data.address || {};
     const display = data.display_name || '';
     
-    // Fix for Tadipatri area - ensure we correctly identify it
+    // Check if location is in Tadipatri area by coordinates
+    // This is a safeguard to ensure our service area is correctly identified
     let city = addressParts.city || addressParts.town || addressParts.village || addressParts.hamlet || '';
     
-    // If location is in Anantapur district and near Tadipatri, ensure we identify as Tadipatri
-    if (addressParts.county === 'Anantapur' && 
-        (city.toLowerCase().includes('tadipatri') || 
-         display.toLowerCase().includes('tadipatri') ||
-         isTadipatriArea(lat, lon))) {
+    // If location is in Anantapur district or near Tadipatri coordinates,
+    // ensure we identify it as Tadipatri
+    if ((addressParts.county === 'Anantapur' && 
+         (city.toLowerCase().includes('tadipatri') || 
+          display.toLowerCase().includes('tadipatri'))) || 
+        isTadipatriArea(lat, lon)) {
       city = 'Tadipatri';
+    }
+    
+    // Never return Kapula Uppada or other incorrect locations
+    // Filter out known false positives
+    if (city.toLowerCase().includes('kapula') || 
+        city.toLowerCase().includes('bheemunipatnam') ||
+        city.toLowerCase().includes('visakhapatnam')) {
+      
+      // If we have coordinates that match Tadipatri area, override the incorrect city
+      if (isTadipatriArea(lat, lon)) {
+        city = 'Tadipatri';
+      } else {
+        // If we can't determine a reliable city, use the first available city as fallback
+        city = AVAILABLE_CITIES[0];
+      }
     }
     
     return {
@@ -59,17 +77,17 @@ export const reverseGeocode = async (lat: number, lon: number) => {
 // Helper function to check if coordinates are within Tadipatri area
 // Using approximate bounding box for Tadipatri
 const isTadipatriArea = (lat: number, lon: number): boolean => {
-  // Approximate bounding box for Tadipatri area
+  // Expanded bounding box for Tadipatri area
   const tadipatriBounds = {
-    minLat: 14.89, maxLat: 14.95,
-    minLon: 77.96, maxLon: 78.03
+    minLat: 14.85, maxLat: 14.98,
+    minLon: 77.90, maxLon: 78.08
   };
   
   return (lat >= tadipatriBounds.minLat && lat <= tadipatriBounds.maxLat && 
           lon >= tadipatriBounds.minLon && lon <= tadipatriBounds.maxLon);
 };
 
-// Get a more accurate address using OpenStreetMap or backup services
+// Get a more accurate address using OpenStreetMap
 export const getAccurateAddress = async (latitude: number, longitude: number): Promise<string> => {
   try {
     // First try with OpenStreetMap
@@ -201,91 +219,29 @@ export const showLocationAccessPrompt = () => {
   return new Promise<boolean>((resolve) => {
     // Check if we've already shown this prompt before
     if (localStorage.getItem('locationPromptShown') === 'true') {
-      resolve(false);
+      resolve(true);
       return;
     }
     
-    if ('permissions' in navigator) {
-      // Check current permission status
-      navigator.permissions.query({ name: 'geolocation' as PermissionName })
-        .then((permissionStatus) => {
-          if (permissionStatus.state === 'granted') {
-            // Already granted, no need for prompt
+    toast(
+      "Allow location access for a better experience",
+      {
+        description: "We use your precise location to show you relevant services in your area and improve delivery accuracy.",
+        action: {
+          label: "Allow",
+          onClick: () => {
             localStorage.setItem('locationPromptShown', 'true');
-            resolve(false);
-          } else if (permissionStatus.state === 'prompt') {
-            // Need to show our custom prompt first
-            toast(
-              "Allow location access for a better experience",
-              {
-                description: "We use your precise location to show you relevant content nearby.",
-                action: {
-                  label: "Allow",
-                  onClick: () => {
-                    localStorage.setItem('locationPromptShown', 'true');
-                    resolve(true);
-                  }
-                },
-                cancel: {
-                  label: "Not now",
-                  onClick: () => {
-                    resolve(false);
-                  }
-                },
-                duration: 10000,
-              }
-            );
-          } else {
-            // Already denied, just mark as shown
-            localStorage.setItem('locationPromptShown', 'true');
+            resolve(true);
+          }
+        },
+        cancel: {
+          label: "Not now",
+          onClick: () => {
             resolve(false);
           }
-        })
-        .catch(() => {
-          // Error checking permissions, just show the prompt
-          toast(
-            "Allow location access for a better experience",
-            {
-              description: "We use your precise location to show you relevant content nearby.",
-              action: {
-                label: "Allow",
-                onClick: () => {
-                  localStorage.setItem('locationPromptShown', 'true');
-                  resolve(true);
-                }
-              },
-              cancel: {
-                label: "Not now",
-                onClick: () => {
-                  resolve(false);
-                }
-              },
-              duration: 10000,
-            }
-          );
-        });
-    } else {
-      // Permissions API not available, just show standard toast
-      toast(
-        "Allow location access for a better experience",
-        {
-          description: "We use your precise location to show you relevant content nearby.",
-          action: {
-            label: "Allow",
-            onClick: () => {
-              localStorage.setItem('locationPromptShown', 'true');
-              resolve(true);
-            }
-          },
-          cancel: {
-            label: "Not now",
-            onClick: () => {
-              resolve(false);
-            }
-          },
-          duration: 10000,
-        }
-      );
-    }
+        },
+        duration: 10000,
+      }
+    );
   });
 };

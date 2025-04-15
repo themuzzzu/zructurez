@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ const MapView = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [detectedPreciseLocation, setDetectedPreciseLocation] = useState<string | null>(null);
   const [accuracyLevel, setAccuracyLevel] = useState<string | null>(null);
+  const [useAccurateGeocoding, setUseAccurateGeocoding] = useState(true);
   
   // Handle initial loading and location detection
   useEffect(() => {
@@ -38,7 +40,7 @@ const MapView = () => {
     const checkFirstTimePrompt = async () => {
       const shouldRequestLocation = await showLocationAccessPrompt();
       if (shouldRequestLocation) {
-        requestGeolocation();
+        requestGeolocation(true); // Request with high accuracy
       }
     };
     
@@ -71,41 +73,51 @@ const MapView = () => {
     const updatePreciseLocation = async () => {
       if (position) {
         try {
-          // Check if we're within Tadipatri area by coordinates
+          // If user is in or near Tadipatri area by coordinates, ensure we identify it correctly
           const isTadipatriArea = 
-            position.latitude >= 14.89 && position.latitude <= 14.95 && 
-            position.longitude >= 77.96 && position.longitude <= 78.03;
+            (position.latitude >= 14.85 && position.latitude <= 14.98 && 
+             position.longitude >= 77.90 && position.longitude <= 78.08);
           
-          // Try to get the most accurate address possible
-          const accurateAddress = await getAccurateAddress(position.latitude, position.longitude);
+          let accurateAddress;
+          
+          if (useAccurateGeocoding) {
+            // Try to get the most accurate address possible with our improved geocoding
+            accurateAddress = await getAccurateAddress(position.latitude, position.longitude);
+          } else {
+            // Fallback to direct components from the hook if geocoding fails
+            if (neighborhood && streetName && cityName) {
+              accurateAddress = `${neighborhood}, ${streetName}, ${cityName}`;
+            } else if (fullAddress) {
+              accurateAddress = fullAddress;
+            } else {
+              accurateAddress = "Unknown location";
+            }
+          }
           
           // If we're in Tadipatri area by coordinates but address doesn't mention it, append it
           if (isTadipatriArea && !accurateAddress.toLowerCase().includes('tadipatri')) {
-            const formattedAddress = `${accurateAddress}, Tadipatri`;
-            setDetectedPreciseLocation(formattedAddress);
+            setDetectedPreciseLocation(`${accurateAddress}, Tadipatri`);
           } else {
             setDetectedPreciseLocation(accurateAddress);
           }
           
-          // If we have neighborhood, street and city from the hook
+        } catch (error) {
+          console.error("Error getting accurate address:", error);
+          setUseAccurateGeocoding(false);
+          
+          // Fallback to components from the hook
           if (neighborhood && streetName && cityName) {
             const formattedAddress = `${neighborhood}, ${streetName}, ${cityName}`;
-            
-            // Only update if we don't already have a more detailed address
-            if (!detectedPreciseLocation || detectedPreciseLocation.length < formattedAddress.length) {
-              setDetectedPreciseLocation(formattedAddress);
-            }
+            setDetectedPreciseLocation(formattedAddress);
           } else if (fullAddress) {
             setDetectedPreciseLocation(fullAddress);
           }
-        } catch (error) {
-          console.error("Error getting accurate address:", error);
         }
       }
     };
     
     updatePreciseLocation();
-  }, [position, streetName, cityName, fullAddress, neighborhood]);
+  }, [position, streetName, cityName, fullAddress, neighborhood, useAccurateGeocoding]);
 
   // Format coordinates for display
   const formatCoordinate = (coord: number): string => {
@@ -116,7 +128,7 @@ const MapView = () => {
   const handleDetectLocation = () => {
     setIsLoading(true);
     setDetectedPreciseLocation(null); // Reset previous detection
-    requestGeolocation();
+    requestGeolocation(true); // Request with high accuracy
     toast.success("Detecting your precise location...");
   };
 
@@ -125,8 +137,8 @@ const MapView = () => {
     if (detectedPreciseLocation) {
       // If the location contains Tadipatri, ensure availability is true
       if (detectedPreciseLocation.toLowerCase().includes('tadipatri') ||
-          (position && position.latitude >= 14.89 && position.latitude <= 14.95 && 
-           position.longitude >= 77.96 && position.longitude <= 78.03)) {
+          (position && position.latitude >= 14.85 && position.latitude <= 14.98 && 
+           position.longitude >= 77.90 && position.longitude <= 78.08)) {
         
         // Ensure Tadipatri is in the location string
         let updatedLocation = detectedPreciseLocation;
@@ -147,7 +159,7 @@ const MapView = () => {
         }
       }
       
-      // Navigate back or to home
+      // Navigate back
       setTimeout(() => navigate(-1), 1000);
     }
   };
@@ -247,7 +259,7 @@ const MapView = () => {
           {detectedPreciseLocation && (
             <Card className="p-4">
               <h3 className="font-medium mb-2 flex items-center">
-                <MapPin className="h-5 w-5 text-primary" />
+                <MapPin className="h-5 w-5 text-primary mr-2" />
                 Precise Location Details
               </h3>
               <div className="space-y-1 text-sm">
