@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { 
   Dialog,
@@ -11,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MapPin, Locate, Search, X, AlertCircle, Navigation, Map } from "lucide-react";
 import { useGeolocation } from "@/hooks/useGeolocation";
-import { isZructuresAvailable, handleLocationUpdate, reverseGeocode } from "@/utils/locationUtils";
+import { isZructuresAvailable, handleLocationUpdate, reverseGeocode, normalizeLocationName } from "@/utils/locationUtils";
 import { toast } from "sonner";
 
 interface SimplifiedLocationPickerProps {

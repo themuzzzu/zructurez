@@ -1,6 +1,7 @@
+
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "sonner";
-import { ThemeProvider } from "@/providers/ThemeProvider";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import { LocationProvider } from "@/providers/LocationProvider";
 import { LocationModalHandler } from "@/components/location/LocationModalHandler";
 import Index from "@/pages/Index";
