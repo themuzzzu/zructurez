@@ -21,6 +21,23 @@ interface SimplifiedLocationPickerProps {
   firstVisit?: boolean;
 }
 
+// Custom Loader component
+const Loader = ({ className = "" }) => (
+  <svg
+    className={`animate-spin ${className}`}
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+  >
+    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+    <path
+      className="opacity-75"
+      fill="currentColor"
+      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+    ></path>
+  </svg>
+);
+
 export function SimplifiedLocationPicker({ 
   open, 
   onOpenChange,
@@ -150,7 +167,7 @@ export function SimplifiedLocationPicker({
             size="lg"
           >
             {loading || isProcessingLocation ? (
-              <Loader className="h-5 w-5 animate-spin" />
+              <Loader className="h-5 w-5" />
             ) : (
               <Navigation className="h-5 w-5" />
             )}
@@ -196,19 +213,6 @@ export function SimplifiedLocationPicker({
             </div>
           )}
           
-          {/* View Map Button */}
-          <Button 
-            variant="ghost" 
-            className="w-full justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-white"
-            onClick={() => {
-              onOpenChange(false);
-              window.location.href = '/maps';
-            }}
-          >
-            <Map className="h-4 w-4 mr-1" />
-            View Location on Map
-          </Button>
-          
           {/* Search Input */}
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-zinc-500" />
@@ -221,46 +225,31 @@ export function SimplifiedLocationPicker({
           </div>
           
           {/* Location List */}
-          <div>
+          <div className="space-y-1">
             <h3 className="text-lg font-medium text-white mb-2">Or select a city or town</h3>
-            <div className="space-y-1 max-h-64 overflow-y-auto">
+            <div className="space-y-3 max-h-64 overflow-y-auto pr-2">
               {filteredLocations.map((location) => {
-                const isAvailable = isZructuresAvailable(location);
+                const isLocationAvailable = isZructuresAvailable(location);
                 
                 return (
                   <div key={location} className="space-y-1">
                     <Button 
                       variant="ghost" 
-                      className="w-full justify-start text-left text-white hover:bg-zinc-800"
+                      className="w-full justify-start text-left text-white hover:bg-zinc-800 h-auto py-2"
                       onClick={() => handleLocationSelect(location)}
                     >
                       <MapPin className="h-4 w-4 mr-2 text-zinc-400" />
                       <span>{location}</span>
                     </Button>
                     
-                    {/* Availability indicators */}
-                    {selectedLocation === location && (
-                      <div className={`rounded-md p-3 ${isAvailable 
-                        ? "bg-green-900/30 border border-green-800/40 text-green-300" 
-                        : "bg-amber-900/30 border border-amber-800/40 text-amber-300"
-                      } ml-6`}>
+                    {/* Availability Message - Show only for the selected location */}
+                    {selectedLocation === location && !isLocationAvailable && (
+                      <div className="rounded-md p-3 bg-amber-900/30 border border-amber-800/40 text-amber-300 ml-6">
                         <div className="flex gap-2 items-start">
-                          <span className={isAvailable ? "text-green-300 mt-0.5" : "text-amber-300 mt-0.5"}>
-                            {isAvailable ? "✓" : "⚠"}
-                          </span>
+                          <span className="text-amber-300 mt-0.5">⚠</span>
                           <div>
-                            <p className="font-medium">
-                              {isAvailable 
-                                ? `Zructures is available in ${location}` 
-                                : `Zructures is not yet available in ${location}`
-                              }
-                            </p>
-                            <p className="text-sm text-amber-400/80">
-                              {isAvailable 
-                                ? "You can access all features and services." 
-                                : "We're expanding rapidly! You'll still be able to browse but some features might be limited."
-                              }
-                            </p>
+                            <p className="font-medium">Zructures is not yet available in {location}.</p>
+                            <p className="text-sm text-amber-400/80">We're expanding rapidly! You'll still be able to browse but some features might be limited.</p>
                           </div>
                         </div>
                       </div>
@@ -271,40 +260,18 @@ export function SimplifiedLocationPicker({
             </div>
           </div>
         </div>
-        
-        {/* Add footer with confirm button for better UX, especially on first visit */}
-        {firstVisit && (
-          <DialogFooter className="mt-6">
-            <Button 
-              onClick={() => onOpenChange(false)}
-              className="w-full"
-              variant="default"
-              disabled={selectedLocation === "All India"}
-            >
-              Confirm Location
-            </Button>
-          </DialogFooter>
-        )}
+
+        <DialogFooter className="mt-6">
+          <Button 
+            variant="default" 
+            onClick={() => handleLocationSelect(selectedLocation)} 
+            className="w-full sm:w-auto bg-primary hover:bg-primary/90"
+            disabled={selectedLocation === "All India" && firstVisit}
+          >
+            Confirm Location
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
-}
-
-function Loader(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-    </svg>
   );
 }
