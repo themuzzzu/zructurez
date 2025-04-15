@@ -1,267 +1,130 @@
 
-import { toast } from "sonner";
+import { normalizeLocationName, AVAILABLE_CITIES } from './cityAvailabilityUtils';
 
-// List of cities where Zructures is available
-// This could be fetched from an API/database in a real implementation
-export const availableCities = [
-  "Tadipatri",
-  // Other cities will be marked as not available
-];
-
-// Check if Zructures is available in a given city
-export const isZructuresAvailable = (location: string): boolean => {
-  if (!location) return false;
-  
-  // Extract city name from the location string (could be "City - Area" format)
-  const cityPart = location.includes(" - ") 
-    ? location.split(" - ")[0] 
-    : location.includes(", ") 
-      ? location.split(", ")[0]
-      : location;
-  
-  // Check if the city is in our list of available cities
-  return availableCities.some(city => 
-    cityPart.toLowerCase() === city.toLowerCase() || 
-    cityPart.toLowerCase().includes(city.toLowerCase()) ||
-    city.toLowerCase().includes(cityPart.toLowerCase())
-  );
-};
-
-// Get user's current location using browser's Geolocation API with high accuracy
-export const getCurrentLocation = (): Promise<GeolocationPosition> => {
-  return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) {
-      reject(new Error("Geolocation is not supported by your browser"));
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        resolve(position);
-      },
-      (error) => {
-        reject(error);
-      },
-      { 
-        enableHighAccuracy: true, // Force the use of GPS for maximum precision
-        timeout: 20000,           // Increased timeout for better accuracy
-        maximumAge: 0             // Always get fresh location data
-      }
-    );
-  });
-};
-
-// Reverse geocode coordinates to get location name with more details
-export const reverseGeocode = async (
-  latitude: number,
-  longitude: number
-): Promise<{
-  displayName: string;
-  city: string;
-  state: string;
-  country: string;
-  street: string;
-  suburb: string;
-  fullAddress: string;
-  raw: any;
-}> => {
+// Use OpenStreetMap's Nominatim for reverse geocoding (free)
+export const reverseGeocode = async (lat: number, lon: number) => {
   try {
-    // Using more detailed parameters for the Nominatim API
     const response = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1&zoom=18&accept-language=en`,
-      {
-        headers: {
-          'Accept': 'application/json',
-          'User-Agent': 'ZructuresApp/1.0' // Add a proper user agent as per Nominatim guidelines
-        }
-      }
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`,
+      { headers: { 'Accept-Language': 'en' } }
     );
-
+    
     if (!response.ok) {
-      throw new Error(`Failed to reverse geocode location: ${response.statusText}`);
+      throw new Error('Failed to reverse geocode');
     }
-
+    
     const data = await response.json();
-    const address = data.address;
-
-    // Process address components with fallbacks for different naming conventions
-    const city = address.city || address.town || address.village || address.hamlet || address.suburb || 'Tadipatri';
-    const street = address.road || address.street || address.footway || address.path || 'Unknown road';
-    const state = address.state || 'Andhra Pradesh';
-    const suburb = address.suburb || address.neighbourhood || address.district || '';
-
-    // Detailed address components
+    
+    const addressParts = data.address || {};
+    const display = data.display_name || '';
+    
     return {
-      displayName: data.display_name,
-      city: city,
-      state: state,
-      country: address.country || 'India',
-      street: street,
-      suburb: suburb,
-      fullAddress: formatFullAddress(address),
-      raw: data // Keep the raw data for debugging
+      street: addressParts.road || addressParts.pedestrian || addressParts.suburb || '',
+      city: addressParts.city || addressParts.town || addressParts.village || addressParts.hamlet || '',
+      state: addressParts.state || '',
+      country: addressParts.country || '',
+      postcode: addressParts.postcode || '',
+      suburb: addressParts.suburb || '',
+      displayName: display
     };
   } catch (error) {
     console.error("Error in reverse geocoding:", error);
-    toast.error("Failed to get your precise location address. Please try again.");
     throw error;
   }
 };
 
-// Format a complete address from components
-const formatFullAddress = (address: any): string => {
-  const components = [];
-  
-  if (address.road || address.street || address.footway || address.path)
-    components.push(address.road || address.street || address.footway || address.path);
-    
-  if (address.suburb && address.suburb !== (address.road || address.street))
-    components.push(address.suburb);
-    
-  if (address.city || address.town || address.village || address.hamlet)
-    components.push(address.city || address.town || address.village || address.hamlet);
-    
-  if (address.state)
-    components.push(address.state);
-    
-  if (address.postcode)
-    components.push(address.postcode);
-    
-  // Only add country if we don't have many other components already
-  if (address.country && components.length < 3)
-    components.push(address.country);
-    
-  return components.join(", ");
-};
-
-// Get location display name for UI
-export const getLocationDisplayName = (location: string): string => {
-  if (!location || location === "All India") return "Select location";
-  return location;
-};
-
-// Handle location update and check availability
-export const handleLocationUpdate = (
-  location: string,
-  onUnavailable?: () => void
-): void => {
-  // If location is likely a full address, extract just the city part
-  const cityPart = location.includes(", ") 
-    ? location.split(", ")[0] // Take the first part before comma
-    : location;
-    
-  const isAvailable = isZructuresAvailable(cityPart);
-  
-  // Save the location to localStorage
-  localStorage.setItem("userLocation", location);
-  
-  // Dispatch custom event for other components to listen to
-  window.dispatchEvent(
-    new CustomEvent("locationUpdated", {
-      detail: { location, isAvailable }
-    })
-  );
-  
-  // Show toast notification based on availability
-  if (isAvailable) {
-    toast.success(`Location updated to ${location}`);
-  } else {
-    toast.info(`Zructures is not yet available in ${cityPart}. We're expanding soon!`);
-    if (onUnavailable) {
-      onUnavailable();
-    }
-  }
-};
-
-// Attempt to get more accurate address using nominatim with additional parameters
-export const getAccurateAddress = async (
-  latitude: number,
-  longitude: number
-): Promise<string> => {
+// Get a more accurate address using OpenStreetMap or backup services
+export const getAccurateAddress = async (latitude: number, longitude: number): Promise<string> => {
   try {
-    // Using the highest zoom level and most detailed request
-    const url = new URL("https://nominatim.openstreetmap.org/reverse");
-    url.searchParams.append("format", "json");
-    url.searchParams.append("lat", latitude.toString());
-    url.searchParams.append("lon", longitude.toString());
-    url.searchParams.append("addressdetails", "1");
-    url.searchParams.append("zoom", "18");
-    url.searchParams.append("namedetails", "1");
-    url.searchParams.append("accept-language", "en");
+    // First try with OpenStreetMap
+    const osmAddressInfo = await reverseGeocode(latitude, longitude);
     
-    const response = await fetch(url.toString(), {
-      headers: {
-        'Accept': 'application/json',
-        'User-Agent': 'ZructuresApp/1.0'
-      }
-    });
+    // Normalize the city name to match our known locations
+    const detectedCity = osmAddressInfo.city ? normalizeLocationName(osmAddressInfo.city) : '';
     
-    if (!response.ok) {
-      throw new Error("Failed to get accurate address");
+    // Format the address giving priority to known cities
+    let formattedAddress = '';
+    
+    if (osmAddressInfo.street) {
+      formattedAddress += osmAddressInfo.street;
     }
     
-    const data = await response.json();
-    
-    // Log the complete response for debugging
-    console.log("Detailed location data:", data);
-    
-    if (data.address) {
-      const addr = data.address;
-      const street = addr.road || addr.street || addr.pedestrian || addr.path || addr.footway || 'Unknown Street';
-      const area = addr.suburb || addr.neighbourhood || addr.hamlet || '';
-      const city = addr.city || addr.town || addr.village || addr.municipality || 'Tadipatri';
-      
-      // Build address string with everything we have
-      let fullAddress = street;
-      
-      if (area && street !== area) {
-        fullAddress += area ? `, ${area}` : '';
-      }
-      
-      if (city && !fullAddress.includes(city)) {
-        fullAddress += city ? `, ${city}` : '';
-      }
-      
-      return fullAddress;
+    if (osmAddressInfo.suburb && osmAddressInfo.suburb !== osmAddressInfo.street) {
+      formattedAddress += formattedAddress ? `, ${osmAddressInfo.suburb}` : osmAddressInfo.suburb;
     }
     
-    return data.display_name || "Location could not be determined precisely";
+    // Check if the detected city is in our available cities list
+    const isKnownCity = AVAILABLE_CITIES.some(city => 
+      detectedCity.toLowerCase() === city.toLowerCase() ||
+      detectedCity.toLowerCase().includes(city.toLowerCase())
+    );
+    
+    // If it's a known city, use it. Otherwise, find the nearest city
+    if (isKnownCity) {
+      formattedAddress += formattedAddress ? `, ${detectedCity}` : detectedCity;
+    } else {
+      // Find nearest city by coordinates - this would need to be implemented
+      // For now we'll use the detected city as a fallback
+      formattedAddress += formattedAddress ? `, ${detectedCity}` : detectedCity;
+    }
+    
+    if (osmAddressInfo.state) {
+      formattedAddress += formattedAddress ? `, ${osmAddressInfo.state}` : osmAddressInfo.state;
+    }
+    
+    return formattedAddress || "Unknown location";
   } catch (error) {
     console.error("Error getting accurate address:", error);
-    return "Unable to determine precise location";
+    return "Location detection failed";
   }
 };
 
-// Determine user's region based on coordinates
-export const determineRegion = async (latitude: number, longitude: number): Promise<string> => {
-  try {
-    const geocodeData = await reverseGeocode(latitude, longitude);
-    
-    // Check if we've detected Andhra Pradesh
-    if (geocodeData.state.toLowerCase().includes("andhra")) {
-      // Check specific regions within Andhra Pradesh
-      const rayalaseemaDistricts = ["anantapur", "kadapa", "kurnool", "chittoor"];
-      const coastalDistricts = ["visakhapatnam", "east godavari", "west godavari", "krishna", "guntur", "prakasam", "nellore"];
-      
-      // Try to get district from geocode data
-      const district = geocodeData.raw?.address?.state_district || 
-                      geocodeData.raw?.address?.county || 
-                      '';
-      
-      if (district) {
-        const districtLower = district.toLowerCase();
-        
-        if (rayalaseemaDistricts.some(d => districtLower.includes(d))) {
-          return "Rayalaseema";
-        } else if (coastalDistricts.some(d => districtLower.includes(d))) {
-          return "Coastal Andhra";
-        }
-      }
-    }
-    
-    return "Other"; // Default region
-  } catch (error) {
-    console.error("Error determining region:", error);
-    return "Unknown";
-  }
+// Check if Zructures is available in given location
+export const isZructuresAvailable = (locationName: string): boolean => {
+  if (!locationName || locationName === "All India") return true;
+  
+  // Extract city name before any comma
+  const cityPart = locationName.split(',')[0].trim();
+  
+  // Normalize the city name
+  const normalizedCity = normalizeLocationName(cityPart);
+  
+  // Check if it's in our list of available cities
+  return AVAILABLE_CITIES.some(city => 
+    normalizedCity.toLowerCase() === city.toLowerCase() ||
+    normalizedCity.toLowerCase().includes(city.toLowerCase())
+  );
+};
+
+// Handle location updates
+export const handleLocationUpdate = (location: string): void => {
+  if (!location) return;
+  
+  // Normalize location name
+  const cityPart = location.split(',')[0].trim();
+  const normalizedCity = normalizeLocationName(cityPart);
+  
+  // Store in localStorage
+  localStorage.setItem('userLocation', location);
+  
+  // Check availability
+  const isAvailable = isZructuresAvailable(normalizedCity);
+  
+  // Dispatch custom event for other components
+  window.dispatchEvent(new CustomEvent('locationUpdated', { 
+    detail: { 
+      location: location,
+      isAvailable: isAvailable
+    } 
+  }));
+  
+  console.log(`Location updated: ${location} (Available: ${isAvailable ? 'Yes' : 'No'})`);
+};
+
+// Find nearest available city based on coordinates
+export const findNearestAvailableCity = async (latitude: number, longitude: number): Promise<string> => {
+  // For now we'll just return the first available city
+  // In a real implementation, this would calculate distances to all cities
+  // and return the nearest one
+  return AVAILABLE_CITIES[0];
 };

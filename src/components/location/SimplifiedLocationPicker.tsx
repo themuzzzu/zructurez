@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { 
   Dialog,
@@ -61,14 +60,24 @@ export function SimplifiedLocationPicker({
   const [detectedAddress, setDetectedAddress] = useState<string | null>(null);
   const [isProcessingLocation, setIsProcessingLocation] = useState(false);
   
-  // Sample locations based on the image
-  const locations = [
+  // Available locations - hardcoded list of locations where service is available
+  const availableLocations = [
     "Tadipatri",
-    "Anantapur",
+    "Anantapur"
+  ];
+  
+  // Coming soon locations - locations where service will be available in the future
+  const comingSoonLocations = [
     "Dharmavaram",
     "Kadapa",
-    "Kurnool",
-    // Add more from image 1
+    "Kurnool"
+  ];
+  
+  // All locations
+  const allLocations = [
+    ...availableLocations,
+    ...comingSoonLocations,
+    // Major cities as examples
     "Delhi",
     "Mumbai",
     "Bengaluru",
@@ -79,14 +88,14 @@ export function SimplifiedLocationPicker({
     "Jaipur"
   ];
   
-  const [filteredLocations, setFilteredLocations] = useState(locations);
+  const [filteredLocations, setFilteredLocations] = useState(allLocations);
   
   // Filter locations when search query changes
   useEffect(() => {
     if (!searchQuery.trim()) {
-      setFilteredLocations(locations);
+      setFilteredLocations(allLocations);
     } else {
-      const filtered = locations.filter(location => 
+      const filtered = allLocations.filter(location => 
         location.toLowerCase().includes(searchQuery.toLowerCase())
       );
       setFilteredLocations(filtered);
@@ -98,20 +107,42 @@ export function SimplifiedLocationPicker({
     if (position && (fullAddress || cityName) && !detectedAddress) {
       setIsProcessingLocation(false);
       
-      // Use the most detailed address information available
-      if (streetName && cityName) {
-        const locationString = `${streetName}, ${cityName}`;
+      let locationString = "";
+      
+      // First, try to extract city from the address info
+      let detectedCity = cityName || 
+        (fullAddress ? fullAddress.split(',')[0].trim() : null);
+      
+      if (detectedCity) {
+        // Normalize the city name to match our known cities
+        detectedCity = normalizeLocationName(detectedCity);
+        
+        // Check if this is a known location where our service is available
+        const isKnownLocation = availableLocations.some(loc => 
+          detectedCity?.toLowerCase() === loc.toLowerCase()
+        );
+        
+        if (!isKnownLocation) {
+          // If not a known location, find the nearest available city
+          const nearestCity = availableLocations[0]; // Fallback to first available
+          
+          // Let the user know we're using a nearby location
+          toast.info(`We detected you're near ${detectedCity}, but service is available in ${nearestCity}.`);
+          
+          // Use the nearest available city
+          detectedCity = nearestCity;
+        }
+        
+        // Create location string
+        if (streetName) {
+          locationString = `${streetName}, ${detectedCity}`;
+        } else {
+          locationString = detectedCity;
+        }
+        
         setDetectedAddress(locationString);
         setSelectedLocation(locationString);
         handleLocationUpdate(locationString);
-      } else if (fullAddress) {
-        setDetectedAddress(fullAddress);
-        setSelectedLocation(fullAddress);
-        handleLocationUpdate(fullAddress);
-      } else if (cityName) {
-        setDetectedAddress(cityName);
-        setSelectedLocation(cityName);
-        handleLocationUpdate(cityName);
       }
     }
   }, [position, fullAddress, cityName, streetName, detectedAddress]);
@@ -132,6 +163,15 @@ export function SimplifiedLocationPicker({
     setSelectedLocation(location);
     handleLocationUpdate(location);
     onOpenChange(false);
+  };
+
+  // Function to check if location is available
+  const isLocationAvailable = (location: string): boolean => {
+    // Check if the location starts with or exactly matches any of the available locations
+    return availableLocations.some(availableLocation => 
+      location.toLowerCase() === availableLocation.toLowerCase() || 
+      location.toLowerCase().startsWith(availableLocation.toLowerCase() + ",")
+    );
   };
 
   return (
@@ -229,7 +269,7 @@ export function SimplifiedLocationPicker({
             <h3 className="text-lg font-medium text-white mb-2">Or select a city or town</h3>
             <div className="space-y-3 max-h-64 overflow-y-auto pr-2">
               {filteredLocations.map((location) => {
-                const isLocationAvailable = isZructuresAvailable(location);
+                const isAvailable = availableLocations.includes(location);
                 
                 return (
                   <div key={location} className="space-y-1">
@@ -240,10 +280,15 @@ export function SimplifiedLocationPicker({
                     >
                       <MapPin className="h-4 w-4 mr-2 text-zinc-400" />
                       <span>{location}</span>
+                      {isAvailable && (
+                        <span className="ml-2 px-1.5 py-0.5 text-xs bg-green-900/30 text-green-300 rounded-full">
+                          Available
+                        </span>
+                      )}
                     </Button>
                     
                     {/* Availability Message - Show only for the selected location */}
-                    {selectedLocation === location && !isLocationAvailable && (
+                    {selectedLocation === location && !isAvailable && (
                       <div className="rounded-md p-3 bg-amber-900/30 border border-amber-800/40 text-amber-300 ml-6">
                         <div className="flex gap-2 items-start">
                           <span className="text-amber-300 mt-0.5">⚠</span>

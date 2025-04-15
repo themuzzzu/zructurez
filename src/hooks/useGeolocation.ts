@@ -1,7 +1,12 @@
 
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { reverseGeocode } from "@/utils/locationUtils";
+import { 
+  reverseGeocode, 
+  normalizeLocationName, 
+  findNearestAvailableCity 
+} from "@/utils/locationUtils";
+import { AVAILABLE_CITIES, normalizeLocationName as normalizeCity } from "@/utils/cityAvailabilityUtils";
 
 interface GeolocationPosition {
   latitude: number;
@@ -100,23 +105,44 @@ export function useGeolocation() {
             timestamp: new Date().toISOString()
           }));
 
-          // Get detailed address using Nominatim's reverse geocoding
           try {
+            // Get detailed address using reverse geocoding
             const addressInfo = await reverseGeocode(latitude, longitude);
             console.log("Got address info:", addressInfo);
+            
+            // Normalize city name to our known list
+            let detectedCity = addressInfo.city;
+            
+            // If city is falsy or not in our list of available cities, find nearest city
+            if (!detectedCity || !AVAILABLE_CITIES.some(city => 
+              normalizeCity(detectedCity).toLowerCase() === city.toLowerCase())) {
+                
+              if (accuracy > 1000) {
+                // Low accuracy, find nearest city by coordinates
+                detectedCity = await findNearestAvailableCity(latitude, longitude);
+                console.log("Low accuracy - found nearest city:", detectedCity);
+              } else {
+                // Try to normalize the detected city name
+                detectedCity = normalizeCity(detectedCity);
+                console.log("Normalized city name:", detectedCity);
+              }
+            }
             
             setState(prev => ({
               ...prev,
               loading: false,
-              cityName: addressInfo.city,
+              cityName: detectedCity,
               streetName: addressInfo.street,
               stateName: addressInfo.state,
               fullAddress: addressInfo.displayName,
-              address: formatAddress(addressInfo)
+              address: formatAddress(addressInfo, detectedCity)
             }));
             
             // Store address in localStorage
-            localStorage.setItem('userAddressDetails', JSON.stringify(addressInfo));
+            localStorage.setItem('userAddressDetails', JSON.stringify({
+              ...addressInfo,
+              normalizedCity: detectedCity
+            }));
             
             if (accuracy > 1000) {
               toast.info("Location detected with low accuracy. Try again in an open area for better results.");
@@ -169,7 +195,7 @@ export function useGeolocation() {
     getPosition(forceHighAccuracy);
   };
   
-  const formatAddress = (addressInfo: any): string => {
+  const formatAddress = (addressInfo: any, normalizedCity?: string): string => {
     let formattedAddress = '';
     
     if (addressInfo.street) {
@@ -180,8 +206,10 @@ export function useGeolocation() {
       formattedAddress += formattedAddress ? `, ${addressInfo.suburb}` : addressInfo.suburb;
     }
     
-    if (addressInfo.city) {
-      formattedAddress += formattedAddress ? `, ${addressInfo.city}` : addressInfo.city;
+    // Use normalized city if available, otherwise use the one from addressInfo
+    const cityToUse = normalizedCity || addressInfo.city;
+    if (cityToUse) {
+      formattedAddress += formattedAddress ? `, ${cityToUse}` : cityToUse;
     }
     
     if (addressInfo.state) {
