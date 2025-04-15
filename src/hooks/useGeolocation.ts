@@ -14,6 +14,9 @@ interface GeolocationState {
   loading: boolean;
   error: string | null;
   cityName: string | null;
+  streetName: string | null;
+  stateName: string | null;
+  fullAddress: string | null;
 }
 
 export function useGeolocation() {
@@ -21,6 +24,9 @@ export function useGeolocation() {
     position: null,
     address: null,
     cityName: null,
+    streetName: null,
+    stateName: null,
+    fullAddress: null,
     loading: false,
     error: null,
   });
@@ -62,14 +68,14 @@ export function useGeolocation() {
     setState(prev => ({ ...prev, loading: true, error: null }));
 
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
         const { latitude, longitude, accuracy } = position.coords;
         
         // Store the precise location in state
         setState(prev => ({
           ...prev,
           position: { latitude, longitude, accuracy },
-          loading: false,
+          loading: true, // Keep loading while we fetch address
         }));
         
         // Store complete location info in localStorage for future use
@@ -79,6 +85,33 @@ export function useGeolocation() {
           accuracy,
           timestamp: new Date().toISOString()
         }));
+
+        // Get detailed address using Nominatim's reverse geocoding
+        try {
+          const addressInfo = await reverseGeocode(latitude, longitude);
+          setState(prev => ({
+            ...prev,
+            loading: false,
+            cityName: addressInfo.city,
+            streetName: addressInfo.road,
+            stateName: addressInfo.state,
+            fullAddress: addressInfo.displayName,
+            address: formatAddress(addressInfo)
+          }));
+          
+          // Store address in localStorage
+          localStorage.setItem('userAddressDetails', JSON.stringify(addressInfo));
+          
+          toast.success("Location detected successfully");
+        } catch (error) {
+          console.error("Error reverse geocoding:", error);
+          setState(prev => ({
+            ...prev,
+            loading: false,
+            error: "Failed to get precise address"
+          }));
+          toast.error("Could not determine your exact address");
+        }
       },
       (error) => {
         setState(prev => ({
@@ -94,11 +127,59 @@ export function useGeolocation() {
         }
       },
       {
-        enableHighAccuracy: true, // Use GPS if available
-        timeout: 10000, // 10 seconds
+        enableHighAccuracy: true, // Use GPS for highest accuracy
+        timeout: 15000, // 15 seconds
         maximumAge: 0 // No cached position
       }
     );
+  };
+  
+  const reverseGeocode = async (
+    latitude: number,
+    longitude: number
+  ): Promise<any> => {
+    // Using Nominatim with more detailed parameters
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1&zoom=18&accept-language=en`
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to reverse geocode location");
+    }
+
+    const data = await response.json();
+    return {
+      displayName: data.display_name,
+      road: data.address?.road || data.address?.street || 'Unknown road',
+      city: data.address?.city || data.address?.town || data.address?.village || data.address?.suburb || 'Tadipatri',
+      state: data.address?.state || 'Andhra Pradesh',
+      country: data.address?.country || 'India',
+      postcode: data.address?.postcode || '',
+      neighbourhood: data.address?.neighbourhood || data.address?.suburb || '',
+      raw: data
+    };
+  };
+  
+  const formatAddress = (addressInfo: any): string => {
+    let formattedAddress = '';
+    
+    if (addressInfo.road) {
+      formattedAddress += addressInfo.road;
+    }
+    
+    if (addressInfo.neighbourhood && addressInfo.neighbourhood !== addressInfo.road) {
+      formattedAddress += formattedAddress ? `, ${addressInfo.neighbourhood}` : addressInfo.neighbourhood;
+    }
+    
+    if (addressInfo.city) {
+      formattedAddress += formattedAddress ? `, ${addressInfo.city}` : addressInfo.city;
+    }
+    
+    if (addressInfo.state) {
+      formattedAddress += formattedAddress ? `, ${addressInfo.state}` : addressInfo.state;
+    }
+    
+    return formattedAddress;
   };
 
   const getGeolocationErrorMessage = (error: GeolocationPositionError): string => {

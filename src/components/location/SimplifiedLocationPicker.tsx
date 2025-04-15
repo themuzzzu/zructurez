@@ -5,11 +5,12 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter
+  DialogFooter,
+  DialogDescription
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MapPin, Locate, Search, X, AlertCircle } from "lucide-react";
+import { MapPin, Locate, Search, X, AlertCircle, Navigation, Map } from "lucide-react";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { isZructuresAvailable, handleLocationUpdate, reverseGeocode } from "@/utils/locationUtils";
 import { toast } from "sonner";
@@ -34,7 +35,10 @@ export function SimplifiedLocationPicker({
     loading, 
     position, 
     error,
-    permissionStatus 
+    permissionStatus,
+    streetName,
+    cityName,
+    fullAddress 
   } = useGeolocation();
   
   const [detectedAddress, setDetectedAddress] = useState<string | null>(null);
@@ -74,49 +78,36 @@ export function SimplifiedLocationPicker({
 
   // Process the detected location from coordinates
   useEffect(() => {
-    async function processLocation() {
-      if (position && !detectedAddress) {
-        setIsProcessingLocation(true);
-        try {
-          const { city, state, displayName } = await reverseGeocode(
-            position.latitude, 
-            position.longitude
-          );
-          
-          // If we have a city, use it
-          if (city) {
-            const locationString = `${city}${state ? `, ${state}` : ''}`;
-            setDetectedAddress(locationString);
-            setSelectedLocation(locationString);
-            handleLocationUpdate(locationString);
-          } else {
-            // If no city found, use the display name
-            setDetectedAddress(displayName);
-            setSelectedLocation(displayName);
-            handleLocationUpdate(displayName);
-          }
-          
-          // Show precise location toast
-          toast.success(`Precise location detected: ${displayName}`);
-        } catch (error) {
-          console.error("Error processing location:", error);
-          toast.error("Could not determine your precise location");
-        } finally {
-          setIsProcessingLocation(false);
-        }
+    if (position && (fullAddress || cityName) && !detectedAddress) {
+      setIsProcessingLocation(false);
+      
+      // Use the most detailed address information available
+      if (streetName && cityName) {
+        const locationString = `${streetName}, ${cityName}`;
+        setDetectedAddress(locationString);
+        setSelectedLocation(locationString);
+        handleLocationUpdate(locationString);
+      } else if (fullAddress) {
+        setDetectedAddress(fullAddress);
+        setSelectedLocation(fullAddress);
+        handleLocationUpdate(fullAddress);
+      } else if (cityName) {
+        setDetectedAddress(cityName);
+        setSelectedLocation(cityName);
+        handleLocationUpdate(cityName);
       }
     }
-    
-    processLocation();
-  }, [position, detectedAddress]);
+  }, [position, fullAddress, cityName, streetName, detectedAddress]);
 
   const handleDetectLocation = async () => {
     // Reset detected address when requesting a new location
     setDetectedAddress(null);
+    setIsProcessingLocation(true);
     await requestGeolocation();
     
     if (permissionStatus === "denied") {
       toast.error("Location permission denied. Please enable location in your browser settings.");
+      setIsProcessingLocation(false);
     }
   };
 
@@ -134,6 +125,9 @@ export function SimplifiedLocationPicker({
             <MapPin className="h-7 w-7" />
             Choose your location
           </DialogTitle>
+          <DialogDescription className="text-zinc-400">
+            Enable precise location or select from the list below
+          </DialogDescription>
           {!firstVisit && (
             <Button 
               variant="ghost" 
@@ -155,8 +149,12 @@ export function SimplifiedLocationPicker({
             disabled={loading || isProcessingLocation}
             size="lg"
           >
-            <Locate className={`h-5 w-5 ${(loading || isProcessingLocation) ? "animate-spin" : ""}`} />
-            {loading || isProcessingLocation ? "Detecting Your Location..." : "Detect My Location"}
+            {loading || isProcessingLocation ? (
+              <Loader className="h-5 w-5 animate-spin" />
+            ) : (
+              <Navigation className="h-5 w-5" />
+            )}
+            {loading || isProcessingLocation ? "Detecting Your Precise Location..." : "Detect My Location"}
           </Button>
           
           {/* Show detected precise address if available */}
@@ -167,6 +165,11 @@ export function SimplifiedLocationPicker({
                 <div>
                   <p className="font-medium">Precise location detected</p>
                   <p className="text-sm text-blue-300/80">{detectedAddress}</p>
+                  {position?.accuracy && (
+                    <p className="text-xs text-blue-300/60 mt-1">
+                      Accuracy: ±{Math.round(position.accuracy)}m
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -180,10 +183,31 @@ export function SimplifiedLocationPicker({
                 <div>
                   <p className="font-medium">Location detection failed</p>
                   <p className="text-sm text-red-300/80">{error}</p>
+                  <Button 
+                    variant="link" 
+                    size="sm" 
+                    className="text-xs text-red-300 p-0 h-auto mt-1"
+                    onClick={() => toast.info("To enable location: In Chrome, click the padlock icon next to the URL, then set Location to Allow.")}
+                  >
+                    How to enable location access?
+                  </Button>
                 </div>
               </div>
             </div>
           )}
+          
+          {/* View Map Button */}
+          <Button 
+            variant="ghost" 
+            className="w-full justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-white"
+            onClick={() => {
+              onOpenChange(false);
+              window.location.href = '/maps';
+            }}
+          >
+            <Map className="h-4 w-4 mr-1" />
+            View Location on Map
+          </Button>
           
           {/* Search Input */}
           <div className="relative">
@@ -266,3 +290,21 @@ export function SimplifiedLocationPicker({
   );
 }
 
+function Loader(props: any) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+    </svg>
+  );
+}
