@@ -1,3 +1,4 @@
+
 import { 
   normalizeLocationName as normalizeCityName, 
   AVAILABLE_CITIES 
@@ -10,8 +11,13 @@ export const normalizeLocationName = normalizeCityName;
 export const reverseGeocode = async (lat: number, lon: number) => {
   try {
     const response = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`,
-      { headers: { 'Accept-Language': 'en' } }
+      `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`,
+      { 
+        headers: { 
+          'Accept-Language': 'en',
+          'User-Agent': 'zructures-location-lookup' // Added User-Agent to avoid rate limiting
+        } 
+      }
     );
     
     if (!response.ok) {
@@ -25,6 +31,7 @@ export const reverseGeocode = async (lat: number, lon: number) => {
     
     return {
       street: addressParts.road || addressParts.pedestrian || addressParts.suburb || '',
+      neighborhood: addressParts.suburb || addressParts.neighbourhood || addressParts.residential || addressParts.quarter || '',
       city: addressParts.city || addressParts.town || addressParts.village || addressParts.hamlet || '',
       state: addressParts.state || '',
       country: addressParts.country || '',
@@ -50,12 +57,14 @@ export const getAccurateAddress = async (latitude: number, longitude: number): P
     // Format the address giving priority to known cities
     let formattedAddress = '';
     
-    if (osmAddressInfo.street) {
-      formattedAddress += osmAddressInfo.street;
+    // Add neighborhood if available
+    if (osmAddressInfo.neighborhood) {
+      formattedAddress = osmAddressInfo.neighborhood;
     }
     
-    if (osmAddressInfo.suburb && osmAddressInfo.suburb !== osmAddressInfo.street) {
-      formattedAddress += formattedAddress ? `, ${osmAddressInfo.suburb}` : osmAddressInfo.suburb;
+    // Add street if available and different from neighborhood
+    if (osmAddressInfo.street && osmAddressInfo.street !== osmAddressInfo.neighborhood) {
+      formattedAddress += formattedAddress ? `, ${osmAddressInfo.street}` : osmAddressInfo.street;
     }
     
     // Check if the detected city is in our available cities list
@@ -132,4 +141,50 @@ export const findNearestAvailableCity = async (latitude: number, longitude: numb
   // In a real implementation, this would calculate distances to all cities
   // and return the nearest one
   return AVAILABLE_CITIES[0];
+};
+
+// Store precise location data including neighborhood
+export const storePreciseLocation = (
+  latitude: number, 
+  longitude: number, 
+  addressInfo: {
+    city?: string, 
+    neighborhood?: string, 
+    street?: string, 
+    state?: string,
+    displayName?: string
+  }
+) => {
+  try {
+    const locationData = {
+      latitude,
+      longitude,
+      city: addressInfo.city || '',
+      neighborhood: addressInfo.neighborhood || '',
+      street: addressInfo.street || '',
+      state: addressInfo.state || '',
+      displayName: addressInfo.displayName || '',
+      timestamp: new Date().toISOString()
+    };
+    
+    localStorage.setItem('userPreciseLocation', JSON.stringify(locationData));
+    
+    return locationData;
+  } catch (error) {
+    console.error("Error storing precise location:", error);
+    return null;
+  }
+};
+
+// Get stored precise location data
+export const getStoredPreciseLocation = () => {
+  try {
+    const storedData = localStorage.getItem('userPreciseLocation');
+    if (!storedData) return null;
+    
+    return JSON.parse(storedData);
+  } catch (error) {
+    console.error("Error retrieving stored location:", error);
+    return null;
+  }
 };

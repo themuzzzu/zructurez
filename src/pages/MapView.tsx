@@ -21,7 +21,8 @@ const MapView = () => {
     streetName,
     cityName,
     stateName,
-    fullAddress
+    fullAddress,
+    neighborhood
   } = useGeolocation();
   
   const [isLoading, setIsLoading] = useState(true);
@@ -65,9 +66,9 @@ const MapView = () => {
           const accurateAddress = await getAccurateAddress(position.latitude, position.longitude);
           setDetectedPreciseLocation(accurateAddress);
           
-          // If we have street and city from the hook
-          if (streetName && cityName) {
-            const formattedAddress = `${streetName}, ${cityName}`;
+          // If we have neighborhood, street and city from the hook
+          if (neighborhood && streetName && cityName) {
+            const formattedAddress = `${neighborhood}, ${streetName}, ${cityName}`;
             
             // Only update if we don't already have a more detailed address
             if (!detectedPreciseLocation || detectedPreciseLocation.length < formattedAddress.length) {
@@ -83,7 +84,7 @@ const MapView = () => {
     };
     
     updatePreciseLocation();
-  }, [position, streetName, cityName, fullAddress]);
+  }, [position, streetName, cityName, fullAddress, neighborhood]);
 
   // Format coordinates for display
   const formatCoordinate = (coord: number): string => {
@@ -208,11 +209,12 @@ const MapView = () => {
           
           {detectedPreciseLocation && (
             <Card className="p-4">
-              <h3 className="font-medium mb-2 flex items-center gap-2">
+              <h3 className="font-medium mb-2 flex items-center">
                 <MapPin className="h-5 w-5 text-primary" />
                 Precise Location Details
               </h3>
               <div className="space-y-1 text-sm">
+                {neighborhood && <p><strong>Neighborhood/Colony:</strong> {neighborhood}</p>}
                 {streetName && <p><strong>Street:</strong> {streetName}</p>}
                 {cityName && <p><strong>City/Town:</strong> {cityName}</p>}
                 {stateName && <p><strong>State:</strong> {stateName}</p>}

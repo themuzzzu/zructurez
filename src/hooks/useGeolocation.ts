@@ -4,7 +4,8 @@ import { toast } from "sonner";
 import { 
   reverseGeocode, 
   normalizeLocationName, 
-  findNearestAvailableCity 
+  findNearestAvailableCity,
+  storePreciseLocation 
 } from "@/utils/locationUtils";
 import { AVAILABLE_CITIES, normalizeLocationName as normalizeCity } from "@/utils/cityAvailabilityUtils";
 
@@ -24,6 +25,7 @@ interface GeolocationState {
   streetName: string | null;
   stateName: string | null;
   fullAddress: string | null;
+  neighborhood: string | null;
 }
 
 export function useGeolocation() {
@@ -34,6 +36,7 @@ export function useGeolocation() {
     streetName: null,
     stateName: null,
     fullAddress: null,
+    neighborhood: null,
     loading: false,
     error: null,
   });
@@ -96,14 +99,6 @@ export function useGeolocation() {
             },
             loading: true, // Keep loading while we fetch address
           }));
-          
-          // Store complete location info in localStorage for future use
-          localStorage.setItem('userPreciseLocation', JSON.stringify({
-            latitude, 
-            longitude, 
-            accuracy,
-            timestamp: new Date().toISOString()
-          }));
 
           try {
             // Get detailed address using reverse geocoding
@@ -128,6 +123,15 @@ export function useGeolocation() {
               }
             }
             
+            // Store the precise location data
+            storePreciseLocation(latitude, longitude, {
+              city: detectedCity,
+              neighborhood: addressInfo.neighborhood,
+              street: addressInfo.street,
+              state: addressInfo.state,
+              displayName: addressInfo.displayName
+            });
+            
             setState(prev => ({
               ...prev,
               loading: false,
@@ -135,13 +139,8 @@ export function useGeolocation() {
               streetName: addressInfo.street,
               stateName: addressInfo.state,
               fullAddress: addressInfo.displayName,
+              neighborhood: addressInfo.neighborhood,
               address: formatAddress(addressInfo, detectedCity)
-            }));
-            
-            // Store address in localStorage
-            localStorage.setItem('userAddressDetails', JSON.stringify({
-              ...addressInfo,
-              normalizedCity: detectedCity
             }));
             
             if (accuracy > 1000) {
@@ -198,12 +197,14 @@ export function useGeolocation() {
   const formatAddress = (addressInfo: any, normalizedCity?: string): string => {
     let formattedAddress = '';
     
-    if (addressInfo.street) {
-      formattedAddress += addressInfo.street;
+    // Use the neighborhood/suburb first if available
+    if (addressInfo.neighborhood) {
+      formattedAddress += addressInfo.neighborhood;
     }
     
-    if (addressInfo.suburb && addressInfo.suburb !== addressInfo.street) {
-      formattedAddress += formattedAddress ? `, ${addressInfo.suburb}` : addressInfo.suburb;
+    // Then add street if available and different from neighborhood
+    if (addressInfo.street && addressInfo.street !== addressInfo.neighborhood) {
+      formattedAddress += formattedAddress ? `, ${addressInfo.street}` : addressInfo.street;
     }
     
     // Use normalized city if available, otherwise use the one from addressInfo
