@@ -1,4 +1,3 @@
-
 import { 
   normalizeLocationName as normalizeCityName, 
   AVAILABLE_CITIES 
@@ -30,10 +29,21 @@ export const reverseGeocode = async (lat: number, lon: number) => {
     const addressParts = data.address || {};
     const display = data.display_name || '';
     
+    // Fix for Tadipatri area - ensure we correctly identify it
+    let city = addressParts.city || addressParts.town || addressParts.village || addressParts.hamlet || '';
+    
+    // If location is in Anantapur district and near Tadipatri, ensure we identify as Tadipatri
+    if (addressParts.county === 'Anantapur' && 
+        (city.toLowerCase().includes('tadipatri') || 
+         display.toLowerCase().includes('tadipatri') ||
+         isTadipatriArea(lat, lon))) {
+      city = 'Tadipatri';
+    }
+    
     return {
       street: addressParts.road || addressParts.pedestrian || addressParts.suburb || '',
       neighborhood: addressParts.suburb || addressParts.neighbourhood || addressParts.residential || addressParts.quarter || '',
-      city: addressParts.city || addressParts.town || addressParts.village || addressParts.hamlet || '',
+      city: city,
       state: addressParts.state || '',
       country: addressParts.country || '',
       postcode: addressParts.postcode || '',
@@ -44,6 +54,19 @@ export const reverseGeocode = async (lat: number, lon: number) => {
     console.error("Error in reverse geocoding:", error);
     throw error;
   }
+};
+
+// Helper function to check if coordinates are within Tadipatri area
+// Using approximate bounding box for Tadipatri
+const isTadipatriArea = (lat: number, lon: number): boolean => {
+  // Approximate bounding box for Tadipatri area
+  const tadipatriBounds = {
+    minLat: 14.89, maxLat: 14.95,
+    minLon: 77.96, maxLon: 78.03
+  };
+  
+  return (lat >= tadipatriBounds.minLat && lat <= tadipatriBounds.maxLat && 
+          lon >= tadipatriBounds.minLon && lon <= tadipatriBounds.maxLon);
 };
 
 // Get a more accurate address using OpenStreetMap or backup services
@@ -90,6 +113,14 @@ export const isZructuresAvailable = (locationName: string): boolean => {
   
   // Normalize the city name
   const normalizedCity = normalizeLocationName(cityPart);
+  
+  // Special case for locations that we know are in Tadipatri area
+  if (locationName.toLowerCase().includes('tadipatri') ||
+      locationName.toLowerCase().includes('tadpatri') ||
+      locationName.toLowerCase().includes('nh67') ||
+      locationName.toLowerCase().includes('nh544')) {
+    return true;
+  }
   
   // Check if it's in our list of available cities
   return AVAILABLE_CITIES.some(city => 

@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -16,7 +15,7 @@ export interface City {
 export const DEFAULT_CITY = "All India";
 
 // Hardcoded available cities for immediate response and fallback
-export const AVAILABLE_CITIES = ["Tadipatri", "Anantapur"];
+export const AVAILABLE_CITIES = ["Tadipatri", "Anantapur", "Tadpatri"];
 
 // Check if a city is available in the Zructures service area
 export const checkCityAvailability = async (cityName: string): Promise<boolean> => {
@@ -27,6 +26,14 @@ export const checkCityAvailability = async (cityName: string): Promise<boolean> 
 
   // Extract city name before any comma to handle "City, District" format
   const cityPart = cityName.split(',')[0].trim();
+
+  // Special case for Tadipatri area identifiers
+  if (cityName.toLowerCase().includes('tadipatri') ||
+      cityName.toLowerCase().includes('tadpatri') ||
+      cityName.toLowerCase().includes('nh67') ||
+      cityName.toLowerCase().includes('nh544')) {
+    return true;
+  }
 
   // First check hardcoded list for immediate response and fallback
   if (AVAILABLE_CITIES.some(city => 
@@ -46,6 +53,12 @@ export const checkCityAvailability = async (cityName: string): Promise<boolean> 
     
     if (error) {
       console.error("Error checking city availability:", error);
+      // Additional check for Tadipatri area
+      if (cityPart.toLowerCase().includes('tadipatri') ||
+          cityPart.toLowerCase().includes('tadpatri') ||
+          cityPart.toLowerCase().includes('anantapur')) {
+        return true;
+      }
       // Fallback to hardcoded check
       return AVAILABLE_CITIES.some(city => 
         cityPart.toLowerCase() === city.toLowerCase() || 
@@ -73,11 +86,17 @@ export const normalizeLocationName = (location: string): string => {
     "vizag": "Visakhapatnam",
     "vizianagaram": "Vizianagaram",
     "tadipatri": "Tadipatri",
+    "tadpatri": "Tadipatri", // Normalize alternative spelling
     "anantapur": "Anantapur", 
     "dharmavaram": "Dharmavaram",
     "kadapa": "Kadapa",
     "kurnool": "Kurnool"
   };
+  
+  // Special case for NH roads in Tadipatri
+  if (cityPart.includes('nh67') || cityPart.includes('nh544')) {
+    return "Tadipatri";
+  }
   
   // Check if the location matches any of our known locations
   for (const [key, value] of Object.entries(cityMappings)) {

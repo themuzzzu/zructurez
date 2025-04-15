@@ -116,6 +116,14 @@ export function useGeolocation() {
             // Use the actual detected city rather than finding nearest city
             let detectedCity = addressInfo.city;
             
+            // Fix for Tadipatri area detection - ensure we use the correct city name
+            // This is a safeguard against incorrect geocoding results
+            if ((latitude >= 14.89 && latitude <= 14.95 && 
+                longitude >= 77.96 && longitude <= 78.03) || 
+                addressInfo.displayName.toLowerCase().includes('tadipatri')) {
+              detectedCity = 'Tadipatri';
+            }
+            
             // Store the precise location data
             storePreciseLocation(latitude, longitude, {
               city: detectedCity,

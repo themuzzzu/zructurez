@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
@@ -72,9 +71,21 @@ const MapView = () => {
     const updatePreciseLocation = async () => {
       if (position) {
         try {
+          // Check if we're within Tadipatri area by coordinates
+          const isTadipatriArea = 
+            position.latitude >= 14.89 && position.latitude <= 14.95 && 
+            position.longitude >= 77.96 && position.longitude <= 78.03;
+          
           // Try to get the most accurate address possible
           const accurateAddress = await getAccurateAddress(position.latitude, position.longitude);
-          setDetectedPreciseLocation(accurateAddress);
+          
+          // If we're in Tadipatri area by coordinates but address doesn't mention it, append it
+          if (isTadipatriArea && !accurateAddress.toLowerCase().includes('tadipatri')) {
+            const formattedAddress = `${accurateAddress}, Tadipatri`;
+            setDetectedPreciseLocation(formattedAddress);
+          } else {
+            setDetectedPreciseLocation(accurateAddress);
+          }
           
           // If we have neighborhood, street and city from the hook
           if (neighborhood && streetName && cityName) {
@@ -104,6 +115,7 @@ const MapView = () => {
   // Handle detect location button click
   const handleDetectLocation = () => {
     setIsLoading(true);
+    setDetectedPreciseLocation(null); // Reset previous detection
     requestGeolocation();
     toast.success("Detecting your precise location...");
   };
@@ -111,13 +123,28 @@ const MapView = () => {
   // Update user's current location
   const handleUseThisLocation = () => {
     if (detectedPreciseLocation) {
-      setCurrentLocation(detectedPreciseLocation);
-      toast.success("Location updated successfully!");
-      
-      // Check if this location is available
-      const isAvailable = isZructuresAvailable(detectedPreciseLocation);
-      if (!isAvailable) {
-        toast.info("Note: Zructures is not yet fully available in this location. Some features may be limited.");
+      // If the location contains Tadipatri, ensure availability is true
+      if (detectedPreciseLocation.toLowerCase().includes('tadipatri') ||
+          (position && position.latitude >= 14.89 && position.latitude <= 14.95 && 
+           position.longitude >= 77.96 && position.longitude <= 78.03)) {
+        
+        // Ensure Tadipatri is in the location string
+        let updatedLocation = detectedPreciseLocation;
+        if (!updatedLocation.toLowerCase().includes('tadipatri')) {
+          updatedLocation = `${updatedLocation}, Tadipatri`;
+        }
+        
+        setCurrentLocation(updatedLocation);
+        toast.success("Location updated to Tadipatri area");
+      } else {
+        setCurrentLocation(detectedPreciseLocation);
+        toast.success("Location updated successfully!");
+        
+        // Check if this location is available
+        const isAvailable = isZructuresAvailable(detectedPreciseLocation);
+        if (!isAvailable) {
+          toast.info("Note: Zructures is not yet fully available in this location. Some features may be limited.");
+        }
       }
       
       // Navigate back or to home
