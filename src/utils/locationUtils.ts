@@ -1,8 +1,10 @@
-
-import { normalizeLocationName as normalizeCity, AVAILABLE_CITIES } from './cityAvailabilityUtils';
+import { 
+  normalizeLocationName as normalizeCityName, 
+  AVAILABLE_CITIES 
+} from './cityAvailabilityUtils';
 
 // Export normalizeLocationName from this file
-export { normalizeLocationName } from './cityAvailabilityUtils';
+export const normalizeLocationName = normalizeCityName;
 
 // Use OpenStreetMap's Nominatim for reverse geocoding (free)
 export const reverseGeocode = async (lat: number, lon: number) => {
