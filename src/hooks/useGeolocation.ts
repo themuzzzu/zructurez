@@ -1,11 +1,13 @@
 
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { reverseGeocode } from "@/utils/locationUtils";
 
 interface GeolocationPosition {
   latitude: number;
   longitude: number;
   accuracy?: number;
+  timestamp?: number;
 }
 
 interface GeolocationState {
@@ -34,6 +36,9 @@ export function useGeolocation() {
   const [permissionStatus, setPermissionStatus] = useState<
     "granted" | "denied" | "prompt" | "unknown"
   >("unknown");
+  
+  const [retries, setRetries] = useState(0);
+  const MAX_RETRIES = 3;
 
   // Check permission status on mount
   useEffect(() => {
@@ -55,7 +60,7 @@ export function useGeolocation() {
     checkPermission();
   }, []);
 
-  const requestGeolocation = () => {
+  const requestGeolocation = (forceHighAccuracy: boolean = true) => {
     if (!navigator.geolocation) {
       setState(prev => ({
         ...prev,
@@ -66,109 +71,113 @@ export function useGeolocation() {
     }
 
     setState(prev => ({ ...prev, loading: true, error: null }));
+    setRetries(0); // Reset retry counter
 
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude, accuracy } = position.coords;
-        
-        // Store the precise location in state
-        setState(prev => ({
-          ...prev,
-          position: { latitude, longitude, accuracy },
-          loading: true, // Keep loading while we fetch address
-        }));
-        
-        // Store complete location info in localStorage for future use
-        localStorage.setItem('userPreciseLocation', JSON.stringify({
-          latitude, 
-          longitude, 
-          accuracy,
-          timestamp: new Date().toISOString()
-        }));
-
-        // Get detailed address using Nominatim's reverse geocoding
-        try {
-          const addressInfo = await reverseGeocode(latitude, longitude);
+    const getPosition = (highAccuracy: boolean) => {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude, accuracy } = position.coords;
+          
+          console.log(`Location detected - Lat: ${latitude}, Lon: ${longitude}, Accuracy: ±${Math.round(accuracy)}m`);
+          
+          // Store the precise location in state
           setState(prev => ({
             ...prev,
-            loading: false,
-            cityName: addressInfo.city,
-            streetName: addressInfo.road,
-            stateName: addressInfo.state,
-            fullAddress: addressInfo.displayName,
-            address: formatAddress(addressInfo)
+            position: { 
+              latitude, 
+              longitude, 
+              accuracy, 
+              timestamp: new Date().getTime()
+            },
+            loading: true, // Keep loading while we fetch address
           }));
           
-          // Store address in localStorage
-          localStorage.setItem('userAddressDetails', JSON.stringify(addressInfo));
+          // Store complete location info in localStorage for future use
+          localStorage.setItem('userPreciseLocation', JSON.stringify({
+            latitude, 
+            longitude, 
+            accuracy,
+            timestamp: new Date().toISOString()
+          }));
+
+          // Get detailed address using Nominatim's reverse geocoding
+          try {
+            const addressInfo = await reverseGeocode(latitude, longitude);
+            console.log("Got address info:", addressInfo);
+            
+            setState(prev => ({
+              ...prev,
+              loading: false,
+              cityName: addressInfo.city,
+              streetName: addressInfo.street,
+              stateName: addressInfo.state,
+              fullAddress: addressInfo.displayName,
+              address: formatAddress(addressInfo)
+            }));
+            
+            // Store address in localStorage
+            localStorage.setItem('userAddressDetails', JSON.stringify(addressInfo));
+            
+            if (accuracy > 1000) {
+              toast.info("Location detected with low accuracy. Try again in an open area for better results.");
+            } else {
+              toast.success("Location detected successfully");
+            }
+          } catch (error) {
+            console.error("Error reverse geocoding:", error);
+            setState(prev => ({
+              ...prev,
+              loading: false,
+              error: "Failed to get precise address"
+            }));
+            toast.error("Could not determine your exact address");
+          }
+        },
+        (error) => {
+          // If high accuracy fails, try with lower accuracy if we haven't already
+          if (highAccuracy && retries < MAX_RETRIES) {
+            setRetries(prev => prev + 1);
+            console.log(`High accuracy location failed. Retrying with lower accuracy. Attempt ${retries + 1}/${MAX_RETRIES}`);
+            
+            setTimeout(() => {
+              getPosition(false);
+            }, 1000);
+            return;
+          }
           
-          toast.success("Location detected successfully");
-        } catch (error) {
-          console.error("Error reverse geocoding:", error);
           setState(prev => ({
             ...prev,
+            error: getGeolocationErrorMessage(error),
             loading: false,
-            error: "Failed to get precise address"
           }));
-          toast.error("Could not determine your exact address");
+          
+          if (error.code === error.PERMISSION_DENIED) {
+            toast.error("Location permission denied. Please enable location in your browser settings.");
+          } else {
+            toast.error(getGeolocationErrorMessage(error));
+          }
+        },
+        {
+          enableHighAccuracy: highAccuracy, // Use GPS for highest accuracy
+          timeout: highAccuracy ? 15000 : 30000, // Longer timeout for high accuracy
+          maximumAge: 0 // No cached position
         }
-      },
-      (error) => {
-        setState(prev => ({
-          ...prev,
-          error: getGeolocationErrorMessage(error),
-          loading: false,
-        }));
-        
-        if (error.code === error.PERMISSION_DENIED) {
-          toast.error("Location permission denied. Please enable location in your browser settings.");
-        } else {
-          toast.error(getGeolocationErrorMessage(error));
-        }
-      },
-      {
-        enableHighAccuracy: true, // Use GPS for highest accuracy
-        timeout: 15000, // 15 seconds
-        maximumAge: 0 // No cached position
-      }
-    );
-  };
-  
-  const reverseGeocode = async (
-    latitude: number,
-    longitude: number
-  ): Promise<any> => {
-    // Using Nominatim with more detailed parameters
-    const response = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1&zoom=18&accept-language=en`
-    );
-
-    if (!response.ok) {
-      throw new Error("Failed to reverse geocode location");
-    }
-
-    const data = await response.json();
-    return {
-      displayName: data.display_name,
-      road: data.address?.road || data.address?.street || 'Unknown road',
-      city: data.address?.city || data.address?.town || data.address?.village || data.address?.suburb || 'Tadipatri',
-      state: data.address?.state || 'Andhra Pradesh',
-      country: data.address?.country || 'India',
-      postcode: data.address?.postcode || '',
-      neighbourhood: data.address?.neighbourhood || data.address?.suburb || '',
-      raw: data
+      );
     };
+    
+    // Start with high accuracy
+    getPosition(forceHighAccuracy);
   };
   
   const formatAddress = (addressInfo: any): string => {
     let formattedAddress = '';
     
-    if (addressInfo.road) {
-      formattedAddress += addressInfo.road;
+    if (addressInfo.street) {
+      formattedAddress += addressInfo.street;
     }
     
-    if (addressInfo.neighbourhood && addressInfo.neighbourhood !== addressInfo.road) {
-      formattedAddress += formattedAddress ? `, ${addressInfo.neighbourhood}` : addressInfo.neighbourhood;
+    if (addressInfo.suburb && addressInfo.suburb !== addressInfo.street) {
+      formattedAddress += formattedAddress ? `, ${addressInfo.suburb}` : addressInfo.suburb;
     }
     
     if (addressInfo.city) {

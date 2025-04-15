@@ -2,17 +2,18 @@
 import { useEffect, useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Loader2, MapPin, Navigation } from "lucide-react";
+import { ArrowLeft, Loader2, MapPin, Navigation, Info } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "@/providers/LocationProvider";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { toast } from "sonner";
+import { getAccurateAddress, isZructuresAvailable } from "@/utils/locationUtils";
 
 const MapView = () => {
   const navigate = useNavigate();
-  const { currentLocation } = useLocation();
+  const { currentLocation, setCurrentLocation } = useLocation();
   const { 
     position, 
     loading, 
@@ -25,6 +26,7 @@ const MapView = () => {
   
   const [isLoading, setIsLoading] = useState(true);
   const [detectedPreciseLocation, setDetectedPreciseLocation] = useState<string | null>(null);
+  const [accuracyLevel, setAccuracyLevel] = useState<string | null>(null);
   
   // Handle initial loading and location detection
   useEffect(() => {
@@ -36,6 +38,19 @@ const MapView = () => {
     if (position) {
       setIsLoading(false);
       clearTimeout(timeout);
+      
+      // Get accuracy level description
+      if (position.accuracy) {
+        if (position.accuracy <= 10) {
+          setAccuracyLevel("Excellent (GPS)");
+        } else if (position.accuracy <= 50) {
+          setAccuracyLevel("Good");
+        } else if (position.accuracy <= 500) {
+          setAccuracyLevel("Approximate");
+        } else {
+          setAccuracyLevel("Low");
+        }
+      }
     }
     
     return () => clearTimeout(timeout);
@@ -43,14 +58,32 @@ const MapView = () => {
 
   // Update detected location when geolocation hook data changes
   useEffect(() => {
-    if (streetName && cityName) {
-      setDetectedPreciseLocation(`${streetName}, ${cityName}`);
-    } else if (fullAddress) {
-      setDetectedPreciseLocation(fullAddress);
-    } else if (cityName) {
-      setDetectedPreciseLocation(cityName);
-    }
-  }, [streetName, cityName, fullAddress]);
+    const updatePreciseLocation = async () => {
+      if (position) {
+        try {
+          // Try to get the most accurate address possible
+          const accurateAddress = await getAccurateAddress(position.latitude, position.longitude);
+          setDetectedPreciseLocation(accurateAddress);
+          
+          // If we have street and city from the hook
+          if (streetName && cityName) {
+            const formattedAddress = `${streetName}, ${cityName}`;
+            
+            // Only update if we don't already have a more detailed address
+            if (!detectedPreciseLocation || detectedPreciseLocation.length < formattedAddress.length) {
+              setDetectedPreciseLocation(formattedAddress);
+            }
+          } else if (fullAddress) {
+            setDetectedPreciseLocation(fullAddress);
+          }
+        } catch (error) {
+          console.error("Error getting accurate address:", error);
+        }
+      }
+    };
+    
+    updatePreciseLocation();
+  }, [position, streetName, cityName, fullAddress]);
 
   // Format coordinates for display
   const formatCoordinate = (coord: number): string => {
@@ -62,6 +95,23 @@ const MapView = () => {
     setIsLoading(true);
     requestGeolocation();
     toast.success("Detecting your precise location...");
+  };
+
+  // Update user's current location
+  const handleUseThisLocation = () => {
+    if (detectedPreciseLocation) {
+      setCurrentLocation(detectedPreciseLocation);
+      toast.success("Location updated successfully!");
+      
+      // Check if this location is available
+      const isAvailable = isZructuresAvailable(detectedPreciseLocation);
+      if (!isAvailable) {
+        toast.info("Note: Zructures is not yet fully available in this location. Some features may be limited.");
+      }
+      
+      // Navigate back or to home
+      setTimeout(() => navigate(-1), 1000);
+    }
   };
   
   return (
@@ -93,7 +143,11 @@ const MapView = () => {
               {position && (
                 <div className="text-xs text-muted-foreground mt-1">
                   Coordinates: {formatCoordinate(position.latitude)}, {formatCoordinate(position.longitude)}
-                  {position.accuracy && ` (Accuracy: ±${Math.round(position.accuracy)}m)`}
+                  {position.accuracy && (
+                    <span className="ml-1">
+                      (Accuracy: ±{Math.round(position.accuracy)}m)
+                    </span>
+                  )}
                 </div>
               )}
             </div>
@@ -113,9 +167,18 @@ const MapView = () => {
                 )}
                 {loading ? "Detecting..." : "Update Location"}
               </Button>
-              <Badge variant="outline" className="px-2 py-1">
-                Using OpenStreetMap
-              </Badge>
+
+              {detectedPreciseLocation && (
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={handleUseThisLocation}
+                  className="flex items-center gap-2"
+                >
+                  <MapPin className="h-4 w-4" />
+                  Use This Location
+                </Button>
+              )}
             </div>
           </div>
 
@@ -124,6 +187,7 @@ const MapView = () => {
               <div className="text-center space-y-4">
                 <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
                 <p>Loading map and detecting precise location...</p>
+                <p className="text-sm text-muted-foreground">This may take a few moments for greater accuracy</p>
               </div>
             </Card>
           ) : (
@@ -157,6 +221,27 @@ const MapView = () => {
                     <p><strong>Full Address:</strong> {fullAddress}</p>
                   </div>
                 )}
+                
+                {position?.accuracy && (
+                  <div className="flex items-center gap-2 pt-2 border-t mt-2">
+                    <Info className="h-4 w-4 text-blue-500" />
+                    <p>
+                      <strong>GPS Accuracy:</strong> ±{Math.round(position.accuracy)}m 
+                      {accuracyLevel && <span> ({accuracyLevel})</span>}
+                    </p>
+                  </div>
+                )}
+                
+                <div className="pt-3 mt-2">
+                  <Button 
+                    onClick={handleUseThisLocation}
+                    className="w-full"
+                    variant="default"
+                  >
+                    <MapPin className="h-4 w-4 mr-2" />
+                    Use This Location
+                  </Button>
+                </div>
               </div>
             </Card>
           )}

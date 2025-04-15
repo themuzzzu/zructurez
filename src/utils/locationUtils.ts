@@ -27,7 +27,7 @@ export const isZructuresAvailable = (location: string): boolean => {
   );
 };
 
-// Get user's current location using browser's Geolocation API
+// Get user's current location using browser's Geolocation API with high accuracy
 export const getCurrentLocation = (): Promise<GeolocationPosition> => {
   return new Promise((resolve, reject) => {
     if (!navigator.geolocation) {
@@ -42,7 +42,11 @@ export const getCurrentLocation = (): Promise<GeolocationPosition> => {
       (error) => {
         reject(error);
       },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+      { 
+        enableHighAccuracy: true, // Force the use of GPS for maximum precision
+        timeout: 20000,           // Increased timeout for better accuracy
+        maximumAge: 0             // Always get fresh location data
+      }
     );
   });
 };
@@ -59,31 +63,47 @@ export const reverseGeocode = async (
   street: string;
   suburb: string;
   fullAddress: string;
+  raw: any;
 }> => {
   try {
+    // Using more detailed parameters for the Nominatim API
     const response = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1&zoom=18&accept-language=en`
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1&zoom=18&accept-language=en`,
+      {
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'ZructuresApp/1.0' // Add a proper user agent as per Nominatim guidelines
+        }
+      }
     );
 
     if (!response.ok) {
-      throw new Error("Failed to reverse geocode location");
+      throw new Error(`Failed to reverse geocode location: ${response.statusText}`);
     }
 
     const data = await response.json();
     const address = data.address;
 
-    // Create a more comprehensive address object
+    // Process address components with fallbacks for different naming conventions
+    const city = address.city || address.town || address.village || address.hamlet || address.suburb || 'Tadipatri';
+    const street = address.road || address.street || address.footway || address.path || 'Unknown road';
+    const state = address.state || 'Andhra Pradesh';
+    const suburb = address.suburb || address.neighbourhood || address.district || '';
+
+    // Detailed address components
     return {
       displayName: data.display_name,
-      city: address.city || address.town || address.village || address.suburb || 'Tadipatri',
-      state: address.state || 'Andhra Pradesh',
+      city: city,
+      state: state,
       country: address.country || 'India',
-      street: address.road || address.street || '',
-      suburb: address.suburb || address.neighbourhood || '',
-      fullAddress: formatFullAddress(address)
+      street: street,
+      suburb: suburb,
+      fullAddress: formatFullAddress(address),
+      raw: data // Keep the raw data for debugging
     };
   } catch (error) {
     console.error("Error in reverse geocoding:", error);
+    toast.error("Failed to get your precise location address. Please try again.");
     throw error;
   }
 };
@@ -92,14 +112,14 @@ export const reverseGeocode = async (
 const formatFullAddress = (address: any): string => {
   const components = [];
   
-  if (address.road || address.street)
-    components.push(address.road || address.street);
+  if (address.road || address.street || address.footway || address.path)
+    components.push(address.road || address.street || address.footway || address.path);
     
   if (address.suburb && address.suburb !== (address.road || address.street))
     components.push(address.suburb);
     
-  if (address.city || address.town || address.village)
-    components.push(address.city || address.town || address.village);
+  if (address.city || address.town || address.village || address.hamlet)
+    components.push(address.city || address.town || address.village || address.hamlet);
     
   if (address.state)
     components.push(address.state);
@@ -107,6 +127,7 @@ const formatFullAddress = (address: any): string => {
   if (address.postcode)
     components.push(address.postcode);
     
+  // Only add country if we don't have many other components already
   if (address.country && components.length < 3)
     components.push(address.country);
     
@@ -149,5 +170,98 @@ export const handleLocationUpdate = (
     if (onUnavailable) {
       onUnavailable();
     }
+  }
+};
+
+// Attempt to get more accurate address using nominatim with additional parameters
+export const getAccurateAddress = async (
+  latitude: number,
+  longitude: number
+): Promise<string> => {
+  try {
+    // Using the highest zoom level and most detailed request
+    const url = new URL("https://nominatim.openstreetmap.org/reverse");
+    url.searchParams.append("format", "json");
+    url.searchParams.append("lat", latitude.toString());
+    url.searchParams.append("lon", longitude.toString());
+    url.searchParams.append("addressdetails", "1");
+    url.searchParams.append("zoom", "18");
+    url.searchParams.append("namedetails", "1");
+    url.searchParams.append("accept-language", "en");
+    
+    const response = await fetch(url.toString(), {
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'ZructuresApp/1.0'
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error("Failed to get accurate address");
+    }
+    
+    const data = await response.json();
+    
+    // Log the complete response for debugging
+    console.log("Detailed location data:", data);
+    
+    if (data.address) {
+      const addr = data.address;
+      const street = addr.road || addr.street || addr.pedestrian || addr.path || addr.footway || 'Unknown Street';
+      const area = addr.suburb || addr.neighbourhood || addr.hamlet || '';
+      const city = addr.city || addr.town || addr.village || addr.municipality || 'Tadipatri';
+      
+      // Build address string with everything we have
+      let fullAddress = street;
+      
+      if (area && street !== area) {
+        fullAddress += area ? `, ${area}` : '';
+      }
+      
+      if (city && !fullAddress.includes(city)) {
+        fullAddress += city ? `, ${city}` : '';
+      }
+      
+      return fullAddress;
+    }
+    
+    return data.display_name || "Location could not be determined precisely";
+  } catch (error) {
+    console.error("Error getting accurate address:", error);
+    return "Unable to determine precise location";
+  }
+};
+
+// Determine user's region based on coordinates
+export const determineRegion = async (latitude: number, longitude: number): Promise<string> => {
+  try {
+    const geocodeData = await reverseGeocode(latitude, longitude);
+    
+    // Check if we've detected Andhra Pradesh
+    if (geocodeData.state.toLowerCase().includes("andhra")) {
+      // Check specific regions within Andhra Pradesh
+      const rayalaseemaDistricts = ["anantapur", "kadapa", "kurnool", "chittoor"];
+      const coastalDistricts = ["visakhapatnam", "east godavari", "west godavari", "krishna", "guntur", "prakasam", "nellore"];
+      
+      // Try to get district from geocode data
+      const district = geocodeData.raw?.address?.state_district || 
+                      geocodeData.raw?.address?.county || 
+                      '';
+      
+      if (district) {
+        const districtLower = district.toLowerCase();
+        
+        if (rayalaseemaDistricts.some(d => districtLower.includes(d))) {
+          return "Rayalaseema";
+        } else if (coastalDistricts.some(d => districtLower.includes(d))) {
+          return "Coastal Andhra";
+        }
+      }
+    }
+    
+    return "Other"; // Default region
+  } catch (error) {
+    console.error("Error determining region:", error);
+    return "Unknown";
   }
 };
