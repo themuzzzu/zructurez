@@ -1,5 +1,4 @@
 
-import { BrowserRouter as Router } from "react-router-dom";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { LocationProvider } from "@/providers/LocationProvider";
@@ -13,11 +12,9 @@ function App() {
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
         <LocationProvider>
-          <Router>
-            <Routes />
-            <LocationModalHandler />
-            <Toaster position="top-center" />
-          </Router>
+          <Routes />
+          <LocationModalHandler />
+          <Toaster position="top-center" />
         </LocationProvider>
       </QueryClientProvider>
     </ThemeProvider>

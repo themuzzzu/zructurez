@@ -1,5 +1,5 @@
 
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, RouteObject } from "react-router-dom";
 import Home from "./pages/Home";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -29,7 +29,8 @@ const Layout = () => {
   );
 };
 
-const router = createBrowserRouter([
+// Export the routes configuration without creating a router instance
+export const routes: RouteObject[] = [
   {
     element: <Layout />,
     errorElement: <ErrorView />,
@@ -146,10 +147,14 @@ const router = createBrowserRouter([
       },
     ]
   }
-]);
+];
 
-export const Routes = () => {
+// Create the router using the routes
+export const router = createBrowserRouter(routes);
+
+// Export the Routes component
+export function Routes() {
   return <RouterProvider router={router} />;
-};
+}
 
 export default router;
