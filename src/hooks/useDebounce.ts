@@ -1,46 +1,48 @@
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from 'react';
 
-export function useDebounce<T>(value: T, delay: number = 500): T {
-  const [debouncedValue, setDebouncedValue] = useState<T>(value);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
+/**
+ * A hook that returns a debounced version of the provided value
+ * @param value The value to debounce
+ * @param delay The delay in milliseconds
+ * @returns The debounced value
+ */
+export function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+  
   useEffect(() => {
-    // Clear any existing timeout
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-    
-    // Set a new timeout
-    timeoutRef.current = setTimeout(() => {
+    const handler = setTimeout(() => {
       setDebouncedValue(value);
     }, delay);
-
-    // Cleanup function to clear timeout if value changes again before delay or on unmount
+    
     return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
+      clearTimeout(handler);
     };
   }, [value, delay]);
-
+  
   return debouncedValue;
 }
 
+/**
+ * A hook that returns a debounced function and loading state
+ * @param callback The function to debounce
+ * @param delay The delay in milliseconds
+ * @returns A tuple with the debounced function and a boolean indicating if it's currently debouncing
+ */
 export function useDebouncedCallback<T extends (...args: any[]) => any>(
   callback: T,
-  delay: number = 500
+  delay: number
 ): [(...args: Parameters<T>) => void, boolean] {
   const [isDebouncing, setIsDebouncing] = useState(false);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const callbackRef = useRef<T>(callback);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const callbackRef = useRef(callback);
   
-  // Update the callback reference when it changes
+  // Update the callback ref when callback changes
   useEffect(() => {
     callbackRef.current = callback;
   }, [callback]);
   
-  const debouncedCallback = useRef((...args: Parameters<T>) => {
+  const debouncedFunction = useCallback((...args: Parameters<T>) => {
     setIsDebouncing(true);
     
     if (timeoutRef.current) {
@@ -50,10 +52,11 @@ export function useDebouncedCallback<T extends (...args: any[]) => any>(
     timeoutRef.current = setTimeout(() => {
       callbackRef.current(...args);
       setIsDebouncing(false);
+      timeoutRef.current = null;
     }, delay);
-  });
+  }, [delay]);
   
-  // Clear the timeout when the component unmounts
+  // Clean up timeout on unmount
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {
@@ -62,28 +65,5 @@ export function useDebouncedCallback<T extends (...args: any[]) => any>(
     };
   }, []);
   
-  return [debouncedCallback.current, isDebouncing];
-}
-
-export function useThrottledValue<T>(value: T, limit: number = 200): T {
-  const [throttledValue, setThrottledValue] = useState<T>(value);
-  const lastExecutedRef = useRef<number>(0);
-  
-  useEffect(() => {
-    const now = Date.now();
-    
-    if (now >= lastExecutedRef.current + limit) {
-      lastExecutedRef.current = now;
-      setThrottledValue(value);
-    } else {
-      const timerId = setTimeout(() => {
-        lastExecutedRef.current = Date.now();
-        setThrottledValue(value);
-      }, limit);
-      
-      return () => clearTimeout(timerId);
-    }
-  }, [value, limit]);
-  
-  return throttledValue;
+  return [debouncedFunction, isDebouncing];
 }
