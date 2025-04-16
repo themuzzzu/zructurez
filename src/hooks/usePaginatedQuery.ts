@@ -44,7 +44,7 @@ export function usePaginatedQuery<T>(
   const { data, isLoading, isError, error } = useQuery({
     queryKey: [queryKey, { page: debouncedPage, pageSize: debouncedPageSize }],
     queryFn: () => fetchFunction(debouncedPage, debouncedPageSize),
-    placeholderData: 'keepPrevious', // Updated from keepPreviousData
+    placeholderData: (prev) => prev, // Using a callback function to return previous data
   });
   
   // Calculate pagination metadata
