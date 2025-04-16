@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
 import { ProductImage } from "@/types/product";
+import { OptimizedImage } from "@/components/ui/optimized-image";
 
 interface ProductImagesProps {
   productId: string;
@@ -32,7 +33,8 @@ export const ProductImages = ({ productId, mainImageUrl }: ProductImagesProps) =
         image_url: item.image_url,
         display_order: item.display_order || 0 // Provide default value if missing
       })) as ProductImage[];
-    }
+    },
+    staleTime: 60000, // Cache for 1 minute
   });
   
   const [allImages, setAllImages] = useState<string[]>([]);

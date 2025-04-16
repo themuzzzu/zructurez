@@ -6,40 +6,59 @@ import { LocationModalHandler } from "@/components/location/LocationModalHandler
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/react-query";
 import { Routes } from "./routes";
-import { useEffect, useState } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import { PageLoader } from "@/components/loaders/PageLoader";
 import { NetworkMonitor } from "@/providers/NetworkMonitor";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import "./App.css";
 
+// Lazy load components that aren't needed right away
+const Toaster = lazy(() => import("sonner").then(module => ({ default: module.Toaster })));
+const LocationModalHandler = lazy(() => import("@/components/location/LocationModalHandler").then(module => ({ default: module.LocationModalHandler })));
+
 function App() {
   const [isLoading, setIsLoading] = useState(true);
+  const [resourcesLoaded, setResourcesLoaded] = useState(false);
   
   useEffect(() => {
-    // Add a slight delay to prevent flash of content
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 100);
-    
-    // Attempt to preload critical resources
-    try {
-      // Create and add preload links for critical resources
+    // Preload critical resources asynchronously
+    const preloadCriticalResources = async () => {
       const criticalResources = [
         '/lovable-uploads/a727b8a0-84a4-45b2-88da-392010b1b66c.png',
         '/lovable-uploads/c395d99e-dcf4-4659-9c50-fc50708c858d.png'
       ];
       
-      criticalResources.forEach(resource => {
-        const link = document.createElement('link');
-        link.rel = 'preload';
-        link.as = 'image';
-        link.href = resource;
-        link.fetchPriority = 'high';
-        document.head.appendChild(link);
-      });
-    } catch (err) {
-      console.error('Failed to preload resources:', err);
-    }
+      try {
+        // Create and add preload links for critical resources
+        const preloadPromises = criticalResources.map(resource => {
+          return new Promise<void>((resolve) => {
+            const link = document.createElement('link');
+            link.rel = 'preload';
+            link.as = 'image';
+            link.href = resource;
+            link.fetchPriority = 'high';
+            link.onload = () => resolve();
+            link.onerror = () => resolve(); // Continue even if load fails
+            document.head.appendChild(link);
+          });
+        });
+        
+        // Wait for resources to load or timeout after 2 seconds
+        const timeout = new Promise<void>(resolve => setTimeout(() => resolve(), 2000));
+        await Promise.race([Promise.all(preloadPromises), timeout]);
+        setResourcesLoaded(true);
+      } catch (err) {
+        console.error('Failed to preload resources:', err);
+        setResourcesLoaded(true); // Continue anyway
+      }
+    };
+    
+    preloadCriticalResources();
+    
+    // Hide loader after resources loaded or timeout
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 300); // Reduced from 100ms
     
     return () => clearTimeout(timer);
   }, []);
@@ -55,8 +74,12 @@ function App() {
               ) : (
                 <>
                   <Routes />
-                  <LocationModalHandler />
-                  <Toaster position="top-center" />
+                  <Suspense fallback={null}>
+                    {resourcesLoaded && <LocationModalHandler />}
+                  </Suspense>
+                  <Suspense fallback={null}>
+                    <Toaster position="top-center" />
+                  </Suspense>
                 </>
               )}
             </LocationProvider>

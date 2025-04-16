@@ -8,15 +8,23 @@ export const getOptimalImageFormat = (): 'avif' | 'webp' | 'jpg' => {
   // Check for browser support
   if (typeof window === 'undefined') return 'jpg';
   
-  // Check for AVIF support first (best compression)
-  if (self.createImageBitmap && 'avif' in self.createImageBitmap) {
-    return 'avif';
+  // Try to detect AVIF support
+  if (typeof HTMLImageElement !== 'undefined') {
+    const img = document.createElement('img');
+    if ('decode' in img && 'contentVisibility' in img.style) {
+      // Modern browser with good image API support, probably supports AVIF
+      return 'avif';
+    }
   }
   
   // Check for WebP support
-  const canvas = document.createElement('canvas');
-  if (canvas.toDataURL('image/webp').indexOf('data:image/webp') === 0) {
-    return 'webp';
+  try {
+    const canvas = document.createElement('canvas');
+    if (canvas.toDataURL('image/webp').indexOf('data:image/webp') === 0) {
+      return 'webp';
+    }
+  } catch (e) {
+    // Canvas or WebP not supported
   }
   
   // Fallback to JPEG
@@ -39,47 +47,44 @@ export const getOptimalImageSize = (
   return 2000; // Maximum size
 };
 
-// Priority calculation for images
-export const calculateImagePriority = (
-  elementTop: number, 
-  viewportHeight: number
-): 'high' | 'medium' | 'low' => {
-  if (elementTop < viewportHeight) {
-    // Element is in the initial viewport - high priority
-    return 'high';
-  } else if (elementTop < viewportHeight * 2) {
-    // Element is just below the fold - medium priority
-    return 'medium';
-  }
-  // Element is well below the fold - low priority
-  return 'low';
-};
+// Image loading state management
+export interface ImageLoadingState {
+  loaded: boolean;
+  error: boolean;
+}
 
-// Generate optimized image URLs
-export const getOptimizedImageUrl = (
-  originalUrl: string, 
-  width: number,
-  format: 'avif' | 'webp' | 'jpg' = getOptimalImageFormat()
-): string => {
-  // For placeholder SVGs, return as is
-  if (originalUrl.includes('placeholder.svg')) {
-    return originalUrl;
+// Lazy load image batch handler
+export const lazyLoadImages = (images: HTMLImageElement[], rootMargin: string = '200px') => {
+  if (typeof IntersectionObserver === 'undefined') {
+    // Fallback for older browsers
+    images.forEach(img => {
+      if (img.dataset.src) {
+        img.src = img.dataset.src;
+      }
+    });
+    return;
   }
   
-  // For remote URLs that don't support our optimization, return as is
-  if (originalUrl.startsWith('http') && !originalUrl.includes('lovable-uploads')) {
-    return originalUrl;
-  }
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const img = entry.target as HTMLImageElement;
+          if (img.dataset.src) {
+            img.src = img.dataset.src;
+            img.onload = () => img.classList.add('loaded');
+            img.onerror = () => img.classList.add('error');
+          }
+          observer.unobserve(img);
+        }
+      });
+    },
+    { rootMargin }
+  );
   
-  // For local images, add width parameter and convert format
-  // This is a mock implementation - in a real app this would connect to an image optimization service
-  // or use responsive images with srcset
+  images.forEach(img => observer.observe(img));
   
-  // Strip existing query parameters if any
-  const baseUrl = originalUrl.split('?')[0];
-  
-  // Add optimization parameters
-  return `${baseUrl}?w=${width}&fmt=${format}&q=80`;
+  return () => observer.disconnect();
 };
 
 // Preload critical images
@@ -94,4 +99,25 @@ export const preloadCriticalImages = (urls: string[]): void => {
     link.fetchPriority = 'high';
     document.head.appendChild(link);
   });
+};
+
+// Progressive image loading quality
+export const loadProgressiveImage = (
+  lowQualitySrc: string, 
+  highQualitySrc: string,
+  imgElement: HTMLImageElement,
+  onFullyLoaded?: () => void
+) => {
+  // First load low quality image
+  imgElement.src = lowQualitySrc;
+  imgElement.classList.add('blur-sm');
+  
+  // Then load high quality
+  const highQualityImg = new Image();
+  highQualityImg.src = highQualitySrc;
+  highQualityImg.onload = () => {
+    imgElement.src = highQualitySrc;
+    imgElement.classList.remove('blur-sm');
+    if (onFullyLoaded) onFullyLoaded();
+  };
 };
