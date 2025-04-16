@@ -74,14 +74,6 @@ export const SearchHero = () => {
           >
             Find Local Businesses & Services
           </motion.h1>
-          <motion.p 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="text-lg md:text-xl text-blue-100"
-          >
-            Discover the best local businesses, services, and deals around you
-          </motion.p>
         </div>
 
         <motion.div 
@@ -90,17 +82,17 @@ export const SearchHero = () => {
           transition={{ delay: 0.6 }}
           className="max-w-2xl mx-auto"
         >
-          <form onSubmit={handleSearch} className="bg-white dark:bg-zinc-800 rounded-lg shadow-lg p-2 flex relative">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400" size={20} />
+          <form onSubmit={handleSearch} className="flex relative">
+            <div className="relative flex-1 rounded-md overflow-hidden">
               <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onFocus={() => setShowSuggestions(true)}
                 placeholder="Search businesses, services, products..."
-                className="w-full pl-10 pr-4 py-3 rounded-md border border-zinc-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 text-zinc-800 dark:text-zinc-200 dark:bg-zinc-800"
+                className="w-full pl-10 pr-4 py-3 rounded-md border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 text-zinc-800 dark:text-zinc-200 dark:bg-zinc-800 bg-white/90 backdrop-blur-sm"
               />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400" size={20} />
               
               <AnimatePresence>
                 {showSuggestions && suggestions.length > 0 && (
@@ -128,10 +120,10 @@ export const SearchHero = () => {
             
             <Button
               type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-md transition-colors ml-2"
+              className="ml-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
               disabled={searchLoading}
             >
-              {searchLoading ? "Searching..." : "Search"}
+              Search
             </Button>
           </form>
 

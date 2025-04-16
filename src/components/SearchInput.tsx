@@ -17,13 +17,13 @@ export const SearchInput = ({
 }: SearchInputProps) => {
   return (
     <div className={`relative ${className}`}>
-      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-zinc-400" />
+      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-zinc-400 z-10" />
       <Input
         type="search"
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="pl-10 w-full"
+        className="pl-10 w-full border-0 ring-1 ring-muted bg-transparent focus:ring-2 focus:ring-primary shadow-none rounded-md"
       />
     </div>
   );

@@ -4,17 +4,6 @@ import { Home, ShoppingBag, Wrench, Building, MessageSquare, MoreVertical, SunMo
 import { Button } from "../ui/button";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuGroup,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
-import { useTheme } from "../ThemeProvider";
-import { cn } from "@/lib/utils";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
-import {
   Drawer,
   DrawerClose,
   DrawerContent,
@@ -24,6 +13,9 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import { useTheme } from "../ThemeProvider";
+import { cn } from "@/lib/utils";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useState } from "react";
 
 // Create a simplified icon component for mobile nav
@@ -74,13 +66,6 @@ export const MobileNav = () => {
   // Main navigation items for bottom bar
   const mainNavItems = allNavItems.slice(0, 5);
   
-  // Additional items for the drawer menu
-  const drawerItems = allNavItems.slice(5);
-
-  const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
-  };
-  
   if (!isMobile) {
     return null; // Don't render on non-mobile devices
   }
@@ -101,44 +86,42 @@ export const MobileNav = () => {
       setDrawerOpen(false);
     }
   };
+
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark");
+  };
   
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 py-2 px-1 z-50 animate-fade-in">
       <div className="flex justify-between items-center max-w-md mx-auto">
         {mainNavItems.map((item, index) => {
-          const Icon = item.icon;
           const isActive = checkActivePath(item.path);
           
-          if (index < 4) {
-            // First 4 items
-            return (
-              <Button
-                key={item.path || item.label}
-                variant="ghost"
-                size="icon"
-                className={cn(
-                  "flex flex-col items-center justify-center h-14 w-14 p-0 gap-1",
-                  isActive ? "text-primary dark:text-primary" : "text-zinc-500 dark:text-zinc-500"
-                )}
-                onClick={() => handleNavClick(item)}
-                aria-label={item.label}
-              >
-                {isActive ? (
-                  <FilledIcon Icon={Icon} />
-                ) : (
-                  <RegularIcon Icon={Icon} />
-                )}
-                <span className={cn(
-                  "text-[10px] font-medium",
-                  isActive ? "text-primary dark:text-primary" : "text-zinc-500 dark:text-zinc-500"
-                )}>
-                  {item.label}
-                </span>
-              </Button>
-            );
-          } else {
-            return null;
-          }
+          return (
+            <Button
+              key={item.path}
+              variant="ghost"
+              size="icon"
+              className={cn(
+                "flex flex-col items-center justify-center h-14 w-14 p-0 gap-1",
+                isActive ? "text-primary dark:text-primary" : "text-zinc-500 dark:text-zinc-500"
+              )}
+              onClick={() => handleNavClick(item)}
+              aria-label={item.label}
+            >
+              {isActive ? (
+                <FilledIcon Icon={item.icon} />
+              ) : (
+                <RegularIcon Icon={item.icon} />
+              )}
+              <span className={cn(
+                "text-[10px] font-medium",
+                isActive ? "text-primary dark:text-primary" : "text-zinc-500 dark:text-zinc-500"
+              )}>
+                {item.label}
+              </span>
+            </Button>
+          );
         })}
 
         {/* Drawer for remaining menu items instead of dropdown */}
@@ -159,9 +142,6 @@ export const MobileNav = () => {
           <DrawerContent>
             <DrawerHeader>
               <DrawerTitle>Menu</DrawerTitle>
-              <DrawerDescription>
-                Access all features and settings
-              </DrawerDescription>
             </DrawerHeader>
             <div className="px-4 py-2 grid grid-cols-3 gap-4">
               {allNavItems.map((item) => {

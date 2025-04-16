@@ -77,24 +77,27 @@ export default function Search() {
           </div>
         </div>
         
-        {/* Search bar */}
+        {/* Search bar - minimalistic design */}
         <div className="mb-6">
           <form onSubmit={handleSearch} className="relative max-w-xl">
-            <Input
-              type="text"
-              placeholder="Search products..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pr-10"
-            />
-            <Button 
-              type="submit" 
-              variant="ghost" 
-              size="icon" 
-              className="absolute right-0 top-0 h-full"
-            >
-              <SearchIcon className="h-4 w-4" />
-            </Button>
+            <div className="relative flex items-center rounded-md overflow-hidden">
+              <SearchIcon className="absolute left-3 z-10 text-muted-foreground h-4 w-4" />
+              <Input
+                type="text"
+                placeholder="Search products..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 pr-10 py-2 rounded-md border-0 ring-1 ring-muted bg-transparent focus:ring-2 focus:ring-primary"
+              />
+              <Button 
+                type="submit" 
+                variant="ghost" 
+                size="sm" 
+                className="absolute right-0 px-3 h-full"
+              >
+                <span className="text-xs font-medium">Search</span>
+              </Button>
+            </div>
           </form>
         </div>
         
