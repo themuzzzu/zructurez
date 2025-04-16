@@ -1,8 +1,6 @@
 
-import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { LocationProvider } from "@/providers/LocationProvider";
-import { LocationModalHandler } from "@/components/location/LocationModalHandler";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/react-query";
 import { Routes } from "./routes";
@@ -13,8 +11,8 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import "./App.css";
 
 // Lazy load components that aren't needed right away
-const Toaster = lazy(() => import("sonner").then(module => ({ default: module.Toaster })));
-const LocationModalHandler = lazy(() => import("@/components/location/LocationModalHandler").then(module => ({ default: module.LocationModalHandler })));
+const LazyToaster = lazy(() => import("sonner").then(module => ({ default: module.Toaster })));
+const LazyLocationModalHandler = lazy(() => import("@/components/location/LocationModalHandler").then(module => ({ default: module.LocationModalHandler })));
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -75,10 +73,10 @@ function App() {
                 <>
                   <Routes />
                   <Suspense fallback={null}>
-                    {resourcesLoaded && <LocationModalHandler />}
+                    {resourcesLoaded && <LazyLocationModalHandler />}
                   </Suspense>
                   <Suspense fallback={null}>
-                    <Toaster position="top-center" />
+                    <LazyToaster position="top-center" />
                   </Suspense>
                 </>
               )}
