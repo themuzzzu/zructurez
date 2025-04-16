@@ -44,7 +44,7 @@ export function usePaginatedQuery<T>(
   const { data, isLoading, isError, error } = useQuery({
     queryKey: [queryKey, { page: debouncedPage, pageSize: debouncedPageSize }],
     queryFn: () => fetchFunction(debouncedPage, debouncedPageSize),
-    keepPreviousData: true, // Keep previous data while loading new data
+    placeholderData: 'keepPrevious', // Updated from keepPreviousData
   });
   
   // Calculate pagination metadata
@@ -102,11 +102,13 @@ export function useInfinitePaginatedQuery<T>(
   const { data, isLoading, isError, error } = useQuery({
     queryKey: [queryKey, { page, pageSize }],
     queryFn: () => fetchFunction(page, pageSize),
-    onSuccess: (newData) => {
-      if (page === 1) {
-        setAllData(newData.data);
-      } else {
-        setAllData(prev => [...prev, ...newData.data]);
+    meta: {
+      onSuccess: (newData: { data: T[], totalCount: number }) => {
+        if (page === 1) {
+          setAllData(newData.data);
+        } else {
+          setAllData(prev => [...prev, ...newData.data]);
+        }
       }
     },
   });
