@@ -1,15 +1,14 @@
 
-import React from 'react';
 import { MessageSquare, Share2, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/ThemeProvider";
 
 interface BusinessCardActionsProps {
   appointment_price?: number;
-  onBookClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  onWhatsAppClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  onShareClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  onCallClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  onBookClick: (e: React.MouseEvent) => void;
+  onWhatsAppClick: (e: React.MouseEvent) => void;
+  onShareClick: (e: React.MouseEvent) => void;
+  onCallClick: (e: React.MouseEvent) => void;
   is_open?: boolean;
 }
 

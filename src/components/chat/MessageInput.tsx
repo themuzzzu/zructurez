@@ -1,5 +1,3 @@
-
-import React from 'react';
 import { Send, Smile } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

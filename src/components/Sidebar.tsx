@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+
 import { cn } from "@/lib/utils";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import {
   Home,
   Store,
@@ -25,6 +26,7 @@ export const Sidebar = ({ className }: React.HTMLAttributes<HTMLDivElement>) => 
   const navigate = useNavigate();
   const location = useLocation();
   const [activeItem, setActiveItem] = useState(() => {
+    // Initialize with current path or default to home
     return location.pathname || "/";
   });
   const [isCollapsed, setIsCollapsed] = useState(localStorage.getItem("sidebarCollapsed") === "true");
@@ -33,19 +35,24 @@ export const Sidebar = ({ className }: React.HTMLAttributes<HTMLDivElement>) => 
   const isDarkMode = theme === "dark";
   const { t, language } = useLanguage();
 
+  // Save collapse state to localStorage and dispatch custom event
   useEffect(() => {
     localStorage.setItem("sidebarCollapsed", String(isCollapsed));
     
+    // Dispatch custom event to notify other components
     window.dispatchEvent(new Event('sidebarStateChanged'));
   }, [isCollapsed]);
 
+  // Update active item when route changes
   useEffect(() => {
     setActiveItem(location.pathname);
   }, [location.pathname]);
 
+  // Update route names when language changes
   useEffect(() => {
+    // Force re-render when language changes
     const handleLanguageChange = () => {
-      setActiveItem(prev => prev);
+      setActiveItem(prev => prev); // Trick to force re-render
     };
     
     window.addEventListener('languageChanged', handleLanguageChange);
@@ -74,6 +81,7 @@ export const Sidebar = ({ className }: React.HTMLAttributes<HTMLDivElement>) => 
     setActiveItem(path);
     navigate(path);
     
+    // Auto-collapse sidebar on mobile after navigation
     if (isMobile) {
       setIsCollapsed(true);
     }
@@ -83,6 +91,7 @@ export const Sidebar = ({ className }: React.HTMLAttributes<HTMLDivElement>) => 
     setTheme(theme === "dark" ? "light" : "dark");
   };
 
+  // Don't render sidebar on mobile - mobile navigation is handled separately
   if (isMobile) {
     return null;
   }
@@ -118,6 +127,7 @@ export const Sidebar = ({ className }: React.HTMLAttributes<HTMLDivElement>) => 
           />
         ))}
         
+        {/* Theme toggle */}
         <ThemeToggle 
           isCollapsed={isCollapsed} 
           isDarkMode={isDarkMode} 

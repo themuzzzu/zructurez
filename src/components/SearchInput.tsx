@@ -1,9 +1,9 @@
 
-import React, { useEffect, useRef } from "react";
 import { Search } from "lucide-react";
 import { Input } from "./ui/input";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useEffect, useRef, useState } from "react";
 
 interface SearchInputProps {
   placeholder?: string;
@@ -24,10 +24,26 @@ export const SearchInput = ({
   autoFocus = false,
   disabled = false
 }: SearchInputProps) => {
-  const { t, language } = useLanguage();
+  const { t, language, tDynamic } = useLanguage();
   const inputRef = useRef<HTMLInputElement>(null);
+  const [translatedPlaceholder, setTranslatedPlaceholder] = useState<string>("");
   
-  const translatedPlaceholder = placeholder === "Search..." ? t("search") + "..." : placeholder;
+  // Update the placeholder when language changes
+  useEffect(() => {
+    // Default to translated placeholder if specific one isn't provided
+    const defaultPlaceholder = placeholder === "Search..." ? t("search") + "..." : placeholder;
+    setTranslatedPlaceholder(defaultPlaceholder);
+    
+    // For custom placeholders that aren't in the static translations
+    if (placeholder !== "Search..." && language !== "english") {
+      const translateCustomPlaceholder = async () => {
+        const custom = await tDynamic(placeholder);
+        setTranslatedPlaceholder(custom);
+      };
+      
+      translateCustomPlaceholder();
+    }
+  }, [placeholder, language, t, tDynamic]);
   
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && onSubmit) {
@@ -35,27 +51,18 @@ export const SearchInput = ({
     }
   };
   
+  // Set RTL properties based on language
   const isRTL = language === "urdu";
   
+  // Update direction and alignment when language changes
   useEffect(() => {
     if (!inputRef.current) return;
     
-    const handleLanguageChange = () => {
-      if (!inputRef.current) return;
-      
-      if (isRTL) {
-        inputRef.current.dir = "rtl";
-      } else {
-        inputRef.current.dir = "ltr";
-      }
-    };
-    
-    handleLanguageChange();
-    window.addEventListener('languageChanged', handleLanguageChange);
-    
-    return () => {
-      window.removeEventListener('languageChanged', handleLanguageChange);
-    };
+    if (isRTL) {
+      inputRef.current.dir = "rtl";
+    } else {
+      inputRef.current.dir = "ltr";
+    }
   }, [language, isRTL]);
 
   return (
@@ -77,7 +84,7 @@ export const SearchInput = ({
         disabled={disabled}
         className={cn(
           "w-full bg-transparent focus-visible:ring-2 focus-visible:ring-primary",
-          "rounded-md border-muted",
+          "rounded-md border-muted transition-all duration-200",
           isRTL ? "pr-10 text-right" : "pl-10",
           disabled && "opacity-70 cursor-not-allowed"
         )}

@@ -1,23 +1,26 @@
 
-import React, { useEffect, useState, lazy, Suspense } from "react";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { LocationProvider } from "@/providers/LocationProvider";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/react-query";
 import { Routes } from "./routes";
+import { useEffect, useState, lazy, Suspense } from "react";
 import { PageLoader } from "@/components/loaders/PageLoader";
 import { NetworkMonitor } from "@/providers/NetworkMonitor";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { AuthProvider } from "@/hooks/useAuth";
 import "./App.css";
 import "./styles/global.css";
 import "./styles/theme-manager.css"; // Import our theme manager
-import { Toaster } from "sonner";
+
+// Lazy load components that aren't needed right away
+const LazyToaster = lazy(() => import("sonner").then(module => ({ default: module.Toaster })));
+const LazyLocationModalHandler = lazy(() => import("@/components/location/LocationModalHandler").then(module => ({ default: module.LocationModalHandler })));
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [resourcesLoaded, setResourcesLoaded] = useState(false);
+  const [isLanguageChanging, setIsLanguageChanging] = useState(false);
   
   useEffect(() => {
     try {
@@ -93,50 +96,80 @@ function App() {
       setIsLoading(false);
     }, 500);
     
-    // Listen for language changes to prevent full refresh
-    const handleLanguageChange = () => {
-      // Use the existing loading state mechanism for smooth transitions
-      setIsLoading(true);
+    // Listen for language changes to handle transitions properly
+    const handleLanguageChange = (e: Event) => {
+      // Use a subtle transition instead of a full reload
+      setIsLanguageChanging(true);
+      document.body.classList.add('lang-transition');
       
+      // Short delay to allow CSS transition to complete
       setTimeout(() => {
-        setIsLoading(false);
-      }, 300);
+        document.body.classList.remove('lang-transition');
+        setIsLanguageChanging(false);
+      }, 800);
     };
     
     window.addEventListener('languageChanged', handleLanguageChange);
     
+    // Preload language translation files
+    const preloadTranslationsScript = document.createElement('script');
+    preloadTranslationsScript.src = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@20.0.0/dist/transformers.min.js';
+    preloadTranslationsScript.async = true;
+    document.head.appendChild(preloadTranslationsScript);
+    
     return () => {
       clearTimeout(timer);
       window.removeEventListener('languageChanged', handleLanguageChange);
+      if (document.head.contains(preloadTranslationsScript)) {
+        document.head.removeChild(preloadTranslationsScript);
+      }
     };
   }, []);
 
+  // Render a lightweight transition screen during language changes
+  const renderContent = () => {
+    if (isLoading) {
+      return <PageLoader type="shimmer" />;
+    }
+    
+    if (isLanguageChanging) {
+      return (
+        <div className="flex min-h-screen items-center justify-center bg-background transition-opacity duration-300">
+          <div className="animate-pulse text-center">
+            <div className="h-8 w-8 mx-auto mb-4 rounded-full bg-primary/30"></div>
+            <div className="h-4 w-32 mx-auto rounded bg-muted"></div>
+          </div>
+        </div>
+      );
+    }
+    
+    return (
+      <>
+        <Routes />
+        <Suspense fallback={null}>
+          {resourcesLoaded && <LazyLocationModalHandler />}
+        </Suspense>
+        <Suspense fallback={null}>
+          <LazyToaster position="top-center" />
+        </Suspense>
+      </>
+    );
+  };
+
   return (
-    <React.StrictMode>
-      <ErrorBoundary>
-        <AuthProvider>
-          <ThemeProvider>
-            <LanguageProvider>
-              <QueryClientProvider client={queryClient}>
-                <NetworkMonitor>
-                  <LocationProvider>
-                    {isLoading ? (
-                      <PageLoader type="shimmer" />
-                    ) : (
-                      <>
-                        <Routes />
-                        {/* Use Toaster directly instead of lazy loading */}
-                        <Toaster position="top-center" />
-                      </>
-                    )}
-                  </LocationProvider>
-                </NetworkMonitor>
-              </QueryClientProvider>
-            </LanguageProvider>
-          </ThemeProvider>
-        </AuthProvider>
-      </ErrorBoundary>
-    </React.StrictMode>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <LanguageProvider>
+          <QueryClientProvider client={queryClient}>
+            <NetworkMonitor>
+              <LocationProvider>
+                {renderContent()}
+              </LocationProvider>
+            </NetworkMonitor>
+          </QueryClientProvider>
+        </LanguageProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }
 

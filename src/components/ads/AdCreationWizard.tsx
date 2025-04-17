@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+
+// Fix the Badge import
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -40,7 +42,7 @@ import { Slider } from "@/components/ui/slider";
 import { ImageUpload } from "@/components/ImageUpload";
 import { LocationSelector } from "@/components/LocationSelector";
 import { Calendar } from "@/components/ui/calendar";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/badge"; // Add this import
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { 
@@ -77,6 +79,7 @@ export function AdCreationWizard({ onClose }: { onClose: () => void }) {
   const [estimatedReach, setEstimatedReach] = useState(0);
   const [estimatedClicks, setEstimatedClicks] = useState(0);
   
+  // Fetch user's products
   const { data: products = [] } = useQuery({
     queryKey: ['user-products'],
     queryFn: async () => {
@@ -93,6 +96,7 @@ export function AdCreationWizard({ onClose }: { onClose: () => void }) {
     enabled: !!currentUser && adType === "product"
   });
   
+  // Fetch available ad placements
   const { data: placements = [] } = useQuery({
     queryKey: ['ad-placements'],
     queryFn: async () => {
@@ -107,6 +111,7 @@ export function AdCreationWizard({ onClose }: { onClose: () => void }) {
     }
   });
   
+  // Filter placements by ad type
   const filteredPlacements = placements.filter(p => {
     if (adType === "product") return p.type === "sponsored";
     if (adType === "banner") return p.type === "banner";
@@ -114,7 +119,10 @@ export function AdCreationWizard({ onClose }: { onClose: () => void }) {
     return true; // PPC shows all
   });
   
+  // Update estimated reach and clicks when bid or budget changes
   const updateEstimates = () => {
+    // In a real implementation, this would call an AI service to predict performance
+    // For now, we'll use a simple formula
     const reach = dailyBudget * 10 * (1 + (bidAmount / 100));
     const clicks = reach * (0.01 + (bidAmount / 10000));
     
@@ -122,6 +130,7 @@ export function AdCreationWizard({ onClose }: { onClose: () => void }) {
     setEstimatedClicks(Math.round(clicks));
   };
   
+  // Handle step navigation
   const nextStep = () => {
     if (step === 1 && !adType) {
       toast.error("Please select an ad type");
@@ -158,6 +167,7 @@ export function AdCreationWizard({ onClose }: { onClose: () => void }) {
     setStep(prev => prev - 1);
   };
   
+  // Handle ad creation
   const handleCreateAd = async () => {
     if (!currentUser) {
       toast.error("You must be logged in to create an ad");
@@ -167,6 +177,7 @@ export function AdCreationWizard({ onClose }: { onClose: () => void }) {
     setIsCreating(true);
     
     try {
+      // For now, we'll just simulate the ad creation
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       setShowSuccessDialog(true);
@@ -727,6 +738,7 @@ export function AdCreationWizard({ onClose }: { onClose: () => void }) {
   );
 }
 
+// Helper component for the card
 function ShoppingBag(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg

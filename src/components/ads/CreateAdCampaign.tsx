@@ -1,22 +1,21 @@
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/components/ui/use-toast";
+import { useQuery } from "@tanstack/react-query";
 import { ImageUpload } from "@/components/ImageUpload";
+import { AdSlotSelector } from "./AdSlotSelector";
+import { AdSlot, AdSlotType } from "@/types/advertising";
+import { Separator } from "@/components/ui/separator";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { CalendarIcon, CircleDollarSign, Clock } from "lucide-react";
+import { format, addDays, differenceInDays } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
-import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { useAuth } from "@/hooks/useAuth";
-import { useLocation } from "@/providers/LocationProvider";
-import { CreateAdvertisementDto } from "@/types/advertisement";
+import { toast } from "sonner";
 
 interface CreateAdCampaignProps {
   businessId?: string;
@@ -25,369 +24,299 @@ interface CreateAdCampaignProps {
 }
 
 export const CreateAdCampaign = ({ businessId, onSuccess, onCancel }: CreateAdCampaignProps) => {
-  const { toast } = useToast();
-  const { user } = useAuth();
-  const { currentLocation } = useLocation();
-  const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    image: null as string | null,
-    type: "banner",
-    format: "standard",
-    budget: "",
-    reference_id: "",
-    start_date: new Date(),
-    end_date: new Date(new Date().setMonth(new Date().getMonth() + 1)), // Default to 1 month
-    location: currentLocation || "",
-    targeting_age_min: 18,
-    targeting_age_max: 65,
-    targeting_gender: "all",
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
+  const [selectedSlot, setSelectedSlot] = useState<AdSlot | null>(null);
+  const [dateRange, setDateRange] = useState<{
+    from: Date;
+    to: Date;
+  }>({
+    from: new Date(),
+    to: addDays(new Date(), 7)
   });
+  const [pricingType, setPricingType] = useState<"daily" | "monthly" | "exclusive">("daily");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleImageUpload = async (base64Image: string | null) => {
-    if (!base64Image) return null;
-    
-    try {
-      // Convert base64 to blob
-      const base64Data = base64Image.split(',')[1];
-      const byteCharacters = atob(base64Data);
-      const byteNumbers = new Array(byteCharacters.length);
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
-      }
-      const byteArray = new Uint8Array(byteNumbers);
-      const blob = new Blob([byteArray], { type: 'image/jpeg' });
-
-      // Upload to Supabase Storage
-      const fileName = `ad-${Date.now()}-${Math.random().toString(36).substring(7)}`;
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('ad-images')
-        .upload(fileName, blob);
-
-      if (uploadError) {
-        throw uploadError;
-      }
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('ad-images')
-        .getPublicUrl(fileName);
-
-      return publicUrl;
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      toast({
-        title: "Image upload failed",
-        description: "There was an error uploading your image. Please try again.",
-        variant: "destructive",
-      });
-      return null;
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-    
-    try {
-      if (!user) {
-        toast({
-          title: "Authentication required",
-          description: "Please sign in to create an ad campaign.",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      if (!businessId) {
-        toast({
-          title: "Business ID required",
-          description: "A business must be selected to create an ad campaign.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Upload image if provided
-      const imageUrl = formData.image ? await handleImageUpload(formData.image) : null;
-      
-      // Format dates for DB
-      const startDateStr = format(formData.start_date, 'yyyy-MM-dd');
-      const endDateStr = format(formData.end_date, 'yyyy-MM-dd');
-      
-      // Prepare data for insertion
-      const adData: CreateAdvertisementDto = {
-        user_id: user.id,
-        business_id: businessId,
-        title: formData.title,
-        description: formData.description,
-        image_url: imageUrl || '',
-        type: formData.type,
-        format: formData.format,
-        reference_id: formData.reference_id || '',
-        budget: parseFloat(formData.budget) || 0,
-        start_date: startDateStr,
-        end_date: endDateStr,
-        location: formData.location,
-        targeting_age_min: formData.targeting_age_min,
-        targeting_age_max: formData.targeting_age_max,
-        targeting_gender: formData.targeting_gender,
-      };
-      
-      // Insert ad campaign
+  const { data: adSlots = [], isLoading: isLoadingSlots } = useQuery({
+    queryKey: ["ad-slots"],
+    queryFn: async () => {
       const { data, error } = await supabase
-        .from('advertisements')
-        .insert(adData)
-        .select()
-        .single();
-        
+        .from('ad_placements')
+        .select('*')
+        .eq('active', true)
+        .order('name');
+      
       if (error) throw error;
       
-      toast({
-        title: "Ad campaign created successfully",
-        description: "Your ad campaign is now pending review.",
-      });
-      
-      if (onSuccess) onSuccess();
-    } catch (error: any) {
-      console.error("Error creating ad campaign:", error);
-      toast({
-        title: "Failed to create ad campaign",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
+      return data.map(slot => ({
+        id: slot.id,
+        name: slot.name,
+        type: slot.type,
+        description: slot.description || '',
+        daily_price: slot.cpm_rate || 0,
+        monthly_price: (slot.cpm_rate || 0) * 20,
+        exclusive_price: (slot.cpm_rate || 0) * 30,
+        position: slot.location || '',
+        max_rotation_slots: slot.priority || 5,
+        rotation_interval_seconds: 10,
+        is_active: slot.active,
+        
+        cpc_rate: slot.cpc_rate,
+        cpm_rate: slot.cpm_rate,
+        location: slot.location,
+        max_size_kb: slot.max_size_kb,
+        priority: slot.priority,
+        size: slot.size
+      } as AdSlot));
+    }
+  });
+
+  const handleSlotSelect = (slotId: string) => {
+    setSelectedSlotId(slotId);
+    const slot = adSlots.find(s => s.id === slotId) || null;
+    setSelectedSlot(slot);
+    
+    if (slot && slot.exclusive_price === null && pricingType === "exclusive") {
+      setPricingType("daily");
     }
   };
 
-  const handleChange = (name: string, value: any) => {
-    setFormData(prev => ({ ...prev, [name]: value }));
+  const durationDays = dateRange.from && dateRange.to 
+    ? differenceInDays(dateRange.to, dateRange.from) + 1
+    : 0;
+
+  const calculateTotalPrice = () => {
+    if (!selectedSlot) return 0;
+    
+    switch (pricingType) {
+      case "daily":
+        return selectedSlot.daily_price * durationDays;
+      case "monthly":
+        const fullMonths = Math.floor(durationDays / 30);
+        const remainingDays = durationDays % 30;
+        return (fullMonths * selectedSlot.monthly_price) + (remainingDays * selectedSlot.daily_price);
+      case "exclusive":
+        if (selectedSlot.exclusive_price === null) return 0;
+        return selectedSlot.exclusive_price;
+      default:
+        return 0;
+    }
+  };
+
+  const totalPrice = calculateTotalPrice();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!businessId || !selectedSlotId || !dateRange.from || !dateRange.to) {
+      toast.error("Please fill all required fields");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+
+      // Get the current authenticated user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("You need to be logged in to create an ad campaign");
+        return;
+      }
+
+      const startDate = format(dateRange.from, "yyyy-MM-dd");
+      const endDate = format(dateRange.to, "yyyy-MM-dd");
+
+      const adData = {
+        business_id: businessId,
+        user_id: user.id, // Add the required user_id field
+        title,
+        description,
+        type: selectedSlot?.type || 'sponsored_product',
+        format: 'standard',
+        reference_id: businessId,
+        location: 'global',
+        budget: totalPrice,
+        start_date: startDate,
+        end_date: endDate,
+        image_url: imageUrl,
+        status: 'pending'
+      };
+
+      const { error } = await supabase.from('advertisements').insert(adData);
+
+      if (error) throw error;
+      
+      if (onSuccess) onSuccess();
+    } catch (error) {
+      console.error('Error creating ad campaign:', error);
+      toast.error("Failed to create ad campaign");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <Card>
-        <CardHeader>
-          <CardTitle>Create Ad Campaign</CardTitle>
-          <CardDescription>
-            Set up a new advertising campaign for your business
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {step === 1 && (
-            <>
-              <div className="space-y-2">
-                <Label htmlFor="title">Campaign Title</Label>
-                <Input
-                  id="title"
-                  value={formData.title}
-                  onChange={(e) => handleChange('title', e.target.value)}
-                  placeholder="Summer Sale Promotion"
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => handleChange('description', e.target.value)}
-                  placeholder="Describe your ad campaign"
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="type">Ad Type</Label>
-                <Select
-                  value={formData.type}
-                  onValueChange={(value) => handleChange('type', value)}
-                >
-                  <SelectTrigger id="type">
-                    <SelectValue placeholder="Select ad type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="banner">Banner Ad</SelectItem>
-                    <SelectItem value="sponsored">Sponsored Listing</SelectItem>
-                    <SelectItem value="flash-deal">Flash Deal</SelectItem>
-                    <SelectItem value="recommended">Recommended</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="format">Ad Format</Label>
-                <Select
-                  value={formData.format}
-                  onValueChange={(value) => handleChange('format', value)}
-                >
-                  <SelectTrigger id="format">
-                    <SelectValue placeholder="Select ad format" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="standard">Standard Banner</SelectItem>
-                    <SelectItem value="square">Square</SelectItem>
-                    <SelectItem value="full-width">Full Width</SelectItem>
-                    <SelectItem value="native">Native Ad</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <Label>Ad Image</Label>
-                <ImageUpload
-                  selectedImage={formData.image}
-                  onImageSelect={(image) => handleChange('image', image)}
-                />
-              </div>
-            </>
-          )}
-          
-          {step === 2 && (
-            <>
-              <div className="space-y-2">
-                <Label htmlFor="budget">Budget (₹)</Label>
-                <Input
-                  id="budget"
-                  type="number"
-                  min="100"
-                  value={formData.budget}
-                  onChange={(e) => handleChange('budget', e.target.value)}
-                  placeholder="1000"
-                  required
-                />
-                <p className="text-sm text-muted-foreground">Minimum budget is ₹100</p>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div>
+        <h2 className="text-xl font-semibold mb-4">Create New Ad Campaign</h2>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="title">Ad Title</Label>
+            <Input 
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Enter a catchy title for your ad"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description">Ad Description</Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Describe your advertisement briefly"
+              rows={3}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Ad Image</Label>
+            <ImageUpload
+              selectedImage={imageUrl}
+              onImageSelect={setImageUrl}
+              skipAutoSave
+            />
+            <p className="text-xs text-muted-foreground">
+              Upload an image for your ad. Recommended size: 1200×628px
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">Select Ad Placement</CardTitle>
+              <CardDescription>Choose where your ad will appear</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <AdSlotSelector 
+                slots={adSlots}
+                selectedSlotId={selectedSlotId}
+                onSelect={handleSlotSelect}
+                isLoading={isLoadingSlots}
+              />
+            </CardContent>
+          </Card>
+
+          {selectedSlot && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg">Campaign Details</CardTitle>
+                <CardDescription>Set duration and pricing</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Start Date</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start text-left font-normal"
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {formData.start_date ? format(formData.start_date, "PPP") : <span>Pick a date</span>}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={formData.start_date}
-                        onSelect={(date) => date && handleChange('start_date', date)}
-                        initialFocus
-                        disabled={(date) => date < new Date()}
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <Label>Campaign Duration</Label>
+                  <div className="flex items-center gap-2 border rounded-md p-3">
+                    <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                    <DateRangePicker 
+                      initialDateFrom={dateRange.from}
+                      initialDateTo={dateRange.to}
+                      onUpdate={({ from, to }) => {
+                        if (from && to) setDateRange({ from, to });
+                      }}
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Clock className="h-3 w-3" /> 
+                    Duration: {durationDays} day{durationDays !== 1 ? 's' : ''}
+                  </p>
                 </div>
-                
+
                 <div className="space-y-2">
-                  <Label>End Date</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start text-left font-normal"
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {formData.end_date ? format(formData.end_date, "PPP") : <span>Pick a date</span>}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={formData.end_date}
-                        onSelect={(date) => date && handleChange('end_date', date)}
-                        initialFocus
-                        disabled={(date) => date <= formData.start_date}
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <Label>Pricing Option</Label>
+                  <RadioGroup
+                    value={pricingType}
+                    onValueChange={(value) => setPricingType(value as "daily" | "monthly" | "exclusive")}
+                    className="grid grid-cols-1 gap-2"
+                  >
+                    <div className="flex items-center space-x-2 border rounded-md p-3">
+                      <RadioGroupItem value="daily" id="daily" />
+                      <Label htmlFor="daily" className="flex-1 cursor-pointer">
+                        <div className="font-medium">Daily</div>
+                        <div className="text-sm text-muted-foreground">
+                          ₹{selectedSlot.daily_price}/day
+                        </div>
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2 border rounded-md p-3">
+                      <RadioGroupItem value="monthly" id="monthly" />
+                      <Label htmlFor="monthly" className="flex-1 cursor-pointer">
+                        <div className="font-medium">Monthly (Save 30%)</div>
+                        <div className="text-sm text-muted-foreground">
+                          ₹{selectedSlot.monthly_price}/month
+                        </div>
+                      </Label>
+                    </div>
+                    
+                    {selectedSlot.exclusive_price !== null && (
+                      <div className="flex items-center space-x-2 border rounded-md p-3 border-primary/30 bg-primary/5">
+                        <RadioGroupItem value="exclusive" id="exclusive" />
+                        <Label htmlFor="exclusive" className="flex-1 cursor-pointer">
+                          <div className="font-medium">Exclusive</div>
+                          <div className="text-sm text-muted-foreground">
+                            ₹{selectedSlot.exclusive_price} (No rotation with other ads)
+                          </div>
+                        </Label>
+                      </div>
+                    )}
+                  </RadioGroup>
                 </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="location">Target Location</Label>
-                <Input
-                  id="location"
-                  value={formData.location}
-                  onChange={(e) => handleChange('location', e.target.value)}
-                  placeholder="Target location"
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label>Target Age Range</Label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="number"
-                    min="13"
-                    max="100"
-                    value={formData.targeting_age_min}
-                    onChange={(e) => handleChange('targeting_age_min', parseInt(e.target.value))}
-                    className="w-20"
-                  />
-                  <span>to</span>
-                  <Input
-                    type="number"
-                    min="13"
-                    max="100"
-                    value={formData.targeting_age_max}
-                    onChange={(e) => handleChange('targeting_age_max', parseInt(e.target.value))}
-                    className="w-20"
-                  />
+              </CardContent>
+              <CardFooter className="border-t pt-4">
+                <div className="w-full">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium">Total Cost:</span>
+                    <span className="text-lg font-bold flex items-center">
+                      <CircleDollarSign className="h-4 w-4 mr-1" />
+                      ₹{totalPrice.toLocaleString()}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {pricingType === "daily" ? (
+                      <>₹{selectedSlot.daily_price}/day × {durationDays} days</>
+                    ) : pricingType === "monthly" ? (
+                      <>₹{selectedSlot.monthly_price}/month (discounted rate)</>
+                    ) : (
+                      <>Exclusive placement with no other ads</>
+                    )}
+                  </p>
                 </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="targeting_gender">Target Gender</Label>
-                <Select
-                  value={formData.targeting_gender}
-                  onValueChange={(value) => handleChange('targeting_gender', value)}
-                >
-                  <SelectTrigger id="targeting_gender">
-                    <SelectValue placeholder="Select target gender" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
-                    <SelectItem value="male">Male</SelectItem>
-                    <SelectItem value="female">Female</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </>
+              </CardFooter>
+            </Card>
           )}
-        </CardContent>
-        
-        <CardFooter className="flex justify-between">
-          {step === 1 ? (
-            <>
-              <Button variant="outline" type="button" onClick={onCancel}>Cancel</Button>
-              <Button type="button" onClick={() => setStep(2)}>Next</Button>
-            </>
-          ) : (
-            <>
-              <Button variant="outline" type="button" onClick={() => setStep(1)}>Back</Button>
-              <div className="flex gap-2">
-                <Button variant="outline" type="button" onClick={onCancel}>Cancel</Button>
-                <Button type="submit" disabled={loading}>
-                  {loading ? "Creating..." : "Create Campaign"}
-                </Button>
-              </div>
-            </>
-          )}
-        </CardFooter>
-      </Card>
+        </div>
+      </div>
+      
+      <Separator />
+
+      <div className="flex justify-end gap-2">
+        <Button variant="outline" type="button" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button type="submit" disabled={isSubmitting || !selectedSlot}>
+          {isSubmitting ? "Creating..." : "Create Ad Campaign"}
+        </Button>
+      </div>
     </form>
   );
 };
-
-export default CreateAdCampaign;

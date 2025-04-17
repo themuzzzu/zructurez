@@ -1,9 +1,13 @@
 
+// Import your existing code, assuming you've already created this file
+// Only adding changes necessary for language sync
+
 "use client";
 
 import * as React from "react";
 import { ThemeProvider as NextThemeProvider } from "next-themes";
 import { type ThemeProviderProps } from "next-themes/dist/types";
+import { useEffect, createContext, useContext, useState } from "react";
 
 type ThemeContextType = {
   theme: string;
@@ -11,19 +15,17 @@ type ThemeContextType = {
   isDarkMode: boolean;
 };
 
-// Create the context with default values
-const ThemeContext = React.createContext<ThemeContextType>({
+const ThemeContext = createContext<ThemeContextType>({
   theme: "light",
   setTheme: () => null,
   isDarkMode: false,
 });
 
 export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
-  // Make sure we're importing React properly to use hooks
-  const [theme, setThemeState] = React.useState("light");
-  const [mounted, setMounted] = React.useState(false);
+  const [theme, setThemeState] = useState("light");
+  const [mounted, setMounted] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     // Check if we have a saved theme
     const savedTheme = localStorage.getItem("theme");
     if (savedTheme) {
@@ -60,9 +62,9 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
     }));
   };
 
-  // Listen for language changes to ensure theme persistence
-  React.useEffect(() => {
-    const handleLanguageChange = () => {
+  // ListEn for language changes to ensure theme persistence
+  useEffect(() => {
+    const handleLanguageChange = (e: Event) => {
       // Ensure theme is still applied after language change
       const currentTheme = localStorage.getItem("theme") || theme;
       setTimeout(() => {
@@ -99,4 +101,4 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
   );
 }
 
-export const useTheme = () => React.useContext(ThemeContext);
+export const useTheme = () => useContext(ThemeContext);

@@ -1,83 +1,124 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { toast } from "sonner";
+import { queryClient } from '@/lib/react-query';
 
-interface NetworkContextType {
+interface NetworkStatusContextType {
   isOnline: boolean;
-  connectionQuality?: 'good' | 'poor' | 'offline';
+  connectionQuality: 'unknown' | 'poor' | 'good' | 'excellent';
+  latency: number | null;
 }
 
-const NetworkContext = createContext<NetworkContextType | undefined>(undefined);
+const NetworkStatusContext = createContext<NetworkStatusContextType>({
+  isOnline: true,
+  connectionQuality: 'unknown',
+  latency: null
+});
 
-export const NetworkMonitor = ({ children }: { children: ReactNode }) => {
+export function useNetworkStatus() {
+  return useContext(NetworkStatusContext);
+}
+
+interface NetworkMonitorProps {
+  children: ReactNode;
+  showToasts?: boolean;
+}
+
+export function NetworkMonitor({ children, showToasts = true }: NetworkMonitorProps) {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
-  const [connectionQuality, setConnectionQuality] = useState<'good' | 'poor' | 'offline'>(
-    navigator.onLine ? 'good' : 'offline'
-  );
-
+  const [connectionQuality, setConnectionQuality] = useState<'unknown' | 'poor' | 'good' | 'excellent'>('unknown');
+  const [latency, setLatency] = useState<number | null>(null);
+  
+  // Monitor online/offline status
   useEffect(() => {
     const handleOnline = () => {
       setIsOnline(true);
-      setConnectionQuality('good');
+      if (showToasts) toast.success("You're back online!");
+      
+      // Refetch any stale queries when coming back online
+      queryClient.refetchQueries();
     };
     
     const handleOffline = () => {
       setIsOnline(false);
-      setConnectionQuality('offline');
+      if (showToasts) toast.error("You're offline. Some features may be unavailable.");
     };
-
-    // Check connection quality if supported
-    const checkConnectionQuality = () => {
-      if ('connection' in navigator && navigator.connection) {
-        const connection = (navigator as any).connection;
-        if (connection.effectiveType === '2g' || connection.downlink < 0.5) {
-          setConnectionQuality('poor');
-        } else {
-          setConnectionQuality('good');
-        }
-      }
-    };
-
+    
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
     
-    // Add connection change listener if available
-    if ('connection' in navigator) {
-      (navigator as any).connection.addEventListener('change', checkConnectionQuality);
-    }
-
-    // Initial check
-    checkConnectionQuality();
-
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
-      if ('connection' in navigator) {
-        (navigator as any).connection.removeEventListener('change', checkConnectionQuality);
+    };
+  }, [showToasts]);
+  
+  // Monitor connection quality if available
+  useEffect(() => {
+    const connection = (navigator as any).connection;
+    
+    if (connection) {
+      const updateConnectionQuality = () => {
+        const effectiveType = connection.effectiveType;
+        
+        // Map connection types to quality levels
+        switch (effectiveType) {
+          case 'slow-2g':
+          case '2g':
+            setConnectionQuality('poor');
+            break;
+          case '3g':
+            setConnectionQuality('good');
+            break;
+          case '4g':
+            setConnectionQuality('excellent');
+            break;
+          default:
+            setConnectionQuality('unknown');
+        }
+      };
+      
+      updateConnectionQuality();
+      connection.addEventListener('change', updateConnectionQuality);
+      
+      return () => {
+        connection.removeEventListener('change', updateConnectionQuality);
+      };
+    }
+  }, []);
+  
+  // Periodically check latency to your backend
+  useEffect(() => {
+    // Only measure latency when online
+    if (!isOnline) return;
+    
+    const checkLatency = async () => {
+      try {
+        const start = performance.now();
+        // Use a lightweight endpoint for ping tests
+        await fetch('/api/ping', { 
+          method: 'HEAD',
+          cache: 'no-store',
+          headers: { 'Cache-Control': 'no-cache' }
+        });
+        const end = performance.now();
+        setLatency(end - start);
+      } catch (error) {
+        console.error('Latency check failed:', error);
       }
     };
-  }, []);
-
+    
+    // Initial check
+    checkLatency();
+    
+    // Check every 30 seconds
+    const interval = setInterval(checkLatency, 30000);
+    return () => clearInterval(interval);
+  }, [isOnline]);
+  
   return (
-    <NetworkContext.Provider value={{ isOnline, connectionQuality }}>
+    <NetworkStatusContext.Provider value={{ isOnline, connectionQuality, latency }}>
       {children}
-    </NetworkContext.Provider>
+    </NetworkStatusContext.Provider>
   );
-};
-
-// Export both names for compatibility
-export const useNetwork = () => {
-  const context = useContext(NetworkContext);
-  if (!context) {
-    throw new Error('useNetwork must be used within a NetworkProvider');
-  }
-  return context;
-};
-
-// Add the useNetworkStatus function that's being imported elsewhere
-export const useNetworkStatus = () => {
-  const context = useContext(NetworkContext);
-  if (!context) {
-    throw new Error('useNetworkStatus must be used within a NetworkProvider');
-  }
-  return context;
-};
+}
