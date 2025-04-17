@@ -1,9 +1,8 @@
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Loader2, Map } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { isMobileDevice } from "@/utils/locationUtils";
 
 interface MapDisplayProps {
   onLocationSelect: (location: string) => void;
@@ -11,47 +10,35 @@ interface MapDisplayProps {
 }
 
 export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [mapLoadError, setMapLoadError] = useState(false);
   const [locationPermission, setLocationPermission] = useState<'granted' | 'denied' | 'prompt' | 'unknown'>('unknown');
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<HTMLIFrameElement>(null);
   const [mapLocation, setMapLocation] = useState("Tadipatri, Andhra Pradesh 515411");
-  const isDesktop = !isMobileDevice();
+  const isMobileDevice = typeof window !== 'undefined' ? window.innerWidth < 768 : false;
   const mapLoadAttempts = useRef(0);
-  const maxMapLoadAttempts = 2; // Reduced from 3 for faster experience
+  const maxMapLoadAttempts = 3;
   const permissionPromptShown = useRef(false);
-  const mapTimeoutRef = useRef<number | null>(null);
-
-  // Function to create map embed URL
-  const getMapEmbedUrl = useCallback((location: string): string => {
-    const encodedLocation = encodeURIComponent(location);
-    return `https://www.google.com/maps/embed/v1/place?key=AIzaSyBky_ax9Xw9iNRRWMwbdqXzneYgbO6iarI&q=${encodedLocation}`;
-  }, []);
-
-  // Improved map loading function
-  const loadMap = useCallback((location: string) => {
-    if (!location) return;
-    
-    setIsLoading(true);
-    setMapLoadError(false);
-    
-    // Set a timeout for map loading
-    if (mapTimeoutRef.current) {
-      clearTimeout(mapTimeoutRef.current);
-    }
-    
-    // Use setTimeout to create a non-blocking delay
-    mapTimeoutRef.current = window.setTimeout(() => {
-      if (mapRef.current) {
-        // Add cache busting
-        const cacheBust = `&cb=${Date.now()}`;
-        mapRef.current.src = getMapEmbedUrl(location) + cacheBust;
-      }
-    }, 10); // Minimal delay
-  }, [getMapEmbedUrl]);
 
   useEffect(() => {
+    // Load map with reduced delay to improve performance
+    const loadMap = () => {
+      if (!searchInput && !mapLocation) return;
+      
+      setIsLoading(true);
+      setMapLoadError(false);
+      
+      // Short delay to ensure React renders loading state first
+      setTimeout(() => {
+        if (mapRef.current) {
+          // Add cache busting
+          const cacheBust = `&cb=${Date.now()}`;
+          mapRef.current.src = getMapEmbedUrl(searchInput || mapLocation) + cacheBust;
+        }
+      }, 50);
+    };
+    
     // Check location permission status
     const checkPermission = async () => {
       if (typeof navigator !== 'undefined' && "permissions" in navigator) {
@@ -71,56 +58,63 @@ export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) =
     };
     
     checkPermission();
-  }, []);
+    
+    // If searchInput changes, update map
+    if (searchInput) {
+      loadMap();
+    }
+  }, [searchInput, mapLocation]);
 
-  // Handle search input changes
   useEffect(() => {
+    // Reset error state when input changes
     if (searchInput) {
       setMapLoadError(false);
+      setIsLoading(true);
       mapLoadAttempts.current = 0;
-      loadMap(searchInput);
-      onLocationSelect(searchInput);
-      setMapLocation(searchInput);
-    } else {
-      // Use default location if no search input
-      const defaultLocation = "Tadipatri, Andhra Pradesh 515411";
-      if (!mapLocation) {
-        setMapLocation(defaultLocation);
-        onLocationSelect(defaultLocation);
-      }
     }
-  }, [searchInput, onLocationSelect, loadMap, mapLocation]);
-  
-  // Set a timeout to hide loading indicator if it takes too long
-  useEffect(() => {
-    if (isLoading) {
+
+    // Default location
+    const defaultLocation = "Tadipatri, Andhra Pradesh 515411";
+    
+    // Use searchInput if provided, otherwise use default
+    const locationToShow = searchInput || defaultLocation;
+    
+    // Set the selected location
+    onLocationSelect(locationToShow);
+    setMapLocation(locationToShow);
+    
+    // Don't simulate loading if it's the initial load
+    if (searchInput) {
+      // Simulate map loading with a lighter approach
       const timer = setTimeout(() => {
         setIsLoading(false);
-      }, 3000); // Max loading time
-      
+      }, 100); // Reduced delay for better performance
+
       return () => clearTimeout(timer);
     }
-  }, [isLoading]);
+  }, [onLocationSelect, searchInput]);
 
-  const handleMapLoad = useCallback(() => {
+  const handleMapLoad = () => {
     setIsLoading(false);
     setMapLoadError(false);
     mapLoadAttempts.current = 0;
-  }, []);
+  };
   
-  const handleMapError = useCallback(() => {
+  const handleMapError = () => {
+    setIsLoading(false);
     setMapLoadError(true);
     console.error("Map failed to load for location:", mapLocation);
     
-    // Auto-retry with linear backoff (faster than exponential)
+    // Auto-retry with exponential backoff
     if (mapLoadAttempts.current < maxMapLoadAttempts) {
       mapLoadAttempts.current += 1;
-      const retryDelay = mapLoadAttempts.current * 500; // Linear backoff
+      const retryDelay = Math.pow(2, mapLoadAttempts.current - 1) * 1000; // Exponential backoff
       
       console.log(`Retrying map load (attempt ${mapLoadAttempts.current}/${maxMapLoadAttempts}) in ${retryDelay}ms`);
       
       setTimeout(() => {
         if (mapRef.current) {
+          setIsLoading(true);
           setMapLoadError(false);
           // Add cache-busting parameter with attempt number
           const cacheBuster = `&cb=${Date.now()}-${mapLoadAttempts.current}`;
@@ -128,12 +122,9 @@ export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) =
         }
       }, retryDelay);
     }
-    
-    // Always hide loading after error (regardless of retries)
-    setIsLoading(false);
-  }, [mapLocation, getMapEmbedUrl, maxMapLoadAttempts]);
+  };
 
-  const requestLocationPermission = useCallback(() => {
+  const requestLocationPermission = () => {
     if (!navigator.geolocation) return;
     
     // Mark that we've shown the prompt
@@ -145,7 +136,7 @@ export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) =
         // Reload to apply new permission, slightly delayed
         setTimeout(() => {
           if (mapRef.current) {
-            setMapLoadError(false);
+            setIsLoading(true);
             const cacheBuster = `&cb=${Date.now()}`;
             mapRef.current.src = getMapEmbedUrl(mapLocation) + cacheBuster;
           }
@@ -156,21 +147,27 @@ export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) =
       },
       { timeout: 10000, maximumAge: 60000 }
     );
-  }, [mapLocation, getMapEmbedUrl]);
+  };
 
-  // Don't auto-request location on desktop devices
+  // Create a Google Maps embed URL from a location string
+  const getMapEmbedUrl = (location: string) => {
+    const encodedLocation = encodeURIComponent(location);
+    return `https://www.google.com/maps/embed/v1/place?key=AIzaSyBky_ax9Xw9iNRRWMwbdqXzneYgbO6iarI&q=${encodedLocation}`;
+  };
+
+  // Show location prompt for mobile users who haven't been asked yet
   useEffect(() => {
-    if (!isDesktop && locationPermission === 'prompt' && !permissionPromptShown.current) {
+    if (isMobileDevice && locationPermission === 'prompt' && !permissionPromptShown.current) {
       const timer = setTimeout(() => {
         requestLocationPermission();
       }, 1000);
       
       return () => clearTimeout(timer);
     }
-  }, [locationPermission, isDesktop, requestLocationPermission]);
+  }, [locationPermission, isMobileDevice]);
 
   // Show permission prompt for mobile users
-  if (!isDesktop && locationPermission === 'denied') {
+  if (isMobileDevice && locationPermission === 'denied') {
     return (
       <div className="space-y-4">
         <div className="w-full h-[250px] rounded-md border bg-gray-50 flex flex-col items-center justify-center text-center p-4">
@@ -193,8 +190,9 @@ export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) =
     <div className="space-y-4">
       <div className="w-full h-[400px] rounded-md border bg-gray-50 overflow-hidden relative">
         {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-50 bg-opacity-50 z-10">
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-50 z-10">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="ml-2 text-sm text-muted-foreground">Loading map...</p>
           </div>
         )}
         
@@ -207,6 +205,7 @@ export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) =
               size="sm" 
               className="mt-2"
               onClick={() => {
+                setIsLoading(true);
                 setMapLoadError(false);
                 if (mapRef.current) {
                   // Add cache-busting parameter
@@ -217,10 +216,13 @@ export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) =
             >
               Try Again
             </Button>
+            <p className="text-xs text-muted-foreground mt-3 max-w-xs text-center">
+              To improve map loading, check your internet connection
+            </p>
           </div>
         )}
         
-        {(!isDesktop && locationPermission === 'denied' ? false : true) && (
+        {(locationPermission !== 'denied' || !isMobileDevice) && (
           <iframe 
             ref={mapRef}
             src={`${getMapEmbedUrl(mapLocation)}&cb=${Date.now()}`}

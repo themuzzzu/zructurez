@@ -20,7 +20,6 @@ const LazyLocationModalHandler = lazy(() => import("@/components/location/Locati
 function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [resourcesLoaded, setResourcesLoaded] = useState(false);
-  const [isLanguageChanging, setIsLanguageChanging] = useState(false);
   
   useEffect(() => {
     try {
@@ -96,65 +95,23 @@ function App() {
       setIsLoading(false);
     }, 500);
     
-    // Listen for language changes to handle transitions properly
+    // Listen for language changes to prevent full refresh
     const handleLanguageChange = (e: Event) => {
-      // Use a subtle transition instead of a full reload
-      setIsLanguageChanging(true);
-      document.body.classList.add('lang-transition');
+      // Use the existing loading state mechanism for smooth transitions
+      setIsLoading(true);
       
-      // Short delay to allow CSS transition to complete
       setTimeout(() => {
-        document.body.classList.remove('lang-transition');
-        setIsLanguageChanging(false);
-      }, 800);
+        setIsLoading(false);
+      }, 300);
     };
     
     window.addEventListener('languageChanged', handleLanguageChange);
     
-    // Preload language translation files
-    const preloadTranslationsScript = document.createElement('script');
-    preloadTranslationsScript.src = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@20.0.0/dist/transformers.min.js';
-    preloadTranslationsScript.async = true;
-    document.head.appendChild(preloadTranslationsScript);
-    
     return () => {
       clearTimeout(timer);
       window.removeEventListener('languageChanged', handleLanguageChange);
-      if (document.head.contains(preloadTranslationsScript)) {
-        document.head.removeChild(preloadTranslationsScript);
-      }
     };
   }, []);
-
-  // Render a lightweight transition screen during language changes
-  const renderContent = () => {
-    if (isLoading) {
-      return <PageLoader type="shimmer" />;
-    }
-    
-    if (isLanguageChanging) {
-      return (
-        <div className="flex min-h-screen items-center justify-center bg-background transition-opacity duration-300">
-          <div className="animate-pulse text-center">
-            <div className="h-8 w-8 mx-auto mb-4 rounded-full bg-primary/30"></div>
-            <div className="h-4 w-32 mx-auto rounded bg-muted"></div>
-          </div>
-        </div>
-      );
-    }
-    
-    return (
-      <>
-        <Routes />
-        <Suspense fallback={null}>
-          {resourcesLoaded && <LazyLocationModalHandler />}
-        </Suspense>
-        <Suspense fallback={null}>
-          <LazyToaster position="top-center" />
-        </Suspense>
-      </>
-    );
-  };
 
   return (
     <ErrorBoundary>
@@ -163,7 +120,19 @@ function App() {
           <QueryClientProvider client={queryClient}>
             <NetworkMonitor>
               <LocationProvider>
-                {renderContent()}
+                {isLoading ? (
+                  <PageLoader type="shimmer" />
+                ) : (
+                  <>
+                    <Routes />
+                    <Suspense fallback={null}>
+                      {resourcesLoaded && <LazyLocationModalHandler />}
+                    </Suspense>
+                    <Suspense fallback={null}>
+                      <LazyToaster position="top-center" />
+                    </Suspense>
+                  </>
+                )}
               </LocationProvider>
             </NetworkMonitor>
           </QueryClientProvider>

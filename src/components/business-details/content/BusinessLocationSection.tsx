@@ -1,10 +1,9 @@
 
-import { useState, useEffect, useRef, memo, useCallback } from 'react';
+import { useState, useEffect, useRef, memo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MapPin, ExternalLink, Loader2, Map } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { isMobileDevice } from '@/utils/locationUtils';
 
 interface BusinessLocationSectionProps {
   businessName: string;
@@ -15,22 +14,14 @@ export const BusinessLocationSection = memo(({
   businessName,
   location
 }: BusinessLocationSectionProps) => {
-  const [isMapLoading, setIsMapLoading] = useState(false);
+  const [isMapLoading, setIsMapLoading] = useState(true);
   const [mapError, setMapError] = useState(false);
   const [mapUrl, setMapUrl] = useState<string>('');
   const [locationPermission, setLocationPermission] = useState<'granted' | 'denied' | 'prompt' | 'unknown'>('unknown');
-  const isMobile = isMobileDevice();
+  const isMobileDevice = typeof window !== 'undefined' ? window.innerWidth < 768 : false;
   const mapRef = useRef<HTMLIFrameElement>(null);
   const mapAttempts = useRef(0);
-  const maxAttempts = 2; // Reduced from 3
-  const mapTimeoutRef = useRef<number | null>(null);
-  
-  // Function to encode location and create map URL
-  const createMapUrl = useCallback((loc: string) => {
-    if (!loc) return '';
-    const encodedLocation = encodeURIComponent(loc);
-    return `https://www.google.com/maps/embed/v1/place?key=AIzaSyBky_ax9Xw9iNRRWMwbdqXzneYgbO6iarI&q=${encodedLocation}`;
-  }, []);
+  const maxAttempts = 3;
   
   useEffect(() => {
     // Check location permission status on mount
@@ -51,81 +42,51 @@ export const BusinessLocationSection = memo(({
     }
   }, []);
 
-  // Generate and update the map URL when location changes
   useEffect(() => {
+    // Generate the map URL when the component mounts or when location changes
     if (!location) return;
     
-    const url = createMapUrl(location);
-    setMapUrl(url);
+    const encodedLocation = encodeURIComponent(location);
+    setMapUrl(`https://www.google.com/maps/embed/v1/place?key=AIzaSyBky_ax9Xw9iNRRWMwbdqXzneYgbO6iarI&q=${encodedLocation}`);
     
-    // Set loading to false after a timeout to prevent long loading states
-    if (!isMobile) {
-      // Desktop should start loading immediately
-      setIsMapLoading(true);
-    } else {
-      // For mobile, only start loading if we have permission
-      if (locationPermission === 'granted') {
-        setIsMapLoading(true);
-      }
-    }
-    
-    // Auto-hide loading indicator after delay
-    const timeout = setTimeout(() => {
-      setIsMapLoading(false);
-    }, 3000);
-    
-    return () => clearTimeout(timeout);
-  }, [location, createMapUrl, locationPermission, isMobile]);
-  
-  // Load map with improved performance
-  const loadMap = useCallback(() => {
+    // Reset map state when location changes
     setIsMapLoading(true);
     setMapError(false);
     mapAttempts.current = 0;
-    
-    // Clear any existing timeout
-    if (mapTimeoutRef.current) {
-      clearTimeout(mapTimeoutRef.current);
-    }
-    
-    // Small delay to ensure loading state is shown
-    mapTimeoutRef.current = window.setTimeout(() => {
-      if (mapRef.current && mapUrl) {
-        const cacheBustParam = `&cb=${Date.now()}`;
-        mapRef.current.src = mapUrl + cacheBustParam;
-      }
-    }, 10);
-  }, [mapUrl]);
+  }, [location]);
   
   // Creates a Google Maps search URL based on business name and location
-  const getGoogleMapsUrl = useCallback(() => {
+  const getGoogleMapsUrl = () => {
     const query = encodeURIComponent(`${businessName}, ${location}`);
     return `https://www.google.com/maps/search/?api=1&query=${query}`;
-  }, [businessName, location]);
+  };
 
   // Handle opening directions in Google Maps
-  const openDirections = useCallback(() => {
+  const openDirections = () => {
     window.open(getGoogleMapsUrl(), '_blank');
-  }, [getGoogleMapsUrl]);
+  };
   
-  const handleMapLoad = useCallback(() => {
+  const handleMapLoad = () => {
     setIsMapLoading(false);
     setMapError(false);
     mapAttempts.current = 0;
-  }, []);
+  };
   
-  const handleMapError = useCallback(() => {
+  const handleMapError = () => {
+    setIsMapLoading(false);
     setMapError(true);
+    console.error("Map failed to load for location:", location);
     
-    // Auto-retry with linear backoff (faster than exponential)
+    // Auto-retry logic with exponential backoff
     if (mapAttempts.current < maxAttempts) {
-      const retryDelay = 500 * (mapAttempts.current + 1);
+      const retryDelay = Math.pow(2, mapAttempts.current) * 1000; // Exponential backoff
       mapAttempts.current += 1;
       
       console.log(`Retrying map load (attempt ${mapAttempts.current}/${maxAttempts}) in ${retryDelay}ms`);
       
       setTimeout(() => {
-        if (mapRef.current && mapUrl) {
+        if (mapRef.current) {
+          setIsMapLoading(true);
           setMapError(false);
           // Add cache-busting parameter for each retry
           const cacheBustParam = `&cb=${Date.now()}-${mapAttempts.current}`;
@@ -133,31 +94,36 @@ export const BusinessLocationSection = memo(({
         }
       }, retryDelay);
     }
-    
-    // Always hide loading state after error
-    setIsMapLoading(false);
-  }, [mapUrl, maxAttempts]);
+  };
   
-  const requestLocationPermission = useCallback(() => {
+  const requestLocationPermission = () => {
     if (!navigator.geolocation) return;
     
     navigator.geolocation.getCurrentPosition(
       () => {
         setLocationPermission('granted');
-        // Load map after permission granted
-        loadMap();
+        // Reload the component when permission is granted
+        setTimeout(() => {
+          setIsMapLoading(true);
+          setMapError(false);
+          if (mapRef.current) {
+            // Add cache-busting parameter
+            const cacheBustParam = `&cb=${Date.now()}`;
+            mapRef.current.src = `${mapUrl}${cacheBustParam}`;
+          }
+        }, 500);
       },
       () => {
         setLocationPermission('denied');
       }
     );
-  }, [loadMap]);
+  };
 
   // Cache busting query parameter to help avoid resource errors
   const cacheBustParam = `&cb=${Date.now()}`;
   
   // Don't show map on mobile if location permission is denied
-  const shouldShowMap = !isMobile || locationPermission !== 'denied';
+  const shouldShowMap = !isMobileDevice || locationPermission !== 'denied';
 
   return (
     <Card>
@@ -172,7 +138,7 @@ export const BusinessLocationSection = memo(({
           
           <div className="aspect-video w-full bg-muted rounded-lg overflow-hidden relative">
             {isMapLoading && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted/50 z-10">
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted z-10">
                 <Loader2 className="h-6 w-6 animate-spin text-primary mb-2" />
                 <p className="text-sm text-muted-foreground">Loading map...</p>
               </div>
@@ -185,14 +151,21 @@ export const BusinessLocationSection = memo(({
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={loadMap}
+                  onClick={() => {
+                    setIsMapLoading(true);
+                    setMapError(false);
+                    if (mapRef.current) {
+                      const newCacheBustParam = `&cb=${Date.now()}`;
+                      mapRef.current.src = `${mapUrl}${newCacheBustParam}`;
+                    }
+                  }}
                 >
                   Try Again
                 </Button>
               </div>
             )}
             
-            {isMobile && locationPermission === 'denied' ? (
+            {isMobileDevice && locationPermission === 'denied' ? (
               <div className="h-full flex flex-col items-center justify-center p-4 text-center">
                 <Map className="h-8 w-8 text-gray-400 mb-2" />
                 <p className="text-sm text-muted-foreground mb-3">
@@ -207,7 +180,7 @@ export const BusinessLocationSection = memo(({
                   </p>
                 </ScrollArea>
               </div>
-            ) : shouldShowMap && mapUrl ? (
+            ) : shouldShowMap && mapUrl && (
               <iframe 
                 ref={mapRef}
                 src={`${mapUrl}${cacheBustParam}`}
@@ -220,7 +193,7 @@ export const BusinessLocationSection = memo(({
                 referrerPolicy="no-referrer-when-downgrade"
                 title={`Map of ${businessName} at ${location}`}
               ></iframe>
-            ) : null}
+            )}
           </div>
           
           <Button onClick={openDirections} variant="outline" className="w-full">
@@ -232,3 +205,4 @@ export const BusinessLocationSection = memo(({
     </Card>
   );
 });
+

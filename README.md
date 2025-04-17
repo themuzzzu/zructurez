@@ -1,58 +1,69 @@
+# Welcome to your Lovable project
 
-# Project Setup Guide
+## Project info
 
-This project uses Vite as a development server with React and TypeScript.
+**URL**: https://lovable.dev/projects/a3a37e78-f21b-4e2a-8091-22cb092fab0a
 
-## Quick Start
+## How can I edit this code?
 
-The simplest way to run this project is:
+There are several ways of editing your application.
 
-```bash
-# Run the direct runner script
-node direct-run.js
-```
+**Use Lovable**
 
-This script will:
-1. Create necessary files if they don't exist
-2. Install required dependencies
-3. Start the Vite development server
+Simply visit the [Lovable Project](https://lovable.dev/projects/a3a37e78-f21b-4e2a-8091-22cb092fab0a) and start prompting.
 
-## Alternative Start Methods
+Changes made via Lovable will be committed automatically to this repo.
 
-If the direct runner doesn't work, try these methods in order:
+**Use your preferred IDE**
 
-```bash
-# Method 1: Using npm run
+If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+
+The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+
+Follow these steps:
+
+```sh
+# Step 1: Clone the repository using the project's Git URL.
+git clone <YOUR_GIT_URL>
+
+# Step 2: Navigate to the project directory.
+cd <YOUR_PROJECT_NAME>
+
+# Step 3: Install the necessary dependencies.
+npm i
+
+# Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
-
-# Method 2: Using npx directly
-npx vite
-
-# Method 3: Using local node_modules binary
-./node_modules/.bin/vite
 ```
 
-## Manual Installation Steps (If Automatic Setup Fails)
+**Edit a file directly in GitHub**
 
-If all automatic methods fail, try these manual steps:
+- Navigate to the desired file(s).
+- Click the "Edit" button (pencil icon) at the top right of the file view.
+- Make your changes and commit the changes.
 
-1. Install Vite and its dependencies:
-```bash
-npm install vite @vitejs/plugin-react react react-dom --save-dev --force
-```
+**Use GitHub Codespaces**
 
-2. Try running Vite directly:
-```bash
-npx vite
-```
+- Navigate to the main page of your repository.
+- Click on the "Code" button (green button) near the top right.
+- Select the "Codespaces" tab.
+- Click on "New codespace" to launch a new Codespace environment.
+- Edit files directly within the Codespace and commit and push your changes once you're done.
 
-## Troubleshooting
+## What technologies are used for this project?
 
-If you encounter issues:
+This project is built with .
 
-1. Make sure Node.js is installed and up to date (v16+ recommended)
-2. Check npm is working correctly with `npm --version`
-3. Try clearing npm cache: `npm cache clean --force`
-4. Delete node_modules and reinstall: `rm -rf node_modules && npm install`
-5. Check `vite.config.js` exists and is correctly formatted
-6. Try running with Node directly: `node ./node_modules/vite/bin/vite.js`
+- Vite
+- TypeScript
+- React
+- shadcn-ui
+- Tailwind CSS
+
+## How can I deploy this project?
+
+Simply open [Lovable](https://lovable.dev/projects/a3a37e78-f21b-4e2a-8091-22cb092fab0a) and click on Share -> Publish.
+
+## I want to use a custom domain - is that possible?
+
+We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
