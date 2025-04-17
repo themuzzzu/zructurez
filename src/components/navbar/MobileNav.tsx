@@ -55,7 +55,8 @@ export function MobileNav() {
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t md:hidden">
       <div className="flex items-center justify-around h-16">
         {navItems.map((item, index) => {
-          const IconComponent = LucideIcons[item.icon];
+          // Get the correct icon component from Lucide
+          const Icon = LucideIcons[item.icon];
           return (
             <Link
               key={index}
@@ -67,7 +68,7 @@ export function MobileNav() {
                   : "text-muted-foreground"
               )}
             >
-              <IconComponent className="h-5 w-5 mb-1" />
+              <Icon className="h-5 w-5 mb-1" />
               <span className="text-[10px]">{item.label}</span>
             </Link>
           );

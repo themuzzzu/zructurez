@@ -107,7 +107,7 @@ export const PricingSection = () => {
               <>
                 <PricingPlans 
                   onSelectPlan={handleSelectPlan} 
-                  selectedPlan={currentPlan?.plan_id}
+                  selectedPlan={currentPlan?.planId}
                   variant="minimal"
                 />
                 <div className="text-center mt-6">

@@ -1,4 +1,3 @@
-
 import { useAuth } from "@/hooks/useAuth";
 import { useBusinessAnalytics } from "../performance/hooks/useBusinessAnalytics";
 import { BusinessAnalyticsCharts } from "../performance/components/BusinessAnalyticsCharts";
@@ -30,7 +29,7 @@ export const AnalyticsTab = () => {
   
   // Mock data for analytics
   const summary = mockAnalyticsSummary;
-  const hasAnalyticsAccess = userSubscription?.analytics_level !== "basic";
+  const hasAnalyticsAccess = userSubscription?.analyticsLevel !== "basic";
   
   return (
     <div className="space-y-6">

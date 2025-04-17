@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PricingPlans } from "@/components/pricing/PricingPlans";
 import { Badge } from "@/components/ui/badge";
@@ -131,7 +132,7 @@ export const PricingTab = () => {
               </h3>
               <PricingPlans 
                 onSelectPlan={handleSelectPlan} 
-                selectedPlan={currentPlan?.plan_id}
+                selectedPlan={currentPlan?.planId}
                 variant="comparison"
               />
               {currentPlan && (
