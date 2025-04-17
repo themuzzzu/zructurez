@@ -34,19 +34,19 @@ export function GeneralSettings() {
     { id: "ui-teal", name: "Teal", class: "bg-teal-500" }
   ];
 
-  // Available languages
+  // Available languages - reordered with Indian languages after English
   const languages = [
     { code: "english", name: "English" },
-    { code: "spanish", name: "Spanish" },
-    { code: "french", name: "French" },
-    { code: "german", name: "German" },
-    { code: "chinese", name: "Chinese" },
-    { code: "japanese", name: "Japanese" },
     { code: "telugu", name: "Telugu" },
     { code: "tamil", name: "Tamil" },
     { code: "kannada", name: "Kannada" },
     { code: "hindi", name: "Hindi" },
-    { code: "malayalam", name: "Malayalam" }
+    { code: "malayalam", name: "Malayalam" },
+    { code: "spanish", name: "Spanish" },
+    { code: "french", name: "French" },
+    { code: "german", name: "German" },
+    { code: "chinese", name: "Chinese" },
+    { code: "japanese", name: "Japanese" }
   ];
 
   // Load saved settings on component mount
@@ -73,9 +73,11 @@ export function GeneralSettings() {
 
   // Apply UI theme changes immediately
   const applyTheme = (themeId: string) => {
-    // Remove all theme classes
-    uiColors.forEach(color => {
-      document.documentElement.classList.remove(color.id);
+    // Remove all theme classes from document root
+    document.documentElement.classList.forEach(className => {
+      if (className.startsWith('ui-')) {
+        document.documentElement.classList.remove(className);
+      }
     });
     
     // Add the selected theme class
@@ -83,13 +85,6 @@ export function GeneralSettings() {
     
     // Save to localStorage for persistence across page reloads
     localStorage.setItem("uiTheme", themeId);
-    
-    // Update CSS variables for theme color
-    const selectedColor = uiColors.find(color => color.id === themeId);
-    if (selectedColor) {
-      const colorClass = selectedColor.class.replace('bg-', '');
-      document.documentElement.style.setProperty('--theme-color', colorClass);
-    }
   };
 
   // Preview font size changes without saving
@@ -110,10 +105,52 @@ export function GeneralSettings() {
     }
   };
 
+  // Apply language changes to the application
+  const applyLanguage = (languageCode: string) => {
+    // In a real app, we would set an i18n context here
+    document.documentElement.lang = languageCode;
+    document.documentElement.setAttribute('data-language', languageCode);
+    
+    // You can also add specific language-based CSS classes if needed
+    document.documentElement.classList.forEach(className => {
+      if (className.startsWith('lang-')) {
+        document.documentElement.classList.remove(className);
+      }
+    });
+    document.documentElement.classList.add(`lang-${languageCode}`);
+    
+    // Save to localStorage for persistence
+    localStorage.setItem("language", languageCode);
+    
+    // Show language indicator for demo purposes
+    const langName = languages.find(lang => lang.code === languageCode)?.name || languageCode;
+    const indicator = document.createElement('div');
+    indicator.textContent = `Language: ${langName}`;
+    indicator.style.position = 'fixed';
+    indicator.style.bottom = '20px';
+    indicator.style.right = '20px';
+    indicator.style.padding = '10px';
+    indicator.style.backgroundColor = 'var(--primary)';
+    indicator.style.color = 'var(--primary-foreground)';
+    indicator.style.borderRadius = '4px';
+    indicator.style.zIndex = '9999';
+    indicator.style.opacity = '0.9';
+    indicator.style.transition = 'opacity 0.5s ease-in-out';
+    
+    document.body.appendChild(indicator);
+    
+    setTimeout(() => {
+      indicator.style.opacity = '0';
+      setTimeout(() => {
+        document.body.removeChild(indicator);
+      }, 500);
+    }, 3000);
+  };
+
   // Handle language change
   const handleLanguageChange = (value: string) => {
     setLanguage(value);
-    localStorage.setItem("language", value);
+    applyLanguage(value);
     
     // Show toast with language change notification
     toast.success(`Language changed to ${languages.find(lang => lang.code === value)?.name}`);
@@ -122,9 +159,6 @@ export function GeneralSettings() {
     if (profile?.id) {
       updateDisplayPreferences("language", value);
     }
-    
-    // In a real app, this would trigger language context updates
-    // or API calls to fetch translations
   };
 
   // Save settings (debounced)
@@ -145,6 +179,11 @@ export function GeneralSettings() {
       updateDisplayPreferences("ui_color", uiTheme.replace('ui-', ''));
       updateDisplayPreferences("language", language);
     }
+    
+    // Apply changes immediately
+    document.documentElement.style.fontSize = `${previewFont}%`;
+    applyTheme(uiTheme);
+    applyLanguage(language);
     
     // Simulate API call
     setTimeout(() => {

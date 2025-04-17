@@ -81,29 +81,32 @@ export const useProfileSettings = (
         }
       };
       const success = await updateProfile(updates);
+      
+      // Apply changes immediately
+      if (setting === "font_size" && typeof value === "number") {
+        document.documentElement.style.fontSize = `${value}%`;
+        localStorage.setItem("fontSize", value.toString());
+      }
+      else if (setting === "ui_color" && typeof value === "string") {
+        // Remove all theme classes first
+        document.documentElement.classList.forEach(className => {
+          if (className.startsWith('ui-')) {
+            document.documentElement.classList.remove(className);
+          }
+        });
+        
+        // Add new class
+        document.documentElement.classList.add(`ui-${value}`);
+        localStorage.setItem("uiTheme", `ui-${value}`);
+      }
+      else if (setting === "language" && typeof value === "string") {
+        document.documentElement.lang = value;
+        document.documentElement.setAttribute('data-language', value);
+        localStorage.setItem("language", value);
+      }
+      
       if (success) {
         toast.success(`Display preference updated`);
-        
-        // Apply changes immediately
-        if (setting === "font_size" && typeof value === "number") {
-          document.documentElement.style.fontSize = `${value}%`;
-          localStorage.setItem("fontSize", value.toString());
-        }
-        else if (setting === "ui_color" && typeof value === "string") {
-          // Remove all theme classes first
-          document.querySelectorAll("[class*='ui-']").forEach(el => {
-            Array.from(el.classList)
-              .filter(cls => cls.startsWith('ui-'))
-              .forEach(cls => el.classList.remove(cls));
-          });
-          
-          // Add new class
-          document.documentElement.classList.add(`ui-${value}`);
-          localStorage.setItem("uiTheme", `ui-${value}`);
-        }
-        else if (setting === "language" && typeof value === "string") {
-          localStorage.setItem("language", value);
-        }
       }
       return success;
     } catch (error) {
