@@ -52,16 +52,28 @@ try {
   }
 }
 
-// Make start scripts executable
+// Make all scripts executable
 try {
-  execSync('chmod +x start.sh', { stdio: 'inherit' });
-  execSync('chmod +x alternate-start.sh', { stdio: 'inherit' });
-  console.log('Made start scripts executable');
+  const scripts = [
+    'start.sh', 
+    'alternate-start.sh', 
+    'try-vite.sh',
+    'run-vite.js',
+    'direct-run-vite.js'
+  ];
+  
+  scripts.forEach(script => {
+    if (fs.existsSync(script)) {
+      execSync(`chmod +x ${script}`, { stdio: 'inherit' });
+      console.log(`Made ${script} executable`);
+    }
+  });
 } catch (error) {
-  console.error('Failed to make start scripts executable:', error);
+  console.error('Failed to make scripts executable:', error);
 }
 
-console.log('\nSetup complete! You can now run:');
-console.log('./start.sh');
-console.log('If that fails, try: npx vite');
-console.log('Or: ./alternate-start.sh');
+console.log('\nSetup complete! You can now run one of these commands:');
+console.log('1. node direct-run-vite.js (Recommended)');
+console.log('2. ./try-vite.sh');
+console.log('3. npx vite');
+console.log('4. node run-vite.js');

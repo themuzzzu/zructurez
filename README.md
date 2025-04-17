@@ -15,39 +15,43 @@ This will:
 1. Create necessary configuration files
 2. Install required dependencies (vite, react, lucide-react)
 3. Set up the start script
+4. Make all utility scripts executable
 
 ## Starting the Development Server
 
 After setup is complete, try these methods in order until one works:
 
 ```bash
-# Method 1: Using the main start script
-./start.sh
+# Method 1: Using the direct run script (Most reliable)
+node direct-run-vite.js
 
-# Method 2: Using npx directly
+# Method 2: Using the comprehensive launch utility
+./try-vite.sh
+
+# Method 3: Using npx directly
 npx vite
 
-# Method 3: Using the alternate start script
-./alternate-start.sh
+# Method 4: Using the run-vite.js script
+node run-vite.js
 ```
 
-## Manual Setup (if automatic setup fails)
+## Manual Installation Steps (If Automatic Setup Fails)
 
 If the automatic setup doesn't work, try these manual steps:
 
 1. Install Vite first:
 ```bash
-npm install vite --save --force
+npm install vite --save-dev --force
 ```
 
 2. Install other dependencies:
 ```bash
-npm install react react-dom @vitejs/plugin-react lucide-react --save --force
+npm install @vitejs/plugin-react react react-dom lucide-react --save --force
 ```
 
 3. Try running Vite directly:
 ```bash
-./node_modules/.bin/vite
+npx vite
 ```
 
 ## Troubleshooting
@@ -56,14 +60,15 @@ If you encounter issues:
 
 1. Make sure Node.js is installed and up to date (v14+ recommended)
 2. Check that you have write permissions in the project directory
-3. Try these alternative commands:
-   - `npx vite` (Uses npx to run Vite without a local installation)
-   - `npm exec vite` (Alternative to npx)
-   - `npm install -g vite && vite` (Install Vite globally and run)
-4. Check if npm is working correctly with: `npm -v`
-5. If you're behind a corporate proxy, configure npm with:
+3. Try cleaning npm cache: `npm cache clean --force`
+4. Delete node_modules and reinstall: `rm -rf node_modules && npm install`
+5. If behind a proxy, configure npm with:
    - `npm config set proxy http://your-proxy:port`
    - `npm config set https-proxy http://your-proxy:port`
-6. On Windows systems, try running commands from PowerShell or Git Bash instead of CMD
-7. Clear npm cache with: `npm cache clean --force`
-8. Check for permission issues: `ls -la node_modules/.bin/`
+6. Try running with Node directly: `node ./node_modules/vite/bin/vite.js`
+7. Check npm logs for more details: `npm logs`
+
+## System Requirements
+
+- Node.js v14.18+ or 16+
+- npm or yarn
