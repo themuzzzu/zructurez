@@ -12,7 +12,13 @@ if (!fs.existsSync('package.json')) {
 
 // Install dependencies
 console.log('Installing dependencies...');
-require('./install-dependencies.js');
+try {
+  execSync('node install-dependencies.js', { stdio: 'inherit' });
+  console.log('Dependencies installed successfully!');
+} catch (error) {
+  console.error('Failed to install dependencies:', error);
+  process.exit(1);
+}
 
 // Make start script executable
 try {

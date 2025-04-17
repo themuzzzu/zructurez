@@ -28,9 +28,9 @@ After setup is complete, start the development server:
 
 If the automatic setup doesn't work, you can run these steps manually:
 
-1. Install dependencies:
+1. Install dependencies directly:
 ```bash
-node install-dependencies.js
+npm install vite@latest lucide-react@latest react@latest react-dom@latest @vitejs/plugin-react@latest --force
 ```
 
 2. Make the start script executable:
@@ -40,7 +40,7 @@ chmod +x start.sh
 
 3. Start the development server:
 ```bash
-./start.sh
+./node_modules/.bin/vite
 ```
 
 ## Troubleshooting
@@ -51,3 +51,7 @@ If you encounter any issues:
 2. Check that you have write permissions in the project directory
 3. If you get "command not found" errors, try running scripts with `node` prefix, e.g., `node install-dependencies.js`
 4. If you encounter issues with icon imports, make sure the type declarations are correctly loaded
+5. If "vite not found" error persists, verify that the vite package is installed in node_modules by running:
+```bash
+ls -la node_modules/.bin/vite
+```

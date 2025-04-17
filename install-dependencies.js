@@ -12,9 +12,13 @@ if (!existsSync('node_modules')) {
 writeFileSync('.npmrc', 'save-exact=true\nlegacy-peer-deps=true\n');
 
 // Install the necessary packages
-console.log('Installing vite, react-dom, react and lucide-react...');
+console.log('Installing dependencies...');
 try {
-  execSync('npm install vite@latest lucide-react@latest react@latest react-dom@latest @vitejs/plugin-react@latest --no-save', { stdio: 'inherit' });
+  // Use --force to ensure dependencies are installed even if there are conflicts
+  execSync('npm install vite@latest lucide-react@latest react@latest react-dom@latest @vitejs/plugin-react@latest --no-save --force', { 
+    stdio: 'inherit',
+    env: { ...process.env, NODE_ENV: 'development' }
+  });
   console.log('Dependencies installed successfully!');
 } catch (error) {
   console.error('Failed to install dependencies:', error);
@@ -27,11 +31,11 @@ const startScript = `
 # Check if node_modules/.bin/vite exists
 if [ -f "node_modules/.bin/vite" ]; then
   # Execute vite directly
-  node_modules/.bin/vite
+  ./node_modules/.bin/vite
 else
   echo "Vite not found in node_modules. Installing dependencies..."
   node install-dependencies.js
-  node_modules/.bin/vite
+  ./node_modules/.bin/vite
 fi
 `;
 

@@ -212,6 +212,50 @@ declare module 'lucide-react' {
   export const CircleCheck: LucideIcon;
   export const CircleDashed: LucideIcon;
   export const CirclePlus: LucideIcon;
+  
+  // Additional icons from the latest errors
+  export const Sofa: LucideIcon;
+  export const Headphones: LucideIcon;
+  export const Tv: LucideIcon;
+  export const Watch: LucideIcon;
+  export const Tablet: LucideIcon;
+  export const SmartphoneCharging: LucideIcon;
+  export const Apple: LucideIcon;
+  export const HeartPulse: LucideIcon;
+  export const RotateCcw: LucideIcon;
+  export const LightbulbIcon: LucideIcon;
+  export const SunMoon: LucideIcon;
+  export const LifeBuoy: LucideIcon;
+  export const BellRing: LucideIcon;
+  export const BellOff: LucideIcon;
+  export const BellPlus: LucideIcon;
+  export const Cpu: LucideIcon;
+  export const Database: LucideIcon;
+  export const Newspaper: LucideIcon;
+  export const BadgePercent: LucideIcon;
+  export const Mic: LucideIcon;
+  export const Square: LucideIcon;
+  export const PhoneCall: LucideIcon;
+  export const Monitor: LucideIcon;
+  export const LayoutTemplate: LucideIcon;
+  export const Radio: LucideIcon;
+  export const History: LucideIcon;
+  export const Rocket: LucideIcon;
+  export const XCircle: LucideIcon;
+  export const ImageOff: LucideIcon;
+  export const PanelLeft: LucideIcon;
+  export const PanelLeftClose: LucideIcon;
+  export const GripVertical: LucideIcon;
+  export const Construction: LucideIcon;
+  export const ListPlus: LucideIcon;
+  export const Medal: LucideIcon;
+  export const LayoutGrid: LucideIcon;
+  export const List: LucideIcon;
+  export const SlidersHorizontal: LucideIcon;
+  export const Grid: LucideIcon;
+  export const Grip: LucideIcon;
+  export const Dot: LucideIcon;
+  export const RefreshCcw: LucideIcon;
 
   // Export the icon function
   export function Icon(props: { icon: IconNode } & LucideProps): JSX.Element;
