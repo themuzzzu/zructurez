@@ -19,8 +19,8 @@ export function GeneralSettings() {
   const [uiTheme, setUiTheme] = useState("ui-blue");
   const [saving, setSaving] = useState(false);
   const [previewFont, setPreviewFont] = useState(100);
-  const { profile, loading } = useProfile();
-  const { updateDisplayPreferences } = useProfileSettings(profile, () => {});
+  const { profile, loading, updateProfile } = useProfile();
+  const { updateDisplayPreferences } = useProfileSettings(profile, updateProfile);
 
   // UI colors available
   const uiColors = [
