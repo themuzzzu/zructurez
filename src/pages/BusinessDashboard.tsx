@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -46,6 +47,11 @@ import { useBusinessAnalytics } from "@/components/performance/hooks/useBusiness
 import { BusinessAnalyticsCharts } from "@/components/performance/components/BusinessAnalyticsCharts";
 import { BusinessBookingsTimeline } from "@/components/bookings/BusinessBookingsTimeline";
 import { SummaryCard } from "@/components/analytics/SummaryCard";
+
+type ProductViewsData = {
+  totalViews: number;
+  productIds: string[];
+};
 
 const BusinessDashboard = () => {
   const { user } = useAuth();
@@ -152,22 +158,44 @@ const BusinessDashboard = () => {
       return {
         totalViews,
         productIds
-      };
+      } as ProductViewsData;
     },
     enabled: !!businessData?.id && !!user?.id
   });
   
+  // Type guard to check if productViewsData has the expected structure
+  const isProductViewsDataObject = (data: any): data is ProductViewsData => {
+    return data && typeof data === 'object' && 'productIds' in data && 'totalViews' in data;
+  };
+  
+  // Get product IDs safely
+  const getProductIds = (): string[] => {
+    if (isProductViewsDataObject(productViewsData)) {
+      return productViewsData.productIds;
+    }
+    return [];
+  };
+  
+  // Get total views safely
+  const getTotalViews = (): number => {
+    if (isProductViewsDataObject(productViewsData)) {
+      return productViewsData.totalViews;
+    }
+    return 0;
+  };
+  
   const { data: wishlistData, isLoading: wishlistLoading, refetch: refetchWishlist } = useQuery({
-    queryKey: ['product-wishlists', productViewsData?.productIds],
+    queryKey: ['product-wishlists', getProductIds()],
     queryFn: async () => {
-      if (!productViewsData?.productIds || productViewsData.productIds.length === 0) return {
+      const productIds = getProductIds();
+      if (productIds.length === 0) return {
         inWishlistCount: 0
       };
       
       const { count, error } = await supabase
         .from('wishlists')
         .select('*', { count: 'exact', head: true })
-        .in('product_id', productViewsData.productIds);
+        .in('product_id', productIds);
         
       if (error) throw error;
       
@@ -175,20 +203,21 @@ const BusinessDashboard = () => {
         inWishlistCount: count || 0
       };
     },
-    enabled: !!(productViewsData?.productIds && productViewsData.productIds.length > 0)
+    enabled: getProductIds().length > 0
   });
   
   const { data: cartItemsData, isLoading: cartItemsLoading, refetch: refetchCartItems } = useQuery({
-    queryKey: ['product-cart-items', productViewsData?.productIds],
+    queryKey: ['product-cart-items', getProductIds()],
     queryFn: async () => {
-      if (!productViewsData?.productIds || productViewsData.productIds.length === 0) return {
+      const productIds = getProductIds();
+      if (productIds.length === 0) return {
         inCartCount: 0
       };
       
       const { count, error } = await supabase
         .from('cart_items')
         .select('*', { count: 'exact', head: true })
-        .in('product_id', productViewsData.productIds);
+        .in('product_id', productIds);
         
       if (error) throw error;
       
@@ -196,20 +225,21 @@ const BusinessDashboard = () => {
         inCartCount: count || 0
       };
     },
-    enabled: !!(productViewsData?.productIds && productViewsData.productIds.length > 0)
+    enabled: getProductIds().length > 0
   });
   
   const { data: ordersData, isLoading: ordersLoading, refetch: refetchOrders } = useQuery({
-    queryKey: ['product-orders', productViewsData?.productIds],
+    queryKey: ['product-orders', getProductIds()],
     queryFn: async () => {
-      if (!productViewsData?.productIds || productViewsData.productIds.length === 0) return {
+      const productIds = getProductIds();
+      if (productIds.length === 0) return {
         orderedCount: 0
       };
       
       const { count, error } = await supabase
         .from('orders')
         .select('*', { count: 'exact', head: true })
-        .in('product_id', productViewsData.productIds);
+        .in('product_id', productIds);
         
       if (error) throw error;
       
@@ -217,7 +247,7 @@ const BusinessDashboard = () => {
         orderedCount: count || 0
       };
     },
-    enabled: !!(productViewsData?.productIds && productViewsData.productIds.length > 0)
+    enabled: getProductIds().length > 0
   });
   
   const { data: businessAnalytics, isLoading: analyticsLoading, refetch: refetchAnalytics } = useBusinessAnalytics(user?.id);
@@ -297,7 +327,7 @@ const BusinessDashboard = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                 <SummaryCard
                   title="Product Views"
-                  value={productViewsData?.totalViews || 0}
+                  value={getTotalViews()}
                   icon={Eye}
                   changeType="positive"
                   change={5}
