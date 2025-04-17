@@ -1,79 +1,64 @@
 
-import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Advertisement, incrementAdClick, incrementAdView } from "@/services/adService";
+import { Button } from "@/components/ui/button";
+import { ExternalLink } from "lucide-react";
+import { incrementAdClick } from "@/services/adService";
 import { useNavigate } from "react-router-dom";
-import { Sparkles } from "lucide-react";
+import { AdCampaign } from "@/services/adService";
 
 interface SponsoredPostProps {
-  ad: Advertisement;
-  className?: string;
+  ad: AdCampaign;
 }
 
-export function SponsoredPost({ ad, className }: SponsoredPostProps) {
+export const SponsoredPost = ({ ad }: SponsoredPostProps) => {
   const navigate = useNavigate();
-  const [hasTrackedView, setHasTrackedView] = useState(false);
-  
-  useEffect(() => {
-    const trackImpression = async () => {
-      if (!hasTrackedView) {
-        await incrementAdView(ad.id);
-        setHasTrackedView(true);
-      }
-    };
-    
-    trackImpression();
-  }, [ad.id, hasTrackedView]);
-  
+
   const handleClick = async () => {
+    // Record ad click
     await incrementAdClick(ad.id);
     
-    // Direct the user to the appropriate page based on ad type
-    if (ad.type === "product") {
-      navigate(`/products/${ad.reference_id}`);
-    } else if (ad.type === "business") {
-      navigate(`/businesses/${ad.reference_id}`);
-    } else if (ad.type === "service") {
-      navigate(`/services/${ad.reference_id}`);
-    } else {
-      window.open(ad.image_url || '', '_blank');
+    // Navigate based on ad type
+    if (ad.reference_id) {
+      if (ad.type === "sponsored_product") {
+        navigate(`/products/${ad.reference_id}`);
+      } else if (ad.type === "sponsored_business") {
+        navigate(`/business/${ad.reference_id}`);
+      } else if (ad.type === "sponsored_service" || ad.type === "recommended_service") {
+        navigate(`/services/${ad.reference_id}`);
+      } else {
+        // Default navigation or external link
+        navigate(`/${ad.location}`);
+      }
     }
   };
-  
+
   return (
-    <Card 
-      className={`overflow-hidden cursor-pointer hover:shadow-md transition-shadow ${className}`}
-      onClick={handleClick}
-    >
-      <CardContent className="p-4 relative">
-        <Badge 
-          variant="outline" 
-          className="absolute top-2 right-2 bg-yellow-500/80 text-white text-xs"
-        >
-          <Sparkles className="h-3 w-3 mr-1" />
+    <Card className="overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+      <div className="relative">
+        {ad.image_url && (
+          <img 
+            src={ad.image_url}
+            alt={ad.title}
+            className="w-full h-48 object-cover"
+          />
+        )}
+        <Badge variant="secondary" className="absolute top-2 right-2">
           Sponsored
         </Badge>
-        
-        <div className="flex gap-3">
-          {ad.image_url && (
-            <div className="w-16 h-16 rounded-md overflow-hidden flex-shrink-0">
-              <img 
-                src={ad.image_url} 
-                alt={ad.title}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          )}
-          
-          <div>
-            <h3 className="font-medium text-base line-clamp-1">{ad.title}</h3>
-            <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-              {ad.description}
-            </p>
-          </div>
-        </div>
+      </div>
+      <CardContent className="p-4">
+        <h3 className="font-semibold text-lg mb-1">{ad.title}</h3>
+        <p className="text-muted-foreground text-sm line-clamp-2 mb-3">
+          {ad.description}
+        </p>
+        <Button onClick={handleClick} className="w-full" variant="outline">
+          Learn More
+          <ExternalLink className="h-4 w-4 ml-2" />
+        </Button>
       </CardContent>
     </Card>
   );
-}
+};
+
+export default SponsoredPost;
