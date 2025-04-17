@@ -73,7 +73,7 @@ export async function translateText(text: string, targetLanguage: Language): Pro
         console.log(`Loading translation model for ${targetLanguage}...`);
         translationModels[modelKey] = await pipeline('translation', modelName, { 
           revision: 'main',
-          quantized: true // Use quantized model for better performance
+          // Remove the 'quantized' property as it's not supported in PretrainedModelOptions
         });
         console.log(`Translation model for ${targetLanguage} loaded successfully`);
       } catch (error) {

@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { SearchSuggestion } from "@/types/search";
 
 interface SearchBarProps {
   placeholder?: string;
@@ -17,6 +18,13 @@ interface SearchBarProps {
   autoFocus?: boolean;
   className?: string;
   showVoiceSearch?: boolean;
+}
+
+// Define a type that matches our component's expectations
+interface TranslatedSuggestion {
+  id: string;
+  term: string;
+  isSponsored: boolean;
 }
 
 export function SearchBar({
@@ -115,22 +123,29 @@ export function SearchBar({
     }
   };
 
-  // Translate suggestion items asynchronously
-  const [translatedSuggestions, setTranslatedSuggestions] = useState<{id: string, term: string, isSponsored: boolean}[]>([]);
+  // Translate suggestion items asynchronously - FIX: Changed type to work with optional isSponsored
+  const [translatedSuggestions, setTranslatedSuggestions] = useState<TranslatedSuggestion[]>([]);
   
   // Update translations for suggestions when they change
   useEffect(() => {
     if (!suggestions.length || language === 'english') {
-      setTranslatedSuggestions(suggestions);
+      // FIX: Convert suggestions to match our required TranslatedSuggestion type
+      const formattedSuggestions: TranslatedSuggestion[] = suggestions.map(suggestion => ({
+        ...suggestion,
+        isSponsored: suggestion.isSponsored || false // Provide default value for optional property
+      }));
+      setTranslatedSuggestions(formattedSuggestions);
       return;
     }
     
     // Only translate if not in English
     const translateSuggestions = async () => {
+      // FIX: Map each suggestion and ensure isSponsored is always defined
       const translated = await Promise.all(
         suggestions.map(async (suggestion) => ({
-          ...suggestion,
-          term: await tDynamic(suggestion.term)
+          id: suggestion.id,
+          term: await tDynamic(suggestion.term),
+          isSponsored: suggestion.isSponsored || false // Provide default value for optional property
         }))
       );
       setTranslatedSuggestions(translated);
