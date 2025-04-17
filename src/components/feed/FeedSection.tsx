@@ -1,45 +1,58 @@
 
-import { useFeed } from "@/hooks/useFeed";
-import { PostCard } from "./PostCard";
-import { Spinner } from "@/components/common/Spinner";
-import { Button } from "@/components/ui/button";
-import { RefreshCw } from "lucide-react";
-import { EmptyFeed } from "./EmptyFeed";
-import { FeedError } from "./FeedError";
+import React from "react";
+import { Card } from "@/components/ui/card";
+import { FeedItem } from "@/types/feed";
+import { FeedItemComponent } from "./FeedItemComponent";
+import { FeedSkeleton } from "./FeedSkeleton";
+import { Button } from "../ui/button";
+import { RefreshCcw } from "lucide-react";
 
-export const FeedSection = () => {
-  const { posts, loading, error, refreshFeed } = useFeed();
-
-  if (loading) {
-    return (
-      <div className="flex justify-center p-8">
-        <Spinner size="lg" />
-      </div>
-    );
+export const FeedSection = ({ feedItems, isLoading, error, refetch, handleLikeToggle }) => {
+  if (isLoading) {
+    return <FeedSkeleton count={3} />;
   }
 
   if (error) {
-    return <FeedError onRetry={refreshFeed} />;
+    return (
+      <Card className="p-6 text-center">
+        <p className="text-muted-foreground mb-4">
+          Failed to load feed. Please try again.
+        </p>
+        <Button onClick={() => refetch()}>Retry</Button>
+      </Card>
+    );
   }
 
-  if (!posts || posts.length === 0) {
-    return <EmptyFeed />;
+  if (feedItems.length === 0) {
+    return (
+      <Card className="p-6 text-center">
+        <p className="text-muted-foreground">
+          No posts to show yet. Follow businesses and users to see their posts here!
+        </p>
+      </Card>
+    );
   }
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">Latest Updates</h2>
-        <Button variant="ghost" size="sm" onClick={refreshFeed} className="gap-2">
-          <RefreshCw className="h-4 w-4" />
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-bold">Your Feed</h2>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="flex items-center gap-2"
+          onClick={() => refetch()}
+        >
+          <RefreshCcw className="h-3.5 w-3.5" />
           Refresh
         </Button>
       </div>
-      {posts.map((post) => (
-        <PostCard 
-          key={post.id} 
-          post={post} 
-          onRefresh={refreshFeed}
+
+      {feedItems.map((item) => (
+        <FeedItemComponent
+          key={item.id}
+          item={item}
+          onLikeToggle={handleLikeToggle}
         />
       ))}
     </div>

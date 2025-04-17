@@ -6,6 +6,7 @@ interface ShimmerProps extends React.HTMLAttributes<HTMLDivElement> {
   height?: string;
   rounded?: boolean;
   circle?: boolean;
+  className?: string;
 }
 
 export function Shimmer({ 
