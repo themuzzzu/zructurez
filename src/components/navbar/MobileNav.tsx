@@ -3,11 +3,11 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import * as Icons from "lucide-react";
+import * as LucideIcons from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface NavItem {
-  icon: keyof typeof Icons;
+  icon: keyof typeof LucideIcons;
   label: string;
   href: string;
   active: boolean;
@@ -55,7 +55,7 @@ export function MobileNav() {
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t md:hidden">
       <div className="flex items-center justify-around h-16">
         {navItems.map((item, index) => {
-          const Icon = Icons[item.icon];
+          const IconComponent = LucideIcons[item.icon];
           return (
             <Link
               key={index}
@@ -67,7 +67,7 @@ export function MobileNav() {
                   : "text-muted-foreground"
               )}
             >
-              <Icon className="h-5 w-5 mb-1" />
+              <IconComponent className="h-5 w-5 mb-1" />
               <span className="text-[10px]">{item.label}</span>
             </Link>
           );

@@ -144,7 +144,7 @@ export const PricingTab = () => {
             </div>
           )}
 
-          {paymentHistory && paymentHistory.length > 0 && (
+          {mockPaymentHistory && mockPaymentHistory.length > 0 && (
             <Card className="mt-8">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
@@ -160,7 +160,7 @@ export const PricingTab = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {paymentHistory.map((payment, index) => (
+                  {mockPaymentHistory.map((payment, index) => (
                     <div key={index} className="flex justify-between items-center py-3 border-b last:border-0">
                       <div>
                         <div className="font-medium">{payment.description || `Payment for Basic Plan`}</div>

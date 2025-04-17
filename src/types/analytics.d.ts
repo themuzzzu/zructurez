@@ -1,3 +1,4 @@
+
 export interface AnalyticsSummary {
   totalViews: number;
   totalLikes: number;
