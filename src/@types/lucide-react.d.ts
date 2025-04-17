@@ -84,9 +84,6 @@ declare module 'lucide-react' {
   export const Star: LucideIcon;
   export const Upload: LucideIcon;
   export const Circle: LucideIcon;
-  export const CircleCheck: LucideIcon;
-  export const CircleDashed: LucideIcon;
-  export const CirclePlus: LucideIcon;
   export const Lock: LucideIcon;
   export const Unlock: LucideIcon;
   export const Filter: LucideIcon;
@@ -113,7 +110,6 @@ declare module 'lucide-react' {
   export const Building2: LucideIcon;
   export const ShoppingBag: LucideIcon;
   export const Dumbbell: LucideIcon;
-  export const Home: LucideIcon;
   export const Wrench: LucideIcon;
   export const Tag: LucideIcon;
   export const ListChecks: LucideIcon;
@@ -165,6 +161,57 @@ declare module 'lucide-react' {
   export const ExternalLink: LucideIcon;
   export const Mail: LucideIcon;
   export const Globe: LucideIcon;
+  
+  // Additional missing icons from error messages
+  export const Shield: LucideIcon;
+  export const BadgeDollarSign: LucideIcon;
+  export const CheckCircle: LucideIcon;
+  export const BarChart3: LucideIcon;
+  export const Facebook: LucideIcon;
+  export const Instagram: LucideIcon;
+  export const Twitter: LucideIcon;
+  export const IndianRupee: LucideIcon;
+  export const PlusCircle: LucideIcon;
+  export const MinusCircle: LucideIcon;
+  export const PartyPopper: LucideIcon;
+  export const Utensils: LucideIcon;
+  export const Smartphone: LucideIcon;
+  export const Laptop: LucideIcon;
+  export const Hammer: LucideIcon;
+  export const ActivitySquare: LucideIcon;
+  export const Plane: LucideIcon;
+  export const Scale: LucideIcon;
+  export const ArrowRightCircle: LucideIcon;
+  export const Minus: LucideIcon;
+  export const Landmark: LucideIcon;
+  export const Wallet: LucideIcon;
+  export const Users2: LucideIcon;
+  export const CalendarClock: LucideIcon;
+  export const Bookmark: LucideIcon;
+  export const MoreHorizontal: LucideIcon;
+  export const Hash: LucideIcon;
+  export const ArrowUpIcon: LucideIcon;
+  export const ArrowDownIcon: LucideIcon;
+  export const Percent: LucideIcon;
+  export const Repeat: LucideIcon;
+  export const Factory: LucideIcon;
+  export const Wheat: LucideIcon;
+  export const AirVent: LucideIcon;
+  export const ShieldCheck: LucideIcon;
+  export const Move: LucideIcon;
+  export const ZoomIn: LucideIcon;
+  export const ImageIcon: LucideIcon;
+  export const WifiOff: LucideIcon;
+  export const Coffee: LucideIcon;
+  export const PalmtreeIcon: LucideIcon;
+  export const Layers: LucideIcon;
+  export const Compass: LucideIcon;
+  export const Paintbrush: LucideIcon;
+  export const Leaf: LucideIcon;
+  export const Music: LucideIcon;
+  export const CircleCheck: LucideIcon;
+  export const CircleDashed: LucideIcon;
+  export const CirclePlus: LucideIcon;
 
   // Export the icon function
   export function Icon(props: { icon: IconNode } & LucideProps): JSX.Element;

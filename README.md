@@ -50,4 +50,4 @@ If you encounter any issues:
 1. Make sure Node.js is installed and up to date
 2. Check that you have write permissions in the project directory
 3. If you get "command not found" errors, try running scripts with `node` prefix, e.g., `node install-dependencies.js`
-
+4. If you encounter issues with icon imports, make sure the type declarations are correctly loaded
