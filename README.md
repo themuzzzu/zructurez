@@ -1,69 +1,49 @@
-# Welcome to your Lovable project
 
-## Project info
+# Project Setup Guide
 
-**URL**: https://lovable.dev/projects/a3a37e78-f21b-4e2a-8091-22cb092fab0a
+This project uses Vite as a development server. Due to some configuration limitations, follow these steps to run the project:
 
-## How can I edit this code?
+## Step 1: Install Dependencies
 
-There are several ways of editing your application.
+Run the following command to install the required dependencies:
 
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/a3a37e78-f21b-4e2a-8091-22cb092fab0a) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```bash
+node install-dependencies.js
 ```
 
-**Edit a file directly in GitHub**
+This will install:
+- vite (development server)
+- lucide-react (icon library)
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Step 2: Start the Development Server
 
-**Use GitHub Codespaces**
+Run the following command to start the development server:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```bash
+./start.sh
+```
 
-## What technologies are used for this project?
+Or alternatively:
 
-This project is built with .
+```bash
+node_modules/.bin/vite
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Troubleshooting
 
-## How can I deploy this project?
+If you encounter any issues with missing modules:
 
-Simply open [Lovable](https://lovable.dev/projects/a3a37e78-f21b-4e2a-8091-22cb092fab0a) and click on Share -> Publish.
+1. Try running the install script again:
+   ```bash
+   node install-dependencies.js
+   ```
 
-## I want to use a custom domain - is that possible?
+2. If you get permissions errors, make the start script executable:
+   ```bash
+   chmod +x start.sh
+   ```
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+3. If you're still experiencing issues, try installing the packages manually:
+   ```bash
+   npm install vite lucide-react --no-save
+   ```
