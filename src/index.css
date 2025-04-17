@@ -50,7 +50,7 @@
     --ring: 240 4.9% 83.9%;
   }
   
-  /* UI color theme overrides */
+  /* UI color theme overrides - more specific selectors to ensure they apply */
   .ui-purple {
     --primary: 270 70% 60%;
     --primary-foreground: 0 0% 98%;
@@ -98,6 +98,18 @@
     --primary-foreground: 0 0% 98%;
     --ring: 168 76% 42%;
   }
+  
+  /* Language-specific font styles */
+  [data-language="hindi"] {
+    font-family: 'Arial', sans-serif;
+  }
+  
+  [data-language="telugu"], 
+  [data-language="tamil"], 
+  [data-language="kannada"], 
+  [data-language="malayalam"] {
+    font-family: 'Noto Sans', sans-serif;
+  }
 }
  
 @layer base {
@@ -123,4 +135,14 @@
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     transition-duration: 300ms;
   }
+}
+
+/* Language indicator animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.language-indicator {
+  animation: fadeIn 0.3s ease-out;
 }

@@ -74,14 +74,6 @@ export const useProfileSettings = (
     value: number | string
   ) => {
     try {
-      const updates: Partial<Profile> = {
-        display_preferences: {
-          ...profile.display_preferences,
-          [setting]: value
-        }
-      };
-      const success = await updateProfile(updates);
-      
       // Apply changes immediately
       if (setting === "font_size" && typeof value === "number") {
         document.documentElement.style.fontSize = `${value}%`;
@@ -105,10 +97,23 @@ export const useProfileSettings = (
         localStorage.setItem("language", value);
       }
       
-      if (success) {
-        toast.success(`Display preference updated`);
+      // Update profile in database if available
+      if (profile?.id) {
+        const updates: Partial<Profile> = {
+          display_preferences: {
+            ...profile.display_preferences,
+            [setting]: value
+          }
+        };
+        
+        const success = await updateProfile(updates);
+        if (success) {
+          toast.success(`Display preference updated`);
+        }
+        return success;
       }
-      return success;
+      
+      return true;
     } catch (error) {
       console.error('Error updating display preferences:', error);
       toast.error('Failed to update display preferences');
