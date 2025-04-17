@@ -1,42 +1,29 @@
 
-export interface AnalyticsSummary {
-  totalViews: number;
-  totalLikes: number;
-  totalShares: number;
-  totalClicks: number;
-  conversionRate: number;
-  period: string;
-}
-
-export interface BusinessAnalytics {
+export interface UserSubscription {
   id: string;
-  business_id: string;
-  period: string;
-  views: number;
-  engagement: number;
-  conversions: number;
-  revenue: number;
-  daily_data: DailyAnalytics[];
+  user_id: string;
+  plan_id: string;
+  status: 'active' | 'canceled' | 'expired' | 'pending';
+  current_period_start: string;
+  current_period_end: string;
+  created_at: string;
+  updated_at: string;
+  plan?: {
+    name: string;
+    price: number;
+    interval: 'month' | 'year';
+    features: string[];
+  };
 }
 
-export interface DailyAnalytics {
-  date: string;
+export interface UserAnalytics {
   views: number;
-  engagement: number;
-  conversions: number;
-  revenue: number;
-}
-
-export interface AdPerformance {
-  id: string;
-  ad_id: string;
-  impressions: number;
   clicks: number;
-  ctr: number;
-  spend: number;
-  cpc: number;
   conversions: number;
-  conversionRate: number;
-  roi: number;
-  date: string;
+  revenue: number;
+  period: 'day' | 'week' | 'month' | 'year';
+  data: {
+    date: string;
+    value: number;
+  }[];
 }

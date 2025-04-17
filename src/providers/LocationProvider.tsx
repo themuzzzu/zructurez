@@ -1,90 +1,49 @@
 
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from "react";
 
 interface LocationContextType {
-  location: string | null;
+  location: string;
   setLocation: (location: string) => void;
-  currentLocation: string;
-  isLocationAvailable: boolean;
-  setShowLocationPicker: (show: boolean) => void;
-  latitude?: number;
-  longitude?: number;
+  latitude: number | null;
+  longitude: number | null;
+  setCurrentLocation: (lat: number, lng: number) => void;
 }
 
-const LocationContext = createContext<LocationContextType | undefined>(undefined);
+const defaultLocationContext: LocationContextType = {
+  location: "Delhi",
+  setLocation: () => {},
+  latitude: null,
+  longitude: null,
+  setCurrentLocation: () => {},
+};
 
-export const LocationProvider = ({ children }: { children: ReactNode }) => {
-  const [location, setLocation] = useState<string | null>(null);
-  const [currentLocation, setCurrentLocation] = useState<string>("All India");
-  const [isLocationAvailable, setIsLocationAvailable] = useState<boolean>(false);
-  const [latitude, setLatitude] = useState<number | undefined>(undefined);
-  const [longitude, setLongitude] = useState<number | undefined>(undefined);
+const LocationContext = createContext<LocationContextType>(defaultLocationContext);
+
+export const useLocation = () => useContext(LocationContext);
+
+export const LocationProvider = ({ children }: { children: React.ReactNode }) => {
+  const [location, setLocation] = useState<string>(() => {
+    const savedLocation = localStorage.getItem("user-location");
+    return savedLocation || "Delhi";
+  });
+  
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
 
   useEffect(() => {
-    // Try to load saved location from localStorage
-    const savedLocation = localStorage.getItem('location');
-    if (savedLocation) {
-      setLocation(savedLocation);
-      setCurrentLocation(savedLocation);
-      
-      // Check if location is available in our service areas
-      // This is a simplified check - in a real app you would check against an API
-      const availableLocations = ["Delhi", "Mumbai", "Bangalore", "Hyderabad", "Chennai"];
-      setIsLocationAvailable(availableLocations.includes(savedLocation));
-    }
-    
-    // Try to get user's geolocation
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLatitude(position.coords.latitude);
-          setLongitude(position.coords.longitude);
-        },
-        (error) => {
-          console.error("Error getting user location:", error);
-        }
-      );
-    }
-  }, []);
+    localStorage.setItem("user-location", location);
+  }, [location]);
 
-  const updateLocation = (newLocation: string) => {
-    setLocation(newLocation);
-    setCurrentLocation(newLocation);
-    localStorage.setItem('location', newLocation);
-    
-    // Check if location is available in our service areas
-    const availableLocations = ["Delhi", "Mumbai", "Bangalore", "Hyderabad", "Chennai"];
-    setIsLocationAvailable(availableLocations.includes(newLocation));
-  };
-
-  const setShowLocationPicker = (show: boolean) => {
-    // Create and dispatch a custom event instead of using state
-    if (show) {
-      window.dispatchEvent(new Event('show-location-picker'));
-    }
+  const setCurrentLocation = (lat: number, lng: number) => {
+    setLatitude(lat);
+    setLongitude(lng);
   };
 
   return (
-    <LocationContext.Provider 
-      value={{ 
-        location, 
-        setLocation: updateLocation, 
-        currentLocation,
-        isLocationAvailable,
-        setShowLocationPicker,
-        latitude,
-        longitude
-      }}
-    >
+    <LocationContext.Provider value={{ location, setLocation, latitude, longitude, setCurrentLocation }}>
       {children}
     </LocationContext.Provider>
   );
 };
 
-export const useLocation = () => {
-  const context = useContext(LocationContext);
-  if (!context) {
-    throw new Error('useLocation must be used within a LocationProvider');
-  }
-  return context;
-};
+export default LocationProvider;
