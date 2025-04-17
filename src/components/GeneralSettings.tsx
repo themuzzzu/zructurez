@@ -19,7 +19,8 @@ const languages = [
   { code: "telugu", name: "Telugu / తెలుగు" },
   { code: "tamil", name: "Tamil / தமிழ்" },
   { code: "kannada", name: "Kannada / ಕನ್ನಡ" },
-  { code: "malayalam", name: "Malayalam / മലയാളം" }
+  { code: "malayalam", name: "Malayalam / മലയാളം" },
+  { code: "urdu", name: "Urdu / اردو" }
 ];
 
 export function GeneralSettings() {
@@ -148,6 +149,7 @@ export function GeneralSettings() {
                     uiTheme === color.id ? 'ring-2 ring-offset-2 ring-primary' : 'opacity-70 hover:opacity-100'
                   }`}
                   aria-label={`Select ${color.name} theme`}
+                  data-translate-aria={color.id}
                 >
                   {uiTheme === color.id && <Check className="h-4 w-4 text-white" />}
                 </button>

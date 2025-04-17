@@ -99,7 +99,20 @@ export const translations = {
     notAvailableIn: "Zructures is not yet available in {location}.",
     expandingRapidly: "We're expanding rapidly! You'll still be able to browse but some features might be limited.",
     confirmLocation: "Confirm Location",
-    locationUpdated: "Location updated successfully"
+    locationUpdated: "Location updated successfully",
+    
+    // Home page specific
+    findLocal: "Find Local Businesses & Services",
+    browsingFrom: "You're browsing from",
+    detect: "Detect",
+    chooseLocation: "Choose Location",
+    
+    // Categories
+    electronics: "Electronics",
+    homeDecor: "Home Decor",
+    fashion: "Fashion",
+    books: "Books",
+    sports: "Sports"
   },
   
   hindi: {
@@ -201,7 +214,20 @@ export const translations = {
     notAvailableIn: "ज़रक्चर्स अभी {location} में उपलब्ध नहीं है।",
     expandingRapidly: "हम तेजी से विस्तार कर रहे हैं! आप अभी भी ब्राउज़ कर पाएंगे लेकिन कुछ सुविधाएँ सीमित हो सकती हैं।",
     confirmLocation: "स्थान की पुष्टि करें",
-    locationUpdated: "स्थान सफलतापूर्वक अपडेट किया गया"
+    locationUpdated: "स्थान सफलतापूर्वक अपडेट किया गया",
+    
+    // Home page specific
+    findLocal: "स्थानीय व्यवसाय और सेवाएं खोजें",
+    browsingFrom: "आप यहां से ब्राउज़ कर रहे हैं",
+    detect: "पता लगाएं",
+    chooseLocation: "स्थान चुनें",
+    
+    // Categories
+    electronics: "इलेक्ट्रॉनिक्स",
+    homeDecor: "होम डेकोर",
+    fashion: "फैशन",
+    books: "किताबें",
+    sports: "खेल"
   },
   
   telugu: {
@@ -303,7 +329,20 @@ export const translations = {
     notAvailableIn: "జ్రక్చర్స్ ఇంకా {location}లో అందుబాటులో లేదు.",
     expandingRapidly: "మేము వేగంగా విస్తరిస్తున్నాము! మీరు ఇంకా బ్రౌజ్ చేయగలరు కానీ కొన్ని ఫీచర్లు పరిమితంగా ఉండవచ్చు.",
     confirmLocation: "స్థానాన్ని నిర్ధారించండి",
-    locationUpdated: "స్థానం విజయవంతంగా నవీకరించబడింది"
+    locationUpdated: "స్థానం విజయవంతంగా నవీకరించబడింది",
+    
+    // Home page specific
+    findLocal: "స్థానిక వ్యాపారాలు మరియు సేవలను కనుగొనండి",
+    browsingFrom: "మీరు ఇక్కడ నుంచి బ్రౌజ్ చేస్తున్నారు",
+    detect: "కనుగొనండి",
+    chooseLocation: "స్థానాన్ని ఎంచుకోండి",
+    
+    // Categories
+    electronics: "ఎలక్ట్రానిక్స్",
+    homeDecor: "ఇంటి అలంకరణ",
+    fashion: "ఫ్యాషన్",
+    books: "పుస్తకాలు",
+    sports: "క్రీడలు"
   },
   
   tamil: {
@@ -391,7 +430,20 @@ export const translations = {
     notAvailableIn: "ஜ்ருக்சர்ஸ் இன்னும் {location} இல் கிடைக்கவில்லை.",
     expandingRapidly: "நாங்கள் வேகமாக விரிவடைந்து வருகிறோம்! நீங்கள் இன்னும் உலாவ முடியும் ஆனால் சில அம்சங்கள் வரம்புக்குட்பட்டதாக இருக்கலாம்.",
     confirmLocation: "இருப்பிடத்தை உறுதிப்படுத்தவும்",
-    locationUpdated: "இருப்பிடம் வெற்றிகரமாக புதுப்பிக்கப்பட்டது"
+    locationUpdated: "இருப்பிடம் வெற்றிகரமாக புதுப்பிக்கப்பட்டது",
+    
+    // Home page specific
+    findLocal: "உள்ளூர் வணிகங்களையும் சேவைகளையும் கண்டறியுங்கள்",
+    browsingFrom: "நீங்கள் பார்வையிடும் இடம்",
+    detect: "கண்டறி",
+    chooseLocation: "இருப்பிடத்தை தேர்வு செய்க",
+    
+    // Categories
+    electronics: "மின்னணுவியல்",
+    homeDecor: "வீட்டு அலங்காரம்",
+    fashion: "ஆடை அலங்காரம்",
+    books: "புத்தகங்கள்",
+    sports: "விளையாட்டுகள்"
   },
   
   kannada: {
@@ -479,7 +531,20 @@ export const translations = {
     notAvailableIn: "ಜ್ರಕ್ಚರ್ಸ್ ಇನ್ನೂ {location} ನಲ್ಲಿ ಲಭ್ಯವಿಲ್ಲ.",
     expandingRapidly: "ನಾವು ವೇಗವಾಗಿ ವಿಸ್ತರಿಸುತ್ತಿದ್ದೇವೆ! ನೀವು ಇನ್ನೂ ಬ್ರೌಸ್ ಮಾಡಬಹುದು ಆದರೆ ಕೆಲವು ವೈಶಿಷ್ಟ್ಯಗಳು ಸೀಮಿತವಾಗಿರಬಹುದು.",
     confirmLocation: "ಸ್ಥಳವನ್ನು ದೃಢೀಕರಿಸಿ",
-    locationUpdated: "ಸ್ಥಳವನ್ನು ಯಶಸ್ವಿಯಾಗಿ ನವೀಕರಿಸಲಾಗಿದೆ"
+    locationUpdated: "ಸ್ಥಳವನ್ನು ಯಶಸ್ವಿಯಾಗಿ ನವೀಕರಿಸಲಾಗಿದೆ",
+    
+    // Home page specific
+    findLocal: "ಸ್ಥಳೀಯ ವ್ಯಾಪಾರಗಳು ಮತ್ತು ಸೇವೆಗಳನ್ನು ಹುಡುಕಿ",
+    browsingFrom: "ನೀವು ಇಲ್ಲಿಂದ ಬ್ರೌಸ್ ಮಾಡುತ್ತಿದ್ದೀರಿ",
+    detect: "ಪತ್ತೆಮಾಡಿ",
+    chooseLocation: "ಸ್ಥಳವನ್ನು ಆರಿಸಿ",
+    
+    // Categories
+    electronics: "ಎಲೆಕ್ಟ್ರಾನಿಕ್ಸ್",
+    homeDecor: "ಮನೆ ಅಲಂಕಾರ",
+    fashion: "ಫ್ಯಾಷನ್",
+    books: "ಪುಸ್ತಕಗಳು",
+    sports: "ಕ್ರೀಡೆಗಳು"
   },
   
   malayalam: {
@@ -567,6 +632,134 @@ export const translations = {
     notAvailableIn: "ഇപ്പോൾ ജ്രക്ചർസ് {location}-ൽ ലഭ്യമല്ല.",
     expandingRapidly: "ഞങ്ങൾ വേഗത്തിൽ വിപുലീകരിക്കുന്നു! നിങ്ങൾക്ക് ഇപ്പോഴും ബ്രൗസ് ചെയ്യാൻ കഴിയും പക്ഷേ ചില ഫീച്ചറുകൾ പരിമിതമായേക്കാം.",
     confirmLocation: "സ്ഥാനം സ്ഥിരീകരിക്കുക",
-    locationUpdated: "സ്ഥാനം വിജയകരമായി അപ്ഡേറ്റ് ചെയ്തു"
+    locationUpdated: "സ്ഥാനം വിജയകരമായി അപ്ഡേറ്റ് ചെയ്തു",
+    
+    // Home page specific
+    findLocal: "പ്രാദേശിക ബിസിനസുകളും സേവനങ്ങളും കണ്ടെത്തുക",
+    browsingFrom: "നിങ്ങൾ ഇവിടെ നിന്നാണ് ബ്രൗസ് ചെയ്യുന്നത്",
+    detect: "കണ്ടെത്തുക",
+    chooseLocation: "സ്ഥാനം തിരഞ്ഞെടുക്കുക",
+    
+    // Categories
+    electronics: "ഇലക്ട്രോണിക്സ്",
+    homeDecor: "ഹോം ഡെക്കോർ",
+    fashion: "ഫാഷൻ",
+    books: "പുസ്തകങ്ങൾ",
+    sports: "കായികം"
+  },
+  
+  urdu: {
+    // General Settings
+    generalSettings: "عام ترتیبات",
+    manageAccount: "اپنے اکاؤنٹ کی ترجیحات اور ظہور کو منظم کریں",
+    fontSize: "فونٹ سائز",
+    small: "چھوٹا",
+    default: "ڈیفالٹ",
+    large: "بڑا",
+    theme: "تھیم",
+    preview: "پیش نظارہ",
+    previewText: "آپ کے منتخب کردہ تھیم اس طرح دکھائی دے گی",
+    language: "زبان",
+    selectLanguage: "زبان منتخب کریں",
+    translationNote: "نوٹ: مکمل ترجمہ کی حمایت جاری ہے۔ کچھ مواد ابھی بھی انگریزی میں دکھائی دے سکتا ہے۔",
+    saveSettings: "ترتیبات محفوظ کریں",
+    saving: "محفوظ کر رہا ہے...",
+    themeColor: "تھیم کا رنگ",
+
+    // Color names
+    blue: "نیلا",
+    purple: "جامنی",
+    red: "سرخ",
+    green: "سبز",
+    yellow: "پیلا",
+    pink: "گلابی",
+    orange: "نارنجی",
+    teal: "فیروزی",
+
+    // Navigation
+    home: "گھر",
+    marketplace: "مارکیٹ پلیس",
+    services: "خدمات",
+    business: "کاروبار",
+    jobs: "ملازمتیں",
+    communities: "کمیونٹیز",
+    messages: "پیغامات",
+    events: "تقریبات",
+    maps: "نقشے",
+    more: "مزید",
+    settings: "ترتیبات",
+    profile: "پروفائل",
+    notifications: "اطلاعات",
+    privacy: "رازداری",
+    orders: "آرڈرز",
+    appointments: "اپائنٹمنٹس",
+    products: "مصنوعات",
+    advertisements: "اشتہارات",
+    adPricing: "اشتہار کی قیمتیں",
+    subscribed: "سبسکرائب کیا گیا",
+    pricing: "قیمتیں",
+    testing: "ٹیسٹنگ",
+    analytics: "تجزیات",
+    location: "مقام",
+    general: "عام",
+    
+    // Common Actions
+    save: "محفوظ کریں",
+    cancel: "منسوخ کریں",
+    edit: "ترمیم کریں",
+    delete: "حذف کریں",
+    back: "واپس",
+    next: "اگلا",
+    submit: "جمع کرائیں",
+    loading: "لوڈ ہو رہا ہے...",
+    search: "تلاش کریں",
+    filter: "فلٹر",
+    sort: "ترتیب دیں",
+    
+    // Notifications
+    settingsSaved: "ترتیبات کامیابی سے محفوظ ہو گئیں",
+    themeUpdated: "تھیم کو اپ ڈیٹ کیا گیا",
+    languageChanged: "زبان تبدیل کر دی گئی",
+    mode: "موڈ",
+    
+    // Placeholders
+    selectOption: "آپشن منتخب کریں",
+    enterValue: "قیمت درج کریں",
+    uploadImage: "تصویر اپلوڈ کریں",
+    
+    // Messages
+    noData: "کوئی ڈیٹا دستیاب نہیں ہے",
+    error: "ایک خرابی پیش آئی",
+    success: "کامیابی",
+    
+    // Back to home
+    backToHome: "ہوم پیج پر واپس جائیں",
+    
+    // Locked feature
+    lockedFeature: "یہ فیچر فی الحال مقفل ہے۔ رسائی کی درخواست کے لئے براہ کرم اپنے ایڈمنسٹریٹر سے رابطہ کریں۔",
+    
+    // Location specific
+    chooseYourLocation: "اپنا مقام منتخب کریں",
+    detectingYourLocation: "آپ کے مقام کا پتہ لگایا جا رہا ہے...",
+    detectMyLocation: "میرے مقام کا پتہ لگائیں",
+    searchCityOrTown: "شہر یا قصبہ تلاش کریں",
+    orSelectCityOrTown: "یا شہر یا قصبہ منتخب کریں",
+    notAvailableIn: "زرکچرز ابھی تک {location} میں دستیاب نہیں ہے۔",
+    expandingRapidly: "ہم تیزی سے پھیل رہے ہیں! آپ ابھی بھی براؤز کر پائیں گے لیکن کچھ فیچرز محدود ہو سکتے ہیں۔",
+    confirmLocation: "مقام کی تصدیق کریں",
+    locationUpdated: "مقام کامیابی سے اپڈیٹ کیا گیا",
+    
+    // Home page specific
+    findLocal: "مقامی کاروباروں اور خدمات تلاش کریں",
+    browsingFrom: "آپ یہاں سے براؤز کر رہے ہیں",
+    detect: "پتہ لگائیں",
+    chooseLocation: "مقام منتخب کریں",
+    
+    // Categories
+    electronics: "الیکٹرونکس",
+    homeDecor: "گھر کی سجاوٹ",
+    fashion: "فیشن",
+    books: "کتابیں",
+    sports: "کھیل"
   }
 };

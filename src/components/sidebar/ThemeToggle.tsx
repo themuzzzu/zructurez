@@ -14,29 +14,6 @@ interface ThemeToggleProps {
 export const ThemeToggle = ({ isCollapsed, isDarkMode, onClick }: ThemeToggleProps) => {
   const { t } = useLanguage();
   
-  useEffect(() => {
-    // Listen for language changes and update button text
-    const handleLanguageChange = () => {
-      // Force re-render when language changes
-      const buttons = document.querySelectorAll('[data-theme-toggle]');
-      buttons.forEach(btn => {
-        if (btn.textContent?.includes('theme')) {
-          // This is our button, update its text
-          const span = btn.querySelector('span');
-          if (span) {
-            span.textContent = t("theme");
-          }
-        }
-      });
-    };
-    
-    window.addEventListener('languageChanged', handleLanguageChange);
-    
-    return () => {
-      window.removeEventListener('languageChanged', handleLanguageChange);
-    };
-  }, [t]);
-  
   if (isCollapsed) {
     return (
       <Button

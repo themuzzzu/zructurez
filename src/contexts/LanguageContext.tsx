@@ -1,8 +1,8 @@
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { translations } from "@/translations";
 
-type Language = "english" | "hindi" | "telugu" | "tamil" | "kannada" | "malayalam";
+type Language = "english" | "hindi" | "telugu" | "tamil" | "kannada" | "malayalam" | "urdu";
 
 type LanguageContextType = {
   language: Language;
@@ -32,7 +32,7 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
   }, []);
 
   // Function to apply language changes to DOM
-  const applyLanguageToDOM = (lang: Language) => {
+  const applyLanguageToDOM = useCallback((lang: Language) => {
     document.documentElement.lang = lang;
     document.documentElement.setAttribute("data-language", lang);
     
@@ -49,11 +49,9 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
     // Show language indicator
     showLanguageIndicator(lang);
     
-    // Apply automatic translation to text nodes if needed
-    if (lang !== "english") {
-      translateVisibleText(lang);
-    }
-  };
+    // Apply automatic translation to text nodes
+    setTimeout(() => translateVisibleText(lang), 100);
+  }, []);
   
   // Show language indicator in the corner
   const showLanguageIndicator = (lang: Language) => {
@@ -71,7 +69,8 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
       telugu: "తెలుగు",
       tamil: "தமிழ்",
       kannada: "ಕನ್ನಡ",
-      malayalam: "മലയാളം"
+      malayalam: "മലയാളം",
+      urdu: "اردو"
     }[lang];
     
     indicator.textContent = `Language: ${langName}`;
@@ -103,7 +102,7 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
   };
   
   // Function to translate visible text elements automatically
-  const translateVisibleText = (lang: Language) => {
+  const translateVisibleText = useCallback((lang: Language) => {
     // Don't translate English content to English
     if (lang === "english") return;
     
@@ -121,8 +120,95 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
       }
     });
     
+    // Now scan for page-specific elements that require translation
+    const translateStaticUI = () => {
+      // Home page elements
+      const homeElements = [
+        { selector: 'h1:contains("Find Local")', key: 'findLocal' },
+        { selector: 'button:contains("Search")', key: 'search' },
+        { selector: 'button:contains("Electronics")', key: 'electronics' },
+        { selector: 'button:contains("Home Decor")', key: 'homeDecor' },
+        { selector: 'button:contains("Fashion")', key: 'fashion' },
+        { selector: 'button:contains("Books")', key: 'books' },
+        { selector: 'button:contains("Sports")', key: 'sports' },
+        { selector: 'div:contains("You\'re browsing from")', key: 'browsingFrom' },
+        { selector: 'button:contains("Detect")', key: 'detect' },
+        { selector: 'button:contains("Choose Location")', key: 'chooseLocation' },
+        { selector: 'span:contains("Home")', key: 'home' },
+        { selector: 'span:contains("Marketplace")', key: 'marketplace' },
+        { selector: 'span:contains("Services")', key: 'services' },
+        { selector: 'span:contains("Business")', key: 'business' },
+        { selector: 'span:contains("Maps")', key: 'maps' },
+        { selector: 'span:contains("More")', key: 'more' }
+      ];
+      
+      // Custom querySelector to find elements containing text
+      const findElementsWithText = (selector: string, text: string): Element[] => {
+        const allElements = document.querySelectorAll(selector);
+        return Array.from(allElements).filter(el => 
+          el.textContent && el.textContent.includes(text) && !el.hasAttribute('data-translated')
+        );
+      };
+      
+      // Translate home page elements if found
+      homeElements.forEach(item => {
+        const selectorParts = item.selector.split(':contains(');
+        if (selectorParts.length === 2) {
+          const tagName = selectorParts[0];
+          const searchText = selectorParts[1].replace('"', '').replace('")', '');
+          
+          const elements = findElementsWithText(tagName, searchText);
+          elements.forEach(el => {
+            const translatedText = translate(item.key);
+            if (translatedText !== item.key) {
+              el.textContent = translatedText;
+              el.setAttribute('data-translated', 'true');
+            }
+          });
+        }
+      });
+    };
+    
+    // Run static UI translation after a short delay
+    setTimeout(translateStaticUI, 300);
+    
     setTranslatedElements(processed);
-  };
+  }, [language]);
+
+  // Re-translate visible text whenever language changes
+  useEffect(() => {
+    translateVisibleText(language);
+    
+    // Set up mutation observer to catch dynamically added content
+    const observer = new MutationObserver((mutations) => {
+      let needsTranslation = false;
+      
+      mutations.forEach(mutation => {
+        if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+          mutation.addedNodes.forEach(node => {
+            if (node.nodeType === 1) { // Element node
+              const element = node as Element;
+              if (element.hasAttribute('data-translate') || 
+                  element.querySelectorAll('[data-translate]').length > 0) {
+                needsTranslation = true;
+              }
+            }
+          });
+        }
+      });
+      
+      if (needsTranslation && language !== 'english') {
+        translateVisibleText(language);
+      }
+    });
+    
+    observer.observe(document.body, { 
+      childList: true, 
+      subtree: true 
+    });
+    
+    return () => observer.disconnect();
+  }, [language, translateVisibleText]);
 
   const value = {
     language,
