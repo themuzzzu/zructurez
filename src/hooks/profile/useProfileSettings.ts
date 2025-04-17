@@ -70,7 +70,7 @@ export const useProfileSettings = (
   };
   
   const updateDisplayPreferences = async (
-    setting: "font_size" | "ui_color",
+    setting: "font_size" | "ui_color" | "language",
     value: number | string
   ) => {
     try {
@@ -83,6 +83,27 @@ export const useProfileSettings = (
       const success = await updateProfile(updates);
       if (success) {
         toast.success(`Display preference updated`);
+        
+        // Apply changes immediately
+        if (setting === "font_size" && typeof value === "number") {
+          document.documentElement.style.fontSize = `${value}%`;
+          localStorage.setItem("fontSize", value.toString());
+        }
+        else if (setting === "ui_color" && typeof value === "string") {
+          // Remove all theme classes first
+          document.querySelectorAll("[class*='ui-']").forEach(el => {
+            Array.from(el.classList)
+              .filter(cls => cls.startsWith('ui-'))
+              .forEach(cls => el.classList.remove(cls));
+          });
+          
+          // Add new class
+          document.documentElement.classList.add(`ui-${value}`);
+          localStorage.setItem("uiTheme", `ui-${value}`);
+        }
+        else if (setting === "language" && typeof value === "string") {
+          localStorage.setItem("language", value);
+        }
       }
       return success;
     } catch (error) {

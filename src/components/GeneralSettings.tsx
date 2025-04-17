@@ -24,12 +24,30 @@ export function GeneralSettings() {
     { id: "ui-purple", name: "Purple", class: "bg-purple-500" },
     { id: "ui-red", name: "Red", class: "bg-red-500" },
     { id: "ui-green", name: "Green", class: "bg-green-500" },
-    { id: "ui-yellow", name: "Yellow", class: "bg-yellow-500" }
+    { id: "ui-yellow", name: "Yellow", class: "bg-yellow-500" },
+    { id: "ui-pink", name: "Pink", class: "bg-pink-500" },
+    { id: "ui-orange", name: "Orange", class: "bg-orange-500" },
+    { id: "ui-teal", name: "Teal", class: "bg-teal-500" }
+  ];
+
+  // Available languages
+  const languages = [
+    { code: "english", name: "English" },
+    { code: "spanish", name: "Spanish" },
+    { code: "french", name: "French" },
+    { code: "german", name: "German" },
+    { code: "chinese", name: "Chinese" },
+    { code: "japanese", name: "Japanese" },
+    { code: "telugu", name: "Telugu" },
+    { code: "tamil", name: "Tamil" },
+    { code: "kannada", name: "Kannada" },
+    { code: "hindi", name: "Hindi" },
+    { code: "malayalam", name: "Malayalam" }
   ];
 
   // Load saved settings on component mount
   useEffect(() => {
-    // Simulate loading saved settings
+    // Load saved settings
     const savedFontSize = localStorage.getItem("fontSize");
     const savedLanguage = localStorage.getItem("language");
     const savedTheme = localStorage.getItem("uiTheme");
@@ -59,6 +77,9 @@ export function GeneralSettings() {
     // Add the selected theme class
     document.documentElement.classList.add(themeId);
     
+    // Save to localStorage for persistence across page reloads
+    localStorage.setItem("uiTheme", themeId);
+    
     // Update CSS variables for theme color
     const selectedColor = uiColors.find(color => color.id === themeId);
     if (selectedColor) {
@@ -78,6 +99,18 @@ export function GeneralSettings() {
   const handleThemeChange = (value: string) => {
     setUiTheme(value);
     applyTheme(value);
+  };
+
+  // Handle language change
+  const handleLanguageChange = (value: string) => {
+    setLanguage(value);
+    localStorage.setItem("language", value);
+    
+    // Show toast with language change notification
+    toast.success(`Language changed to ${languages.find(lang => lang.code === value)?.name}`);
+    
+    // In a real app, this would trigger language context updates
+    // or API calls to fetch translations
   };
 
   // Save settings (debounced)
@@ -135,7 +168,7 @@ export function GeneralSettings() {
           {/* UI Color Theme */}
           <div className="space-y-4">
             <Label htmlFor="theme" className="text-base font-medium">UI Color</Label>
-            <div className="grid grid-cols-5 gap-3">
+            <div className="grid grid-cols-4 gap-3">
               {uiColors.map((color) => (
                 <button
                   key={color.id}
@@ -160,19 +193,23 @@ export function GeneralSettings() {
           {/* Language Selection */}
           <div className="space-y-2">
             <Label htmlFor="language" className="text-base font-medium">Language</Label>
-            <Select value={language} onValueChange={setLanguage}>
+            <Select value={language} onValueChange={handleLanguageChange}>
               <SelectTrigger>
                 <SelectValue placeholder="Select language" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="english">English</SelectItem>
-                <SelectItem value="spanish">Spanish</SelectItem>
-                <SelectItem value="french">French</SelectItem>
-                <SelectItem value="german">German</SelectItem>
-                <SelectItem value="chinese">Chinese</SelectItem>
-                <SelectItem value="japanese">Japanese</SelectItem>
+              <SelectContent className="max-h-[200px]">
+                {languages.map((lang) => (
+                  <SelectItem key={lang.code} value={lang.code}>
+                    {lang.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
+            {language !== "english" && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Note: Full translation support is in progress. Some content may still appear in English.
+              </p>
+            )}
           </div>
           
           {/* Save Button */}

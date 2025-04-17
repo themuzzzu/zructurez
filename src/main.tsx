@@ -16,15 +16,15 @@ const setInitialTheme = () => {
   }
   
   // Apply stored font size
-  const storedFontSize = localStorage.getItem("appFontSize");
+  const storedFontSize = localStorage.getItem("fontSize");
   if (storedFontSize) {
     document.documentElement.style.fontSize = `${storedFontSize}%`;
   }
   
-  // Apply stored UI color
-  const storedUiColor = localStorage.getItem("appUiColor");
-  if (storedUiColor && storedUiColor !== 'default') {
-    document.documentElement.classList.add(`ui-${storedUiColor}`);
+  // Apply stored UI color theme
+  const storedUiTheme = localStorage.getItem("uiTheme");
+  if (storedUiTheme) {
+    document.documentElement.classList.add(storedUiTheme);
   }
 };
 
