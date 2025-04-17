@@ -1,5 +1,5 @@
 
-import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
 interface LocationContextType {
   location: string | null;
@@ -7,6 +7,9 @@ interface LocationContextType {
   currentLocation: string;
   isLocationAvailable: boolean;
   setShowLocationPicker: (show: boolean) => void;
+  // Add latitude and longitude
+  latitude?: number;
+  longitude?: number;
 }
 
 const LocationContext = createContext<LocationContextType | undefined>(undefined);
@@ -15,6 +18,9 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
   const [location, setLocation] = useState<string | null>(null);
   const [currentLocation, setCurrentLocation] = useState<string>("All India");
   const [isLocationAvailable, setIsLocationAvailable] = useState<boolean>(false);
+  // Add latitude and longitude state
+  const [latitude, setLatitude] = useState<number | undefined>(undefined);
+  const [longitude, setLongitude] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     // Try to load saved location from localStorage
@@ -27,6 +33,19 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
       // This is a simplified check - in a real app you would check against an API
       const availableLocations = ["Delhi", "Mumbai", "Bangalore", "Hyderabad", "Chennai"];
       setIsLocationAvailable(availableLocations.includes(savedLocation));
+    }
+    
+    // Try to get user's geolocation
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLatitude(position.coords.latitude);
+          setLongitude(position.coords.longitude);
+        },
+        (error) => {
+          console.error("Error getting user location:", error);
+        }
+      );
     }
   }, []);
 
@@ -54,7 +73,9 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
         setLocation: updateLocation, 
         currentLocation,
         isLocationAvailable,
-        setShowLocationPicker
+        setShowLocationPicker,
+        latitude,
+        longitude
       }}
     >
       {children}

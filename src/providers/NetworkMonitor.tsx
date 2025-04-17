@@ -1,5 +1,4 @@
-
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 interface NetworkContextType {
   isOnline: boolean;
@@ -74,4 +73,10 @@ export const useNetwork = () => {
 };
 
 // Add the useNetworkStatus function that was missing
-export const useNetworkStatus = useNetwork;
+export const useNetworkStatus = () => {
+  const context = useContext(NetworkContext);
+  if (!context) {
+    throw new Error('useNetworkStatus must be used within a NetworkProvider');
+  }
+  return context;
+};

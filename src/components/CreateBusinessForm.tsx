@@ -1,4 +1,4 @@
-
+import React, { useState } from "react";
 import { Button } from "./ui/button";
 import { ImageUpload } from "./ImageUpload";
 import { BusinessBasicInfo } from "./business-form/BusinessBasicInfo";
@@ -9,7 +9,6 @@ import { BusinessMembershipPlans } from "./business-form/BusinessMembershipPlans
 import { BusinessPlanSelection } from "./business-form/BusinessPlanSelection";
 import { Label } from "./ui/label";
 import { useBusinessForm } from "./business-form/useBusinessForm";
-import { useState } from "react";
 import type { FormProps } from "./business-form/types/form";
 
 const TEST_BUSINESS = {

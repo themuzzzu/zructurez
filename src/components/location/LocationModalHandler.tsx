@@ -1,8 +1,12 @@
-
 import React, { useEffect, useState } from 'react';
 import { useLocation } from "@/providers/LocationProvider";
 import { Dialog } from "@/components/ui/dialog";
 import { LocationPickerModal } from "./LocationPickerModal";
+
+interface LocationPickerModalProps {
+  onLocationSelect: (location: string) => void;
+  onClose: () => void;
+}
 
 export const LocationModalHandler = () => {
   // State to control the location picker dialog

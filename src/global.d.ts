@@ -10,6 +10,9 @@ declare global {
       VITE_SUPABASE_ANON_KEY: string;
     }
   }
+
+  // Make React available globally for JSX
+  const React: typeof import('react');
 }
 
 // This ensures React is properly defined globally
@@ -17,6 +20,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 
 declare global {
+  // Redefine React in global scope more explicitly
   const React: typeof React;
   const ReactDOM: typeof ReactDOM;
 }

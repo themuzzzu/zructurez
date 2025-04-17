@@ -1,9 +1,8 @@
-
+import React, { useEffect, useRef } from "react";
 import { Search } from "lucide-react";
 import { Input } from "./ui/input";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useEffect, useRef } from "react";
 
 interface SearchInputProps {
   placeholder?: string;
@@ -27,7 +26,6 @@ export const SearchInput = ({
   const { t, language } = useLanguage();
   const inputRef = useRef<HTMLInputElement>(null);
   
-  // Default to translated placeholder if specific one isn't provided
   const translatedPlaceholder = placeholder === "Search..." ? t("search") + "..." : placeholder;
   
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -36,10 +34,8 @@ export const SearchInput = ({
     }
   };
   
-  // Set RTL properties based on language
   const isRTL = language === "urdu";
   
-  // Update direction and alignment when language changes
   useEffect(() => {
     if (!inputRef.current) return;
     
