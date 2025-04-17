@@ -39,6 +39,16 @@ function App() {
       document.documentElement.style.fontSize = `${savedFontSize}%`;
     }
     
+    // Force initial language translation
+    const savedLanguage = localStorage.getItem("language");
+    if (savedLanguage) {
+      const langEvent = new CustomEvent("language-changed", { 
+        bubbles: true,
+        detail: { language: savedLanguage } 
+      });
+      document.documentElement.dispatchEvent(langEvent);
+    }
+    
     // Preload critical resources asynchronously
     const preloadCriticalResources = async () => {
       const criticalResources = [

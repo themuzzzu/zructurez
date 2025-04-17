@@ -20,7 +20,6 @@ const LanguageContext = createContext<LanguageContextType>(defaultContext);
 
 export const LanguageProvider = ({ children }: { children: React.ReactNode }) => {
   const [language, setLanguage] = useState<Language>("english");
-  const [translatedElements, setTranslatedElements] = useState<Element[]>([]);
 
   // Load saved language on component mount
   useEffect(() => {
@@ -49,8 +48,8 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
     // Show language indicator
     showLanguageIndicator(lang);
     
-    // Apply automatic translation to text nodes
-    setTimeout(() => translateVisibleText(lang), 100);
+    // Apply automatic translation to text nodes - this is the key function
+    translateAllDOMText(lang);
   }, []);
   
   // Show language indicator in the corner
@@ -75,6 +74,15 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
     
     indicator.textContent = `Language: ${langName}`;
     indicator.className = 'language-indicator';
+    indicator.style.position = 'fixed';
+    indicator.style.top = '80px';
+    indicator.style.right = '20px';
+    indicator.style.padding = '8px 16px';
+    indicator.style.backgroundColor = 'rgba(0,0,0,0.6)';
+    indicator.style.color = 'white';
+    indicator.style.borderRadius = '4px';
+    indicator.style.zIndex = '9999';
+    indicator.style.transition = 'opacity 0.5s';
     document.body.appendChild(indicator);
     
     // Auto-hide after 3 seconds
@@ -101,114 +109,169 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
     return translations.english[key] || key;
   };
   
-  // Function to translate visible text elements automatically
-  const translateVisibleText = useCallback((lang: Language) => {
-    // Don't translate English content to English
+  // Function to translate ALL text in DOM
+  const translateAllDOMText = useCallback((lang: Language) => {
+    // Skip for English (default language)
     if (lang === "english") return;
     
-    const textNodes = document.querySelectorAll('[data-translate]');
-    const processed: Element[] = [];
-    
-    textNodes.forEach(node => {
+    // First, translate all elements with data-translate attribute
+    const translatableElements = document.querySelectorAll('[data-translate]');
+    translatableElements.forEach(node => {
       const key = node.getAttribute('data-translate');
       if (key) {
         const translatedText = translate(key);
         if (translatedText !== key) {
           node.textContent = translatedText;
-          processed.push(node);
         }
       }
     });
     
-    // Now scan for page-specific elements that require translation
-    const translateStaticUI = () => {
-      // Home page elements
-      const homeElements = [
-        { selector: 'h1:contains("Find Local")', key: 'findLocal' },
-        { selector: 'button:contains("Search")', key: 'search' },
-        { selector: 'button:contains("Electronics")', key: 'electronics' },
-        { selector: 'button:contains("Home Decor")', key: 'homeDecor' },
-        { selector: 'button:contains("Fashion")', key: 'fashion' },
-        { selector: 'button:contains("Books")', key: 'books' },
-        { selector: 'button:contains("Sports")', key: 'sports' },
-        { selector: 'div:contains("You\'re browsing from")', key: 'browsingFrom' },
-        { selector: 'button:contains("Detect")', key: 'detect' },
-        { selector: 'button:contains("Choose Location")', key: 'chooseLocation' },
-        { selector: 'span:contains("Home")', key: 'home' },
-        { selector: 'span:contains("Marketplace")', key: 'marketplace' },
-        { selector: 'span:contains("Services")', key: 'services' },
-        { selector: 'span:contains("Business")', key: 'business' },
-        { selector: 'span:contains("Maps")', key: 'maps' },
-        { selector: 'span:contains("More")', key: 'more' }
-      ];
+    // Common UI elements to translate - comprehensive list
+    const commonUIElements = [
+      { selector: 'button, a.btn', textKey: 'text' },
+      { selector: 'h1, h2, h3, h4, h5, h6', textKey: 'title' },
+      { selector: 'label', textKey: 'label' },
+      { selector: 'p', textKey: 'paragraph' },
+      { selector: 'a:not(.btn)', textKey: 'link' },
+      { selector: 'span:not([data-no-translate])', textKey: 'text' },
+      { selector: 'th', textKey: 'column' },
+      { selector: 'input[type="submit"], button[type="submit"]', textKey: 'submit' },
+      { selector: '.card-title', textKey: 'card' },
+      { selector: '.nav-link', textKey: 'navigation' }
+    ];
+
+    // Navigation and sidebar items
+    const navigationItems = [
+      { text: "Home", key: "home" },
+      { text: "Marketplace", key: "marketplace" }, 
+      { text: "Services", key: "services" },
+      { text: "Business", key: "business" },
+      { text: "Jobs", key: "jobs" },
+      { text: "Communities", key: "communities" },
+      { text: "Messages", key: "messages" },
+      { text: "Events", key: "events" },
+      { text: "Maps", key: "maps" },
+      { text: "Settings", key: "settings" },
+      { text: "Theme", key: "theme" },
+      { text: "Search", key: "search" },
+      { text: "Profile", key: "profile" },
+      { text: "Notifications", key: "notifications" },
+      { text: "Log out", key: "logOut" },
+      { text: "Sign in", key: "signIn" },
+      { text: "Register", key: "register" }
+    ];
+    
+    // Product/service related terms
+    const productTerms = [
+      { text: "Add to cart", key: "addToCart" },
+      { text: "Buy now", key: "buyNow" },
+      { text: "Add to wishlist", key: "addToWishlist" },
+      { text: "View details", key: "viewDetails" },
+      { text: "Price", key: "price" },
+      { text: "Discount", key: "discount" },
+      { text: "Reviews", key: "reviews" },
+      { text: "Rating", key: "rating" }
+    ];
+
+    // Translate common text content by comparing to known keys
+    const translateTextContent = (element: Element) => {
+      if (!element.textContent || element.hasAttribute('data-translated')) return;
       
-      // Custom querySelector to find elements containing text
-      const findElementsWithText = (selector: string, text: string): Element[] => {
-        const allElements = document.querySelectorAll(selector);
-        return Array.from(allElements).filter(el => 
-          el.textContent && el.textContent.includes(text) && !el.hasAttribute('data-translated')
-        );
-      };
+      const text = element.textContent.trim();
+      if (!text || text.length < 2 || text.length > 50) return; // Skip empty or very long text
       
-      // Translate home page elements if found
-      homeElements.forEach(item => {
-        const selectorParts = item.selector.split(':contains(');
-        if (selectorParts.length === 2) {
-          const tagName = selectorParts[0];
-          const searchText = selectorParts[1].replace('"', '').replace('")', '');
-          
-          const elements = findElementsWithText(tagName, searchText);
-          elements.forEach(el => {
-            const translatedText = translate(item.key);
-            if (translatedText !== item.key) {
-              el.textContent = translatedText;
-              el.setAttribute('data-translated', 'true');
+      // Don't translate numbers, dates, and codes
+      if (/^\d+(\.\d+)?$/.test(text) || /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(text)) return;
+      
+      // Check navigation items
+      for (const item of navigationItems) {
+        if (text === item.text || text.includes(item.text)) {
+          const translatedText = translate(item.key);
+          if (translatedText !== item.key) {
+            element.textContent = element.textContent?.replace(item.text, translatedText);
+            element.setAttribute('data-translated', 'true');
+            return;
+          }
+        }
+      }
+      
+      // Check product terms
+      for (const term of productTerms) {
+        if (text === term.text || text.includes(term.text)) {
+          const translatedText = translate(term.key);
+          if (translatedText !== term.key) {
+            element.textContent = element.textContent?.replace(term.text, translatedText);
+            element.setAttribute('data-translated', 'true');
+            return;
+          }
+        }
+      }
+      
+      // Try direct translation for other UI elements
+      const normalizedKey = text.toLowerCase().replace(/\s+/g, '_');
+      const translatedText = translate(normalizedKey);
+      if (translatedText !== normalizedKey && translatedText !== text) {
+        element.textContent = translatedText;
+        element.setAttribute('data-translated', 'true');
+      }
+    };
+    
+    // Traverse the DOM and translate text nodes
+    const processNode = (node: Element) => {
+      // Skip script and style elements
+      if (node.tagName === 'SCRIPT' || node.tagName === 'STYLE' || 
+          node.getAttribute('data-no-translate') === 'true') {
+        return;
+      }
+      
+      // Process this element
+      translateTextContent(node);
+      
+      // Process children (if any)
+      for (const child of Array.from(node.children)) {
+        processNode(child);
+      }
+    };
+    
+    // Start translation from the body
+    processNode(document.body);
+    
+    // Set up mutation observer to translate dynamically added content
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach(mutation => {
+        if (mutation.type === 'childList') {
+          mutation.addedNodes.forEach(node => {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+              processNode(node as Element);
             }
           });
         }
       });
+    });
+    
+    // Start observing
+    observer.observe(document.body, { 
+      childList: true,
+      subtree: true
+    });
+    
+    // Store observer to disconnect later
+    const currentLang = lang;
+    
+    // Disconnect observer when language changes
+    return () => {
+      if (currentLang !== language) {
+        observer.disconnect();
+      }
     };
-    
-    // Run static UI translation after a short delay
-    setTimeout(translateStaticUI, 300);
-    
-    setTranslatedElements(processed);
   }, [language]);
 
   // Re-translate visible text whenever language changes
   useEffect(() => {
-    translateVisibleText(language);
-    
-    // Set up mutation observer to catch dynamically added content
-    const observer = new MutationObserver((mutations) => {
-      let needsTranslation = false;
-      
-      mutations.forEach(mutation => {
-        if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-          mutation.addedNodes.forEach(node => {
-            if (node.nodeType === 1) { // Element node
-              const element = node as Element;
-              if (element.hasAttribute('data-translate') || 
-                  element.querySelectorAll('[data-translate]').length > 0) {
-                needsTranslation = true;
-              }
-            }
-          });
-        }
-      });
-      
-      if (needsTranslation && language !== 'english') {
-        translateVisibleText(language);
-      }
-    });
-    
-    observer.observe(document.body, { 
-      childList: true, 
-      subtree: true 
-    });
-    
-    return () => observer.disconnect();
-  }, [language, translateVisibleText]);
+    if (language !== 'english') {
+      translateAllDOMText(language);
+    }
+  }, [language, translateAllDOMText]);
 
   const value = {
     language,

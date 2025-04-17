@@ -26,6 +26,7 @@ export const ThemeToggle = ({ isCollapsed, isDarkMode, onClick }: ThemeTogglePro
         )}
         onClick={onClick}
         data-theme-toggle="true"
+        aria-label={t("theme")}
       >
         <SunMoon className="h-5 w-5 text-muted-foreground" />
       </Button>

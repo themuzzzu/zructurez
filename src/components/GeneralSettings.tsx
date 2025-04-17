@@ -88,6 +88,19 @@ export function GeneralSettings() {
     // Show toast with language change notification
     const langName = languages.find(lang => lang.code === value)?.name || value;
     toast.success(`${t("languageChanged")} ${langName}`);
+    
+    // Force global language update event
+    const langEvent = new CustomEvent("language-changed", { 
+      bubbles: true,
+      detail: { language: value } 
+    });
+    document.documentElement.dispatchEvent(langEvent);
+    
+    // Show UI feedback
+    document.body.classList.add('lang-transition');
+    setTimeout(() => {
+      document.body.classList.remove('lang-transition');
+    }, 1000);
   };
 
   // Save settings (debounced)
