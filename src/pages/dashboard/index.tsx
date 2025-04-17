@@ -1,6 +1,9 @@
 
-import { NotFound } from "@/components/NotFound";
+import { useNavigate } from "react-router-dom";
+import BusinessDashboard from "../BusinessDashboard";
 
 export default function Dashboard() {
-  return <NotFound />;
+  const navigate = useNavigate();
+  
+  return <BusinessDashboard />;
 }

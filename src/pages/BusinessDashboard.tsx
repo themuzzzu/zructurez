@@ -27,7 +27,11 @@ import {
   DollarSign,
   Target,
   LineChart,
-  Calendar
+  Calendar,
+  Heart,
+  Eye,
+  Package,
+  ShoppingBag
 } from "lucide-react";
 import { toast } from "sonner";
 import { ChartContainer } from "@/components/ui/chart";
@@ -41,6 +45,7 @@ import { UpgradeAIFeaturesCard } from "@/components/dashboard/UpgradeAIFeaturesC
 import { useBusinessAnalytics } from "@/components/performance/hooks/useBusinessAnalytics";
 import { BusinessAnalyticsCharts } from "@/components/performance/components/BusinessAnalyticsCharts";
 import { BusinessBookingsTimeline } from "@/components/bookings/BusinessBookingsTimeline";
+import { SummaryCard } from "@/components/analytics/SummaryCard";
 
 const BusinessDashboard = () => {
   const { user } = useAuth();
@@ -116,6 +121,104 @@ const BusinessDashboard = () => {
     },
     enabled: !!businessData?.id && !!user?.id
   });
+
+  const { data: productViewsData, isLoading: productViewsLoading, refetch: refetchProductViews } = useQuery({
+    queryKey: ['product-views', businessData?.id],
+    queryFn: async () => {
+      if (!businessData?.id || !user?.id) return [];
+      
+      const { data: products, error: productsError } = await supabase
+        .from('products')
+        .select('id')
+        .eq('user_id', user.id);
+      
+      if (productsError) throw productsError;
+      if (!products || products.length === 0) return { 
+        totalViews: 0, 
+        productIds: [] 
+      };
+      
+      const productIds = products.map(p => p.id);
+      
+      const { data: viewsData, error: viewsError } = await supabase
+        .from('products')
+        .select('id, views')
+        .in('id', productIds);
+        
+      if (viewsError) throw viewsError;
+      
+      const totalViews = viewsData?.reduce((sum, product) => sum + (product.views || 0), 0) || 0;
+      
+      return {
+        totalViews,
+        productIds
+      };
+    },
+    enabled: !!businessData?.id && !!user?.id
+  });
+  
+  const { data: wishlistData, isLoading: wishlistLoading, refetch: refetchWishlist } = useQuery({
+    queryKey: ['product-wishlists', productViewsData?.productIds],
+    queryFn: async () => {
+      if (!productViewsData?.productIds || productViewsData.productIds.length === 0) return {
+        inWishlistCount: 0
+      };
+      
+      const { count, error } = await supabase
+        .from('wishlists')
+        .select('*', { count: 'exact', head: true })
+        .in('product_id', productViewsData.productIds);
+        
+      if (error) throw error;
+      
+      return {
+        inWishlistCount: count || 0
+      };
+    },
+    enabled: !!(productViewsData?.productIds && productViewsData.productIds.length > 0)
+  });
+  
+  const { data: cartItemsData, isLoading: cartItemsLoading, refetch: refetchCartItems } = useQuery({
+    queryKey: ['product-cart-items', productViewsData?.productIds],
+    queryFn: async () => {
+      if (!productViewsData?.productIds || productViewsData.productIds.length === 0) return {
+        inCartCount: 0
+      };
+      
+      const { count, error } = await supabase
+        .from('cart_items')
+        .select('*', { count: 'exact', head: true })
+        .in('product_id', productViewsData.productIds);
+        
+      if (error) throw error;
+      
+      return {
+        inCartCount: count || 0
+      };
+    },
+    enabled: !!(productViewsData?.productIds && productViewsData.productIds.length > 0)
+  });
+  
+  const { data: ordersData, isLoading: ordersLoading, refetch: refetchOrders } = useQuery({
+    queryKey: ['product-orders', productViewsData?.productIds],
+    queryFn: async () => {
+      if (!productViewsData?.productIds || productViewsData.productIds.length === 0) return {
+        orderedCount: 0
+      };
+      
+      const { count, error } = await supabase
+        .from('orders')
+        .select('*', { count: 'exact', head: true })
+        .in('product_id', productViewsData.productIds);
+        
+      if (error) throw error;
+      
+      return {
+        orderedCount: count || 0
+      };
+    },
+    enabled: !!(productViewsData?.productIds && productViewsData.productIds.length > 0)
+  });
   
   const { data: businessAnalytics, isLoading: analyticsLoading, refetch: refetchAnalytics } = useBusinessAnalytics(user?.id);
   
@@ -126,7 +229,11 @@ const BusinessDashboard = () => {
       refetchSales(),
       refetchAds(),
       refetchInventory(),
-      refetchAnalytics()
+      refetchAnalytics(),
+      refetchProductViews(),
+      refetchWishlist(),
+      refetchCartItems(),
+      refetchOrders()
     ]);
     setIsRefreshing(false);
     toast.success("Dashboard data refreshed");
@@ -140,6 +247,12 @@ const BusinessDashboard = () => {
   const totalImpressions = adData?.reduce((sum, ad) => sum + (ad.reach || 0), 0) || 0;
   const totalClicks = adData?.reduce((sum, ad) => sum + (ad.clicks || 0), 0) || 0;
   const averageCTR = totalImpressions > 0 ? (totalClicks / totalImpressions * 100).toFixed(2) : "0";
+  
+  const productKpisLoading = 
+    productViewsLoading || 
+    wishlistLoading || 
+    cartItemsLoading || 
+    ordersLoading;
   
   return (
     <div className="container py-6 max-w-7xl mx-auto px-3">
@@ -173,6 +286,50 @@ const BusinessDashboard = () => {
         </Card>
       ) : (
         <>
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>Product Performance</CardTitle>
+              <CardDescription>
+                Key metrics for your product engagement
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                <SummaryCard
+                  title="Product Views"
+                  value={productViewsData?.totalViews || 0}
+                  icon={Eye}
+                  changeType="positive"
+                  change={5}
+                  isLoading={productKpisLoading}
+                />
+                <SummaryCard
+                  title="Products in Wishlist"
+                  value={wishlistData?.inWishlistCount || 0}
+                  icon={Heart}
+                  changeType="neutral"
+                  isLoading={productKpisLoading}
+                />
+                <SummaryCard
+                  title="Products in Cart"
+                  value={cartItemsData?.inCartCount || 0}
+                  icon={ShoppingCart}
+                  changeType="positive"
+                  change={12}
+                  isLoading={productKpisLoading}
+                />
+                <SummaryCard
+                  title="Products Ordered"
+                  value={ordersData?.orderedCount || 0}
+                  icon={Package}
+                  changeType="positive"
+                  change={8}
+                  isLoading={productKpisLoading}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
           <Card className="mb-6">
             <CardHeader>
               <CardTitle>Booking Timeline</CardTitle>
