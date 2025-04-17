@@ -2,6 +2,7 @@
 const { execSync } = require('child_process');
 const { existsSync, writeFileSync, mkdirSync } = require('fs');
 const { join } = require('path');
+const path = require('path');
 
 // Ensure node_modules directory exists
 if (!existsSync('node_modules')) {
@@ -14,46 +15,62 @@ writeFileSync('.npmrc', 'save-exact=true\nlegacy-peer-deps=true\n');
 // Install the necessary packages
 console.log('Installing dependencies...');
 try {
-  // Install dependencies globally in the project
-  execSync('npm install vite@latest lucide-react@latest react@latest react-dom@latest @vitejs/plugin-react@latest --save --force', { 
+  // Install dependencies with explicit save flag
+  console.log('Installing Vite and related packages...');
+  execSync('npm install vite@latest --save --force', { 
+    stdio: 'inherit',
+    env: { ...process.env, NODE_ENV: 'development' }
+  });
+  
+  console.log('Installing React and related packages...');
+  execSync('npm install react@latest react-dom@latest @vitejs/plugin-react@latest lucide-react@latest --save --force', { 
     stdio: 'inherit',
     env: { ...process.env, NODE_ENV: 'development' }
   });
   
   // Verify vite installation
-  if (existsSync('node_modules/.bin/vite')) {
-    console.log('Vite successfully installed!');
+  if (existsSync(path.join('node_modules', '.bin', 'vite'))) {
+    console.log('✓ Vite successfully installed!');
   } else {
-    console.error('Vite installation verification failed! Installing again directly...');
-    execSync('npm install vite@latest --save --force', {
-      stdio: 'inherit',
-      env: { ...process.env, NODE_ENV: 'development' }
+    console.error('! Vite binary not found in node_modules/.bin');
+    console.log('Trying global installation as fallback...');
+    execSync('npm install -g vite', {
+      stdio: 'inherit'
     });
+    console.log('✓ Vite installed globally as fallback');
   }
   
-  console.log('Dependencies installed successfully!');
+  console.log('✓ Dependencies installed successfully!');
 } catch (error) {
   console.error('Failed to install dependencies:', error);
-  process.exit(1);
+  console.log('Error details:', error.message);
 }
 
 // Create a more robust start script
-const startScript = `
-#!/bin/bash
-# Check if node_modules/.bin/vite exists
+const startScript = `#!/bin/bash
+
+echo "Starting Vite development server..."
+
+# Try local vite first
 if [ -f "node_modules/.bin/vite" ]; then
-  echo "Starting Vite development server..."
-  # Execute vite directly
+  echo "Using locally installed Vite..."
   ./node_modules/.bin/vite
+elif command -v npx > /dev/null; then
+  echo "Using npx to run Vite..."
+  npx vite
+elif command -v vite > /dev/null; then
+  echo "Using globally installed Vite..."
+  vite
 else
-  echo "Vite not found in node_modules. Installing dependencies..."
-  node install-dependencies.js
+  echo "ERROR: Vite not found. Attempting to install it now..."
+  npm install vite --save --force
+  
   if [ -f "node_modules/.bin/vite" ]; then
-    echo "Starting Vite development server..."
+    echo "Vite installed successfully. Starting server..."
     ./node_modules/.bin/vite
   else
-    echo "ERROR: Vite installation failed. Attempting alternative method..."
-    npx vite
+    echo "CRITICAL ERROR: Could not install Vite. Please check your npm configuration."
+    exit 1
   fi
 fi
 `;
@@ -61,6 +78,19 @@ fi
 writeFileSync('start.sh', startScript);
 execSync('chmod +x start.sh', { stdio: 'inherit' });
 
+// Create an alternative start script using npx
+const alternateScript = `#!/bin/bash
+
+# Alternative start script using npx for more reliable execution
+echo "Starting Vite server using npx..."
+npx vite
+`;
+
+writeFileSync('alternate-start.sh', alternateScript);
+execSync('chmod +x alternate-start.sh', { stdio: 'inherit' });
+
 console.log('\nSetup complete!');
-console.log('To start the development server, run:');
-console.log('./start.sh\n');
+console.log('To start the development server, try these commands in order:');
+console.log('1. ./start.sh');
+console.log('2. npx vite');
+console.log('3. ./alternate-start.sh\n');
