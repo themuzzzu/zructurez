@@ -21,7 +21,7 @@ export interface Advertisement {
   end_date: string;
   budget: number;
   clicks: number;
-  impressions: number; // Explicitly define impressions property
+  impressions: number; 
   format: string;
   video_url?: string;
   user_id: string;
@@ -33,6 +33,9 @@ export interface Advertisement {
   targeting_gender?: string;
   reach?: number;
 }
+
+// Export AdCampaign type alias
+export type AdCampaign = Advertisement;
 
 // Updated AdPlacement interface with all required properties
 export interface AdPlacement {
@@ -48,9 +51,9 @@ export interface AdPlacement {
   priority: number;
   max_size_kb: number;
   created_at?: string;
-  impressions: number; // Explicitly define impressions property
-  clicks: number;      // Explicitly define clicks property
-  revenue: number;     // Explicitly define revenue property
+  impressions: number;
+  clicks: number;
+  revenue: number;
 }
 
 export const getAdPlacements = async (): Promise<AdPlacement[]> => {

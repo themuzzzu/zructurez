@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
 import { incrementAdClick } from "@/services/adService";
 import { useNavigate } from "react-router-dom";
-import { AdCampaign } from "@/services/adService";
+import { Advertisement } from "@/services/adService";
 
 interface SponsoredPostProps {
-  ad: AdCampaign;
+  ad: Advertisement;
 }
 
 export const SponsoredPost = ({ ad }: SponsoredPostProps) => {

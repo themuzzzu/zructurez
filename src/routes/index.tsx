@@ -1,149 +1,121 @@
 
 import { Navigate, useRoutes } from "react-router-dom";
-import { LandingPage } from "@/pages/LandingPage";
-import { SignInPage } from "@/pages/SignInPage";
-import { SignUpPage } from "@/pages/SignUpPage";
-import { ResetPasswordPage } from "@/pages/ResetPasswordPage";
-import { SearchPage } from "@/pages/SearchPage";
-import { MarketplacePage } from "@/pages/MarketplacePage"; 
-import { BusinessDashboard } from "@/pages/BusinessDashboard";
-import { ServicesPage } from "@/pages/ServicesPage";
-import { ServiceDetailPage } from "@/pages/ServiceDetailPage";
-import { ProductDetailPage } from "@/pages/ProductDetailPage";
-import { CartPage } from "@/pages/CartPage";
-import { ProfilePage } from "@/pages/ProfilePage";
-import { ListProductPage } from "@/pages/ListProductPage";
-import { AccountSettingsPage } from "@/pages/AccountSettingsPage";
-import { BusinessDetailPage } from "@/pages/BusinessDetailPage";
-import { CreateServicePage } from "@/pages/CreateServicePage";
-import { OrderConfirmationPage } from "@/pages/OrderConfirmationPage";
-import { UnavailableCityPage } from "@/pages/UnavailableCityPage";
-import { NotFoundPage } from "@/pages/NotFoundPage";
-import { ChatPage } from "@/pages/ChatPage";
-import { GroupsPage } from "@/pages/GroupsPage";
-import { GroupDetailPage } from "@/pages/GroupDetailPage";
-import { FAQPage } from "@/pages/FAQPage";
-import { ContactPage } from "@/pages/ContactPage";
-import { AboutPage } from "@/pages/AboutPage";
-import { PrivacyPolicyPage } from "@/pages/PrivacyPolicyPage";
-import { TermsOfServicePage } from "@/pages/TermsOfServicePage";
-import { MainLayout } from "@/layouts/MainLayout";
-import { AuthLayout } from "@/layouts/AuthLayout";
-import { AdminLayout } from "@/layouts/AdminLayout";
-import { AdminDashboard } from "@/pages/admin/AdminDashboard";
-import { UserManagement } from "@/pages/admin/UserManagement";
-import { ContentModeration } from "@/pages/admin/ContentModeration";
-import { SystemSettings } from "@/pages/admin/SystemSettings";
-import { CreateBusinessPage } from "@/pages/CreateBusinessPage";
-import { UserPreferencesPage } from "@/pages/UserPreferencesPage";
-import { RequireAuth } from "@/components/auth/RequireAuth";
-import { Suspense } from "react";
+import { Suspense, lazy } from "react";
 import { PageLoader } from "@/components/loaders/PageLoader";
-import { PaymentPage } from "@/pages/PaymentPage";
-import { ImageSearchPage } from "@/pages/ImageSearchPage";
-import { AdDashboard } from "@/pages/admin/AdDashboard";
-import { ServiceBookingPage } from "@/pages/ServiceBookingPage";
-import { UnifiedHome } from "@/pages/UnifiedHome";
-import Analytics from "@/pages/Analytics";
+import { RequireAuth } from "@/components/auth/RequireAuth";
+
+// Use lazy loading for all pages
+const LandingPage = lazy(() => import("@/pages/LandingPage").then(module => ({ default: module.default || module.LandingPage })));
+const UnifiedHome = lazy(() => import("@/pages/UnifiedHome").then(module => ({ default: module.default || module.UnifiedHome })));
+const SearchPage = lazy(() => import("@/pages/SearchPage").then(module => ({ default: module.default || module.SearchPage })));
+const MarketplacePage = lazy(() => import("@/pages/MarketplacePage").then(module => ({ default: module.default || module.MarketplacePage })));
+const ServicesPage = lazy(() => import("@/pages/ServicesPage").then(module => ({ default: module.default || module.ServicesPage })));
+const ServiceDetailPage = lazy(() => import("@/pages/ServiceDetailPage").then(module => ({ default: module.default || module.ServiceDetailPage })));
+const ProductDetailPage = lazy(() => import("@/pages/ProductDetailPage").then(module => ({ default: module.default || module.ProductDetailPage })));
+const BusinessDetailPage = lazy(() => import("@/pages/BusinessDetailPage").then(module => ({ default: module.default || module.BusinessDetailPage })));
+const BusinessDashboard = lazy(() => import("@/pages/BusinessDashboard").then(module => ({ default: module.default || module.BusinessDashboard })));
+const SignInPage = lazy(() => import("@/pages/SignInPage").then(module => ({ default: module.default || module.SignInPage })));
+const SignUpPage = lazy(() => import("@/pages/SignUpPage").then(module => ({ default: module.default || module.SignUpPage })));
+const ProfilePage = lazy(() => import("@/pages/ProfilePage").then(module => ({ default: module.default || module.ProfilePage })));
+const Analytics = lazy(() => import("@/pages/Analytics").then(module => ({ default: module.default || module.Analytics })));
+const NotFoundPage = lazy(() => import("@/pages/NotFoundPage").then(module => ({ default: module.default || module.NotFoundPage })));
+
+// Lazy load layouts
+const MainLayout = lazy(() => import("@/layouts/MainLayout").then(module => ({ default: module.default || module.MainLayout })));
+const AuthLayout = lazy(() => import("@/layouts/AuthLayout").then(module => ({ default: module.default || module.AuthLayout })));
+const AdminLayout = lazy(() => import("@/layouts/AdminLayout").then(module => ({ default: module.default || module.AdminLayout })));
+
+// Create a loading component
+const LazyLoadingFallback = () => <PageLoader />;
 
 export const Routes = () => {
   return useRoutes([
     {
-      element: <MainLayout />,
+      element: (
+        <Suspense fallback={<LazyLoadingFallback />}>
+          <MainLayout />
+        </Suspense>
+      ),
       children: [
-        { path: "/", element: <LandingPage /> },
-        { path: "/unified-home", element: <UnifiedHome /> },
-        { path: "/search", element: <SearchPage /> },
-        { path: "/marketplace", element: <MarketplacePage /> },
-        { path: "/businesses", element: <ServicesPage /> },
-        { path: "/services", element: <ServicesPage /> },
-        { path: "/services/:id", element: <ServiceDetailPage /> },
-        { path: "/products/:id", element: <ProductDetailPage /> },
-        { path: "/business/:id", element: <BusinessDetailPage /> },
-        { path: "/unavailable", element: <UnavailableCityPage /> },
-        { path: "/chat", element: <ChatPage /> },
-        { path: "/groups", element: <GroupsPage /> },
-        { path: "/groups/:id", element: <GroupDetailPage /> },
-        { path: "/faq", element: <FAQPage /> },
-        { path: "/contact", element: <ContactPage /> },
-        { path: "/about", element: <AboutPage /> },
-        { path: "/privacy-policy", element: <PrivacyPolicyPage /> },
-        { path: "/terms-of-service", element: <TermsOfServicePage /> },
-        { path: "/image-search", element: <ImageSearchPage /> },
-        { path: "/service-booking/:id", element: <ServiceBookingPage /> },
-        {
-          path: "/create-service",
+        { 
+          path: "/", 
           element: (
-            <RequireAuth>
-              <CreateServicePage />
-            </RequireAuth>
-          ),
+            <Suspense fallback={<LazyLoadingFallback />}>
+              <LandingPage />
+            </Suspense>
+          ) 
+        },
+        { 
+          path: "/unified-home", 
+          element: (
+            <Suspense fallback={<LazyLoadingFallback />}>
+              <UnifiedHome />
+            </Suspense>
+          ) 
+        },
+        { 
+          path: "/search", 
+          element: (
+            <Suspense fallback={<LazyLoadingFallback />}>
+              <SearchPage />
+            </Suspense>
+          ) 
+        },
+        { 
+          path: "/marketplace", 
+          element: (
+            <Suspense fallback={<LazyLoadingFallback />}>
+              <MarketplacePage />
+            </Suspense>
+          ) 
+        },
+        { 
+          path: "/businesses", 
+          element: (
+            <Suspense fallback={<LazyLoadingFallback />}>
+              <ServicesPage />
+            </Suspense>
+          ) 
+        },
+        { 
+          path: "/services", 
+          element: (
+            <Suspense fallback={<LazyLoadingFallback />}>
+              <ServicesPage />
+            </Suspense>
+          ) 
+        },
+        { 
+          path: "/services/:id", 
+          element: (
+            <Suspense fallback={<LazyLoadingFallback />}>
+              <ServiceDetailPage />
+            </Suspense>
+          ) 
+        },
+        { 
+          path: "/products/:id", 
+          element: (
+            <Suspense fallback={<LazyLoadingFallback />}>
+              <ProductDetailPage />
+            </Suspense>
+          ) 
+        },
+        { 
+          path: "/business/:id", 
+          element: (
+            <Suspense fallback={<LazyLoadingFallback />}>
+              <BusinessDetailPage />
+            </Suspense>
+          ) 
         },
         {
-          path: "/create-business",
+          path: "/analytics",
           element: (
             <RequireAuth>
-              <CreateBusinessPage />
-            </RequireAuth>
-          ),
-        },
-        {
-          path: "/list-product",
-          element: (
-            <RequireAuth>
-              <ListProductPage />
-            </RequireAuth>
-          ),
-        },
-        {
-          path: "/cart",
-          element: (
-            <RequireAuth>
-              <CartPage />
-            </RequireAuth>
-          ),
-        },
-        {
-          path: "/order-confirmation",
-          element: (
-            <RequireAuth>
-              <OrderConfirmationPage />
-            </RequireAuth>
-          ),
-        },
-        {
-          path: "/payment",
-          element: (
-            <RequireAuth>
-              <PaymentPage />
-            </RequireAuth>
-          ),
-        },
-        {
-          path: "/profile",
-          element: (
-            <RequireAuth>
-              <ProfilePage />
-            </RequireAuth>
-          ),
-        },
-        {
-          path: "/profile/:id",
-          element: <ProfilePage />,
-        },
-        {
-          path: "/settings",
-          element: (
-            <RequireAuth>
-              <AccountSettingsPage />
-            </RequireAuth>
-          ),
-        },
-        {
-          path: "/preferences",
-          element: (
-            <RequireAuth>
-              <UserPreferencesPage />
+              <Suspense fallback={<LazyLoadingFallback />}>
+                <Analytics />
+              </Suspense>
             </RequireAuth>
           ),
         },
@@ -151,42 +123,64 @@ export const Routes = () => {
           path: "/business-dashboard",
           element: (
             <RequireAuth>
-              <BusinessDashboard />
+              <Suspense fallback={<LazyLoadingFallback />}>
+                <BusinessDashboard />
+              </Suspense>
             </RequireAuth>
           ),
         },
         {
-          path: "/analytics",
+          path: "/profile",
           element: (
             <RequireAuth>
-              <Analytics />
+              <Suspense fallback={<LazyLoadingFallback />}>
+                <ProfilePage />
+              </Suspense>
             </RequireAuth>
+          ),
+        },
+        {
+          path: "/profile/:id",
+          element: (
+            <Suspense fallback={<LazyLoadingFallback />}>
+              <ProfilePage />
+            </Suspense>
           ),
         },
       ],
     },
     {
-      element: <AuthLayout />,
-      children: [
-        { path: "/signin", element: <SignInPage /> },
-        { path: "/signup", element: <SignUpPage /> },
-        { path: "/reset-password", element: <ResetPasswordPage /> },
-      ],
-    },
-    {
       element: (
-        <RequireAuth>
-          <AdminLayout />
-        </RequireAuth>
+        <Suspense fallback={<LazyLoadingFallback />}>
+          <AuthLayout />
+        </Suspense>
       ),
       children: [
-        { path: "/admin", element: <AdminDashboard /> },
-        { path: "/admin/users", element: <UserManagement /> },
-        { path: "/admin/content", element: <ContentModeration /> },
-        { path: "/admin/settings", element: <SystemSettings /> },
-        { path: "/admin/ads", element: <AdDashboard /> },
+        { 
+          path: "/signin", 
+          element: (
+            <Suspense fallback={<LazyLoadingFallback />}>
+              <SignInPage />
+            </Suspense>
+          ) 
+        },
+        { 
+          path: "/signup", 
+          element: (
+            <Suspense fallback={<LazyLoadingFallback />}>
+              <SignUpPage />
+            </Suspense>
+          ) 
+        },
       ],
     },
-    { path: "*", element: <NotFoundPage /> },
+    { 
+      path: "*", 
+      element: (
+        <Suspense fallback={<LazyLoadingFallback />}>
+          <NotFoundPage />
+        </Suspense>
+      ) 
+    },
   ]);
 };

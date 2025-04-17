@@ -1,4 +1,3 @@
-
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { LocationProvider } from "@/providers/LocationProvider";
