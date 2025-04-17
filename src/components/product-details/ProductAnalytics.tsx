@@ -22,7 +22,7 @@ export const ProductAnalytics = ({ productId, isOwner }: ProductAnalyticsProps) 
   const { data: userPlan, isLoading: isPlanLoading } = useUserSubscription();
   
   // Determine plan level (default to "basic" if no plan is found)
-  const planLevel = userPlan?.plan_id || "basic";
+  const planLevel = userPlan?.planId || "basic";
   
   // Define which features are available based on plan
   const features = {

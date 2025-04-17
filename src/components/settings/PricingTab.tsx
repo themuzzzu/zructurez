@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PricingPlans } from "@/components/pricing/PricingPlans";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useUserSubscription } from "@/hooks/useUserSubscription";
 
-// Mock payment history data since the payment_history table doesn't exist in Supabase
 const mockPaymentHistory = [
   {
     id: "payment-1",
@@ -34,10 +32,8 @@ export const PricingTab = () => {
   const [showAllPlans, setShowAllPlans] = useState(false);
   
   const { data: currentPlan, isLoading } = useUserSubscription();
-  const paymentHistory = mockPaymentHistory;
 
   const handleSelectPlan = (planId: string) => {
-    // This would be connected to a payment processing system
     toast.success(`Plan ${planId} selected! Payment flow would start here.`);
   };
 
@@ -76,15 +72,15 @@ export const PricingTab = () => {
                 <div className="space-y-6">
                   <div className="flex justify-between items-center">
                     <div>
-                      <h3 className="text-lg font-semibold">{currentPlan.plan_name || "Basic Plan"}</h3>
+                      <h3 className="text-lg font-semibold">{currentPlan.planName || "Basic Plan"}</h3>
                       <p className="text-sm text-muted-foreground">
-                        {currentPlan.billing_interval || "Monthly"} billing
+                        {currentPlan.billingInterval || "Monthly"} billing
                       </p>
                     </div>
                     <div className="text-right">
                       <div className="text-2xl font-bold">₹{currentPlan.amount || "100"}</div>
                       <p className="text-sm text-muted-foreground">
-                        Next payment on {new Date(currentPlan.next_payment_date || Date.now() + 30*24*60*60*1000).toLocaleDateString()}
+                        Next payment on {new Date(currentPlan.nextPaymentDate || Date.now() + 30*24*60*60*1000).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
@@ -94,28 +90,28 @@ export const PricingTab = () => {
                       <div className="text-xs text-muted-foreground mb-1">Products</div>
                       <div className="text-lg font-semibold flex items-center">
                         <BarChart3 className="h-4 w-4 mr-1 text-primary" />
-                        {currentPlan.product_limit || "5"}/{currentPlan.product_limit || "5"}
+                        {currentPlan.productLimit || "5"}/{currentPlan.productLimit || "5"}
                       </div>
                     </div>
                     <div className="bg-muted/50 p-4 rounded-lg">
                       <div className="text-xs text-muted-foreground mb-1">Services</div>
                       <div className="text-lg font-semibold flex items-center">
                         <Zap className="h-4 w-4 mr-1 text-primary" />
-                        {currentPlan.service_limit || "1"}/{currentPlan.service_limit || "1"}
+                        {currentPlan.serviceLimit || "1"}/{currentPlan.serviceLimit || "1"}
                       </div>
                     </div>
                     <div className="bg-muted/50 p-4 rounded-lg">
                       <div className="text-xs text-muted-foreground mb-1">Visibility</div>
                       <div className="text-lg font-semibold flex items-center">
                         <Rocket className="h-4 w-4 mr-1 text-primary" />
-                        {currentPlan.visibility_level || "Local"}
+                        {currentPlan.visibilityLevel || "Local"}
                       </div>
                     </div>
                     <div className="bg-muted/50 p-4 rounded-lg">
                       <div className="text-xs text-muted-foreground mb-1">Analytics</div>
                       <div className="text-lg font-semibold flex items-center">
                         <BarChart3 className="h-4 w-4 mr-1 text-primary" />
-                        {currentPlan.analytics_level || "Basic"}
+                        {currentPlan.analyticsLevel || "Basic"}
                       </div>
                     </div>
                   </div>

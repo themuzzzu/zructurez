@@ -31,7 +31,7 @@ export const PricingSection = () => {
         </CardTitle>
         {currentPlan && (
           <Badge variant="outline" className="ml-2 bg-background/80">
-            {currentPlan.plan_name || "Basic Plan"}
+            {currentPlan.planName || "Basic Plan"}
           </Badge>
         )}
       </CardHeader>
@@ -46,9 +46,9 @@ export const PricingSection = () => {
               <div className="mb-6">
                 <div className="flex justify-between items-center mb-4">
                   <div>
-                    <h3 className="text-lg font-semibold">{currentPlan.plan_name || "Basic Plan"}</h3>
+                    <h3 className="text-lg font-semibold">{currentPlan.planName || "Basic Plan"}</h3>
                     <p className="text-sm text-muted-foreground">
-                      Renewal on {new Date(currentPlan.next_payment_date || Date.now() + 30*24*60*60*1000).toLocaleDateString()}
+                      Renewal on {new Date(currentPlan.nextPaymentDate || Date.now() + 30*24*60*60*1000).toLocaleDateString()}
                     </p>
                   </div>
                   <Badge variant="secondary" className="text-xs">
@@ -59,19 +59,19 @@ export const PricingSection = () => {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                   <div className="bg-muted/50 p-3 rounded-lg">
                     <div className="text-xs text-muted-foreground">Products</div>
-                    <div className="text-lg font-semibold">{currentPlan.product_limit || "5"}/{currentPlan.product_limit || "5"}</div>
+                    <div className="text-lg font-semibold">{currentPlan.productLimit || "5"}/{currentPlan.productLimit || "5"}</div>
                   </div>
                   <div className="bg-muted/50 p-3 rounded-lg">
                     <div className="text-xs text-muted-foreground">Services</div>
-                    <div className="text-lg font-semibold">{currentPlan.service_limit || "1"}/{currentPlan.service_limit || "1"}</div>
+                    <div className="text-lg font-semibold">{currentPlan.serviceLimit || "1"}/{currentPlan.serviceLimit || "1"}</div>
                   </div>
                   <div className="bg-muted/50 p-3 rounded-lg">
                     <div className="text-xs text-muted-foreground">Visibility</div>
-                    <div className="text-lg font-semibold">{currentPlan.visibility_level || "Local"}</div>
+                    <div className="text-lg font-semibold">{currentPlan.visibilityLevel || "Local"}</div>
                   </div>
                   <div className="bg-muted/50 p-3 rounded-lg">
                     <div className="text-xs text-muted-foreground">Analytics</div>
-                    <div className="text-lg font-semibold">{currentPlan.analytics_level || "Basic"}</div>
+                    <div className="text-lg font-semibold">{currentPlan.analyticsLevel || "Basic"}</div>
                   </div>
                 </div>
 
