@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
@@ -97,7 +98,6 @@ export default function Search() {
         <div className="mb-6">
           <form onSubmit={handleSearch} className="relative max-w-xl">
             <SearchInput
-              type="text"
               placeholder="Search products..."
               value={searchTerm}
               onChange={handleSearchChange}
