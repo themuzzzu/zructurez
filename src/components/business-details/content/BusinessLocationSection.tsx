@@ -1,7 +1,8 @@
 
+import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MapPin, ExternalLink } from 'lucide-react';
+import { MapPin, ExternalLink, Loader2 } from 'lucide-react';
 
 interface BusinessLocationSectionProps {
   businessName: string;
@@ -12,6 +13,8 @@ export const BusinessLocationSection = ({
   businessName,
   location
 }: BusinessLocationSectionProps) => {
+  const [isMapLoading, setIsMapLoading] = useState(true);
+  
   // Creates a Google Maps search URL based on business name and location
   const getGoogleMapsUrl = () => {
     const query = encodeURIComponent(`${businessName}, ${location}`);
@@ -21,6 +24,10 @@ export const BusinessLocationSection = ({
   // Handle opening directions in Google Maps
   const openDirections = () => {
     window.open(getGoogleMapsUrl(), '_blank');
+  };
+  
+  const handleMapLoad = () => {
+    setIsMapLoading(false);
   };
 
   return (
@@ -34,17 +41,26 @@ export const BusinessLocationSection = ({
             <p>{location}</p>
           </div>
           
-          <div className="aspect-video w-full bg-muted rounded-lg overflow-hidden relative flex items-center justify-center">
-            <div className="p-6 text-center">
-              <p className="text-muted-foreground mb-4">Map view is not available in preview mode</p>
-              <Button onClick={openDirections}>
-                <ExternalLink className="h-4 w-4 mr-2" />
-                Open in Google Maps
-              </Button>
-            </div>
+          <div className="aspect-video w-full bg-muted rounded-lg overflow-hidden relative">
+            {isMapLoading && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted z-10">
+                <Loader2 className="h-6 w-6 animate-spin text-primary mb-2" />
+                <p className="text-sm text-muted-foreground">Loading map...</p>
+              </div>
+            )}
+            
+            <iframe 
+              src={`https://www.openstreetmap.org/export/embed.html?bbox=${77.96}%2C${14.89}%2C${78.00}%2C${14.92}&layer=mapnik`}
+              width="100%" 
+              height="100%" 
+              style={{ border: 0 }}
+              onLoad={handleMapLoad}
+              loading="lazy"
+            ></iframe>
           </div>
           
           <Button onClick={openDirections} variant="outline" className="w-full">
+            <ExternalLink className="h-4 w-4 mr-2" />
             Get Directions
           </Button>
         </div>

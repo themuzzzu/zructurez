@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+
+import { useState, useEffect, useRef, memo } from "react";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { MapPin } from "lucide-react";
@@ -16,43 +17,45 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
   const [selectedLocation, setSelectedLocation] = useState<string>(value);
   const [isLoading, setIsLoading] = useState(true);
   const [manualLocation, setManualLocation] = useState(value);
+  const mapLoadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    // Set a timeout to consider the map loaded after a reasonable amount of time
+    // This prevents infinite loading states if the Google Maps event never fires
+    mapLoadTimeoutRef.current = setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+    
     const handleGoogleMapsLoaded = () => {
       setIsLoading(false);
+      if (mapLoadTimeoutRef.current) {
+        clearTimeout(mapLoadTimeoutRef.current);
+      }
     };
 
     if (window.google?.maps) {
       setIsLoading(false);
+      if (mapLoadTimeoutRef.current) {
+        clearTimeout(mapLoadTimeoutRef.current);
+      }
     }
 
     window.addEventListener('google-maps-loaded', handleGoogleMapsLoaded);
     
     return () => {
       window.removeEventListener('google-maps-loaded', handleGoogleMapsLoaded);
+      if (mapLoadTimeoutRef.current) {
+        clearTimeout(mapLoadTimeoutRef.current);
+      }
     };
   }, []);
 
+  // Use a smaller handler to improve performance
   const handleConfirm = () => {
-    // Use either the map-selected location or manual input
     const finalLocation = manualLocation || selectedLocation;
     onChange(finalLocation);
     setIsOpen(false);
   };
-
-  if (isLoading) {
-    return (
-      <Button
-        type="button"
-        variant="outline"
-        className="w-full justify-start gap-2"
-        disabled
-      >
-        <MapPin className="h-4 w-4" />
-        Loading map...
-      </Button>
-    );
-  }
 
   return (
     <div className="space-y-2">
@@ -66,7 +69,14 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
         {value || "Select or type location..."}
       </Button>
 
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <Dialog open={isOpen} onOpenChange={(open) => {
+        setIsOpen(open);
+        if (!open) {
+          // Clean up resources when dialog is closed
+          setSelectedLocation(value);
+          setManualLocation(value);
+        }
+      }}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>Select Location</DialogTitle>
@@ -85,13 +95,16 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
               />
             </div>
 
-            <div className="space-y-2">
-              <Label>Or select from map</Label>
-              <MapDisplay 
-                onLocationSelect={setSelectedLocation}
-                searchInput=""
-              />
-            </div>
+            {/* Only render MapDisplay when dialog is open to save resources */}
+            {isOpen && (
+              <div className="space-y-2">
+                <Label>Or select from map</Label>
+                <MapDisplay 
+                  onLocationSelect={setSelectedLocation}
+                  searchInput=""
+                />
+              </div>
+            )}
           </div>
 
           <div className="flex justify-between">
@@ -105,3 +118,6 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
     </div>
   );
 };
+
+// Export memoized version to prevent unnecessary re-renders
+export default memo(MapLocationSelector);

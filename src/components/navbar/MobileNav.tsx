@@ -16,10 +16,10 @@ import {
 import { useTheme } from "../ThemeProvider";
 import { cn } from "@/lib/utils";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { useState } from "react";
+import { useState, memo } from "react";
 
 // Create a simplified icon component for mobile nav
-const FilledIcon = ({ Icon }: { Icon: React.ElementType }) => {
+const FilledIcon = memo(({ Icon }: { Icon: React.ElementType }) => {
   return (
     <div className="relative">
       <Icon 
@@ -29,16 +29,18 @@ const FilledIcon = ({ Icon }: { Icon: React.ElementType }) => {
       />
     </div>
   );
-};
+});
+FilledIcon.displayName = 'FilledIcon';
 
 // Regular icon with no inner decorations
-const RegularIcon = ({ Icon }: { Icon: React.ElementType }) => {
+const RegularIcon = memo(({ Icon }: { Icon: React.ElementType }) => {
   return (
     <div className="relative">
       <Icon className="h-5 w-5" strokeWidth={1.5} />
     </div>
   );
-};
+});
+RegularIcon.displayName = 'RegularIcon';
 
 export const MobileNav = () => {
   const location = useLocation();
@@ -54,11 +56,11 @@ export const MobileNav = () => {
     { icon: ShoppingBag, label: "Marketplace", path: "/marketplace" },
     { icon: Wrench, label: "Services", path: "/services" },
     { icon: Building, label: "Business", path: "/businesses" },
+    { icon: Map, label: "Maps", path: "/maps" }, // Moved Maps to main navigation
     { icon: MessageSquare, label: "Messages", path: "/messages" },
     { icon: Users, label: "Communities", path: "/communities" },
     { icon: Briefcase, label: "Jobs", path: "/jobs" },
     { icon: Calendar, label: "Events", path: "/events" },
-    { icon: Map, label: "Maps", path: "/maps" },
     { icon: Heart, label: "Wishlist", path: "/wishlist" },
     { icon: Settings, label: "Settings", path: "/settings" },
   ];
@@ -94,7 +96,7 @@ export const MobileNav = () => {
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 py-2 px-1 z-50 animate-fade-in">
       <div className="flex justify-between items-center max-w-md mx-auto">
-        {mainNavItems.map((item, index) => {
+        {mainNavItems.map((item) => {
           const isActive = checkActivePath(item.path);
           
           return (
@@ -144,7 +146,7 @@ export const MobileNav = () => {
               <DrawerTitle>Menu</DrawerTitle>
             </DrawerHeader>
             <div className="px-4 py-2 grid grid-cols-3 gap-4">
-              {allNavItems.map((item) => {
+              {allNavItems.slice(5).map((item) => {
                 const isActive = checkActivePath(item.path);
                 return (
                   <Button

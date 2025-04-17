@@ -4,11 +4,11 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
-  Search, 
-  ShoppingCart, 
   Filter, 
-  Heart
+  Heart,
+  ShoppingCart
 } from "lucide-react";
+import { SearchInput } from "@/components/SearchInput";
 
 export interface MarketplaceHeaderProps {
   searchQuery: string;
@@ -31,8 +31,8 @@ export const MarketplaceHeader = ({
 }: MarketplaceHeaderProps) => {
   const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSearch = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     setSearchQuery(localSearchQuery);
   };
 
@@ -100,16 +100,13 @@ export const MarketplaceHeader = ({
       </div>
       
       <form onSubmit={handleSearch} className="flex w-full gap-2">
-        <div className="relative flex-1 rounded-md overflow-hidden">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
-          <input
-            type="search"
-            placeholder="Search products..."
-            className="w-full pl-10 pr-4 py-2 rounded-md border-0 ring-1 ring-muted bg-transparent focus:outline-none focus:ring-2 focus:ring-primary"
-            value={localSearchQuery}
-            onChange={(e) => setLocalSearchQuery(e.target.value)}
-          />
-        </div>
+        <SearchInput
+          placeholder="Search products..."
+          value={localSearchQuery}
+          onChange={setLocalSearchQuery}
+          onSubmit={handleSearch}
+          className="flex-1"
+        />
         <Button type="submit" className="shrink-0">
           Search
         </Button>

@@ -1,15 +1,15 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { EnhancedShoppingSection } from "@/components/EnhancedShoppingSection";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Filter, Heart } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { SearchIcon } from "lucide-react";
 import { GridLayoutSelector } from "@/components/marketplace/GridLayoutSelector";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
 import { LikeProvider } from "@/components/products/LikeContext";
+import { SearchInput } from "@/components/SearchInput";
+import { debounce } from "@/utils/performanceUtils";
 
 export default function Search() {
   const [searchParams] = useSearchParams();
@@ -23,10 +23,27 @@ export default function Search() {
     setSearchTerm(query);
   }, [query]);
 
+  // Debounce navigation to prevent excessive renders
+  const debouncedNavigate = useCallback(
+    debounce((term: string) => {
+      if (term.trim()) {
+        navigate(`/search?q=${encodeURIComponent(term)}`);
+      }
+    }, 300),
+    [navigate]
+  );
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchTerm.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchTerm)}`);
+    }
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    if (value.trim().length > 2) {
+      debouncedNavigate(value);
     }
   };
 
@@ -80,24 +97,14 @@ export default function Search() {
         {/* Search bar - minimalistic design */}
         <div className="mb-6">
           <form onSubmit={handleSearch} className="relative max-w-xl">
-            <div className="relative flex items-center rounded-md overflow-hidden">
-              <SearchIcon className="absolute left-3 z-10 text-muted-foreground h-4 w-4" />
-              <Input
-                type="text"
-                placeholder="Search products..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-10 py-2 rounded-md border-0 ring-1 ring-muted bg-transparent focus:ring-2 focus:ring-primary"
-              />
-              <Button 
-                type="submit" 
-                variant="ghost" 
-                size="sm" 
-                className="absolute right-0 px-3 h-full"
-              >
-                <span className="text-xs font-medium">Search</span>
-              </Button>
-            </div>
+            <SearchInput
+              type="text"
+              placeholder="Search products..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+              className="w-full"
+              onSubmit={handleSearch}
+            />
           </form>
         </div>
         

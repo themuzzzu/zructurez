@@ -19,6 +19,17 @@ import ComingSoonPage from "./pages/ComingSoonPage";
 import { RedirectHandler } from "@/components/RedirectHandler";
 import { Outlet } from "react-router-dom";
 import { ErrorView } from "@/components/ErrorView";
+import { Suspense, lazy } from "react";
+import { CircularLoader } from "@/components/loaders/CircularLoader";
+
+// Lazy load heavy components to improve initial load time
+const LazyMapView = lazy(() => import("./pages/MapView"));
+
+const LoadingFallback = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <CircularLoader size={48} color="#3B82F6" />
+  </div>
+);
 
 const Layout = () => {
   return (
@@ -122,7 +133,11 @@ export const routes: RouteObject[] = [
       },
       {
         path: "/maps",
-        element: <MapView />,
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <LazyMapView />
+          </Suspense>
+        ),
         errorElement: <ErrorView />,
       },
       {

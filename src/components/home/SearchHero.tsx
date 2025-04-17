@@ -1,11 +1,12 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { useSearch } from "@/hooks/useSearch";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLoading } from "@/providers/LoadingProvider";
+import { SearchInput } from "@/components/SearchInput";
 
 export const SearchHero = () => {
   const navigate = useNavigate();
@@ -29,6 +30,13 @@ export const SearchHero = () => {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    if (query.trim()) {
+      setLoading(true);
+      navigate(`/search?q=${encodeURIComponent(query)}`);
+    }
+  };
+
+  const handleSearchSubmit = () => {
     if (query.trim()) {
       setLoading(true);
       navigate(`/search?q=${encodeURIComponent(query)}`);
@@ -83,16 +91,15 @@ export const SearchHero = () => {
           className="max-w-2xl mx-auto"
         >
           <form onSubmit={handleSearch} className="flex relative">
-            <div className="relative flex-1 rounded-md overflow-hidden">
-              <input
-                type="text"
+            <div className="relative flex-1">
+              <SearchInput
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onFocus={() => setShowSuggestions(true)}
+                onChange={setQuery}
+                onSubmit={handleSearchSubmit}
                 placeholder="Search businesses, services, products..."
-                className="w-full pl-10 pr-4 py-3 rounded-md border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 text-zinc-800 dark:text-zinc-200 dark:bg-zinc-800 bg-white/90 backdrop-blur-sm"
+                className="w-full text-zinc-800 dark:text-zinc-200"
+                autoFocus={false}
               />
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-400" size={20} />
               
               <AnimatePresence>
                 {showSuggestions && suggestions.length > 0 && (
@@ -109,7 +116,7 @@ export const SearchHero = () => {
                         className="px-4 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-700 cursor-pointer text-zinc-800 dark:text-zinc-200 text-left flex items-center"
                         onClick={() => handleSuggestionClick(suggestion)}
                       >
-                        <Search className="h-4 w-4 mr-2 text-zinc-400" />
+                        <div className="h-4 w-4 mr-2 text-zinc-400" />
                         {suggestion.term}
                       </div>
                     ))}
