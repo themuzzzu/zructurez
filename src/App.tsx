@@ -13,10 +13,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import "./App.css";
 import "./styles/global.css";
 import "./styles/theme-manager.css"; // Import our theme manager
-
-// Lazy load components that aren't needed right away
-const LazyToaster = lazy(() => import("sonner").then(module => ({ default: module.Toaster })));
-const LazyLocationModalHandler = lazy(() => import("@/components/location/LocationModalHandler").then(module => ({ default: module.LocationModalHandler })));
+import { Toaster } from "sonner";
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -97,7 +94,7 @@ function App() {
     }, 500);
     
     // Listen for language changes to prevent full refresh
-    const handleLanguageChange = (e: Event) => {
+    const handleLanguageChange = () => {
       // Use the existing loading state mechanism for smooth transitions
       setIsLoading(true);
       
@@ -128,12 +125,8 @@ function App() {
                     ) : (
                       <>
                         <Routes />
-                        <Suspense fallback={null}>
-                          {resourcesLoaded && <LazyLocationModalHandler />}
-                        </Suspense>
-                        <Suspense fallback={null}>
-                          <LazyToaster position="top-center" />
-                        </Suspense>
+                        {/* Use Toaster directly instead of lazy loading */}
+                        <Toaster position="top-center" />
                       </>
                     )}
                   </LocationProvider>

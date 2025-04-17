@@ -11,6 +11,7 @@ type ThemeContextType = {
   isDarkMode: boolean;
 };
 
+// Create the context with default values
 const ThemeContext = React.createContext<ThemeContextType>({
   theme: "light",
   setTheme: () => null,
@@ -18,6 +19,7 @@ const ThemeContext = React.createContext<ThemeContextType>({
 });
 
 export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
+  // Make sure we're importing React properly to use hooks
   const [theme, setThemeState] = React.useState("light");
   const [mounted, setMounted] = React.useState(false);
 
@@ -60,7 +62,7 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
 
   // Listen for language changes to ensure theme persistence
   React.useEffect(() => {
-    const handleLanguageChange = (e: Event) => {
+    const handleLanguageChange = () => {
       // Ensure theme is still applied after language change
       const currentTheme = localStorage.getItem("theme") || theme;
       setTimeout(() => {

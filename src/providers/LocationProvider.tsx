@@ -13,7 +13,6 @@ const LocationContext = createContext<LocationContextType | undefined>(undefined
 
 export const LocationProvider = ({ children }: { children: ReactNode }) => {
   const [location, setLocation] = useState<string | null>(null);
-  const [showLocationPicker, setShowLocationPicker] = useState(false);
   const [currentLocation, setCurrentLocation] = useState<string>("All India");
   const [isLocationAvailable, setIsLocationAvailable] = useState<boolean>(false);
 
@@ -39,6 +38,13 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
     // Check if location is available in our service areas
     const availableLocations = ["Delhi", "Mumbai", "Bangalore", "Hyderabad", "Chennai"];
     setIsLocationAvailable(availableLocations.includes(newLocation));
+  };
+
+  const setShowLocationPicker = (show: boolean) => {
+    // Create and dispatch a custom event instead of using state
+    if (show) {
+      window.dispatchEvent(new Event('show-location-picker'));
+    }
   };
 
   return (
