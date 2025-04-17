@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Check, Save } from "lucide-react";
 import { toast } from "sonner";
 import { debounce } from "lodash";
+import { useProfileSettings } from "@/hooks/profile/useProfileSettings";
+import { useProfile } from "@/hooks/useProfile";
 
 export function GeneralSettings() {
   // User settings
@@ -17,6 +19,8 @@ export function GeneralSettings() {
   const [uiTheme, setUiTheme] = useState("ui-blue");
   const [saving, setSaving] = useState(false);
   const [previewFont, setPreviewFont] = useState(100);
+  const { profile, loading } = useProfile();
+  const { updateDisplayPreferences } = useProfileSettings(profile, () => {});
 
   // UI colors available
   const uiColors = [
@@ -99,6 +103,11 @@ export function GeneralSettings() {
   const handleThemeChange = (value: string) => {
     setUiTheme(value);
     applyTheme(value);
+    
+    // Also update profile settings if profile is available
+    if (profile?.id) {
+      updateDisplayPreferences("ui_color", value.replace('ui-', ''));
+    }
   };
 
   // Handle language change
@@ -108,6 +117,11 @@ export function GeneralSettings() {
     
     // Show toast with language change notification
     toast.success(`Language changed to ${languages.find(lang => lang.code === value)?.name}`);
+    
+    // Update profile settings if profile is available
+    if (profile?.id) {
+      updateDisplayPreferences("language", value);
+    }
     
     // In a real app, this would trigger language context updates
     // or API calls to fetch translations
@@ -124,6 +138,13 @@ export function GeneralSettings() {
     localStorage.setItem("fontSize", previewFont.toString());
     localStorage.setItem("language", language);
     localStorage.setItem("uiTheme", uiTheme);
+    
+    // Update profile settings if profile is available
+    if (profile?.id) {
+      updateDisplayPreferences("font_size", previewFont);
+      updateDisplayPreferences("ui_color", uiTheme.replace('ui-', ''));
+      updateDisplayPreferences("language", language);
+    }
     
     // Simulate API call
     setTimeout(() => {
