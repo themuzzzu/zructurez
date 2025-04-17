@@ -14,6 +14,7 @@ import { MapPin, Locate, Search, X, AlertCircle, Navigation, Map } from "lucide-
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { isZructuresAvailable, handleLocationUpdate, reverseGeocode, normalizeLocationName } from "@/utils/locationUtils";
 import { toast } from "sonner";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface SimplifiedLocationPickerProps {
   open: boolean;
@@ -177,7 +178,7 @@ export function SimplifiedLocationPicker({
 
   return (
     <Dialog open={open} onOpenChange={firstVisit ? () => {} : onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] p-6 bg-zinc-900 text-white border-zinc-800">
+      <DialogContent className="sm:max-w-[500px] p-6 bg-zinc-900 text-white border-zinc-800 max-h-[95vh] flex flex-col">
         <DialogHeader className="mb-4">
           <DialogTitle className="flex items-center gap-2 text-2xl font-semibold text-white">
             <MapPin className="h-7 w-7" />
@@ -198,11 +199,11 @@ export function SimplifiedLocationPicker({
           )}
         </DialogHeader>
         
-        <div className="space-y-6">
+        <div className="space-y-6 flex-1 overflow-hidden flex flex-col">
           {/* Detect Location Button */}
           <Button 
             variant="outline" 
-            className="w-full justify-start gap-2 bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-white"
+            className="w-full justify-start gap-2 bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-white shrink-0"
             onClick={handleDetectLocation}
             disabled={loading || isProcessingLocation}
             size="lg"
@@ -217,7 +218,7 @@ export function SimplifiedLocationPicker({
           
           {/* Show detected precise address if available */}
           {detectedAddress && (
-            <div className="rounded-md p-3 bg-blue-900/30 border border-blue-800/40 text-blue-300">
+            <div className="rounded-md p-3 bg-blue-900/30 border border-blue-800/40 text-blue-300 shrink-0">
               <div className="flex gap-2 items-start">
                 <MapPin className="h-4 w-4 mt-0.5 text-blue-300" />
                 <div>
@@ -235,7 +236,7 @@ export function SimplifiedLocationPicker({
           
           {/* Error message if location detection failed */}
           {error && !loading && (
-            <div className="rounded-md p-3 bg-red-900/30 border border-red-800/40 text-red-300">
+            <div className="rounded-md p-3 bg-red-900/30 border border-red-800/40 text-red-300 shrink-0">
               <div className="flex gap-2 items-start">
                 <AlertCircle className="h-4 w-4 mt-0.5 text-red-300" />
                 <div>
@@ -255,7 +256,7 @@ export function SimplifiedLocationPicker({
           )}
           
           {/* Search Input */}
-          <div className="relative">
+          <div className="relative shrink-0">
             <Search className="absolute left-3 top-3 h-4 w-4 text-zinc-500" />
             <Input
               placeholder="Search city or town"
@@ -265,49 +266,51 @@ export function SimplifiedLocationPicker({
             />
           </div>
           
-          {/* Location List */}
-          <div className="space-y-1">
+          {/* Location List - Using ScrollArea component to prevent overflow */}
+          <div className="flex-1 min-h-0 overflow-hidden">
             <h3 className="text-lg font-medium text-white mb-2">Or select a city or town</h3>
-            <div className="space-y-3 max-h-64 overflow-y-auto pr-2">
-              {filteredLocations.map((location) => {
-                const isAvailable = availableLocations.includes(location);
-                
-                return (
-                  <div key={location} className="space-y-1">
-                    <Button 
-                      variant="ghost" 
-                      className="w-full justify-start text-left text-white hover:bg-zinc-800 h-auto py-2"
-                      onClick={() => handleLocationSelect(location)}
-                    >
-                      <MapPin className="h-4 w-4 mr-2 text-zinc-400" />
-                      <span>{location}</span>
-                      {isAvailable && (
-                        <span className="ml-2 px-1.5 py-0.5 text-xs bg-green-900/30 text-green-300 rounded-full">
-                          Available
-                        </span>
-                      )}
-                    </Button>
-                    
-                    {/* Availability Message - Show only for the selected location */}
-                    {selectedLocation === location && !isAvailable && (
-                      <div className="rounded-md p-3 bg-amber-900/30 border border-amber-800/40 text-amber-300 ml-6">
-                        <div className="flex gap-2 items-start">
-                          <span className="text-amber-300 mt-0.5">⚠</span>
-                          <div>
-                            <p className="font-medium">Zructures is not yet available in {location}.</p>
-                            <p className="text-sm text-amber-400/80">We're expanding rapidly! You'll still be able to browse but some features might be limited.</p>
+            <ScrollArea className="h-[calc(100%-2rem)] max-h-64 pr-2">
+              <div className="space-y-1 pb-2">
+                {filteredLocations.map((location) => {
+                  const isAvailable = availableLocations.includes(location);
+                  
+                  return (
+                    <div key={location} className="space-y-1">
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start text-left text-white hover:bg-zinc-800 h-auto py-2"
+                        onClick={() => handleLocationSelect(location)}
+                      >
+                        <MapPin className="h-4 w-4 mr-2 text-zinc-400" />
+                        <span>{location}</span>
+                        {isAvailable && (
+                          <span className="ml-2 px-1.5 py-0.5 text-xs bg-green-900/30 text-green-300 rounded-full">
+                            Available
+                          </span>
+                        )}
+                      </Button>
+                      
+                      {/* Availability Message - Show only for the selected location */}
+                      {selectedLocation === location && !isAvailable && (
+                        <div className="rounded-md p-3 bg-amber-900/30 border border-amber-800/40 text-amber-300 ml-6">
+                          <div className="flex gap-2 items-start">
+                            <span className="text-amber-300 mt-0.5">⚠</span>
+                            <div>
+                              <p className="font-medium">Zructures is not yet available in {location}.</p>
+                              <p className="text-sm text-amber-400/80">We're expanding rapidly! You'll still be able to browse but some features might be limited.</p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </ScrollArea>
           </div>
         </div>
 
-        <DialogFooter className="mt-6">
+        <DialogFooter className="mt-6 shrink-0">
           <Button 
             variant="default" 
             onClick={() => handleLocationSelect(selectedLocation)} 

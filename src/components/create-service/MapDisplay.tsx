@@ -15,22 +15,21 @@ export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) =
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<HTMLIFrameElement>(null);
   const [mapLocation, setMapLocation] = useState("Tadipatri, Andhra Pradesh 515411");
-  const isMobileDevice = window.innerWidth < 768;
+  const isMobileDevice = typeof window !== 'undefined' ? window.innerWidth < 768 : false;
+  const mapLoadAttempts = useRef(0);
+  const maxMapLoadAttempts = 3;
 
   useEffect(() => {
     // Check location permission status
     const checkPermission = async () => {
-      if (!("permissions" in navigator)) {
-        setLocationPermission('unknown');
-        return;
-      }
-      
-      try {
-        const permission = await navigator.permissions.query({ name: "geolocation" as PermissionName });
-        setLocationPermission(permission.state as 'granted' | 'denied' | 'prompt');
-      } catch (error) {
-        console.error("Error checking geolocation permission:", error);
-        setLocationPermission('unknown');
+      if (typeof navigator !== 'undefined' && "permissions" in navigator) {
+        try {
+          const permission = await navigator.permissions.query({ name: "geolocation" as PermissionName });
+          setLocationPermission(permission.state as 'granted' | 'denied' | 'prompt');
+        } catch (error) {
+          console.error("Error checking geolocation permission:", error);
+          setLocationPermission('unknown');
+        }
       }
     };
     
@@ -38,6 +37,13 @@ export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) =
   }, []);
 
   useEffect(() => {
+    // Reset error state when input changes
+    if (searchInput) {
+      setMapLoadError(false);
+      setIsLoading(true);
+      mapLoadAttempts.current = 0;
+    }
+
     // Default location
     const defaultLocation = "Tadipatri, Andhra Pradesh 515411";
     
@@ -48,22 +54,45 @@ export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) =
     onLocationSelect(locationToShow);
     setMapLocation(locationToShow);
     
-    // Simulate map loading with a lighter approach
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 500);
+    // Don't simulate loading if it's the initial load
+    if (searchInput) {
+      // Simulate map loading with a lighter approach
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+      }, 300);
 
-    return () => clearTimeout(timer);
+      return () => clearTimeout(timer);
+    }
   }, [onLocationSelect, searchInput]);
 
   const handleMapLoad = () => {
     setIsLoading(false);
     setMapLoadError(false);
+    mapLoadAttempts.current = 0;
   };
   
   const handleMapError = () => {
     setIsLoading(false);
     setMapLoadError(true);
+    console.error("Map failed to load for location:", mapLocation);
+    
+    // Auto-retry a limited number of times with increasing delay
+    if (mapLoadAttempts.current < maxMapLoadAttempts) {
+      mapLoadAttempts.current += 1;
+      const retryDelay = 1000 * mapLoadAttempts.current;
+      
+      console.log(`Retrying map load (attempt ${mapLoadAttempts.current}/${maxMapLoadAttempts}) in ${retryDelay}ms`);
+      
+      setTimeout(() => {
+        if (mapRef.current) {
+          setIsLoading(true);
+          setMapLoadError(false);
+          // Add cache-busting parameter
+          const cacheBuster = `&cb=${Date.now()}`;
+          mapRef.current.src = getMapEmbedUrl(mapLocation) + cacheBuster;
+        }
+      }, retryDelay);
+    }
   };
 
   const requestLocationPermission = () => {
@@ -86,8 +115,8 @@ export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) =
     return `https://www.google.com/maps/embed/v1/place?key=AIzaSyBky_ax9Xw9iNRRWMwbdqXzneYgbO6iarI&q=${encodedLocation}`;
   };
 
-  // Don't show map on mobile if location permission is denied
-  const shouldShowMap = !isMobileDevice || locationPermission !== 'denied';
+  // Cache busting query parameter to help avoid resource errors
+  const cacheBustParam = `&cb=${Date.now()}`;
 
   // Show permission prompt for mobile users
   if (isMobileDevice && locationPermission === 'denied') {
@@ -129,19 +158,23 @@ export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) =
                 setIsLoading(true);
                 setMapLoadError(false);
                 if (mapRef.current) {
-                  mapRef.current.src = getMapEmbedUrl(mapLocation);
+                  // Add cache-busting parameter
+                  mapRef.current.src = getMapEmbedUrl(mapLocation) + cacheBustParam;
                 }
               }}
             >
               Try Again
             </Button>
+            <p className="text-xs text-muted-foreground mt-3 max-w-xs text-center">
+              To improve map loading, try refreshing the page or check your internet connection
+            </p>
           </div>
         )}
         
-        {shouldShowMap && (
+        {(locationPermission !== 'denied' || !isMobileDevice) && (
           <iframe 
             ref={mapRef}
-            src={getMapEmbedUrl(mapLocation)}
+            src={`${getMapEmbedUrl(mapLocation)}${cacheBustParam}`}
             width="100%"
             height="100%"
             style={{ border: 0 }}
@@ -149,6 +182,7 @@ export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) =
             onLoad={handleMapLoad}
             onError={handleMapError}
             referrerPolicy="no-referrer-when-downgrade"
+            title="Location Map"
           />
         )}
       </div>

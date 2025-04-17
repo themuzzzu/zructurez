@@ -29,9 +29,22 @@ export const ErrorView = ({
     toast.error(message || "An error occurred");
   }, [status, title, message]);
 
-  // Handle page refresh
+  // Handle retry with cache clearing
   const handleRetry = () => {
-    window.location.reload();
+    // Clear any potential cache-related issues
+    if ('caches' in window) {
+      caches.keys().then(cacheNames => {
+        cacheNames.forEach(cacheName => {
+          caches.delete(cacheName);
+        });
+        console.log('Cleared cache before retrying');
+      });
+    }
+    
+    // Add a small delay to ensure cache clearing completes
+    setTimeout(() => {
+      window.location.reload();
+    }, 100);
   };
 
   return (
@@ -45,6 +58,19 @@ export const ErrorView = ({
             {status ? `${status} - ${title}` : title}
           </h2>
           <p className="text-muted-foreground max-w-md px-4 text-base">{message}</p>
+          
+          <div className="space-y-2 max-w-md">
+            <p className="text-sm text-muted-foreground">
+              This might be due to one of the following:
+            </p>
+            <ul className="text-sm text-muted-foreground list-disc list-inside text-left">
+              <li>Internet connection issues</li>
+              <li>Server is temporarily unavailable</li>
+              <li>Map resources couldn't be loaded</li>
+              <li>Your browser may be blocking certain resources</li>
+            </ul>
+          </div>
+          
           <div className="flex flex-wrap gap-3 sm:gap-4 justify-center">
             <Button variant="outline" onClick={() => navigate(-1)} className="flex items-center gap-2">
               <ArrowLeft className="h-4 w-4" />

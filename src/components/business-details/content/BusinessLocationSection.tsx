@@ -15,12 +15,13 @@ export const BusinessLocationSection = ({
 }: BusinessLocationSectionProps) => {
   const [isMapLoading, setIsMapLoading] = useState(true);
   const [mapError, setMapError] = useState(false);
+  const [mapUrl, setMapUrl] = useState<string>('');
   const [locationPermission, setLocationPermission] = useState<'granted' | 'denied' | 'prompt' | 'unknown'>('unknown');
-  const isMobileDevice = window.innerWidth < 768;
+  const isMobileDevice = typeof window !== 'undefined' ? window.innerWidth < 768 : false;
   
   useEffect(() => {
     // Check location permission status on mount
-    if ("permissions" in navigator) {
+    if (typeof navigator !== 'undefined' && "permissions" in navigator) {
       navigator.permissions.query({ name: "geolocation" as PermissionName })
         .then(permissionStatus => {
           setLocationPermission(permissionStatus.state as 'granted' | 'denied' | 'prompt');
@@ -31,17 +32,17 @@ export const BusinessLocationSection = ({
         });
     }
   }, []);
+
+  useEffect(() => {
+    // Generate the map URL when the component mounts or when location changes
+    const encodedLocation = encodeURIComponent(location);
+    setMapUrl(`https://www.google.com/maps/embed/v1/place?key=AIzaSyBky_ax9Xw9iNRRWMwbdqXzneYgbO6iarI&q=${encodedLocation}`);
+  }, [location]);
   
   // Creates a Google Maps search URL based on business name and location
   const getGoogleMapsUrl = () => {
     const query = encodeURIComponent(`${businessName}, ${location}`);
     return `https://www.google.com/maps/search/?api=1&query=${query}`;
-  };
-
-  // Get a static map URL for the given location
-  const getStaticMapUrl = () => {
-    const encodedLocation = encodeURIComponent(location);
-    return `https://www.google.com/maps/embed/v1/place?key=AIzaSyBky_ax9Xw9iNRRWMwbdqXzneYgbO6iarI&q=${encodedLocation}`;
   };
 
   // Handle opening directions in Google Maps
@@ -57,6 +58,7 @@ export const BusinessLocationSection = ({
   const handleMapError = () => {
     setIsMapLoading(false);
     setMapError(true);
+    console.error("Map failed to load for location:", location);
   };
   
   const requestLocationPermission = () => {
@@ -72,6 +74,9 @@ export const BusinessLocationSection = ({
     );
   };
 
+  // Cache busting query parameter to help avoid resource errors
+  const cacheBustParam = `&cb=${Date.now()}`;
+  
   // Don't show map on mobile if location permission is denied
   const shouldShowMap = !isMobileDevice || locationPermission !== 'denied';
 
@@ -120,10 +125,13 @@ export const BusinessLocationSection = ({
                 <Button size="sm" onClick={requestLocationPermission}>
                   Allow Location Access
                 </Button>
+                <p className="text-xs text-muted-foreground mt-3">
+                  Manual location: {location}
+                </p>
               </div>
-            ) : shouldShowMap && (
+            ) : shouldShowMap && mapUrl && (
               <iframe 
-                src={getStaticMapUrl()}
+                src={`${mapUrl}${cacheBustParam}`}
                 width="100%" 
                 height="100%" 
                 style={{ border: 0 }}
