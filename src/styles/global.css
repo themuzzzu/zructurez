@@ -1,8 +1,9 @@
 
 /* Add language transition effects */
 body.lang-transition {
-  transition: all 0.3s ease;
+  transition: all 0.5s ease;
   animation: lang-fade 0.8s ease;
+  opacity: 0.95;
 }
 
 @keyframes lang-fade {
@@ -67,16 +68,6 @@ html[data-language="urdu"] .rtl-support {
   position: relative;
 }
 
-/* Small indicator for translated content (only in development) */
-.dev-mode [data-translated="true"]::after {
-  content: "•";
-  position: absolute;
-  bottom: -2px;
-  right: -5px;
-  font-size: 10px;
-  color: rgba(0, 255, 0, 0.5);
-}
-
 /* Fix for mobile navigation with translated text */
 @media (max-width: 768px) {
   .fixed.bottom-0 button span {
@@ -105,7 +96,7 @@ html[data-language="urdu"] .rtl-support {
 /* Ensure bottom nav has enough space for translated text */
 .bottom-nav-item {
   width: auto;
-  min-width: 60px;
+  min-width: 65px;
 }
 
 /* Prevent layout shifts during translation */
@@ -113,20 +104,37 @@ html[data-language="urdu"] .rtl-support {
   min-height: 1em;
 }
 
-/* Fix for RTL languages in the UI */
-html[data-language="urdu"] .fixed.bottom-0,
-html[data-language="urdu"] .search-box,
+/* Fix for search input in RTL languages */
 html[data-language="urdu"] .pl-10 {
-  direction: ltr; /* Keep UI direction consistent */
-}
-
-html[data-language="urdu"] .pl-10 {
-  text-align: right;
+  padding-left: 0 !important;
   padding-right: 2.5rem !important;
 }
 
-/* Ensure search icons remain correctly positioned */
-html[data-language="urdu"] .search-icon-left {
+html[data-language="urdu"] .relative .left-3 {
   left: auto;
   right: 0.75rem;
+}
+
+/* Fix for RTL languages in the UI */
+html[data-language="urdu"] .fixed.bottom-0,
+html[data-language="urdu"] .search-box,
+html[data-language="urdu"] .search-bar-container {
+  direction: ltr; /* Keep UI direction consistent */
+}
+
+/* Mobile bottom nav fixes */
+.fixed.bottom-0 button span {
+  display: block;
+  text-align: center;
+  font-size: 10px;
+}
+
+/* Search box fixes */
+.search-bar-container .absolute.left-3 {
+  pointer-events: none;
+}
+
+/* Fix for bottom navigation in mobile RTL */
+html[data-language="urdu"] .fixed.bottom-0 button {
+  direction: rtl;
 }

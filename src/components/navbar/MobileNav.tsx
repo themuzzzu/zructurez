@@ -16,7 +16,7 @@ import {
 import { useTheme } from "../ThemeProvider";
 import { cn } from "@/lib/utils";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { useState, memo, useEffect } from "react";
+import { useState, memo, useEffect, useRef } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 // Create a simplified icon component for mobile nav
@@ -51,22 +51,35 @@ export const MobileNav = () => {
   const isDarkMode = theme === "dark";
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { t, language } = useLanguage();
-
+  const navRef = useRef<HTMLDivElement>(null);
+  
   // Force re-render when language changes
-  const [, forceUpdate] = useState({});
   useEffect(() => {
-    const handleLanguageChange = () => {
-      forceUpdate({});
+    const handleLanguageChange = (e: Event) => {
+      // Force re-render by triggering state update after language change
+      setTimeout(() => {
+        if (navRef.current) {
+          // Update the nav items
+          const navButtons = navRef.current.querySelectorAll('button[data-translate]');
+          navButtons.forEach(button => {
+            const key = button.getAttribute('data-translate');
+            if (key) {
+              const span = button.querySelector('span');
+              if (span) {
+                span.textContent = t(key);
+              }
+            }
+          });
+        }
+      }, 100); // Short delay to ensure translations are loaded
     };
     
     window.addEventListener('languageChanged', handleLanguageChange);
-    document.addEventListener('language-changed', handleLanguageChange);
     
     return () => {
       window.removeEventListener('languageChanged', handleLanguageChange);
-      document.removeEventListener('language-changed', handleLanguageChange);
     };
-  }, [language]);
+  }, [t, language]);
 
   // All navigation items with translations
   const allNavItems = [
@@ -112,7 +125,10 @@ export const MobileNav = () => {
   };
   
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 py-2 px-1 z-50 animate-fade-in">
+    <div 
+      ref={navRef} 
+      className="fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 py-2 px-1 z-50 animate-fade-in"
+    >
       <div className="flex justify-between items-center max-w-md mx-auto">
         {mainNavItems.map((item) => {
           const isActive = checkActivePath(item.path);
@@ -123,7 +139,7 @@ export const MobileNav = () => {
               variant="ghost"
               size="icon"
               className={cn(
-                "flex flex-col items-center justify-center h-14 w-14 p-0 gap-1",
+                "flex flex-col items-center justify-center h-14 w-16 p-0 gap-1 bottom-nav-item",
                 isActive ? "text-primary dark:text-primary" : "text-zinc-500 dark:text-zinc-500"
               )}
               onClick={() => handleNavClick(item)}
@@ -136,7 +152,7 @@ export const MobileNav = () => {
                 <RegularIcon Icon={item.icon} />
               )}
               <span className={cn(
-                "text-[10px] font-medium overflow-hidden text-ellipsis max-w-11",
+                "text-[10px] font-medium overflow-hidden text-ellipsis w-full px-1",
                 isActive ? "text-primary dark:text-primary" : "text-zinc-500 dark:text-zinc-500"
               )}
               data-translate={item.label.toLowerCase()}>
@@ -152,13 +168,16 @@ export const MobileNav = () => {
             <Button 
               variant="ghost" 
               size="icon"
-              className="flex flex-col items-center justify-center h-14 w-14 p-0 gap-1 text-zinc-500 dark:text-zinc-500"
+              className="flex flex-col items-center justify-center h-14 w-16 p-0 gap-1 text-zinc-500 dark:text-zinc-500 bottom-nav-item"
               aria-label={t("more")}
+              data-translate="more"
             >
               <div className="relative">
                 <MoreVertical className="h-5 w-5" />
               </div>
-              <span className="text-[10px] font-medium" data-translate="more">{t("more")}</span>
+              <span className="text-[10px] font-medium w-full px-1" data-translate="more">
+                {t("more")}
+              </span>
             </Button>
           </DrawerTrigger>
           <DrawerContent>
@@ -177,6 +196,7 @@ export const MobileNav = () => {
                       isActive ? "bg-muted" : ""
                     )}
                     onClick={() => handleNavClick(item)}
+                    data-translate={item.label.toLowerCase()}
                   >
                     <item.icon className={cn(
                       "h-5 w-5 mb-2",
