@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,7 +34,7 @@ export function GeneralSettings() {
     { id: "ui-teal", name: "Teal", class: "bg-teal-500" }
   ];
 
-  // Available languages - reordered with Indian languages after English
+  // Available languages - with Indian languages first after English
   const languages = [
     { code: "english", name: "English" },
     { code: "telugu", name: "Telugu" },
@@ -51,7 +51,6 @@ export function GeneralSettings() {
 
   // Load saved settings on component mount
   useEffect(() => {
-    // Load saved settings
     const savedFontSize = localStorage.getItem("fontSize");
     const savedLanguage = localStorage.getItem("language");
     const savedTheme = localStorage.getItem("uiTheme");
@@ -73,17 +72,13 @@ export function GeneralSettings() {
 
   // Apply UI theme changes immediately
   const applyTheme = (themeId: string) => {
-    // Remove all theme classes from document root
     document.documentElement.classList.forEach(className => {
       if (className.startsWith('ui-')) {
         document.documentElement.classList.remove(className);
       }
     });
     
-    // Add the selected theme class
     document.documentElement.classList.add(themeId);
-    
-    // Save to localStorage for persistence across page reloads
     localStorage.setItem("uiTheme", themeId);
   };
 
@@ -99,7 +94,6 @@ export function GeneralSettings() {
     setUiTheme(value);
     applyTheme(value);
     
-    // Also update profile settings if profile is available
     if (profile?.id) {
       updateDisplayPreferences("ui_color", value.replace('ui-', ''));
     }
@@ -107,11 +101,11 @@ export function GeneralSettings() {
 
   // Apply language changes to the application
   const applyLanguage = (languageCode: string) => {
-    // In a real app, we would set an i18n context here
+    // Set language on document root
     document.documentElement.lang = languageCode;
     document.documentElement.setAttribute('data-language', languageCode);
     
-    // You can also add specific language-based CSS classes if needed
+    // Remove previous language classes
     document.documentElement.classList.forEach(className => {
       if (className.startsWith('lang-')) {
         document.documentElement.classList.remove(className);
@@ -119,10 +113,10 @@ export function GeneralSettings() {
     });
     document.documentElement.classList.add(`lang-${languageCode}`);
     
-    // Save to localStorage for persistence
+    // Save to localStorage
     localStorage.setItem("language", languageCode);
     
-    // Show language indicator for demo purposes
+    // Show temporary language indicator
     const langName = languages.find(lang => lang.code === languageCode)?.name || languageCode;
     const indicator = document.createElement('div');
     indicator.textContent = `Language: ${langName}`;
@@ -135,7 +129,6 @@ export function GeneralSettings() {
     indicator.style.borderRadius = '4px';
     indicator.style.zIndex = '9999';
     indicator.style.opacity = '0.9';
-    indicator.style.transition = 'opacity 0.5s ease-in-out';
     
     document.body.appendChild(indicator);
     

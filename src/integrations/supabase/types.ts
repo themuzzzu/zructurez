@@ -2000,9 +2000,13 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           created_at: string
+          display_preferences: Json | null
           id: string
           location: string | null
           name: string | null
+          notification_preferences: Json | null
+          privacy_settings: Json | null
+          theme_preference: string | null
           updated_at: string | null
           username: string | null
         }
@@ -2010,9 +2014,13 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          display_preferences?: Json | null
           id: string
           location?: string | null
           name?: string | null
+          notification_preferences?: Json | null
+          privacy_settings?: Json | null
+          theme_preference?: string | null
           updated_at?: string | null
           username?: string | null
         }
@@ -2020,9 +2028,13 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          display_preferences?: Json | null
           id?: string
           location?: string | null
           name?: string | null
+          notification_preferences?: Json | null
+          privacy_settings?: Json | null
+          theme_preference?: string | null
           updated_at?: string | null
           username?: string | null
         }

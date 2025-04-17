@@ -68,7 +68,7 @@ export const useProfileSettings = (
       return false;
     }
   };
-  
+
   const updateDisplayPreferences = async (
     setting: "font_size" | "ui_color" | "language",
     value: number | string
@@ -115,7 +115,7 @@ export const useProfileSettings = (
       return false;
     }
   };
-
+  
   return {
     updateThemePreference,
     updatePrivacySettings,
