@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MapPin, ExternalLink, Loader2, MapOff } from 'lucide-react';
+import { MapPin, ExternalLink, Loader2, Map } from 'lucide-react';
 
 interface BusinessLocationSectionProps {
   businessName: string;
@@ -96,7 +96,7 @@ export const BusinessLocationSection = ({
             
             {mapError && (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted z-10">
-                <MapOff className="h-8 w-8 text-muted-foreground mb-2" />
+                <Map className="h-8 w-8 text-muted-foreground mb-2" />
                 <p className="text-sm text-muted-foreground mb-2">Unable to load map</p>
                 <Button 
                   variant="outline" 
@@ -113,7 +113,7 @@ export const BusinessLocationSection = ({
             
             {isMobileDevice && locationPermission === 'denied' ? (
               <div className="h-full flex flex-col items-center justify-center p-4 text-center">
-                <MapOff className="h-8 w-8 text-gray-400 mb-2" />
+                <Map className="h-8 w-8 text-gray-400 mb-2" />
                 <p className="text-sm text-muted-foreground mb-3">
                   Location access is required to show the map on mobile devices
                 </p>

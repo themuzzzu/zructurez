@@ -1,6 +1,6 @@
 
 import { useEffect, useState, useRef } from "react";
-import { Loader2, MapOff } from "lucide-react";
+import { Loader2, Map } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface MapDisplayProps {
@@ -94,7 +94,7 @@ export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) =
     return (
       <div className="space-y-4">
         <div className="w-full h-[250px] rounded-md border bg-gray-50 flex flex-col items-center justify-center text-center p-4">
-          <MapOff className="h-10 w-10 text-gray-400 mb-2" />
+          <Map className="h-10 w-10 text-gray-400 mb-2" />
           <p className="text-muted-foreground mb-4">Location access is required to show the map on mobile devices</p>
           <Button onClick={requestLocationPermission}>
             Allow Location Access
@@ -119,7 +119,7 @@ export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) =
         
         {mapLoadError && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-50 z-10">
-            <MapOff className="h-10 w-10 text-gray-400 mb-2" />
+            <Map className="h-10 w-10 text-gray-400 mb-2" />
             <p className="text-muted-foreground">Unable to load map</p>
             <Button 
               variant="outline" 

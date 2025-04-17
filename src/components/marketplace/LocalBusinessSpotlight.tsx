@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MapPin, Store, Star, ArrowRightCircle, MapOff } from "lucide-react";
+import { MapPin, Store, Star, ArrowRightCircle, Map } from "lucide-react";
 import { isMobileDevice } from "@/utils/locationUtils";
 import { useGeolocation } from "@/hooks/useGeolocation";
 
@@ -124,7 +124,7 @@ export const LocalBusinessSpotlight = () => {
 
       {!isDesktopDevice && locationPermission === 'denied' && (
         <Card className="p-6 text-center">
-          <MapOff className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+          <Map className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
           <p className="mb-2">Location access is required to show nearby businesses</p>
           <p className="text-sm text-muted-foreground mb-4">
             Please enable location services in your browser settings
