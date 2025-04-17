@@ -1,47 +1,56 @@
 
-import React from "react";
+import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { Shimmer } from "@/components/ui/shimmer";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
 
-interface SkeletonCardProps {
-  imageHeight?: string;
+interface ShimmerProps {
   className?: string;
-  withActions?: boolean;
-  withFooter?: boolean;
+  rounded?: boolean;
+  circle?: boolean;
 }
 
-export function SkeletonCard({
-  imageHeight = "h-48",
-  className,
-  withActions = true,
-  withFooter = true
-}: SkeletonCardProps) {
+// Create a custom Shimmer component that accepts className, rounded, and circle props
+const Shimmer = ({ className, rounded = false, circle = false }: ShimmerProps) => {
   return (
-    <Card className={cn("overflow-hidden", className)}>
-      <Shimmer className={cn(imageHeight, "w-full")} rounded />
-      
-      <CardContent className="p-4 space-y-3">
-        <div className="flex justify-between items-start">
-          <Shimmer className="h-5 w-2/3" rounded />
-          {withActions && <Shimmer className="h-8 w-8" circle />}
-        </div>
-        
-        <Shimmer className="h-3 w-1/3" rounded />
-        
-        <div className="space-y-2">
-          <Shimmer className="h-3 w-full" rounded />
-          <Shimmer className="h-3 w-4/5" rounded />
-        </div>
-        
-        <Shimmer className="h-5 w-1/4" rounded />
-      </CardContent>
-      
-      {withFooter && (
-        <CardFooter className="p-4 pt-0">
-          <Shimmer className="h-9 w-full" rounded />
-        </CardFooter>
+    <div
+      className={cn(
+        "animate-pulse bg-gray-300 dark:bg-gray-700",
+        rounded && "rounded",
+        circle && "rounded-full",
+        className
       )}
+    />
+  );
+};
+
+export const SkeletonCard = ({ className }: { className?: string }) => {
+  return (
+    <Card className={cn("overflow-hidden p-0", className)}>
+      {/* Image placeholder */}
+      <Shimmer className="w-full h-44" rounded={true} />
+
+      {/* Content placeholders */}
+      <div className="p-4 space-y-3">
+        <div className="flex items-center space-x-2 mb-4">
+          <Shimmer className="w-10 h-10" circle={true} />
+          <div className="flex-1">
+            <Shimmer className="h-4 w-2/3 mb-2" rounded={true} />
+            <Shimmer className="h-3 w-1/2" rounded={true} />
+          </div>
+        </div>
+
+        {/* Title and description */}
+        <Shimmer className="h-5 w-3/4" rounded={true} />
+        <Shimmer className="h-4 w-full" rounded={true} />
+        <Shimmer className="h-4 w-5/6" rounded={true} />
+
+        {/* Actions */}
+        <div className="flex justify-between pt-2">
+          <Shimmer className="h-8 w-24" rounded={true} />
+          <Shimmer className="h-8 w-24" rounded={true} />
+        </div>
+      </div>
     </Card>
   );
-}
+};
+
+export default SkeletonCard;

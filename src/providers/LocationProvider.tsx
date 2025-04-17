@@ -7,7 +7,6 @@ interface LocationContextType {
   currentLocation: string;
   isLocationAvailable: boolean;
   setShowLocationPicker: (show: boolean) => void;
-  // Add latitude and longitude
   latitude?: number;
   longitude?: number;
 }
@@ -18,7 +17,6 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
   const [location, setLocation] = useState<string | null>(null);
   const [currentLocation, setCurrentLocation] = useState<string>("All India");
   const [isLocationAvailable, setIsLocationAvailable] = useState<boolean>(false);
-  // Add latitude and longitude state
   const [latitude, setLatitude] = useState<number | undefined>(undefined);
   const [longitude, setLongitude] = useState<number | undefined>(undefined);
 

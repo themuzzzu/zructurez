@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 interface NetworkContextType {
@@ -63,7 +64,7 @@ export const NetworkMonitor = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// Export both names to maintain backward compatibility and fix errors
+// Export both names for compatibility
 export const useNetwork = () => {
   const context = useContext(NetworkContext);
   if (!context) {
@@ -72,7 +73,7 @@ export const useNetwork = () => {
   return context;
 };
 
-// Add the useNetworkStatus function that was missing
+// Add the useNetworkStatus function that's being imported elsewhere
 export const useNetworkStatus = () => {
   const context = useContext(NetworkContext);
   if (!context) {

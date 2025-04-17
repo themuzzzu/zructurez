@@ -1,3 +1,5 @@
+
+import React from 'react';
 import { AttachmentButtons } from "./AttachmentButtons";
 import { MessageInput } from "./MessageInput";
 
