@@ -2,13 +2,13 @@
 import React, { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ProductCard } from "@/components/ProductCard";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import SkeletonCard from "@/components/loaders/SkeletonCard";
+import { ProductCard } from "@/components/products/ProductCard";
 
 interface ProductRankingsProps {
   title?: string;
