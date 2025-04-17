@@ -173,3 +173,36 @@
   padding: 1rem;
   margin-top: 0.5rem;
 }
+
+/* Fix mobile dialog positioning */
+@media (max-width: 640px) {
+  .fixed.max-h-\[90vh\] {
+    max-height: 90vh;
+    position: fixed;
+    inset: 50% auto auto 50%;
+    transform: translate(-50%, -50%);
+    width: calc(100% - 2rem);
+    margin: 0;
+  }
+  
+  /* Ensure modals are properly centered on mobile */
+  [role="dialog"] {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* Custom scrollbar for dialogs with lots of content */
+.max-h-\[90vh\].overflow-auto::-webkit-scrollbar {
+  width: 6px;
+}
+
+.max-h-\[90vh\].overflow-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.max-h-\[90vh\].overflow-auto::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+}

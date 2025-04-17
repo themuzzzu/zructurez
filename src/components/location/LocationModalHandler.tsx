@@ -2,9 +2,11 @@
 import { useEffect } from "react";
 import { SimplifiedLocationPicker } from "./SimplifiedLocationPicker";
 import { useLocation } from "@/providers/LocationProvider";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function LocationModalHandler() {
   const { showLocationPicker, setShowLocationPicker, isFirstVisit, resetFirstVisit } = useLocation();
+  const { t } = useLanguage();
   
   // Handle closing the modal for first-time users
   const handleOpenChange = (open: boolean) => {

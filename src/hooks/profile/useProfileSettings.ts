@@ -1,3 +1,4 @@
+
 import { toast } from "sonner";
 import type { Profile } from "@/types/profile";
 
@@ -79,21 +80,27 @@ export const useProfileSettings = (
         localStorage.setItem("fontSize", value.toString());
       }
       else if (setting === "ui_color" && typeof value === "string") {
-        // Remove all theme classes first
+        // Remove all existing theme classes
         document.documentElement.classList.forEach(className => {
           if (className.startsWith('ui-')) {
             document.documentElement.classList.remove(className);
           }
         });
         
-        // Add new class
-        document.documentElement.classList.add(`ui-${value}`);
-        localStorage.setItem("uiTheme", `ui-${value}`);
+        // Add the new theme class
+        const themeClass = `ui-${value}`;
+        document.documentElement.classList.add(themeClass);
+        localStorage.setItem("uiTheme", themeClass);
       }
       else if (setting === "language" && typeof value === "string") {
         document.documentElement.lang = value;
         document.documentElement.setAttribute('data-language', value);
         localStorage.setItem("language", value);
+        
+        // Dispatch a custom event for components to listen for language changes
+        window.dispatchEvent(new CustomEvent('languageChanged', {
+          detail: { language: value }
+        }));
       }
       
       // Only attempt to update profile in database if profile exists and has ID
