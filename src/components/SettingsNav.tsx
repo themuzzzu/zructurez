@@ -1,4 +1,3 @@
-
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -12,7 +11,7 @@ import {
   Store,
   Wrench,
   MessageSquare,
-  Ad,
+  Megaphone,
   PiggyBank,
   ListChecks,
   Activity,
@@ -83,7 +82,7 @@ export function SettingsNav({ activeTab, setActiveTab }: SettingsNavProps) {
     {
       id: "advertisements",
       label: t("advertisements"),
-      icon: <Ad className="h-4 w-4" />,
+      icon: <Megaphone className="h-4 w-4" />,
     },
     {
       id: "ad-pricing",
