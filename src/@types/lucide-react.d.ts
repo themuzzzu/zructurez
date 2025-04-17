@@ -16,7 +16,7 @@ declare module 'lucide-react' {
 
   export type LucideIcon = ForwardRefExoticComponent<LucideProps & RefAttributes<SVGSVGElement>>;
 
-  // Export all icons
+  // Common icons (existing)
   export const Menu: LucideIcon;
   export const Search: LucideIcon;
   export const Heart: LucideIcon;
@@ -65,7 +65,6 @@ declare module 'lucide-react' {
   export const Bell: LucideIcon;
   export const Calendar: LucideIcon;
   export const CreditCard: LucideIcon;
-  export const ShoppingCart: LucideIcon;
   export const Package: LucideIcon;
   export const Truck: LucideIcon;
   export const Activity: LucideIcon;
@@ -103,6 +102,69 @@ declare module 'lucide-react' {
   export const Save: LucideIcon;
   export const Link: LucideIcon;
   export const LinkIcon: LucideIcon;
+
+  // Additional icons needed by components
+  export const Hospital: LucideIcon;
+  export const Car: LucideIcon;
+  export const UtensilsCrossed: LucideIcon;
+  export const Briefcase: LucideIcon;
+  export const Scissors: LucideIcon;
+  export const GraduationCap: LucideIcon;
+  export const Building2: LucideIcon;
+  export const ShoppingBag: LucideIcon;
+  export const Dumbbell: LucideIcon;
+  export const Home: LucideIcon;
+  export const Wrench: LucideIcon;
+  export const Tag: LucideIcon;
+  export const ListChecks: LucideIcon;
+  export const Archive: LucideIcon;
+  export const Forward: LucideIcon;
+  export const ThumbsUp: LucideIcon;
+  export const SmilePlus: LucideIcon;
+  export const Grid3X3: LucideIcon;
+  export const Grid2X2: LucideIcon;
+  export const LayoutList: LucideIcon;
+  export const Zap: LucideIcon;
+  export const Computer: LucideIcon;
+  export const PaintBucket: LucideIcon;
+  export const Bug: LucideIcon;
+  export const Shirt: LucideIcon;
+  export const Dog: LucideIcon;
+  export const BookOpen: LucideIcon;
+  export const Wifi: LucideIcon;
+  export const Baby: LucideIcon;
+  export const Flower2: LucideIcon;
+  export const Music2: LucideIcon;
+  export const Stethoscope: LucideIcon;
+  export const Store: LucideIcon;
+  export const CalendarDays: LucideIcon;
+  export const Megaphone: LucideIcon;
+  export const PiggyBank: LucideIcon;
+  export const Building: LucideIcon;
+  export const MousePointer: LucideIcon;
+  export const Trash2Icon: LucideIcon;
+  export const PlusCircleIcon: LucideIcon;
+  export const Sparkles: LucideIcon;
+  export const Award: LucideIcon;
+  export const TrendingUp: LucideIcon;
+  export const DollarSign: LucideIcon;
+  export const Target: LucideIcon;
+  export const ShoppingCart: LucideIcon;
+  export const CalendarIcon: LucideIcon;
+  export const ClockIcon: LucideIcon;
+  export const ChevronRightIcon: LucideIcon;
+  export const EyeIcon: LucideIcon;
+  export const MousePointerClickIcon: LucideIcon;
+  export const ActivityIcon: LucideIcon;
+  export const CircleDollarSign: LucideIcon;
+  export const Bot: LucideIcon;
+  export const Minimize2: LucideIcon;
+  export const Maximize2: LucideIcon;
+  export const DownloadCloud: LucideIcon;
+  export const Reply: LucideIcon;
+  export const ExternalLink: LucideIcon;
+  export const Mail: LucideIcon;
+  export const Globe: LucideIcon;
 
   // Export the icon function
   export function Icon(props: { icon: IconNode } & LucideProps): JSX.Element;

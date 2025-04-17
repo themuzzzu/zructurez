@@ -12,9 +12,9 @@ if (!existsSync('node_modules')) {
 writeFileSync('.npmrc', 'save-exact=true\nlegacy-peer-deps=true\n');
 
 // Install the necessary packages
-console.log('Installing vite and lucide-react...');
+console.log('Installing vite, react-dom, react and lucide-react...');
 try {
-  execSync('npm install vite@latest lucide-react@latest --no-save', { stdio: 'inherit' });
+  execSync('npm install vite@latest lucide-react@latest react@latest react-dom@latest @vitejs/plugin-react@latest --no-save', { stdio: 'inherit' });
   console.log('Dependencies installed successfully!');
 } catch (error) {
   console.error('Failed to install dependencies:', error);
