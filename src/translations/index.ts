@@ -120,7 +120,7 @@ export const translations = {
     orders: "ऑर्डर",
     appointments: "अपॉइंटमेंट",
     products: "उत्पाद",
-    business: "व्यापार",
+    // Removed duplicate "business" key here
     advertisements: "विज्ञापन",
     adPricing: "विज्ञापन मूल्य निर्धारण",
     subscribed: "सब्सक्राइब किया गया",
