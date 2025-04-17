@@ -8,7 +8,7 @@ interface SearchInputProps {
   value: string;
   onChange: (value: string) => void;
   className?: string;
-  onSubmit?: () => void;
+  onSubmit?: (e?: React.FormEvent) => void;
   autoFocus?: boolean;
   disabled?: boolean;
 }
