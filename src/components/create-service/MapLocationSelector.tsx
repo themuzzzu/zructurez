@@ -6,6 +6,7 @@ import { MapPin, AlertCircle } from "lucide-react";
 import { Input } from "../ui/input";
 import { MapDisplay } from "./MapDisplay";
 import { Label } from "../ui/label";
+import { ScrollArea } from "../ui/scroll-area";
 
 interface MapLocationSelectorProps {
   value: string;
@@ -19,6 +20,7 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
   const [searchInput, setSearchInput] = useState("");
   const [locationPermission, setLocationPermission] = useState<'granted' | 'denied' | 'prompt' | 'unknown'>('unknown');
   const isMobileDevice = useRef(window.innerWidth < 768);
+  const permissionPromptShown = useRef(false);
 
   useEffect(() => {
     const handleResize = () => {
@@ -77,6 +79,9 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
   const requestLocationPermission = () => {
     if (!navigator.geolocation) return;
     
+    // Mark that we've shown the permission prompt
+    permissionPromptShown.current = true;
+    
     navigator.geolocation.getCurrentPosition(
       () => {
         setLocationPermission('granted');
@@ -107,71 +112,73 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
           setManualLocation(value);
         }
       }}>
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh]">
           <DialogHeader>
             <DialogTitle>Select Location</DialogTitle>
           </DialogHeader>
           
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="manual-location">Enter Location</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="manual-location"
-                  type="text"
-                  placeholder="Type your location..."
-                  value={manualLocation}
-                  onChange={handleManualLocationChange}
-                  className="w-full"
-                  autoFocus={!isMobileDevice.current}
-                />
-                <Button type="button" onClick={handleSearchLocation}>
-                  Search
-                </Button>
+          <ScrollArea className="max-h-[calc(90vh-120px)] overflow-auto pr-4">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="manual-location">Enter Location</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="manual-location"
+                    type="text"
+                    placeholder="Type your location..."
+                    value={manualLocation}
+                    onChange={handleManualLocationChange}
+                    className="w-full"
+                    autoFocus={!isMobileDevice.current}
+                  />
+                  <Button type="button" onClick={handleSearchLocation}>
+                    Search
+                  </Button>
+                </div>
+                
+                {isMobileDevice.current && locationPermission === 'denied' && (
+                  <div className="flex items-center gap-2 text-amber-600 mt-2 text-sm">
+                    <AlertCircle className="h-4 w-4" />
+                    <span>Location access denied. Manual entry only.</span>
+                  </div>
+                )}
+                
+                <p className="text-xs text-muted-foreground">
+                  {isMobileDevice.current ? 
+                    locationPermission === 'granted' ?
+                      "You can type your location or select from the map below" :
+                      "Allow location access for better map functionality" : 
+                    "For best performance, please enter your location manually"}
+                </p>
+                
+                {isMobileDevice.current && locationPermission === 'denied' && (
+                  <Button 
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="mt-2"
+                    onClick={requestLocationPermission}
+                  >
+                    Allow Location Access
+                  </Button>
+                )}
               </div>
-              
-              {isMobileDevice.current && locationPermission === 'denied' && (
-                <div className="flex items-center gap-2 text-amber-600 mt-2 text-sm">
-                  <AlertCircle className="h-4 w-4" />
-                  <span>Location access denied. Manual entry only.</span>
+
+              {/* Only render MapDisplay when dialog is open to save resources */}
+              {isOpen && (
+                <div className="space-y-2">
+                  <Label>Or select from map</Label>
+                  <MapDisplay 
+                    onLocationSelect={setSelectedLocation}
+                    searchInput={searchInput}
+                  />
                 </div>
               )}
-              
-              <p className="text-xs text-muted-foreground">
-                {isMobileDevice.current ? 
-                  locationPermission === 'granted' ?
-                    "You can type your location or select from the map below" :
-                    "Allow location access for better map functionality" : 
-                  "For best performance, please enter your location manually"}
-              </p>
-              
-              {isMobileDevice.current && locationPermission === 'denied' && (
-                <Button 
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="mt-2"
-                  onClick={requestLocationPermission}
-                >
-                  Allow Location Access
-                </Button>
-              )}
             </div>
+          </ScrollArea>
 
-            {/* Only render MapDisplay when dialog is open to save resources */}
-            {isOpen && (
-              <div className="space-y-2">
-                <Label>Or select from map</Label>
-                <MapDisplay 
-                  onLocationSelect={setSelectedLocation}
-                  searchInput={searchInput}
-                />
-              </div>
-            )}
-          </div>
-
-          <div className="flex justify-between">
-            <div className="text-sm text-muted-foreground">
+          <div className="flex justify-between mt-4">
+            <div className="text-sm text-muted-foreground truncate max-w-[70%]">
               {selectedLocation || manualLocation || "Enter location or select from map"}
             </div>
             <Button onClick={handleConfirm}>Confirm Location</Button>

@@ -1,5 +1,4 @@
-
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, memo, Suspense, lazy } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -32,19 +31,76 @@ interface BusinessData {
   [key: string]: any; // Allow other fields
 }
 
+const BusinessCard = memo(({ business }: { business: LocalBusiness }) => (
+  <Card key={business.id} className="overflow-hidden transition-all hover:shadow-lg">
+    <div className="h-40 bg-slate-100 dark:bg-slate-800 relative">
+      {business.image_url ? (
+        <img
+          src={business.image_url}
+          alt={business.name}
+          className="w-full h-full object-cover"
+          loading="lazy"
+          decoding="async"
+        />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center bg-emerald-100 dark:bg-emerald-900">
+          <Store size={40} className="text-emerald-600 dark:text-emerald-400" />
+        </div>
+      )}
+    </div>
+    <div className="p-4">
+      <h3 className="font-semibold text-lg mb-1 truncate">{business.name}</h3>
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center">
+          <Star size={16} className="text-yellow-500 fill-yellow-500 mr-1" />
+          <span className="text-sm">{business.rating.toFixed(1)}</span>
+        </div>
+        <div className="flex items-center text-sm text-muted-foreground">
+          <MapPin size={14} className="mr-1" />
+          <span>{business.distance}km</span>
+        </div>
+      </div>
+      <p className="text-sm text-muted-foreground line-clamp-2">
+        {business.description || "Local business offering quality products and services."}
+      </p>
+      <Button 
+        variant="outline" 
+        size="sm" 
+        className="w-full mt-3 border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 dark:border-emerald-800 dark:hover:bg-emerald-950"
+      >
+        View Business
+      </Button>
+    </div>
+  </Card>
+));
+
+const BusinessLoadingPlaceholder = () => (
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    {Array.from({ length: 4 }).map((_, index) => (
+      <Card key={index} className="animate-pulse">
+        <div className="h-40 bg-slate-200 dark:bg-slate-700"></div>
+        <div className="p-4">
+          <div className="h-5 w-3/4 bg-slate-200 dark:bg-slate-700 rounded mb-2"></div>
+          <div className="h-4 w-1/2 bg-slate-200 dark:bg-slate-700 rounded mb-2"></div>
+          <div className="h-4 w-1/4 bg-slate-200 dark:bg-slate-700 rounded"></div>
+        </div>
+      </Card>
+    ))}
+  </div>
+);
+
 export const LocalBusinessSpotlight = () => {
   const { position, requestGeolocation, permissionStatus } = useGeolocation();
   const [locationPermission, setLocationPermission] = useState<'granted' | 'denied' | 'prompt'>('prompt');
   const isDesktopDevice = !isMobileDevice();
+  const permissionPromptShown = useRef(false);
 
-  // Update local permission state whenever the hook's state changes
   useEffect(() => {
     if (permissionStatus !== 'unknown') {
       setLocationPermission(permissionStatus);
     }
   }, [permissionStatus]);
 
-  // For desktop devices, use default coordinates
   const effectiveCoordinates = position || 
     (isDesktopDevice ? { latitude: 14.90409405, longitude: 78.00200075 } : null);
 
@@ -60,17 +116,14 @@ export const LocalBusinessSpotlight = () => {
 
       if (error) throw error;
       
-      // Transform business data to match LocalBusiness interface
       return data.map((business: BusinessData): LocalBusiness => {
         const ratings = business.business_ratings || [];
         const totalRating = ratings.reduce((sum: number, rating: BusinessRating) => sum + (rating.rating || 0), 0);
         const avgRating = ratings.length > 0 ? totalRating / ratings.length : 0;
         
-        // Calculate rough distance if we have coordinates
         let distance = Math.round(Math.random() * 10) / 10; // Default mock distance
         
         if (effectiveCoordinates && business.latitude && business.longitude) {
-          // Simple distance calculation (this is an approximation)
           const R = 6371; // Earth radius in km
           const dLat = (business.latitude - effectiveCoordinates.latitude) * Math.PI / 180;
           const dLon = (business.longitude - effectiveCoordinates.longitude) * Math.PI / 180;
@@ -95,7 +148,21 @@ export const LocalBusinessSpotlight = () => {
       });
     },
     enabled: !!effectiveCoordinates,
+    staleTime: 30000,
   });
+
+  useEffect(() => {
+    if (!isDesktopDevice && 
+        locationPermission === 'prompt' && 
+        !permissionPromptShown.current) {
+      const timer = setTimeout(() => {
+        requestGeolocation();
+        permissionPromptShown.current = true;
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [locationPermission, isDesktopDevice, requestGeolocation]);
 
   const handleRequestLocation = useCallback(() => {
     requestGeolocation();
@@ -136,18 +203,9 @@ export const LocalBusinessSpotlight = () => {
       )}
 
       {((isDesktopDevice || locationPermission === 'granted') && isLoading) && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {Array.from({ length: 4 }).map((_, index) => (
-            <Card key={index} className="animate-pulse">
-              <div className="h-40 bg-slate-200 dark:bg-slate-700"></div>
-              <div className="p-4">
-                <div className="h-5 w-3/4 bg-slate-200 dark:bg-slate-700 rounded mb-2"></div>
-                <div className="h-4 w-1/2 bg-slate-200 dark:bg-slate-700 rounded mb-2"></div>
-                <div className="h-4 w-1/4 bg-slate-200 dark:bg-slate-700 rounded"></div>
-              </div>
-            </Card>
-          ))}
-        </div>
+        <Suspense fallback={<BusinessLoadingPlaceholder />}>
+          <BusinessLoadingPlaceholder />
+        </Suspense>
       )}
 
       {((isDesktopDevice || locationPermission === 'granted') && !isLoading && businessesData.length === 0) && (
@@ -160,45 +218,7 @@ export const LocalBusinessSpotlight = () => {
       {((isDesktopDevice || locationPermission === 'granted') && !isLoading && businessesData.length > 0) && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {businessesData.map((business: LocalBusiness) => (
-            <Card key={business.id} className="overflow-hidden transition-all hover:shadow-lg">
-              <div className="h-40 bg-slate-100 dark:bg-slate-800 relative">
-                {business.image_url ? (
-                  <img
-                    src={business.image_url}
-                    alt={business.name}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-emerald-100 dark:bg-emerald-900">
-                    <Store size={40} className="text-emerald-600 dark:text-emerald-400" />
-                  </div>
-                )}
-              </div>
-              <div className="p-4">
-                <h3 className="font-semibold text-lg mb-1 truncate">{business.name}</h3>
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center">
-                    <Star size={16} className="text-yellow-500 fill-yellow-500 mr-1" />
-                    <span className="text-sm">{business.rating.toFixed(1)}</span>
-                  </div>
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <MapPin size={14} className="mr-1" />
-                    <span>{business.distance}km</span>
-                  </div>
-                </div>
-                <p className="text-sm text-muted-foreground line-clamp-2">
-                  {business.description || "Local business offering quality products and services."}
-                </p>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="w-full mt-3 border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 dark:border-emerald-800 dark:hover:bg-emerald-950"
-                >
-                  View Business
-                </Button>
-              </div>
-            </Card>
+            <BusinessCard key={business.id} business={business} />
           ))}
         </div>
       )}

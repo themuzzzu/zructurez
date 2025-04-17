@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Home, AlertCircle, RefreshCw } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Layout } from "./layout/Layout";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 interface ErrorViewProps {
@@ -20,6 +20,8 @@ export const ErrorView = ({
   canRetry = true
 }: ErrorViewProps) => {
   const navigate = useNavigate();
+  const [retryCount, setRetryCount] = useState(0);
+  const [isClearing, setIsClearing] = useState(false);
   
   // Log error for debugging
   useEffect(() => {
@@ -31,6 +33,15 @@ export const ErrorView = ({
 
   // Handle retry with cache clearing
   const handleRetry = () => {
+    // Prevent multiple rapid clicks
+    if (isClearing) return;
+    
+    setIsClearing(true);
+    setRetryCount(prev => prev + 1);
+    
+    // Show toast notification
+    toast.loading("Clearing cache and reloading...");
+    
     // Clear any potential cache-related issues
     if ('caches' in window) {
       caches.keys().then(cacheNames => {
@@ -38,13 +49,32 @@ export const ErrorView = ({
           caches.delete(cacheName);
         });
         console.log('Cleared cache before retrying');
+        
+        // For persistent errors, try more aggressive cache clearing
+        if (retryCount > 1) {
+          // Clear localStorage cache keys
+          const cacheKeys = Object.keys(localStorage).filter(
+            key => key.includes('cache') || key.includes('map')
+          );
+          cacheKeys.forEach(key => localStorage.removeItem(key));
+          console.log('Cleared localStorage cache keys');
+        }
+        
+        // Add a small delay to ensure cache clearing completes
+        setTimeout(() => {
+          window.location.reload();
+        }, retryCount > 1 ? 500 : 200);
+      }).catch(err => {
+        console.error('Error clearing cache:', err);
+        // Reload anyway
+        window.location.reload();
       });
+    } else {
+      // If caches API is not available
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
     }
-    
-    // Add a small delay to ensure cache clearing completes
-    setTimeout(() => {
-      window.location.reload();
-    }, 100);
   };
 
   return (
@@ -78,9 +108,13 @@ export const ErrorView = ({
             </Button>
             
             {canRetry && (
-              <Button onClick={handleRetry} className="flex items-center gap-2 bg-primary">
-                <RefreshCw className="h-4 w-4" />
-                Try Again
+              <Button 
+                onClick={handleRetry} 
+                className="flex items-center gap-2 bg-primary"
+                disabled={isClearing}
+              >
+                <RefreshCw className={`h-4 w-4 ${isClearing ? 'animate-spin' : ''}`} />
+                {isClearing ? 'Reloading...' : 'Try Again'}
               </Button>
             )}
             

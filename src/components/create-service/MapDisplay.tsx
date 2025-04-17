@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Loader2, Map } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface MapDisplayProps {
   onLocationSelect: (location: string) => void;
@@ -18,14 +19,37 @@ export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) =
   const isMobileDevice = typeof window !== 'undefined' ? window.innerWidth < 768 : false;
   const mapLoadAttempts = useRef(0);
   const maxMapLoadAttempts = 3;
+  const permissionPromptShown = useRef(false);
 
   useEffect(() => {
+    // Load map with reduced delay to improve performance
+    const loadMap = () => {
+      if (!searchInput && !mapLocation) return;
+      
+      setIsLoading(true);
+      setMapLoadError(false);
+      
+      // Short delay to ensure React renders loading state first
+      setTimeout(() => {
+        if (mapRef.current) {
+          // Add cache busting
+          const cacheBust = `&cb=${Date.now()}`;
+          mapRef.current.src = getMapEmbedUrl(searchInput || mapLocation) + cacheBust;
+        }
+      }, 50);
+    };
+    
     // Check location permission status
     const checkPermission = async () => {
       if (typeof navigator !== 'undefined' && "permissions" in navigator) {
         try {
           const permission = await navigator.permissions.query({ name: "geolocation" as PermissionName });
           setLocationPermission(permission.state as 'granted' | 'denied' | 'prompt');
+          
+          // Listen for permission changes
+          permission.onchange = function() {
+            setLocationPermission(this.state as 'granted' | 'denied' | 'prompt');
+          };
         } catch (error) {
           console.error("Error checking geolocation permission:", error);
           setLocationPermission('unknown');
@@ -34,7 +58,12 @@ export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) =
     };
     
     checkPermission();
-  }, []);
+    
+    // If searchInput changes, update map
+    if (searchInput) {
+      loadMap();
+    }
+  }, [searchInput, mapLocation]);
 
   useEffect(() => {
     // Reset error state when input changes
@@ -59,7 +88,7 @@ export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) =
       // Simulate map loading with a lighter approach
       const timer = setTimeout(() => {
         setIsLoading(false);
-      }, 300);
+      }, 100); // Reduced delay for better performance
 
       return () => clearTimeout(timer);
     }
@@ -76,10 +105,10 @@ export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) =
     setMapLoadError(true);
     console.error("Map failed to load for location:", mapLocation);
     
-    // Auto-retry a limited number of times with increasing delay
+    // Auto-retry with exponential backoff
     if (mapLoadAttempts.current < maxMapLoadAttempts) {
       mapLoadAttempts.current += 1;
-      const retryDelay = 1000 * mapLoadAttempts.current;
+      const retryDelay = Math.pow(2, mapLoadAttempts.current - 1) * 1000; // Exponential backoff
       
       console.log(`Retrying map load (attempt ${mapLoadAttempts.current}/${maxMapLoadAttempts}) in ${retryDelay}ms`);
       
@@ -87,8 +116,8 @@ export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) =
         if (mapRef.current) {
           setIsLoading(true);
           setMapLoadError(false);
-          // Add cache-busting parameter
-          const cacheBuster = `&cb=${Date.now()}`;
+          // Add cache-busting parameter with attempt number
+          const cacheBuster = `&cb=${Date.now()}-${mapLoadAttempts.current}`;
           mapRef.current.src = getMapEmbedUrl(mapLocation) + cacheBuster;
         }
       }, retryDelay);
@@ -98,14 +127,25 @@ export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) =
   const requestLocationPermission = () => {
     if (!navigator.geolocation) return;
     
+    // Mark that we've shown the prompt
+    permissionPromptShown.current = true;
+    
     navigator.geolocation.getCurrentPosition(
       () => {
         setLocationPermission('granted');
-        window.location.reload(); // Refresh to apply new permission
+        // Reload to apply new permission, slightly delayed
+        setTimeout(() => {
+          if (mapRef.current) {
+            setIsLoading(true);
+            const cacheBuster = `&cb=${Date.now()}`;
+            mapRef.current.src = getMapEmbedUrl(mapLocation) + cacheBuster;
+          }
+        }, 500);
       },
       () => {
         setLocationPermission('denied');
-      }
+      },
+      { timeout: 10000, maximumAge: 60000 }
     );
   };
 
@@ -115,8 +155,16 @@ export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) =
     return `https://www.google.com/maps/embed/v1/place?key=AIzaSyBky_ax9Xw9iNRRWMwbdqXzneYgbO6iarI&q=${encodedLocation}`;
   };
 
-  // Cache busting query parameter to help avoid resource errors
-  const cacheBustParam = `&cb=${Date.now()}`;
+  // Show location prompt for mobile users who haven't been asked yet
+  useEffect(() => {
+    if (isMobileDevice && locationPermission === 'prompt' && !permissionPromptShown.current) {
+      const timer = setTimeout(() => {
+        requestLocationPermission();
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [locationPermission, isMobileDevice]);
 
   // Show permission prompt for mobile users
   if (isMobileDevice && locationPermission === 'denied') {
@@ -128,9 +176,11 @@ export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) =
           <Button onClick={requestLocationPermission}>
             Allow Location Access
           </Button>
-          <p className="text-xs text-muted-foreground mt-4">
-            Using manual location: {mapLocation}
-          </p>
+          <ScrollArea className="h-16 mt-4 w-full">
+            <p className="text-xs text-muted-foreground px-3">
+              Using manual location: {mapLocation}
+            </p>
+          </ScrollArea>
         </div>
       </div>
     );
@@ -159,14 +209,15 @@ export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) =
                 setMapLoadError(false);
                 if (mapRef.current) {
                   // Add cache-busting parameter
-                  mapRef.current.src = getMapEmbedUrl(mapLocation) + cacheBustParam;
+                  const cacheBuster = `&cb=${Date.now()}`;
+                  mapRef.current.src = getMapEmbedUrl(mapLocation) + cacheBuster;
                 }
               }}
             >
               Try Again
             </Button>
             <p className="text-xs text-muted-foreground mt-3 max-w-xs text-center">
-              To improve map loading, try refreshing the page or check your internet connection
+              To improve map loading, check your internet connection
             </p>
           </div>
         )}
@@ -174,7 +225,7 @@ export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) =
         {(locationPermission !== 'denied' || !isMobileDevice) && (
           <iframe 
             ref={mapRef}
-            src={`${getMapEmbedUrl(mapLocation)}${cacheBustParam}`}
+            src={`${getMapEmbedUrl(mapLocation)}&cb=${Date.now()}`}
             width="100%"
             height="100%"
             style={{ border: 0 }}

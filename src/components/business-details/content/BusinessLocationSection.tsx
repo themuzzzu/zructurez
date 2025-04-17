@@ -1,15 +1,16 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, memo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MapPin, ExternalLink, Loader2, Map } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface BusinessLocationSectionProps {
   businessName: string;
   location: string;
 }
 
-export const BusinessLocationSection = ({
+export const BusinessLocationSection = memo(({
   businessName,
   location
 }: BusinessLocationSectionProps) => {
@@ -18,6 +19,9 @@ export const BusinessLocationSection = ({
   const [mapUrl, setMapUrl] = useState<string>('');
   const [locationPermission, setLocationPermission] = useState<'granted' | 'denied' | 'prompt' | 'unknown'>('unknown');
   const isMobileDevice = typeof window !== 'undefined' ? window.innerWidth < 768 : false;
+  const mapRef = useRef<HTMLIFrameElement>(null);
+  const mapAttempts = useRef(0);
+  const maxAttempts = 3;
   
   useEffect(() => {
     // Check location permission status on mount
@@ -25,6 +29,11 @@ export const BusinessLocationSection = ({
       navigator.permissions.query({ name: "geolocation" as PermissionName })
         .then(permissionStatus => {
           setLocationPermission(permissionStatus.state as 'granted' | 'denied' | 'prompt');
+          
+          // Listen for permission changes
+          permissionStatus.onchange = function() {
+            setLocationPermission(this.state as 'granted' | 'denied' | 'prompt');
+          };
         })
         .catch(error => {
           console.error("Error checking location permission:", error);
@@ -35,8 +44,15 @@ export const BusinessLocationSection = ({
 
   useEffect(() => {
     // Generate the map URL when the component mounts or when location changes
+    if (!location) return;
+    
     const encodedLocation = encodeURIComponent(location);
     setMapUrl(`https://www.google.com/maps/embed/v1/place?key=AIzaSyBky_ax9Xw9iNRRWMwbdqXzneYgbO6iarI&q=${encodedLocation}`);
+    
+    // Reset map state when location changes
+    setIsMapLoading(true);
+    setMapError(false);
+    mapAttempts.current = 0;
   }, [location]);
   
   // Creates a Google Maps search URL based on business name and location
@@ -53,12 +69,31 @@ export const BusinessLocationSection = ({
   const handleMapLoad = () => {
     setIsMapLoading(false);
     setMapError(false);
+    mapAttempts.current = 0;
   };
   
   const handleMapError = () => {
     setIsMapLoading(false);
     setMapError(true);
     console.error("Map failed to load for location:", location);
+    
+    // Auto-retry logic with exponential backoff
+    if (mapAttempts.current < maxAttempts) {
+      const retryDelay = Math.pow(2, mapAttempts.current) * 1000; // Exponential backoff
+      mapAttempts.current += 1;
+      
+      console.log(`Retrying map load (attempt ${mapAttempts.current}/${maxAttempts}) in ${retryDelay}ms`);
+      
+      setTimeout(() => {
+        if (mapRef.current) {
+          setIsMapLoading(true);
+          setMapError(false);
+          // Add cache-busting parameter for each retry
+          const cacheBustParam = `&cb=${Date.now()}-${mapAttempts.current}`;
+          mapRef.current.src = `${mapUrl}${cacheBustParam}`;
+        }
+      }, retryDelay);
+    }
   };
   
   const requestLocationPermission = () => {
@@ -67,6 +102,16 @@ export const BusinessLocationSection = ({
     navigator.geolocation.getCurrentPosition(
       () => {
         setLocationPermission('granted');
+        // Reload the component when permission is granted
+        setTimeout(() => {
+          setIsMapLoading(true);
+          setMapError(false);
+          if (mapRef.current) {
+            // Add cache-busting parameter
+            const cacheBustParam = `&cb=${Date.now()}`;
+            mapRef.current.src = `${mapUrl}${cacheBustParam}`;
+          }
+        }, 500);
       },
       () => {
         setLocationPermission('denied');
@@ -88,7 +133,7 @@ export const BusinessLocationSection = ({
         <div className="space-y-4">
           <div className="flex items-start gap-2">
             <MapPin className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-            <p>{location}</p>
+            <p className="break-words">{location}</p>
           </div>
           
           <div className="aspect-video w-full bg-muted rounded-lg overflow-hidden relative">
@@ -109,6 +154,10 @@ export const BusinessLocationSection = ({
                   onClick={() => {
                     setIsMapLoading(true);
                     setMapError(false);
+                    if (mapRef.current) {
+                      const newCacheBustParam = `&cb=${Date.now()}`;
+                      mapRef.current.src = `${mapUrl}${newCacheBustParam}`;
+                    }
                   }}
                 >
                   Try Again
@@ -125,12 +174,15 @@ export const BusinessLocationSection = ({
                 <Button size="sm" onClick={requestLocationPermission}>
                   Allow Location Access
                 </Button>
-                <p className="text-xs text-muted-foreground mt-3">
-                  Manual location: {location}
-                </p>
+                <ScrollArea className="h-16 mt-3 w-full">
+                  <p className="text-xs text-muted-foreground px-2">
+                    Manual location: {location}
+                  </p>
+                </ScrollArea>
               </div>
             ) : shouldShowMap && mapUrl && (
               <iframe 
+                ref={mapRef}
                 src={`${mapUrl}${cacheBustParam}`}
                 width="100%" 
                 height="100%" 
@@ -139,6 +191,7 @@ export const BusinessLocationSection = ({
                 onError={handleMapError}
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
+                title={`Map of ${businessName} at ${location}`}
               ></iframe>
             )}
           </div>
@@ -151,4 +204,5 @@ export const BusinessLocationSection = ({
       </CardContent>
     </Card>
   );
-};
+});
+
