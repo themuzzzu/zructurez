@@ -1,4 +1,3 @@
-
 #root {
   width: 100%;
   margin: 0 auto;
@@ -275,4 +274,132 @@
     transform: none !important;
     animation: fade-in 0.2s ease-out !important;
   }
+}
+
+/* Additional responsive styles for settings */
+.settings-page {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Mobile optimizations for settings */
+@media (max-width: 768px) {
+  /* Fix settings page padding */
+  .settings-container {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+  
+  /* Fix small text on mobile */
+  .settings-text {
+    font-size: 14px !important;
+  }
+  
+  /* Better spacing for settings groups */
+  .settings-group {
+    margin-bottom: 16px !important;
+  }
+  
+  /* Improve color buttons layout */
+  .color-grid {
+    gap: 8px !important;
+  }
+  
+  /* Position modals better on mobile */
+  .modal-content {
+    width: 100% !important;
+    margin: 0 !important;
+    border-radius: 12px 12px 0 0 !important;
+    bottom: 0 !important;
+    top: auto !important;
+    position: fixed !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+  }
+}
+
+/* Theme specific CSS variables */
+:root.ui-blue {
+  --theme-primary: #1E40AF;
+  --theme-light: #DBEAFE;
+  --theme-dark: #1E3A8A;
+  --theme-accent: #3B82F6;
+}
+
+:root.ui-purple {
+  --theme-primary: #7E22CE;
+  --theme-light: #F3E8FF;
+  --theme-dark: #6B21A8;
+  --theme-accent: #A855F7;
+}
+
+:root.ui-green {
+  --theme-primary: #15803D;
+  --theme-light: #DCFCE7;
+  --theme-dark: #166534;
+  --theme-accent: #22C55E;
+}
+
+:root.ui-red {
+  --theme-primary: #B91C1C;
+  --theme-light: #FEE2E2;
+  --theme-dark: #991B1B;
+  --theme-accent: #EF4444;
+}
+
+:root.ui-yellow {
+  --theme-primary: #A16207;
+  --theme-light: #FEF9C3;
+  --theme-dark: #854D0E;
+  --theme-accent: #EAB308;
+}
+
+:root.ui-pink {
+  --theme-primary: #BE185D;
+  --theme-light: #FCE7F3;
+  --theme-dark: #9D174D;
+  --theme-accent: #EC4899;
+}
+
+:root.ui-orange {
+  --theme-primary: #C2410C;
+  --theme-light: #FFEDD5;
+  --theme-dark: #9A3412;
+  --theme-accent: #F97316;
+}
+
+:root.ui-teal {
+  --theme-primary: #115E59;
+  --theme-light: #CCFBF1;
+  --theme-dark: #134E4A;
+  --theme-accent: #14B8A6;
+}
+
+/* Apply font sizes globally based on setting */
+.font-size-75 {
+  font-size: 75%;
+}
+
+.font-size-80 {
+  font-size: 80%;
+}
+
+.font-size-90 {
+  font-size: 90%;
+}
+
+.font-size-100 {
+  font-size: 100%;
+}
+
+.font-size-110 {
+  font-size: 110%;
+}
+
+.font-size-125 {
+  font-size: 125%;
+}
+
+.font-size-150 {
+  font-size: 150%;
 }

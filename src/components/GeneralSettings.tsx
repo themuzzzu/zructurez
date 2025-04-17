@@ -79,6 +79,14 @@ export function GeneralSettings() {
     
     document.documentElement.classList.add(themeId);
     localStorage.setItem("uiTheme", themeId);
+    
+    // Set CSS variables for the theme color
+    document.documentElement.style.setProperty('--theme-color', colorName);
+    
+    // Trigger a custom event for theme changes
+    window.dispatchEvent(new CustomEvent('themeColorChanged', { 
+      detail: { themeColor: colorName }
+    }));
   };
 
   // Preview font size changes without saving
@@ -172,19 +180,19 @@ export function GeneralSettings() {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
+      <Card className="shadow-sm hover:shadow-md transition-shadow">
+        <CardHeader className="bg-muted/50">
           <CardTitle>{t("generalSettings")}</CardTitle>
           <CardDescription>
             {t("manageAccount")}
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-8">
+        <CardContent className="space-y-8 p-6">
           {/* Font Size */}
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <Label htmlFor="font-size" className="text-base font-medium">{t("fontSize")}</Label>
-              <span className="text-sm font-medium bg-secondary px-2 py-1 rounded">{previewFont}%</span>
+              <span className="text-sm font-medium bg-secondary px-2 py-1 rounded-full">{previewFont}%</span>
             </div>
             <Slider 
               id="font-size"
@@ -203,10 +211,10 @@ export function GeneralSettings() {
             </div>
           </div>
           
-          {/* UI Theme (renamed from UI Color) */}
+          {/* UI Theme Color */}
           <div className="space-y-4">
-            <Label htmlFor="theme" className="text-base font-medium">{t("theme")}</Label>
-            <div className="grid grid-cols-4 gap-3">
+            <Label htmlFor="theme" className="text-base font-medium">{t("themeColor")}</Label>
+            <div className="grid grid-cols-4 sm:grid-cols-4 gap-3">
               {uiColors.map((color) => (
                 <button
                   key={color.id}
@@ -220,31 +228,31 @@ export function GeneralSettings() {
                 </button>
               ))}
             </div>
-            <div className="mt-2 p-3 border rounded-md bg-background">
+            <div className="mt-2 p-4 border rounded-md bg-card">
               <p className="text-sm font-medium mb-2">{t("preview")}</p>
-              <div className={`p-3 rounded-md bg-${uiTheme}-500 bg-opacity-20 text-${uiTheme}-500`}>
-                <p className="text-sm">{t("previewText")}</p>
+              <div className={`p-4 rounded-md bg-${uiTheme}-500 bg-opacity-20 border border-${uiTheme}-200 dark:border-${uiTheme}-800`}>
+                <p className="text-sm text-${uiTheme}-700 dark:text-${uiTheme}-300">{t("previewText")}</p>
               </div>
             </div>
           </div>
           
           {/* Language Selection */}
-          <div className="space-y-2">
+          <div className="space-y-3">
             <Label htmlFor="language" className="text-base font-medium">{t("language")}</Label>
             <Select value={language} onValueChange={handleLanguageChange}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full h-11">
                 <SelectValue placeholder={t("selectLanguage")} />
               </SelectTrigger>
-              <SelectContent className="max-h-[200px]">
+              <SelectContent className="max-h-[300px] overflow-y-auto">
                 {languages.map((lang) => (
-                  <SelectItem key={lang.code} value={lang.code}>
+                  <SelectItem key={lang.code} value={lang.code} className="cursor-pointer">
                     {lang.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             {language !== "english" && (
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground mt-1 p-2 bg-muted rounded-md">
                 {t("translationNote")}
               </p>
             )}
@@ -252,12 +260,12 @@ export function GeneralSettings() {
           
           {/* Save Button */}
           <Button 
-            className="w-full" 
+            className="w-full h-11 font-medium text-base flex items-center justify-center gap-2" 
             onClick={saveSettings} 
             disabled={saving}
           >
             {saving ? t("saving") : t("saveSettings")}
-            <Save className="ml-2 h-4 w-4" />
+            <Save className="h-4 w-4" />
           </Button>
         </CardContent>
       </Card>

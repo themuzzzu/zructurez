@@ -20,6 +20,7 @@ import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { SidebarItem } from "./sidebar/SidebarItem";
 import { ThemeToggle } from "./sidebar/ThemeToggle";
 import { CollapseButton } from "./sidebar/CollapseButton";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export const Sidebar = ({ className }: React.HTMLAttributes<HTMLDivElement>) => {
   const navigate = useNavigate();
@@ -32,6 +33,7 @@ export const Sidebar = ({ className }: React.HTMLAttributes<HTMLDivElement>) => 
   const { theme, setTheme } = useTheme();
   const isMobile = useMediaQuery("(max-width: 768px)");
   const isDarkMode = theme === "dark";
+  const { t } = useLanguage();
 
   // Save collapse state to localStorage and dispatch custom event
   useEffect(() => {
@@ -47,16 +49,16 @@ export const Sidebar = ({ className }: React.HTMLAttributes<HTMLDivElement>) => 
   }, [location.pathname]);
 
   const routes = [
-    { name: "Home", path: "/", icon: Home },
-    { name: "Marketplace", path: "/marketplace", icon: ShoppingBag },
-    { name: "Services", path: "/services", icon: Wrench },
-    { name: "Business", path: "/businesses", icon: Building },
-    { name: "Jobs", path: "/jobs", icon: Briefcase },
-    { name: "Communities", path: "/communities", icon: Users },
-    { name: "Messages", path: "/messages", icon: MessageSquare },
-    { name: "Events", path: "/events", icon: Calendar },
-    { name: "Maps", path: "/maps", icon: Map },
-    { name: "Settings", path: "/settings", icon: Settings },
+    { name: t("home"), path: "/", icon: Home },
+    { name: t("marketplace"), path: "/marketplace", icon: ShoppingBag },
+    { name: t("services"), path: "/services", icon: Wrench },
+    { name: t("business"), path: "/businesses", icon: Building },
+    { name: t("jobs"), path: "/jobs", icon: Briefcase },
+    { name: t("communities"), path: "/communities", icon: Users },
+    { name: t("messages"), path: "/messages", icon: MessageSquare },
+    { name: t("events"), path: "/events", icon: Calendar },
+    { name: t("maps"), path: "/maps", icon: Map },
+    { name: t("settings"), path: "/settings", icon: Settings },
   ];
 
   const handleItemClick = (path: string) => {

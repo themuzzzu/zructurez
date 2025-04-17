@@ -19,6 +19,59 @@ export function LocationModalHandler() {
     }
   };
   
+  // Update modal positioning styles
+  useEffect(() => {
+    const updateModalStyles = () => {
+      // Add custom styles for modal positioning on small screens
+      const styleEl = document.createElement('style');
+      styleEl.id = 'location-modal-styles';
+      styleEl.innerHTML = `
+        @media (max-width: 768px) {
+          .location-modal-content {
+            position: fixed !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            margin: 0 !important;
+            max-height: 90vh !important;
+            border-bottom-left-radius: 0 !important;
+            border-bottom-right-radius: 0 !important;
+            border-top-left-radius: 12px !important;
+            border-top-right-radius: 12px !important;
+            animation: slideUp 0.3s ease-out !important;
+          }
+          
+          @keyframes slideUp {
+            from {
+              transform: translateY(100%);
+            }
+            to {
+              transform: translateY(0);
+            }
+          }
+        }
+      `;
+      
+      // Remove existing style element if it exists
+      const existingStyle = document.getElementById('location-modal-styles');
+      if (existingStyle) {
+        existingStyle.remove();
+      }
+      
+      document.head.appendChild(styleEl);
+    };
+    
+    updateModalStyles();
+    
+    // Remove styles on component unmount
+    return () => {
+      const styleEl = document.getElementById('location-modal-styles');
+      if (styleEl) {
+        styleEl.remove();
+      }
+    };
+  }, []);
+  
   return (
     <SimplifiedLocationPicker
       open={showLocationPicker}

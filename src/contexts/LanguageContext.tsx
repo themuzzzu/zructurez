@@ -50,6 +50,9 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
       document.documentElement.lang = newLanguage;
       document.documentElement.setAttribute("data-language", newLanguage);
       localStorage.setItem("language", newLanguage);
+      
+      // Add global language change event for component refreshes
+      window.dispatchEvent(new CustomEvent('languageChanged', { detail: { language: newLanguage } }));
     },
     t: translate,
   };

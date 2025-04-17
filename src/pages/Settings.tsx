@@ -87,7 +87,7 @@ const Settings = () => {
   };
 
   const LockedFeature = ({ title }: { title: string }) => (
-    <Card className="p-8 text-center">
+    <Card className="p-8 text-center shadow-sm hover:shadow-md transition-shadow">
       <div className="flex flex-col items-center justify-center gap-4">
         <div className="rounded-full bg-muted p-3">
           <div className="h-6 w-6 text-muted-foreground">🔒</div>
@@ -102,7 +102,7 @@ const Settings = () => {
 
   return (
     <Layout hideSidebar>
-      <div className="container max-w-[1400px] py-4 md:py-6 px-2 md:px-4">
+      <div className="container max-w-[1400px] py-4 md:py-6 px-2 md:px-4 settings-container">
         {!isMobile && (
           <Button 
             variant="outline" 
@@ -114,9 +114,9 @@ const Settings = () => {
             {t("backToHome")}
           </Button>
         )}
-        <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex flex-col md:flex-row gap-4 settings-page">
           <SettingsNav activeTab={activeTab} setActiveTab={setActiveTab} />
-          <div className="flex-1">{renderContent()}</div>
+          <div className="flex-1 settings-content">{renderContent()}</div>
         </div>
       </div>
     </Layout>
