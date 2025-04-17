@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { 
   reverseGeocode, 
@@ -48,7 +48,10 @@ export function useGeolocation() {
   >("unknown");
   
   const [retries, setRetries] = useState(0);
+  const [lastLocationUpdate, setLastLocationUpdate] = useState<number | null>(null);
   const MAX_RETRIES = 2;
+  const MIN_UPDATE_INTERVAL = 60000; // 1 minute minimum between location updates
+  const MIN_DISTANCE_CHANGE = 100; // 100 meters minimum distance to trigger update
 
   // Check permission status on mount
   useEffect(() => {
@@ -69,8 +72,50 @@ export function useGeolocation() {
     
     checkPermission();
   }, []);
+  
+  // Calculate distance between two points using Haversine formula
+  const calculateDistance = useCallback((lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 6371e3; // Earth radius in meters
+    const φ1 = (lat1 * Math.PI) / 180;
+    const φ2 = (lat2 * Math.PI) / 180;
+    const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+    const Δλ = ((lon2 - lon1) * Math.PI) / 180;
 
-  const requestGeolocation = async (forceHighAccuracy: boolean = true) => {
+    const a = 
+      Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+      Math.cos(φ1) * Math.cos(φ2) *
+      Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+      
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; // Distance in meters
+  }, []);
+  
+  // Check if location update is needed based on time and distance
+  const shouldUpdateLocation = useCallback((newPos: GeolocationPosition): boolean => {
+    const now = Date.now();
+    
+    // Always update if this is the first location
+    if (!state.position || !lastLocationUpdate) {
+      return true;
+    }
+    
+    // Check time interval
+    if ((now - lastLocationUpdate) < MIN_UPDATE_INTERVAL) {
+      return false;
+    }
+    
+    // Check distance threshold
+    const distance = calculateDistance(
+      state.position.latitude,
+      state.position.longitude,
+      newPos.latitude,
+      newPos.longitude
+    );
+    
+    return distance > MIN_DISTANCE_CHANGE;
+  }, [state.position, lastLocationUpdate, calculateDistance]);
+
+  const requestGeolocation = useCallback(async (forceHighAccuracy: boolean = true) => {
     // If on desktop, use default location instead of requesting geolocation
     if (!isMobileDevice()) {
       // For desktops/laptops, provide default location data without making API calls
@@ -121,17 +166,28 @@ export function useGeolocation() {
           
           console.log(`Location detected - Lat: ${latitude}, Lon: ${longitude}, Accuracy: ±${Math.round(accuracy)}m`);
           
-          // Store the precise location in state
+          // Create position object
+          const newPosition = { 
+            latitude, 
+            longitude, 
+            accuracy, 
+            timestamp: new Date().getTime()
+          };
+          
+          // Check if we should update location based on time and distance
+          if (!shouldUpdateLocation(newPosition)) {
+            setState(prev => ({ ...prev, loading: false }));
+            return;
+          }
+          
+          // Store the precise location in state and update last update time
           setState(prev => ({
             ...prev,
-            position: { 
-              latitude, 
-              longitude, 
-              accuracy, 
-              timestamp: new Date().getTime()
-            },
+            position: newPosition,
             loading: true, // Keep loading while we fetch address
           }));
+          
+          setLastLocationUpdate(Date.now());
 
           try {
             // Get detailed address using reverse geocoding
@@ -188,9 +244,9 @@ export function useGeolocation() {
             }));
             
             if (accuracy > 1000) {
-              toast.info("Location detected with low accuracy. Try again in an open area for better results.");
-            } else {
-              toast.success("Location detected successfully");
+              toast.info("Location detected with low accuracy.", {
+                description: "Try again in an open area for better results."
+              });
             }
           } catch (error) {
             console.error("Error reverse geocoding:", error);
@@ -205,8 +261,6 @@ export function useGeolocation() {
               fullAddress: 'Tadipatri, Andhra Pradesh 515411',
               address: 'Tadipatri, Andhra Pradesh 515411'
             }));
-            
-            toast.info("Using default location for Tadipatri area");
           }
         },
         (error) => {
@@ -243,7 +297,7 @@ export function useGeolocation() {
     
     // Start with high accuracy
     getPosition(forceHighAccuracy);
-  };
+  }, [shouldUpdateLocation, state.position, lastLocationUpdate]);
   
   const formatAddress = (addressInfo: any): string => {
     let formattedAddress = '';

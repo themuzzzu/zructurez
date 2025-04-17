@@ -1,11 +1,12 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MapPin, Store, Star, ArrowRightCircle } from "lucide-react";
+import { MapPin, Store, Star, ArrowRightCircle, MapOff } from "lucide-react";
 import { isMobileDevice } from "@/utils/locationUtils";
+import { useGeolocation } from "@/hooks/useGeolocation";
 
 interface LocalBusiness {
   id: string;
@@ -32,45 +33,25 @@ interface BusinessData {
 }
 
 export const LocalBusinessSpotlight = () => {
-  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
-  const [locationPermission, setLocationPermission] = useState<'granted' | 'denied' | 'pending'>('pending');
+  const { position, requestGeolocation, permissionStatus } = useGeolocation();
+  const [locationPermission, setLocationPermission] = useState<'granted' | 'denied' | 'prompt'>('prompt');
   const isDesktopDevice = !isMobileDevice();
 
+  // Update local permission state whenever the hook's state changes
   useEffect(() => {
-    // For desktop devices, use a default location directly
-    if (isDesktopDevice) {
-      setUserLocation({ latitude: 14.90409405, longitude: 78.00200075 });
-      setLocationPermission('granted');
-      return;
+    if (permissionStatus !== 'unknown') {
+      setLocationPermission(permissionStatus);
     }
-    
-    // For mobile devices, try to get the user's location
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          });
-          setLocationPermission('granted');
-        },
-        () => {
-          setLocationPermission('denied');
-          // Use default Tadipatri coordinates as fallback
-          setUserLocation({ latitude: 14.90409405, longitude: 78.00200075 });
-        }
-      );
-    } else {
-      setLocationPermission('denied');
-      // Use default Tadipatri coordinates as fallback
-      setUserLocation({ latitude: 14.90409405, longitude: 78.00200075 });
-    }
-  }, [isDesktopDevice]);
+  }, [permissionStatus]);
+
+  // For desktop devices, use default coordinates
+  const effectiveCoordinates = position || 
+    (isDesktopDevice ? { latitude: 14.90409405, longitude: 78.00200075 } : null);
 
   const { data: businessesData = [], isLoading } = useQuery({
-    queryKey: ['local-businesses', userLocation],
+    queryKey: ['local-businesses', effectiveCoordinates?.latitude, effectiveCoordinates?.longitude],
     queryFn: async () => {
-      if (!userLocation) return [];
+      if (!effectiveCoordinates) return [];
 
       const { data, error } = await supabase
         .from('businesses')
@@ -85,46 +66,40 @@ export const LocalBusinessSpotlight = () => {
         const totalRating = ratings.reduce((sum: number, rating: BusinessRating) => sum + (rating.rating || 0), 0);
         const avgRating = ratings.length > 0 ? totalRating / ratings.length : 0;
         
+        // Calculate rough distance if we have coordinates
+        let distance = Math.round(Math.random() * 10) / 10; // Default mock distance
+        
+        if (effectiveCoordinates && business.latitude && business.longitude) {
+          // Simple distance calculation (this is an approximation)
+          const R = 6371; // Earth radius in km
+          const dLat = (business.latitude - effectiveCoordinates.latitude) * Math.PI / 180;
+          const dLon = (business.longitude - effectiveCoordinates.longitude) * Math.PI / 180;
+          const a = 
+            Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(effectiveCoordinates.latitude * Math.PI / 180) * 
+            Math.cos(business.latitude * Math.PI / 180) *
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+          distance = Math.round((R * c) * 10) / 10; // Round to 1 decimal place
+        }
+        
         return {
           id: business.id,
           name: business.name,
           description: business.description,
           image_url: business.image_url,
           rating: avgRating, 
-          distance: Math.round(Math.random() * 10) / 10, // Mock distance
+          distance: distance,
           location: business.location
         };
       });
     },
-    enabled: !!userLocation,
+    enabled: !!effectiveCoordinates,
   });
 
-  const requestLocationPermission = () => {
-    if (isDesktopDevice) {
-      // For desktop, just use default location
-      setUserLocation({ latitude: 14.90409405, longitude: 78.00200075 });
-      setLocationPermission('granted');
-      return;
-    }
-    
-    // For mobile devices, try to get precise location
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          });
-          setLocationPermission('granted');
-        },
-        () => {
-          setLocationPermission('denied');
-          // Use default location as fallback
-          setUserLocation({ latitude: 14.90409405, longitude: 78.00200075 });
-        }
-      );
-    }
-  };
+  const handleRequestLocation = useCallback(() => {
+    requestGeolocation();
+  }, [requestGeolocation]);
 
   return (
     <div className="my-8 mobile-container">
@@ -138,28 +113,29 @@ export const LocalBusinessSpotlight = () => {
         </Button>
       </div>
 
-      {locationPermission === 'pending' && !isDesktopDevice && (
+      {!isDesktopDevice && locationPermission === 'prompt' && (
         <Card className="p-6 text-center">
           <p className="mb-4">Allow location access to discover businesses near you</p>
-          <Button onClick={requestLocationPermission} className="bg-emerald-600 hover:bg-emerald-700">
+          <Button onClick={handleRequestLocation} className="bg-emerald-600 hover:bg-emerald-700">
             Enable Location
           </Button>
         </Card>
       )}
 
-      {locationPermission === 'denied' && !isDesktopDevice && (
+      {!isDesktopDevice && locationPermission === 'denied' && (
         <Card className="p-6 text-center">
+          <MapOff className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
           <p className="mb-2">Location access is required to show nearby businesses</p>
           <p className="text-sm text-muted-foreground mb-4">
             Please enable location services in your browser settings
           </p>
-          <Button onClick={requestLocationPermission} variant="outline">
+          <Button onClick={handleRequestLocation} variant="outline">
             Try Again
           </Button>
         </Card>
       )}
 
-      {(locationPermission === 'granted' && isLoading) && (
+      {((isDesktopDevice || locationPermission === 'granted') && isLoading) && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, index) => (
             <Card key={index} className="animate-pulse">
@@ -174,14 +150,14 @@ export const LocalBusinessSpotlight = () => {
         </div>
       )}
 
-      {(locationPermission === 'granted' && !isLoading && businessesData.length === 0) && (
+      {((isDesktopDevice || locationPermission === 'granted') && !isLoading && businessesData.length === 0) && (
         <Card className="p-6 text-center">
           <p className="mb-2">No local businesses found near your location</p>
           <p className="text-sm text-muted-foreground">Try searching in a different area</p>
         </Card>
       )}
 
-      {(locationPermission === 'granted' && !isLoading && businessesData.length > 0) && (
+      {((isDesktopDevice || locationPermission === 'granted') && !isLoading && businessesData.length > 0) && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {businessesData.map((business: LocalBusiness) => (
             <Card key={business.id} className="overflow-hidden transition-all hover:shadow-lg">
