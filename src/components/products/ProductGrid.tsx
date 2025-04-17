@@ -11,7 +11,7 @@ interface ProductGridProps {
 
 export const ProductGrid: React.FC<ProductGridProps> = ({ 
   children, 
-  className,
+  className = "",
   gridLayout = "grid4x4"
 }) => {
   const getGridClasses = () => {
