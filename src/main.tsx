@@ -6,7 +6,5 @@ import "./index.css";
 
 // We don't need to wrap with providers here since they are already in App.tsx
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+  <App />
 );

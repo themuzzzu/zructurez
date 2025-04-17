@@ -9,10 +9,10 @@ import { DataTable } from "@/components/ui/data-table";
 import { RefreshCw, Plus, BarChart } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { AdCampaign } from "@/services/adService";
 import { AdPerformanceMetrics } from "./AdPerformanceMetrics";
 import { AdCreateForm } from "./AdCreateForm";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Advertisement } from "@/types/advertisement";
 
 export const AdDashboard = () => {
   const [activeTab, setActiveTab] = useState("active");
@@ -41,7 +41,7 @@ export const AdDashboard = () => {
         return [];
       }
 
-      return data as AdCampaign[];
+      return data as Advertisement[];
     },
   });
 
@@ -177,8 +177,9 @@ export const AdDashboard = () => {
 };
 
 // This is just a placeholder - you'll need to implement the actual table
-const AdCampaignsTable = ({ ads, status, onRefresh }) => {
+const AdCampaignsTable = ({ ads, status, onRefresh }: { ads: Advertisement[], status: string, onRefresh: () => Promise<void> }) => {
   const { toast } = useToast();
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
   
   // Delete ad function
   const deleteAd = async (id: string) => {
@@ -194,7 +195,7 @@ const AdCampaignsTable = ({ ads, status, onRefresh }) => {
         title: "Ad deleted successfully",
       });
       onRefresh();
-    } catch (error) {
+    } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Failed to delete ad",

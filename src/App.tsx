@@ -1,13 +1,15 @@
+
+import React, { useEffect, useState, lazy, Suspense } from "react";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { LocationProvider } from "@/providers/LocationProvider";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/react-query";
 import { Routes } from "./routes";
-import { useEffect, useState, lazy, Suspense } from "react";
 import { PageLoader } from "@/components/loaders/PageLoader";
 import { NetworkMonitor } from "@/providers/NetworkMonitor";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { AuthProvider } from "@/hooks/useAuth";
 import "./App.css";
 import "./styles/global.css";
 import "./styles/theme-manager.css"; // Import our theme manager
@@ -113,31 +115,35 @@ function App() {
   }, []);
 
   return (
-    <ErrorBoundary>
-      <ThemeProvider>
-        <LanguageProvider>
-          <QueryClientProvider client={queryClient}>
-            <NetworkMonitor>
-              <LocationProvider>
-                {isLoading ? (
-                  <PageLoader type="shimmer" />
-                ) : (
-                  <>
-                    <Routes />
-                    <Suspense fallback={null}>
-                      {resourcesLoaded && <LazyLocationModalHandler />}
-                    </Suspense>
-                    <Suspense fallback={null}>
-                      <LazyToaster position="top-center" />
-                    </Suspense>
-                  </>
-                )}
-              </LocationProvider>
-            </NetworkMonitor>
-          </QueryClientProvider>
-        </LanguageProvider>
-      </ThemeProvider>
-    </ErrorBoundary>
+    <React.StrictMode>
+      <ErrorBoundary>
+        <AuthProvider>
+          <ThemeProvider>
+            <LanguageProvider>
+              <QueryClientProvider client={queryClient}>
+                <NetworkMonitor>
+                  <LocationProvider>
+                    {isLoading ? (
+                      <PageLoader type="shimmer" />
+                    ) : (
+                      <>
+                        <Routes />
+                        <Suspense fallback={null}>
+                          {resourcesLoaded && <LazyLocationModalHandler />}
+                        </Suspense>
+                        <Suspense fallback={null}>
+                          <LazyToaster position="top-center" />
+                        </Suspense>
+                      </>
+                    )}
+                  </LocationProvider>
+                </NetworkMonitor>
+              </QueryClientProvider>
+            </LanguageProvider>
+          </ThemeProvider>
+        </AuthProvider>
+      </ErrorBoundary>
+    </React.StrictMode>
   );
 }
 

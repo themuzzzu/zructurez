@@ -1,32 +1,31 @@
 
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { AdCampaign } from "@/services/adService";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { AdCreateForm } from "./AdCreateForm";
-import { RefreshCw, Plus, Zap, DollarSign, BarChart } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { RefreshCw, Plus, Calendar, ChevronRight, Bar, BarChart, TrendingUp, Users } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { format, addDays } from "date-fns";
+import { useQuery } from "@tanstack/react-query";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Advertisement } from "@/types/advertisement";
 
 interface BusinessAdsDashboardProps {
   businessId?: string;
 }
 
 export const BusinessAdsDashboard = ({ businessId }: BusinessAdsDashboardProps) => {
-  const [activeTab, setActiveTab] = useState("active");
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState("active");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const { data: adCampaigns = [], refetch } = useQuery({
+  const { data: adCampaigns = [], refetch, isLoading: isLoadingQuery } = useQuery({
     queryKey: ["business-ads", businessId],
     queryFn: async () => {
       if (!businessId) return [];
-
+      
       const { data, error } = await supabase
         .from("advertisements")
         .select("*")
@@ -42,259 +41,316 @@ export const BusinessAdsDashboard = ({ businessId }: BusinessAdsDashboardProps) 
         return [];
       }
 
-      return data as AdCampaign[];
+      return data as Advertisement[];
     },
-    enabled: !!businessId,
+    enabled: !!businessId
   });
 
   const refreshData = async () => {
-    setIsRefreshing(true);
+    setIsLoading(true);
     await refetch();
-    setIsRefreshing(false);
+    setIsLoading(false);
     toast({
       title: "Ad campaigns refreshed",
     });
   };
 
-  const filterAdsByStatus = (status: string) => {
-    return adCampaigns.filter((ad) => ad.status === status);
-  };
+  // Filter ads by status
+  const activeAds = adCampaigns.filter(ad => ad.status === 'active');
+  const pendingAds = adCampaigns.filter(ad => ad.status === 'pending');
+  const expiredAds = adCampaigns.filter(ad => ad.status === 'expired' || ad.status === 'completed');
 
-  const activeAds = filterAdsByStatus("active");
-  const pendingAds = filterAdsByStatus("pending");
-  const expiredAds = filterAdsByStatus("expired");
+  if (isLoadingQuery) {
+    return (
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <Skeleton className="h-8 w-40" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Skeleton className="h-24" />
+          <Skeleton className="h-24" />
+          <Skeleton className="h-24" />
+        </div>
+        <Skeleton className="h-64" />
+      </div>
+    );
+  }
 
-  const totalClicks = adCampaigns.reduce((sum, ad) => sum + (ad.clicks || 0), 0);
-  const totalImpressions = adCampaigns.reduce((sum, ad) => sum + (ad.reach || 0), 0);
-  const totalBudget = adCampaigns.reduce((sum, ad) => sum + (ad.budget || 0), 0);
-  
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h3 className="font-semibold">Your Ad Campaigns</h3>
-          <p className="text-sm text-muted-foreground">Manage and track your business advertisements</p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={refreshData} disabled={isRefreshing}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`} />
-            Refresh
-          </Button>
-          <Button size="sm" onClick={() => setCreateDialogOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Create Ad
-          </Button>
-        </div>
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-medium">Ad Campaigns</h3>
+        <Button variant="outline" size="sm" onClick={refreshData} disabled={isLoading}>
+          <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`} />
+          Refresh
+        </Button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardContent className="pt-6">
-            <div className="flex justify-between items-start">
+            <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Active Campaigns</p>
+                <p className="text-sm font-medium text-muted-foreground">Active</p>
                 <p className="text-2xl font-bold">{activeAds.length}</p>
               </div>
-              <div className="bg-green-100 dark:bg-green-900 p-2 rounded-full">
-                <Zap className="h-5 w-5 text-green-600 dark:text-green-400" />
+              <div className="p-2 bg-green-100 rounded-full dark:bg-green-900/20">
+                <TrendingUp className="h-5 w-5 text-green-600 dark:text-green-400" />
               </div>
             </div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <div className="flex justify-between items-start">
+            <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Total Clicks</p>
-                <p className="text-2xl font-bold">{totalClicks}</p>
+                <p className="text-sm font-medium text-muted-foreground">Reach</p>
+                <p className="text-2xl font-bold">
+                  {adCampaigns.reduce((sum, ad) => sum + (ad.reach || 0), 0).toLocaleString()}
+                </p>
               </div>
-              <div className="bg-blue-100 dark:bg-blue-900 p-2 rounded-full">
-                <BarChart className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <div className="p-2 bg-blue-100 rounded-full dark:bg-blue-900/20">
+                <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </div>
             </div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <div className="flex justify-between items-start">
+            <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Total Impressions</p>
-                <p className="text-2xl font-bold">{totalImpressions}</p>
+                <p className="text-sm font-medium text-muted-foreground">Clicks</p>
+                <p className="text-2xl font-bold">
+                  {adCampaigns.reduce((sum, ad) => sum + (ad.clicks || 0), 0).toLocaleString()}
+                </p>
               </div>
-              <div className="bg-purple-100 dark:bg-purple-900 p-2 rounded-full">
+              <div className="p-2 bg-purple-100 rounded-full dark:bg-purple-900/20">
                 <BarChart className="h-5 w-5 text-purple-600 dark:text-purple-400" />
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Budget</p>
-                <p className="text-2xl font-bold">${totalBudget}</p>
-              </div>
-              <div className="bg-amber-100 dark:bg-amber-900 p-2 rounded-full">
-                <DollarSign className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="active">
             Active
-            {activeAds.length > 0 && (
-              <Badge variant="secondary" className="ml-2">
-                {activeAds.length}
-              </Badge>
-            )}
+            <Badge variant="secondary" className="ml-2">
+              {activeAds.length}
+            </Badge>
           </TabsTrigger>
           <TabsTrigger value="pending">
             Pending
-            {pendingAds.length > 0 && (
-              <Badge variant="secondary" className="ml-2">
-                {pendingAds.length}
-              </Badge>
-            )}
+            <Badge variant="secondary" className="ml-2">
+              {pendingAds.length}
+            </Badge>
           </TabsTrigger>
           <TabsTrigger value="expired">
             Expired
-            {expiredAds.length > 0 && (
-              <Badge variant="secondary" className="ml-2">
-                {expiredAds.length}
-              </Badge>
-            )}
+            <Badge variant="secondary" className="ml-2">
+              {expiredAds.length}
+            </Badge>
           </TabsTrigger>
         </TabsList>
-
-        <TabsContent value="active" className="space-y-4">
-          <CampaignsTable ads={activeAds} onRefresh={refreshData} />
+        
+        <TabsContent value="active">
+          <Card>
+            <CardHeader>
+              <CardTitle>Active Campaigns</CardTitle>
+              <CardDescription>
+                Your currently running ad campaigns
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {activeAds.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground">No active campaigns</p>
+                  </div>
+                ) : (
+                  activeAds.map((ad) => (
+                    <CampaignCard key={ad.id} ad={ad} onDelete={() => refreshData()} />
+                  ))
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
-
-        <TabsContent value="pending" className="space-y-4">
-          <CampaignsTable ads={pendingAds} onRefresh={refreshData} />
+        
+        <TabsContent value="pending">
+          <Card>
+            <CardHeader>
+              <CardTitle>Pending Review</CardTitle>
+              <CardDescription>
+                Campaigns waiting for approval
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {pendingAds.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground">No pending campaigns</p>
+                  </div>
+                ) : (
+                  pendingAds.map((ad) => (
+                    <CampaignCard key={ad.id} ad={ad} onDelete={() => refreshData()} />
+                  ))
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
-
-        <TabsContent value="expired" className="space-y-4">
-          <CampaignsTable ads={expiredAds} onRefresh={refreshData} />
+        
+        <TabsContent value="expired">
+          <Card>
+            <CardHeader>
+              <CardTitle>Expired Campaigns</CardTitle>
+              <CardDescription>
+                Past campaigns that are no longer running
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {expiredAds.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground">No expired campaigns</p>
+                  </div>
+                ) : (
+                  expiredAds.map((ad) => (
+                    <CampaignCard key={ad.id} ad={ad} onDelete={() => refreshData()} />
+                  ))
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
-
-      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <AdCreateForm
-            businessId={businessId}
-            onSuccess={() => {
-              setCreateDialogOpen(false);
-              refreshData();
-              toast({
-                title: "Ad campaign created successfully",
-                description: "Your ad is now pending review",
-              });
-            }}
-            onCancel={() => setCreateDialogOpen(false)}
-          />
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
 
-interface CampaignsTableProps {
-  ads: AdCampaign[];
-  onRefresh: () => void;
+interface CampaignCardProps {
+  ad: Advertisement;
+  onDelete: () => void;
 }
 
-const CampaignsTable = ({ ads, onRefresh }: CampaignsTableProps) => {
+const CampaignCard = ({ ad, onDelete }: CampaignCardProps) => {
   const { toast } = useToast();
-  
-  const deleteAd = async (id: string) => {
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const deleteAd = async () => {
+    if (!window.confirm("Are you sure you want to delete this campaign?")) return;
+    
+    setIsDeleting(true);
     try {
       const { error } = await supabase
         .from("advertisements")
         .delete()
-        .eq("id", id);
-      
+        .eq("id", ad.id);
+        
       if (error) throw error;
       
       toast({
-        title: "Ad deleted successfully",
+        title: "Campaign deleted",
       });
-      onRefresh();
-    } catch (error) {
+      onDelete();
+    } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Failed to delete ad",
+        title: "Failed to delete campaign",
         description: error.message,
       });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
-  if (ads.length === 0) {
-    return (
-      <Card className="border-dashed">
-        <CardContent className="flex flex-col items-center justify-center py-8">
-          <p className="text-muted-foreground text-center mb-4">No ads found in this category</p>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => document.querySelector('[data-create-ad-button="true"]')?.click()}
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Create a new ad campaign
-          </Button>
-        </CardContent>
-      </Card>
-    );
-  }
+  const viewDetails = () => {
+    // In a real app, this would navigate to a detailed view
+    toast({
+      title: "View ad details",
+      description: `Viewing details for ${ad.title}`,
+    });
+  };
 
   return (
-    <Card>
-      <CardContent className="p-0">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-muted/50">
-              <tr>
-                <th className="p-3 text-left">Title</th>
-                <th className="p-3 text-left">Type</th>
-                <th className="p-3 text-left hidden md:table-cell">Start Date</th>
-                <th className="p-3 text-left hidden md:table-cell">End Date</th>
-                <th className="p-3 text-left">Budget</th>
-                <th className="p-3 text-left hidden sm:table-cell">Performance</th>
-                <th className="p-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {ads.map((ad) => (
-                <tr key={ad.id} className="border-b hover:bg-muted/50">
-                  <td className="p-3">{ad.title}</td>
-                  <td className="p-3">
-                    <Badge variant="outline">{ad.type}</Badge>
-                  </td>
-                  <td className="p-3 hidden md:table-cell">
-                    {new Date(ad.start_date).toLocaleDateString()}
-                  </td>
-                  <td className="p-3 hidden md:table-cell">
-                    {new Date(ad.end_date).toLocaleDateString()}
-                  </td>
-                  <td className="p-3">${ad.budget}</td>
-                  <td className="p-3 hidden sm:table-cell">
-                    {`${ad.clicks || 0} clicks / ${ad.reach || 0} views`}
-                  </td>
-                  <td className="p-3 text-right">
-                    <Button variant="ghost" size="sm" onClick={() => deleteAd(ad.id)}>
-                      Delete
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+    <Card className="overflow-hidden">
+      <div className="grid grid-cols-1 md:grid-cols-5">
+        {ad.image_url && (
+          <div className="md:col-span-1 h-full">
+            <img 
+              src={ad.image_url} 
+              alt={ad.title} 
+              className="w-full h-full object-cover aspect-video md:aspect-square"
+            />
+          </div>
+        )}
+        <div className={`p-4 ${ad.image_url ? 'md:col-span-4' : 'md:col-span-5'}`}>
+          <div className="flex justify-between items-start mb-2">
+            <div>
+              <h4 className="font-medium">{ad.title}</h4>
+              <p className="text-sm text-muted-foreground">{ad.description}</p>
+            </div>
+            <Badge variant={ad.status === "active" ? "success" : ad.status === "pending" ? "warning" : "destructive"}>
+              {ad.status}
+            </Badge>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 my-4">
+            <div>
+              <p className="text-xs text-muted-foreground">Type</p>
+              <p className="text-sm font-medium">{ad.type}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Budget</p>
+              <p className="text-sm font-medium">₹{ad.budget}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Start Date</p>
+              <p className="text-sm font-medium">{format(new Date(ad.start_date), 'dd MMM yyyy')}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">End Date</p>
+              <p className="text-sm font-medium">{format(new Date(ad.end_date), 'dd MMM yyyy')}</p>
+            </div>
+          </div>
+          
+          <div className="flex justify-between items-center mt-4 pt-4 border-t">
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <p className="text-xs text-muted-foreground">Impressions</p>
+                <p className="text-sm font-medium">{ad.impressions || 0}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Clicks</p>
+                <p className="text-sm font-medium">{ad.clicks || 0}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">CTR</p>
+                <p className="text-sm font-medium">
+                  {ad.impressions ? ((ad.clicks || 0) / ad.impressions * 100).toFixed(2) : 0}%
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={viewDetails}>
+                Details
+              </Button>
+              <Button 
+                variant="destructive" 
+                size="sm" 
+                onClick={deleteAd} 
+                disabled={isDeleting}
+              >
+                {isDeleting ? "Deleting..." : "Delete"}
+              </Button>
+            </div>
+          </div>
         </div>
-      </CardContent>
+      </div>
     </Card>
   );
 };
