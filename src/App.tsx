@@ -39,14 +39,29 @@ function App() {
       document.documentElement.style.fontSize = `${savedFontSize}%`;
     }
     
-    // Force initial language translation
+    // Set the data-language attribute on HTML element
     const savedLanguage = localStorage.getItem("language");
+    if (savedLanguage) {
+      document.documentElement.setAttribute("data-language", savedLanguage);
+      
+      // For RTL languages (like Urdu), add appropriate direction
+      if (savedLanguage === "urdu") {
+        document.documentElement.setAttribute("dir", "rtl");
+      } else {
+        document.documentElement.removeAttribute("dir");
+      }
+    }
+    
+    // Force initial language translation
     if (savedLanguage) {
       const langEvent = new CustomEvent("language-changed", { 
         bubbles: true,
         detail: { language: savedLanguage } 
       });
       document.documentElement.dispatchEvent(langEvent);
+      window.dispatchEvent(new CustomEvent('languageChanged', { 
+        detail: { language: savedLanguage } 
+      }));
     }
     
     // Preload critical resources asynchronously
@@ -86,9 +101,34 @@ function App() {
     // Hide loader after resources loaded or timeout
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 300); // Reduced from 100ms
+    }, 300); // Reduced from 1000ms
     
     return () => clearTimeout(timer);
+  }, []);
+
+  // Listen for language changes to update direction attribute
+  useEffect(() => {
+    const handleLanguageChange = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      const language = customEvent.detail?.language;
+      
+      if (language) {
+        // Add appropriate direction for RTL languages
+        if (language === "urdu") {
+          document.documentElement.setAttribute("dir", "rtl");
+        } else {
+          document.documentElement.removeAttribute("dir");
+        }
+      }
+    };
+    
+    window.addEventListener("language-changed", handleLanguageChange);
+    document.addEventListener("language-changed", handleLanguageChange);
+    
+    return () => {
+      window.removeEventListener("language-changed", handleLanguageChange);
+      document.removeEventListener("language-changed", handleLanguageChange);
+    };
   }, []);
 
   return (

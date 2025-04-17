@@ -75,6 +75,17 @@ export function GeneralSettings() {
     setUiTheme(colorName);
     // Apply color globally
     updateDisplayPreferences("ui_color", colorName);
+    
+    // Apply the color theme class to document root
+    document.documentElement.classList.forEach(className => {
+      if (className.startsWith('ui-')) {
+        document.documentElement.classList.remove(className);
+      }
+    });
+    document.documentElement.classList.add(`ui-${colorName}`);
+    
+    // Save to local storage
+    localStorage.setItem("uiTheme", `ui-${colorName}`);
   };
 
   // Apply language changes to the application
@@ -88,6 +99,9 @@ export function GeneralSettings() {
     // Show toast with language change notification
     const langName = languages.find(lang => lang.code === value)?.name || value;
     toast.success(`${t("languageChanged")} ${langName}`);
+    
+    // Store in local storage
+    localStorage.setItem("language", value);
     
     // Force global language update event
     const langEvent = new CustomEvent("language-changed", { 
@@ -109,6 +123,9 @@ export function GeneralSettings() {
     
     // Apply the preview font size as the actual setting
     setFontSize(previewFont);
+    
+    // Save to local storage
+    localStorage.setItem("fontSize", previewFont.toString());
     
     // Update font size
     updateDisplayPreferences("font_size", previewFont).then(() => {

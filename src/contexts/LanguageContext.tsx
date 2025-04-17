@@ -20,6 +20,7 @@ const LanguageContext = createContext<LanguageContextType>(defaultContext);
 
 export const LanguageProvider = ({ children }: { children: React.ReactNode }) => {
   const [language, setLanguage] = useState<Language>("english");
+  const [translationObserver, setTranslationObserver] = useState<MutationObserver | null>(null);
 
   // Load saved language on component mount
   useEffect(() => {
@@ -74,15 +75,6 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
     
     indicator.textContent = `Language: ${langName}`;
     indicator.className = 'language-indicator';
-    indicator.style.position = 'fixed';
-    indicator.style.top = '80px';
-    indicator.style.right = '20px';
-    indicator.style.padding = '8px 16px';
-    indicator.style.backgroundColor = 'rgba(0,0,0,0.6)';
-    indicator.style.color = 'white';
-    indicator.style.borderRadius = '4px';
-    indicator.style.zIndex = '9999';
-    indicator.style.transition = 'opacity 0.5s';
     document.body.appendChild(indicator);
     
     // Auto-hide after 3 seconds
@@ -109,8 +101,13 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
     return translations.english[key] || key;
   };
   
-  // Function to translate ALL text in DOM
+  // Updated function to safely translate DOM text
   const translateAllDOMText = useCallback((lang: Language) => {
+    // Disconnect any existing observer before creating a new one
+    if (translationObserver) {
+      translationObserver.disconnect();
+    }
+
     // Skip for English (default language)
     if (lang === "english") return;
     
@@ -121,30 +118,22 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
       if (key) {
         const translatedText = translate(key);
         if (translatedText !== key) {
-          node.textContent = translatedText;
+          try {
+            node.textContent = translatedText;
+            node.setAttribute('data-translated', 'true');
+          } catch (error) {
+            console.error('Error translating element:', error);
+          }
         }
       }
     });
     
-    // Common UI elements to translate - comprehensive list
-    const commonUIElements = [
-      { selector: 'button, a.btn', textKey: 'text' },
-      { selector: 'h1, h2, h3, h4, h5, h6', textKey: 'title' },
-      { selector: 'label', textKey: 'label' },
-      { selector: 'p', textKey: 'paragraph' },
-      { selector: 'a:not(.btn)', textKey: 'link' },
-      { selector: 'span:not([data-no-translate])', textKey: 'text' },
-      { selector: 'th', textKey: 'column' },
-      { selector: 'input[type="submit"], button[type="submit"]', textKey: 'submit' },
-      { selector: '.card-title', textKey: 'card' },
-      { selector: '.nav-link', textKey: 'navigation' }
-    ];
-
-    // Navigation and sidebar items
+    // Translation mapping for common UI elements
     const navigationItems = [
       { text: "Home", key: "home" },
       { text: "Marketplace", key: "marketplace" }, 
       { text: "Services", key: "services" },
+      { text: "Businesses", key: "businesses" },
       { text: "Business", key: "business" },
       { text: "Jobs", key: "jobs" },
       { text: "Communities", key: "communities" },
@@ -155,6 +144,7 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
       { text: "Theme", key: "theme" },
       { text: "Search", key: "search" },
       { text: "Profile", key: "profile" },
+      { text: "More", key: "more" },
       { text: "Notifications", key: "notifications" },
       { text: "Log out", key: "logOut" },
       { text: "Sign in", key: "signIn" },
@@ -170,12 +160,17 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
       { text: "Price", key: "price" },
       { text: "Discount", key: "discount" },
       { text: "Reviews", key: "reviews" },
-      { text: "Rating", key: "rating" }
+      { text: "Rating", key: "rating" },
+      { text: "Categories", key: "categories" },
+      { text: "Browse by Category", key: "browseByCategory" },
+      { text: "Popular", key: "popular" },
+      { text: "Local Businesses", key: "localBusinesses" },
+      { text: "Register Business", key: "registerBusiness" }
     ];
-
-    // Translate common text content by comparing to known keys
-    const translateTextContent = (element: Element) => {
-      if (!element.textContent || element.hasAttribute('data-translated')) return;
+    
+    // Safe translation function that won't cause DOM errors
+    const safelyTranslateTextContent = (element: Element) => {
+      if (!element || !element.textContent || element.hasAttribute('data-translated')) return;
       
       const text = element.textContent.trim();
       if (!text || text.length < 2 || text.length > 50) return; // Skip empty or very long text
@@ -183,95 +178,118 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
       // Don't translate numbers, dates, and codes
       if (/^\d+(\.\d+)?$/.test(text) || /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(text)) return;
       
-      // Check navigation items
-      for (const item of navigationItems) {
-        if (text === item.text || text.includes(item.text)) {
-          const translatedText = translate(item.key);
-          if (translatedText !== item.key) {
-            element.textContent = element.textContent?.replace(item.text, translatedText);
-            element.setAttribute('data-translated', 'true');
-            return;
-          }
-        }
-      }
-      
-      // Check product terms
-      for (const term of productTerms) {
-        if (text === term.text || text.includes(term.text)) {
-          const translatedText = translate(term.key);
-          if (translatedText !== term.key) {
-            element.textContent = element.textContent?.replace(term.text, translatedText);
-            element.setAttribute('data-translated', 'true');
-            return;
-          }
-        }
-      }
-      
-      // Try direct translation for other UI elements
-      const normalizedKey = text.toLowerCase().replace(/\s+/g, '_');
-      const translatedText = translate(normalizedKey);
-      if (translatedText !== normalizedKey && translatedText !== text) {
-        element.textContent = translatedText;
-        element.setAttribute('data-translated', 'true');
-      }
-    };
-    
-    // Traverse the DOM and translate text nodes
-    const processNode = (node: Element) => {
-      // Skip script and style elements
-      if (node.tagName === 'SCRIPT' || node.tagName === 'STYLE' || 
-          node.getAttribute('data-no-translate') === 'true') {
-        return;
-      }
-      
-      // Process this element
-      translateTextContent(node);
-      
-      // Process children (if any)
-      for (const child of Array.from(node.children)) {
-        processNode(child);
-      }
-    };
-    
-    // Start translation from the body
-    processNode(document.body);
-    
-    // Set up mutation observer to translate dynamically added content
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach(mutation => {
-        if (mutation.type === 'childList') {
-          mutation.addedNodes.forEach(node => {
-            if (node.nodeType === Node.ELEMENT_NODE) {
-              processNode(node as Element);
+      try {
+        // Check navigation items
+        for (const item of navigationItems) {
+          if (text === item.text || text.includes(item.text)) {
+            const translatedText = translate(item.key);
+            if (translatedText !== item.key && element.textContent) {
+              element.textContent = element.textContent.replace(item.text, translatedText);
+              element.setAttribute('data-translated', 'true');
+              return;
             }
-          });
+          }
         }
-      });
-    });
-    
-    // Start observing
-    observer.observe(document.body, { 
-      childList: true,
-      subtree: true
-    });
-    
-    // Store observer to disconnect later
-    const currentLang = lang;
-    
-    // Disconnect observer when language changes
-    return () => {
-      if (currentLang !== language) {
-        observer.disconnect();
+        
+        // Check product terms
+        for (const term of productTerms) {
+          if (text === term.text || text.includes(term.text)) {
+            const translatedText = translate(term.key);
+            if (translatedText !== term.key && element.textContent) {
+              element.textContent = element.textContent.replace(term.text, translatedText);
+              element.setAttribute('data-translated', 'true');
+              return;
+            }
+          }
+        }
+        
+        // Try direct translation for other UI elements
+        const normalizedKey = text.toLowerCase().replace(/\s+/g, '_');
+        const translatedText = translate(normalizedKey);
+        if (translatedText !== normalizedKey && translatedText !== text) {
+          element.textContent = translatedText;
+          element.setAttribute('data-translated', 'true');
+        }
+      } catch (error) {
+        console.error('Error translating element:', error);
       }
     };
-  }, [language]);
-
-  // Re-translate visible text whenever language changes
-  useEffect(() => {
-    if (language !== 'english') {
-      translateAllDOMText(language);
+    
+    // Safe process node function that won't cause DOM errors
+    const safelyProcessNode = (node: Element) => {
+      try {
+        // Skip script and style elements
+        if (node.tagName === 'SCRIPT' || node.tagName === 'STYLE' || 
+            node.getAttribute('data-no-translate') === 'true') {
+          return;
+        }
+        
+        // Process this element
+        safelyTranslateTextContent(node);
+        
+        // Process children (if any)
+        Array.from(node.children).forEach(child => {
+          safelyProcessNode(child);
+        });
+      } catch (error) {
+        console.error('Error processing node for translation:', error);
+      }
+    };
+    
+    // Start translation from the body with safety checks
+    try {
+      if (document.body) {
+        safelyProcessNode(document.body);
+      }
+    } catch (error) {
+      console.error('Error translating body:', error);
     }
-  }, [language, translateAllDOMText]);
+    
+    // Create and set up a new mutation observer
+    try {
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach(mutation => {
+          if (mutation.type === 'childList') {
+            mutation.addedNodes.forEach(node => {
+              if (node.nodeType === Node.ELEMENT_NODE) {
+                try {
+                  safelyProcessNode(node as Element);
+                } catch (error) {
+                  console.error('Error translating dynamic node:', error);
+                }
+              }
+            });
+          }
+        });
+      });
+      
+      // Start observing with safer options
+      observer.observe(document.body, { 
+        childList: true,
+        subtree: true
+      });
+      
+      // Store the observer for later cleanup
+      setTranslationObserver(observer);
+    } catch (error) {
+      console.error('Error setting up translation observer:', error);
+    }
+    
+    return () => {
+      if (translationObserver) {
+        translationObserver.disconnect();
+      }
+    };
+  }, [language, translationObserver]);
+
+  // Clean up observer when component unmounts
+  useEffect(() => {
+    return () => {
+      if (translationObserver) {
+        translationObserver.disconnect();
+      }
+    };
+  }, [translationObserver]);
 
   const value = {
     language,

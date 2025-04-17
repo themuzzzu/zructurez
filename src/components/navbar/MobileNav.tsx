@@ -16,7 +16,8 @@ import {
 import { useTheme } from "../ThemeProvider";
 import { cn } from "@/lib/utils";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { useState, memo } from "react";
+import { useState, memo, useEffect } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // Create a simplified icon component for mobile nav
 const FilledIcon = memo(({ Icon }: { Icon: React.ElementType }) => {
@@ -49,20 +50,37 @@ export const MobileNav = () => {
   const isMobile = useMediaQuery("(max-width: 768px)");
   const isDarkMode = theme === "dark";
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const { t, language } = useLanguage();
 
-  // All navigation items
+  // Force re-render when language changes
+  const [, forceUpdate] = useState({});
+  useEffect(() => {
+    const handleLanguageChange = () => {
+      forceUpdate({});
+    };
+    
+    window.addEventListener('languageChanged', handleLanguageChange);
+    document.addEventListener('language-changed', handleLanguageChange);
+    
+    return () => {
+      window.removeEventListener('languageChanged', handleLanguageChange);
+      document.removeEventListener('language-changed', handleLanguageChange);
+    };
+  }, [language]);
+
+  // All navigation items with translations
   const allNavItems = [
-    { icon: Home, label: "Home", path: "/" },
-    { icon: ShoppingBag, label: "Marketplace", path: "/marketplace" },
-    { icon: Wrench, label: "Services", path: "/services" },
-    { icon: Building, label: "Business", path: "/businesses" },
-    { icon: Map, label: "Maps", path: "/maps" }, // Moved Maps to main navigation
-    { icon: MessageSquare, label: "Messages", path: "/messages" },
-    { icon: Users, label: "Communities", path: "/communities" },
-    { icon: Briefcase, label: "Jobs", path: "/jobs" },
-    { icon: Calendar, label: "Events", path: "/events" },
-    { icon: Heart, label: "Wishlist", path: "/wishlist" },
-    { icon: Settings, label: "Settings", path: "/settings" },
+    { icon: Home, label: t("home"), path: "/" },
+    { icon: ShoppingBag, label: t("marketplace"), path: "/marketplace" },
+    { icon: Wrench, label: t("services"), path: "/services" },
+    { icon: Building, label: t("business"), path: "/businesses" },
+    { icon: Map, label: t("maps"), path: "/maps" }, 
+    { icon: MessageSquare, label: t("messages"), path: "/messages" },
+    { icon: Users, label: t("communities"), path: "/communities" },
+    { icon: Briefcase, label: t("jobs"), path: "/jobs" },
+    { icon: Calendar, label: t("events"), path: "/events" },
+    { icon: Heart, label: t("wishlist"), path: "/wishlist" },
+    { icon: Settings, label: t("settings"), path: "/settings" },
   ];
 
   // Main navigation items for bottom bar
@@ -110,6 +128,7 @@ export const MobileNav = () => {
               )}
               onClick={() => handleNavClick(item)}
               aria-label={item.label}
+              data-translate={item.label.toLowerCase()}
             >
               {isActive ? (
                 <FilledIcon Icon={item.icon} />
@@ -117,9 +136,10 @@ export const MobileNav = () => {
                 <RegularIcon Icon={item.icon} />
               )}
               <span className={cn(
-                "text-[10px] font-medium",
+                "text-[10px] font-medium overflow-hidden text-ellipsis max-w-11",
                 isActive ? "text-primary dark:text-primary" : "text-zinc-500 dark:text-zinc-500"
-              )}>
+              )}
+              data-translate={item.label.toLowerCase()}>
                 {item.label}
               </span>
             </Button>
@@ -133,17 +153,17 @@ export const MobileNav = () => {
               variant="ghost" 
               size="icon"
               className="flex flex-col items-center justify-center h-14 w-14 p-0 gap-1 text-zinc-500 dark:text-zinc-500"
-              aria-label="More options"
+              aria-label={t("more")}
             >
               <div className="relative">
                 <MoreVertical className="h-5 w-5" />
               </div>
-              <span className="text-[10px] font-medium">More</span>
+              <span className="text-[10px] font-medium" data-translate="more">{t("more")}</span>
             </Button>
           </DrawerTrigger>
           <DrawerContent>
             <DrawerHeader>
-              <DrawerTitle>Menu</DrawerTitle>
+              <DrawerTitle data-translate="menu">{t("menu")}</DrawerTitle>
             </DrawerHeader>
             <div className="px-4 py-2 grid grid-cols-3 gap-4">
               {allNavItems.slice(5).map((item) => {
@@ -162,7 +182,9 @@ export const MobileNav = () => {
                       "h-5 w-5 mb-2",
                       isActive ? "text-primary" : "text-foreground"
                     )} />
-                    <span className="text-xs">{item.label}</span>
+                    <span className="text-xs" data-translate={item.label.toLowerCase()}>
+                      {item.label}
+                    </span>
                   </Button>
                 );
               })}
@@ -173,14 +195,14 @@ export const MobileNav = () => {
                 onClick={toggleTheme}
               >
                 <SunMoon className="h-5 w-5 mb-2" />
-                <span className="text-xs">
-                  {isDarkMode ? "Light" : "Dark"}
+                <span className="text-xs" data-translate={isDarkMode ? "light" : "dark"}>
+                  {t(isDarkMode ? "light" : "dark")}
                 </span>
               </Button>
             </div>
             <DrawerFooter>
               <DrawerClose asChild>
-                <Button variant="outline">Close</Button>
+                <Button variant="outline" data-translate="close">{t("close")}</Button>
               </DrawerClose>
             </DrawerFooter>
           </DrawerContent>

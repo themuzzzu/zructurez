@@ -1,5 +1,5 @@
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useSearch } from "@/hooks/useSearch";
 import { Search as SearchIcon, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useNavigate } from "react-router-dom";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface SearchBarProps {
   placeholder?: string;
@@ -19,7 +20,7 @@ interface SearchBarProps {
 }
 
 export function SearchBar({
-  placeholder = "Search...",
+  placeholder,
   onSearch,
   showSuggestions = true,
   autoFocus = false,
@@ -28,6 +29,12 @@ export function SearchBar({
   const navigate = useNavigate();
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { t } = useLanguage();
+  
+  // Create a memoized placeholder to avoid unnecessary re-renders
+  const translatedPlaceholder = useMemo(() => {
+    return placeholder || `${t("search")}...`;
+  }, [placeholder, t]);
   
   const {
     query,
@@ -76,11 +83,12 @@ export function SearchBar({
         <Input
           ref={inputRef}
           type="text"
-          placeholder={placeholder}
+          placeholder={translatedPlaceholder}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => showSuggestions && setShowSuggestions(true)}
           className="pl-10 pr-16 h-12 w-full bg-white dark:bg-zinc-900 border-zinc-300 dark:border-zinc-700 focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white"
+          aria-label={t("search")}
         />
         
         <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
@@ -91,6 +99,7 @@ export function SearchBar({
               size="icon"
               className="h-7 w-7 text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
               onClick={() => setQuery("")}
+              aria-label={t("clear")}
             >
               <X className="h-4 w-4" />
             </Button>
@@ -114,7 +123,7 @@ export function SearchBar({
                 <span>{suggestion.term}</span>
                 {suggestion.isSponsored && (
                   <Badge variant="outline" className="text-xs border-zinc-300 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400">
-                    Sponsored
+                    {t("sponsored")}
                   </Badge>
                 )}
               </li>

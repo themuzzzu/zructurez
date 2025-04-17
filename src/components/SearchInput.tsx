@@ -2,6 +2,7 @@
 import { Search } from "lucide-react";
 import { Input } from "./ui/input";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface SearchInputProps {
   placeholder?: string;
@@ -22,6 +23,11 @@ export const SearchInput = ({
   autoFocus = false,
   disabled = false
 }: SearchInputProps) => {
+  const { t } = useLanguage();
+  
+  // Default to translated placeholder if specific one isn't provided
+  const translatedPlaceholder = placeholder === "Search..." ? t("search") + "..." : placeholder;
+  
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && onSubmit) {
       onSubmit();
@@ -33,7 +39,7 @@ export const SearchInput = ({
       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-zinc-400 z-10" />
       <Input
         type="search"
-        placeholder={placeholder}
+        placeholder={translatedPlaceholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={handleKeyDown}
@@ -44,6 +50,7 @@ export const SearchInput = ({
           "rounded-md border-muted",
           disabled && "opacity-70 cursor-not-allowed"
         )}
+        aria-label={t("search")}
       />
     </div>
   );
