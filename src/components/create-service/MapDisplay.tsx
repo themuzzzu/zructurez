@@ -7,25 +7,39 @@ interface MapDisplayProps {
   searchInput: string;
 }
 
-export const MapDisplay = ({ onLocationSelect }: MapDisplayProps) => {
+export const MapDisplay = ({ onLocationSelect, searchInput }: MapDisplayProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<HTMLIFrameElement>(null);
+  const [mapLocation, setMapLocation] = useState("Tadipatri, Andhra Pradesh 515411");
 
   useEffect(() => {
-    // Set default location
-    onLocationSelect("Tadipatri, Andhra Pradesh 515411");
+    // Default location
+    const defaultLocation = "Tadipatri, Andhra Pradesh 515411";
+    
+    // Use searchInput if provided, otherwise use default
+    const locationToShow = searchInput || defaultLocation;
+    
+    // Set the selected location
+    onLocationSelect(locationToShow);
+    setMapLocation(locationToShow);
     
     // Simulate map loading with a lighter approach
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 500); // Reduced loading time
+    }, 500);
 
     return () => clearTimeout(timer);
-  }, [onLocationSelect]);
+  }, [onLocationSelect, searchInput]);
 
   const handleMapLoad = () => {
     setIsLoading(false);
+  };
+
+  // Create a Google Maps embed URL from a location string
+  const getMapEmbedUrl = (location: string) => {
+    const encodedLocation = encodeURIComponent(location);
+    return `https://www.google.com/maps/embed/v1/place?key=AIzaSyBky_ax9Xw9iNRRWMwbdqXzneYgbO6iarI&q=${encodedLocation}`;
   };
 
   return (
@@ -39,7 +53,7 @@ export const MapDisplay = ({ onLocationSelect }: MapDisplayProps) => {
         )}
         <iframe 
           ref={mapRef}
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d30844.733356070145!2d78.00200075!3d14.90409405!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bb41cadcd3b8d9f%3A0xd1bff73d9d4719fc!2sTadipatri%2C%20Andhra%20Pradesh%20515411!5e0!3m2!1sen!2sin!4v1735109120186!5m2!1sen!2sin"
+          src={getMapEmbedUrl(mapLocation)}
           width="100%"
           height="100%"
           style={{ border: 0 }}

@@ -1,4 +1,3 @@
-
 import { 
   normalizeLocationName as normalizeCityName, 
   AVAILABLE_CITIES 
@@ -8,9 +7,67 @@ import { toast } from 'sonner';
 // Export normalizeLocationName from this file
 export const normalizeLocationName = normalizeCityName;
 
-// Use OpenStreetMap's Nominatim for reverse geocoding (free)
+// Detect if device is mobile/tablet
+export const isMobileDevice = () => {
+  return window.innerWidth < 768 || 
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+};
+
+// Use OpenStreetMap's Nominatim for reverse geocoding (free) with rate limiting
+const geocodingRequests = new Map();
+const GEOCODING_THROTTLE_MS = 2000; // Minimum time between requests
+
 export const reverseGeocode = async (lat: number, lon: number) => {
   try {
+    // Create a key for this request to avoid duplicates
+    const requestKey = `${lat.toFixed(4)},${lon.toFixed(4)}`;
+    
+    // Check if we've made this request recently
+    const lastRequestTime = geocodingRequests.get(requestKey);
+    const now = Date.now();
+    
+    if (lastRequestTime && (now - lastRequestTime) < GEOCODING_THROTTLE_MS) {
+      console.log(`Skipping geocoding request for ${requestKey}, too soon since last request`);
+      throw new Error('Rate limiting geocoding requests');
+    }
+    
+    // On desktop and laptop devices, don't make geocoding requests, use default location
+    if (!isMobileDevice()) {
+      return {
+        city: 'Tadipatri',
+        neighborhood: '',
+        street: '',
+        state: 'Andhra Pradesh',
+        country: 'India',
+        postcode: '515411',
+        suburb: '',
+        displayName: 'Tadipatri, Andhra Pradesh, India'
+      };
+    }
+    
+    // Record this request time
+    geocodingRequests.set(requestKey, now);
+    
+    // Clean up old requests (keep map size manageable)
+    if (geocodingRequests.size > 20) {
+      const oldestKey = [...geocodingRequests.keys()][0];
+      geocodingRequests.delete(oldestKey);
+    }
+    
+    // Use fallback data if coordinates are near Tadipatri
+    if (isTadipatriArea(lat, lon)) {
+      return {
+        street: '',
+        neighborhood: '',
+        city: 'Tadipatri',
+        state: 'Andhra Pradesh',
+        country: 'India',
+        postcode: '515411',
+        suburb: '',
+        displayName: 'Tadipatri, Andhra Pradesh, India'
+      };
+    }
+    
     const response = await fetch(
       `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`,
       { 
@@ -70,7 +127,18 @@ export const reverseGeocode = async (lat: number, lon: number) => {
     };
   } catch (error) {
     console.error("Error in reverse geocoding:", error);
-    throw error;
+    
+    // Provide fallback data for desktop devices and when geocoding fails
+    return {
+      street: '',
+      neighborhood: '',
+      city: 'Tadipatri',
+      state: 'Andhra Pradesh',
+      country: 'India',
+      postcode: '515411',
+      suburb: '',
+      displayName: 'Tadipatri, Andhra Pradesh 515411, India'
+    };
   }
 };
 
@@ -90,7 +158,23 @@ const isTadipatriArea = (lat: number, lon: number): boolean => {
 // Get a more accurate address using OpenStreetMap
 export const getAccurateAddress = async (latitude: number, longitude: number): Promise<string> => {
   try {
-    // First try with OpenStreetMap
+    // For desktop devices, return a default address to avoid API calls
+    if (!isMobileDevice()) {
+      return "Tadipatri, Andhra Pradesh 515411";
+    }
+    
+    // For mobile devices, try with OpenStreetMap but with rate limiting
+    const requestKey = `${latitude.toFixed(4)},${longitude.toFixed(4)}`;
+    const lastRequestTime = geocodingRequests.get(`accurate-${requestKey}`);
+    const now = Date.now();
+    
+    if (lastRequestTime && (now - lastRequestTime) < GEOCODING_THROTTLE_MS) {
+      return "Tadipatri, Andhra Pradesh"; // Fallback when rate limiting
+    }
+    
+    // Record this request
+    geocodingRequests.set(`accurate-${requestKey}`, now);
+    
     const osmAddressInfo = await reverseGeocode(latitude, longitude);
     
     // Format the address using the accurate components
@@ -115,10 +199,10 @@ export const getAccurateAddress = async (latitude: number, longitude: number): P
       formattedAddress += formattedAddress ? `, ${osmAddressInfo.state}` : osmAddressInfo.state;
     }
     
-    return formattedAddress || osmAddressInfo.displayName || "Unknown location";
+    return formattedAddress || osmAddressInfo.displayName || "Tadipatri, Andhra Pradesh";
   } catch (error) {
     console.error("Error getting accurate address:", error);
-    return "Location detection failed";
+    return "Tadipatri, Andhra Pradesh 515411";
   }
 };
 
@@ -220,6 +304,13 @@ export const showLocationAccessPrompt = () => {
     // Check if we've already shown this prompt before
     if (localStorage.getItem('locationPromptShown') === 'true') {
       resolve(true);
+      return;
+    }
+    
+    // For desktop devices, don't show the prompt
+    if (!isMobileDevice()) {
+      localStorage.setItem('locationPromptShown', 'true');
+      resolve(false);
       return;
     }
     

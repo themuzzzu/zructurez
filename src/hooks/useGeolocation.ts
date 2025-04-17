@@ -6,7 +6,8 @@ import {
   normalizeLocationName, 
   getAccurateAddress,
   storePreciseLocation,
-  showLocationAccessPrompt
+  showLocationAccessPrompt,
+  isMobileDevice
 } from "@/utils/locationUtils";
 import { AVAILABLE_CITIES, normalizeLocationName as normalizeCity } from "@/utils/cityAvailabilityUtils";
 
@@ -47,7 +48,7 @@ export function useGeolocation() {
   >("unknown");
   
   const [retries, setRetries] = useState(0);
-  const MAX_RETRIES = 3;
+  const MAX_RETRIES = 2;
 
   // Check permission status on mount
   useEffect(() => {
@@ -70,6 +71,30 @@ export function useGeolocation() {
   }, []);
 
   const requestGeolocation = async (forceHighAccuracy: boolean = true) => {
+    // If on desktop, use default location instead of requesting geolocation
+    if (!isMobileDevice()) {
+      // For desktops/laptops, provide default location data without making API calls
+      const defaultPosition = { 
+        latitude: 14.90409405, 
+        longitude: 78.00200075,
+        accuracy: 1000
+      };
+      
+      setState(prev => ({
+        ...prev,
+        position: defaultPosition,
+        loading: false,
+        error: null,
+        cityName: 'Tadipatri',
+        stateName: 'Andhra Pradesh',
+        fullAddress: 'Tadipatri, Andhra Pradesh 515411',
+        address: 'Tadipatri, Andhra Pradesh 515411'
+      }));
+      
+      return;
+    }
+    
+    // Continue with mobile geolocation request
     if (!navigator.geolocation) {
       setState(prev => ({
         ...prev,
@@ -169,12 +194,19 @@ export function useGeolocation() {
             }
           } catch (error) {
             console.error("Error reverse geocoding:", error);
+            
+            // Use default location data if geocoding fails
             setState(prev => ({
               ...prev,
               loading: false,
-              error: "Failed to get precise address"
+              error: null,
+              cityName: 'Tadipatri',
+              stateName: 'Andhra Pradesh',
+              fullAddress: 'Tadipatri, Andhra Pradesh 515411',
+              address: 'Tadipatri, Andhra Pradesh 515411'
             }));
-            toast.error("Could not determine your exact address");
+            
+            toast.info("Using default location for Tadipatri area");
           }
         },
         (error) => {
@@ -284,6 +316,7 @@ export function useGeolocation() {
     ...state, 
     requestGeolocation, 
     permissionStatus,
-    getDistanceBetweenCoordinates
+    getDistanceBetweenCoordinates,
+    isDesktop: !isMobileDevice()
   };
 }

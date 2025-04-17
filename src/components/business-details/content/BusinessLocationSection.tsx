@@ -21,6 +21,12 @@ export const BusinessLocationSection = ({
     return `https://www.google.com/maps/search/?api=1&query=${query}`;
   };
 
+  // Get a static map URL for the given location
+  const getStaticMapUrl = () => {
+    const encodedLocation = encodeURIComponent(location);
+    return `https://www.google.com/maps/embed/v1/place?key=AIzaSyBky_ax9Xw9iNRRWMwbdqXzneYgbO6iarI&q=${encodedLocation}`;
+  };
+
   // Handle opening directions in Google Maps
   const openDirections = () => {
     window.open(getGoogleMapsUrl(), '_blank');
@@ -50,12 +56,13 @@ export const BusinessLocationSection = ({
             )}
             
             <iframe 
-              src={`https://www.openstreetmap.org/export/embed.html?bbox=${77.96}%2C${14.89}%2C${78.00}%2C${14.92}&layer=mapnik`}
+              src={getStaticMapUrl()}
               width="100%" 
               height="100%" 
               style={{ border: 0 }}
               onLoad={handleMapLoad}
               loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
             ></iframe>
           </div>
           

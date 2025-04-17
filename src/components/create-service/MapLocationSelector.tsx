@@ -15,46 +15,45 @@ interface MapLocationSelectorProps {
 export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<string>(value);
-  const [isLoading, setIsLoading] = useState(true);
   const [manualLocation, setManualLocation] = useState(value);
-  const mapLoadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [searchInput, setSearchInput] = useState("");
+  const isMobileDevice = useRef(window.innerWidth < 768);
 
   useEffect(() => {
-    // Set a timeout to consider the map loaded after a reasonable amount of time
-    // This prevents infinite loading states if the Google Maps event never fires
-    mapLoadTimeoutRef.current = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
-    
-    const handleGoogleMapsLoaded = () => {
-      setIsLoading(false);
-      if (mapLoadTimeoutRef.current) {
-        clearTimeout(mapLoadTimeoutRef.current);
-      }
+    const handleResize = () => {
+      isMobileDevice.current = window.innerWidth < 768;
     };
-
-    if (window.google?.maps) {
-      setIsLoading(false);
-      if (mapLoadTimeoutRef.current) {
-        clearTimeout(mapLoadTimeoutRef.current);
-      }
-    }
-
-    window.addEventListener('google-maps-loaded', handleGoogleMapsLoaded);
-    
-    return () => {
-      window.removeEventListener('google-maps-loaded', handleGoogleMapsLoaded);
-      if (mapLoadTimeoutRef.current) {
-        clearTimeout(mapLoadTimeoutRef.current);
-      }
-    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Use a smaller handler to improve performance
+  // Update manual location input when value changes from outside
+  useEffect(() => {
+    setManualLocation(value);
+  }, [value]);
+
   const handleConfirm = () => {
+    // Prioritize manual location input
     const finalLocation = manualLocation || selectedLocation;
     onChange(finalLocation);
     setIsOpen(false);
+    
+    // Update search input for the map display
+    if (finalLocation) {
+      setSearchInput(finalLocation);
+    }
+  };
+
+  // Handle manual location input change
+  const handleManualLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setManualLocation(e.target.value);
+  };
+
+  // Handle search button click
+  const handleSearchLocation = () => {
+    if (manualLocation.trim()) {
+      setSearchInput(manualLocation);
+    }
   };
 
   return (
@@ -72,7 +71,7 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
       <Dialog open={isOpen} onOpenChange={(open) => {
         setIsOpen(open);
         if (!open) {
-          // Clean up resources when dialog is closed
+          // Reset state when dialog is closed
           setSelectedLocation(value);
           setManualLocation(value);
         }
@@ -85,14 +84,25 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="manual-location">Enter Location</Label>
-              <Input
-                id="manual-location"
-                type="text"
-                placeholder="Type your location..."
-                value={manualLocation}
-                onChange={(e) => setManualLocation(e.target.value)}
-                className="w-full"
-              />
+              <div className="flex gap-2">
+                <Input
+                  id="manual-location"
+                  type="text"
+                  placeholder="Type your location..."
+                  value={manualLocation}
+                  onChange={handleManualLocationChange}
+                  className="w-full"
+                  autoFocus={!isMobileDevice.current}
+                />
+                <Button type="button" onClick={handleSearchLocation}>
+                  Search
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {isMobileDevice.current ? 
+                  "You can type your location or select from the map below" : 
+                  "For best performance, please enter your location manually"}
+              </p>
             </div>
 
             {/* Only render MapDisplay when dialog is open to save resources */}
@@ -101,7 +111,7 @@ export const MapLocationSelector = ({ value, onChange }: MapLocationSelectorProp
                 <Label>Or select from map</Label>
                 <MapDisplay 
                   onLocationSelect={setSelectedLocation}
-                  searchInput=""
+                  searchInput={searchInput}
                 />
               </div>
             )}
