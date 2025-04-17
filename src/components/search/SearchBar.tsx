@@ -29,13 +29,10 @@ export function SearchBar({
   const navigate = useNavigate();
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const { t, language } = useLanguage();
+  const { t, tDynamic, language } = useLanguage();
+  const [translatedPlaceholder, setTranslatedPlaceholder] = useState<string>("");
   
-  // Create a memoized placeholder to avoid unnecessary re-renders
-  const translatedPlaceholder = useMemo(() => {
-    return placeholder || `${t("search")}...`;
-  }, [placeholder, t]);
-  
+  // Load the search state
   const {
     query,
     setQuery,
@@ -47,6 +44,28 @@ export function SearchBar({
   } = useSearch({
     suggestionsEnabled: showSuggestions,
   });
+  
+  // Update the placeholder when language changes
+  useEffect(() => {
+    // Default placeholder text
+    const defaultText = `${t("search")}...`;
+    setTranslatedPlaceholder(placeholder || defaultText);
+    
+    // For custom placeholders that aren't in the static translations
+    if (placeholder && placeholder !== "Search..." && language !== "english") {
+      const translateCustomPlaceholder = async () => {
+        try {
+          const custom = await tDynamic(placeholder);
+          setTranslatedPlaceholder(custom);
+        } catch (error) {
+          console.error("Error translating placeholder:", error);
+          setTranslatedPlaceholder(placeholder); 
+        }
+      };
+      
+      translateCustomPlaceholder();
+    }
+  }, [placeholder, language, t, tDynamic]);
   
   // Set RTL properties based on language
   const isRTL = language === "urdu";
@@ -71,24 +90,13 @@ export function SearchBar({
   useEffect(() => {
     if (!inputRef.current) return;
     
-    const handleLanguageChange = () => {
-      if (!inputRef.current) return;
-      
-      if (isRTL) {
-        inputRef.current.dir = "rtl";
-        inputRef.current.style.textAlign = "right";
-      } else {
-        inputRef.current.dir = "ltr";
-        inputRef.current.style.textAlign = "left";
-      }
-    };
-    
-    handleLanguageChange();
-    window.addEventListener('languageChanged', handleLanguageChange);
-    
-    return () => {
-      window.removeEventListener('languageChanged', handleLanguageChange);
-    };
+    if (isRTL) {
+      inputRef.current.dir = "rtl";
+      inputRef.current.style.textAlign = "right";
+    } else {
+      inputRef.current.dir = "ltr";
+      inputRef.current.style.textAlign = "left";
+    }
   }, [language, isRTL]);
   
   // Handle search submission
@@ -107,6 +115,30 @@ export function SearchBar({
     }
   };
 
+  // Translate suggestion items asynchronously
+  const [translatedSuggestions, setTranslatedSuggestions] = useState<{id: string, term: string, isSponsored: boolean}[]>([]);
+  
+  // Update translations for suggestions when they change
+  useEffect(() => {
+    if (!suggestions.length || language === 'english') {
+      setTranslatedSuggestions(suggestions);
+      return;
+    }
+    
+    // Only translate if not in English
+    const translateSuggestions = async () => {
+      const translated = await Promise.all(
+        suggestions.map(async (suggestion) => ({
+          ...suggestion,
+          term: await tDynamic(suggestion.term)
+        }))
+      );
+      setTranslatedSuggestions(translated);
+    };
+    
+    translateSuggestions();
+  }, [suggestions, language, tDynamic]);
+
   return (
     <div ref={searchRef} className={`relative search-bar-container ${className}`}>
       <form onSubmit={handleSubmit} className="relative">
@@ -122,7 +154,7 @@ export function SearchBar({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => showSuggestions && setShowSuggestions(true)}
-          className={`h-12 w-full bg-white dark:bg-zinc-900 border-zinc-300 dark:border-zinc-700 focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white ${
+          className={`h-12 w-full bg-white dark:bg-zinc-900 border-zinc-300 dark:border-zinc-700 focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white transition-all duration-200 ${
             isRTL ? "pr-10 pl-16 text-right" : "pl-10 pr-16"
           }`}
           aria-label={t("search")}
@@ -149,18 +181,22 @@ export function SearchBar({
       </form>
       
       {/* Suggestions dropdown */}
-      {showSuggestionsState && suggestions.length > 0 && (
+      {showSuggestionsState && translatedSuggestions.length > 0 && (
         <Card className="absolute z-50 w-full mt-1 shadow-lg overflow-hidden border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900">
           <ul className="py-1">
-            {suggestions.map((suggestion) => (
+            {translatedSuggestions.map((suggestion) => (
               <li 
                 key={suggestion.id}
                 className={`px-4 py-2 cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center ${
                   isRTL ? "flex-row-reverse" : "flex-row"
                 } justify-between`}
                 onClick={() => {
-                  applySuggestion(suggestion);
-                  navigate(`/search?q=${encodeURIComponent(suggestion.term)}`);
+                  // Use the original suggestion for search but display translated term
+                  const originalSuggestion = suggestions.find(s => s.id === suggestion.id);
+                  if (originalSuggestion) {
+                    applySuggestion(originalSuggestion);
+                    navigate(`/search?q=${encodeURIComponent(originalSuggestion.term)}`);
+                  }
                 }}
               >
                 <span>{suggestion.term}</span>
