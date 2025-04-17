@@ -16,7 +16,7 @@ import {
 import { useTheme } from "../ThemeProvider";
 import { cn } from "@/lib/utils";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { useState, memo, useEffect, useRef } from "react";
+import { useState, memo, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 // Create a simplified icon component for mobile nav
@@ -43,6 +43,50 @@ const RegularIcon = memo(({ Icon }: { Icon: React.ElementType }) => {
 });
 RegularIcon.displayName = 'RegularIcon';
 
+// NavItem component to ensure proper translation
+const NavItem = memo(({ 
+  item, 
+  isActive, 
+  onClick 
+}: { 
+  item: { icon: React.ElementType; label: string; path: string; };
+  isActive: boolean;
+  onClick: () => void;
+}) => {
+  const { t } = useLanguage();
+  const translationKey = item.label.toLowerCase();
+  
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      className={cn(
+        "flex flex-col items-center justify-center h-14 w-16 p-0 gap-1 bottom-nav-item",
+        isActive ? "text-primary dark:text-primary" : "text-zinc-500 dark:text-zinc-500"
+      )}
+      onClick={onClick}
+      aria-label={t(translationKey)}
+      data-translate={translationKey}
+    >
+      {isActive ? (
+        <FilledIcon Icon={item.icon} />
+      ) : (
+        <RegularIcon Icon={item.icon} />
+      )}
+      <span 
+        className={cn(
+          "text-[10px] font-medium overflow-hidden text-ellipsis w-full px-1",
+          isActive ? "text-primary dark:text-primary" : "text-zinc-500 dark:text-zinc-500"
+        )}
+        data-translate={translationKey}
+      >
+        {t(translationKey)}
+      </span>
+    </Button>
+  );
+});
+NavItem.displayName = 'NavItem';
+
 export const MobileNav = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -51,53 +95,37 @@ export const MobileNav = () => {
   const isDarkMode = theme === "dark";
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { t, language } = useLanguage();
-  const navRef = useRef<HTMLDivElement>(null);
   
-  // Force re-render when language changes
-  useEffect(() => {
-    const handleLanguageChange = (e: Event) => {
-      // Force re-render by triggering state update after language change
-      setTimeout(() => {
-        if (navRef.current) {
-          // Update the nav items
-          const navButtons = navRef.current.querySelectorAll('button[data-translate]');
-          navButtons.forEach(button => {
-            const key = button.getAttribute('data-translate');
-            if (key) {
-              const span = button.querySelector('span');
-              if (span) {
-                span.textContent = t(key);
-              }
-            }
-          });
-        }
-      }, 100); // Short delay to ensure translations are loaded
-    };
-    
-    window.addEventListener('languageChanged', handleLanguageChange);
-    
-    return () => {
-      window.removeEventListener('languageChanged', handleLanguageChange);
-    };
-  }, [t, language]);
-
-  // All navigation items with translations
+  // All navigation items
   const allNavItems = [
-    { icon: Home, label: t("home"), path: "/" },
-    { icon: ShoppingBag, label: t("marketplace"), path: "/marketplace" },
-    { icon: Wrench, label: t("services"), path: "/services" },
-    { icon: Building, label: t("business"), path: "/businesses" },
-    { icon: Map, label: t("maps"), path: "/maps" }, 
-    { icon: MessageSquare, label: t("messages"), path: "/messages" },
-    { icon: Users, label: t("communities"), path: "/communities" },
-    { icon: Briefcase, label: t("jobs"), path: "/jobs" },
-    { icon: Calendar, label: t("events"), path: "/events" },
-    { icon: Heart, label: t("wishlist"), path: "/wishlist" },
-    { icon: Settings, label: t("settings"), path: "/settings" },
+    { icon: Home, label: "home", path: "/" },
+    { icon: ShoppingBag, label: "marketplace", path: "/marketplace" },
+    { icon: Wrench, label: "services", path: "/services" },
+    { icon: Building, label: "business", path: "/businesses" },
+    { icon: Map, label: "maps", path: "/maps" }, 
+    { icon: MessageSquare, label: "messages", path: "/messages" },
+    { icon: Users, label: "communities", path: "/communities" },
+    { icon: Briefcase, label: "jobs", path: "/jobs" },
+    { icon: Calendar, label: "events", path: "/events" },
+    { icon: Heart, label: "wishlist", path: "/wishlist" },
+    { icon: Settings, label: "settings", path: "/settings" },
   ];
 
   // Main navigation items for bottom bar
   const mainNavItems = allNavItems.slice(0, 5);
+  
+  // Update nav items when language changes
+  useEffect(() => {
+    const handleLanguageChange = () => {
+      // Force a re-render by updating state
+      setDrawerOpen(open => open);
+    };
+    
+    window.addEventListener('languageChanged', handleLanguageChange);
+    return () => {
+      window.removeEventListener('languageChanged', handleLanguageChange);
+    };
+  }, [language]);
   
   if (!isMobile) {
     return null; // Don't render on non-mobile devices
@@ -126,39 +154,24 @@ export const MobileNav = () => {
   
   return (
     <div 
-      ref={navRef} 
       className="fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 py-2 px-1 z-50 animate-fade-in"
+      dir="ltr" // Always LTR for the navigation bar
     >
       <div className="flex justify-between items-center max-w-md mx-auto">
         {mainNavItems.map((item) => {
           const isActive = checkActivePath(item.path);
           
           return (
-            <Button
+            <NavItem
               key={item.path}
-              variant="ghost"
-              size="icon"
-              className={cn(
-                "flex flex-col items-center justify-center h-14 w-16 p-0 gap-1 bottom-nav-item",
-                isActive ? "text-primary dark:text-primary" : "text-zinc-500 dark:text-zinc-500"
-              )}
+              item={{
+                icon: item.icon,
+                label: t(item.label),
+                path: item.path
+              }}
+              isActive={isActive}
               onClick={() => handleNavClick(item)}
-              aria-label={item.label}
-              data-translate={item.label.toLowerCase()}
-            >
-              {isActive ? (
-                <FilledIcon Icon={item.icon} />
-              ) : (
-                <RegularIcon Icon={item.icon} />
-              )}
-              <span className={cn(
-                "text-[10px] font-medium overflow-hidden text-ellipsis w-full px-1",
-                isActive ? "text-primary dark:text-primary" : "text-zinc-500 dark:text-zinc-500"
-              )}
-              data-translate={item.label.toLowerCase()}>
-                {item.label}
-              </span>
-            </Button>
+            />
           );
         })}
 
@@ -180,7 +193,7 @@ export const MobileNav = () => {
               </span>
             </Button>
           </DrawerTrigger>
-          <DrawerContent>
+          <DrawerContent dir={language === "urdu" ? "rtl" : "ltr"}>
             <DrawerHeader>
               <DrawerTitle data-translate="menu">{t("menu")}</DrawerTitle>
             </DrawerHeader>
@@ -196,14 +209,14 @@ export const MobileNav = () => {
                       isActive ? "bg-muted" : ""
                     )}
                     onClick={() => handleNavClick(item)}
-                    data-translate={item.label.toLowerCase()}
+                    data-translate={item.label}
                   >
                     <item.icon className={cn(
                       "h-5 w-5 mb-2",
                       isActive ? "text-primary" : "text-foreground"
                     )} />
-                    <span className="text-xs" data-translate={item.label.toLowerCase()}>
-                      {item.label}
+                    <span className="text-xs" data-translate={item.label}>
+                      {t(item.label)}
                     </span>
                   </Button>
                 );

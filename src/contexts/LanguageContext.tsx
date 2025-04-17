@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { translations } from "@/translations";
 
 type Language = "english" | "hindi" | "telugu" | "tamil" | "kannada" | "malayalam" | "urdu";
@@ -20,14 +20,13 @@ const LanguageContext = createContext<LanguageContextType>(defaultContext);
 
 export const LanguageProvider = ({ children }: { children: React.ReactNode }) => {
   const [language, setLanguage] = useState<Language>("english");
-  const translationObserverRef = useRef<MutationObserver | null>(null);
-  const languageIndicatorRef = useRef<HTMLDivElement | null>(null);
+  const [languageIndicator, setLanguageIndicator] = useState<HTMLDivElement | null>(null);
   
   // Load saved language on component mount
   useEffect(() => {
     try {
       const savedLanguage = localStorage.getItem("language") as Language;
-      if (savedLanguage && translations[savedLanguage]) {
+      if (savedLanguage && Object.keys(translations).includes(savedLanguage)) {
         setLanguage(savedLanguage);
         document.documentElement.setAttribute("data-language", savedLanguage);
         
@@ -60,10 +59,15 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
   // Show language indicator in the corner
   const showLanguageIndicator = useCallback((lang: Language) => {
     try {
-      // Remove any existing indicator
-      if (languageIndicatorRef.current && languageIndicatorRef.current.parentNode) {
-        languageIndicatorRef.current.parentNode.removeChild(languageIndicatorRef.current);
-        languageIndicatorRef.current = null;
+      // Remove any existing indicator safely
+      if (languageIndicator) {
+        try {
+          if (document.body.contains(languageIndicator)) {
+            document.body.removeChild(languageIndicator);
+          }
+        } catch (error) {
+          console.error("Error removing language indicator:", error);
+        }
       }
       
       // Language display names
@@ -82,7 +86,7 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
       indicator.textContent = `Language: ${langName}`;
       indicator.className = 'language-indicator';
       document.body.appendChild(indicator);
-      languageIndicatorRef.current = indicator;
+      setLanguageIndicator(indicator);
       
       // Auto-hide after 3 seconds
       setTimeout(() => {
@@ -90,9 +94,11 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
           indicator.style.opacity = '0';
           setTimeout(() => {
             if (indicator && document.body.contains(indicator)) {
-              indicator.remove();
-              if (languageIndicatorRef.current === indicator) {
-                languageIndicatorRef.current = null;
+              try {
+                document.body.removeChild(indicator);
+                setLanguageIndicator(null);
+              } catch (error) {
+                console.error("Error removing faded language indicator:", error);
               }
             }
           }, 500);
@@ -101,138 +107,68 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
     } catch (error) {
       console.error("Error showing language indicator:", error);
     }
-  }, []);
+  }, [languageIndicator]);
 
-  // Safely translate DOM text elements
-  const translateAllDOMText = useCallback((lang: Language) => {
-    // Skip for English (default language)
-    if (lang === "english") return;
-    
-    // Clean up previous observer
-    if (translationObserverRef.current) {
-      translationObserverRef.current.disconnect();
-      translationObserverRef.current = null;
-    }
-    
+  // Apply data-translate attributes to elements
+  const applyTranslationAttributes = useCallback(() => {
     try {
-      // First, translate all elements with data-translate attribute
-      const translatableElements = document.querySelectorAll('[data-translate]');
-      translatableElements.forEach(node => {
-        const key = node.getAttribute('data-translate');
-        if (key) {
-          const translatedText = translate(key);
-          if (translatedText !== key) {
-            try {
-              node.textContent = translatedText;
-              node.setAttribute('data-translated', 'true');
-            } catch (error) {
-              console.error('Error translating element with key:', key, error);
-            }
-          }
-        }
-      });
-      
-      // Translation mapping for common UI elements
+      // Common UI elements mapping
+      const commonElements = [
+        { selector: 'button, a', attributes: ['aria-label'] },
+        { selector: 'input, textarea', attributes: ['placeholder'] },
+        { selector: 'h1, h2, h3, h4, h5, h6, p, span, div', attributes: ['innerText'] }
+      ];
+
+      // Add data-translate attribute to elements with common UI terms
       const commonUITerms = [
-        { text: "Home", key: "home" },
-        { text: "Marketplace", key: "marketplace" }, 
-        { text: "Services", key: "services" },
-        { text: "Businesses", key: "businesses" },
-        { text: "Business", key: "business" },
-        { text: "Jobs", key: "jobs" },
-        { text: "Communities", key: "communities" },
-        { text: "Messages", key: "messages" },
-        { text: "Events", key: "events" },
-        { text: "Maps", key: "maps" },
-        { text: "Settings", key: "settings" },
-        { text: "Search", key: "search" },
-        { text: "More", key: "more" },
-        { text: "Close", key: "close" },
-        { text: "Menu", key: "menu" }
+        "home", "marketplace", "services", "businesses", "business", 
+        "jobs", "communities", "messages", "events", "maps", "settings",
+        "search", "more", "close", "menu"
       ];
       
-      // Safe translation function that won't cause DOM errors
-      const safelyTranslateElement = (element: Element) => {
-        if (!element || !element.textContent || element.hasAttribute('data-translated')) return;
-        
-        // Skip elements that shouldn't be translated
-        if (element.tagName === 'SCRIPT' || element.tagName === 'STYLE' || 
-            element.getAttribute('data-no-translate') === 'true') {
-          return;
-        }
-        
-        const text = element.textContent.trim();
-        if (!text || text.length < 2 || text.length > 30) return; // Skip empty or very long text
-        
-        // Don't translate numbers, dates, and codes
-        if (/^\d+(\.\d+)?$/.test(text) || /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(text)) return;
-        
-        try {
-          // Check common UI terms
-          for (const item of commonUITerms) {
-            if (text === item.text) {
-              const translatedText = translate(item.key);
-              if (translatedText !== item.key) {
-                element.textContent = translatedText;
-                element.setAttribute('data-translated', 'true');
-                return;
-              }
-            }
-          }
-        } catch (error) {
-          console.error('Error translating element:', error);
-        }
-      };
-      
-      // Set up observer for dynamic content - but with safety checks
-      try {
-        // Only observe body and limit depth to avoid performance issues
-        const observer = new MutationObserver((mutations) => {
-          mutations.forEach(mutation => {
-            if (mutation.type === 'childList') {
-              mutation.addedNodes.forEach(node => {
-                if (node.nodeType === Node.ELEMENT_NODE) {
-                  const element = node as Element;
-                  if (element.hasAttribute('data-translate')) {
-                    const key = element.getAttribute('data-translate');
-                    if (key) {
-                      const translatedText = translate(key);
-                      if (translatedText !== key) {
-                        try {
-                          element.textContent = translatedText;
-                          element.setAttribute('data-translated', 'true');
-                        } catch (error) {
-                          console.error('Error translating dynamic element with key:', key, error);
-                        }
-                      }
-                    }
-                  }
+      // Process common UI elements
+      commonElements.forEach(({ selector, attributes }) => {
+        document.querySelectorAll(selector).forEach(element => {
+          attributes.forEach(attr => {
+            const value = attr === 'innerText' 
+              ? element.textContent?.trim() 
+              : element.getAttribute(attr);
+            
+            if (value && !element.hasAttribute('data-translate')) {
+              commonUITerms.forEach(term => {
+                const match = translations.english[term]?.toLowerCase();
+                if (match && value.toLowerCase() === match.toLowerCase()) {
+                  element.setAttribute('data-translate', term);
                 }
               });
             }
           });
         });
-        
-        // Observe only specific parts of the DOM to reduce overhead
-        const navElements = document.querySelectorAll('nav, header, footer, .fixed');
-        navElements.forEach(el => {
-          observer.observe(el, {
-            childList: true,
-            subtree: true,
-            attributes: false,
-            characterData: false
-          });
-        });
-        
-        translationObserverRef.current = observer;
-        
-      } catch (error) {
-        console.error('Error setting up translation observer:', error);
-      }
+      });
     } catch (error) {
-      console.error('Error in translateAllDOMText:', error);
+      console.error("Error applying translation attributes:", error);
     }
-  }, [translate]);
+  }, []);
+  
+  // Translate DOM elements with data-translate attribute
+  const translateDataAttributes = useCallback(() => {
+    if (language === "english") return;
+    
+    try {
+      const elements = document.querySelectorAll('[data-translate]');
+      elements.forEach(element => {
+        const key = element.getAttribute('data-translate');
+        if (key) {
+          const translatedText = translate(key);
+          if (translatedText !== key) {
+            element.textContent = translatedText;
+          }
+        }
+      });
+    } catch (error) {
+      console.error("Error translating data attributes:", error);
+    }
+  }, [language, translate]);
   
   // Apply language changes to DOM
   const applyLanguageToDOM = useCallback((lang: Language) => {
@@ -240,6 +176,7 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
       // Update HTML attributes
       document.documentElement.lang = lang;
       document.documentElement.setAttribute("data-language", lang);
+      document.body.classList.add('lang-transition');
       
       // Handle RTL for Urdu
       if (lang === "urdu") {
@@ -248,19 +185,18 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
         document.documentElement.removeAttribute("dir");
       }
       
-      // Add transition class to body for smooth change
-      document.body.classList.add('lang-transition');
-      
       // Show language indicator
       showLanguageIndicator(lang);
       
-      // Translate text in DOM
-      translateAllDOMText(lang);
+      // Apply translation attributes and translate elements
+      applyTranslationAttributes();
+      translateDataAttributes();
       
-      // Dispatch events for components to update
-      window.dispatchEvent(new CustomEvent('languageChanged', { 
+      // Dispatch event for components to update
+      const event = new CustomEvent('languageChanged', { 
         detail: { language: lang } 
-      }));
+      });
+      window.dispatchEvent(event);
       
       // Remove transition class after animation completes
       setTimeout(() => {
@@ -270,19 +206,8 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
     } catch (error) {
       console.error("Error applying language to DOM:", error);
     }
-  }, [showLanguageIndicator, translateAllDOMText]);
+  }, [showLanguageIndicator, applyTranslationAttributes, translateDataAttributes]);
 
-  // Clean up observer when component unmounts
-  useEffect(() => {
-    return () => {
-      if (translationObserverRef.current) {
-        translationObserverRef.current.disconnect();
-        translationObserverRef.current = null;
-      }
-    };
-  }, []);
-
-  // Create context value with memoized functions
   const value = {
     language,
     setLanguage: useCallback((newLanguage: Language) => {
@@ -297,4 +222,3 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
 };
 
 export const useLanguage = () => useContext(LanguageContext);
-

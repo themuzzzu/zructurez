@@ -90,12 +90,27 @@ function App() {
     
     preloadCriticalResources();
     
-    // Hide loader after resources loaded or timeout
+    // Hide loader after a delay to ensure resources are loaded
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 300); // Reduced from 1000ms
+    }, 500);
     
-    return () => clearTimeout(timer);
+    // Listen for language changes to prevent full refresh
+    const handleLanguageChange = (e: Event) => {
+      // Use the existing loading state mechanism for smooth transitions
+      setIsLoading(true);
+      
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 300);
+    };
+    
+    window.addEventListener('languageChanged', handleLanguageChange);
+    
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('languageChanged', handleLanguageChange);
+    };
   }, []);
 
   return (

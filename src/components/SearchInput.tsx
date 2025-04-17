@@ -36,34 +36,37 @@ export const SearchInput = ({
     }
   };
   
-  // Update position of search icon for RTL languages
+  // Set RTL properties based on language
+  const isRTL = language === "urdu";
+  
+  // Update direction and alignment when language changes
   useEffect(() => {
     if (!inputRef.current) return;
     
-    const isRTL = language === "urdu";
-    const input = inputRef.current;
-    const parentDiv = input.parentElement;
-    
-    if (parentDiv) {
-      const searchIcon = parentDiv.querySelector('svg');
-      if (searchIcon && searchIcon.parentElement) {
-        if (isRTL) {
-          searchIcon.parentElement.classList.remove('left-3');
-          searchIcon.parentElement.classList.add('right-3');
-        } else {
-          searchIcon.parentElement.classList.add('left-3');
-          searchIcon.parentElement.classList.remove('right-3');
-        }
+    const handleLanguageChange = () => {
+      if (!inputRef.current) return;
+      
+      if (isRTL) {
+        inputRef.current.dir = "rtl";
+      } else {
+        inputRef.current.dir = "ltr";
       }
-    }
-  }, [language]);
+    };
+    
+    handleLanguageChange();
+    window.addEventListener('languageChanged', handleLanguageChange);
+    
+    return () => {
+      window.removeEventListener('languageChanged', handleLanguageChange);
+    };
+  }, [language, isRTL]);
 
   return (
     <div className={cn("relative", className)}>
       <Search 
         className={cn(
           "absolute top-1/2 transform -translate-y-1/2 h-4 w-4 text-zinc-400 z-10",
-          language === "urdu" ? "right-3" : "left-3"
+          isRTL ? "right-3" : "left-3"
         )} 
       />
       <Input
@@ -78,11 +81,12 @@ export const SearchInput = ({
         className={cn(
           "w-full bg-transparent focus-visible:ring-2 focus-visible:ring-primary",
           "rounded-md border-muted",
-          language === "urdu" ? "pr-10 text-right" : "pl-10",
+          isRTL ? "pr-10 text-right" : "pl-10",
           disabled && "opacity-70 cursor-not-allowed"
         )}
         aria-label={t("search")}
-        dir={language === "urdu" ? "rtl" : "ltr"}
+        dir={isRTL ? "rtl" : "ltr"}
+        data-translate-placeholder="search"
       />
     </div>
   );

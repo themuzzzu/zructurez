@@ -49,7 +49,6 @@ html[data-language="malayalam"] {
 
 html[data-language="urdu"] {
   --font-family: 'Arial', 'Noto Sans Urdu', sans-serif;
-  direction: rtl;
 }
 
 /* Apply the custom font family when a data-language is set */
@@ -58,9 +57,19 @@ html[data-language]:not([data-language="english"]) body {
 }
 
 /* Right-to-left support for Urdu */
+html[data-language="urdu"] {
+  direction: rtl;
+}
+
 html[data-language="urdu"] .rtl-support {
   direction: rtl;
   text-align: right;
+}
+
+/* Don't apply RTL to specific UI components that should remain LTR */
+html[data-language="urdu"] [dir="ltr"],
+html[data-language="urdu"] .no-rtl {
+  direction: ltr;
 }
 
 /* Specific styling for language-specific UI elements */
@@ -105,6 +114,10 @@ html[data-language="urdu"] .rtl-support {
 }
 
 /* Fix for search input in RTL languages */
+html[data-language="urdu"] .search-bar-container input[dir="rtl"] {
+  text-align: right;
+}
+
 html[data-language="urdu"] .pl-10 {
   padding-left: 0 !important;
   padding-right: 2.5rem !important;
@@ -115,26 +128,27 @@ html[data-language="urdu"] .relative .left-3 {
   right: 0.75rem;
 }
 
-/* Fix for RTL languages in the UI */
-html[data-language="urdu"] .fixed.bottom-0,
-html[data-language="urdu"] .search-box,
-html[data-language="urdu"] .search-bar-container {
-  direction: ltr; /* Keep UI direction consistent */
-}
-
-/* Mobile bottom nav fixes */
-.fixed.bottom-0 button span {
-  display: block;
-  text-align: center;
-  font-size: 10px;
-}
-
-/* Search box fixes */
-.search-bar-container .absolute.left-3 {
-  pointer-events: none;
+/* Override RTL for specific UI components */
+html[data-language="urdu"] .fixed.bottom-0 {
+  direction: ltr;
 }
 
 /* Fix for bottom navigation in mobile RTL */
-html[data-language="urdu"] .fixed.bottom-0 button {
+html[data-language="urdu"] .fixed.bottom-0 [dir="rtl"] {
   direction: rtl;
+}
+
+/* Fix for inputs with icons in RTL mode */
+html[data-language="urdu"] .search-input-container {
+  direction: rtl;
+}
+
+html[data-language="urdu"] .search-input-container input {
+  padding-right: 2.5rem !important;
+  padding-left: 1rem !important;
+}
+
+html[data-language="urdu"] .search-input-container .search-icon {
+  left: auto;
+  right: 0.75rem;
 }

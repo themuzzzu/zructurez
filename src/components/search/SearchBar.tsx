@@ -48,6 +48,9 @@ export function SearchBar({
     suggestionsEnabled: showSuggestions,
   });
   
+  // Set RTL properties based on language
+  const isRTL = language === "urdu";
+  
   // Focus input on mount if autoFocus is true
   useEffect(() => {
     if (autoFocus && inputRef.current) {
@@ -64,24 +67,29 @@ export function SearchBar({
     setShowSuggestions(false);
   });
   
-  // Handle language change to update RTL styling
+  // Update direction and alignment when language changes
   useEffect(() => {
     if (!inputRef.current) return;
     
-    // Adjust for RTL languages
-    const isRTL = language === "urdu";
-    if (isRTL) {
-      inputRef.current.style.paddingRight = "2.75rem";
-      inputRef.current.style.paddingLeft = "3rem";
-      inputRef.current.style.textAlign = "right";
-      inputRef.current.dir = "rtl";
-    } else {
-      inputRef.current.style.paddingLeft = "2.75rem";
-      inputRef.current.style.paddingRight = "3rem";
-      inputRef.current.style.textAlign = "left";
-      inputRef.current.dir = "ltr";
-    }
-  }, [language]);
+    const handleLanguageChange = () => {
+      if (!inputRef.current) return;
+      
+      if (isRTL) {
+        inputRef.current.dir = "rtl";
+        inputRef.current.style.textAlign = "right";
+      } else {
+        inputRef.current.dir = "ltr";
+        inputRef.current.style.textAlign = "left";
+      }
+    };
+    
+    handleLanguageChange();
+    window.addEventListener('languageChanged', handleLanguageChange);
+    
+    return () => {
+      window.removeEventListener('languageChanged', handleLanguageChange);
+    };
+  }, [language, isRTL]);
   
   // Handle search submission
   const handleSubmit = (e: React.FormEvent) => {
@@ -104,7 +112,7 @@ export function SearchBar({
       <form onSubmit={handleSubmit} className="relative">
         <SearchIcon 
           className={`absolute top-1/2 transform -translate-y-1/2 h-4 w-4 text-zinc-500 dark:text-zinc-400 z-10 ${
-            language === "urdu" ? "right-3" : "left-3"
+            isRTL ? "right-3" : "left-3"
           }`} 
         />
         <Input
@@ -115,14 +123,15 @@ export function SearchBar({
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => showSuggestions && setShowSuggestions(true)}
           className={`h-12 w-full bg-white dark:bg-zinc-900 border-zinc-300 dark:border-zinc-700 focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white ${
-            language === "urdu" ? "pr-10 pl-16 text-right" : "pl-10 pr-16"
+            isRTL ? "pr-10 pl-16 text-right" : "pl-10 pr-16"
           }`}
           aria-label={t("search")}
-          dir={language === "urdu" ? "rtl" : "ltr"}
+          dir={isRTL ? "rtl" : "ltr"}
+          data-translate-placeholder="search"
         />
         
         <div className={`absolute top-1/2 transform -translate-y-1/2 flex items-center gap-1 ${
-          language === "urdu" ? "left-3" : "right-3"
+          isRTL ? "left-3" : "right-3"
         }`}>
           {query && (
             <Button
@@ -147,7 +156,7 @@ export function SearchBar({
               <li 
                 key={suggestion.id}
                 className={`px-4 py-2 cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center ${
-                  language === "urdu" ? "flex-row-reverse" : "flex-row"
+                  isRTL ? "flex-row-reverse" : "flex-row"
                 } justify-between`}
                 onClick={() => {
                   applySuggestion(suggestion);
