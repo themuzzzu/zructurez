@@ -3,6 +3,7 @@ import React from "react";
 import { SunMoon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ThemeToggleProps {
   isCollapsed: boolean;
@@ -11,6 +12,8 @@ interface ThemeToggleProps {
 }
 
 export const ThemeToggle = ({ isCollapsed, isDarkMode, onClick }: ThemeToggleProps) => {
+  const { t } = useLanguage();
+  
   if (isCollapsed) {
     return (
       <Button
@@ -43,7 +46,7 @@ export const ThemeToggle = ({ isCollapsed, isDarkMode, onClick }: ThemeTogglePro
         <SunMoon size={20} className="text-muted-foreground" />
       </div>
       <span className="text-sm text-muted-foreground">
-        Toggle Theme
+        {t("theme")}
       </span>
     </Button>
   );

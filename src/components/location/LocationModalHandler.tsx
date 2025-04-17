@@ -27,6 +27,17 @@ export function LocationModalHandler() {
       styleEl.id = 'location-modal-styles';
       styleEl.innerHTML = `
         @media (max-width: 768px) {
+          [data-radix-popper-content-wrapper] {
+            position: fixed !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            top: auto !important;
+            transform: none !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+          }
+          
           .location-modal-content {
             position: fixed !important;
             bottom: 0 !important;
@@ -34,11 +45,25 @@ export function LocationModalHandler() {
             right: 0 !important;
             margin: 0 !important;
             max-height: 90vh !important;
+            width: 100% !important;
             border-bottom-left-radius: 0 !important;
             border-bottom-right-radius: 0 !important;
             border-top-left-radius: 12px !important;
             border-top-right-radius: 12px !important;
             animation: slideUp 0.3s ease-out !important;
+            transform: none !important;
+          }
+          
+          .radix-dialog-content {
+            position: fixed !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            max-height: 90vh !important;
+            border-bottom-left-radius: 0 !important;
+            border-bottom-right-radius: 0 !important; 
+            margin: 0 !important;
+            width: 100% !important;
           }
           
           @keyframes slideUp {
@@ -63,12 +88,20 @@ export function LocationModalHandler() {
     
     updateModalStyles();
     
+    // Ensure modal positioning is updated when language changes
+    const handleLanguageChange = () => {
+      setTimeout(updateModalStyles, 100);
+    };
+    
+    window.addEventListener('languageChanged', handleLanguageChange);
+    
     // Remove styles on component unmount
     return () => {
       const styleEl = document.getElementById('location-modal-styles');
       if (styleEl) {
         styleEl.remove();
       }
+      window.removeEventListener('languageChanged', handleLanguageChange);
     };
   }, []);
   

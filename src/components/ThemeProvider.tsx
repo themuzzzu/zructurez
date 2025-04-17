@@ -37,26 +37,37 @@ export function ThemeProvider({
     }
   );
 
-  React.useEffect(() => {
+  // Apply theme to document and dispatch events
+  const applyTheme = React.useCallback((newTheme: Theme) => {
     const root = window.document.documentElement;
     
     // Remove existing theme classes
     root.classList.remove("light", "dark");
 
     // Set the appropriate theme
-    if (theme === "system") {
+    if (newTheme === "system") {
       const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
         ? "dark"
         : "light";
       
       root.classList.add(systemTheme);
     } else {
-      root.classList.add(theme);
+      root.classList.add(newTheme);
     }
 
+    // Dispatch theme change event
+    window.dispatchEvent(new CustomEvent('themeChanged', { 
+      detail: { theme: newTheme } 
+    }));
+
     // Save to localStorage
-    localStorage.setItem(storageKey, theme);
-  }, [theme, storageKey]);
+    localStorage.setItem(storageKey, newTheme);
+  }, [storageKey]);
+
+  // Apply theme whenever it changes
+  React.useEffect(() => {
+    applyTheme(theme);
+  }, [theme, applyTheme]);
 
   // Listen for system theme changes when system theme is selected
   React.useEffect(() => {
@@ -67,7 +78,14 @@ export function ThemeProvider({
     const handleChange = () => {
       const root = window.document.documentElement;
       root.classList.remove("light", "dark");
-      root.classList.add(mediaQuery.matches ? "dark" : "light");
+      
+      const newTheme = mediaQuery.matches ? "dark" : "light";
+      root.classList.add(newTheme);
+      
+      // Dispatch event for system theme change
+      window.dispatchEvent(new CustomEvent('systemThemeChanged', { 
+        detail: { theme: newTheme } 
+      }));
     };
     
     mediaQuery.addEventListener("change", handleChange);
@@ -84,8 +102,9 @@ export function ThemeProvider({
     theme,
     setTheme: (newTheme: Theme) => {
       setTheme(newTheme);
+      applyTheme(newTheme);
     },
-  }), [theme]);
+  }), [theme, applyTheme]);
 
   return (
     <ThemeProviderContext.Provider {...props} value={value}>

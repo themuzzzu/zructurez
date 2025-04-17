@@ -18,11 +18,25 @@ export const translations = {
     saving: "Saving...",
     themeColor: "Theme Color",
 
+    // Color names
+    blue: "Blue",
+    purple: "Purple",
+    red: "Red",
+    green: "Green",
+    yellow: "Yellow",
+    pink: "Pink",
+    orange: "Orange",
+    teal: "Teal",
+
     // Navigation
     home: "Home",
     marketplace: "Marketplace",
     services: "Services",
     business: "Business",
+    jobs: "Jobs",
+    communities: "Communities",
+    messages: "Messages",
+    events: "Events",
     maps: "Maps",
     more: "More",
     settings: "Settings",
@@ -106,11 +120,25 @@ export const translations = {
     saving: "सहेज रहा है...",
     themeColor: "थीम रंग",
 
+    // Color names
+    blue: "नीला",
+    purple: "बैंगनी",
+    red: "लाल",
+    green: "हरा",
+    yellow: "पीला",
+    pink: "गुलाबी",
+    orange: "नारंगी",
+    teal: "हरिनील",
+
     // Navigation
     home: "होम",
     marketplace: "मार्केटप्लेस",
     services: "सेवाएं",
     business: "व्यापार",
+    jobs: "नौकरियां",
+    communities: "समुदाय",
+    messages: "संदेश",
+    events: "कार्यक्रम",
     maps: "नक्शे",
     more: "अधिक",
     settings: "सेटिंग्स",
@@ -120,7 +148,6 @@ export const translations = {
     orders: "ऑर्डर",
     appointments: "अपॉइंटमेंट",
     products: "उत्पाद",
-    // Removed duplicate "business" key here
     advertisements: "विज्ञापन",
     adPricing: "विज्ञापन मूल्य निर्धारण",
     subscribed: "सब्सक्राइब किया गया",
@@ -194,12 +221,26 @@ export const translations = {
     saveSettings: "సెట్టింగ్‌లను సేవ్ చేయండి",
     saving: "సేవ్ చేస్తోంది...",
     themeColor: "థీమ్ రంగు",
+    
+    // Color names
+    blue: "నీలం",
+    purple: "ఊదా",
+    red: "ఎరుపు",
+    green: "ఆకుపచ్చ",
+    yellow: "పసుపు",
+    pink: "పింక్",
+    orange: "నారింజ",
+    teal: "నీలం-ఆకుపచ్చ",
 
     // Navigation
     home: "హోమ్",
     marketplace: "మార్కెట్‌ప్లేస్",
     services: "సర్వీసెస్",
     business: "బిజినెస్",
+    jobs: "ఉద్యోగాలు",
+    communities: "సముదాయాలు",
+    messages: "సందేశాలు",
+    events: "ఈవెంట్లు",
     maps: "మ్యాప్స్",
     more: "మరిన్ని",
     settings: "సెట్టింగ్‌లు",

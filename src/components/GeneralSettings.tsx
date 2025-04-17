@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
@@ -34,20 +34,21 @@ export function GeneralSettings() {
 
   // UI colors available
   const uiColors = [
-    { id: "blue", name: "Blue", class: "bg-blue-500" },
-    { id: "purple", name: "Purple", class: "bg-purple-500" },
-    { id: "red", name: "Red", class: "bg-red-500" },
-    { id: "green", name: "Green", class: "bg-green-500" },
-    { id: "yellow", name: "Yellow", class: "bg-yellow-500" },
-    { id: "pink", name: "Pink", class: "bg-pink-500" },
-    { id: "orange", name: "Orange", class: "bg-orange-500" },
-    { id: "teal", name: "Teal", class: "bg-teal-500" }
+    { id: "blue", name: t("blue"), class: "bg-blue-500" },
+    { id: "purple", name: t("purple"), class: "bg-purple-500" },
+    { id: "red", name: t("red"), class: "bg-red-500" },
+    { id: "green", name: t("green"), class: "bg-green-500" },
+    { id: "yellow", name: t("yellow"), class: "bg-yellow-500" },
+    { id: "pink", name: t("pink"), class: "bg-pink-500" },
+    { id: "orange", name: t("orange"), class: "bg-orange-500" },
+    { id: "teal", name: t("teal"), class: "bg-teal-500" }
   ];
 
   // Load saved settings on component mount
   useEffect(() => {
     const savedFontSize = localStorage.getItem("fontSize");
     const savedTheme = localStorage.getItem("uiTheme");
+    const savedLanguage = localStorage.getItem("language");
     
     if (savedFontSize) {
       const parsedSize = parseInt(savedFontSize);
@@ -60,80 +61,54 @@ export function GeneralSettings() {
       // Extract color name from theme class (ui-blue -> blue)
       const colorName = savedTheme.replace('ui-', '');
       setUiTheme(colorName);
-      applyTheme(colorName);
-    } else {
-      // If no theme is set, apply the default
-      applyTheme("blue");
     }
   }, []);
 
-  // Apply UI theme changes immediately
-  const applyTheme = (colorName) => {
-    const themeId = `ui-${colorName}`;
-    
-    document.documentElement.classList.forEach(className => {
-      if (className.startsWith('ui-')) {
-        document.documentElement.classList.remove(className);
-      }
-    });
-    
-    document.documentElement.classList.add(themeId);
-    localStorage.setItem("uiTheme", themeId);
-    
-    // Set CSS variables for the theme color
-    document.documentElement.style.setProperty('--theme-color', colorName);
-    
-    // Trigger a custom event for theme changes
-    window.dispatchEvent(new CustomEvent('themeColorChanged', { 
-      detail: { themeColor: colorName }
-    }));
-  };
-
   // Preview font size changes without saving
-  const handleFontSizePreview = (value) => {
+  const handleFontSizePreview = (value: number[]) => {
     const newSize = value[0];
     setPreviewFont(newSize);
     document.documentElement.style.fontSize = `${newSize}%`;
   };
 
-  // Handle theme change with immediate preview
-  const handleThemeChange = (colorName) => {
+  // Handle theme change with immediate preview and application
+  const handleThemeChange = (colorName: string) => {
     setUiTheme(colorName);
-    applyTheme(colorName);
-    
-    if (profile?.id) {
-      updateDisplayPreferences("ui_color", colorName);
-    }
+    updateDisplayPreferences("ui_color", colorName);
   };
 
   // Apply language changes to the application
-  const handleLanguageChange = (value) => {
-    // Update the language context which handles all the translations
-    setLanguage(value);
+  const handleLanguageChange = (value: string) => {
+    // First update the language in the context
+    setLanguage(value as any);
+    
+    // Then update in profile settings which will apply CSS changes and dispatch events
+    updateDisplayPreferences("language", value);
     
     // Show toast with language change notification
     const langName = languages.find(lang => lang.code === value)?.name || value;
     toast.success(`${t("languageChanged")} ${langName}`);
-    
-    // Update profile settings if profile is available
-    if (profile?.id) {
-      updateDisplayPreferences("language", value);
-    }
     
     // Show temporary language indicator
     showLanguageIndicator(langName);
   };
   
   // Display a language change indicator
-  const showLanguageIndicator = (langName) => {
+  const showLanguageIndicator = useCallback((langName: string) => {
+    // Remove any existing indicator
+    const existingIndicator = document.querySelector('.language-indicator');
+    if (existingIndicator) {
+      document.body.removeChild(existingIndicator);
+    }
+    
     const indicator = document.createElement('div');
     indicator.textContent = `${t("language")}: ${langName}`;
     indicator.style.position = 'fixed';
     indicator.style.bottom = '20px';
     indicator.style.right = '20px';
     indicator.style.padding = '10px';
-    indicator.style.backgroundColor = 'var(--primary)';
-    indicator.style.color = 'var(--primary-foreground)';
+    indicator.style.backgroundColor = 'var(--primary, #3b82f6)';
+    indicator.style.color = 'white';
     indicator.style.borderRadius = '4px';
     indicator.style.zIndex = '9999';
     indicator.style.opacity = '0.9';
@@ -145,10 +120,12 @@ export function GeneralSettings() {
     setTimeout(() => {
       indicator.style.opacity = '0';
       setTimeout(() => {
-        document.body.removeChild(indicator);
+        if (document.body.contains(indicator)) {
+          document.body.removeChild(indicator);
+        }
       }, 500);
     }, 3000);
-  };
+  }, [t]);
 
   // Save settings (debounced)
   const saveSettings = debounce(() => {
@@ -157,19 +134,8 @@ export function GeneralSettings() {
     // Apply the preview font size as the actual setting
     setFontSize(previewFont);
     
-    // Save to localStorage
-    localStorage.setItem("fontSize", previewFont.toString());
-    localStorage.setItem("uiTheme", `ui-${uiTheme}`);
-    
-    // Update profile settings if profile is available
-    if (profile?.id) {
-      updateDisplayPreferences("font_size", previewFont);
-      updateDisplayPreferences("ui_color", uiTheme);
-    }
-    
-    // Apply changes immediately
-    document.documentElement.style.fontSize = `${previewFont}%`;
-    applyTheme(uiTheme);
+    // Update font size
+    updateDisplayPreferences("font_size", previewFont);
     
     // Simulate API call
     setTimeout(() => {
@@ -230,8 +196,8 @@ export function GeneralSettings() {
             </div>
             <div className="mt-2 p-4 border rounded-md bg-card">
               <p className="text-sm font-medium mb-2">{t("preview")}</p>
-              <div className={`p-4 rounded-md bg-${uiTheme}-500 bg-opacity-20 border border-${uiTheme}-200 dark:border-${uiTheme}-800`}>
-                <p className="text-sm text-${uiTheme}-700 dark:text-${uiTheme}-300">{t("previewText")}</p>
+              <div className={`p-4 rounded-md bg-${uiTheme}-500/20 border border-${uiTheme}-200 dark:border-${uiTheme}-800`}>
+                <p className="text-sm">{t("previewText")}</p>
               </div>
             </div>
           </div>

@@ -21,14 +21,23 @@ const LanguageContext = createContext<LanguageContextType>(defaultContext);
 export const LanguageProvider = ({ children }: { children: React.ReactNode }) => {
   const [language, setLanguage] = useState<Language>("english");
 
+  // Load saved language on component mount
   useEffect(() => {
     const savedLanguage = localStorage.getItem("language") as Language;
     if (savedLanguage && translations[savedLanguage]) {
       setLanguage(savedLanguage);
-      document.documentElement.lang = savedLanguage;
-      document.documentElement.setAttribute("data-language", savedLanguage);
+      applyLanguageToDOM(savedLanguage);
     }
   }, []);
+
+  // Function to apply language changes to DOM
+  const applyLanguageToDOM = (lang: Language) => {
+    document.documentElement.lang = lang;
+    document.documentElement.setAttribute("data-language", lang);
+    document.documentElement.dispatchEvent(
+      new CustomEvent("language-changed", { bubbles: true })
+    );
+  };
 
   const translate = (key: string): string => {
     // First try to get translation in current language
@@ -47,12 +56,22 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
     language,
     setLanguage: (newLanguage: Language) => {
       setLanguage(newLanguage);
-      document.documentElement.lang = newLanguage;
-      document.documentElement.setAttribute("data-language", newLanguage);
+      applyLanguageToDOM(newLanguage);
       localStorage.setItem("language", newLanguage);
       
-      // Add global language change event for component refreshes
-      window.dispatchEvent(new CustomEvent('languageChanged', { detail: { language: newLanguage } }));
+      // Force UI update with multiple events to ensure propagation
+      // This creates a complete re-render effect across the application
+      setTimeout(() => {
+        // Global custom event for component refreshes
+        window.dispatchEvent(new CustomEvent('languageChanged', { 
+          detail: { language: newLanguage } 
+        }));
+        
+        // Additional DOM event for better propagation
+        document.documentElement.dispatchEvent(
+          new CustomEvent("language-changed", { bubbles: true })
+        );
+      }, 0);
     },
     t: translate,
   };

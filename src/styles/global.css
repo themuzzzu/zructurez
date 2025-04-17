@@ -1,0 +1,178 @@
+
+/* Dynamic Theme Colors - Applied via JS */
+:root {
+  --theme-color: blue;
+  --app-primary-color: blue;
+  --primary: #3b82f6; /* Default blue */
+  --primary-darker: #2563eb;
+  --primary-lighter: #60a5fa;
+}
+
+/* Apply theme color changes globally */
+.ui-blue {
+  --primary: #3b82f6;
+  --primary-darker: #2563eb;
+  --primary-lighter: #60a5fa;
+}
+
+.ui-purple {
+  --primary: #8b5cf6;
+  --primary-darker: #7c3aed;
+  --primary-lighter: #a78bfa;
+}
+
+.ui-red {
+  --primary: #ef4444;
+  --primary-darker: #dc2626;
+  --primary-lighter: #f87171;
+}
+
+.ui-green {
+  --primary: #22c55e;
+  --primary-darker: #16a34a;
+  --primary-lighter: #4ade80;
+}
+
+.ui-yellow {
+  --primary: #eab308;
+  --primary-darker: #ca8a04;
+  --primary-lighter: #facc15;
+}
+
+.ui-pink {
+  --primary: #ec4899;
+  --primary-darker: #db2777;
+  --primary-lighter: #f472b6;
+}
+
+.ui-orange {
+  --primary: #f97316;
+  --primary-darker: #ea580c;
+  --primary-lighter: #fb923c;
+}
+
+.ui-teal {
+  --primary: #14b8a6;
+  --primary-darker: #0d9488;
+  --primary-lighter: #2dd4bf;
+}
+
+/* Font Size Control */
+.font-size-75 {
+  font-size: 75%;
+}
+
+.font-size-80 {
+  font-size: 80%;
+}
+
+.font-size-85 {
+  font-size: 85%;
+}
+
+.font-size-90 {
+  font-size: 90%;
+}
+
+.font-size-95 {
+  font-size: 95%;
+}
+
+.font-size-100 {
+  font-size: 100%;
+}
+
+.font-size-105 {
+  font-size: 105%;
+}
+
+.font-size-110 {
+  font-size: 110%;
+}
+
+.font-size-115 {
+  font-size: 115%;
+}
+
+.font-size-120 {
+  font-size: 120%;
+}
+
+.font-size-125 {
+  font-size: 125%;
+}
+
+.font-size-130 {
+  font-size: 130%;
+}
+
+.font-size-135 {
+  font-size: 135%;
+}
+
+.font-size-140 {
+  font-size: 140%;
+}
+
+.font-size-145 {
+  font-size: 145%;
+}
+
+.font-size-150 {
+  font-size: 150%;
+}
+
+/* Modal positioning fixes */
+@media (max-width: 768px) {
+  [data-radix-popper-content-wrapper] {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: auto !important;
+    transform: none !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    width: 100% !important;
+    z-index: 999 !important;
+  }
+  
+  .settings-container {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+  
+  .settings-page {
+    gap: 1rem !important;
+  }
+  
+  .settings-content {
+    padding: 0 !important;
+  }
+}
+
+/* Responsive improvements */
+@media (max-width: 640px) {
+  .card-content-responsive {
+    padding: 1rem !important;
+  }
+  
+  .font-size-control {
+    width: 100% !important;
+  }
+}
+
+/* Language indicator styling */
+.language-indicator {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 10px;
+  background-color: var(--primary);
+  color: white;
+  border-radius: 4px;
+  z-index: 9999;
+  opacity: 0.9;
+  transition: opacity 0.5s ease-out;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}

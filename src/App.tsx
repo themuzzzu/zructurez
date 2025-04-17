@@ -1,5 +1,6 @@
 
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 import { LocationProvider } from "@/providers/LocationProvider";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/react-query";
@@ -9,6 +10,7 @@ import { PageLoader } from "@/components/loaders/PageLoader";
 import { NetworkMonitor } from "@/providers/NetworkMonitor";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import "./App.css";
+import "./styles/global.css"; // Import global CSS
 
 // Lazy load components that aren't needed right away
 const LazyToaster = lazy(() => import("sonner").then(module => ({ default: module.Toaster })));
@@ -19,6 +21,23 @@ function App() {
   const [resourcesLoaded, setResourcesLoaded] = useState(false);
   
   useEffect(() => {
+    // Load saved theme color from localStorage and apply it
+    const savedTheme = localStorage.getItem("uiTheme");
+    if (savedTheme) {
+      document.documentElement.classList.forEach(className => {
+        if (className.startsWith('ui-')) {
+          document.documentElement.classList.remove(className);
+        }
+      });
+      document.documentElement.classList.add(savedTheme);
+    }
+    
+    // Load saved font size from localStorage and apply it
+    const savedFontSize = localStorage.getItem("fontSize");
+    if (savedFontSize) {
+      document.documentElement.style.fontSize = `${savedFontSize}%`;
+    }
+    
     // Preload critical resources asynchronously
     const preloadCriticalResources = async () => {
       const criticalResources = [
@@ -64,25 +83,27 @@ function App() {
   return (
     <ThemeProvider>
       <ErrorBoundary>
-        <QueryClientProvider client={queryClient}>
-          <NetworkMonitor>
-            <LocationProvider>
-              {isLoading ? (
-                <PageLoader type="shimmer" />
-              ) : (
-                <>
-                  <Routes />
-                  <Suspense fallback={null}>
-                    {resourcesLoaded && <LazyLocationModalHandler />}
-                  </Suspense>
-                  <Suspense fallback={null}>
-                    <LazyToaster position="top-center" />
-                  </Suspense>
-                </>
-              )}
-            </LocationProvider>
-          </NetworkMonitor>
-        </QueryClientProvider>
+        <LanguageProvider>
+          <QueryClientProvider client={queryClient}>
+            <NetworkMonitor>
+              <LocationProvider>
+                {isLoading ? (
+                  <PageLoader type="shimmer" />
+                ) : (
+                  <>
+                    <Routes />
+                    <Suspense fallback={null}>
+                      {resourcesLoaded && <LazyLocationModalHandler />}
+                    </Suspense>
+                    <Suspense fallback={null}>
+                      <LazyToaster position="top-center" />
+                    </Suspense>
+                  </>
+                )}
+              </LocationProvider>
+            </NetworkMonitor>
+          </QueryClientProvider>
+        </LanguageProvider>
       </ErrorBoundary>
     </ThemeProvider>
   );
