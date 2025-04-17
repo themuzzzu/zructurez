@@ -1,4 +1,3 @@
-
 import { toast } from "sonner";
 import type { Profile } from "@/types/profile";
 import { useLanguage } from "@/contexts/LanguageContext";

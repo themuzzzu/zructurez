@@ -36,6 +36,7 @@ export function LocationModalHandler() {
             transform: none !important;
             max-width: 100% !important;
             margin: 0 !important;
+            width: 100% !important;
           }
           
           .location-modal-content {
@@ -94,6 +95,7 @@ export function LocationModalHandler() {
     };
     
     window.addEventListener('languageChanged', handleLanguageChange);
+    document.addEventListener('language-changed', handleLanguageChange);
     
     // Remove styles on component unmount
     return () => {
@@ -102,6 +104,7 @@ export function LocationModalHandler() {
         styleEl.remove();
       }
       window.removeEventListener('languageChanged', handleLanguageChange);
+      document.removeEventListener('language-changed', handleLanguageChange);
     };
   }, []);
   

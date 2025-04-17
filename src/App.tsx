@@ -10,7 +10,8 @@ import { PageLoader } from "@/components/loaders/PageLoader";
 import { NetworkMonitor } from "@/providers/NetworkMonitor";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import "./App.css";
-import "./styles/global.css"; // Import global CSS
+import "./styles/global.css";
+import "./styles/theme-manager.css"; // Import our new theme manager
 
 // Lazy load components that aren't needed right away
 const LazyToaster = lazy(() => import("sonner").then(module => ({ default: module.Toaster })));

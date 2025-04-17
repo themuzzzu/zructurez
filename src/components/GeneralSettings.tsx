@@ -15,11 +15,11 @@ import { useLanguage } from "@/contexts/LanguageContext";
 // Available languages - with Indian languages first after English
 const languages = [
   { code: "english", name: "English" },
-  { code: "hindi", name: "Hindi" },
-  { code: "telugu", name: "Telugu" },
-  { code: "tamil", name: "Tamil" },
-  { code: "kannada", name: "Kannada" },
-  { code: "malayalam", name: "Malayalam" }
+  { code: "hindi", name: "Hindi / हिन्दी" },
+  { code: "telugu", name: "Telugu / తెలుగు" },
+  { code: "tamil", name: "Tamil / தமிழ்" },
+  { code: "kannada", name: "Kannada / ಕನ್ನಡ" },
+  { code: "malayalam", name: "Malayalam / മലയാളം" }
 ];
 
 export function GeneralSettings() {
@@ -48,13 +48,11 @@ export function GeneralSettings() {
   useEffect(() => {
     const savedFontSize = localStorage.getItem("fontSize");
     const savedTheme = localStorage.getItem("uiTheme");
-    const savedLanguage = localStorage.getItem("language");
     
     if (savedFontSize) {
       const parsedSize = parseInt(savedFontSize);
       setFontSize(parsedSize);
       setPreviewFont(parsedSize);
-      document.documentElement.style.fontSize = `${parsedSize}%`;
     }
     
     if (savedTheme) {
@@ -71,61 +69,25 @@ export function GeneralSettings() {
     document.documentElement.style.fontSize = `${newSize}%`;
   };
 
-  // Handle theme change with immediate preview and application
+  // Handle theme change with immediate global application
   const handleThemeChange = (colorName: string) => {
     setUiTheme(colorName);
+    // Apply color globally
     updateDisplayPreferences("ui_color", colorName);
   };
 
   // Apply language changes to the application
   const handleLanguageChange = (value: string) => {
-    // First update the language in the context
-    setLanguage(value as any);
-    
-    // Then update in profile settings which will apply CSS changes and dispatch events
+    // Update in profile settings first
     updateDisplayPreferences("language", value);
+    
+    // Then update the language in the context
+    setLanguage(value as any);
     
     // Show toast with language change notification
     const langName = languages.find(lang => lang.code === value)?.name || value;
     toast.success(`${t("languageChanged")} ${langName}`);
-    
-    // Show temporary language indicator
-    showLanguageIndicator(langName);
   };
-  
-  // Display a language change indicator
-  const showLanguageIndicator = useCallback((langName: string) => {
-    // Remove any existing indicator
-    const existingIndicator = document.querySelector('.language-indicator');
-    if (existingIndicator) {
-      document.body.removeChild(existingIndicator);
-    }
-    
-    const indicator = document.createElement('div');
-    indicator.textContent = `${t("language")}: ${langName}`;
-    indicator.style.position = 'fixed';
-    indicator.style.bottom = '20px';
-    indicator.style.right = '20px';
-    indicator.style.padding = '10px';
-    indicator.style.backgroundColor = 'var(--primary, #3b82f6)';
-    indicator.style.color = 'white';
-    indicator.style.borderRadius = '4px';
-    indicator.style.zIndex = '9999';
-    indicator.style.opacity = '0.9';
-    indicator.style.transition = 'opacity 0.5s ease-out';
-    indicator.className = 'language-indicator';
-    
-    document.body.appendChild(indicator);
-    
-    setTimeout(() => {
-      indicator.style.opacity = '0';
-      setTimeout(() => {
-        if (document.body.contains(indicator)) {
-          document.body.removeChild(indicator);
-        }
-      }, 500);
-    }, 3000);
-  }, [t]);
 
   // Save settings (debounced)
   const saveSettings = debounce(() => {
@@ -135,21 +97,18 @@ export function GeneralSettings() {
     setFontSize(previewFont);
     
     // Update font size
-    updateDisplayPreferences("font_size", previewFont);
-    
-    // Simulate API call
-    setTimeout(() => {
-      toast.success(t("settingsSaved"));
+    updateDisplayPreferences("font_size", previewFont).then(() => {
       setSaving(false);
-    }, 500);
+      toast.success(t("settingsSaved"));
+    });
   }, 200);
 
   return (
     <div className="space-y-6">
       <Card className="shadow-sm hover:shadow-md transition-shadow">
         <CardHeader className="bg-muted/50">
-          <CardTitle>{t("generalSettings")}</CardTitle>
-          <CardDescription>
+          <CardTitle data-translate="generalSettings">{t("generalSettings")}</CardTitle>
+          <CardDescription data-translate="manageAccount">
             {t("manageAccount")}
           </CardDescription>
         </CardHeader>
@@ -157,7 +116,7 @@ export function GeneralSettings() {
           {/* Font Size */}
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <Label htmlFor="font-size" className="text-base font-medium">{t("fontSize")}</Label>
+              <Label htmlFor="font-size" className="text-base font-medium" data-translate="fontSize">{t("fontSize")}</Label>
               <span className="text-sm font-medium bg-secondary px-2 py-1 rounded-full">{previewFont}%</span>
             </div>
             <Slider 
@@ -171,15 +130,15 @@ export function GeneralSettings() {
               className="py-4"
             />
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>{t("small")}</span>
-              <span>{t("default")}</span>
-              <span>{t("large")}</span>
+              <span data-translate="small">{t("small")}</span>
+              <span data-translate="default">{t("default")}</span>
+              <span data-translate="large">{t("large")}</span>
             </div>
           </div>
           
           {/* UI Theme Color */}
           <div className="space-y-4">
-            <Label htmlFor="theme" className="text-base font-medium">{t("themeColor")}</Label>
+            <Label htmlFor="theme" className="text-base font-medium" data-translate="themeColor">{t("themeColor")}</Label>
             <div className="grid grid-cols-4 sm:grid-cols-4 gap-3">
               {uiColors.map((color) => (
                 <button
@@ -195,16 +154,16 @@ export function GeneralSettings() {
               ))}
             </div>
             <div className="mt-2 p-4 border rounded-md bg-card">
-              <p className="text-sm font-medium mb-2">{t("preview")}</p>
+              <p className="text-sm font-medium mb-2" data-translate="preview">{t("preview")}</p>
               <div className={`p-4 rounded-md bg-${uiTheme}-500/20 border border-${uiTheme}-200 dark:border-${uiTheme}-800`}>
-                <p className="text-sm">{t("previewText")}</p>
+                <p className="text-sm" data-translate="previewText">{t("previewText")}</p>
               </div>
             </div>
           </div>
           
           {/* Language Selection */}
           <div className="space-y-3">
-            <Label htmlFor="language" className="text-base font-medium">{t("language")}</Label>
+            <Label htmlFor="language" className="text-base font-medium" data-translate="language">{t("language")}</Label>
             <Select value={language} onValueChange={handleLanguageChange}>
               <SelectTrigger className="w-full h-11">
                 <SelectValue placeholder={t("selectLanguage")} />
@@ -218,7 +177,7 @@ export function GeneralSettings() {
               </SelectContent>
             </Select>
             {language !== "english" && (
-              <p className="text-xs text-muted-foreground mt-1 p-2 bg-muted rounded-md">
+              <p className="text-xs text-muted-foreground mt-1 p-2 bg-muted rounded-md" data-translate="translationNote">
                 {t("translationNote")}
               </p>
             )}
@@ -230,7 +189,9 @@ export function GeneralSettings() {
             onClick={saveSettings} 
             disabled={saving}
           >
-            {saving ? t("saving") : t("saveSettings")}
+            <span data-translate={saving ? "saving" : "saveSettings"}>
+              {saving ? t("saving") : t("saveSettings")}
+            </span>
             <Save className="h-4 w-4" />
           </Button>
         </CardContent>

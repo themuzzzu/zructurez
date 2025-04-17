@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { SunMoon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,29 @@ interface ThemeToggleProps {
 export const ThemeToggle = ({ isCollapsed, isDarkMode, onClick }: ThemeToggleProps) => {
   const { t } = useLanguage();
   
+  useEffect(() => {
+    // Listen for language changes and update button text
+    const handleLanguageChange = () => {
+      // Force re-render when language changes
+      const buttons = document.querySelectorAll('[data-theme-toggle]');
+      buttons.forEach(btn => {
+        if (btn.textContent?.includes('theme')) {
+          // This is our button, update its text
+          const span = btn.querySelector('span');
+          if (span) {
+            span.textContent = t("theme");
+          }
+        }
+      });
+    };
+    
+    window.addEventListener('languageChanged', handleLanguageChange);
+    
+    return () => {
+      window.removeEventListener('languageChanged', handleLanguageChange);
+    };
+  }, [t]);
+  
   if (isCollapsed) {
     return (
       <Button
@@ -25,6 +48,7 @@ export const ThemeToggle = ({ isCollapsed, isDarkMode, onClick }: ThemeTogglePro
             : "hover:bg-zinc-200 dark:hover:bg-zinc-800"
         )}
         onClick={onClick}
+        data-theme-toggle="true"
       >
         <SunMoon className="h-5 w-5 text-muted-foreground" />
       </Button>
@@ -41,11 +65,12 @@ export const ThemeToggle = ({ isCollapsed, isDarkMode, onClick }: ThemeTogglePro
           : "hover:bg-zinc-200 dark:hover:bg-zinc-800"
       )}
       onClick={onClick}
+      data-theme-toggle="true"
     >
       <div className="flex items-center justify-center">
         <SunMoon size={20} className="text-muted-foreground" />
       </div>
-      <span className="text-sm text-muted-foreground">
+      <span className="text-sm text-muted-foreground" data-translate="theme">
         {t("theme")}
       </span>
     </Button>

@@ -33,7 +33,7 @@ export const Sidebar = ({ className }: React.HTMLAttributes<HTMLDivElement>) => 
   const { theme, setTheme } = useTheme();
   const isMobile = useMediaQuery("(max-width: 768px)");
   const isDarkMode = theme === "dark";
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   // Save collapse state to localStorage and dispatch custom event
   useEffect(() => {
@@ -47,6 +47,22 @@ export const Sidebar = ({ className }: React.HTMLAttributes<HTMLDivElement>) => 
   useEffect(() => {
     setActiveItem(location.pathname);
   }, [location.pathname]);
+
+  // Update route names when language changes
+  useEffect(() => {
+    // Force re-render when language changes
+    const handleLanguageChange = () => {
+      setActiveItem(prev => prev); // Trick to force re-render
+    };
+    
+    window.addEventListener('languageChanged', handleLanguageChange);
+    document.addEventListener('language-changed', handleLanguageChange);
+    
+    return () => {
+      window.removeEventListener('languageChanged', handleLanguageChange);
+      document.removeEventListener('language-changed', handleLanguageChange);
+    };
+  }, [language]);
 
   const routes = [
     { name: t("home"), path: "/", icon: Home },
@@ -107,6 +123,7 @@ export const Sidebar = ({ className }: React.HTMLAttributes<HTMLDivElement>) => 
             isCollapsed={isCollapsed}
             isDarkMode={isDarkMode}
             onClick={handleItemClick}
+            data-translate={route.name.toLowerCase()}
           />
         ))}
         

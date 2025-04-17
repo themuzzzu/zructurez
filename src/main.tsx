@@ -3,17 +3,10 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
-import { ThemeProvider } from "./components/ThemeProvider.tsx";
-import { LanguageProvider } from "./contexts/LanguageContext.tsx";
-import { Toaster } from "sonner";
 
+// We don't need to wrap with providers here since they are already in App.tsx
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <ThemeProvider defaultTheme="system">
-      <LanguageProvider>
-        <App />
-        <Toaster position="top-center" />
-      </LanguageProvider>
-    </ThemeProvider>
+    <App />
   </React.StrictMode>
 );
