@@ -50,53 +50,69 @@
     --ring: 240 4.9% 83.9%;
   }
   
-  /* UI color theme overrides - more specific selectors to ensure they apply */
+  /* UI theme overrides - more specific selectors to ensure they apply */
   .ui-purple {
     --primary: 270 70% 60%;
     --primary-foreground: 0 0% 98%;
     --ring: 270 70% 60%;
+    --accent: 270 70% 95%;
+    --accent-foreground: 270 70% 30%;
   }
   
   .ui-red {
     --primary: 0 72% 51%;
     --primary-foreground: 0 0% 98%;
     --ring: 0 72% 51%;
+    --accent: 0 72% 95%;
+    --accent-foreground: 0 72% 30%;
   }
   
   .ui-yellow {
     --primary: 38 92% 50%;
     --primary-foreground: 0 0% 12%;
     --ring: 38 92% 50%;
+    --accent: 38 92% 90%;
+    --accent-foreground: 38 92% 30%;
   }
   
   .ui-green {
     --primary: 142 72% 29%;
     --primary-foreground: 0 0% 98%;
     --ring: 142 72% 29%;
+    --accent: 142 72% 90%;
+    --accent-foreground: 142 72% 20%;
   }
   
   .ui-blue {
     --primary: 217 91% 60%;
     --primary-foreground: 0 0% 98%;
     --ring: 217 91% 60%;
+    --accent: 217 91% 95%;
+    --accent-foreground: 217 91% 30%;
   }
   
   .ui-pink {
     --primary: 330 81% 60%;
     --primary-foreground: 0 0% 98%;
     --ring: 330 81% 60%;
+    --accent: 330 81% 95%;
+    --accent-foreground: 330 81% 30%;
   }
   
   .ui-orange {
     --primary: 24 94% 50%;
     --primary-foreground: 0 0% 98%;
     --ring: 24 94% 50%;
+    --accent: 24 94% 95%;
+    --accent-foreground: 24 94% 30%;
   }
   
   .ui-teal {
     --primary: 168 76% 42%;
     --primary-foreground: 0 0% 98%;
     --ring: 168 76% 42%;
+    --accent: 168 76% 95%;
+    --accent-foreground: 168 76% 30%;
   }
   
   /* Language-specific font styles */
@@ -145,4 +161,15 @@
 
 .language-indicator {
   animation: fadeIn 0.3s ease-out;
+}
+
+/* Add Google Fonts for better language support */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap');
+
+/* Theme preview styles */
+.theme-preview {
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 1rem;
+  margin-top: 0.5rem;
 }

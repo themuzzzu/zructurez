@@ -1,4 +1,3 @@
-
 import { toast } from "sonner";
 import type { Profile } from "@/types/profile";
 
@@ -97,20 +96,27 @@ export const useProfileSettings = (
         localStorage.setItem("language", value);
       }
       
-      // Update profile in database if available
+      // Only attempt to update profile in database if profile exists and has ID
       if (profile?.id) {
-        const updates: Partial<Profile> = {
-          display_preferences: {
-            ...profile.display_preferences,
-            [setting]: value
+        try {
+          const updates: Partial<Profile> = {
+            display_preferences: {
+              ...profile.display_preferences,
+              [setting]: value
+            }
+          };
+          
+          const success = await updateProfile(updates);
+          if (success) {
+            toast.success(`Display preference updated`);
           }
-        };
-        
-        const success = await updateProfile(updates);
-        if (success) {
-          toast.success(`Display preference updated`);
+          return success;
+        } catch (error) {
+          // If the database update fails, still keep the local changes
+          console.error('Error updating display preferences in database:', error);
+          // Don't show error toast since local changes were successful
+          return true;
         }
-        return success;
       }
       
       return true;

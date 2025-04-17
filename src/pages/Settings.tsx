@@ -23,6 +23,7 @@ import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { Card } from "@/components/ui/card";
 import { LocationSettings } from "@/components/settings/LocationSettings";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Settings = () => {
   const [searchParams] = useSearchParams();
@@ -31,6 +32,7 @@ const Settings = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useMediaQuery("(max-width: 768px)");
+  const { t } = useLanguage();
 
   // Update URL when tab changes without page reload
   useEffect(() => {
@@ -54,7 +56,7 @@ const Settings = () => {
       case "notifications":
         return <NotificationSettings />;
       case "privacy":
-        return <LockedFeature title="Privacy Settings" />;
+        return <LockedFeature title={t("privacy")} />;
       case "orders":
         return <OrdersTab />;
       case "appointments":
@@ -70,9 +72,9 @@ const Settings = () => {
       case "ad-pricing":
         return <AdvertisementPricingTab />;
       case "subscribed":
-        return <LockedFeature title="Subscribed Businesses" />;
+        return <LockedFeature title={t("subscribed")} />;
       case "pricing":
-        return <LockedFeature title="Pricing & Plans" />;
+        return <LockedFeature title={t("pricing")} />;
       case "testing":
         return <TestingTab />;
       case "analytics":
@@ -92,7 +94,7 @@ const Settings = () => {
         </div>
         <h2 className="text-xl font-semibold">{title}</h2>
         <p className="text-muted-foreground max-w-md">
-          This feature is currently locked. Please contact your administrator to request access.
+          {t("lockedFeature")}
         </p>
       </div>
     </Card>
@@ -109,7 +111,7 @@ const Settings = () => {
             onClick={() => navigate("/")}
           >
             <ChevronLeft className="h-4 w-4" />
-            Back to Home
+            {t("backToHome")}
           </Button>
         )}
         <div className="flex flex-col md:flex-row gap-4">

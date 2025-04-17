@@ -1,72 +1,180 @@
 
+import { cn } from "@/lib/utils";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { 
-  Settings, Bell, Shield, User, Package, 
-  Briefcase, Wrench, Megaphone, ShoppingBag, 
-  Calendar, BarChart, Activity, Heart, BadgeDollarSign,
-  DollarSign, TagIcon, Lock, MapPin
+import {
+  Settings,
+  Bell,
+  Lock,
+  ShoppingBag,
+  CalendarDays,
+  Package,
+  Store,
+  Wrench,
+  MessageSquare,
+  Ad,
+  PiggyBank,
+  ListChecks,
+  Activity,
+  BarChart,
+  MapPin,
+  User,
+  Menu,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-
-interface TabItem {
-  id: string;
-  label: string;
-  icon: React.ComponentType<any>;
-  locked?: boolean;
-}
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface SettingsNavProps {
   activeTab: string;
-  setActiveTab: (tab: string) => void;
+  setActiveTab: React.Dispatch<React.SetStateAction<string>>;
 }
 
-export const SettingsNav = ({ activeTab, setActiveTab }: SettingsNavProps) => {
-  const navigate = useNavigate();
-  
-  const tabs: TabItem[] = [
-    { id: "profile", label: "Profile", icon: User },
-    { id: "general", label: "General", icon: Settings },
-    { id: "location", label: "Location", icon: MapPin },
-    { id: "notifications", label: "Notifications", icon: Bell },
-    { id: "privacy", label: "Privacy", icon: Shield, locked: true },
-    { id: "appointments", label: "Appointments", icon: Calendar },
-    { id: "orders", label: "Orders", icon: ShoppingBag },
-    { id: "subscribed", label: "Subscriptions", icon: Heart, locked: true },
-    { id: "business", label: "Business", icon: Briefcase },
-    { id: "services", label: "Services", icon: Wrench },
-    { id: "products", label: "Products", icon: Package },
-    { id: "advertisements", label: "Advertisements", icon: Megaphone },
-    { id: "ad-pricing", label: "Ad Pricing & Booking", icon: TagIcon },
-    { id: "pricing", label: "Pricing & Plans", icon: BadgeDollarSign, locked: true },
-    { id: "testing", label: "Testing", icon: Activity },
-    { id: "analytics", label: "Analytics", icon: BarChart },
+export function SettingsNav({ activeTab, setActiveTab }: SettingsNavProps) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const isMobile = useMediaQuery("(max-width: 768px)");
+  const { t } = useLanguage();
+
+  const settingsNavItems = [
+    {
+      id: "profile",
+      label: t("profile"),
+      icon: <User className="h-4 w-4" />,
+    },
+    {
+      id: "general",
+      label: t("general"),
+      icon: <Settings className="h-4 w-4" />,
+    },
+    {
+      id: "notifications",
+      label: t("notifications"),
+      icon: <Bell className="h-4 w-4" />,
+    },
+    {
+      id: "privacy",
+      label: t("privacy"),
+      icon: <Lock className="h-4 w-4" />,
+    },
+    {
+      id: "orders",
+      label: t("orders"),
+      icon: <ShoppingBag className="h-4 w-4" />,
+    },
+    {
+      id: "appointments",
+      label: t("appointments"),
+      icon: <CalendarDays className="h-4 w-4" />,
+    },
+    {
+      id: "products",
+      label: t("products"),
+      icon: <Package className="h-4 w-4" />,
+    },
+    {
+      id: "business",
+      label: t("business"),
+      icon: <Store className="h-4 w-4" />,
+    },
+    {
+      id: "services",
+      label: t("services"),
+      icon: <Wrench className="h-4 w-4" />,
+    },
+    {
+      id: "advertisements",
+      label: t("advertisements"),
+      icon: <Ad className="h-4 w-4" />,
+    },
+    {
+      id: "ad-pricing",
+      label: t("adPricing"),
+      icon: <PiggyBank className="h-4 w-4" />,
+    },
+    {
+      id: "subscribed",
+      label: t("subscribed"),
+      icon: <ListChecks className="h-4 w-4" />,
+    },
+    {
+      id: "pricing",
+      label: t("pricing"),
+      icon: <Activity className="h-4 w-4" />,
+    },
+    {
+      id: "analytics",
+      label: t("analytics"),
+      icon: <BarChart className="h-4 w-4" />,
+    },
+    {
+      id: "location",
+      label: t("location"),
+      icon: <MapPin className="h-4 w-4" />,
+    },
   ];
 
-  // Handle tab change
   const handleTabChange = (tabId: string) => {
     setActiveTab(tabId);
-    // Update URL without full page reload - Fixed: Convert location to string
-    const url = new URL(window.location.href);
-    url.searchParams.set('tab', tabId);
-    window.history.pushState({}, '', url);
+    if (isMobile) {
+      setIsMenuOpen(false);
+    }
   };
 
-  return (
-    <nav className="w-full md:w-56 lg:w-64 space-y-1.5 px-2 md:px-0">
-      {tabs.map(({ id, label, icon: Icon, locked }) => (
+  if (isMobile) {
+    return (
+      <div className="w-full">
         <Button
-          key={id}
-          variant={activeTab === id ? "default" : "ghost"}
-          className={`w-full justify-start ${activeTab === id ? "bg-primary" : ""} 
-                     ${locked ? "opacity-70 cursor-not-allowed" : ""}`}
-          onClick={() => !locked && handleTabChange(id)}
-          title={locked ? "This feature requires admin approval" : ""}
+          variant="outline"
+          className="w-full flex justify-between items-center mb-4"
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
         >
-          <Icon className="mr-2 h-4 w-4" />
-          {label}
-          {locked && <Lock className="ml-auto h-3 w-3" />}
+          <span className="flex items-center gap-2">
+            {settingsNavItems.find((item) => item.id === activeTab)?.icon}
+            {settingsNavItems.find((item) => item.id === activeTab)?.label}
+          </span>
+          <Menu className="h-4 w-4" />
         </Button>
-      ))}
-    </nav>
+        {isMenuOpen && (
+          <div className="bg-background rounded-md shadow-lg border p-2 space-y-1 mb-4 animate-in fade-in duration-200">
+            {settingsNavItems.map((item) => (
+              <Button
+                key={item.id}
+                variant={activeTab === item.id ? "default" : "ghost"}
+                className={cn("w-full justify-start", 
+                  activeTab === item.id
+                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                    : ""
+                )}
+                onClick={() => handleTabChange(item.id)}
+              >
+                {item.icon}
+                <span className="ml-2">{item.label}</span>
+              </Button>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-[240px] shrink-0">
+      <div className="space-y-1 py-2 sticky top-[80px]">
+        {settingsNavItems.map((item) => (
+          <Button
+            key={item.id}
+            variant={activeTab === item.id ? "default" : "ghost"}
+            className={cn("w-full justify-start", 
+              activeTab === item.id
+                ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                : ""
+            )}
+            onClick={() => handleTabChange(item.id)}
+          >
+            {item.icon}
+            <span className="ml-2">{item.label}</span>
+          </Button>
+        ))}
+      </div>
+    </div>
   );
-};
+}
