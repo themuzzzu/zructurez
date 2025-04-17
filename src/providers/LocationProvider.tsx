@@ -4,6 +4,7 @@ import { checkCityAvailability, DEFAULT_CITY } from '@/utils/cityAvailabilityUti
 import { supabase } from '@/integrations/supabase/client';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { toast } from 'sonner';
+import { isMobileDevice } from '@/utils/locationUtils';
 
 interface LocationContextType {
   currentLocation: string;
@@ -38,6 +39,9 @@ export function LocationProvider({ children }: { children: ReactNode }) {
     loading: isDetectingLocation, 
     requestGeolocation 
   } = useGeolocation();
+
+  // Check if running on desktop device
+  const isDesktop = !isMobileDevice();
 
   // Check city availability on mount and when location changes
   useEffect(() => {
@@ -115,9 +119,9 @@ export function LocationProvider({ children }: { children: ReactNode }) {
     }
   }, [position]);
   
-  // On first mount, try to detect location automatically if it's the first visit
+  // On first mount, try to detect location automatically ONLY on mobile devices
   useEffect(() => {
-    if (isFirstVisit && navigator.geolocation) {
+    if (isFirstVisit && navigator.geolocation && !isDesktop) {
       // Small delay to ensure the app is fully loaded first
       const timer = setTimeout(() => {
         requestGeolocation();
@@ -125,7 +129,7 @@ export function LocationProvider({ children }: { children: ReactNode }) {
       
       return () => clearTimeout(timer);
     }
-  }, [isFirstVisit, requestGeolocation]);
+  }, [isFirstVisit, requestGeolocation, isDesktop]);
   
   // Subscribe to real-time updates of city_availability table
   useEffect(() => {

@@ -1,4 +1,3 @@
-
 import { pipeline } from "@huggingface/transformers";
 import { translations } from "@/translations";
 
@@ -17,6 +16,7 @@ const translationCache: Record<string, Record<string, string>> = {};
 
 // Initialize models on demand to save resources
 let translationModels: Record<string, any> = {};
+let loadingPromises: Record<string, Promise<any>> = {}; // Track loading promises to prevent duplicate requests
 
 export type Language = "english" | "hindi" | "telugu" | "tamil" | "kannada" | "malayalam" | "urdu";
 
@@ -67,19 +67,42 @@ export async function translateText(text: string, targetLanguage: Language): Pro
       return text;
     }
     
-    // Initialize model if not already loaded
+    // Initialize model if not already loaded or loading
     if (!translationModels[modelKey]) {
-      try {
-        console.log(`Loading translation model for ${targetLanguage}...`);
-        translationModels[modelKey] = await pipeline('translation', modelName, { 
-          revision: 'main',
-          // Remove the 'quantized' property as it's not supported in PretrainedModelOptions
-        });
-        console.log(`Translation model for ${targetLanguage} loaded successfully`);
-      } catch (error) {
-        console.error(`Failed to load translation model for ${targetLanguage}:`, error);
-        return text;
+      // Prevent multiple simultaneous loading attempts for the same model
+      if (!loadingPromises[modelKey]) {
+        try {
+          console.log(`Loading translation model for ${targetLanguage}...`);
+          
+          // Create a loading promise and store it
+          loadingPromises[modelKey] = pipeline('translation', modelName, { 
+            revision: 'main',
+          });
+          
+          // Await the loading promise
+          translationModels[modelKey] = await loadingPromises[modelKey];
+          console.log(`Translation model for ${targetLanguage} loaded successfully`);
+        } catch (error) {
+          console.error(`Failed to load translation model for ${targetLanguage}:`, error);
+          // Remove the failed loading promise so we can try again later
+          delete loadingPromises[modelKey];
+          return text;
+        }
+      } else {
+        // Another request is already loading this model - wait for it
+        try {
+          translationModels[modelKey] = await loadingPromises[modelKey];
+        } catch (error) {
+          // If the existing promise fails, clear it so we can try again next time
+          delete loadingPromises[modelKey];
+          return text;
+        }
       }
+    }
+    
+    // Fall back to original text if model failed to load
+    if (!translationModels[modelKey]) {
+      return text;
     }
     
     // Translate the text
@@ -147,6 +170,13 @@ export function cleanupUnusedModels(currentLanguage: Language): void {
       console.log(`Cleaning up unused translation model: ${modelKey}`);
       translationModels[modelKey] = null;
       delete translationModels[modelKey];
+    }
+  });
+  
+  // Also clear any loading promises for models we don't need
+  Object.keys(loadingPromises).forEach(modelKey => {
+    if (modelKey !== neededModel && modelKey !== "english-english") {
+      delete loadingPromises[modelKey];
     }
   });
 }

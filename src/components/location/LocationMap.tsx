@@ -1,14 +1,17 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+
+import { useState, useEffect, useRef, useCallback, memo } from "react";
 import { MapPin, Layers, Plus, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { useLocation } from "@/providers/LocationProvider";
+import { isMobileDevice } from "@/utils/locationUtils";
 
 declare global {
   interface Window {
     google: typeof google;
     initMap: () => void;
+    googleMapsLoaded: boolean;
   }
 }
 
@@ -22,7 +25,8 @@ interface LocationMapProps {
   zoom?: number;
 }
 
-export function LocationMap({
+// Use memo to prevent unnecessary re-renders
+export const LocationMap = memo(({
   className = "",
   businesses = [],
   services = [],
@@ -30,14 +34,17 @@ export function LocationMap({
   onMarkerClick,
   center,
   zoom = 14
-}: LocationMapProps) {
+}: LocationMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [mapInstance, setMapInstance] = useState<google.maps.Map | null>(null);
   const [mapMarkers, setMapMarkers] = useState<google.maps.Marker[]>([]);
   const { requestGeolocation, position } = useGeolocation();
   const [mapZoom, setMapZoom] = useState(zoom);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
+  const [isScriptLoading, setIsScriptLoading] = useState(false);
   const { latitude, longitude } = useLocation();
+  const isMobile = isMobileDevice();
+  const hasInitialized = useRef(false);
   
   // Clean up markers when component unmounts
   useEffect(() => {
@@ -46,224 +53,260 @@ export function LocationMap({
     };
   }, [mapMarkers]);
 
-  // Initialize the map when the component mounts
+  // Load Google Maps script efficiently - once per page load
   useEffect(() => {
-    // Check if Google Maps API is loaded
-    const loadGoogleMaps = () => {
-      if (typeof window !== 'undefined' && !window.google?.maps) {
-        // Create script tag
-        const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyBky_ax9Xw9iNRRWMwbdqXzneYgbO6iarI&callback=initMap`;
-        script.async = true;
-        script.defer = true;
-        
-        // Create global init function
+    if (typeof window !== 'undefined') {
+      // Check if script is already being loaded or has loaded
+      if (window.googleMapsLoaded || isScriptLoading || document.querySelector('script[src*="maps.googleapis.com/maps/api"]')) {
+        if (window.google?.maps) {
+          initializeMap();
+        }
+        return;
+      }
+      
+      // Load script if not already loaded or loading
+      setIsScriptLoading(true);
+      
+      const script = document.createElement('script');
+      script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyBky_ax9Xw9iNRRWMwbdqXzneYgbO6iarI&callback=initMap`;
+      script.async = true;
+      script.defer = true;
+      
+      // Create global init function only once
+      if (!window.initMap) {
         window.initMap = () => {
-          // Dispatch event that Google Maps is loaded
+          window.googleMapsLoaded = true;
           window.dispatchEvent(new Event('google-maps-loaded'));
         };
-        
-        // Append script to document
-        document.head.appendChild(script);
       }
-    };
-    
-    loadGoogleMaps();
-    
-    // Initialize map
-    const initMap = () => {
-      if (!mapRef.current || !window.google?.maps) return;
       
-      const defaultCenter = { lat: 20.5937, lng: 78.9629 }; // Center of India
-      const userCenter = center || 
-        (position ? { lat: position.latitude, lng: position.longitude } : undefined) ||
-        (latitude && longitude ? { lat: latitude, lng: longitude } : undefined) ||
-        defaultCenter;
+      // Listen for script load event
+      script.onload = () => {
+        setIsScriptLoading(false);
+      };
       
-      const map = new window.google.maps.Map(mapRef.current, {
-        center: userCenter,
-        zoom: mapZoom,
-        mapTypeControl: false,
-        streetViewControl: false,
-        fullscreenControl: false,
-        zoomControl: false,
-        styles: [
-          {
-            featureType: "poi",
-            elementType: "labels",
-            stylers: [{ visibility: "off" }]
-          }
-        ]
-      });
+      script.onerror = (error) => {
+        console.error("Error loading Google Maps API:", error);
+        setIsScriptLoading(false);
+      };
       
-      setMapInstance(map);
-      setIsMapLoaded(true);
-      
-      // Add a marker for user's position if available
-      if (position || (latitude && longitude)) {
-        const userPosition = position 
-          ? { lat: position.latitude, lng: position.longitude }
-          : { lat: latitude as number, lng: longitude as number };
-            
-        new window.google.maps.Marker({
-          position: userPosition,
-          map,
-          icon: {
-            path: window.google.maps.SymbolPath.CIRCLE,
-            fillColor: "#4285F4",
-            fillOpacity: 1,
-            strokeColor: "#FFFFFF",
-            strokeWeight: 2,
-            scale: 8
-          },
-          title: "Your location"
-        });
-        
-        // Add a circle to show accuracy
-        if (position?.accuracy) {
-          new window.google.maps.Circle({
-            strokeColor: "#4285F4",
-            strokeOpacity: 0.2,
-            strokeWeight: 1,
-            fillColor: "#4285F4",
-            fillOpacity: 0.1,
-            map,
-            center: userPosition,
-            radius: position.accuracy
-          });
-        }
-      }
-    };
-    
+      // Append script to document
+      document.head.appendChild(script);
+    }
+  }, []);
+  
+  // Wait for google maps to load
+  useEffect(() => {
     if (window.google?.maps) {
-      initMap();
+      initializeMap();
     } else {
-      window.addEventListener('google-maps-loaded', initMap);
+      const handleMapsLoaded = () => {
+        initializeMap();
+      };
+      
+      window.addEventListener('google-maps-loaded', handleMapsLoaded);
       return () => {
-        window.removeEventListener('google-maps-loaded', initMap);
+        window.removeEventListener('google-maps-loaded', handleMapsLoaded);
       };
     }
-  }, [position, center, mapZoom, latitude, longitude]);
+  }, []);
   
-  // Update map center if it changes
+  // Initialize map function
+  const initializeMap = useCallback(() => {
+    if (!mapRef.current || !window.google?.maps || hasInitialized.current) return;
+    
+    hasInitialized.current = true;
+    
+    const defaultCenter = { lat: 20.5937, lng: 78.9629 }; // Center of India
+    const userCenter = center || 
+      (position ? { lat: position.latitude, lng: position.longitude } : undefined) ||
+      (latitude && longitude ? { lat: latitude, lng: longitude } : undefined) ||
+      defaultCenter;
+    
+    // Simplified map options for better performance
+    const mapOptions: google.maps.MapOptions = {
+      center: userCenter,
+      zoom: mapZoom,
+      mapTypeControl: false,
+      streetViewControl: false,
+      fullscreenControl: false,
+      zoomControl: false,
+      gestureHandling: "cooperative", // Improves mobile performance
+      disableDefaultUI: true, // Minimize UI elements for performance
+      styles: [
+        {
+          featureType: "poi",
+          elementType: "labels",
+          stylers: [{ visibility: "off" }]
+        },
+        {
+          featureType: "transit",
+          elementType: "labels",
+          stylers: [{ visibility: "off" }]
+        }
+      ]
+    };
+    
+    const map = new window.google.maps.Map(mapRef.current, mapOptions);
+    
+    // Optimize map rendering
+    map.addListener('tilesloaded', () => {
+      setIsMapLoaded(true);
+    });
+    
+    setMapInstance(map);
+    
+    // Add a marker for user's position if available
+    if (position || (latitude && longitude)) {
+      const userPosition = position 
+        ? { lat: position.latitude, lng: position.longitude }
+        : { lat: latitude as number, lng: longitude as number };
+          
+      new window.google.maps.Marker({
+        position: userPosition,
+        map,
+        icon: {
+          path: window.google.maps.SymbolPath.CIRCLE,
+          fillColor: "#4285F4",
+          fillOpacity: 1,
+          strokeColor: "#FFFFFF",
+          strokeWeight: 2,
+          scale: 8
+        },
+        title: "Your location"
+      });
+      
+      // Add a circle for accuracy - only if on mobile
+      if (isMobile && position?.accuracy) {
+        new window.google.maps.Circle({
+          strokeColor: "#4285F4",
+          strokeOpacity: 0.2,
+          strokeWeight: 1,
+          fillColor: "#4285F4",
+          fillOpacity: 0.1,
+          map,
+          center: userPosition,
+          radius: position.accuracy
+        });
+      }
+    }
+  }, [position, center, mapZoom, latitude, longitude, isMobile]);
+
+  // Update map center when it changes
   useEffect(() => {
     if (mapInstance && center) {
-      mapInstance.panTo(center);
+      mapInstance.setCenter(center);
     }
   }, [center, mapInstance]);
   
-  // Update markers when businesses, services, or products change
+  // Update markers only once map is initialized
   useEffect(() => {
     if (!mapInstance || !isMapLoaded) return;
     
     // Clear existing markers
     mapMarkers.forEach(marker => marker.setMap(null));
+    
+    // Batch all marker creation operations to reduce reflows
     const newMarkers: google.maps.Marker[] = [];
     
-    // Add business markers
-    businesses.forEach(business => {
-      if (!business.latitude || !business.longitude) return;
-      
-      const marker = new window.google.maps.Marker({
-        position: { lat: business.latitude, lng: business.longitude },
-        map: mapInstance,
-        title: business.name,
-        icon: {
-          path: window.google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
-          fillColor: "#FF5722",
-          fillOpacity: 1,
-          strokeWeight: 1,
-          strokeColor: "#FFFFFF",
-          scale: 5
-        }
-      });
-      
-      marker.addListener("click", () => {
-        if (onMarkerClick) onMarkerClick(business);
-      });
-      
-      newMarkers.push(marker);
-    });
+    // Optimize marker creation by batching
+    const batchSize = 10;
     
-    // Add service markers
-    services.forEach(service => {
-      if (!service.latitude || !service.longitude) return;
+    // Helper function to create markers in batches
+    const createMarkersBatch = (items: any[], color: string, type: string, startIndex: number) => {
+      const endIndex = Math.min(startIndex + batchSize, items.length);
       
-      const marker = new window.google.maps.Marker({
-        position: { lat: service.latitude, lng: service.longitude },
-        map: mapInstance,
-        title: service.title,
-        icon: {
-          path: window.google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
-          fillColor: "#4CAF50",
-          fillOpacity: 1,
-          strokeWeight: 1,
-          strokeColor: "#FFFFFF",
-          scale: 5
+      for (let i = startIndex; i < endIndex; i++) {
+        const item = items[i];
+        if (!item.latitude || !item.longitude) continue;
+        
+        const marker = new window.google.maps.Marker({
+          position: { lat: item.latitude, lng: item.longitude },
+          map: mapInstance,
+          title: item.name || item.title,
+          // Use optimized SVG path for markers
+          icon: {
+            path: window.google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+            fillColor: color,
+            fillOpacity: 1,
+            strokeWeight: 1,
+            strokeColor: "#FFFFFF",
+            scale: 5
+          }
+        });
+        
+        if (onMarkerClick) {
+          marker.addListener("click", () => onMarkerClick(item));
         }
-      });
+        
+        newMarkers.push(marker);
+      }
       
-      marker.addListener("click", () => {
-        if (onMarkerClick) onMarkerClick(service);
-      });
-      
-      newMarkers.push(marker);
-    });
+      // If there are more items to process, schedule the next batch
+      if (endIndex < items.length) {
+        setTimeout(() => {
+          createMarkersBatch(items, color, type, endIndex);
+        }, 0);
+      }
+    };
     
-    // Add product markers
-    products.forEach(product => {
-      if (!product.latitude || !product.longitude) return;
-      
-      const marker = new window.google.maps.Marker({
-        position: { lat: product.latitude, lng: product.longitude },
-        map: mapInstance,
-        title: product.name,
-        icon: {
-          path: window.google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
-          fillColor: "#2196F3",
-          fillOpacity: 1,
-          strokeWeight: 1,
-          strokeColor: "#FFFFFF",
-          scale: 5
-        }
-      });
-      
-      marker.addListener("click", () => {
-        if (onMarkerClick) onMarkerClick(product);
-      });
-      
-      newMarkers.push(marker);
-    });
+    // Start creating markers in batches
+    if (businesses.length > 0) {
+      createMarkersBatch(businesses, "#FF5722", "business", 0);
+    }
+    
+    if (services.length > 0) {
+      createMarkersBatch(services, "#4CAF50", "service", 0);
+    }
+    
+    if (products.length > 0) {
+      createMarkersBatch(products, "#2196F3", "product", 0);
+    }
     
     setMapMarkers(newMarkers);
   }, [businesses, services, products, mapInstance, isMapLoaded, onMarkerClick]);
   
+  // Zoom controls
   const handleZoomIn = useCallback(() => {
     if (mapInstance) {
-      mapInstance.setZoom(mapInstance.getZoom() + 1);
-      setMapZoom(mapInstance.getZoom());
+      const newZoom = mapInstance.getZoom() + 1;
+      mapInstance.setZoom(newZoom);
+      setMapZoom(newZoom);
     }
   }, [mapInstance]);
 
   const handleZoomOut = useCallback(() => {
     if (mapInstance) {
-      mapInstance.setZoom(mapInstance.getZoom() - 1);
-      setMapZoom(mapInstance.getZoom());
+      const newZoom = mapInstance.getZoom() - 1;
+      mapInstance.setZoom(newZoom);
+      setMapZoom(newZoom);
     }
   }, [mapInstance]);
   
   const handleMyLocation = useCallback(() => {
-    requestGeolocation();
-    if (position && mapInstance) {
-      mapInstance.panTo({ lat: position.latitude, lng: position.longitude });
-      mapInstance.setZoom(17);
-      setMapZoom(17);
+    if (mapInstance) {
+      // On desktop, use the manual request
+      requestGeolocation();
+      
+      if (position) {
+        mapInstance.panTo({ lat: position.latitude, lng: position.longitude });
+        mapInstance.setZoom(17);
+        setMapZoom(17);
+      } else if (latitude && longitude) {
+        mapInstance.panTo({ lat: latitude, lng: longitude });
+        mapInstance.setZoom(17);
+        setMapZoom(17);
+      }
     }
-  }, [mapInstance, position, requestGeolocation]);
+  }, [mapInstance, position, requestGeolocation, latitude, longitude]);
 
   return (
     <div className={`relative ${className}`}>
-      <div ref={mapRef} className="w-full h-full min-h-[300px] rounded-lg overflow-hidden" />
+      <div 
+        ref={mapRef} 
+        className="w-full h-full min-h-[300px] rounded-lg overflow-hidden"
+        style={{ willChange: "transform" }} // Performance optimization
+      />
       
       {/* Map controls */}
       <div className="absolute top-3 right-3 flex flex-col gap-2">
@@ -293,9 +336,9 @@ export function LocationMap({
         </Button>
       </div>
       
-      {/* Loading overlay */}
+      {/* Loading overlay - only show briefly */}
       {!isMapLoaded && (
-        <div className="absolute inset-0 flex items-center justify-center bg-background/50">
+        <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm">
           <Card className="p-4">
             <div className="flex items-center gap-2">
               <div className="h-4 w-4 rounded-full border-2 border-primary border-t-transparent animate-spin" />
@@ -306,4 +349,6 @@ export function LocationMap({
       )}
     </div>
   );
-}
+});
+
+export default LocationMap;
