@@ -1,4 +1,3 @@
-
 import { createBrowserRouter, RouterProvider, RouteObject } from "react-router-dom";
 import Home from "./pages/Home";
 import Index from "./pages/Index";
@@ -22,7 +21,6 @@ import { Outlet } from "react-router-dom";
 import { ErrorView } from "@/components/ErrorView";
 import { Suspense, lazy } from "react";
 import { CircularLoader } from "@/components/loaders/CircularLoader";
-import UnifiedSearchPage from "./pages/search/UnifiedSearchPage";
 
 // Lazy load heavy components to improve initial load time
 const LazyMapView = lazy(() => import("./pages/MapView"));
@@ -145,11 +143,6 @@ export const routes: RouteObject[] = [
       {
         path: "/more",
         element: <More />,
-        errorElement: <ErrorView />,
-      },
-      {
-        path: "/search",
-        element: <UnifiedSearchPage />,
         errorElement: <ErrorView />,
       },
       {
