@@ -59,6 +59,14 @@ export default function MarketplaceSearch() {
     }
   };
 
+  // Fix the type issue by creating a properly typed handler function
+  const handlePriceRangeChange = (value: number[]) => {
+    // Ensure we handle the value as a tuple of two numbers
+    if (value.length === 2) {
+      setPriceRange([value[0], value[1]]);
+    }
+  };
+
   const applyFilters = () => {
     search(searchQuery, {
       categories: selectedCategories,
@@ -179,7 +187,7 @@ export default function MarketplaceSearch() {
                           min={0}
                           max={10000}
                           step={100}
-                          onValueChange={setPriceRange}
+                          onValueChange={handlePriceRangeChange}
                         />
                         <div className="flex justify-between text-sm">
                           <span>₹{priceRange[0]}</span>
@@ -287,7 +295,7 @@ export default function MarketplaceSearch() {
                     <ProductCard
                       product={{
                         ...product,
-                        imageUrl: product.imageUrl || product.image_url,
+                        imageUrl: product.imageUrl || '',
                         price: product.price || 0,
                       }}
                       layout={gridLayout}
