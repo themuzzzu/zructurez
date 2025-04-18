@@ -27,36 +27,27 @@ export function LocationModalHandler() {
       @media (max-width: 640px) {
         [data-radix-popper-content-wrapper] {
           position: fixed !important;
-          bottom: 0 !important;
+          top: 0 !important;
           left: 0 !important;
           right: 0 !important;
-          top: auto !important;
+          bottom: 0 !important;
           transform: none !important;
           max-width: 100% !important;
           width: 100% !important;
-          z-index: 100 !important;
+          height: 100% !important;
+          z-index: 9999 !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
         }
         
         .radix-dialog-content {
-          position: fixed !important;
-          bottom: 0 !important;
-          left: 0 !important;
-          right: 0 !important;
-          border-bottom-left-radius: 0 !important;
-          border-bottom-right-radius: 0 !important; 
-          max-height: 90vh !important;
-          margin: 0 !important;
           width: 100% !important;
-          animation: slideUp 0.3s ease-out !important;
-        }
-        
-        @keyframes slideUp {
-          from {
-            transform: translateY(100%);
-          }
-          to {
-            transform: translateY(0);
-          }
+          max-height: 100% !important;
+          margin: 0 !important;
+          border-radius: 0 !important;
+          height: 100% !important;
+          max-width: 100% !important;
         }
       }
     `;

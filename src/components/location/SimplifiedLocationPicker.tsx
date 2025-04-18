@@ -100,7 +100,7 @@ export function SimplifiedLocationPicker({
 
   return (
     <Dialog open={open} onOpenChange={firstVisit ? () => {} : onOpenChange}>
-      <DialogContent className="fixed left-0 right-0 bottom-0 top-auto sm:top-[50%] sm:left-[50%] sm:bottom-auto sm:transform sm:-translate-x-1/2 sm:-translate-y-1/2 sm:max-w-[500px] p-6 bg-zinc-900 text-white border-zinc-800 max-h-[90vh] overflow-y-auto rounded-b-none rounded-t-xl sm:rounded-xl shadow-lg w-full animate-in slide-in-from-bottom duration-300">
+      <DialogContent className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-zinc-900 text-white border-zinc-800 max-h-[90vh] overflow-y-auto rounded-xl shadow-lg w-[95%] max-w-[500px] sm:w-4/5 p-6 z-[9999] sm:max-h-[85vh]">
         <DialogHeader className="mb-4">
           <DialogTitle className="flex items-center gap-2 text-2xl font-semibold text-white">
             <MapPin className="h-7 w-7" />
