@@ -7,6 +7,8 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 interface ErrorViewProps {
+  error?: Error;
+  resetErrorBoundary?: () => void;
   message?: string;
   title?: string;
   status?: number;
@@ -14,6 +16,8 @@ interface ErrorViewProps {
 }
 
 export const ErrorView = ({ 
+  error,
+  resetErrorBoundary,
   message = "Something went wrong", 
   title = "Error",
   status,
@@ -23,13 +27,16 @@ export const ErrorView = ({
   const [retryCount, setRetryCount] = useState(0);
   const [isClearing, setIsClearing] = useState(false);
   
+  const errorMessage = error?.message || message;
+  const errorTitle = error?.name || title;
+  
   // Log error for debugging
   useEffect(() => {
-    console.error(`Error view rendered: ${status} - ${title} - ${message}`);
+    console.error(`Error view rendered:`, error || `${status} - ${title} - ${message}`);
     
     // Show toast notification
-    toast.error(message || "An error occurred");
-  }, [status, title, message]);
+    toast.error(errorMessage || "An error occurred");
+  }, [error, status, title, message, errorMessage]);
 
   // Handle retry with cache clearing
   const handleRetry = () => {
@@ -60,20 +67,38 @@ export const ErrorView = ({
           console.log('Cleared localStorage cache keys');
         }
         
-        // Add a small delay to ensure cache clearing completes
-        setTimeout(() => {
-          window.location.reload();
-        }, retryCount > 1 ? 500 : 200);
+        // Reset error boundary if provided
+        if (resetErrorBoundary) {
+          setTimeout(() => {
+            resetErrorBoundary();
+            setIsClearing(false);
+          }, 300);
+        } else {
+          // Add a small delay to ensure cache clearing completes
+          setTimeout(() => {
+            window.location.reload();
+          }, retryCount > 1 ? 500 : 200);
+        }
       }).catch(err => {
         console.error('Error clearing cache:', err);
-        // Reload anyway
-        window.location.reload();
+        // Reset or reload anyway
+        if (resetErrorBoundary) {
+          resetErrorBoundary();
+        } else {
+          window.location.reload();
+        }
+        setIsClearing(false);
       });
     } else {
       // If caches API is not available
-      setTimeout(() => {
-        window.location.reload();
-      }, 100);
+      if (resetErrorBoundary) {
+        resetErrorBoundary();
+      } else {
+        setTimeout(() => {
+          window.location.reload();
+        }, 100);
+      }
+      setIsClearing(false);
     }
   };
 
@@ -85,9 +110,17 @@ export const ErrorView = ({
             <AlertCircle className="h-12 w-12 sm:h-16 sm:w-16 text-destructive" />
           </div>
           <h2 className="text-xl sm:text-2xl font-semibold">
-            {status ? `${status} - ${title}` : title}
+            {status ? `${status} - ${errorTitle}` : errorTitle}
           </h2>
-          <p className="text-muted-foreground max-w-md px-4 text-base">{message}</p>
+          <p className="text-muted-foreground max-w-md px-4 text-base">{errorMessage}</p>
+          
+          {error && (
+            <div className="bg-muted/30 p-4 rounded-md max-w-md overflow-auto text-left mx-4">
+              <code className="text-xs text-muted-foreground whitespace-pre-wrap">
+                {error.stack}
+              </code>
+            </div>
+          )}
           
           <div className="space-y-2 max-w-md">
             <p className="text-sm text-muted-foreground">
@@ -96,7 +129,7 @@ export const ErrorView = ({
             <ul className="text-sm text-muted-foreground list-disc list-inside text-left">
               <li>Internet connection issues</li>
               <li>Server is temporarily unavailable</li>
-              <li>Map resources couldn't be loaded</li>
+              <li>The page resources couldn't be loaded</li>
               <li>Your browser may be blocking certain resources</li>
             </ul>
           </div>

@@ -11,6 +11,8 @@ import { NetworkMonitor } from "@/providers/NetworkMonitor";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Toaster } from "sonner";
 import { LocationModalHandler } from "@/components/location/LocationModalHandler";
+import { ErrorView } from "@/components/ErrorView";
+import { LoadingProvider } from "@/providers/LoadingProvider";
 import "./App.css";
 import "./styles/global.css";
 import "./styles/theme-manager.css";
@@ -143,21 +145,23 @@ function App() {
       <>
         <AppRoutes />
         <LocationModalHandler />
-        <Toaster position="top-center" />
+        <Toaster position="top-center" richColors closeButton />
       </>
     );
   };
 
   return (
-    <ErrorBoundary>
+    <ErrorBoundary FallbackComponent={ErrorView}>
       <ThemeProvider>
         <LanguageProvider>
           <QueryClientProvider client={queryClient}>
-            <NetworkMonitor>
-              <LocationProvider>
-                {renderContent()}
-              </LocationProvider>
-            </NetworkMonitor>
+            <LoadingProvider>
+              <NetworkMonitor>
+                <LocationProvider>
+                  {renderContent()}
+                </LocationProvider>
+              </NetworkMonitor>
+            </LoadingProvider>
           </QueryClientProvider>
         </LanguageProvider>
       </ThemeProvider>

@@ -1,45 +1,47 @@
 
 import { QueryClient } from "@tanstack/react-query";
-import { measureApiCall } from "@/utils/performanceTracking";
+import { toast } from "sonner";
 
-// Create a query client with optimized configuration
+const queryErrorHandler = (error: unknown) => {
+  // Log to console
+  console.error("Query error:", error);
+  
+  // You can customize error handling logic based on error type
+  let errorMessage = "An unexpected error occurred";
+  
+  if (error instanceof Error) {
+    errorMessage = error.message;
+  } else if (typeof error === "string") {
+    errorMessage = error;
+  } else if (error && typeof error === "object" && "message" in error) {
+    errorMessage = String(error.message);
+  }
+  
+  // Show toast notification
+  toast.error(errorMessage, {
+    description: "Please try again or contact support if this persists."
+  });
+};
+
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes
-      retry: 1,
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      gcTime: 1000 * 60 * 15, // 15 minutes
       refetchOnWindowFocus: false,
-      refetchOnMount: false, // Don't refetch on component mount
+      retry: 1,
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+      throwOnError: false,
+      meta: {
+        errorHandler: queryErrorHandler,
+      }
+    },
+    mutations: {
+      retry: 1,
+      throwOnError: false,
+      meta: {
+        errorHandler: queryErrorHandler,
+      }
     },
   },
 });
-
-// Helper to create optimized query keys with proper structure
-export const createQueryKey = (base: string, params?: Record<string, any>): any[] => {
-  if (!params) return [base];
-  return [base, params];
-};
-
-// Track performance of queries
-export const trackQueryPerformance = <T>(
-  queryFn: () => Promise<T>,
-  queryName: string
-): (() => Promise<T>) => {
-  return () => measureApiCall(queryName, queryFn);
-};
-
-// Prefetch query data for common routes
-export const prefetchCommonQueries = async () => {
-  // Prefetch popular marketplace data
-  queryClient.prefetchQuery({
-    queryKey: ['sponsored-products'],
-    queryFn: async () => {
-      // Implementation depends on your data fetching logic
-      return [];
-    },
-  });
-  
-  // Prefetch other common data
-  // Add more prefetch calls as needed
-};
