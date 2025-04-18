@@ -68,7 +68,7 @@ export function MobileNav() {
                   : "text-muted-foreground"
               )}
             >
-              <Icon className="h-5 w-5 mb-1" />
+              <Icon className="h-4 w-4 mb-1" />
               <span className="text-[10px] truncate">{item.label}</span>
             </Link>
           );

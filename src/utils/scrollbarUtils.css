@@ -18,10 +18,11 @@
 }
 
 /* Global overflow control for all main wrapper elements */
-body, #root, main, .content-wrapper, .page-container {
+html, body, #root, main, .content-wrapper, .page-container {
   overflow-x: hidden;
   max-width: 100vw;
   width: 100%;
+  position: relative;
 }
 
 /* Prevent horizontal overflow in grids and flex containers */
@@ -42,6 +43,7 @@ nav, header, .navbar {
   width: 100%;
   max-width: 100vw;
   overflow-x: hidden;
+  position: relative;
 }
 
 /* Fix absolute positioned elements from causing overflow */
@@ -54,6 +56,24 @@ nav, header, .navbar {
   display: flex;
   align-items: center;
   width: 100%;
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
+}
+
+/* Fixing the sheet content */
+[data-radix-popper-content-wrapper] {
+  max-width: 95vw !important;
+}
+
+/* Improved responsive sizing */
+@media (max-width: 640px) {
+  .container {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  
+  /* Make sure fixed elements don't overflow on mobile */
+  .fixed {
+    width: 100%;
+    left: 0;
+    right: 0;
+  }
 }

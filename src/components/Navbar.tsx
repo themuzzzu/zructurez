@@ -12,27 +12,16 @@ import { Sidebar } from "./Sidebar";
 import { CartButton } from "./navbar/CartButton";
 import { UserMenu } from "./navbar/UserMenu";
 import { MobileNav } from "./navbar/MobileNav";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { useTheme } from "./ThemeProvider";
-import { Heart, MapPin, Navigation, Locate, Map } from "lucide-react";
-import { useState } from "react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Badge } from "./ui/badge";
-import { useGeolocation } from "@/hooks/useGeolocation";
+import { Heart, MapPin, Map } from "lucide-react";
 import { useLocation } from "@/providers/LocationProvider";
-import { handleLocationUpdate, isZructuresAvailable } from "@/utils/locationUtils";
+import { useGeolocation } from "@/hooks/useGeolocation";
 
 export const Navbar = () => {
   const routerLocation = useRouterLocation();
   const navigate = useNavigate();
   const isHomePage = routerLocation.pathname === "/";
   const { theme } = useTheme();
-  const [locationPopoverOpen, setLocationPopoverOpen] = useState(false);
   const { loading } = useGeolocation();
   const { 
     currentLocation, 
@@ -46,15 +35,10 @@ export const Navbar = () => {
            routerLocation.pathname.includes('/marketplace');
   };
 
-  const handleLocationChange = (newLocation: string) => {
-    handleLocationUpdate(newLocation);
-    setLocationPopoverOpen(false);
-  };
-
   return (
     <>
-      <nav className="border-b bg-background py-3 fixed top-0 left-0 right-0 w-full z-50 h-16">
-        <div className="container max-w-[1400px] flex items-center justify-between animate-fade-down px-2">
+      <nav className="border-b bg-background py-2 fixed top-0 left-0 right-0 w-full z-50 h-16">
+        <div className="container max-w-[1400px] flex items-center justify-between px-2 sm:px-4 mx-auto">
           <div className="flex items-center gap-2">
             <Sheet>
               <SheetTrigger asChild>
@@ -66,27 +50,23 @@ export const Navbar = () => {
                 <Sidebar className="w-full" />
               </SheetContent>
             </Sheet>
-            <h1 className="text-xl font-bold text-primary">
+            <h1 className="text-xl font-bold text-primary truncate">
               Zructures
             </h1>
           </div>
 
-          <div className="flex items-center gap-1 sm:gap-2">
+          <div className="flex items-center gap-1">
             {/* Home page specific buttons (location and maps) - visible on mobile */}
             {isHomePage && (
               <>
                 <Button 
                   variant="ghost" 
                   size="sm"
-                  className="relative group flex items-center gap-1.5 px-1 py-1 h-9 sm:hidden"
+                  className="relative group flex items-center gap-1 px-1 py-1 h-9 sm:hidden"
                   aria-label="Select location"
                   onClick={() => setShowLocationPicker(true)}
                 >
-                  {loading ? (
-                    <Locate className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <MapPin className="h-4 w-4" />
-                  )}
+                  <MapPin className="h-4 w-4" />
                 </Button>
                 
                 <Button 
@@ -96,7 +76,7 @@ export const Navbar = () => {
                   aria-label="View map"
                   className="sm:hidden"
                 >
-                  <Map className="h-5 w-5" />
+                  <Map className="h-4 w-4" />
                 </Button>
               </>
             )}
@@ -108,49 +88,25 @@ export const Navbar = () => {
                 size="icon" 
                 onClick={() => navigate("/wishlist")}
                 aria-label="View wishlist"
+                className="hidden xs:flex"
               >
-                <Heart className="h-5 w-5" />
+                <Heart className="h-4 w-4" />
               </Button>
             )}
 
             {/* Location selector button - only visible on desktop */}
-            <Popover open={locationPopoverOpen} onOpenChange={setLocationPopoverOpen}>
-              <PopoverTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  className="relative group flex items-center gap-1.5 px-2 py-1 h-9 hidden sm:flex"
-                  aria-label="Select location"
-                  onClick={() => setShowLocationPicker(true)}
-                >
-                  {loading ? (
-                    <Locate className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <MapPin className="h-4 w-4" />
-                  )}
-                  <span className="max-w-24 truncate text-sm">
-                    {currentLocation === "All India" ? "Select location" : currentLocation}
-                  </span>
-                  <Badge 
-                    variant={isLocationAvailable ? "success" : "warning"} 
-                    className="h-2 w-2 rounded-full p-0"
-                  />
-                </Button>
-              </PopoverTrigger>
-            </Popover>
-
-            {/* Wishlist button - only visible on desktop */}
-            {isBusinessOrServices() && (
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => navigate("/wishlist")}
-                aria-label="View wishlist"
-                className="hidden sm:flex"
-              >
-                <Heart className="h-5 w-5" />
-              </Button>
-            )}
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className="relative group items-center gap-1.5 px-2 py-1 h-9 hidden sm:flex"
+              aria-label="Select location"
+              onClick={() => setShowLocationPicker(true)}
+            >
+              <MapPin className="h-4 w-4" />
+              <span className="max-w-24 truncate text-sm hidden md:inline">
+                {currentLocation === "All India" ? "Select location" : currentLocation}
+              </span>
+            </Button>
 
             {/* Map button - only visible on desktop */}
             <Button 
@@ -160,7 +116,7 @@ export const Navbar = () => {
               aria-label="View map"
               className={`hidden sm:flex ${routerLocation.pathname === "/maps" ? "bg-accent" : ""}`}
             >
-              <Map className="h-5 w-5" />
+              <Map className="h-4 w-4" />
             </Button>
 
             <CartButton />

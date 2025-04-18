@@ -33,21 +33,21 @@ export const CartButton = () => {
     <Sheet>
       <SheetTrigger asChild>
         <div className="relative">
-          <Button variant="ghost" size="icon" className="transition-transform duration-300 hover:scale-110">
-            <ShoppingCart className="h-5 w-5" />
+          <Button variant="ghost" size="icon" className="h-9 w-9 transition-transform duration-300 hover:scale-110">
+            <ShoppingCart className="h-4 w-4" />
           </Button>
           {cartItemCount > 0 && (
-            <span className="absolute -top-2 -right-1 h-5 w-5 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center shadow-sm">
+            <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-[9px] rounded-full flex items-center justify-center shadow-sm">
               {cartItemCount}
             </span>
           )}
         </div>
       </SheetTrigger>
-      <SheetContent className="w-[95vw] sm:w-[400px] md:w-[540px]">
+      <SheetContent className="w-full sm:max-w-md">
         <SheetHeader>
           <SheetTitle>Shopping Cart</SheetTitle>
         </SheetHeader>
-        <div className="mt-4 overflow-x-hidden">
+        <div className="mt-4 overflow-y-auto overflow-x-hidden h-[calc(100vh-8rem)]">
           <Cart />
         </div>
       </SheetContent>

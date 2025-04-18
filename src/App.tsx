@@ -1,25 +1,23 @@
+
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { LocationProvider } from "@/providers/LocationProvider";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/react-query";
 import { Routes as AppRoutes } from "./routes";
-import { useEffect, useState, lazy, Suspense } from "react";
+import { useEffect, useState } from "react";
 import { PageLoader } from "@/components/loaders/PageLoader";
 import { NetworkMonitor } from "@/providers/NetworkMonitor";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { Toaster } from "sonner";
+import { LocationModalHandler } from "@/components/location/LocationModalHandler";
 import "./App.css";
 import "./styles/global.css";
 import "./styles/theme-manager.css";
-import UnifiedSearchPage from "@/pages/search/UnifiedSearchPage";
-
-// Lazy load components that aren't needed right away
-const LazyToaster = lazy(() => import("sonner").then(module => ({ default: module.Toaster })));
-const LazyLocationModalHandler = lazy(() => import("@/components/location/LocationModalHandler").then(module => ({ default: module.LocationModalHandler })));
+import "./utils/scrollbarUtils.css";
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
-  const [resourcesLoaded, setResourcesLoaded] = useState(false);
   const [isLanguageChanging, setIsLanguageChanging] = useState(false);
   
   useEffect(() => {
@@ -82,10 +80,8 @@ function App() {
         // Wait for resources to load or timeout after 2 seconds
         const timeout = new Promise<void>(resolve => setTimeout(() => resolve(), 2000));
         await Promise.race([Promise.all(preloadPromises), timeout]);
-        setResourcesLoaded(true);
       } catch (err) {
         console.error('Failed to preload resources:', err);
-        setResourcesLoaded(true); // Continue anyway
       }
     };
     
@@ -146,12 +142,8 @@ function App() {
     return (
       <>
         <AppRoutes />
-        <Suspense fallback={null}>
-          {resourcesLoaded && <LazyLocationModalHandler />}
-        </Suspense>
-        <Suspense fallback={null}>
-          <LazyToaster position="top-center" />
-        </Suspense>
+        <LocationModalHandler />
+        <Toaster position="top-center" />
       </>
     );
   };
