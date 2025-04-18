@@ -18,7 +18,11 @@ export function HomeBannerAds() {
   });
 
   if (isLoading) {
-    return <Skeleton className="w-full h-[200px] rounded-lg" />;
+    return (
+      <div className="w-full px-0 sm:px-2">
+        <Skeleton className="w-full h-[200px] sm:h-[300px] rounded-lg" />
+      </div>
+    );
   }
 
   if (!ads.length) {
@@ -26,18 +30,20 @@ export function HomeBannerAds() {
   }
 
   return (
-    <Carousel className="w-full">
-      <CarouselContent>
-        {ads.map((ad) => (
-          <CarouselItem key={ad.id}>
-            <div className="p-1">
-              <BannerAd ad={ad} />
-            </div>
-          </CarouselItem>
-        ))}
-      </CarouselContent>
-      <CarouselPrevious className="hidden sm:flex" />
-      <CarouselNext className="hidden sm:flex" />
-    </Carousel>
+    <div className="w-full px-0 sm:px-2">
+      <Carousel className="w-full">
+        <CarouselContent>
+          {ads.map((ad) => (
+            <CarouselItem key={ad.id}>
+              <div className="p-0 sm:p-1">
+                <BannerAd ad={ad} />
+              </div>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <CarouselPrevious className="hidden sm:flex" />
+        <CarouselNext className="hidden sm:flex" />
+      </Carousel>
+    </div>
   );
 }

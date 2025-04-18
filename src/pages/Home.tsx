@@ -26,17 +26,18 @@ export default function Home() {
           <div className="min-h-[calc(100vh-4rem)] flex flex-col">
             <SearchHero />
             
-            <div className="mb-8">
+            <div className="-mt-4">
               <HomeBannerAds />
             </div>
             
-            {/* Category Sections */}
-            <div className="space-y-6">
+            {/* Category Scrollers */}
+            <div className="space-y-4">
               <BusinessCategoryScroller />
               <ServiceCategoryScroller />
               <MarketplaceCategoryScroller />
             </div>
             
+            {/* Location Section */}
             <LocationHeader />
             
             {currentLocation !== "All India" && (
