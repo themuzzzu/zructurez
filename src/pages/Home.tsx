@@ -6,9 +6,11 @@ import { LocationAvailabilityStatus } from "@/components/location/LocationAvaila
 import { LocationHeader } from "@/components/home/LocationHeader";
 import { EmptyLocationState } from "@/components/home/EmptyLocationState";
 import { useLocation } from "@/providers/LocationProvider";
+import { MapPin } from "lucide-react"; 
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
-  const { currentLocation, isLocationAvailable } = useLocation();
+  const { currentLocation, isLocationAvailable, setShowLocationPicker } = useLocation();
   const [searchRadius, setSearchRadius] = useState(5);
   
   const handleExpandRadius = () => {
