@@ -7,29 +7,48 @@ import { HomeBannerAds } from "@/components/home/HomeBannerAds";
 import { BusinessCategoryScroller } from "@/components/business/BusinessCategoryScroller";
 import { ServiceCategoryScroller } from "@/components/services/ServiceCategoryScroller";
 import { MarketplaceCategoryScroller } from "@/components/marketplace/MarketplaceCategoryScroller";
-import { FlashSale } from "@/components/marketplace/FlashSale";
+import { FlashDeals } from "@/components/marketplace/FlashDeals";
 import { useLocation } from "@/providers/LocationProvider";
-import { MapPin } from "lucide-react";
+import { MapPin, Grid3X3, ListIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sidebar } from "@/components/Sidebar";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ProductGrid } from "@/components/products/ProductGrid";
 import React, { useState } from "react";
 import { CategoryNavigationBar } from "@/components/marketplace/CategoryNavigationBar";
+import { BusinessesTabContent } from "@/components/home/BusinessesTabContent";
+import { ProductsTabContent } from "@/components/home/ProductsTabContent";
+import { ServicesTabContent } from "@/components/home/ServicesTabContent";
+import { GridLayoutType } from "@/components/products/types/ProductTypes";
 
 export default function Home() {
   const { currentLocation, isLocationAvailable, setShowLocationPicker } = useLocation();
   const isMobile = useMediaQuery("(max-width: 768px)");
   const [activeTab, setActiveTab] = useState("business");
-  const [gridLayout, setGridLayout] = useState<"grid4x4" | "grid2x2">("grid4x4");
+  const [gridLayout, setGridLayout] = useState<GridLayoutType>("grid4x4");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  
+  // Available categories for each tab
+  const businessCategories = ["All", "Local", "Featured", "New", "Popular"];
+  const serviceCategories = ["All", "Home", "Professional", "Health", "Education"];
+  const productCategories = ["All", "Electronics", "Fashion", "Home", "Beauty"];
+  
+  // Get the appropriate categories based on active tab
+  const getActiveCategories = () => {
+    switch (activeTab) {
+      case "business": return businessCategories;
+      case "services": return serviceCategories;
+      case "products": return productCategories;
+      default: return businessCategories;
+    }
+  };
   
   return (
     <Layout>
       <div className="flex min-h-[calc(100vh-4rem)]">
         {!isMobile && <Sidebar className="h-[calc(100vh-4rem)] fixed left-0 top-16" />}
         
-        <div className={`container mx-auto px-4 max-w-6xl space-y-8 pb-12 transition-all ${!isMobile ? 'ml-[72px]' : ''}`}>
+        <div className={`container mx-auto px-4 max-w-6xl space-y-6 md:space-y-8 pb-12 transition-all ${!isMobile ? 'ml-[72px]' : ''}`}>
           <div className="min-h-[calc(100vh-4rem)] flex flex-col">
             <SearchHero />
             
@@ -37,7 +56,7 @@ export default function Home() {
             <HomeBannerAds />
             
             {/* Category Scrollers with improved spacing */}
-            <div className="space-y-12">
+            <div className="space-y-8 md:space-y-12">
               {/* Business Categories */}
               <div>
                 <BusinessCategoryScroller />
@@ -54,19 +73,22 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Flash Deals Section */}
-            <div className="mt-12">
-              <FlashSale />
+            {/* Flash Deals Section - New */}
+            <div className="mt-8 md:mt-12">
+              <FlashDeals />
             </div>
 
             {/* Selection Bar and Content */}
-            <div className="mt-12 space-y-6">
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <div className="flex items-center justify-between mb-4">
-                  <TabsList>
-                    <TabsTrigger value="business">Businesses</TabsTrigger>
-                    <TabsTrigger value="services">Services</TabsTrigger>
-                    <TabsTrigger value="products">Products</TabsTrigger>
+            <div className="mt-8 md:mt-12 space-y-6">
+              <Tabs value={activeTab} onValueChange={(value) => {
+                setActiveTab(value);
+                setSelectedCategory("All"); // Reset category when changing tabs
+              }} className="w-full">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+                  <TabsList className="h-10">
+                    <TabsTrigger value="business" className="px-4">Businesses</TabsTrigger>
+                    <TabsTrigger value="services" className="px-4">Services</TabsTrigger>
+                    <TabsTrigger value="products" className="px-4">Products</TabsTrigger>
                   </TabsList>
 
                   <div className="flex items-center gap-2">
@@ -75,43 +97,44 @@ export default function Home() {
                       size="sm"
                       onClick={() => setGridLayout("grid4x4")}
                       className="p-2"
+                      aria-label="Grid view"
                     >
-                      <div className="grid grid-cols-2 gap-0.5">
-                        <div className="w-1.5 h-1.5 bg-current rounded-sm" />
-                        <div className="w-1.5 h-1.5 bg-current rounded-sm" />
-                        <div className="w-1.5 h-1.5 bg-current rounded-sm" />
-                        <div className="w-1.5 h-1.5 bg-current rounded-sm" />
-                      </div>
+                      <Grid3X3 className="h-4 w-4" />
                     </Button>
                     <Button
                       variant={gridLayout === "grid2x2" ? "default" : "outline"}
                       size="sm"
                       onClick={() => setGridLayout("grid2x2")}
                       className="p-2"
+                      aria-label="List view"
                     >
-                      <div className="grid grid-cols-1 gap-0.5">
-                        <div className="w-3 h-1.5 bg-current rounded-sm" />
-                        <div className="w-3 h-1.5 bg-current rounded-sm" />
-                      </div>
+                      <ListIcon className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
 
-                <TabsContent value="business" className="mt-2">
+                {/* Category Navigation for each tab content */}
+                <div className="mb-6">
                   <CategoryNavigationBar 
-                    categories={["All", "Local", "Featured", "New", "Popular"]}
+                    categories={getActiveCategories()}
+                    activeCategory={selectedCategory}
+                    onCategorySelect={setSelectedCategory}
                   />
+                </div>
+
+                {/* Tab Content */}
+                <TabsContent value="business" className="mt-2">
+                  <BusinessesTabContent category={selectedCategory !== "All" ? selectedCategory : undefined} />
                 </TabsContent>
 
                 <TabsContent value="services" className="mt-2">
-                  <CategoryNavigationBar 
-                    categories={["All", "Home", "Professional", "Health", "Education"]}
-                  />
+                  <ServicesTabContent category={selectedCategory !== "All" ? selectedCategory : undefined} />
                 </TabsContent>
 
                 <TabsContent value="products" className="mt-2">
-                  <CategoryNavigationBar 
-                    categories={["All", "Electronics", "Fashion", "Home", "Beauty"]}
+                  <ProductsTabContent 
+                    category={selectedCategory !== "All" ? selectedCategory : undefined} 
+                    layout={gridLayout}
                   />
                 </TabsContent>
               </Tabs>
