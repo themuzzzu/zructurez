@@ -32,7 +32,7 @@ export function ServiceSearchResults({ results, isLoading, query }: ServiceSearc
   // Convert search results to service format
   const services = results.map(result => ({
     id: result.id,
-    name: result.title,
+    title: result.title,
     description: result.description,
     category: result.category || 'General',
     image_url: result.imageUrl,

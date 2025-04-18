@@ -82,7 +82,7 @@ export function ProductSearchResults({ results, isLoading, query, gridLayout = "
                 price: result.price || 0,
                 imageUrl: result.imageUrl || '',
                 category: result.category || '',
-                is_discounted: result.isDiscounted || false,
+                is_discounted: result.isDiscounted || result.is_discounted || false,
                 discount_percentage: result.discount_percentage || 0,
                 original_price: result.original_price || 0,
                 brand: result.brand || 'Brand',

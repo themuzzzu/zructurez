@@ -23,6 +23,13 @@ export interface SearchResult {
   highlight_tags?: string[];
   isDiscounted?: boolean;
   discount_percentage?: number;
+  original_price?: number;
+  brand?: string;
+  rating?: number;
+  rating_count?: number;
+  provider?: string;
+  location?: string;
+  tags?: string[];
   // Include both formats for backward compatibility
   is_discounted?: boolean;
 }
