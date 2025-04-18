@@ -9,16 +9,16 @@ console.log('Installing missing dependencies...');
 try {
   if (fs.existsSync(path.join(__dirname, 'package.json'))) {
     // First install critical dependencies
-    console.log('Installing critical dependencies...');
-    execSync('npm install --save-dev vite@latest @vitejs/plugin-react-swc@latest lovable-tagger@latest typescript@latest', { stdio: 'inherit' });
+    console.log('Installing critical development dependencies...');
+    execSync('npm install --save-dev vite@latest @vitejs/plugin-react-swc@latest typescript@latest @types/node@latest lovable-tagger@latest class-variance-authority@latest tailwind-merge@latest clsx@latest tailwindcss-animate@latest', { stdio: 'inherit' });
     
     // Then React dependencies
     console.log('Installing React dependencies...');
     execSync('npm install react@latest react-dom@latest @types/react@latest @types/react-dom@latest --save', { stdio: 'inherit' });
 
-    // Install other essential dependencies
+    // Install UI dependencies
     console.log('Installing UI dependencies...');
-    execSync('npm install @radix-ui/react-dialog@latest @radix-ui/react-select@latest @radix-ui/react-scroll-area@latest @radix-ui/react-label@latest --save', { stdio: 'inherit' });
+    execSync('npm install @radix-ui/react-dialog@latest @radix-ui/react-select@latest @radix-ui/react-scroll-area@latest @radix-ui/react-label@latest @radix-ui/react-slot@latest lucide-react@latest sonner@latest --save', { stdio: 'inherit' });
 
     // Create npm scripts
     console.log('Creating npm scripts...');
