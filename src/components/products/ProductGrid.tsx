@@ -7,12 +7,14 @@ interface ProductGridProps {
   children: ReactNode;
   gridLayout?: GridLayoutType;
   className?: string;
+  testId?: string; // Added for testing purposes
 }
 
 export function ProductGrid({ 
   children, 
   gridLayout = "grid4x4",
-  className
+  className,
+  testId = "product-grid" // Default value
 }: ProductGridProps) {
   const getGridClasses = () => {
     switch (gridLayout) {
@@ -30,11 +32,10 @@ export function ProductGrid({
   };
 
   return (
-    <div className={cn(
-      "grid",
-      getGridClasses(),
-      className
-    )}>
+    <div 
+      className={cn("grid", getGridClasses(), className)}
+      data-testid={testId}
+    >
       {children}
     </div>
   );
