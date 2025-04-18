@@ -18,12 +18,23 @@ try {
       execSync('npm install vite@latest --save-dev', { stdio: 'inherit' });
       console.log('Vite installed successfully.');
     }
+
+    // Make sure we have the necessary Vite plugins for React
+    try {
+      require.resolve('@vitejs/plugin-react-swc');
+      console.log('@vitejs/plugin-react-swc is already installed.');
+    } catch (e) {
+      console.log('Installing @vitejs/plugin-react-swc...');
+      execSync('npm install @vitejs/plugin-react-swc --save-dev', { stdio: 'inherit' });
+      console.log('@vitejs/plugin-react-swc installed successfully.');
+    }
   } else {
     console.error('package.json not found');
     process.exit(1);
   }
   
   console.log('All dependencies installed successfully!');
+  console.log('You can now run the application with: npm run dev');
 } catch (error) {
   console.error('Error installing dependencies:', error);
   process.exit(1);
