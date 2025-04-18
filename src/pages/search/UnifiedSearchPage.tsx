@@ -1,56 +1,110 @@
 
 import { useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { SearchInput } from "@/components/SearchInput";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { X } from "lucide-react";
-import { Avatar } from "@/components/ui/avatar";
+import { X, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSearch } from "@/hooks/useSearch";
 import { SearchResults } from "@/components/search/SearchResults";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { FilterPanel } from "@/components/shopping/FilterPanel";
+import { GridLayoutSelector } from "@/components/marketplace/GridLayoutSelector";
+import { GridLayoutType } from "@/components/products/types/ProductTypes";
 
 type SearchCategory = "all" | "users" | "products" | "posts" | "businesses" | "services";
 
 export default function UnifiedSearchPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const query = searchParams.get("q") || "";
   const [activeTab, setActiveTab] = useState<SearchCategory>("all");
+  const [gridLayout, setGridLayout] = useState<GridLayoutType>("grid4x4");
+  const [showFilters, setShowFilters] = useState(false);
+  const [showDiscounted, setShowDiscounted] = useState(false);
+  const [showUsed, setShowUsed] = useState(false);
+  const [showBranded, setShowBranded] = useState(false);
+  const [sortOption, setSortOption] = useState("newest");
+  const [priceRange, setPriceRange] = useState("all");
   
   const { results, isLoading } = useSearch({
     initialQuery: query,
     suggestionsEnabled: false
   });
   
+  // Check if we came from the home page search
+  const fromHome = searchParams.get("fromHome") === "true";
+  
   const handleClear = () => {
-    setSearchParams(new URLSearchParams());
+    navigate("/");
   };
+
+  if (!fromHome) {
+    navigate("/");
+    return null;
+  }
 
   return (
     <Layout>
       <div className="container max-w-3xl mx-auto px-4 py-4">
         {/* Search Header */}
-        <div className="relative mb-6">
-          <SearchInput
-            value={query}
-            onChange={(value) => {
-              const params = new URLSearchParams(searchParams);
-              params.set("q", value);
-              setSearchParams(params);
-            }}
-            className="w-full h-12 bg-muted/50"
-            placeholder="Search..."
-          />
-          {query && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute right-2 top-1/2 -translate-y-1/2"
-              onClick={handleClear}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          )}
+        <div className="flex items-center justify-between mb-6">
+          <div className="relative flex-1 max-w-2xl">
+            <SearchInput
+              value={query}
+              onChange={(value) => {
+                const params = new URLSearchParams(searchParams);
+                params.set("q", value);
+                params.set("fromHome", "true");
+                setSearchParams(params);
+              }}
+              className="w-full h-12 bg-muted/50"
+              placeholder="Search..."
+            />
+            {query && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-2 top-1/2 -translate-y-1/2"
+                onClick={handleClear}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+          
+          <div className="flex items-center gap-2 ml-4">
+            <GridLayoutSelector 
+              layout={gridLayout}
+              onChange={setGridLayout}
+            />
+            
+            <Sheet open={showFilters} onOpenChange={setShowFilters}>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <Filter className="h-4 w-4" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent>
+                <FilterPanel
+                  selectedCategory={activeTab}
+                  showDiscounted={showDiscounted}
+                  showUsed={showUsed}
+                  showBranded={showBranded}
+                  sortOption={sortOption}
+                  priceRange={priceRange}
+                  onDiscountedChange={setShowDiscounted}
+                  onUsedChange={setShowUsed}
+                  onBrandedChange={setShowBranded}
+                  onSortChange={setSortOption}
+                  onPriceRangeChange={setPriceRange}
+                  onCloseMobileFilter={() => setShowFilters(false)}
+                  isFilterMobileOpen={showFilters}
+                />
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
 
         {/* Category Tabs */}
@@ -119,6 +173,7 @@ export default function UnifiedSearchPage() {
                     <SearchResults
                       results={results.filter(r => r.type === 'product')}
                       isLoading={isLoading}
+                      layout={gridLayout}
                     />
                   </div>
                 )}
