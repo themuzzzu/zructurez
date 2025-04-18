@@ -19,92 +19,62 @@ export function LocationModalHandler() {
     }
   };
   
-  // Update modal positioning styles
+  // Add styles for the location modal to ensure proper positioning on all devices
   useEffect(() => {
-    const updateModalStyles = () => {
-      // Add custom styles for modal positioning on small screens
-      const styleEl = document.createElement('style');
-      styleEl.id = 'location-modal-styles';
-      styleEl.innerHTML = `
-        @media (max-width: 768px) {
-          [data-radix-popper-content-wrapper] {
-            position: fixed !important;
-            bottom: 0 !important;
-            left: 0 !important;
-            right: 0 !important;
-            top: auto !important;
-            transform: none !important;
-            max-width: 100% !important;
-            margin: 0 !important;
-            width: 100% !important;
+    const styleEl = document.createElement('style');
+    styleEl.id = 'location-modal-styles';
+    styleEl.innerHTML = `
+      @media (max-width: 640px) {
+        [data-radix-popper-content-wrapper] {
+          position: fixed !important;
+          bottom: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          top: auto !important;
+          transform: none !important;
+          max-width: 100% !important;
+          width: 100% !important;
+          z-index: 100 !important;
+        }
+        
+        .radix-dialog-content {
+          position: fixed !important;
+          bottom: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          border-bottom-left-radius: 0 !important;
+          border-bottom-right-radius: 0 !important; 
+          max-height: 90vh !important;
+          margin: 0 !important;
+          width: 100% !important;
+          animation: slideUp 0.3s ease-out !important;
+        }
+        
+        @keyframes slideUp {
+          from {
+            transform: translateY(100%);
           }
-          
-          .location-modal-content {
-            position: fixed !important;
-            bottom: 0 !important;
-            left: 0 !important;
-            right: 0 !important;
-            margin: 0 !important;
-            max-height: 90vh !important;
-            width: 100% !important;
-            border-bottom-left-radius: 0 !important;
-            border-bottom-right-radius: 0 !important;
-            border-top-left-radius: 12px !important;
-            border-top-right-radius: 12px !important;
-            animation: slideUp 0.3s ease-out !important;
-            transform: none !important;
-          }
-          
-          .radix-dialog-content {
-            position: fixed !important;
-            bottom: 0 !important;
-            left: 0 !important;
-            right: 0 !important;
-            max-height: 90vh !important;
-            border-bottom-left-radius: 0 !important;
-            border-bottom-right-radius: 0 !important; 
-            margin: 0 !important;
-            width: 100% !important;
-          }
-          
-          @keyframes slideUp {
-            from {
-              transform: translateY(100%);
-            }
-            to {
-              transform: translateY(0);
-            }
+          to {
+            transform: translateY(0);
           }
         }
-      `;
-      
-      // Remove existing style element if it exists
-      const existingStyle = document.getElementById('location-modal-styles');
-      if (existingStyle) {
-        existingStyle.remove();
       }
-      
-      document.head.appendChild(styleEl);
-    };
+    `;
     
-    updateModalStyles();
+    // Remove existing style element if it exists
+    const existingStyle = document.getElementById('location-modal-styles');
+    if (existingStyle) {
+      existingStyle.remove();
+    }
     
-    // Ensure modal positioning is updated when language changes
-    const handleLanguageChange = () => {
-      setTimeout(updateModalStyles, 100);
-    };
+    document.head.appendChild(styleEl);
     
-    window.addEventListener('languageChanged', handleLanguageChange);
-    document.addEventListener('language-changed', handleLanguageChange);
-    
-    // Remove styles on component unmount
+    // Clean up on component unmount
     return () => {
       const styleEl = document.getElementById('location-modal-styles');
       if (styleEl) {
         styleEl.remove();
       }
-      window.removeEventListener('languageChanged', handleLanguageChange);
-      document.removeEventListener('language-changed', handleLanguageChange);
     };
   }, []);
   

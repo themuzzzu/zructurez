@@ -28,18 +28,18 @@ export default function Home() {
           {/* Welcome Message for New Users */}
           {currentLocation === "All India" && (
             <div className="flex-1 flex flex-col items-center justify-center py-8 sm:py-16 text-center">
-              <div className="bg-primary/10 dark:bg-primary/20 rounded-full p-5 mb-4">
+              <div className="bg-primary/10 dark:bg-primary/20 rounded-full p-5 mb-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <MapPin className="h-12 w-12 text-primary" />
               </div>
-              <h2 className="text-2xl font-bold mb-2">Welcome to Zructures</h2>
-              <p className="text-muted-foreground max-w-md mx-auto mb-6">
+              <h2 className="text-2xl font-bold mb-2 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150">Welcome to Zructures</h2>
+              <p className="text-muted-foreground max-w-md mx-auto mb-6 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
                 To discover businesses and services in your area, 
                 please select your location to get started.
               </p>
               <Button 
                 onClick={() => setShowLocationPicker(true)}
                 size="lg"
-                className="h-12"
+                className="h-12 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-450"
               >
                 Set My Location
               </Button>
