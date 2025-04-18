@@ -1,7 +1,9 @@
 
 import { RouteObject } from "react-router-dom";
 import UnifiedSearchPage from "@/pages/search/UnifiedSearchPage";
-import SearchResultsPage from "@/pages/search/SearchResultsPage";
+import MarketplaceSearch from "@/pages/search/marketplace/MarketplaceSearch";
+import ServicesSearch from "@/pages/search/services/ServicesSearch";
+import BusinessSearch from "@/pages/search/business/BusinessSearch";
 import { ErrorView } from "@/components/ErrorView";
 
 export const searchRoutes: RouteObject[] = [
@@ -12,17 +14,17 @@ export const searchRoutes: RouteObject[] = [
   },
   {
     path: "/search/marketplace",
-    element: <SearchResultsPage type="marketplace" />,
-    errorElement: <ErrorView />,
-  },
-  {
-    path: "/search/business",
-    element: <SearchResultsPage type="business" />,
+    element: <MarketplaceSearch />,
     errorElement: <ErrorView />,
   },
   {
     path: "/search/services",
-    element: <SearchResultsPage type="services" />,
+    element: <ServicesSearch />,
+    errorElement: <ErrorView />,
+  },
+  {
+    path: "/search/business",
+    element: <BusinessSearch />,
     errorElement: <ErrorView />,
   }
 ];
