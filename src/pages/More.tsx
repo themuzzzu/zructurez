@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Map, LogOut, User, Settings, Info, Send, Calendar, MessagesSquare, Briefcase } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/providers/AuthProvider";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function More() {
