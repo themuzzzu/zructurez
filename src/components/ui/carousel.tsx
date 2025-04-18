@@ -63,14 +63,14 @@ const Carousel = React.forwardRef<
     const [canScrollPrev, setCanScrollPrev] = React.useState(false)
     const [canScrollNext, setCanScrollNext] = React.useState(false)
 
-    const onSelect = React.useCallback((api: CarouselApi) => {
+    const onSelect = React.useCallback(() => {
       if (!api) {
         return
       }
 
       setCanScrollPrev(api.canScrollPrev())
       setCanScrollNext(api.canScrollNext())
-    }, [])
+    }, [api])
 
     const scrollPrev = React.useCallback(() => {
       api?.scrollPrev()
@@ -106,7 +106,9 @@ const Carousel = React.forwardRef<
         return
       }
 
-      onSelect(api)
+      onSelect()
+      
+      // Fix the type issues by using proper event handlers
       api.on("select", onSelect)
       api.on("reInit", onSelect)
 
