@@ -5,16 +5,19 @@ declare module '@/components/ui/dialog' {
   interface DialogTitleProps {
     children?: ReactNode;
     className?: string;
+    asChild?: boolean;
   }
   
   interface DialogDescriptionProps {
     children?: ReactNode;
     className?: string;
+    asChild?: boolean;
   }
   
   interface DialogContentProps {
     children?: ReactNode;
     className?: string;
+    asChild?: boolean;
   }
   
   interface DialogHeaderProps {
@@ -32,12 +35,14 @@ declare module '@/components/ui/select' {
   interface SelectTriggerProps {
     children?: ReactNode;
     className?: string;
+    asChild?: boolean;
   }
   
   interface SelectContentProps {
     children?: ReactNode;
     className?: string;
     position?: "item" | "popper";
+    asChild?: boolean;
   }
   
   interface SelectItemProps {
@@ -45,6 +50,7 @@ declare module '@/components/ui/select' {
     value: string;
     className?: string;
     key?: string;
+    asChild?: boolean;
   }
   
   interface SelectValueProps {
@@ -57,6 +63,7 @@ declare module '@/components/ui/scroll-area' {
   interface ScrollAreaProps {
     children?: ReactNode;
     className?: string;
+    asChild?: boolean;
   }
 }
 
@@ -65,5 +72,6 @@ declare module '@/components/ui/label' {
     children?: ReactNode;
     htmlFor?: string;
     className?: string;
+    asChild?: boolean;
   }
 }
