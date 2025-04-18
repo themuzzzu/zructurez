@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { 
   Dialog,
@@ -9,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MapPin, Compass, Locate, Search } from "lucide-react";
+import { MapPin, Navigation, Search, X } from "lucide-react";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { isZructuresAvailable, handleLocationUpdate } from "@/utils/locationUtils";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -101,85 +102,102 @@ export function SimplifiedLocationPicker({
 
   return (
     <Dialog open={open} onOpenChange={firstVisit ? () => {} : onOpenChange}>
-      <DialogContent className="fixed inset-0 sm:inset-auto sm:fixed sm:top-1/2 sm:left-1/2 sm:transform sm:-translate-x-1/2 sm:-translate-y-1/2 bg-zinc-900 text-white border-zinc-800 overflow-y-auto sm:rounded-xl shadow-lg w-full h-full sm:h-auto sm:max-h-[90vh] sm:w-[95%] sm:max-w-[500px] p-4 sm:p-6 z-[9999]">
-        <DialogHeader className="mb-4">
-          <DialogTitle className="flex items-center gap-2 text-xl sm:text-2xl font-semibold text-white">
-            <MapPin className="h-6 w-6" />
-            {t("chooseYourLocation")}
-          </DialogTitle>
-          <DialogDescription className="text-zinc-400">
-            Select your location to find nearby services
-          </DialogDescription>
-        </DialogHeader>
-        
-        <div className="space-y-4">
-          <Button 
-            variant="outline" 
-            className="w-full justify-start gap-2 bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-white h-12"
-            onClick={handleDetectLocation}
-            disabled={loading}
-          >
-            <Locate className={`h-5 w-5 ${loading ? "animate-spin" : ""}`} />
-            {loading || isDetecting ? t("detectingYourLocation") : t("detectMyLocation")}
-          </Button>
-          
-          <div className="relative">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-zinc-500" />
-            <Input
-              placeholder={t("searchCityOrTown")}
-              className="pl-9 bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 h-12"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          
-          <ScrollArea className="h-[40vh] pr-4">
-            <div className="space-y-1">
-              <h3 className="text-lg font-medium text-white mb-2">{t("orSelectCityOrTown")}</h3>
-              <div className="space-y-2">
-                {filteredLocations.map((location) => {
-                  const isLocationAvailable = isZructuresAvailable(location);
-                  
-                  return (
-                    <div key={location} className="space-y-1">
-                      <Button 
-                        variant="ghost" 
-                        className="w-full justify-start text-left text-white hover:bg-zinc-800 h-auto py-3"
-                        onClick={() => handleLocationSelect(location)}
-                      >
-                        <MapPin className="h-4 w-4 mr-2 text-zinc-400 shrink-0" />
-                        <span className="truncate">{location}</span>
-                      </Button>
-                      
-                      {selectedLocation === location && !isLocationAvailable && (
-                        <div className="rounded-md p-3 bg-amber-900/30 border border-amber-800/40 text-amber-300 ml-6">
-                          <div className="flex gap-2 items-start">
-                            <span className="text-amber-300 mt-0.5">⚠</span>
-                            <div>
-                              <p className="font-medium">{t("notAvailableIn").replace("{location}", location)}</p>
-                              <p className="text-sm text-amber-400/80">{t("expandingRapidly")}</p>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+      <DialogContent className="fixed inset-0 sm:inset-auto sm:fixed sm:top-1/2 sm:left-1/2 sm:transform sm:-translate-x-1/2 sm:-translate-y-1/2 bg-background border-border overflow-y-auto sm:rounded-xl shadow-lg w-full h-full sm:h-auto sm:max-h-[90vh] sm:w-[95%] sm:max-w-[500px] p-0 z-[9999]">
+        <div className="sticky top-0 z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-b border-border">
+          <DialogHeader className="p-4 sm:p-6 pb-4">
+            <DialogTitle className="flex items-center gap-2 text-xl sm:text-2xl font-semibold">
+              <MapPin className="h-6 w-6 text-primary" />
+              {t("chooseYourLocation")}
+            </DialogTitle>
+            <DialogDescription className="text-muted-foreground">
+              Select your location to find nearby services
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="px-4 sm:px-6 pb-4 space-y-3">
+            <Button 
+              variant="outline" 
+              className="w-full justify-start gap-2 h-12"
+              onClick={handleDetectLocation}
+              disabled={loading}
+            >
+              <Navigation className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
+              {loading || isDetecting ? t("detectingYourLocation") : t("detectMyLocation")}
+            </Button>
+            
+            <div className="relative">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder={t("searchCityOrTown")}
+                className="pl-9 h-12"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
             </div>
-          </ScrollArea>
+          </div>
         </div>
 
-        <DialogFooter className="mt-6">
-          <Button 
-            variant="default" 
-            onClick={handleConfirmLocation} 
-            className="w-full sm:w-auto bg-primary hover:bg-primary/90 h-12"
-            disabled={selectedLocation === "All India" && firstVisit}
-          >
-            {t("confirmLocation")}
-          </Button>
-        </DialogFooter>
+        <ScrollArea className="flex-1 p-4 sm:p-6 pt-2 h-[calc(100vh-220px)] sm:h-[400px]">
+          <div className="space-y-4">
+            <div className="text-sm font-medium text-muted-foreground mb-2">{t("orSelectCityOrTown")}</div>
+            <div className="space-y-1">
+              {filteredLocations.map((location) => {
+                const isLocationAvailable = isZructuresAvailable(location);
+                const isSelected = location === selectedLocation;
+                
+                return (
+                  <div key={location} className="space-y-1">
+                    <Button 
+                      variant={isSelected ? "secondary" : "ghost"}
+                      className={`w-full justify-start text-left h-auto py-3 ${
+                        isSelected ? 'bg-secondary' : ''
+                      }`}
+                      onClick={() => handleLocationSelect(location)}
+                    >
+                      <MapPin className={`h-4 w-4 mr-2 shrink-0 ${
+                        isSelected ? 'text-primary' : 'text-muted-foreground'
+                      }`} />
+                      <span className="truncate">{location}</span>
+                    </Button>
+                    
+                    {isSelected && !isLocationAvailable && (
+                      <div className="rounded-md p-3 bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 ml-6">
+                        <div className="flex gap-2 items-start">
+                          <span className="text-yellow-500 mt-0.5">⚠</span>
+                          <div>
+                            <p className="font-medium">{t("notAvailableIn").replace("{location}", location)}</p>
+                            <p className="text-sm text-yellow-500/80">{t("expandingRapidly")}</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </ScrollArea>
+
+        <div className="sticky bottom-0 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+          <DialogFooter className="p-4 sm:p-6">
+            <Button 
+              variant="default" 
+              onClick={handleConfirmLocation} 
+              className="w-full sm:w-auto h-12"
+              disabled={selectedLocation === "All India" && firstVisit}
+            >
+              {t("confirmLocation")}
+            </Button>
+          </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );
