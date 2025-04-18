@@ -1,6 +1,4 @@
-
 import { useNavigate } from "react-router-dom";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { 
   ShoppingBag, 
   Smartphone, 
@@ -62,7 +60,6 @@ export const BusinessCategoryScroller = () => {
   ];
 
   const handleCategoryClick = (categoryId: string) => {
-    // Log category click to help with debugging
     console.log(`Category clicked: ${categoryId}`);
     navigate(`/businesses?category=${categoryId}`);
   };
@@ -70,26 +67,23 @@ export const BusinessCategoryScroller = () => {
   return (
     <div className="bg-white dark:bg-zinc-900 rounded-lg p-4 mb-6 shadow-sm">
       <h3 className="text-lg font-semibold mb-3">Browse by Category</h3>
-      <ScrollArea className="w-full">
-        <div className="flex gap-2 pb-2">
-          {categories.map((category) => (
-            <motion.div
-              key={category.id}
-              onClick={() => handleCategoryClick(category.id)}
-              className="flex flex-col items-center justify-center min-w-[70px] p-2 bg-gray-50 dark:bg-zinc-800 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-zinc-700 transition-colors"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              transition={{ duration: 0.2 }}
-            >
-              <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-2">
-                {category.icon}
-              </div>
-              <span className="text-xs text-center line-clamp-2 h-8">{category.name}</span>
-            </motion.div>
-          ))}
-        </div>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+        {categories.map((category) => (
+          <motion.div
+            key={category.id}
+            onClick={() => handleCategoryClick(category.id)}
+            className="flex flex-col items-center justify-center p-2 bg-gray-50 dark:bg-zinc-800 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-zinc-700 transition-colors"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-2">
+              {category.icon}
+            </div>
+            <span className="text-xs text-center line-clamp-2 h-8">{category.name}</span>
+          </motion.div>
+        ))}
+      </div>
     </div>
   );
 };

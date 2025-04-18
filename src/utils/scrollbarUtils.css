@@ -10,21 +10,8 @@
   scrollbar-width: none;  /* Firefox */
 }
 
-/* Subtle scrollbar for when we want to show it */
-.scrollbar-thin::-webkit-scrollbar {
-  height: 4px;
-  width: 4px;
-}
-
-.scrollbar-thin::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.scrollbar-thin::-webkit-scrollbar-thumb {
-  display: none;
-}
-
 /* Ensure no horizontal scroll on main containers */
 .container {
   overflow-x: hidden;
 }
+
