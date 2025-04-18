@@ -1,4 +1,3 @@
-
 import React, { Suspense, lazy, useEffect, useState } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { NotFound } from "@/components/NotFound";
@@ -117,7 +116,7 @@ const Marketplace = () => {
   
   return (
     <Layout>
-      <div className={`container max-w-7xl mx-auto px-1 sm:px-4 pt-2 sm:pt-6 pb-16 overflow-visible transition-opacity duration-300 ${isReady ? 'opacity-100' : 'opacity-0'}`}>
+      <div className={`container max-w-7xl mx-auto px-1 sm:px-4 pt-2 sm:pt-6 pb-16 overflow-hidden transition-opacity duration-300 ${isReady ? 'opacity-100' : 'opacity-0'}`}>
         <Suspense fallback={<MarketplaceSkeleton />}>
           <ErrorBoundary fallback={<ErrorView message="There was a problem loading the marketplace. Please try again later." />}>
             <OptimizedMarketplace />
@@ -125,7 +124,7 @@ const Marketplace = () => {
         </Suspense>
         
         {/* Add sponsored products section */}
-        <div className="mt-6">
+        <div className="mt-6 overflow-hidden">
           <h2 className="text-xl font-bold mb-4">Sponsored Products</h2>
           <Suspense fallback={<MarketplaceSkeleton />}>
             <ErrorBoundary fallback={<div className="py-4 text-center text-muted-foreground">

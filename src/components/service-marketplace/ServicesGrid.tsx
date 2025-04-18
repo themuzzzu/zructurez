@@ -17,20 +17,20 @@ export const ServicesGrid: React.FC<ServicesGridProps> = ({
   const getLayoutClasses = () => {
     switch (layout) {
       case "grid2x2":
-        return "grid grid-cols-1 sm:grid-cols-2 gap-4";
+        return "grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 w-full";
       case "grid3x3":
-        return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4";
+        return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 w-full";
       case "grid4x4":
-        return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4";
+        return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 w-full";
       case "list":
-        return "flex flex-col gap-4";
+        return "flex flex-col gap-3 sm:gap-4 w-full";
       default:
-        return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4";
+        return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 w-full";
     }
   };
 
   return (
-    <div className={cn(getLayoutClasses())}>
+    <div className={cn(getLayoutClasses(), "overflow-hidden")}>
       {services.map((service) => (
         <ServiceCard key={service.id} service={service} />
       ))}

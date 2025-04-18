@@ -73,18 +73,20 @@ export const BusinessCategoryFilter = ({ onCategoryChange }: BusinessCategoryFil
   };
 
   return (
-    <div className="flex gap-3 overflow-x-auto pb-4 px-2 scrollbar-hide animate-fade-up">
-      {categories.map(({ id, name, icon: Icon }) => (
-        <Button
-          key={id}
-          variant={id === selectedCategory ? "default" : "outline"}
-          className="whitespace-nowrap min-w-[120px] justify-center transition-colors duration-300 hover:bg-accent/80"
-          onClick={() => handleCategoryClick(id)}
-        >
-          {Icon && <Icon className="h-4 w-4 mr-2 shrink-0 stroke-black dark:stroke-white" />}
-          <span className="truncate">{name}</span>
-        </Button>
-      ))}
+    <div className="w-full overflow-x-auto scrollbar-hide pb-4 px-2 animate-fade-up">
+      <div className="flex gap-3 min-w-max">
+        {categories.map(({ id, name, icon: Icon }) => (
+          <Button
+            key={id}
+            variant={id === selectedCategory ? "default" : "outline"}
+            className="whitespace-nowrap min-w-[120px] justify-center transition-colors duration-300 hover:bg-accent/80"
+            onClick={() => handleCategoryClick(id)}
+          >
+            {Icon && <Icon className="h-4 w-4 mr-2 shrink-0 stroke-black dark:stroke-white" />}
+            <span className="truncate">{name}</span>
+          </Button>
+        ))}
+      </div>
     </div>
   );
 };

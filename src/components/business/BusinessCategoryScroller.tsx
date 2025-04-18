@@ -14,28 +14,14 @@ import {
   Shirt, 
   BookOpen, 
   Scissors, 
-  Wrench, 
-  Hammer, 
-  GraduationCap, 
-  Camera, 
-  ActivitySquare, 
-  Plane, 
-  Scale 
+  Wrench 
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { LazyImage } from "@/components/ui/LazyImage";
-
-interface CategoryProps {
-  id: string;
-  name: string;
-  icon: React.ReactNode;
-  image?: string;
-}
 
 export const BusinessCategoryScroller = () => {
   const navigate = useNavigate();
   
-  const categories: CategoryProps[] = [
+  const categories = [
     { id: "retail", name: "Retail & Local Shops", icon: <ShoppingBag className="h-4 w-4" />, image: "/placeholder.svg" },
     { id: "electronics", name: "Electronics & Mobile", icon: <Smartphone className="h-4 w-4" />, image: "/placeholder.svg" },
     { id: "healthcare", name: "Healthcare & Medical", icon: <Heart className="h-4 w-4" />, image: "/placeholder.svg" },
@@ -51,23 +37,22 @@ export const BusinessCategoryScroller = () => {
     { id: "books", name: "Books & Education Stores", icon: <BookOpen className="h-4 w-4" />, image: "/placeholder.svg" },
     { id: "beauty", name: "Beauty & Personal Care", icon: <Scissors className="h-4 w-4" />, image: "/placeholder.svg" },
     { id: "home-services", name: "Home Services", icon: <Wrench className="h-4 w-4" />, image: "/placeholder.svg" },
-    { id: "repairs", name: "Repairs & Maintenance", icon: <Hammer className="h-4 w-4" />, image: "/placeholder.svg" },
-    { id: "education", name: "Education & Coaching", icon: <GraduationCap className="h-4 w-4" />, image: "/placeholder.svg" },
-    { id: "events", name: "Events & Photography", icon: <Camera className="h-4 w-4" />, image: "/placeholder.svg" },
-    { id: "wellness", name: "Health & Wellness", icon: <ActivitySquare className="h-4 w-4" />, image: "/placeholder.svg" },
-    { id: "travel", name: "Travel & Transport", icon: <Plane className="h-4 w-4" />, image: "/placeholder.svg" },
-    { id: "legal", name: "Legal & Finance Services", icon: <Scale className="h-4 w-4" />, image: "/placeholder.svg" },
+    { id: "repairs", name: "Repairs & Maintenance", icon: <Wrench className="h-4 w-4" />, image: "/placeholder.svg" },
+    { id: "education", name: "Education & Coaching", icon: <Wrench className="h-4 w-4" />, image: "/placeholder.svg" },
+    { id: "events", name: "Events & Photography", icon: <Wrench className="h-4 w-4" />, image: "/placeholder.svg" },
+    { id: "wellness", name: "Health & Wellness", icon: <Wrench className="h-4 w-4" />, image: "/placeholder.svg" },
+    { id: "travel", name: "Travel & Transport", icon: <Wrench className="h-4 w-4" />, image: "/placeholder.svg" },
+    { id: "legal", name: "Legal & Finance Services", icon: <Wrench className="h-4 w-4" />, image: "/placeholder.svg" },
   ];
 
   const handleCategoryClick = (categoryId: string) => {
-    console.log(`Category clicked: ${categoryId}`);
     navigate(`/businesses?category=${categoryId}`);
   };
   
   return (
-    <div className="bg-white dark:bg-zinc-900 rounded-lg p-4 mb-6 shadow-sm">
+    <div className="bg-white dark:bg-zinc-900 rounded-lg p-4 mb-6 shadow-sm w-full">
       <h3 className="text-lg font-semibold mb-3">Browse by Category</h3>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2 w-full">
         {categories.map((category) => (
           <motion.div
             key={category.id}
@@ -80,7 +65,7 @@ export const BusinessCategoryScroller = () => {
             <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-2">
               {category.icon}
             </div>
-            <span className="text-xs text-center line-clamp-2 h-8">{category.name}</span>
+            <span className="text-xs text-center line-clamp-1">{category.name}</span>
           </motion.div>
         ))}
       </div>

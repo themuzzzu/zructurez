@@ -121,20 +121,20 @@ export const BusinessCategoryScroller = () => {
   };
   
   return (
-    <div className="bg-white dark:bg-zinc-900 rounded-lg p-4 shadow-sm">
+    <div className="bg-white dark:bg-zinc-900 rounded-lg p-4 shadow-sm w-full overflow-hidden">
       <h3 className="text-lg font-semibold mb-3">Browse by Category</h3>
-      <ScrollArea className="w-full">
-        <div className="flex gap-3 pb-4">
+      <ScrollArea className="w-full overflow-x-auto">
+        <div className="flex gap-3 pb-4 min-w-max overflow-visible">
           {categories.map((category) => (
             <motion.div
               key={category.id}
               onClick={() => handleCategoryClick(category.id)}
-              className="flex flex-col items-center cursor-pointer min-w-[120px] group"
+              className="flex flex-col items-center cursor-pointer min-w-[100px] max-w-[120px] group"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               transition={{ duration: 0.2 }}
             >
-              <div className="relative w-20 h-20 rounded-lg overflow-hidden mb-2">
+              <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden mb-2">
                 <img 
                   src={category.image} 
                   alt={category.name}
@@ -146,11 +146,11 @@ export const BusinessCategoryScroller = () => {
                 />
                 <div className="absolute inset-0 bg-black bg-opacity-20 group-hover:bg-opacity-10 transition-all" />
               </div>
-              <span className="text-xs text-center">{category.name}</span>
+              <span className="text-xs text-center w-full line-clamp-2">{category.name}</span>
             </motion.div>
           ))}
         </div>
-        <ScrollBar orientation="horizontal" />
+        <ScrollBar orientation="horizontal" className="opacity-0 sm:opacity-100" />
       </ScrollArea>
     </div>
   );
