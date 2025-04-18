@@ -1,20 +1,15 @@
+
 import { useNavigate } from "react-router-dom";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { 
-  ShoppingBag, 
-  Smartphone, 
-  Heart, 
-  Utensils, 
-  BarChart3, 
-  Home, 
-  Factory, 
-  Car, 
+  Store, 
   Building2, 
-  Laptop, 
-  Wheat, 
-  Shirt, 
-  BookOpen, 
-  Scissors, 
-  Wrench 
+  Utensils, 
+  ShoppingBag, 
+  Package, 
+  Factory, 
+  Building, 
+  GraduationCap 
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -22,53 +17,43 @@ export const BusinessCategoryScroller = () => {
   const navigate = useNavigate();
   
   const categories = [
-    { id: "retail", name: "Retail & Local Shops", icon: <ShoppingBag className="h-4 w-4" />, image: "/placeholder.svg" },
-    { id: "electronics", name: "Electronics & Mobile", icon: <Smartphone className="h-4 w-4" />, image: "/placeholder.svg" },
-    { id: "healthcare", name: "Healthcare & Medical", icon: <Heart className="h-4 w-4" />, image: "/placeholder.svg" },
-    { id: "food", name: "Food & Beverage", icon: <Utensils className="h-4 w-4" />, image: "/placeholder.svg" },
-    { id: "wholesale", name: "Wholesale & Distributors", icon: <BarChart3 className="h-4 w-4" />, image: "/placeholder.svg" },
-    { id: "home-living", name: "Home & Living", icon: <Home className="h-4 w-4" />, image: "/placeholder.svg" },
-    { id: "industrial", name: "Industrial & B2B", icon: <Factory className="h-4 w-4" />, image: "/lovable-uploads/9a155fb9-4d56-4192-b7f2-9b810ca09e5e.png" },
-    { id: "auto", name: "Auto & Transport", icon: <Car className="h-4 w-4" />, image: "/lovable-uploads/aa0358a3-f8ba-4fe8-a5b0-6a588bfda79e.png" },
-    { id: "real-estate", name: "Real Estate", icon: <Building2 className="h-4 w-4" />, image: "/placeholder.svg" },
-    { id: "tech", name: "Tech & Digital", icon: <Laptop className="h-4 w-4" />, image: "/placeholder.svg" },
-    { id: "agriculture", name: "Agriculture & Farming", icon: <Wheat className="h-4 w-4" />, image: "/placeholder.svg" },
-    { id: "fashion", name: "Fashion & Lifestyle", icon: <Shirt className="h-4 w-4" />, image: "/placeholder.svg" },
-    { id: "books", name: "Books & Education Stores", icon: <BookOpen className="h-4 w-4" />, image: "/placeholder.svg" },
-    { id: "beauty", name: "Beauty & Personal Care", icon: <Scissors className="h-4 w-4" />, image: "/placeholder.svg" },
-    { id: "home-services", name: "Home Services", icon: <Wrench className="h-4 w-4" />, image: "/placeholder.svg" },
-    { id: "repairs", name: "Repairs & Maintenance", icon: <Wrench className="h-4 w-4" />, image: "/placeholder.svg" },
-    { id: "education", name: "Education & Coaching", icon: <Wrench className="h-4 w-4" />, image: "/placeholder.svg" },
-    { id: "events", name: "Events & Photography", icon: <Wrench className="h-4 w-4" />, image: "/placeholder.svg" },
-    { id: "wellness", name: "Health & Wellness", icon: <Wrench className="h-4 w-4" />, image: "/placeholder.svg" },
-    { id: "travel", name: "Travel & Transport", icon: <Wrench className="h-4 w-4" />, image: "/placeholder.svg" },
-    { id: "legal", name: "Legal & Finance Services", icon: <Wrench className="h-4 w-4" />, image: "/placeholder.svg" },
+    { id: "retail", name: "Local Shops", icon: <Store className="h-4 w-4 text-blue-400" /> },
+    { id: "real-estate", name: "Real Estate", icon: <Building2 className="h-4 w-4 text-green-400" /> },
+    { id: "restaurants", name: "Food", icon: <Utensils className="h-4 w-4 text-orange-400" /> },
+    { id: "fashion", name: "Fashion", icon: <ShoppingBag className="h-4 w-4 text-pink-400" /> },
+    { id: "wholesale", name: "Wholesale", icon: <Package className="h-4 w-4 text-amber-400" /> },
+    { id: "industrial", name: "Industrial", icon: <Factory className="h-4 w-4 text-slate-400" /> },
+    { id: "commercial", name: "Commercial", icon: <Building className="h-4 w-4 text-purple-400" /> },
+    { id: "education", name: "Education", icon: <GraduationCap className="h-4 w-4 text-cyan-400" /> },
   ];
 
   const handleCategoryClick = (categoryId: string) => {
-    navigate(`/businesses?category=${categoryId}`);
+    navigate(`/business?category=${categoryId}`);
   };
-  
+
   return (
-    <div className="bg-white dark:bg-zinc-900 rounded-lg p-4 mb-6 shadow-sm w-full">
-      <h3 className="text-lg font-semibold mb-3">Browse by Category</h3>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2 w-full">
-        {categories.map((category) => (
-          <motion.div
-            key={category.id}
-            onClick={() => handleCategoryClick(category.id)}
-            className="flex flex-col items-center justify-center p-2 bg-gray-50 dark:bg-zinc-800 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-zinc-700 transition-colors"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-          >
-            <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-2">
-              {category.icon}
-            </div>
-            <span className="text-xs text-center line-clamp-1">{category.name}</span>
-          </motion.div>
-        ))}
-      </div>
+    <div className="bg-black dark:bg-zinc-950 rounded-lg p-3 mb-5">
+      <h3 className="text-lg font-semibold mb-2 text-white">Explore Businesses</h3>
+      <ScrollArea className="w-full overflow-hidden">
+        <div className="flex gap-2 pb-2">
+          {categories.map((category) => (
+            <motion.div
+              key={category.id}
+              onClick={() => handleCategoryClick(category.id)}
+              className="flex flex-col items-center cursor-pointer group min-w-[65px] bg-[#1b2430] rounded-lg p-2"
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              transition={{ duration: 0.15 }}
+            >
+              <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mb-1">
+                {category.icon}
+              </div>
+              <span className="text-xs text-center text-white line-clamp-1">{category.name}</span>
+            </motion.div>
+          ))}
+        </div>
+        <ScrollBar orientation="horizontal" className="h-2" />
+      </ScrollArea>
     </div>
   );
 };
