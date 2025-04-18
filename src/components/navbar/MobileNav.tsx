@@ -3,7 +3,7 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { Home, Search, MapPin, Store, User } from "lucide-react";
+import { Home, ShoppingBag, Wrench, Briefcase, MoreHorizontal } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { IconComponent } from "@/types/component";
 
@@ -27,28 +27,28 @@ export function MobileNav() {
       active: location.pathname === "/",
     },
     {
-      icon: Search,
-      label: t("search"),
-      href: "/search",
-      active: location.pathname.startsWith("/search"),
-    },
-    {
-      icon: MapPin,
-      label: t("map"),
-      href: "/maps",
-      active: location.pathname.startsWith("/maps"),
-    },
-    {
-      icon: Store,
+      icon: ShoppingBag,
       label: t("marketplace"),
       href: "/marketplace",
       active: location.pathname.startsWith("/marketplace"),
     },
     {
-      icon: User,
-      label: user ? t("profile") : t("account"),
-      href: user ? "/profile" : "/login",
-      active: location.pathname.startsWith("/profile") || location.pathname.startsWith("/login"),
+      icon: Wrench,
+      label: t("services"),
+      href: "/services",
+      active: location.pathname.startsWith("/services"),
+    },
+    {
+      icon: Briefcase,
+      label: t("business"),
+      href: "/businesses",
+      active: location.pathname.startsWith("/business"),
+    },
+    {
+      icon: MoreHorizontal,
+      label: t("more"),
+      href: "/more",
+      active: location.pathname === "/more",
     },
   ];
 
