@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useSearch } from "@/hooks/useSearch";
 import { Search as SearchIcon, X } from "lucide-react";
@@ -18,9 +17,9 @@ interface SearchBarProps {
   autoFocus?: boolean;
   className?: string;
   showVoiceSearch?: boolean;
+  type?: 'marketplace' | 'business' | 'services' | 'general';
 }
 
-// Define a type that matches our component's expectations
 interface TranslatedSuggestion {
   id: string;
   term: string;
@@ -33,6 +32,7 @@ export function SearchBar({
   showSuggestions = true,
   autoFocus = false,
   className = "",
+  type
 }: SearchBarProps) {
   const navigate = useNavigate();
   const searchRef = useRef<HTMLDivElement>(null);
@@ -40,7 +40,6 @@ export function SearchBar({
   const { t, tDynamic, language } = useLanguage();
   const [translatedPlaceholder, setTranslatedPlaceholder] = useState<string>("");
   
-  // Load the search state
   const {
     query,
     setQuery,
@@ -53,13 +52,10 @@ export function SearchBar({
     suggestionsEnabled: showSuggestions,
   });
   
-  // Update the placeholder when language changes
   useEffect(() => {
-    // Default placeholder text
     const defaultText = `${t("search")}...`;
     setTranslatedPlaceholder(placeholder || defaultText);
     
-    // For custom placeholders that aren't in the static translations
     if (placeholder && placeholder !== "Search..." && language !== "english") {
       const translateCustomPlaceholder = async () => {
         try {
@@ -75,10 +71,8 @@ export function SearchBar({
     }
   }, [placeholder, language, t, tDynamic]);
   
-  // Set RTL properties based on language
   const isRTL = language === "urdu";
   
-  // Focus input on mount if autoFocus is true
   useEffect(() => {
     if (autoFocus && inputRef.current) {
       setTimeout(() => {
@@ -89,12 +83,10 @@ export function SearchBar({
     }
   }, [autoFocus]);
   
-  // Handle click outside to close suggestions
   useClickOutside(searchRef, () => {
     setShowSuggestions(false);
   });
   
-  // Update direction and alignment when language changes
   useEffect(() => {
     if (!inputRef.current) return;
     
@@ -107,14 +99,12 @@ export function SearchBar({
     }
   }, [language, isRTL]);
   
-  // Handle search submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
-      // Redirect to search page with query parameter
-      navigate(`/search?q=${encodeURIComponent(query)}`);
+      const searchPath = type ? `/search/${type}?q=${encodeURIComponent(query)}` : `/search?q=${encodeURIComponent(query)}`;
+      navigate(searchPath);
       
-      // Also call onSearch if provided
       if (onSearch) {
         onSearch(query);
       }
@@ -123,29 +113,24 @@ export function SearchBar({
     }
   };
 
-  // Translate suggestion items asynchronously - FIX: Changed type to work with optional isSponsored
   const [translatedSuggestions, setTranslatedSuggestions] = useState<TranslatedSuggestion[]>([]);
   
-  // Update translations for suggestions when they change
   useEffect(() => {
     if (!suggestions.length || language === 'english') {
-      // FIX: Convert suggestions to match our required TranslatedSuggestion type
       const formattedSuggestions: TranslatedSuggestion[] = suggestions.map(suggestion => ({
         ...suggestion,
-        isSponsored: suggestion.isSponsored || false // Provide default value for optional property
+        isSponsored: suggestion.isSponsored || false
       }));
       setTranslatedSuggestions(formattedSuggestions);
       return;
     }
     
-    // Only translate if not in English
     const translateSuggestions = async () => {
-      // FIX: Map each suggestion and ensure isSponsored is always defined
       const translated = await Promise.all(
         suggestions.map(async (suggestion) => ({
           id: suggestion.id,
           term: await tDynamic(suggestion.term),
-          isSponsored: suggestion.isSponsored || false // Provide default value for optional property
+          isSponsored: suggestion.isSponsored || false
         }))
       );
       setTranslatedSuggestions(translated);
@@ -153,7 +138,7 @@ export function SearchBar({
     
     translateSuggestions();
   }, [suggestions, language, tDynamic]);
-
+  
   return (
     <div ref={searchRef} className={`relative search-bar-container ${className}`}>
       <form onSubmit={handleSubmit} className="relative">
@@ -195,7 +180,6 @@ export function SearchBar({
         </div>
       </form>
       
-      {/* Suggestions dropdown */}
       {showSuggestionsState && translatedSuggestions.length > 0 && (
         <Card className="absolute z-50 w-full mt-1 shadow-lg overflow-hidden border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900">
           <ul className="py-1">
@@ -206,7 +190,6 @@ export function SearchBar({
                   isRTL ? "flex-row-reverse" : "flex-row"
                 } justify-between`}
                 onClick={() => {
-                  // Use the original suggestion for search but display translated term
                   const originalSuggestion = suggestions.find(s => s.id === suggestion.id);
                   if (originalSuggestion) {
                     applySuggestion(originalSuggestion);

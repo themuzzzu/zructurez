@@ -21,6 +21,8 @@ import { Outlet } from "react-router-dom";
 import { ErrorView } from "@/components/ErrorView";
 import { Suspense, lazy } from "react";
 import { CircularLoader } from "@/components/loaders/CircularLoader";
+import UnifiedSearchPage from "./pages/search/UnifiedSearchPage";
+import SearchResultsPage from "./pages/search/SearchResultsPage";
 
 // Lazy load heavy components to improve initial load time
 const LazyMapView = lazy(() => import("./pages/MapView"));
@@ -158,6 +160,26 @@ export const routes: RouteObject[] = [
       {
         path: "/messaging",
         element: <ComingSoonPage title="Messaging" message="The Messaging section is coming soon!" />,
+        errorElement: <ErrorView />,
+      },
+      {
+        path: "/search",
+        element: <UnifiedSearchPage />,
+        errorElement: <ErrorView />,
+      },
+      {
+        path: "/search/marketplace",
+        element: <SearchResultsPage type="marketplace" />,
+        errorElement: <ErrorView />,
+      },
+      {
+        path: "/search/business",
+        element: <SearchResultsPage type="business" />,
+        errorElement: <ErrorView />,
+      },
+      {
+        path: "/search/services",
+        element: <SearchResultsPage type="services" />,
         errorElement: <ErrorView />,
       },
       {

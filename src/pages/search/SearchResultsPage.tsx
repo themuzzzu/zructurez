@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
@@ -14,12 +13,15 @@ import { useSearch } from "@/hooks/useSearch";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ProductFilters } from "@/components/marketplace/ProductFilters";
 
-export default function SearchResultsPage() {
+interface SearchResultsPageProps {
+  type?: 'marketplace' | 'business' | 'services';
+}
+
+export default function SearchResultsPage({ type = 'marketplace' }: SearchResultsPageProps) {
   const [searchParams, setSearchParams] = useSearchParams();
   const query = searchParams.get("q") || "";
   const navigate = useNavigate();
   
-  // Get grid layout from URL or default to grid4x4
   const initialLayout = (searchParams.get("layout") || "grid4x4") as GridLayoutType;
   const [gridLayout, setGridLayout] = useState<GridLayoutType>(initialLayout);
   
@@ -31,7 +33,32 @@ export default function SearchResultsPage() {
   const [sortOption, setSortOption] = useState(searchParams.get("sort") || "newest");
   const [priceRange, setPriceRange] = useState(searchParams.get("price") || "all");
   
-  // Set up search using the hook
+  const getTitle = () => {
+    switch (type) {
+      case 'marketplace':
+        return 'Product Search';
+      case 'business':
+        return 'Business Search';
+      case 'services':
+        return 'Services Search';
+      default:
+        return 'Search Results';
+    }
+  };
+
+  const getPlaceholder = () => {
+    switch (type) {
+      case 'marketplace':
+        return 'Search for products...';
+      case 'business':
+        return 'Search for businesses...';
+      case 'services':
+        return 'Search for services...';
+      default:
+        return 'Search...';
+    }
+  };
+
   const { 
     results,
     isLoading,
@@ -42,23 +69,19 @@ export default function SearchResultsPage() {
     suggestionsEnabled: false
   });
 
-  // Search when query or filters change
   useEffect(() => {
     if (query) {
       search(query);
     }
   }, [query, search]);
 
-  // Update URL when filters or layout change
   useEffect(() => {
     const params = new URLSearchParams(searchParams);
     
-    // Update layout in URL
     if (gridLayout) {
       params.set("layout", gridLayout);
     }
     
-    // Update filters in URL
     if (selectedCategory) {
       params.set("category", selectedCategory);
     } else {
@@ -95,7 +118,6 @@ export default function SearchResultsPage() {
       params.delete("price");
     }
     
-    // Only update if parameters actually changed
     if (searchParams.toString() !== params.toString()) {
       setSearchParams(params);
     }
@@ -128,7 +150,6 @@ export default function SearchResultsPage() {
     <Layout>
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col gap-6">
-          {/* Header with back button and title */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <Button 
@@ -140,7 +161,7 @@ export default function SearchResultsPage() {
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <h1 className="text-xl md:text-2xl font-bold">
-                {query ? `Results for "${query}"` : "Search Results"}
+                {query ? `${getTitle()} - "${query}"` : getTitle()}
               </h1>
             </div>
             
@@ -183,18 +204,17 @@ export default function SearchResultsPage() {
             </div>
           </div>
           
-          {/* Search bar */}
           <div className="w-full max-w-2xl mx-auto">
             <SearchBar
-              placeholder="Search products..."
+              placeholder={getPlaceholder()}
               onSearch={handleSearch}
               showSuggestions={true}
               autoFocus={false}
               className="w-full"
+              type={type}
             />
           </div>
           
-          {/* Search results or empty state */}
           <div className="mt-6">
             <LikeProvider>
               {!isLoading && (!results || results.length === 0) ? (
