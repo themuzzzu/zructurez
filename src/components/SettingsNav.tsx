@@ -1,3 +1,4 @@
+
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -121,6 +122,9 @@ export function SettingsNav({ activeTab, setActiveTab }: SettingsNavProps) {
   if (isMobile) {
     return (
       <div className="w-full">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold">{t("settings")}</h1>
+        </div>
         <Button
           variant="outline"
           className="w-full flex justify-between items-center mb-4"
@@ -128,7 +132,7 @@ export function SettingsNav({ activeTab, setActiveTab }: SettingsNavProps) {
         >
           <span className="flex items-center gap-2">
             {settingsNavItems.find((item) => item.id === activeTab)?.icon}
-            {settingsNavItems.find((item) => item.id === activeTab)?.label}
+            {settingsNavItems.find((item) => item.id === activeTab)?.label || t("selectSetting")}
           </span>
           <Menu className="h-4 w-4" />
         </Button>
@@ -157,6 +161,9 @@ export function SettingsNav({ activeTab, setActiveTab }: SettingsNavProps) {
 
   return (
     <div className="w-[240px] shrink-0">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold">{t("settings")}</h1>
+      </div>
       <div className="space-y-1 py-2 sticky top-[80px]">
         {settingsNavItems.map((item) => (
           <Button
