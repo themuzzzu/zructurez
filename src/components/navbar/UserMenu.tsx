@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { 
   User, 
@@ -100,10 +99,14 @@ export const UserMenu = () => {
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-          <Avatar>
-            <AvatarImage src={user?.user_metadata?.avatar_url} />
-            <AvatarFallback className="bg-primary text-primary-foreground">
+        <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0 overflow-hidden">
+          <Avatar className="h-full w-full">
+            <AvatarImage 
+              src={user?.user_metadata?.avatar_url} 
+              alt="User Avatar" 
+              className="object-cover w-full h-full"
+            />
+            <AvatarFallback className="bg-primary text-primary-foreground w-full h-full flex items-center justify-center">
               {user?.user_metadata?.name 
                 ? getInitials(user.user_metadata.name) 
                 : "U"}
