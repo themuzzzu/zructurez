@@ -42,6 +42,7 @@ export function LocationModalHandler() {
           justify-content: center !important;
           margin: 0 !important;
           padding: 0 !important;
+          background-color: rgba(0, 0, 0, 0.5) !important;
         }
         
         .radix-dialog-content,
