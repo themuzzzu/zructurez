@@ -1,4 +1,5 @@
 
+import React, { Suspense } from "react";
 import { BannerAd } from "@/components/ads/BannerAd";
 import { useQuery } from "@tanstack/react-query";
 import { fetchActiveAds } from "@/services/adService";
@@ -25,9 +26,9 @@ export function HomeBannerAds() {
     
     return (
       <div className="w-full px-0 sm:px-2 mt-2 mb-6">
-        <React.Suspense fallback={<Skeleton className="w-full h-[200px] sm:h-[300px] rounded-lg" />}>
+        <Suspense fallback={<Skeleton className="w-full h-[200px] sm:h-[300px] rounded-lg" />}>
           <BannerCarousel />
-        </React.Suspense>
+        </Suspense>
       </div>
     );
   }
