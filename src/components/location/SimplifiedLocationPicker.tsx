@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { 
   Dialog,
@@ -102,7 +101,7 @@ export function SimplifiedLocationPicker({
 
   return (
     <Dialog open={open} onOpenChange={firstVisit ? () => {} : onOpenChange}>
-      <DialogContent className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-zinc-900 text-white border-zinc-800 max-h-[90vh] overflow-y-auto sm:rounded-xl shadow-lg w-full sm:w-[95%] sm:max-w-[500px] p-4 sm:p-6 z-[9999]">
+      <DialogContent className="fixed inset-0 sm:inset-auto sm:fixed sm:top-1/2 sm:left-1/2 sm:transform sm:-translate-x-1/2 sm:-translate-y-1/2 bg-zinc-900 text-white border-zinc-800 overflow-y-auto sm:rounded-xl shadow-lg w-full h-full sm:h-auto sm:max-h-[90vh] sm:w-[95%] sm:max-w-[500px] p-4 sm:p-6 z-[9999]">
         <DialogHeader className="mb-4">
           <DialogTitle className="flex items-center gap-2 text-xl sm:text-2xl font-semibold text-white">
             <MapPin className="h-6 w-6" />
