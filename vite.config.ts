@@ -6,7 +6,11 @@ import { componentTagger } from "lovable-tagger";
 
 export default defineConfig(({ mode }) => ({
   plugins: [
-    react(),
+    react({
+      // Enable TypeScript support
+      tsDecorators: true,
+      tsconfig: './tsconfig.json',
+    }),
     mode === 'development' && componentTagger(),
   ].filter(Boolean),
   resolve: {
