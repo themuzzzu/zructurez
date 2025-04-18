@@ -1,70 +1,63 @@
 
 import { ReactNode } from 'react';
 
+// Create a base interface for any component that might accept children
+interface WithChildren {
+  children?: ReactNode;
+}
+
 // Extend shadcn components to properly accept children props
 declare module '@/components/ui/dialog' {
-  interface DialogTitleProps {
-    children?: ReactNode;
+  interface DialogTitleProps extends WithChildren {
     className?: string;
   }
   
-  interface DialogDescriptionProps {
-    children?: ReactNode;
+  interface DialogDescriptionProps extends WithChildren {
     className?: string;
   }
   
-  interface DialogContentProps {
-    children?: ReactNode;
+  interface DialogContentProps extends WithChildren {
     className?: string;
   }
   
-  interface DialogHeaderProps {
-    children?: ReactNode;
+  interface DialogHeaderProps extends WithChildren {
     className?: string;
   }
   
-  interface DialogFooterProps {
-    children?: ReactNode;
+  interface DialogFooterProps extends WithChildren {
     className?: string;
   }
 }
 
 declare module '@/components/ui/select' {
-  interface SelectTriggerProps {
-    children?: ReactNode;
+  interface SelectTriggerProps extends WithChildren {
     className?: string;
   }
   
-  interface SelectContentProps {
-    children?: ReactNode;
+  interface SelectContentProps extends WithChildren {
     className?: string;
   }
   
-  interface SelectItemProps {
-    children?: ReactNode;
+  interface SelectItemProps extends WithChildren {
     value: string;
     className?: string;
     key?: string;
   }
   
-  interface SelectValueProps {
-    children?: ReactNode;
+  interface SelectValueProps extends WithChildren {
     placeholder?: string;
   }
 }
 
 declare module '@/components/ui/scroll-area' {
-  interface ScrollAreaProps {
-    children?: ReactNode;
+  interface ScrollAreaProps extends WithChildren {
     className?: string;
   }
 }
 
 declare module '@/components/ui/label' {
-  interface LabelProps {
-    children?: ReactNode;
+  interface LabelProps extends WithChildren {
     htmlFor?: string;
     className?: string;
   }
 }
-
