@@ -35,19 +35,28 @@ export function LocationModalHandler() {
           max-width: 100% !important;
           width: 100% !important;
           height: 100% !important;
+          max-height: 100vh !important;
           z-index: 9999 !important;
           display: flex !important;
           align-items: center !important;
           justify-content: center !important;
+          margin: 0 !important;
+          padding: 0 !important;
         }
         
-        .radix-dialog-content {
+        .radix-dialog-content,
+        [data-radix-dialog-content] {
           width: 100% !important;
           max-height: 100% !important;
           margin: 0 !important;
           border-radius: 0 !important;
           height: 100% !important;
           max-width: 100% !important;
+          position: absolute !important;
+          top: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          bottom: 0 !important;
         }
       }
     `;

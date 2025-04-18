@@ -17,10 +17,10 @@ export default function Home() {
     <Layout>
       <div className="flex min-h-[calc(100vh-4rem)]">
         {/* Sidebar - Only shown on desktop */}
-        {!isMobile && <Sidebar className="h-[calc(100vh-4rem)]" />}
+        {!isMobile && <Sidebar className="h-[calc(100vh-4rem)] fixed left-0 top-16" />}
         
         {/* Main Content */}
-        <div className={`container mx-auto px-4 max-w-6xl space-y-6 pb-12 transition-all ${!isMobile ? 'ml-12' : ''}`}>
+        <div className={`container mx-auto px-4 max-w-6xl space-y-6 pb-12 transition-all ${!isMobile ? 'ml-[72px]' : ''}`}>
           <div className="min-h-[calc(100vh-4rem)] flex flex-col">
             {/* Hero Section */}
             <SearchHero />
