@@ -60,6 +60,12 @@ export const ProductCardStandard = ({
   // Generate random rating for display - don't change on hover
   const rating = useState((Math.floor(Math.random() * 15) + 35) / 10)[0];
   
+  // Get image URL, handling both property names
+  const imageUrl = product.imageUrl || product.image_url;
+  
+  // Get brand name, handling both property names
+  const brandName = product.brand_name || product.brand || product.category || "General";
+  
   return (
     <Card className="overflow-hidden hover:shadow-md transition-all h-full">
       <div className="relative">
@@ -67,9 +73,9 @@ export const ProductCardStandard = ({
           className="aspect-square cursor-pointer" 
           onClick={onClick}
         >
-          {product.image_url ? (
+          {imageUrl ? (
             <img
-              src={product.image_url}
+              src={imageUrl}
               alt={product.title}
               className="w-full h-full object-cover"
             />
@@ -104,7 +110,7 @@ export const ProductCardStandard = ({
       <div className={`p-3 ${isGrid2x2 ? 'p-4' : ''}`} onClick={onClick}>
         <div className="mb-1">
           <div className="text-xs text-gray-500 mb-1">
-            {product.brand_name || product.brand || product.category || "General"}
+            {brandName}
           </div>
           <h3 className={`font-medium line-clamp-1 ${isGrid2x2 ? 'text-base' : 'text-sm'}`}>
             {product.title}

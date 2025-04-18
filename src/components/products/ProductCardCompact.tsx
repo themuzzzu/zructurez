@@ -1,3 +1,4 @@
+
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -111,15 +112,21 @@ export const ProductCardCompact = ({
   };
 
   const rating = (Math.floor(Math.random() * 15) + 35) / 10;
+  
+  // Get image URL, handling both property names
+  const imageUrl = product.imageUrl || product.image_url;
+  
+  // Get brand name, handling both property names
+  const brandName = product.brand_name || product.brand || product.category || "General";
 
   return (
     <Card className="overflow-hidden hover:shadow-md transition-all h-full">
       <div className="flex flex-row w-full" onClick={onClick}>
         <div className="w-1/3 sm:w-1/4">
           <div className="aspect-square relative">
-            {product.image_url ? (
+            {imageUrl ? (
               <img
-                src={product.image_url}
+                src={imageUrl}
                 alt={product.title}
                 className="w-full h-full object-cover"
               />
@@ -169,7 +176,7 @@ export const ProductCardCompact = ({
               </div>
               
               <div className="text-xs text-gray-500 line-clamp-1">
-                {product.brand_name || product.brand || product.category || "General"}
+                {brandName}
               </div>
             </div>
             

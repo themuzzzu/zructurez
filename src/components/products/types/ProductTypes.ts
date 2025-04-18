@@ -9,11 +9,13 @@ export interface ProductType {
   description?: string;
   price: number;
   imageUrl?: string;
+  image_url?: string;  // Added for compatibility with Product interface
   category?: string;
   is_discounted?: boolean;
   discount_percentage?: number;
   original_price?: number;
   brand?: string;
+  brand_name?: string;  // Added for compatibility with Product interface
   rating?: number;
   rating_count?: number;
   highlight_tags?: string[];
