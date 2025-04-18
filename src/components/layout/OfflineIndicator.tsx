@@ -4,7 +4,7 @@ import { WifiOff } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export const OfflineIndicator = () => {
-  const { isOnline, connectionQuality } = useNetworkStatus();
+  const { isOnline } = useNetworkStatus();
   const [visible, setVisible] = useState(false);
   
   // Control visibility with a slight delay to prevent flashing

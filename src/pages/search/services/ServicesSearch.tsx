@@ -3,16 +3,20 @@ import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { SearchHeader } from "@/components/search/SearchHeader";
-import { SearchLayout } from "@/components/search/SearchLayout";
 import { ServiceSearchResults } from "@/components/search/ServiceSearchResults";
 import { ServiceSearchFilters } from "@/components/search/ServiceSearchFilters";
 import { useSearch } from "@/hooks/useSearch";
 import { SearchFilters } from "@/types/search";
+import { Button } from "@/components/ui/button";
+import { Filter } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 export default function ServicesSearch() {
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q") || "";
-  const { results, isLoading, search } = useSearch({
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
+  
+  const { results, isLoading, search, correctedQuery } = useSearch({
     initialQuery: query,
     suggestionsEnabled: false
   });
@@ -33,30 +37,77 @@ export default function ServicesSearch() {
 
   return (
     <Layout>
-      <div className="container max-w-7xl mx-auto">
-        <SearchLayout
-          filters={
-            <ServiceSearchFilters
-              filters={{}}
-              onChange={handleFilterChange}
-              onReset={handleResetFilters}
-            />
-          }
-          content={
-            <div className="space-y-4">
-              <SearchHeader 
-                query={query}
-                totalResults={results.length}
-                breadcrumbs={breadcrumbs}
-              />
-              <ServiceSearchResults
-                results={results}
-                isLoading={isLoading}
-                query={query}
+      <div className="container max-w-7xl mx-auto px-2 md:px-4 py-4">
+        <SearchHeader 
+          query={query}
+          totalResults={results.length}
+          breadcrumbs={breadcrumbs}
+        />
+        
+        {/* Mobile filters button - only shown on small screens */}
+        <div className="flex md:hidden items-center justify-between mb-4 border-b pb-2">
+          <Sheet open={showMobileFilters} onOpenChange={setShowMobileFilters}>
+            <SheetTrigger asChild>
+              <Button variant="outline" size="sm" className="flex items-center gap-1">
+                <Filter className="h-4 w-4" />
+                Filters
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-[85%] sm:w-[350px]">
+              <div className="py-4">
+                <h3 className="font-semibold text-lg mb-4">Service Filters</h3>
+                <ServiceSearchFilters
+                  filters={{}}
+                  onChange={handleFilterChange}
+                  onReset={handleResetFilters}
+                />
+              </div>
+            </SheetContent>
+          </Sheet>
+          
+          <div>
+            <Button variant="outline" size="sm">
+              Sort By: Relevance
+            </Button>
+          </div>
+        </div>
+        
+        {/* Main content with sidebar */}
+        <div className="flex flex-col md:flex-row gap-5">
+          {/* Desktop filters sidebar */}
+          <div className="hidden md:block w-[240px] flex-shrink-0">
+            <div className="sticky top-4">
+              <ServiceSearchFilters
+                filters={{}}
+                onChange={handleFilterChange}
+                onReset={handleResetFilters}
               />
             </div>
-          }
-        />
+          </div>
+          
+          {/* Main content area */}
+          <div className="flex-1 min-w-0">
+            {/* Corrected query notification */}
+            {correctedQuery && correctedQuery !== query && (
+              <div className="mb-4 text-sm">
+                Showing results for <span className="font-medium">{correctedQuery}</span> instead of <span className="italic">{query}</span>
+              </div>
+            )}
+            
+            {/* Results count - desktop */}
+            <div className="hidden md:block mb-4">
+              <p className="text-sm text-muted-foreground">
+                {isLoading ? 'Searching...' : `Showing ${results.length} results for "${query}"`}
+              </p>
+            </div>
+            
+            <ServiceSearchResults
+              results={results}
+              isLoading={isLoading}
+              query={query}
+            />
+          </div>
+        </div>
       </div>
     </Layout>
   );
