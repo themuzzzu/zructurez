@@ -30,3 +30,12 @@ declare module 'react' {
     (props: P & { children?: React.ReactNode }, context?: any): React.ReactElement<any, any> | null;
   }
 }
+
+// Augment ForwardRefExoticComponent to ensure children are allowed
+declare module 'react' {
+  interface ForwardRefExoticComponent<P> {
+    defaultProps?: Partial<P>;
+    propTypes?: React.WeakValidationMap<P>;
+    displayName?: string;
+  }
+}

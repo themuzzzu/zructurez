@@ -12,4 +12,12 @@ declare module 'react' {
   }
 }
 
+// Explicitly declare children prop support for shadcn components
+declare module '@/components/ui/*' {
+  interface BaseComponentProps {
+    children?: React.ReactNode;
+    className?: string;
+  }
+}
+
 export {};
