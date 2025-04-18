@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { ShoppingSection } from './ShoppingSection';
 import { GridLayoutType } from './products/types/ProductTypes';
 import { motion } from 'framer-motion';
+import { SearchResult } from '@/types/search';
 
 interface EnhancedShoppingSectionProps {
   searchQuery: string;
@@ -14,6 +15,10 @@ interface EnhancedShoppingSectionProps {
   sortOption?: string;
   priceRange?: string;
   gridLayout?: GridLayoutType;
+  isLoading?: boolean;
+  results?: SearchResult[];
+  hasError?: boolean;
+  onRetry?: () => void;
 }
 
 export const EnhancedShoppingSection = ({
@@ -25,7 +30,11 @@ export const EnhancedShoppingSection = ({
   showBranded = false,
   sortOption = 'newest',
   priceRange = 'all',
-  gridLayout = 'grid4x4'
+  gridLayout = 'grid4x4',
+  isLoading = false,
+  results = [],
+  hasError = false,
+  onRetry
 }: EnhancedShoppingSectionProps) => {
   const containerAnimation = {
     hidden: { opacity: 0 },
@@ -54,6 +63,10 @@ export const EnhancedShoppingSection = ({
         priceRange={priceRange}
         gridLayout={gridLayout}
         title="Search Results"
+        isLoading={isLoading}
+        results={results}
+        hasError={hasError}
+        onRetry={onRetry}
       />
     </motion.div>
   );

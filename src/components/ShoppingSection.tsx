@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { ProductsGrid } from './products/ProductsGrid';
 import { useQuery } from '@tanstack/react-query';
@@ -9,6 +8,10 @@ import { Skeleton } from './ui/skeleton';
 import { ShoppingCardSkeleton } from './ShoppingCardSkeleton';
 import { LoadingView } from './LoadingView';
 import { Progress } from './ui/progress';
+import { SearchResult } from '@/types/search';
+import { Alert, AlertTitle, AlertDescription } from './ui/alert';
+import { Button } from './ui/button';
+import { Wifi, WifiOff } from 'lucide-react';
 
 interface ShoppingSectionProps {
   searchQuery: string;
@@ -20,6 +23,10 @@ interface ShoppingSectionProps {
   priceRange?: string;
   gridLayout?: GridLayoutType;
   title?: string;
+  isLoading?: boolean;
+  results?: SearchResult[];
+  hasError?: boolean;
+  onRetry?: () => void;
 }
 
 export const ShoppingSection = ({
@@ -31,7 +38,11 @@ export const ShoppingSection = ({
   sortOption = 'newest',
   priceRange = 'all',
   gridLayout = 'grid4x4',
-  title = 'Products'
+  title = 'Products',
+  isLoading: externalLoading,
+  results: externalResults,
+  hasError = false,
+  onRetry
 }: ShoppingSectionProps) => {
   // Local state for filters
   const [localCategory, setLocalCategory] = useState(selectedCategory);
@@ -46,9 +57,12 @@ export const ShoppingSection = ({
   
   // Progress reference for loading animation
   const loadingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // If external results and loading state are provided, use them instead of fetching
+  const shouldFetch = !externalResults || externalResults.length === 0;
   
   // Fetch products based on filters
-  const { data: products, isLoading, error } = useQuery({
+  const { data: products, isLoading: queryLoading, error } = useQuery({
     queryKey: ['products', searchQuery, localCategory, localShowDiscounted, localShowUsed, localShowBranded, localSortOption, localPriceRange],
     queryFn: async () => {
       // Start loading progress animation
@@ -116,7 +130,14 @@ export const ShoppingSection = ({
       }
     },
     staleTime: 60000, // 1 minute
+    enabled: shouldFetch, // Only run the query if we don't have external results
   });
+
+  // Determine if we're loading
+  const isLoading = externalLoading !== undefined ? externalLoading : queryLoading;
+  
+  // Determine which results to use
+  const displayProducts = externalResults || products || [];
   
   // Start loading animation
   const startLoadingProgress = () => {
@@ -197,6 +218,21 @@ export const ShoppingSection = ({
           <Progress value={loadingProgress} className="h-1" />
         </div>
       )}
+
+      {hasError && (
+        <Alert variant="warning" className="mb-4">
+          <WifiOff className="h-4 w-4" />
+          <AlertTitle>Network connectivity issue</AlertTitle>
+          <AlertDescription>
+            We couldn't connect to our search service. Showing you locally cached results instead.
+            {onRetry && (
+              <Button variant="outline" size="sm" onClick={onRetry} className="ml-2">
+                Retry
+              </Button>
+            )}
+          </AlertDescription>
+        </Alert>
+      )}
       
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {/* Filters - Desktop */}
@@ -234,7 +270,7 @@ export const ShoppingSection = ({
             </div>
           ) : (
             <ProductsGrid 
-              products={products || []} 
+              products={displayProducts} 
               isLoading={isLoading} 
               layout={localGridLayout}
               onLayoutChange={setLocalGridLayout}
