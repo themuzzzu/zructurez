@@ -14,60 +14,60 @@ interface UserMenuItemsProps {
 
 export const UserMenuItems = ({ onNavigate, cartCount, wishlistCount }: UserMenuItemsProps) => {
   return (
-    <DropdownMenuGroup>
+    <DropdownMenuGroup className="space-y-0.5">
       <DropdownMenuItem 
         onClick={() => onNavigate("/profile")}
-        className="hover:bg-muted py-2 cursor-pointer"
+        className="flex items-center py-2.5 px-3 cursor-pointer rounded-md transition-colors hover:bg-muted focus:bg-muted"
       >
-        <User className="mr-3 h-4 w-4" />
-        <span>Profile</span>
+        <User className="mr-3 h-4 w-4 text-muted-foreground" />
+        <span className="font-medium">Profile</span>
         <ChevronRight className="ml-auto h-4 w-4 opacity-50" />
       </DropdownMenuItem>
       <DropdownMenuItem 
         onClick={() => onNavigate("/businesses/my-businesses")}
-        className="hover:bg-muted py-2 cursor-pointer"
+        className="flex items-center py-2.5 px-3 cursor-pointer rounded-md transition-colors hover:bg-muted focus:bg-muted"
       >
-        <Store className="mr-3 h-4 w-4" />
-        <span>My Businesses</span>
+        <Store className="mr-3 h-4 w-4 text-muted-foreground" />
+        <span className="font-medium">My Businesses</span>
         <ChevronRight className="ml-auto h-4 w-4 opacity-50" />
       </DropdownMenuItem>
       <DropdownMenuItem 
         onClick={() => onNavigate("/wishlist")}
-        className="hover:bg-muted py-2 cursor-pointer"
+        className="flex items-center py-2.5 px-3 cursor-pointer rounded-md transition-colors hover:bg-muted focus:bg-muted"
       >
-        <Heart className="mr-3 h-4 w-4" />
-        <span>Wishlist</span>
+        <Heart className="mr-3 h-4 w-4 text-muted-foreground" />
+        <span className="font-medium">Wishlist</span>
         {wishlistCount > 0 && (
-          <Badge className="ml-auto px-1.5 rounded-full text-xs" variant="secondary">
+          <Badge className="ml-auto px-2 py-0.5 rounded-full" variant="secondary">
             {wishlistCount}
           </Badge>
         )}
       </DropdownMenuItem>
       <DropdownMenuItem 
         onClick={() => onNavigate("/cart")}
-        className="hover:bg-muted py-2 cursor-pointer"
+        className="flex items-center py-2.5 px-3 cursor-pointer rounded-md transition-colors hover:bg-muted focus:bg-muted"
       >
-        <ShoppingBag className="mr-3 h-4 w-4" />
-        <span>Cart</span>
+        <ShoppingBag className="mr-3 h-4 w-4 text-muted-foreground" />
+        <span className="font-medium">Cart</span>
         {cartCount > 0 && (
-          <Badge className="ml-auto px-1.5 rounded-full text-xs" variant="secondary">
+          <Badge className="ml-auto px-2 py-0.5 rounded-full" variant="secondary">
             {cartCount}
           </Badge>
         )}
       </DropdownMenuItem>
       <DropdownMenuItem 
         onClick={() => onNavigate("/notifications")}
-        className="hover:bg-muted py-2 cursor-pointer"
+        className="flex items-center py-2.5 px-3 cursor-pointer rounded-md transition-colors hover:bg-muted focus:bg-muted"
       >
-        <Bell className="mr-3 h-4 w-4" />
-        <span>Notifications</span>
+        <Bell className="mr-3 h-4 w-4 text-muted-foreground" />
+        <span className="font-medium">Notifications</span>
       </DropdownMenuItem>
       <DropdownMenuItem 
         onClick={() => onNavigate("/pricing")}
-        className="hover:bg-muted py-2 cursor-pointer"
+        className="flex items-center py-2.5 px-3 cursor-pointer rounded-md transition-colors hover:bg-muted focus:bg-muted"
       >
-        <BadgeDollarSign className="mr-3 h-4 w-4" />
-        <span>Pricing Plans</span>
+        <BadgeDollarSign className="mr-3 h-4 w-4 text-muted-foreground" />
+        <span className="font-medium">Pricing Plans</span>
         <ChevronRight className="ml-auto h-4 w-4 opacity-50" />
       </DropdownMenuItem>
     </DropdownMenuGroup>

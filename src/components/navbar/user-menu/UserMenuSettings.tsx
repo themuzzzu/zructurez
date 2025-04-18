@@ -12,24 +12,24 @@ export const UserMenuSettings = ({ onNavigate, onSignOut }: UserMenuSettingsProp
     <>
       <DropdownMenuItem 
         onClick={() => onNavigate("/settings")}
-        className="hover:bg-muted py-2 cursor-pointer"
+        className="flex items-center py-2.5 px-3 cursor-pointer rounded-md transition-colors hover:bg-muted focus:bg-muted"
       >
-        <Settings className="mr-3 h-4 w-4" />
-        <span>Settings</span>
+        <Settings className="mr-3 h-4 w-4 text-muted-foreground" />
+        <span className="font-medium">Settings</span>
       </DropdownMenuItem>
       <DropdownMenuItem 
         onClick={() => onNavigate("/support")}
-        className="hover:bg-muted py-2 cursor-pointer"
+        className="flex items-center py-2.5 px-3 cursor-pointer rounded-md transition-colors hover:bg-muted focus:bg-muted"
       >
-        <LifeBuoy className="mr-3 h-4 w-4" />
-        <span>Help & Support</span>
+        <LifeBuoy className="mr-3 h-4 w-4 text-muted-foreground" />
+        <span className="font-medium">Help & Support</span>
       </DropdownMenuItem>
       <DropdownMenuItem 
         onClick={onSignOut}
-        className="hover:bg-red-100 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 py-2 cursor-pointer"
+        className="flex items-center py-2.5 px-3 cursor-pointer rounded-md transition-colors text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50 focus:bg-red-50 dark:focus:bg-red-950/50"
       >
         <LogOut className="mr-3 h-4 w-4" />
-        <span>Log out</span>
+        <span className="font-medium">Log out</span>
       </DropdownMenuItem>
     </>
   );
