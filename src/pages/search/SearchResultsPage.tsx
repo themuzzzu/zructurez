@@ -1,58 +1,62 @@
 
-import React, { useState } from "react";
-import { useSearchParams } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
-import { useSearch } from "@/hooks/useSearch";
-import { SearchResults } from "@/components/search/SearchResults";
+import { SearchLayout } from "@/components/search/SearchLayout";
+import { SearchHeader } from "@/components/search/SearchHeader";
+import { ImprovedSearchFilters } from "@/components/search/ImprovedSearchFilters";
 import { ProductSearchResults } from "@/components/search/ProductSearchResults";
-import { BusinessSearchResults } from "@/components/search/BusinessSearchResults";
-import { ServiceSearchResults } from "@/components/search/ServiceSearchResults";
+import { useSearchParams } from "react-router-dom";
+import { useSearch } from "@/hooks/useSearch";
+import { SearchFilters } from "@/types/search";
 
-interface SearchResultsPageProps {
-  type?: 'marketplace' | 'business' | 'services';
-}
-
-export default function SearchResultsPage({ type = 'marketplace' }: SearchResultsPageProps) {
+export default function SearchResultsPage() {
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q") || "";
 
-  const { results, isLoading } = useSearch({
+  const { results, isLoading, search } = useSearch({
     initialQuery: query,
-    suggestionsEnabled: false,
-    initialFilters: { 
-      categories: type === 'marketplace' ? ['products'] : type === 'business' ? ['business'] : ['services']
-    }
+    suggestionsEnabled: false
   });
 
-  const getTitle = () => {
-    switch (type) {
-      case 'marketplace':
-        return 'Products Search';
-      case 'business':
-        return 'Business Search';
-      case 'services':
-        return 'Services Search';
-      default:
-        return 'Search Results';
-    }
+  const handleFilterChange = (newFilters: Partial<SearchFilters>) => {
+    search(query, newFilters);
   };
+
+  const handleResetFilters = () => {
+    search(query);
+  };
+
+  const breadcrumbs = [
+    { label: "Home", href: "/" },
+    { label: "Search", href: "/search" },
+    { label: query, href: `/search?q=${query}` }
+  ];
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-6">{getTitle()}</h1>
-        
-        {type === 'marketplace' && (
-          <ProductSearchResults results={results} isLoading={isLoading} query={query} />
-        )}
-        
-        {type === 'business' && (
-          <BusinessSearchResults results={results} isLoading={isLoading} query={query} />
-        )}
-        
-        {type === 'services' && (
-          <ServiceSearchResults results={results} isLoading={isLoading} query={query} />
-        )}
+      <div className="container max-w-7xl mx-auto">
+        <SearchLayout
+          filters={
+            <ImprovedSearchFilters
+              filters={{}}
+              onChange={handleFilterChange}
+              onReset={handleResetFilters}
+            />
+          }
+          content={
+            <div className="space-y-4">
+              <SearchHeader 
+                query={query}
+                totalResults={results.length}
+                breadcrumbs={breadcrumbs}
+              />
+              <ProductSearchResults
+                results={results}
+                isLoading={isLoading}
+                query={query}
+              />
+            </div>
+          }
+        />
       </div>
     </Layout>
   );
