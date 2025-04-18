@@ -1,6 +1,7 @@
 
 import { ComponentType, ForwardRefExoticComponent, RefAttributes } from 'react';
 
+// This file extends React's typings to properly support the children prop
 declare module 'react' {
   // Ensure that React's ElementType can handle components with children props
   interface ElementType<P = any> {
@@ -17,8 +18,15 @@ declare module 'react' {
 // Ensure that JSX inherently supports children props
 declare namespace JSX {
   interface IntrinsicAttributes {
-    children?: any;
+    children?: React.ReactNode;
     key?: any;
     ref?: any;
+  }
+}
+
+// Make sure React knows elements can have children
+declare module 'react' {
+  interface FunctionComponent<P = {}> {
+    (props: P & { children?: React.ReactNode }, context?: any): React.ReactElement<any, any> | null;
   }
 }
