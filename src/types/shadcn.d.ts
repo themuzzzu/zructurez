@@ -17,6 +17,7 @@ declare module '@/components/ui/select' {
     children?: ReactNode;
     value: string;
     className?: string;
+    key?: string;
   }
   
   interface SelectValueProps {
