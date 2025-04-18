@@ -3,6 +3,8 @@ import { Layout } from "@/components/layout/Layout";
 import { SearchHero } from "@/components/home/SearchHero";
 import { LocationAvailabilityStatus } from "@/components/location/LocationAvailabilityStatus";
 import { LocationHeader } from "@/components/home/LocationHeader";
+import { HomeCategories } from "@/components/home/HomeCategories";
+import { HomeBannerAds } from "@/components/home/HomeBannerAds";
 import { useLocation } from "@/providers/LocationProvider";
 import { MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -24,6 +26,17 @@ export default function Home() {
           <div className="min-h-[calc(100vh-4rem)] flex flex-col">
             {/* Hero Section */}
             <SearchHero />
+            
+            {/* Banner Ads Section */}
+            <div className="mb-8">
+              <HomeBannerAds />
+            </div>
+            
+            {/* Categories Section */}
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold mb-6">Browse Categories</h2>
+              <HomeCategories />
+            </div>
             
             {/* Location Header */}
             <LocationHeader />
