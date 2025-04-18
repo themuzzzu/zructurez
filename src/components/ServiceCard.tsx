@@ -11,7 +11,8 @@ interface ServiceCardProps {
   id: string;
   name: string;
   description: string;
-  image: string;
+  image?: string;
+  image_url?: string; // Added this to support both image and image_url
   price: string;
   providerName: string;
   providerId: string;
@@ -23,6 +24,7 @@ export const ServiceCard = ({
   name,
   description,
   image,
+  image_url,
   price,
   providerName,
   providerId,
@@ -68,7 +70,7 @@ export const ServiceCard = ({
     <Card className="overflow-hidden transition-all duration-300 hover:shadow-md h-full flex flex-col">
       <div className="relative h-48 overflow-hidden">
         <img 
-          src={image || '/placeholder-image.jpg'}
+          src={image_url || image || '/placeholder-image.jpg'}
           alt={name}
           className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
         />

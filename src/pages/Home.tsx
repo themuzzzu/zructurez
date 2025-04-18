@@ -19,13 +19,12 @@ import { CategoryNavigationBar } from "@/components/marketplace/CategoryNavigati
 import { BusinessesTabContent } from "@/components/home/BusinessesTabContent";
 import { ProductsTabContent } from "@/components/home/ProductsTabContent";
 import { ServicesTabContent } from "@/components/home/ServicesTabContent";
-import { GridLayoutType } from "@/components/products/types/ProductTypes";
 
 export default function Home() {
   const { currentLocation, isLocationAvailable, setShowLocationPicker } = useLocation();
   const isMobile = useMediaQuery("(max-width: 768px)");
   const [activeTab, setActiveTab] = useState("business");
-  const [gridLayout, setGridLayout] = useState<GridLayoutType>("grid4x4");
+  const [gridLayout, setGridLayout] = useState<"grid4x4" | "grid2x2">("grid4x4");
   const [selectedCategory, setSelectedCategory] = useState("All");
   
   // Available categories for each tab

@@ -55,7 +55,17 @@ export const ServicesTabContent = ({ category = 'all' }: ServicesTabContentProps
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {services.map((service) => (
-        <ServiceCard key={service.id} service={service} />
+        <ServiceCard 
+          key={service.id} 
+          id={service.id}
+          name={service.title || ''}
+          description={service.description}
+          image={service.image_url || ''}
+          price={service.price?.toString() || '$0'}
+          providerName={service.business_name || 'Provider'}
+          providerId={service.business_id || service.id}
+          contact_info={service.contact_info}
+        />
       ))}
     </div>
   );

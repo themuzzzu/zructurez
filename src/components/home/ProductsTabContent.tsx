@@ -4,10 +4,11 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductsGrid } from '@/components/products/ProductsGrid';
 import { Spinner } from '@/components/common/Spinner';
+import type { GridLayoutType } from '@/components/products/types/ProductTypes';
 
 interface ProductsTabContentProps {
   category?: string;
-  layout?: "grid4x4" | "grid2x2";
+  layout?: "grid4x4" | "grid2x2" | "grid3x3" | "grid1x1";
 }
 
 export const ProductsTabContent = ({ category = 'all', layout = "grid4x4" }: ProductsTabContentProps) => {
@@ -40,6 +41,9 @@ export const ProductsTabContent = ({ category = 'all', layout = "grid4x4" }: Pro
   }
 
   return (
-    <ProductsGrid products={products || []} layout={layout} />
+    <ProductsGrid 
+      products={products || []} 
+      layout={layout as GridLayoutType} 
+    />
   );
 };
