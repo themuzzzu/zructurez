@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { SimplifiedLocationPicker } from "./SimplifiedLocationPicker";
 import { useLocation } from "@/providers/LocationProvider";
 import { useLanguage } from "@/contexts/LanguageContext";
+import "../styles/location-picker.css"; // Import the CSS file
 
 export function LocationModalHandler() {
   const { showLocationPicker, setShowLocationPicker, isFirstVisit, resetFirstVisit } = useLocation();
@@ -59,6 +60,23 @@ export function LocationModalHandler() {
           right: 0 !important;
           bottom: 0 !important;
         }
+      }
+      
+      /* Ensure dialog has a dark background even in light mode */
+      [data-radix-dialog-content] {
+        background-color: #121212 !important;
+        color: white !important;
+      }
+      
+      /* Make sure inputs in the dialog are visible */
+      [data-radix-dialog-content] input {
+        color: white !important;
+        background-color: #1e1e1e !important; 
+        border-color: #333333 !important;
+      }
+      
+      [data-radix-dialog-content] input::placeholder {
+        color: #aaaaaa !important;
       }
     `;
     

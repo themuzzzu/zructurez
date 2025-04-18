@@ -1,8 +1,8 @@
-
 @import 'tailwindcss/base';
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 @import './utils/scrollbarUtils.css';
+@import './styles/location-picker.css';
  
 @layer base {
   :root {
@@ -57,62 +57,6 @@
     --ring: 270 70% 60%;
     --accent: 270 70% 95%;
     --accent-foreground: 270 70% 30%;
-  }
-  
-  .ui-red {
-    --primary: 0 72% 51%;
-    --primary-foreground: 0 0% 98%;
-    --ring: 0 72% 51%;
-    --accent: 0 72% 95%;
-    --accent-foreground: 0 72% 30%;
-  }
-  
-  .ui-yellow {
-    --primary: 38 92% 50%;
-    --primary-foreground: 0 0% 12%;
-    --ring: 38 92% 50%;
-    --accent: 38 92% 90%;
-    --accent-foreground: 38 92% 30%;
-  }
-  
-  .ui-green {
-    --primary: 142 72% 29%;
-    --primary-foreground: 0 0% 98%;
-    --ring: 142 72% 29%;
-    --accent: 142 72% 90%;
-    --accent-foreground: 142 72% 20%;
-  }
-  
-  .ui-blue {
-    --primary: 217 91% 60%;
-    --primary-foreground: 0 0% 98%;
-    --ring: 217 91% 60%;
-    --accent: 217 91% 95%;
-    --accent-foreground: 217 91% 30%;
-  }
-  
-  .ui-pink {
-    --primary: 330 81% 60%;
-    --primary-foreground: 0 0% 98%;
-    --ring: 330 81% 60%;
-    --accent: 330 81% 95%;
-    --accent-foreground: 330 81% 30%;
-  }
-  
-  .ui-orange {
-    --primary: 24 94% 50%;
-    --primary-foreground: 0 0% 98%;
-    --ring: 24 94% 50%;
-    --accent: 24 94% 95%;
-    --accent-foreground: 24 94% 30%;
-  }
-  
-  .ui-teal {
-    --primary: 168 76% 42%;
-    --primary-foreground: 0 0% 98%;
-    --ring: 168 76% 42%;
-    --accent: 168 76% 95%;
-    --accent-foreground: 168 76% 30%;
   }
   
   /* Language-specific font styles */
@@ -205,4 +149,29 @@
 .max-h-\[90vh\].overflow-auto::-webkit-scrollbar-thumb {
   background-color: rgba(255, 255, 255, 0.2);
   border-radius: 20px;
+}
+
+/* Location picker dialog special handling */
+[data-radix-dialog-content] {
+  color-scheme: dark;
+}
+
+/* Dialog with location-picker class will have dark theme regardless of site theme */
+.location-picker [data-radix-dialog-content] {
+  background-color: #121212 !important;
+  color: white !important;
+  border-color: #333333 !important;
+}
+
+/* Ensure inputs in location picker are visible */
+.location-picker [data-radix-dialog-content] input {
+  background-color: #222222 !important;
+  color: white !important;
+  border-color: #444444 !important;
+}
+
+/* Ensure buttons in location picker have proper contrast */
+.location-picker [data-radix-dialog-content] .confirm-button {
+  background-color: #2563eb !important;
+  color: white !important;
 }
