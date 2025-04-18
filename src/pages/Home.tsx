@@ -4,18 +4,12 @@ import { Layout } from "@/components/layout/Layout";
 import { SearchHero } from "@/components/home/SearchHero";
 import { LocationAvailabilityStatus } from "@/components/location/LocationAvailabilityStatus";
 import { LocationHeader } from "@/components/home/LocationHeader";
-import { EmptyLocationState } from "@/components/home/EmptyLocationState";
 import { useLocation } from "@/providers/LocationProvider";
-import { MapPin } from "lucide-react"; 
+import { MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function Home() {
   const { currentLocation, isLocationAvailable, setShowLocationPicker } = useLocation();
-  const [searchRadius, setSearchRadius] = useState(5);
-  
-  const handleExpandRadius = () => {
-    setSearchRadius(prev => prev + 5);
-  };
   
   return (
     <Layout>
@@ -30,13 +24,6 @@ export default function Home() {
         {currentLocation !== "All India" && (
           <LocationAvailabilityStatus className="mb-6" />
         )}
-        
-        {/* Main Content */}
-        {currentLocation !== "All India" && isLocationAvailable ? (
-          <div className="space-y-8">
-            <EmptyLocationState onExpandRadius={handleExpandRadius} />
-          </div>
-        ) : null}
         
         {/* Welcome Message for New Users */}
         {currentLocation === "All India" && (
