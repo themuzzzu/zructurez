@@ -13,6 +13,17 @@ export const formatPrice = (price: number): string => {
 };
 
 /**
+ * Format a number as an Indian currency price without the currency symbol
+ * @param price - The price to format
+ * @returns Formatted price string (1,000)
+ */
+export const formatPriceWithoutSymbol = (price: number): string => {
+  return new Intl.NumberFormat('en-IN', {
+    maximumFractionDigits: 0
+  }).format(price);
+};
+
+/**
  * Calculate the discount percentage between original and sale price
  * @param originalPrice - The original price
  * @param salePrice - The discounted price

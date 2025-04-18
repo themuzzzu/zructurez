@@ -25,7 +25,7 @@ export const EnhancedProductCard = ({
 }: EnhancedProductCardProps) => {
   const navigate = useNavigate();
   const [isAddingToCart, setIsAddingToCart] = useState(false);
-  const { isLiked, toggleLike } = useLike(product.id);
+  const { isLiked, toggleLike } = useLike();
   const [imageLoaded, setImageLoaded] = useState(false);
   
   const handleClick = () => {
@@ -36,7 +36,7 @@ export const EnhancedProductCard = ({
     e.stopPropagation();
     toggleLike(product.id);
     
-    if (!isLiked) {
+    if (!isLiked(product.id)) {
       toast.success("Added to wishlist");
     }
   };
