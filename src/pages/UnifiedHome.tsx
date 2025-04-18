@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -9,6 +8,7 @@ import { Spinner } from "@/components/common/Spinner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
+import { FlashDeals } from "@/components/marketplace/FlashDeals";
 
 const UnifiedHome = () => {
   const [products, setProducts] = useState([]);
@@ -66,6 +66,10 @@ const UnifiedHome = () => {
       </div>
 
       <div className="container max-w-7xl mx-auto px-4 py-8">
+        <div className="mb-8">
+          <FlashDeals />
+        </div>
+
         <Heading className="mb-6">Browse by Category</Heading>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-12">
           {["Electronics", "Fashion", "Home", "Beauty", "Sports", "Toys"].map((category) => (

@@ -25,7 +25,6 @@ export default function MarketplaceIndex() {
   React.useEffect(() => {
     const fetchPopularSearches = async () => {
       try {
-        // Simplified to avoid database errors if table doesn't exist
         setPopularSearches([
           { term: "electronics" },
           { term: "clothing" },
@@ -41,7 +40,6 @@ export default function MarketplaceIndex() {
 
     const fetchTrendingCategories = async () => {
       try {
-        // Simplified to avoid database errors if table doesn't exist
         setTrendingCategories(['clothing', 'electronics', 'home', 'beauty', 'sports']);
       } catch (err) {
         console.error('Error fetching trending categories:', err);
@@ -59,7 +57,6 @@ export default function MarketplaceIndex() {
     setSearchTerm(term);
     
     try {
-      // Simplified to avoid database errors if table doesn't exist
       setTimeout(() => {
         setSearchResults([]);
         setIsSearching(false);
@@ -73,7 +70,6 @@ export default function MarketplaceIndex() {
 
   const handleCategorySelect = (category) => {
     setSelectedCategory(category);
-    // Navigate to category page with this category pre-selected
     navigate(`/marketplace/category/${category}`);
   };
 
@@ -97,12 +93,12 @@ export default function MarketplaceIndex() {
         <BannerCarousel />
       </div>
 
-      {/* New Shop by Category Section */}
+      {/* Shop by Category Section */}
       <div className="mb-8">
         <ShopByCategory onCategorySelect={handleCategorySelect} />
       </div>
 
-      {/* Sponsored Products Section */}
+      {/* Sponsored Products moved below categories */}
       <div className="mb-8">
         <SponsoredProducts />
       </div>
@@ -110,11 +106,6 @@ export default function MarketplaceIndex() {
       {/* Recommended Products */}
       <div className="mb-8">
         <RecommendedProducts />
-      </div>
-      
-      {/* Personalized Recommendations */}
-      <div className="mb-8">
-        <PersonalizedRecommendations />
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -152,7 +143,6 @@ export default function MarketplaceIndex() {
           <TabsContent value="trending">
             <div className="space-y-8">
               <TrendingProducts />
-              {/* Changed second trending products to sponsored products */}
               <SponsoredProducts />
             </div>
           </TabsContent>
