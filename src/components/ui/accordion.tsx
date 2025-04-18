@@ -17,7 +17,7 @@ const AccordionItem = React.forwardRef<
     className={cn("border-b", className)}
     {...props}
   />
-)) as React.FC<React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Item>>
+))
 
 AccordionItem.displayName = "AccordionItem"
 
@@ -38,7 +38,7 @@ const AccordionTrigger = React.forwardRef<
       <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
     </AccordionPrimitive.Trigger>
   </AccordionPrimitive.Header>
-)) as React.FC<React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger>>
+))
 
 AccordionTrigger.displayName = AccordionPrimitive.Trigger.displayName
 
@@ -53,7 +53,7 @@ const AccordionContent = React.forwardRef<
   >
     <div className={cn("pb-4 pt-0", className)}>{children}</div>
   </AccordionPrimitive.Content>
-)) as React.FC<React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Content>>
+))
 
 AccordionContent.displayName = AccordionPrimitive.Content.displayName
 

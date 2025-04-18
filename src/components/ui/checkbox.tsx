@@ -22,7 +22,7 @@ const Checkbox = React.forwardRef<
       <Check className="h-4 w-4" />
     </CheckboxPrimitive.Indicator>
   </CheckboxPrimitive.Root>
-)) as React.FC<React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>>
+))
 
 Checkbox.displayName = CheckboxPrimitive.Root.displayName
 

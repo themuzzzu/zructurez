@@ -1,10 +1,7 @@
 
 declare global {
   namespace React {
-    type ElementType<P = any> = {
-      [K in keyof JSX.IntrinsicElements]: P extends JSX.IntrinsicElements[K] ? K : never
-    }[keyof JSX.IntrinsicElements] | React.ComponentType<P>;
-    
+    // Remove conflicting ElementType definition from here
     interface FunctionComponent<P = {}> {
       (props: P, context?: any): ReactElement<any, any> | null;
       displayName?: string;
