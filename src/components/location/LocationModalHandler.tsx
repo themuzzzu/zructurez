@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { SimplifiedLocationPicker } from "./SimplifiedLocationPicker";
 import { useLocation } from "@/providers/LocationProvider";
 import { useLanguage } from "@/contexts/LanguageContext";
-import "../styles/location-picker.css"; // Import the CSS file
+import "@/styles/location-picker.css"; // Fixed import path using alias
 
 export function LocationModalHandler() {
   const { showLocationPicker, setShowLocationPicker, isFirstVisit, resetFirstVisit } = useLocation();
