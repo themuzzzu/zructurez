@@ -1,6 +1,5 @@
 
 import { useNavigate } from "react-router-dom";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { 
   ShoppingBag, 
   Tv, 
@@ -50,36 +49,33 @@ export const MarketplaceCategoryScroller = () => {
   return (
     <div className="bg-white dark:bg-zinc-900 rounded-lg p-4 mb-6 shadow-sm">
       <h3 className="text-lg font-semibold mb-3">Shop Products</h3>
-      <ScrollArea className="w-full">
-        <div className="flex gap-2 pb-2">
-          {categories.map((category) => (
-            <motion.div
-              key={category.id}
-              onClick={() => handleCategoryClick(category.id)}
-              className="flex flex-col items-center justify-center min-w-[70px] p-2 bg-gray-50 dark:bg-zinc-800 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-zinc-700 transition-colors"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              transition={{ duration: 0.2 }}
-            >
-              {category.image ? (
-                <div className="w-6 h-6 rounded-full overflow-hidden mb-2">
-                  <LazyImage
-                    src={category.image}
-                    alt={category.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ) : (
-                <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-2">
-                  {category.icon}
-                </div>
-              )}
-              <span className="text-xs text-center line-clamp-1">{category.name}</span>
-            </motion.div>
-          ))}
-        </div>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
+        {categories.map((category) => (
+          <motion.div
+            key={category.id}
+            onClick={() => handleCategoryClick(category.id)}
+            className="flex flex-col items-center justify-center p-2 bg-gray-50 dark:bg-zinc-800 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-zinc-700 transition-colors"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+          >
+            {category.image ? (
+              <div className="w-6 h-6 rounded-full overflow-hidden mb-2">
+                <LazyImage
+                  src={category.image}
+                  alt={category.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ) : (
+              <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-2">
+                {category.icon}
+              </div>
+            )}
+            <span className="text-xs text-center line-clamp-1">{category.name}</span>
+          </motion.div>
+        ))}
+      </div>
     </div>
   );
 };

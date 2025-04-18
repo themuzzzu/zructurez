@@ -21,18 +21,10 @@
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 2px;
+  display: none;
 }
 
-.dark .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.3);
-}
-
-.dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+/* Ensure no horizontal scroll on main containers */
+.container {
+  overflow-x: hidden;
 }

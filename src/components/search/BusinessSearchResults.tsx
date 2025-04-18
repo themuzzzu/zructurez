@@ -13,7 +13,7 @@ interface BusinessSearchResultsProps {
 export function BusinessSearchResults({ results, isLoading, query }: BusinessSearchResultsProps) {
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="container mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {Array.from({ length: 6 }).map((_, i) => (
           <div key={i} className="animate-pulse">
             <div className="bg-gray-200 h-48 rounded-lg mb-2"></div>
@@ -30,7 +30,7 @@ export function BusinessSearchResults({ results, isLoading, query }: BusinessSea
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="container mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {results.map((result) => (
         <BusinessCard
           key={result.id}
@@ -39,11 +39,11 @@ export function BusinessSearchResults({ results, isLoading, query }: BusinessSea
           description={result.description}
           category={result.category || ''}
           image_url={result.imageUrl}
-          rating={4.5} // Default rating
-          reviews={10} // Default reviews count
-          location="Local Area" // Default location
-          contact="" // Default contact
-          hours="" // Default hours
+          rating={4.5}
+          reviews={10}
+          location="Local Area"
+          contact=""
+          hours=""
         />
       ))}
     </div>
