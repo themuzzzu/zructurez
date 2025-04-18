@@ -123,6 +123,21 @@ export default function UnifiedSearchPage() {
                   </div>
                 )}
 
+                {(activeTab === "all" || activeTab === "posts") && (
+                  <div>
+                    <h2 className="font-semibold mb-4">POSTS</h2>
+                    <div className="space-y-4">
+                      <div className="flex gap-4 p-4 hover:bg-muted/50 rounded-lg cursor-pointer">
+                        <Avatar className="h-12 w-12" />
+                        <div>
+                          <h3 className="font-medium">Neil Henderson</h3>
+                          <p className="text-sm">Looking for recommendations for a reliable plumbing service in the area.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {(activeTab === "all" || activeTab === "services") && (
                   <div>
                     <h2 className="font-semibold mb-4">SERVICES</h2>
@@ -141,7 +156,26 @@ export default function UnifiedSearchPage() {
                   </div>
                 )}
 
-                {/* Similar sections for posts and businesses */}
+                {(activeTab === "all" || activeTab === "businesses") && (
+                  <div>
+                    <h2 className="font-semibold mb-4">BUSINESSES</h2>
+                    <div className="space-y-4">
+                      <div className="flex gap-4 p-4 hover:bg-muted/50 rounded-lg cursor-pointer">
+                        <div className="h-16 w-16 bg-muted rounded-lg overflow-hidden">
+                          <img src="/plumbing-business.jpg" alt="" className="w-full h-full object-cover" />
+                        </div>
+                        <div>
+                          <h3 className="font-medium">Johnson Plumbing</h3>
+                          <p className="text-sm text-muted-foreground">Professional plumbing services with 20+ years of experience</p>
+                          <div className="mt-1 flex items-center text-sm">
+                            <span className="text-yellow-500">★★★★★</span>
+                            <span className="ml-1 text-muted-foreground">(124 reviews)</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </>
             ) : (
               <div className="text-center py-12">
