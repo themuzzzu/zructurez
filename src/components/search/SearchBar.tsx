@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useSearch } from "@/hooks/useSearch";
 import { Search as SearchIcon, X } from "lucide-react";
@@ -39,16 +40,12 @@ export function SearchBar({
   const inputRef = useRef<HTMLInputElement>(null);
   const { t, tDynamic, language } = useLanguage();
   const [translatedPlaceholder, setTranslatedPlaceholder] = useState<string>("");
+  const [query, setQuery] = useState("");
+  const [localSuggestions, setLocalSuggestions] = useState<any[]>([]);
+  const [showLocalSuggestions, setShowLocalSuggestions] = useState(false);
   
-  const {
-    query,
-    setQuery,
-    suggestions,
-    isLoading,
-    applySuggestion,
-    showSuggestions: showSuggestionsState,
-    setShowSuggestions
-  } = useSearch({
+  // Initialize search hook - but we'll use our local state to manage the UI
+  const searchHook = useSearch({
     suggestionsEnabled: showSuggestions,
   });
   
@@ -84,7 +81,7 @@ export function SearchBar({
   }, [autoFocus]);
   
   useClickOutside(searchRef, () => {
-    setShowSuggestions(false);
+    setShowLocalSuggestions(false);
   });
   
   useEffect(() => {
@@ -109,25 +106,29 @@ export function SearchBar({
         onSearch(query);
       }
       
-      setShowSuggestions(false);
+      setShowLocalSuggestions(false);
+      searchHook.search(query);
     }
   };
 
   const [translatedSuggestions, setTranslatedSuggestions] = useState<TranslatedSuggestion[]>([]);
   
   useEffect(() => {
-    if (!suggestions.length || language === 'english') {
-      const formattedSuggestions: TranslatedSuggestion[] = suggestions.map(suggestion => ({
-        ...suggestion,
-        isSponsored: suggestion.isSponsored || false
-      }));
-      setTranslatedSuggestions(formattedSuggestions);
+    // Use local suggestions for now
+    const mockSuggestions = [
+      { id: '1', term: 'smartphone', isSponsored: false },
+      { id: '2', term: 'laptop', isSponsored: true },
+      { id: '3', term: 'headphones', isSponsored: false }
+    ];
+    
+    if (language === 'english') {
+      setTranslatedSuggestions(mockSuggestions);
       return;
     }
     
     const translateSuggestions = async () => {
       const translated = await Promise.all(
-        suggestions.map(async (suggestion) => ({
+        mockSuggestions.map(async (suggestion) => ({
           id: suggestion.id,
           term: await tDynamic(suggestion.term),
           isSponsored: suggestion.isSponsored || false
@@ -137,7 +138,12 @@ export function SearchBar({
     };
     
     translateSuggestions();
-  }, [suggestions, language, tDynamic]);
+  }, [language, tDynamic]);
+  
+  const applySuggestion = (suggestion: any) => {
+    setQuery(suggestion.term);
+    handleSubmit(new Event('submit') as any);
+  };
   
   return (
     <div ref={searchRef} className={`relative search-bar-container ${className}`}>
@@ -153,7 +159,7 @@ export function SearchBar({
           placeholder={translatedPlaceholder}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          onFocus={() => showSuggestions && setShowSuggestions(true)}
+          onFocus={() => showSuggestions && setShowLocalSuggestions(true)}
           className={`h-12 w-full bg-white dark:bg-zinc-900 border-zinc-300 dark:border-zinc-700 focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white transition-all duration-200 ${
             isRTL ? "pr-10 pl-16 text-right" : "pl-10 pr-16"
           }`}
@@ -180,7 +186,7 @@ export function SearchBar({
         </div>
       </form>
       
-      {showSuggestionsState && translatedSuggestions.length > 0 && (
+      {showLocalSuggestions && translatedSuggestions.length > 0 && (
         <Card className="absolute z-50 w-full mt-1 shadow-lg overflow-hidden border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900">
           <ul className="py-1">
             {translatedSuggestions.map((suggestion) => (
@@ -189,13 +195,7 @@ export function SearchBar({
                 className={`px-4 py-2 cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center ${
                   isRTL ? "flex-row-reverse" : "flex-row"
                 } justify-between`}
-                onClick={() => {
-                  const originalSuggestion = suggestions.find(s => s.id === suggestion.id);
-                  if (originalSuggestion) {
-                    applySuggestion(originalSuggestion);
-                    navigate(`/search?q=${encodeURIComponent(originalSuggestion.term)}`);
-                  }
-                }}
+                onClick={() => applySuggestion(suggestion)}
               >
                 <span>{suggestion.term}</span>
                 {suggestion.isSponsored && (

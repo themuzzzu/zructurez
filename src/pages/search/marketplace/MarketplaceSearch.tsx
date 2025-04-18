@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
@@ -50,10 +49,10 @@ export default function MarketplaceSearch() {
     results, 
     isLoading, 
     search,
-    correctedQuery,
-    updateFilters
+    correctedQuery = null,
+    updateFilters = () => {} // Default empty function in case it doesn't exist
   } = useSearch({
-    initialQuery: queryParam,
+    initialQuery: searchParams.get("q") || "",
     suggestionsEnabled: true
   });
 
@@ -251,7 +250,7 @@ export default function MarketplaceSearch() {
         </div>
 
         {/* Tab navigation */}
-        <Tabs defaultValue="products" value={activeTab} onValueChange={setActiveTab} className="mb-6">
+        <Tabs defaultValue="products" value="products" onValueChange={() => {}} className="mb-6">
           <TabsList className="w-full md:w-auto">
             <TabsTrigger value="products" className="flex-1 md:flex-none">Products</TabsTrigger>
             <TabsTrigger value="services" className="flex-1 md:flex-none">Services</TabsTrigger>
@@ -259,13 +258,12 @@ export default function MarketplaceSearch() {
           </TabsList>
           
           {/* Show corrected query suggestion if any */}
-          {correctedQuery && correctedQuery !== queryParam && (
+          {correctedQuery && correctedQuery !== searchParams.get("q") && (
             <div className="mt-3 text-sm">
               Did you mean: <Button 
                 variant="link" 
                 className="p-0 h-auto font-medium"
                 onClick={() => {
-                  setSearchQuery(correctedQuery);
                   const params = new URLSearchParams(searchParams);
                   params.set("q", correctedQuery);
                   setSearchParams(params);

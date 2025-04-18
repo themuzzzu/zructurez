@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
@@ -12,6 +11,11 @@ import { useSearch } from "@/hooks/useSearch";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { LikeProvider } from "@/components/products/LikeContext";
 import { motion } from "framer-motion";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Slider } from "@/components/ui/slider";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 export default function MarketplaceSearch() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -29,6 +33,8 @@ export default function MarketplaceSearch() {
   const [gridLayout, setGridLayout] = useState<"grid1x1" | "grid2x2" | "grid4x4">(() => {
     return (localStorage.getItem("searchGridLayout") as any) || "grid4x4";
   });
+  const [showDiscounted, setShowDiscounted] = useState(false);
+  const [showBranded, setShowBranded] = useState(false);
 
   const { results, isLoading, search, relatedResults } = useSearch({
     initialQuery: query,
