@@ -3,7 +3,7 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { Home, ShoppingBag, Wrench, Briefcase, MoreHorizontal } from "lucide-react";
+import { Home, ShoppingBag, Wrench, Briefcase, MoreVertical } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { IconComponent } from "@/types/component";
 
@@ -45,10 +45,10 @@ export function MobileNav() {
       active: location.pathname.startsWith("/business"),
     },
     {
-      icon: MoreHorizontal,
+      icon: MoreVertical,
       label: t("more"),
       href: "/more",
-      active: location.pathname === "/more",
+      active: location.pathname === "/more" || location.pathname === "/maps",
     },
   ];
 

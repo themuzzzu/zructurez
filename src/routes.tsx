@@ -1,4 +1,3 @@
-
 import { createBrowserRouter, RouterProvider, RouteObject } from "react-router-dom";
 import Home from "./pages/Home";
 import Index from "./pages/Index";
@@ -16,6 +15,7 @@ import Wishlist from "./pages/Wishlist";
 import UnifiedHome from "./pages/UnifiedHome";
 import MapView from "./pages/MapView";
 import ComingSoonPage from "./pages/ComingSoonPage";
+import More from "./pages/More";
 import { RedirectHandler } from "@/components/RedirectHandler";
 import { Outlet } from "react-router-dom";
 import { ErrorView } from "@/components/ErrorView";
@@ -138,6 +138,11 @@ export const routes: RouteObject[] = [
             <LazyMapView />
           </Suspense>
         ),
+        errorElement: <ErrorView />,
+      },
+      {
+        path: "/more",
+        element: <More />,
         errorElement: <ErrorView />,
       },
       {
