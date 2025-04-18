@@ -19,5 +19,7 @@ declare module 'react' {
 declare namespace JSX {
   interface IntrinsicAttributes {
     // This ensures React components accept children properly
+    children?: any;
+    key?: any;
   }
 }

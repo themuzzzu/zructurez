@@ -37,6 +37,7 @@ declare module '@/components/ui/select' {
   interface SelectContentProps {
     children?: ReactNode;
     className?: string;
+    position?: "item" | "popper";
   }
   
   interface SelectItemProps {

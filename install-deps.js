@@ -11,7 +11,7 @@ try {
   if (fs.existsSync(path.join(__dirname, 'package.json'))) {
     // Install Vite and its React plugin
     console.log('Installing Vite and React plugin...');
-    execSync('npm install vite@latest @vitejs/plugin-react-swc@latest --save-dev', { stdio: 'inherit' });
+    execSync('npm install --save-dev vite@latest @vitejs/plugin-react-swc@latest', { stdio: 'inherit' });
     
     // Make sure we have React and React DOM
     console.log('Installing React dependencies...');
