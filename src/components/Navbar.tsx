@@ -1,4 +1,3 @@
-
 import { Menu } from "lucide-react";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
@@ -73,9 +72,7 @@ export const Navbar = () => {
             </h1>
           </div>
 
-          {isHomePage && (
-            <SearchBox className="flex-1 max-w-xl mx-4 hidden md:block" />
-          )}
+          {/* Removed SearchBox from here */}
 
           <div className="flex items-center gap-2">
             {/* Home page specific buttons (location and maps) - visible on mobile */}

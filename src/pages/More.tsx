@@ -1,20 +1,25 @@
-
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Map, LogOut, User, Settings, Info, Send, Calendar, MessagesSquare, Briefcase } from "lucide-react";
+import { LogOut, User, Settings, Info, Send, Calendar, MessagesSquare, Briefcase, SunMoon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/providers/AuthProvider";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useTheme } from "@/components/ThemeProvider";
 
 export default function More() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { t } = useLanguage();
+  const { theme, setTheme } = useTheme();
 
   const handleLogout = async () => {
     await signOut();
     navigate("/");
+  };
+
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark");
   };
 
   return (
@@ -41,6 +46,15 @@ export default function More() {
           >
             <Map className="mr-3 h-5 w-5" />
             {t("maps")}
+          </Button>
+
+          <Button 
+            variant="ghost" 
+            className="w-full justify-start text-base" 
+            onClick={toggleTheme}
+          >
+            <SunMoon className="mr-3 h-5 w-5" />
+            {theme === "dark" ? t("light_mode") : t("dark_mode")}
           </Button>
 
           <Separator />
