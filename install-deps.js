@@ -9,7 +9,7 @@ console.log('Installing missing dependencies...');
 try {
   // Check if package.json exists
   if (fs.existsSync(path.join(__dirname, 'package.json'))) {
-    // Check if vite is installed
+    // Install Vite
     try {
       require.resolve('vite');
       console.log('Vite is already installed.');
@@ -28,6 +28,20 @@ try {
       execSync('npm install @vitejs/plugin-react-swc --save-dev', { stdio: 'inherit' });
       console.log('@vitejs/plugin-react-swc installed successfully.');
     }
+
+    // Ensure we have React and React DOM
+    try {
+      require.resolve('react');
+      console.log('React is already installed.');
+    } catch (e) {
+      console.log('Installing React...');
+      execSync('npm install react react-dom --save', { stdio: 'inherit' });
+      console.log('React installed successfully.');
+    }
+
+    // Run npm install to ensure all dependencies are properly installed
+    console.log('Running npm install to ensure all dependencies are up to date...');
+    execSync('npm install', { stdio: 'inherit' });
   } else {
     console.error('package.json not found');
     process.exit(1);

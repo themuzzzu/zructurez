@@ -9,10 +9,14 @@ const labelVariants = cva(
   "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 )
 
+interface LabelProps extends React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root>,
+  VariantProps<typeof labelVariants> {
+  children?: React.ReactNode;
+}
+
 const Label = React.forwardRef<
   React.ElementRef<typeof LabelPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root> &
-    VariantProps<typeof labelVariants>
+  LabelProps
 >(({ className, children, ...props }, ref) => (
   <LabelPrimitive.Root
     ref={ref}
