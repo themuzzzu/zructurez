@@ -6,15 +6,12 @@ export type IconComponent = LucideIcon | ComponentType<{ className?: string }>;
 
 // Type definitions for React components
 declare module 'react' {
-  // Extend ElementType to handle ForwardRefExoticComponent
-  type ElementType<P = any> =
-    | keyof JSX.IntrinsicElements
-    | FunctionComponent<P>
-    | ComponentClass<P>
-    | ForwardRefExoticComponent<P>
-    | (new (props: P) => Component<P, any>);
+  // Make ElementType accept ForwardRefExoticComponent
+  interface ElementType<P = any> {
+    // This is an interface extension to make TypeScript recognize ForwardRefExoticComponent as an ElementType
+  }
 
-  // Make ComponentProps handle ForwardRefExoticComponent
+  // Extend ComponentProps to handle ForwardRefExoticComponent properly
   type ComponentProps<T extends ElementType> =
     T extends ForwardRefExoticComponent<infer P>
       ? P
@@ -25,9 +22,11 @@ declare module 'react' {
       : never;
 }
 
-// Empty interface to allow module augmentation
-declare namespace JSX {
-  interface IntrinsicAttributes {
-    // This empty interface is needed to prevent type errors when using ForwardRefExoticComponent
+// Add proper JSX IntrinsicAttributes support
+declare global {
+  namespace JSX {
+    interface IntrinsicAttributes {
+      // Empty interface extension to handle ForwardRefExoticComponent
+    }
   }
 }
