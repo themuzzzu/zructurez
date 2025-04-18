@@ -1,81 +1,23 @@
 
-import { ReactNode, useEffect, useState } from "react";
-import { Navbar } from "@/components/Navbar";
-import { Sidebar } from "@/components/Sidebar";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { useTheme } from "@/components/ThemeProvider";
-import { MobileNav } from "@/components/navbar/MobileNav";
-import { OfflineIndicator } from "./OfflineIndicator";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { ReactNode } from "react";
+import { Navbar } from "../navbar/Navbar";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { SuspenseBoundary } from "./SuspenseBoundary";
 
 interface LayoutProps {
   children: ReactNode;
-  hideSidebar?: boolean;
+  hideNav?: boolean;
 }
 
-export const Layout = ({ children, hideSidebar = false }: LayoutProps) => {
-  // Sidebar width values for desktop
-  const [sidebarWidth, setSidebarWidth] = useState(() => {
-    return localStorage.getItem("sidebarCollapsed") === "true" ? 45 : 180;
-  });
-  
-  const isMobile = useMediaQuery("(max-width: 768px)");
-  const { theme } = useTheme();
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Listen for sidebar state changes
-  useEffect(() => {
-    const handleSidebarChange = () => {
-      setSidebarWidth(localStorage.getItem("sidebarCollapsed") === "true" ? 45 : 180);
-    };
-
-    window.addEventListener('sidebarStateChanged', handleSidebarChange);
-    
-    // Set loading to false after a short delay to prevent animation issues
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 50);
-    
-    return () => {
-      window.removeEventListener('sidebarStateChanged', handleSidebarChange);
-      clearTimeout(timer);
-    };
-  }, []);
-
+export function Layout({ children, hideNav = false }: LayoutProps) {
   return (
-    <div className={`min-h-screen bg-background ${isLoading ? 'overflow-hidden' : ''}`}>
-      <ErrorBoundary>
-        <Navbar />
-        <div className="flex flex-1 w-full h-[calc(100vh-4rem)] pt-16"> 
-          {!hideSidebar && !isMobile && (
-            <div 
-              style={{ width: sidebarWidth + 'px', minWidth: sidebarWidth + 'px' }} 
-              className="transition-all duration-300 fixed h-[calc(100vh-64px)] overflow-y-auto overflow-x-hidden scrollbar-hide z-20"
-            >
-              <Sidebar />
-            </div>
-          )}
-          <main 
-            className={`flex-1 overflow-y-auto overflow-x-hidden transition-all duration-200 w-full ${isLoading ? 'opacity-0' : 'opacity-100'}`}
-            style={{ 
-              marginLeft: hideSidebar || isMobile ? 0 : sidebarWidth + 'px',
-              paddingBottom: isMobile ? '5rem' : '1rem', 
-              height: 'calc(100vh - 64px)',
-              padding: isMobile ? '0.5rem 0.5rem 5rem 0.5rem' : '0.5rem 0.5rem 1rem 0.5rem',
-            }}
-          >
-            <ErrorBoundary>
-              {children}
-            </ErrorBoundary>
-          </main>
-        </div>
-        
-        {/* Mobile Navigation - will render on ALL mobile device views */}
-        {isMobile && <MobileNav />}
-        
-        {/* Offline indicator */}
-        <OfflineIndicator />
-      </ErrorBoundary>
+    <div className="min-h-screen bg-background">
+      {!hideNav && <Navbar />}
+      <main className="min-h-screen pt-16">
+        <SuspenseBoundary>
+          {children}
+        </SuspenseBoundary>
+      </main>
     </div>
   );
 }

@@ -1,11 +1,9 @@
-
 import { useState, useEffect } from "react";
 import { 
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
   DialogFooter
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -14,6 +12,7 @@ import { MapPin, Compass, Locate, Search, X } from "lucide-react";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { isZructuresAvailable, handleLocationUpdate } from "@/utils/locationUtils";
 import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface LocationPickerModalProps {
   open: boolean;
@@ -34,14 +33,12 @@ export function LocationPickerModal({
   const { requestGeolocation, loading, position, address } = useGeolocation();
   const [availabilityChecked, setAvailabilityChecked] = useState(!firstVisit);
 
-  // Sample locations based on the image
   const locations = [
     "Tadipatri",
     "Anantapur",
     "Dharmavaram",
     "Kadapa",
     "Kurnool",
-    // Add more from image 1
     "Delhi",
     "Mumbai",
     "Bengaluru",
@@ -61,7 +58,6 @@ export function LocationPickerModal({
     }
   }, [address]);
   
-  // Filter locations when search query changes
   useEffect(() => {
     if (!searchQuery.trim()) {
       setFilteredLocations(locations);
@@ -73,7 +69,6 @@ export function LocationPickerModal({
     }
   }, [searchQuery]);
   
-  // Update availability status when location changes
   useEffect(() => {
     if (selectedLocation !== "All India") {
       setAvailabilityChecked(true);
@@ -88,7 +83,6 @@ export function LocationPickerModal({
 
   const handleConfirmLocation = () => {
     if (selectedLocation === "All India" && firstVisit) {
-      // Force user to select a specific location on first visit
       return;
     }
     
@@ -105,19 +99,18 @@ export function LocationPickerModal({
 
   return (
     <Dialog open={open} onOpenChange={firstVisit ? () => {} : onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] p-6 bg-zinc-900 text-white border-zinc-800">
+      <DialogContent className="sm:max-w-[500px] p-4 sm:p-6 fixed w-[95%] max-h-[90vh] overflow-auto">
         <DialogHeader className="mb-4">
-          <DialogTitle className="flex items-center gap-2 text-2xl font-semibold text-white">
-            <MapPin className="h-7 w-7" />
+          <DialogTitle className="flex items-center gap-2 text-xl sm:text-2xl font-semibold">
+            <MapPin className="h-6 w-6" />
             Choose your location
           </DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-6">
-          {/* Detect Location Button */}
+        <div className="space-y-4">
           <Button 
             variant="outline" 
-            className="w-full justify-start gap-2 bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-white"
+            className="w-full justify-start gap-2"
             onClick={handleDetectLocation}
             disabled={loading}
             size="lg"
@@ -126,59 +119,58 @@ export function LocationPickerModal({
             {loading || isDetecting ? "Detecting Your Location..." : "Detect My Location"}
           </Button>
           
-          {/* Search Input */}
           <div className="relative">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-zinc-500" />
+            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search city or town"
-              className="pl-9 bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500"
+              className="pl-9"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
           
-          {/* Location List */}
-          <div className="space-y-1">
-            <h3 className="text-lg font-medium text-white mb-2">Or select a city or town</h3>
-            <div className="space-y-3 max-h-64 overflow-y-auto pr-2">
-              {filteredLocations.map((location) => {
-                const isLocationAvailable = isZructuresAvailable(location);
-                
-                return (
-                  <div key={location} className="space-y-1">
-                    <Button 
-                      variant="ghost" 
-                      className="w-full justify-start text-left text-white hover:bg-zinc-800 h-auto py-2"
-                      onClick={() => handleLocationSelect(location)}
-                    >
-                      <MapPin className="h-4 w-4 mr-2 text-zinc-400" />
-                      <span>{location}</span>
-                    </Button>
-                    
-                    {/* Availability Message - Show only for the selected location */}
-                    {selectedLocation === location && !isLocationAvailable && (
-                      <div className="rounded-md p-3 bg-amber-900/30 border border-amber-800/40 text-amber-300 ml-6">
-                        <div className="flex gap-2 items-start">
-                          <span className="text-amber-300 mt-0.5">⚠</span>
-                          <div>
-                            <p className="font-medium">Zructures is not yet available in {location}.</p>
-                            <p className="text-sm text-amber-400/80">We're expanding rapidly! You'll still be able to browse but some features might be limited.</p>
+          <ScrollArea className="h-[40vh] sm:h-[50vh]">
+            <div className="space-y-1 pr-4">
+              <h3 className="text-lg font-medium mb-2">Or select a city or town</h3>
+              <div className="space-y-2">
+                {filteredLocations.map((location) => {
+                  const isLocationAvailable = isZructuresAvailable(location);
+                  
+                  return (
+                    <div key={location} className="space-y-1">
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start text-left h-auto py-2"
+                        onClick={() => handleLocationSelect(location)}
+                      >
+                        <MapPin className="h-4 w-4 mr-2 shrink-0 text-muted-foreground" />
+                        <span className="truncate">{location}</span>
+                      </Button>
+                      
+                      {selectedLocation === location && !isLocationAvailable && (
+                        <div className="rounded-md p-3 bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 ml-6">
+                          <div className="flex gap-2 items-start">
+                            <span className="text-amber-500 mt-0.5">⚠</span>
+                            <div>
+                              <p className="font-medium">Zructures is not yet available in {location}</p>
+                              <p className="text-sm opacity-80">We're expanding rapidly! You'll still be able to browse but some features might be limited.</p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          </ScrollArea>
         </div>
 
-        <DialogFooter className="mt-6">
+        <DialogFooter className="mt-6 flex-col sm:flex-row gap-2">
           <Button 
             variant="default" 
             onClick={handleConfirmLocation} 
-            className="w-full sm:w-auto bg-primary hover:bg-primary/90"
+            className="w-full sm:w-auto"
             disabled={selectedLocation === "All India" && firstVisit}
           >
             Confirm Location
