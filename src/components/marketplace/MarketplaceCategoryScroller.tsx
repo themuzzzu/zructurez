@@ -1,30 +1,53 @@
 
 import { useNavigate } from "react-router-dom";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { 
-  Shirt, 
-  Smartphone, 
-  ShoppingBag, 
-  Laptop, 
-  Headphones, 
-  Tv, 
-  Watch, 
-  Camera 
-} from "lucide-react";
+import { ImageFallback } from "@/components/ui/image-fallback";
 import { motion } from "framer-motion";
 
 export const MarketplaceCategoryScroller = () => {
   const navigate = useNavigate();
   
   const categories = [
-    { id: "electronics", name: "Electronics", icon: <Smartphone className="h-4 w-4 text-blue-400" /> },
-    { id: "fashion", name: "Fashion", icon: <Shirt className="h-4 w-4 text-pink-400" /> },
-    { id: "mobile", name: "Mobile Phones", icon: <Smartphone className="h-4 w-4 text-indigo-400" /> },
-    { id: "laptops", name: "Laptops", icon: <Laptop className="h-4 w-4 text-violet-400" /> },
-    { id: "headphones", name: "Headphones", icon: <Headphones className="h-4 w-4 text-cyan-400" /> },
-    { id: "cameras", name: "Cameras", icon: <Camera className="h-4 w-4 text-emerald-400" /> },
-    { id: "tv", name: "TV & Audio", icon: <Tv className="h-4 w-4 text-rose-400" /> },
-    { id: "wearables", name: "Wearables", icon: <Watch className="h-4 w-4 text-amber-400" /> },
+    { 
+      id: "electronics", 
+      name: "Electronics", 
+      image: "/lovable-uploads/d01039d6-6bee-4097-9c23-8981fd856e92.png",
+    },
+    { 
+      id: "fashion", 
+      name: "Fashion", 
+      image: "/lovable-uploads/db350618-6a6d-4b77-9761-78b2c5a9d56e.png",
+    },
+    { 
+      id: "furniture", 
+      name: "Furniture", 
+      image: "/lovable-uploads/46a5e835-fcad-4044-8ca3-a3b617d56afd.png",
+    },
+    { 
+      id: "beauty", 
+      name: "Beauty", 
+      image: "/lovable-uploads/bbbc13ee-6ebf-4bb8-b472-95ef720eed0c.png",
+    },
+    { 
+      id: "toys", 
+      name: "Toys & Kids", 
+      image: "/lovable-uploads/232b303d-8292-4874-957a-e46de1d74c41.png",
+    },
+    { 
+      id: "sports", 
+      name: "Sports", 
+      image: "/lovable-uploads/0c11e8d4-b796-449e-a507-165623e30fc7.png",
+    },
+    { 
+      id: "health", 
+      name: "Health", 
+      image: "/lovable-uploads/e31366a1-6fb7-4cc0-8fb3-de640eed4826.png",
+    },
+    { 
+      id: "gifts", 
+      name: "Gifts", 
+      image: "/lovable-uploads/1f522bd7-0eef-456b-bf41-542ae4239826.png",
+    }
   ];
   
   const handleCategoryClick = (categoryId: string) => {
@@ -45,8 +68,13 @@ export const MarketplaceCategoryScroller = () => {
               whileTap={{ scale: 0.97 }}
               transition={{ duration: 0.15 }}
             >
-              <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mb-1">
-                {category.icon}
+              <div className="w-8 h-8 rounded-full overflow-hidden mb-1">
+                <ImageFallback
+                  src={category.image}
+                  alt={category.name}
+                  className="w-full h-full object-cover"
+                  fallbackSrc="/placeholders/image-placeholder.jpg"
+                />
               </div>
               <span className="text-xs text-center text-white line-clamp-1">{category.name}</span>
             </motion.div>
