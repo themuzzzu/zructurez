@@ -1,7 +1,8 @@
+
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { LogOut, User, Settings, Info, Send, Calendar, MessagesSquare, Briefcase, SunMoon } from "lucide-react";
+import { LogOut, User, Settings, Info, Send, Calendar, MessagesSquare, Briefcase, SunMoon, Map as MapIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/providers/AuthProvider";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -44,7 +45,7 @@ export default function More() {
             className="w-full justify-start text-base" 
             onClick={() => navigate("/maps")}
           >
-            <Map className="mr-3 h-5 w-5" />
+            <MapIcon className="mr-3 h-5 w-5" />
             {t("maps")}
           </Button>
 
