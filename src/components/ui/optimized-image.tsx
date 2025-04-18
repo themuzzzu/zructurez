@@ -5,6 +5,7 @@ import { LoadingSpinner } from "./loading-spinner";
 
 interface OptimizedImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   fallback?: string;
+  priority?: boolean; // Added this property to fix the TypeScript error
 }
 
 export function OptimizedImage({ 
@@ -12,6 +13,7 @@ export function OptimizedImage({
   alt, 
   className, 
   fallback = "/placeholder.png",
+  priority = false, // Added default value
   ...props 
 }: OptimizedImageProps) {
   const [isLoading, setIsLoading] = useState(true);

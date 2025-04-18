@@ -79,8 +79,7 @@ export const ProductImageCarousel = ({
           src={images[currentIndex] || fallbackImage}
           alt={`Product image ${currentIndex + 1}`}
           className="h-full w-full transition-opacity duration-300"
-          priority={currentIndex === 0} // Priority load first image only
-          aspectRatio="square"
+          priority={currentIndex === 0} // This is now properly typed
         />
       </div>
 
