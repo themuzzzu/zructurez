@@ -17,6 +17,7 @@ declare module '@/components/ui/*' {
   interface BaseComponentProps {
     children?: React.ReactNode;
     className?: string;
+    asChild?: boolean;
   }
 }
 

@@ -2,50 +2,50 @@
 import { ReactNode } from 'react';
 
 declare module '@/components/ui/dialog' {
-  interface DialogTitleProps {
+  export interface DialogTitleProps {
     children?: ReactNode;
     className?: string;
     asChild?: boolean;
   }
   
-  interface DialogDescriptionProps {
+  export interface DialogDescriptionProps {
     children?: ReactNode;
     className?: string;
     asChild?: boolean;
   }
   
-  interface DialogContentProps {
+  export interface DialogContentProps {
     children?: ReactNode;
     className?: string;
     asChild?: boolean;
   }
   
-  interface DialogHeaderProps {
+  export interface DialogHeaderProps {
     children?: ReactNode;
     className?: string;
   }
   
-  interface DialogFooterProps {
+  export interface DialogFooterProps {
     children?: ReactNode;
     className?: string;
   }
 }
 
 declare module '@/components/ui/select' {
-  interface SelectTriggerProps {
+  export interface SelectTriggerProps {
     children?: ReactNode;
     className?: string;
     asChild?: boolean;
   }
   
-  interface SelectContentProps {
+  export interface SelectContentProps {
     children?: ReactNode;
     className?: string;
     position?: "item" | "popper";
     asChild?: boolean;
   }
   
-  interface SelectItemProps {
+  export interface SelectItemProps {
     children?: ReactNode;
     value: string;
     className?: string;
@@ -53,14 +53,14 @@ declare module '@/components/ui/select' {
     asChild?: boolean;
   }
   
-  interface SelectValueProps {
+  export interface SelectValueProps {
     children?: ReactNode;
     placeholder?: string;
   }
 }
 
 declare module '@/components/ui/scroll-area' {
-  interface ScrollAreaProps {
+  export interface ScrollAreaProps {
     children?: ReactNode;
     className?: string;
     asChild?: boolean;
@@ -68,7 +68,7 @@ declare module '@/components/ui/scroll-area' {
 }
 
 declare module '@/components/ui/label' {
-  interface LabelProps {
+  export interface LabelProps {
     children?: ReactNode;
     htmlFor?: string;
     className?: string;
