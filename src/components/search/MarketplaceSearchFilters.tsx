@@ -1,319 +1,295 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { SearchFilters } from "@/types/search";
-import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { ChevronDown, ChevronUp } from "lucide-react";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { 
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Slider } from "@/components/ui/slider";
+import { motion } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
 
 interface MarketplaceSearchFiltersProps {
-  onChange: (newFilters: Partial<SearchFilters>) => void;
+  filters?: Partial<SearchFilters>;
+  onChange: (filters: Partial<SearchFilters>) => void;
   onReset: () => void;
+  className?: string;
 }
 
+const productCategories = [
+  { id: "electronics", name: "Electronics" },
+  { id: "fashion", name: "Fashion" },
+  { id: "home", name: "Home & Kitchen" },
+  { id: "beauty", name: "Beauty & Personal Care" },
+  { id: "books", name: "Books & Stationery" },
+  { id: "toys", name: "Toys & Games" },
+  { id: "sports", name: "Sports & Outdoors" },
+  { id: "grocery", name: "Grocery & Gourmet" }
+];
+
+const sortOptions = [
+  { id: "relevance", name: "Relevance" },
+  { id: "price-asc", name: "Price: Low to High" },
+  { id: "price-desc", name: "Price: High to Low" },
+  { id: "newest", name: "Newest First" },
+  { id: "popularity", name: "Popularity" },
+];
+
 export function MarketplaceSearchFilters({ 
-  onChange,
-  onReset
+  filters = {}, 
+  onChange, 
+  onReset,
+  className
 }: MarketplaceSearchFiltersProps) {
-  // State for local filters before applying
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState<"relevance" | "price-asc" | "price-desc" | "newest" | "popularity">("relevance");
-  const [includeSponsored, setIncludeSponsored] = useState(true);
-  const [showDiscountedOnly, setShowDiscountedOnly] = useState(false);
-  const [ratings, setRatings] = useState<number[]>([]);
-  const [openSections, setOpenSections] = useState({
-    sort: true,
-    price: true,
-    categories: true,
-    ratings: false,
-    other: false
-  });
+  // Local filter state
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(filters.categories || []);
+  const [priceRange, setPriceRange] = useState<[number, number]>([
+    filters.priceMin || 0, 
+    filters.priceMax || 10000
+  ]);
+  const [sortBy, setSortBy] = useState<string>(filters.sortBy || "relevance");
+  const [discountedOnly, setDiscountedOnly] = useState<boolean>(false);
+  const [ratingFilter, setRatingFilter] = useState<number | null>(null);
+  const [availabilityFilter, setAvailabilityFilter] = useState<"all" | "in-stock">("all");
+  const [openAccordions, setOpenAccordions] = useState<string[]>(["category", "price", "sort"]);
   
-  // Toggle section visibility
-  const toggleSection = (section: keyof typeof openSections) => {
-    setOpenSections(prev => ({
-      ...prev,
-      [section]: !prev[section]
-    }));
-  };
+  // Update local state when props change
+  useEffect(() => {
+    setSelectedCategories(filters.categories || []);
+    setPriceRange([filters.priceMin || 0, filters.priceMax || 10000]);
+    setSortBy(filters.sortBy || "relevance");
+  }, [filters]);
   
-  // Apply all filters at once
-  const applyFilters = () => {
-    onChange({
-      priceMin: priceRange[0],
-      priceMax: priceRange[1],
-      categories: selectedCategories.length > 0 ? selectedCategories : undefined,
-      sortBy,
-      includeSponsored
+  // Handle category selection
+  const toggleCategory = (categoryId: string) => {
+    setSelectedCategories(prev => {
+      if (prev.includes(categoryId)) {
+        return prev.filter(id => id !== categoryId);
+      } else {
+        return [...prev, categoryId];
+      }
     });
   };
   
-  // Reset all local filter states
-  const handleReset = () => {
-    setPriceRange([0, 10000]);
+  // Handle rating filter selection
+  const handleRatingChange = (rating: number) => {
+    setRatingFilter(ratingFilter === rating ? null : rating);
+  };
+  
+  // Handle apply filters
+  const handleApplyFilters = () => {
+    const newFilters: Partial<SearchFilters> = {
+      categories: selectedCategories.length > 0 ? selectedCategories : undefined,
+      priceMin: priceRange[0],
+      priceMax: priceRange[1],
+      sortBy: sortBy as SearchFilters["sortBy"],
+    };
+    
+    onChange(newFilters);
+  };
+  
+  // Handle reset filters
+  const handleResetFilters = () => {
     setSelectedCategories([]);
+    setPriceRange([0, 10000]);
     setSortBy("relevance");
-    setIncludeSponsored(true);
-    setShowDiscountedOnly(false);
-    setRatings([]);
+    setDiscountedOnly(false);
+    setRatingFilter(null);
+    setAvailabilityFilter("all");
     onReset();
   };
   
-  // Handle category selection
-  const toggleCategory = (category: string) => {
-    setSelectedCategories(prev => 
-      prev.includes(category) 
-        ? prev.filter(c => c !== category) 
-        : [...prev, category]
-    );
-  };
-  
-  // Handle rating filter
-  const toggleRating = (rating: number) => {
-    setRatings(prev => 
-      prev.includes(rating) 
-        ? prev.filter(r => r !== rating) 
-        : [...prev, rating]
-    );
-  };
-  
-  // Available categories
-  const categories = [
-    { id: 'electronics', label: 'Electronics & Gadgets' },
-    { id: 'clothing', label: 'Clothing & Fashion' },
-    { id: 'home', label: 'Home & Kitchen' },
-    { id: 'beauty', label: 'Beauty & Personal Care' },
-    { id: 'sports', label: 'Sports & Fitness' },
-    { id: 'toys', label: 'Toys & Games' },
-    { id: 'books', label: 'Books & Media' },
-    { id: 'automotive', label: 'Automotive' }
-  ];
-  
   return (
-    <div className="space-y-6">
-      {/* Sort By Section */}
-      <Collapsible open={openSections.sort} onOpenChange={() => toggleSection("sort")}>
-        <CollapsibleTrigger className="flex w-full items-center justify-between font-medium text-base py-1">
-          <span>Sort By</span>
-          {openSections.sort ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-        </CollapsibleTrigger>
-        <CollapsibleContent className="pt-2">
-          <RadioGroup 
-            value={sortBy} 
-            onValueChange={(value: "relevance" | "price-asc" | "price-desc" | "newest" | "popularity") => {
-              setSortBy(value);
-              onChange({ sortBy: value });
-            }}
-            className="space-y-1.5"
-          >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="relevance" id="sort-relevance" />
-              <Label htmlFor="sort-relevance" className="text-sm cursor-pointer">Relevance</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="popularity" id="sort-popularity" />
-              <Label htmlFor="sort-popularity" className="text-sm cursor-pointer">Popularity</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="price-asc" id="sort-price-asc" />
-              <Label htmlFor="sort-price-asc" className="text-sm cursor-pointer">Price: Low to High</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="price-desc" id="sort-price-desc" />
-              <Label htmlFor="sort-price-desc" className="text-sm cursor-pointer">Price: High to Low</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="newest" id="sort-newest" />
-              <Label htmlFor="sort-newest" className="text-sm cursor-pointer">Newest First</Label>
-            </div>
-          </RadioGroup>
-        </CollapsibleContent>
-      </Collapsible>
-      
-      <Separator />
-      
-      {/* Price Range Section */}
-      <Collapsible open={openSections.price} onOpenChange={() => toggleSection("price")}>
-        <CollapsibleTrigger className="flex w-full items-center justify-between font-medium text-base py-1">
-          <span>Price Range</span>
-          {openSections.price ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-        </CollapsibleTrigger>
-        <CollapsibleContent className="pt-3">
-          <div className="space-y-4">
-            <Slider
-              min={0}
-              max={10000}
-              step={100}
-              value={priceRange}
-              onValueChange={(value) => setPriceRange(value as [number, number])}
-              className="mb-6"
-            />
-            <div className="flex justify-between text-sm">
-              <span>₹{priceRange[0].toLocaleString()}</span>
-              <span>₹{priceRange[1].toLocaleString()}</span>
-            </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => onChange({ priceMin: priceRange[0], priceMax: priceRange[1] })}
-              className="w-full"
-            >
-              Apply Price
-            </Button>
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
-      
-      <Separator />
-      
-      {/* Categories Section */}
-      <Collapsible open={openSections.categories} onOpenChange={() => toggleSection("categories")}>
-        <CollapsibleTrigger className="flex w-full items-center justify-between font-medium text-base py-1">
-          <span>Categories</span>
-          {openSections.categories ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-        </CollapsibleTrigger>
-        <CollapsibleContent className="pt-3">
-          <div className="space-y-1.5">
-            {categories.map(category => (
-              <div key={category.id} className="flex items-center space-x-2">
-                <Checkbox
-                  id={`category-${category.id}`}
-                  checked={selectedCategories.includes(category.id)}
-                  onCheckedChange={() => {
-                    toggleCategory(category.id);
-                    onChange({ 
-                      categories: selectedCategories.includes(category.id) 
-                        ? selectedCategories.filter(c => c !== category.id) 
-                        : [...selectedCategories, category.id]
-                    });
-                  }}
-                />
-                <Label 
-                  htmlFor={`category-${category.id}`}
-                  className="text-sm cursor-pointer leading-tight"
-                >
-                  {category.label}
-                </Label>
-              </div>
-            ))}
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
-      
-      <Separator />
-      
-      {/* Ratings Section */}
-      <Collapsible open={openSections.ratings} onOpenChange={() => toggleSection("ratings")}>
-        <CollapsibleTrigger className="flex w-full items-center justify-between font-medium text-base py-1">
-          <span>Ratings</span>
-          {openSections.ratings ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-        </CollapsibleTrigger>
-        <CollapsibleContent className="pt-3">
-          <div className="space-y-2">
-            {[4, 3, 2, 1].map(rating => (
-              <div key={rating} className="flex items-center space-x-2">
-                <Checkbox
-                  id={`rating-${rating}`}
-                  checked={ratings.includes(rating)}
-                  onCheckedChange={() => toggleRating(rating)}
-                />
-                <Label 
-                  htmlFor={`rating-${rating}`}
-                  className="text-sm cursor-pointer flex items-center"
-                >
-                  <div className="flex">
-                    {Array.from({ length: rating }).map((_, i) => (
-                      <Star key={i} fill={true} />
-                    ))}
-                    {Array.from({ length: 5 - rating }).map((_, i) => (
-                      <Star key={i + rating} fill={false} />
-                    ))}
-                  </div>
-                  <span className="ml-1">&amp; Above</span>
-                </Label>
-              </div>
-            ))}
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
-      
-      <Separator />
-      
-      {/* Other Filters Section */}
-      <Collapsible open={openSections.other} onOpenChange={() => toggleSection("other")}>
-        <CollapsibleTrigger className="flex w-full items-center justify-between font-medium text-base py-1">
-          <span>Other Filters</span>
-          {openSections.other ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-        </CollapsibleTrigger>
-        <CollapsibleContent className="pt-3">
-          <div className="space-y-3">
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="show-discounted"
-                checked={showDiscountedOnly}
-                onCheckedChange={(checked) => setShowDiscountedOnly(!!checked)}
-              />
-              <Label htmlFor="show-discounted" className="text-sm cursor-pointer">Discounted Items Only</Label>
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="include-sponsored"
-                checked={includeSponsored}
-                onCheckedChange={(checked) => {
-                  setIncludeSponsored(!!checked);
-                  onChange({ includeSponsored: !!checked });
-                }}
-              />
-              <Label htmlFor="include-sponsored" className="text-sm cursor-pointer">Include Sponsored Results</Label>
-            </div>
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
-      
-      {/* Action Buttons */}
-      <div className="flex space-x-2 pt-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleReset}
-          className="flex-1"
+    <div className={className}>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold">Filters</h3>
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={handleResetFilters}
         >
           Reset All
         </Button>
-        <Button
-          size="sm"
-          onClick={applyFilters}
-          className="flex-1"
-        >
-          Apply Filters
-        </Button>
       </div>
+      
+      <Accordion 
+        type="multiple" 
+        defaultValue={openAccordions} 
+        className="space-y-2"
+      >
+        {/* Categories */}
+        <AccordionItem value="category" className="border rounded-md px-1">
+          <AccordionTrigger className="px-3 py-2 hover:no-underline">
+            <span className="text-sm font-medium">Categories</span>
+          </AccordionTrigger>
+          <AccordionContent className="px-1 pt-1 pb-2">
+            <div className="space-y-1 max-h-48 overflow-y-auto pr-1">
+              {productCategories.map((category) => (
+                <div key={category.id} className="flex items-center space-x-2 py-1 px-2">
+                  <Checkbox 
+                    id={`category-${category.id}`}
+                    checked={selectedCategories.includes(category.id)}
+                    onCheckedChange={() => toggleCategory(category.id)}
+                  />
+                  <Label 
+                    htmlFor={`category-${category.id}`}
+                    className="text-sm cursor-pointer flex-1"
+                  >
+                    {category.name}
+                  </Label>
+                </div>
+              ))}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+        
+        {/* Price Range */}
+        <AccordionItem value="price" className="border rounded-md px-1">
+          <AccordionTrigger className="px-3 py-2 hover:no-underline">
+            <span className="text-sm font-medium">Price Range</span>
+          </AccordionTrigger>
+          <AccordionContent className="px-3 pt-2 pb-4">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-sm">₹{priceRange[0]}</span>
+                <span className="text-sm">₹{priceRange[1]}</span>
+              </div>
+              <Slider
+                min={0}
+                max={10000}
+                step={100}
+                value={priceRange}
+                onValueChange={(value: [number, number]) => setPriceRange(value)}
+              />
+              <div className="flex flex-wrap gap-1 mt-2">
+                {[1000, 2500, 5000, 7500].map((price) => (
+                  <Badge 
+                    key={price}
+                    variant="outline" 
+                    className="cursor-pointer hover:bg-accent"
+                    onClick={() => setPriceRange([0, price])}
+                  >
+                    Under ₹{price}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+        
+        {/* Sort By */}
+        <AccordionItem value="sort" className="border rounded-md px-1">
+          <AccordionTrigger className="px-3 py-2 hover:no-underline">
+            <span className="text-sm font-medium">Sort By</span>
+          </AccordionTrigger>
+          <AccordionContent className="px-3 pt-2 pb-1">
+            <RadioGroup value={sortBy} onValueChange={setSortBy}>
+              <div className="space-y-1">
+                {sortOptions.map((option) => (
+                  <div key={option.id} className="flex items-center space-x-2 py-1">
+                    <RadioGroupItem value={option.id} id={`sort-${option.id}`} />
+                    <Label htmlFor={`sort-${option.id}`} className="text-sm">
+                      {option.name}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </RadioGroup>
+          </AccordionContent>
+        </AccordionItem>
+        
+        {/* Customer Ratings */}
+        <AccordionItem value="rating" className="border rounded-md px-1">
+          <AccordionTrigger className="px-3 py-2 hover:no-underline">
+            <span className="text-sm font-medium">Customer Ratings</span>
+          </AccordionTrigger>
+          <AccordionContent className="px-3 pt-2 pb-4">
+            <div className="space-y-2">
+              {[4, 3, 2, 1].map((rating) => (
+                <div
+                  key={rating}
+                  className={`flex items-center space-x-2 py-1 px-2 rounded-md cursor-pointer ${
+                    ratingFilter === rating ? "bg-accent/50" : "hover:bg-accent/20"
+                  }`}
+                  onClick={() => handleRatingChange(rating)}
+                >
+                  <div className="flex items-center">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <svg
+                        key={i}
+                        className={`w-4 h-4 ${i < rating ? "text-yellow-400" : "text-gray-300"}`}
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    ))}
+                  </div>
+                  <span className="text-sm">{rating}+ Stars</span>
+                </div>
+              ))}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+        
+        {/* Additional Filters */}
+        <AccordionItem value="additional" className="border rounded-md px-1">
+          <AccordionTrigger className="px-3 py-2 hover:no-underline">
+            <span className="text-sm font-medium">Additional Filters</span>
+          </AccordionTrigger>
+          <AccordionContent className="px-3 pt-2 pb-4">
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2 py-1">
+                <Checkbox 
+                  id="discounted-only" 
+                  checked={discountedOnly}
+                  onCheckedChange={(checked) => setDiscountedOnly(!!checked)}
+                />
+                <Label 
+                  htmlFor="discounted-only" 
+                  className="text-sm cursor-pointer"
+                >
+                  Discounted Items Only
+                </Label>
+              </div>
+              
+              <div className="flex items-center space-x-2 py-1">
+                <RadioGroup 
+                  value={availabilityFilter} 
+                  onValueChange={(value) => setAvailabilityFilter(value as "all" | "in-stock")}
+                >
+                  <div className="space-y-1">
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="all" id="filter-all" />
+                      <Label htmlFor="filter-all" className="text-sm">Show All Items</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="in-stock" id="filter-in-stock" />
+                      <Label htmlFor="filter-in-stock" className="text-sm">In Stock Only</Label>
+                    </div>
+                  </div>
+                </RadioGroup>
+              </div>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+      
+      <Separator className="my-4" />
+      
+      <Button 
+        onClick={handleApplyFilters} 
+        className="w-full"
+      >
+        Apply Filters
+      </Button>
     </div>
-  );
-}
-
-// Star component for ratings
-function Star({ fill }: { fill: boolean }) {
-  return (
-    <svg 
-      xmlns="http://www.w3.org/2000/svg" 
-      viewBox="0 0 24 24" 
-      width="14" 
-      height="14" 
-      fill={fill ? "currentColor" : "none"} 
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-      className={fill ? "text-amber-500" : "text-gray-300"}
-    >
-      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-    </svg>
   );
 }

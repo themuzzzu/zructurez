@@ -5,28 +5,16 @@ import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { 
-  ArrowLeft, 
-  Filter, 
-  Grid2X2,
-  Grid,
-  ListFilter,
-  ShoppingCart,
-  Heart,
-  Star,
-  Search as SearchIcon 
-} from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Filter, Grid2X2, Grid, ListFilter, ArrowLeft, Search as SearchIcon } from "lucide-react";
 import { useSearch } from "@/hooks/useSearch";
 import { SearchFilters } from "@/types/search";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { cn } from "@/lib/utils";
+import { useNetworkStatus } from "@/providers/NetworkMonitor";
+import { MarketplaceSearchFilters } from "@/components/search/MarketplaceSearchFilters";
 import { EnhancedProductSearchResults } from "@/components/search/EnhancedProductSearchResults";
 import { ServiceSearchResults } from "@/components/search/ServiceSearchResults";
 import { BusinessSearchResults } from "@/components/search/BusinessSearchResults";
-import { MarketplaceSearchFilters } from "@/components/search/MarketplaceSearchFilters";
-import { useNetworkStatus } from "@/providers/NetworkMonitor";
 
 export default function MarketplaceSearch() {
   // Get search parameters from the URL
@@ -55,12 +43,6 @@ export default function MarketplaceSearch() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
     categoryParam ? [categoryParam] : []
   );
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
-  const [sortBy, setSortBy] = useState<"relevance" | "price-asc" | "price-desc" | "newest" | "popularity">("relevance");
-  const [showDiscounted, setShowDiscounted] = useState(false);
-  const [showUsed, setShowUsed] = useState(false);
-  const [showBranded, setShowBranded] = useState(false);
-  const [location, setLocation] = useState("");
   const [appliedFilters, setAppliedFilters] = useState<string[]>([]);
 
   // Set up search from the hook
@@ -139,12 +121,6 @@ export default function MarketplaceSearch() {
   // Reset filters to default values
   const resetFilters = () => {
     setSelectedCategories([]);
-    setPriceRange([0, 10000]);
-    setSortBy("relevance");
-    setShowDiscounted(false);
-    setShowUsed(false);
-    setShowBranded(false);
-    setLocation("");
     setAppliedFilters([]);
     
     search(queryParam);

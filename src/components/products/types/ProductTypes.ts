@@ -1,24 +1,41 @@
 
+// Define grid layout options
 export type GridLayoutType = "grid1x1" | "grid2x2" | "grid3x3" | "grid4x4" | "list" | "single";
 
-export interface Product {
+// Product type definition
+export interface ProductType {
   id: string;
   title: string;
-  description: string;
+  description?: string;
   price: number;
   imageUrl?: string;
-  image_url?: string; // Allow both imageUrl and image_url
-  category: string;
-  rating?: number;
-  rating_count?: number;
-  highlight_tags?: string[];
+  category?: string;
   is_discounted?: boolean;
   discount_percentage?: number;
   original_price?: number;
-  brand_name?: string;
   brand?: string;
-  name?: string; // Some components use name instead of title
+  rating?: number;
+  rating_count?: number;
+  highlight_tags?: string[];
+  is_new?: boolean;
+  is_bestseller?: boolean;
+  stock_quantity?: number;
+  variant_options?: ProductVariantOption[];
 }
 
-// Add ProductType as an alias for Product to fix the imports
-export type ProductType = Product;
+// Product variant option definition
+export interface ProductVariantOption {
+  name: string;
+  options: string[];
+}
+
+// Product review type
+export interface ProductReview {
+  id: string;
+  user_name: string;
+  rating: number;
+  comment: string;
+  date: string;
+  helpful_count?: number;
+  images?: string[];
+}

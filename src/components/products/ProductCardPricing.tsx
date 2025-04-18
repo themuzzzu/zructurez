@@ -1,37 +1,62 @@
 
-import { IndianRupee } from "lucide-react";
-import { formatPriceWithoutSymbol } from "@/utils/productUtils";
+import { Badge } from "@/components/ui/badge";
+import { formatPrice, formatPriceWithoutSymbol, calculateDiscountPercentage } from "@/utils/productUtils";
 
 interface ProductCardPricingProps {
   price: number;
-  originalPrice?: number | null;
-  discountPercentage?: number | null;
+  originalPrice?: number;
+  discountPercentage?: number;
+  isDiscounted?: boolean;
+  size?: "sm" | "md" | "lg";
 }
 
-export const ProductCardPricing = ({ 
-  price, 
-  originalPrice, 
-  discountPercentage 
+export const ProductCardPricing = ({
+  price,
+  originalPrice,
+  discountPercentage,
+  isDiscounted = false,
+  size = "md"
 }: ProductCardPricingProps) => {
+  // Calculate discount percentage if not provided
+  const displayDiscount = discountPercentage || 
+    (isDiscounted && originalPrice ? calculateDiscountPercentage(originalPrice, price) : 0);
+  
+  // Determine text size based on size prop
+  const priceTextClass = {
+    "sm": "text-sm font-medium",
+    "md": "text-base font-semibold",
+    "lg": "text-lg font-bold"
+  }[size];
+  
+  const originalPriceTextClass = {
+    "sm": "text-xs",
+    "md": "text-xs",
+    "lg": "text-sm"
+  }[size];
+  
   return (
-    <div className="flex flex-wrap items-center gap-1.5">
-      <span className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white flex items-center gap-0.5">
-        <IndianRupee className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-        {formatPriceWithoutSymbol(price)}
-      </span>
-      
-      {originalPrice && (
-        <>
-          <span className="text-xs text-gray-500 dark:text-gray-400 line-through">
-            ₹{formatPriceWithoutSymbol(originalPrice)}
+    <div className="flex items-center gap-2 flex-wrap">
+      <div className="flex items-baseline gap-2">
+        <span className={priceTextClass}>{formatPrice(price)}</span>
+        
+        {isDiscounted && originalPrice && originalPrice > price && (
+          <span className={`${originalPriceTextClass} text-muted-foreground line-through`}>
+            {formatPrice(originalPrice)}
           </span>
-          
-          {discountPercentage && (
-            <span className="text-[10px] sm:text-xs font-medium text-green-600 dark:text-green-500">
-              {discountPercentage}% off
-            </span>
-          )}
-        </>
+        )}
+      </div>
+      
+      {displayDiscount > 0 && (
+        <Badge 
+          variant="outline" 
+          className={`text-xs px-1.5 ${
+            displayDiscount >= 40 ? "bg-green-100 text-green-700 border-green-200" : 
+            displayDiscount >= 20 ? "bg-amber-100 text-amber-700 border-amber-200" :
+            "bg-red-100 text-red-700 border-red-200"
+          }`}
+        >
+          {displayDiscount}% off
+        </Badge>
       )}
     </div>
   );

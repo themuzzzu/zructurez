@@ -1,6 +1,6 @@
 
-import { GridLayoutType } from './types/ProductTypes';
 import { cn } from '@/lib/utils';
+import { GridLayoutType } from './types/ProductTypes';
 import { ReactNode } from 'react';
 
 interface ProductGridProps {
