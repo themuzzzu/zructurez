@@ -7,8 +7,14 @@ import { ProductSearchResults } from "@/components/search/ProductSearchResults";
 import { useSearchParams } from "react-router-dom";
 import { useSearch } from "@/hooks/useSearch";
 import { SearchFilters } from "@/types/search";
+import { BusinessSearchResults } from "@/components/search/BusinessSearchResults";
+import { ServiceSearchResults } from "@/components/search/ServiceSearchResults";
 
-export default function SearchResultsPage() {
+interface SearchResultsPageProps {
+  type?: 'marketplace' | 'business' | 'services';
+}
+
+export default function SearchResultsPage({ type = 'marketplace' }: SearchResultsPageProps) {
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q") || "";
 
@@ -31,6 +37,24 @@ export default function SearchResultsPage() {
     { label: query, href: `/search?q=${query}` }
   ];
 
+  const renderResults = () => {
+    switch (type) {
+      case 'business':
+        return <BusinessSearchResults results={results} isLoading={isLoading} query={query} />;
+      case 'services':
+        return <ServiceSearchResults results={results} isLoading={isLoading} query={query} />;
+      case 'marketplace':
+      default:
+        return (
+          <ProductSearchResults
+            results={results}
+            isLoading={isLoading}
+            query={query}
+          />
+        );
+    }
+  };
+
   return (
     <Layout>
       <div className="container max-w-7xl mx-auto">
@@ -49,11 +73,7 @@ export default function SearchResultsPage() {
                 totalResults={results.length}
                 breadcrumbs={breadcrumbs}
               />
-              <ProductSearchResults
-                results={results}
-                isLoading={isLoading}
-                query={query}
-              />
+              {renderResults()}
             </div>
           }
         />

@@ -68,7 +68,10 @@ export function ImprovedSearchFilters({ filters, onChange, onReset }: ImprovedSe
             max={10000}
             step={100}
             value={priceRange}
-            onValueChange={setPriceRange}
+            onValueChange={(value) => {
+              // Fix: Type casting the value to [number, number]
+              setPriceRange(value as [number, number]);
+            }}
             onValueCommit={(value) => {
               onChange({
                 priceMin: value[0],
