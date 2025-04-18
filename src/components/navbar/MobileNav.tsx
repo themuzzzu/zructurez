@@ -5,9 +5,10 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Home, Search, MapPin, Store, User } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { IconComponent } from "@/types/component";
 
 interface NavItem {
-  icon: React.ElementType;
+  icon: IconComponent;
   label: string;
   href: string;
   active: boolean;
