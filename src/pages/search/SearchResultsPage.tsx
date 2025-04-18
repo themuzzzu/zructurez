@@ -19,7 +19,7 @@ export default function SearchResultsPage({ type = 'marketplace' }: SearchResult
   const { results, isLoading } = useSearch({
     initialQuery: query,
     suggestionsEnabled: false,
-    filters: { category: type }
+    initialFilters: { category: type }
   });
 
   const getTitle = () => {

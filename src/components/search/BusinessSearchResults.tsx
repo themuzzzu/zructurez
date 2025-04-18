@@ -44,8 +44,6 @@ export function BusinessSearchResults({ results, isLoading, query }: BusinessSea
           location="Local Area" // Default location
           contact="" // Default contact
           hours="" // Default hours
-          user_id=""
-          created_at={new Date().toISOString()}
         />
       ))}
     </div>
