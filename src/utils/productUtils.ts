@@ -1,33 +1,35 @@
 
 /**
- * Formats a price value to display as Indian Rupees
+ * Format a number as an Indian currency price
+ * @param price - The price to format
+ * @returns Formatted price string (₹1,000)
  */
-export const formatPrice = (price: number | string | undefined, currency: string = '₹'): string => {
-  if (price === undefined || price === null) {
-    return `${currency}0.00`;
-  }
-  
-  const numericPrice = typeof price === 'string' ? parseFloat(price) : price;
-  
-  // Format as Indian Rupees with thousands separator
-  return currency + numericPrice.toLocaleString('en-IN', {
-    maximumFractionDigits: 2,
-    minimumFractionDigits: 0
-  });
+export const formatPrice = (price: number): string => {
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    maximumFractionDigits: 0
+  }).format(price);
 };
 
 /**
- * Formats a price value to display as currency without the symbol
+ * Calculate the discount percentage between original and sale price
+ * @param originalPrice - The original price
+ * @param salePrice - The discounted price
+ * @returns Discount percentage as a whole number
  */
-export const formatPriceWithoutSymbol = (price: number | string | undefined): string => {
-  if (price === undefined || price === null) {
-    return '0';
-  }
-  
-  const numericPrice = typeof price === 'string' ? parseFloat(price) : price;
-  
-  return numericPrice.toLocaleString('en-IN', {
-    maximumFractionDigits: 2,
-    minimumFractionDigits: 0
-  });
+export const calculateDiscountPercentage = (originalPrice: number, salePrice: number): number => {
+  if (!originalPrice || !salePrice || originalPrice <= salePrice) return 0;
+  return Math.round(((originalPrice - salePrice) / originalPrice) * 100);
+};
+
+/**
+ * Truncate text to a specific length with ellipsis
+ * @param text - The text to truncate
+ * @param length - Maximum length before truncating
+ * @returns Truncated text with ellipsis if needed
+ */
+export const truncateText = (text: string, length: number): string => {
+  if (!text) return '';
+  return text.length > length ? text.substring(0, length) + '...' : text;
 };
