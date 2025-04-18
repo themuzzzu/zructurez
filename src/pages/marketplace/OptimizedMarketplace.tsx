@@ -1,25 +1,27 @@
-
 import { useState, useEffect, Suspense, lazy } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
 import { AutocompleteSearch } from "@/components/marketplace/AutocompleteSearch";
-import { BannerCarousel } from "@/components/marketplace/BannerCarousel";
-import { CrazyDeals } from "@/components/marketplace/CrazyDeals";
-import SponsoredProducts from "@/components/marketplace/SponsoredProducts";
 import { ShopByCategory } from "@/components/marketplace/ShopByCategory";
-import { TrendingProducts } from "@/components/marketplace/TrendingProducts"; 
-import { PersonalizedRecommendations } from "@/components/marketplace/PersonalizedRecommendations";
-import { ProductRankings } from "@/components/rankings/ProductRankings";
-import { BrowseTabContent } from "./BrowseTabContent";
+import { Button } from "@/components/ui/button";
 import { SkeletonCard } from "@/components/loaders";
 import { useLoading } from "@/providers/LoadingProvider";
-import { FlashSale } from "@/components/marketplace/FlashSale";
-import { SponsoredRecommendations } from "@/components/recommendations/SponsoredRecommendations";
 
-// Optimized LazySection for better performance - reduced loading skeleton count
+// Lazy load non-critical components
+const BannerCarousel = lazy(() => import("@/components/marketplace/BannerCarousel"));
+const CrazyDeals = lazy(() => import("@/components/marketplace/CrazyDeals"));
+const SponsoredProducts = lazy(() => import("@/components/marketplace/SponsoredProducts"));
+const TrendingProducts = lazy(() => import("@/components/marketplace/TrendingProducts"));
+const PersonalizedRecommendations = lazy(() => import("@/components/marketplace/PersonalizedRecommendations"));
+const ProductRankings = lazy(() => import("@/components/rankings/ProductRankings"));
+const BrowseTabContent = lazy(() => import("./BrowseTabContent"));
+const FlashSale = lazy(() => import("@/components/marketplace/FlashSale"));
+const SponsoredRecommendations = lazy(() => import("@/components/recommendations/SponsoredRecommendations"));
+
+// Optimized section loader with reduced skeleton count
 const LazySection = ({ children, fallbackCount = 2 }) => (
   <Suspense fallback={
-    <div className="grid grid-cols-2 sm:grid-cols-2 gap-2 animate-fade-in">
+    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 animate-fade-in">
       {Array.from({ length: fallbackCount }).map((_, i) => (
         <SkeletonCard key={i} />
       ))}
@@ -145,70 +147,58 @@ export const OptimizedMarketplace = () => {
   };
   
   return (
-    <div className={`pt-2 sm:pt-0 px-1 sm:px-2 transition-opacity duration-200 overflow-x-hidden ${isPageReady ? 'opacity-100' : 'opacity-0'}`}>
-      {/* Single Search Bar at the top with improved design - fixed padding */}
-      <div className="mb-4 sm:mb-6">
+    <div className="pt-2 sm:pt-4 px-2 sm:px-4 md:px-6 transition-opacity duration-200">
+      {/* Search Bar - Full width on mobile, max-width on desktop */}
+      <div className="mb-4 sm:mb-6 max-w-3xl mx-auto w-full">
         <AutocompleteSearch 
           value={searchQuery}
           onChange={setSearchQuery}
           onSearchSelect={handleSearchSelect}
           placeholder="Search for products, services, or businesses..."
-          className="w-full max-w-3xl mx-auto"
+          className="w-full"
         />
       </div>
       
-      {/* Banner carousel below search - fixed styling for better scrolling */}
-      <LazySection fallbackCount={1}>
-        <div className="mb-4 sm:mb-6">
+      {/* Main content sections with improved responsive spacing */}
+      <div className="space-y-4 sm:space-y-6 md:space-y-8">
+        {/* Banner - Lazy loaded with priority */}
+        <LazySection fallbackCount={1}>
           <BannerCarousel />
-        </div>
-      </LazySection>
-      
-      {/* New Shop by Category section - improved spacing */}
-      <div className="mb-4 sm:mb-6">
-        <ShopByCategory onCategorySelect={handleCategoryChange} />
-      </div>
-      
-      {/* Real-time Product Rankings - improved spacing */}
-      <LazySection>
+        </LazySection>
+        
+        {/* Categories - Load immediately as it's critical */}
         <div className="mb-4 sm:mb-6">
+          <ShopByCategory onCategorySelect={handleCategoryChange} />
+        </div>
+        
+        {/* Lazy loaded sections with progressive enhancement */}
+        <LazySection>
           <ProductRankings />
-        </div>
-      </LazySection>
-
-      {/* Sponsored Products below rankings - NEW */}
-      <LazySection>
-        <div className="mb-4 sm:mb-6">
+        </LazySection>
+        
+        <LazySection>
           <SponsoredRecommendations 
             title="Sponsored Products" 
             limit={4} 
           />
-        </div>
-      </LazySection>
-      
-      {/* Flash Sale Section - improved spacing */}
-      <LazySection>
-        <div className="mb-4 sm:mb-6">
+        </LazySection>
+        
+        <LazySection>
           <FlashSale />
-        </div>
-      </LazySection>
-      
-      {/* Sponsored Products Section - improved spacing */}
-      <LazySection>
-        <div className="mb-4 sm:mb-6">
-          <SponsoredProducts gridLayout={gridLayout} />
-        </div>
-      </LazySection>
-      
-      {/* Main content - Browse All */}
-      <LazySection>
-        <div className="mt-4 sm:mt-6">
+        </LazySection>
+        
+        <LazySection>
+          <CrazyDeals />
+        </LazySection>
+        
+        {/* Main browse content */}
+        <LazySection>
           <BrowseTabContent 
             searchTerm={searchQuery}
             onCategorySelect={handleCategoryChange}
           />
-        </div>
-      </LazySection>
+        </LazySection>
+      </div>
     </div>
   );
 };
