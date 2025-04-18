@@ -1,3 +1,4 @@
+
 import { useState, useEffect, Suspense, lazy } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
@@ -7,16 +8,34 @@ import { Button } from "@/components/ui/button";
 import { SkeletonCard } from "@/components/loaders";
 import { useLoading } from "@/providers/LoadingProvider";
 
-// Lazy load non-critical components
-const BannerCarousel = lazy(() => import("@/components/marketplace/BannerCarousel"));
-const CrazyDeals = lazy(() => import("@/components/marketplace/CrazyDeals"));
-const SponsoredProducts = lazy(() => import("@/components/marketplace/SponsoredProducts"));
-const TrendingProducts = lazy(() => import("@/components/marketplace/TrendingProducts"));
-const PersonalizedRecommendations = lazy(() => import("@/components/marketplace/PersonalizedRecommendations"));
-const ProductRankings = lazy(() => import("@/components/rankings/ProductRankings"));
-const BrowseTabContent = lazy(() => import("./BrowseTabContent"));
-const FlashSale = lazy(() => import("@/components/marketplace/FlashSale"));
-const SponsoredRecommendations = lazy(() => import("@/components/recommendations/SponsoredRecommendations"));
+// Lazy load non-critical components - Fixed imports to handle named exports
+const BannerCarousel = lazy(() => 
+  import("@/components/marketplace/BannerCarousel").then(module => ({ default: module.BannerCarousel }))
+);
+const CrazyDeals = lazy(() => 
+  import("@/components/marketplace/CrazyDeals").then(module => ({ default: module.CrazyDeals }))
+);
+const SponsoredProducts = lazy(() => 
+  import("@/components/marketplace/SponsoredProducts").then(module => ({ default: module.default }))
+);
+const TrendingProducts = lazy(() => 
+  import("@/components/marketplace/TrendingProducts").then(module => ({ default: module.TrendingProducts }))
+);
+const PersonalizedRecommendations = lazy(() => 
+  import("@/components/marketplace/PersonalizedRecommendations").then(module => ({ default: module.PersonalizedRecommendations }))
+);
+const ProductRankings = lazy(() => 
+  import("@/components/rankings/ProductRankings").then(module => ({ default: module.ProductRankings }))
+);
+const BrowseTabContent = lazy(() => 
+  import("./BrowseTabContent").then(module => ({ default: module.BrowseTabContent }))
+);
+const FlashSale = lazy(() => 
+  import("@/components/marketplace/FlashSale").then(module => ({ default: module.FlashSale }))
+);
+const SponsoredRecommendations = lazy(() => 
+  import("@/components/recommendations/SponsoredRecommendations").then(module => ({ default: module.SponsoredRecommendations }))
+);
 
 // Optimized section loader with reduced skeleton count
 const LazySection = ({ children, fallbackCount = 2 }) => (
