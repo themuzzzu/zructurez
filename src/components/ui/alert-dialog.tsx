@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog"
 
@@ -22,7 +23,7 @@ const AlertDialogOverlay = React.forwardRef<
     {...props}
     ref={ref}
   />
-))
+)) as React.FC<React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Overlay>>
 AlertDialogOverlay.displayName = AlertDialogPrimitive.Overlay.displayName
 
 const AlertDialogContent = React.forwardRef<
@@ -40,7 +41,7 @@ const AlertDialogContent = React.forwardRef<
       {...props}
     />
   </AlertDialogPortal>
-))
+)) as React.FC<React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Content>>
 AlertDialogContent.displayName = AlertDialogPrimitive.Content.displayName
 
 const AlertDialogHeader = ({
@@ -80,7 +81,7 @@ const AlertDialogTitle = React.forwardRef<
     className={cn("text-lg font-semibold", className)}
     {...props}
   />
-))
+)) as React.FC<React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Title>>
 AlertDialogTitle.displayName = AlertDialogPrimitive.Title.displayName
 
 const AlertDialogDescription = React.forwardRef<
@@ -92,7 +93,7 @@ const AlertDialogDescription = React.forwardRef<
     className={cn("text-sm text-muted-foreground", className)}
     {...props}
   />
-))
+)) as React.FC<React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Description>>
 AlertDialogDescription.displayName =
   AlertDialogPrimitive.Description.displayName
 
@@ -105,7 +106,7 @@ const AlertDialogAction = React.forwardRef<
     className={cn(buttonVariants(), className)}
     {...props}
   />
-))
+)) as React.FC<React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Action>>
 AlertDialogAction.displayName = AlertDialogPrimitive.Action.displayName
 
 const AlertDialogCancel = React.forwardRef<
@@ -121,7 +122,7 @@ const AlertDialogCancel = React.forwardRef<
     )}
     {...props}
   />
-))
+)) as React.FC<React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Cancel>>
 AlertDialogCancel.displayName = AlertDialogPrimitive.Cancel.displayName
 
 export {
