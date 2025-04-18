@@ -1,3 +1,33 @@
+export interface AnalyticsSummary {
+  totalViews: number;
+  totalLikes: number;
+  totalShares: number;
+  totalClicks: number;
+  conversionRate: number;
+  period: string;
+}
+
+export interface UserSubscription {
+  id: string;
+  userId: string;
+  planId: string;
+  planName: string;
+  status: 'active' | 'cancelled' | 'expired' | 'pending';
+  startDate: string;
+  endDate: string;
+  nextPaymentDate: string;
+  amount: number;
+  productLimit: number;
+  serviceLimit: number;
+  visibilityLevel: string;
+  analyticsLevel: string;
+  billingInterval: string;
+  plan?: {
+    name: string;
+    price: number;
+    features: string[];
+  };
+}
 
 // Basic analytics data interfaces
 export interface AnalyticsData {
@@ -5,20 +35,6 @@ export interface AnalyticsData {
   uniqueVisitors: number;
   bounceRate: number;
   averageSessionDuration: number;
-}
-
-export interface UserSubscription {
-  id: string;
-  userId: string;
-  planId: string;
-  status: 'active' | 'cancelled' | 'expired' | 'pending';
-  startDate: string;
-  endDate: string;
-  plan: {
-    name: string;
-    price: number;
-    features: string[];
-  };
 }
 
 export interface MetricData {
