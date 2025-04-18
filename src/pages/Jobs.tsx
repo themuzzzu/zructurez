@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -140,7 +139,7 @@ const Jobs = () => {
   });
 
   return (
-    <Layout hideSidebar>
+    <Layout hideNav={false}>
       <div className="container max-w-[1400px] py-6 px-4">
         <main className="space-y-6">
           <div className="flex flex-col gap-4">

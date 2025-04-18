@@ -1,4 +1,3 @@
-
 import { ProfileView } from "@/components/ProfileView";
 import { SettingsNav } from "@/components/SettingsNav";
 import { useState, useEffect } from "react";
@@ -34,14 +33,12 @@ const Settings = () => {
   const isMobile = useMediaQuery("(max-width: 768px)");
   const { t } = useLanguage();
 
-  // Update URL when tab changes without page reload
   useEffect(() => {
     const url = new URL(window.location.href);
     url.searchParams.set('tab', activeTab);
     window.history.replaceState({}, '', url);
   }, [activeTab]);
 
-  // Handle direct navigation to settings pages
   useEffect(() => {
     const tabFromParams = searchParams.get('tab');
     if (tabFromParams && tabFromParams !== activeTab) {
@@ -101,7 +98,7 @@ const Settings = () => {
   );
 
   return (
-    <Layout hideSidebar>
+    <Layout hideNav={false}>
       <div className="container max-w-[1400px] py-4 md:py-6 px-2 md:px-4 settings-container">
         {!isMobile && (
           <Button 
