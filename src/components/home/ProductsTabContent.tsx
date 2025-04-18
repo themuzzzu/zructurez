@@ -8,7 +8,7 @@ import type { GridLayoutType } from '@/components/products/types/ProductTypes';
 
 interface ProductsTabContentProps {
   category?: string;
-  layout?: "grid4x4" | "grid2x2" | "grid3x3" | "grid1x1";
+  layout?: GridLayoutType;
 }
 
 export const ProductsTabContent = ({ category = 'all', layout = "grid4x4" }: ProductsTabContentProps) => {
@@ -43,7 +43,7 @@ export const ProductsTabContent = ({ category = 'all', layout = "grid4x4" }: Pro
   return (
     <ProductsGrid 
       products={products || []} 
-      layout={layout as GridLayoutType} 
+      layout={layout} 
     />
   );
 };

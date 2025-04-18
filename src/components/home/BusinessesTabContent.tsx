@@ -62,8 +62,8 @@ export const BusinessesTabContent = ({ category = 'all' }: BusinessesTabContentP
           category={business.category}
           description={business.description}
           image={business.image_url}
-          rating={business.rating || 0}
-          reviews={business.reviews || 0}
+          rating={0} // Default rating since it's not in the business object
+          reviews={0} // Default reviews since it's not in the business object
           location={business.location || ""}
           contact={business.contact || ""}
           hours={business.hours || ""}

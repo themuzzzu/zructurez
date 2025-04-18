@@ -59,11 +59,11 @@ export const ServicesTabContent = ({ category = 'all' }: ServicesTabContentProps
           key={service.id} 
           id={service.id}
           name={service.title || ''}
-          description={service.description}
-          image={service.image_url || ''}
-          price={service.price?.toString() || '$0'}
-          providerName={service.business_name || 'Provider'}
-          providerId={service.business_id || service.id}
+          description={service.description || ''}
+          image={service.image_url}
+          price={(service.price || 0).toString()}
+          providerName="Provider" // Default provider name since business_name is not available
+          providerId={service.user_id || service.id} // Use user_id as providerId since business_id is not available
           contact_info={service.contact_info}
         />
       ))}
