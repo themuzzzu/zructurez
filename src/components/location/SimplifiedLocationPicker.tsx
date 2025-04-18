@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { 
   Dialog,
@@ -9,10 +8,9 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MapPin, Compass, Locate, Search, X } from "lucide-react";
+import { MapPin, Compass, Locate, Search } from "lucide-react";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { isZructuresAvailable, handleLocationUpdate } from "@/utils/locationUtils";
-import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface SimplifiedLocationPickerProps {
@@ -35,14 +33,12 @@ export function SimplifiedLocationPicker({
   const [availabilityChecked, setAvailabilityChecked] = useState(!firstVisit);
   const { t } = useLanguage();
 
-  // Sample locations based on the image
   const locations = [
     "Tadipatri",
     "Anantapur",
     "Dharmavaram",
     "Kadapa",
     "Kurnool",
-    // Add more from image 1
     "Delhi",
     "Mumbai",
     "Bengaluru",
@@ -62,7 +58,6 @@ export function SimplifiedLocationPicker({
     }
   }, [address]);
   
-  // Filter locations when search query changes
   useEffect(() => {
     if (!searchQuery.trim()) {
       setFilteredLocations(locations);
@@ -74,7 +69,6 @@ export function SimplifiedLocationPicker({
     }
   }, [searchQuery]);
   
-  // Update availability status when location changes
   useEffect(() => {
     if (selectedLocation !== "All India") {
       setAvailabilityChecked(true);
@@ -89,7 +83,6 @@ export function SimplifiedLocationPicker({
 
   const handleConfirmLocation = () => {
     if (selectedLocation === "All India" && firstVisit) {
-      // Force user to select a specific location on first visit
       return;
     }
     
@@ -106,7 +99,7 @@ export function SimplifiedLocationPicker({
 
   return (
     <Dialog open={open} onOpenChange={firstVisit ? () => {} : onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] p-6 bg-zinc-900 text-white border-zinc-800 fixed max-h-[90vh] overflow-auto">
+      <DialogContent className="fixed bottom-0 left-0 right-0 top-auto sm:relative sm:top-[50%] sm:left-[50%] sm:transform sm:-translate-x-1/2 sm:-translate-y-1/2 max-w-[500px] p-6 bg-zinc-900 text-white border-zinc-800 max-h-[90vh] overflow-auto rounded-b-none rounded-t-xl sm:rounded-xl transition-transform duration-300 ease-out animate-in slide-in-from-bottom">
         <DialogHeader className="mb-4">
           <DialogTitle className="flex items-center gap-2 text-2xl font-semibold text-white">
             <MapPin className="h-7 w-7" />
@@ -115,33 +108,29 @@ export function SimplifiedLocationPicker({
         </DialogHeader>
         
         <div className="space-y-6">
-          {/* Detect Location Button */}
           <Button 
             variant="outline" 
-            className="w-full justify-start gap-2 bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-white"
+            className="w-full justify-start gap-2 bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-white h-12"
             onClick={handleDetectLocation}
             disabled={loading}
-            size="lg"
           >
-            <Locate className="h-5 w-5" />
+            <Locate className={`h-5 w-5 ${loading ? "animate-spin" : ""}`} />
             {loading || isDetecting ? t("detectingYourLocation") : t("detectMyLocation")}
           </Button>
           
-          {/* Search Input */}
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-zinc-500" />
             <Input
               placeholder={t("searchCityOrTown")}
-              className="pl-9 bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500"
+              className="pl-9 bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 h-12"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
           
-          {/* Location List */}
           <div className="space-y-1">
             <h3 className="text-lg font-medium text-white mb-2">{t("orSelectCityOrTown")}</h3>
-            <div className="space-y-3 max-h-64 overflow-y-auto pr-2">
+            <div className="space-y-3 max-h-[40vh] sm:max-h-[45vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-zinc-800">
               {filteredLocations.map((location) => {
                 const isLocationAvailable = isZructuresAvailable(location);
                 
@@ -149,14 +138,13 @@ export function SimplifiedLocationPicker({
                   <div key={location} className="space-y-1">
                     <Button 
                       variant="ghost" 
-                      className="w-full justify-start text-left text-white hover:bg-zinc-800 h-auto py-2"
+                      className="w-full justify-start text-left text-white hover:bg-zinc-800 h-auto py-3"
                       onClick={() => handleLocationSelect(location)}
                     >
-                      <MapPin className="h-4 w-4 mr-2 text-zinc-400" />
-                      <span>{location}</span>
+                      <MapPin className="h-4 w-4 mr-2 text-zinc-400 shrink-0" />
+                      <span className="truncate">{location}</span>
                     </Button>
                     
-                    {/* Availability Message - Show only for the selected location */}
                     {selectedLocation === location && !isLocationAvailable && (
                       <div className="rounded-md p-3 bg-amber-900/30 border border-amber-800/40 text-amber-300 ml-6">
                         <div className="flex gap-2 items-start">
@@ -179,7 +167,7 @@ export function SimplifiedLocationPicker({
           <Button 
             variant="default" 
             onClick={handleConfirmLocation} 
-            className="w-full sm:w-auto bg-primary hover:bg-primary/90"
+            className="w-full sm:w-auto bg-primary hover:bg-primary/90 h-12"
             disabled={selectedLocation === "All India" && firstVisit}
           >
             {t("confirmLocation")}
