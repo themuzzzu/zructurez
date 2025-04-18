@@ -1,3 +1,4 @@
+
 import { Menu } from "lucide-react";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
@@ -11,18 +12,16 @@ import { Sidebar } from "./Sidebar";
 import { CartButton } from "./navbar/CartButton";
 import { UserMenu } from "./navbar/UserMenu";
 import { MobileNav } from "./navbar/MobileNav";
-import { SearchBox } from "./search/SearchBox";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTheme } from "./ThemeProvider";
 import { Heart, MapPin, Navigation, Locate, Map } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { EnhancedLocationSelector } from "./location/EnhancedLocationSelector";
 import { Badge } from "./ui/badge";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { useLocation } from "@/providers/LocationProvider";
@@ -55,8 +54,8 @@ export const Navbar = () => {
   return (
     <>
       <nav className="border-b bg-background py-3 fixed top-0 left-0 right-0 w-full z-50 h-16">
-        <div className="container max-w-[1400px] flex items-center justify-between animate-fade-down">
-          <div className="flex items-center gap-4">
+        <div className="container max-w-[1400px] flex items-center justify-between animate-fade-down px-2">
+          <div className="flex items-center gap-2">
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="lg:hidden">
@@ -72,16 +71,14 @@ export const Navbar = () => {
             </h1>
           </div>
 
-          {/* Removed SearchBox from here */}
-
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             {/* Home page specific buttons (location and maps) - visible on mobile */}
             {isHomePage && (
               <>
                 <Button 
                   variant="ghost" 
                   size="sm"
-                  className="relative group flex items-center gap-1.5 px-2 py-1 h-9 sm:hidden"
+                  className="relative group flex items-center gap-1.5 px-1 py-1 h-9 sm:hidden"
                   aria-label="Select location"
                   onClick={() => setShowLocationPicker(true)}
                 >
@@ -131,7 +128,7 @@ export const Navbar = () => {
                   ) : (
                     <MapPin className="h-4 w-4" />
                   )}
-                  <span className="max-w-28 truncate text-sm">
+                  <span className="max-w-24 truncate text-sm">
                     {currentLocation === "All India" ? "Select location" : currentLocation}
                   </span>
                   <Badge 

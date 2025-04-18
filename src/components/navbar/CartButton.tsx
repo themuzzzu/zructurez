@@ -37,17 +37,17 @@ export const CartButton = () => {
             <ShoppingCart className="h-5 w-5" />
           </Button>
           {cartItemCount > 0 && (
-            <span className="absolute -top-2 -right-2 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center shadow-sm animate-fade-in">
+            <span className="absolute -top-2 -right-1 h-5 w-5 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center shadow-sm">
               {cartItemCount}
             </span>
           )}
         </div>
       </SheetTrigger>
-      <SheetContent className="w-[400px] sm:w-[540px]">
+      <SheetContent className="w-[95vw] sm:w-[400px] md:w-[540px]">
         <SheetHeader>
           <SheetTitle>Shopping Cart</SheetTitle>
         </SheetHeader>
-        <div className="mt-4">
+        <div className="mt-4 overflow-x-hidden">
           <Cart />
         </div>
       </SheetContent>

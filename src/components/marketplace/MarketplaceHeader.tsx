@@ -53,26 +53,27 @@ export const MarketplaceHeader = ({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 w-full overflow-hidden px-1 sm:px-0">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Marketplace</h1>
         
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           <Button 
             variant="ghost" 
             size="icon"
             onClick={handleWishlistClick}
+            className="h-8 w-8 sm:h-10 sm:w-10"
           >
-            <Heart className="h-5 w-5" />
+            <Heart className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
           
           <Button 
             variant="ghost" 
             size="icon" 
-            className="relative"
+            className="relative h-8 w-8 sm:h-10 sm:w-10"
             onClick={handleCartClick}
           >
-            <ShoppingCart className="h-5 w-5" />
+            <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" />
             {cartItemCount > 0 && (
               <Badge 
                 className="absolute -top-1 -right-1 px-1.5 py-0.5 min-w-[18px] h-[18px] flex items-center justify-center"
@@ -85,8 +86,8 @@ export const MarketplaceHeader = ({
           
           <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
             <SheetTrigger asChild>
-              <Button variant="outline" size="icon" onClick={handleFilterClick}>
-                <Filter className="h-5 w-5" />
+              <Button variant="outline" size="icon" className="h-8 w-8 sm:h-10 sm:w-10" onClick={handleFilterClick}>
+                <Filter className="h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
             </SheetTrigger>
             <SheetContent>
@@ -99,7 +100,7 @@ export const MarketplaceHeader = ({
         </div>
       </div>
       
-      <form onSubmit={handleSearch} className="flex w-full gap-2">
+      <form onSubmit={handleSearch} className="flex w-full gap-2 overflow-hidden">
         <SearchInput
           placeholder="Search products..."
           value={localSearchQuery}

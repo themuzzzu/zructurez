@@ -47,7 +47,7 @@ export const MarketplaceCategoryScroller = () => {
   };
   
   return (
-    <div className="bg-white dark:bg-zinc-900 rounded-lg p-4 mb-6 shadow-sm w-full overflow-hidden">
+    <div className="bg-white dark:bg-zinc-900 rounded-lg p-3 sm:p-4 mb-6 shadow-sm w-full overflow-hidden">
       <h3 className="text-lg font-semibold mb-3">Shop Products</h3>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2 w-full">
         {categories.map((category) => (
@@ -55,8 +55,8 @@ export const MarketplaceCategoryScroller = () => {
             key={category.id}
             onClick={() => handleCategoryClick(category.id)}
             className="flex flex-col items-center justify-center p-2 bg-gray-50 dark:bg-zinc-800 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-zinc-700 transition-colors"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
             transition={{ duration: 0.2 }}
           >
             {category.image ? (

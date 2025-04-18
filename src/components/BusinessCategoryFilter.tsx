@@ -1,6 +1,6 @@
 
 import { Button } from "./ui/button";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { useNavigate, useLocation } from "react-router-dom";
 import { 
@@ -42,6 +42,7 @@ export const BusinessCategoryFilter = ({ onCategoryChange }: BusinessCategoryFil
   const navigate = useNavigate();
   const location = useLocation();
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   // Extract category from URL on initial load
   useEffect(() => {
@@ -53,7 +54,19 @@ export const BusinessCategoryFilter = ({ onCategoryChange }: BusinessCategoryFil
         onCategoryChange(categoryParam);
       }
     }
-  }, [location.search]);
+  }, [location.search, onCategoryChange]);
+
+  useEffect(() => {
+    // Scroll selected category into view
+    if (selectedCategory && scrollRef.current) {
+      const selectedElement = document.getElementById(`category-${selectedCategory}`);
+      if (selectedElement) {
+        const scrollContainer = scrollRef.current;
+        const scrollLeft = selectedElement.offsetLeft - (scrollContainer.offsetWidth / 2) + (selectedElement.offsetWidth / 2);
+        scrollContainer.scrollLeft = Math.max(0, scrollLeft);
+      }
+    }
+  }, [selectedCategory]);
 
   const handleCategoryClick = (categoryId: string) => {
     setSelectedCategory(categoryId);
@@ -73,19 +86,25 @@ export const BusinessCategoryFilter = ({ onCategoryChange }: BusinessCategoryFil
   };
 
   return (
-    <div className="w-full overflow-x-auto scrollbar-hide pb-4 px-2 animate-fade-up">
-      <div className="flex gap-3 min-w-max">
-        {categories.map(({ id, name, icon: Icon }) => (
-          <Button
-            key={id}
-            variant={id === selectedCategory ? "default" : "outline"}
-            className="whitespace-nowrap min-w-[120px] justify-center transition-colors duration-300 hover:bg-accent/80"
-            onClick={() => handleCategoryClick(id)}
-          >
-            {Icon && <Icon className="h-4 w-4 mr-2 shrink-0 stroke-black dark:stroke-white" />}
-            <span className="truncate">{name}</span>
-          </Button>
-        ))}
+    <div className="w-full overflow-hidden animate-fade-up px-1 sm:px-2">
+      <div 
+        ref={scrollRef}
+        className="w-full overflow-x-auto scrollbar-hide pb-3 flex"
+      >
+        <div className="flex gap-2 sm:gap-3 min-w-max px-1">
+          {categories.map(({ id, name, icon: Icon }) => (
+            <Button
+              id={`category-${id}`}
+              key={id}
+              variant={id === selectedCategory ? "default" : "outline"}
+              className="whitespace-nowrap min-w-[100px] sm:min-w-[120px] justify-center transition-colors duration-300 hover:bg-accent/80"
+              onClick={() => handleCategoryClick(id)}
+            >
+              {Icon && <Icon className="h-4 w-4 mr-2 shrink-0 stroke-black dark:stroke-white" />}
+              <span className="truncate text-sm">{name}</span>
+            </Button>
+          ))}
+        </div>
       </div>
     </div>
   );

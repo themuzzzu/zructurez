@@ -62,14 +62,14 @@ export function MobileNav() {
               key={index}
               to={item.href}
               className={cn(
-                "flex flex-col items-center justify-center flex-1 h-full py-1 px-3 text-xs",
+                "flex flex-col items-center justify-center flex-1 h-full py-1 px-1",
                 item.active
                   ? "text-primary border-t-2 border-primary"
                   : "text-muted-foreground"
               )}
             >
               <Icon className="h-5 w-5 mb-1" />
-              <span className="text-[10px]">{item.label}</span>
+              <span className="text-[10px] truncate">{item.label}</span>
             </Link>
           );
         })}

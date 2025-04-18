@@ -1,3 +1,4 @@
+
 import React, { Suspense, lazy, useEffect, useState } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { NotFound } from "@/components/NotFound";
@@ -30,7 +31,7 @@ const SponsoredProducts = lazy(() =>
 
 // Better loading placeholder with reduced padding on mobile
 const MarketplaceSkeleton = () => (
-  <div className="space-y-2 w-full px-1 sm:px-4 animate-fade-in">
+  <div className="space-y-2 w-full px-1 animate-fade-in">
     <Skeleton className="h-10 w-full max-w-3xl mx-auto rounded-lg" />
     <Skeleton className="h-48 w-full rounded-lg" />
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
@@ -116,7 +117,7 @@ const Marketplace = () => {
   
   return (
     <Layout>
-      <div className={`container max-w-7xl mx-auto px-1 sm:px-4 pt-2 sm:pt-6 pb-16 overflow-hidden transition-opacity duration-300 ${isReady ? 'opacity-100' : 'opacity-0'}`}>
+      <div className={`container max-w-7xl mx-auto px-1 pt-2 sm:pt-6 pb-16 overflow-hidden transition-opacity duration-300 ${isReady ? 'opacity-100' : 'opacity-0'}`}>
         <Suspense fallback={<MarketplaceSkeleton />}>
           <ErrorBoundary fallback={<ErrorView message="There was a problem loading the marketplace. Please try again later." />}>
             <OptimizedMarketplace />
