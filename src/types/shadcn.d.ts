@@ -1,62 +1,67 @@
 
 import { ReactNode } from 'react';
 
-// Create a base interface for any component that might accept children
-interface WithChildren {
-  children?: ReactNode;
-}
-
-// Extend shadcn components to properly accept children props
 declare module '@/components/ui/dialog' {
-  interface DialogTitleProps extends WithChildren {
+  interface DialogTitleProps {
+    children?: ReactNode;
     className?: string;
   }
   
-  interface DialogDescriptionProps extends WithChildren {
+  interface DialogDescriptionProps {
+    children?: ReactNode;
     className?: string;
   }
   
-  interface DialogContentProps extends WithChildren {
+  interface DialogContentProps {
+    children?: ReactNode;
     className?: string;
   }
   
-  interface DialogHeaderProps extends WithChildren {
+  interface DialogHeaderProps {
+    children?: ReactNode;
     className?: string;
   }
   
-  interface DialogFooterProps extends WithChildren {
+  interface DialogFooterProps {
+    children?: ReactNode;
     className?: string;
   }
 }
 
 declare module '@/components/ui/select' {
-  interface SelectTriggerProps extends WithChildren {
+  interface SelectTriggerProps {
+    children?: ReactNode;
     className?: string;
   }
   
-  interface SelectContentProps extends WithChildren {
+  interface SelectContentProps {
+    children?: ReactNode;
     className?: string;
   }
   
-  interface SelectItemProps extends WithChildren {
+  interface SelectItemProps {
+    children?: ReactNode;
     value: string;
     className?: string;
     key?: string;
   }
   
-  interface SelectValueProps extends WithChildren {
+  interface SelectValueProps {
+    children?: ReactNode;
     placeholder?: string;
   }
 }
 
 declare module '@/components/ui/scroll-area' {
-  interface ScrollAreaProps extends WithChildren {
+  interface ScrollAreaProps {
+    children?: ReactNode;
     className?: string;
   }
 }
 
 declare module '@/components/ui/label' {
-  interface LabelProps extends WithChildren {
+  interface LabelProps {
+    children?: ReactNode;
     htmlFor?: string;
     className?: string;
   }
