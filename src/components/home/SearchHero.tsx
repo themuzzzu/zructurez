@@ -3,9 +3,18 @@ import { useState } from 'react';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 export function SearchHero() {
   const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
 
   return (
     <div className="w-full max-w-3xl mx-auto pt-4 sm:pt-8 pb-6">
@@ -18,7 +27,7 @@ export function SearchHero() {
         </p>
       </div>
       
-      <div className="relative animate-in fade-in slide-in-from-bottom duration-700 delay-200">
+      <form onSubmit={handleSearch} className="relative animate-in fade-in slide-in-from-bottom duration-700 delay-200">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         <Input
           type="text"
@@ -29,11 +38,12 @@ export function SearchHero() {
         />
         <Button 
           className="absolute right-1.5 top-1/2 -translate-y-1/2 h-9"
+          type="submit"
           size="sm"
         >
           Search
         </Button>
-      </div>
+      </form>
     </div>
   );
 }

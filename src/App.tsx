@@ -1,4 +1,3 @@
-
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { LocationProvider } from "@/providers/LocationProvider";
@@ -11,7 +10,9 @@ import { NetworkMonitor } from "@/providers/NetworkMonitor";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import "./App.css";
 import "./styles/global.css";
-import "./styles/theme-manager.css"; // Import our theme manager
+import "./styles/theme-manager.css";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import UnifiedSearchPage from "@/pages/search/UnifiedSearchPage";
 
 // Lazy load components that aren't needed right away
 const LazyToaster = lazy(() => import("sonner").then(module => ({ default: module.Toaster })));
@@ -145,7 +146,9 @@ function App() {
     
     return (
       <>
-        <Routes />
+        <Routes>
+          <Route path="/search" element={<UnifiedSearchPage />} />
+        </Routes>
         <Suspense fallback={null}>
           {resourcesLoaded && <LazyLocationModalHandler />}
         </Suspense>
