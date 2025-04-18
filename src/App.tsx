@@ -1,4 +1,3 @@
-
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { LocationProvider } from "@/providers/LocationProvider";
@@ -12,7 +11,6 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import "./App.css";
 import "./styles/global.css";
 import "./styles/theme-manager.css";
-import { BrowserRouter } from "react-router-dom";
 import UnifiedSearchPage from "@/pages/search/UnifiedSearchPage";
 
 // Lazy load components that aren't needed right away
@@ -165,9 +163,7 @@ function App() {
           <QueryClientProvider client={queryClient}>
             <NetworkMonitor>
               <LocationProvider>
-                <BrowserRouter>
-                  {renderContent()}
-                </BrowserRouter>
+                {renderContent()}
               </LocationProvider>
             </NetworkMonitor>
           </QueryClientProvider>
