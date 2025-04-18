@@ -1,4 +1,3 @@
-
 import { Layout } from "@/components/layout/Layout";
 import { SearchHero } from "@/components/home/SearchHero";
 import { LocationAvailabilityStatus } from "@/components/location/LocationAvailabilityStatus";
@@ -28,12 +27,10 @@ export default function Home() {
   const [gridLayout, setGridLayout] = useState<GridLayoutType>("grid4x4");
   const [selectedCategory, setSelectedCategory] = useState("All");
   
-  // Available categories for each tab
   const businessCategories = ["All", "Local", "Featured", "New", "Popular"];
   const serviceCategories = ["All", "Home", "Professional", "Health", "Education"];
   const productCategories = ["All", "Electronics", "Fashion", "Home", "Beauty"];
   
-  // Get the appropriate categories based on active tab
   const getActiveCategories = () => {
     switch (activeTab) {
       case "business": return businessCategories;
@@ -48,41 +45,23 @@ export default function Home() {
       <div className="flex min-h-[calc(100vh-4rem)]">
         {!isMobile && <Sidebar className="h-[calc(100vh-4rem)] fixed left-0 top-16" />}
         
-        <div className={`container mx-auto px-4 max-w-6xl space-y-6 md:space-y-8 pb-12 transition-all ${!isMobile ? 'ml-[72px]' : ''}`}>
+        <div className={`container mx-auto px-2 sm:px-4 max-w-6xl space-y-3 md:space-y-4 pb-8 transition-all ${!isMobile ? 'ml-[72px]' : ''}`}>
           <div className="min-h-[calc(100vh-4rem)] flex flex-col">
             <SearchHero />
             
-            {/* Banner Ads Section */}
             <HomeBannerAds />
             
-            {/* Category Scrollers with improved spacing */}
-            <div className="space-y-8 md:space-y-12">
-              {/* Business Categories */}
-              <div>
-                <BusinessCategoryScroller />
-              </div>
-              
-              {/* Service Categories */}
-              <div>
-                <ServiceCategoryScroller />
-              </div>
-              
-              {/* Marketplace Categories */}
-              <div>
-                <MarketplaceCategoryScroller />
-              </div>
-            </div>
-
-            {/* Flash Deals Section - New */}
-            <div className="mt-8 md:mt-12">
+            <div className="space-y-3 md:space-y-4">
+              <BusinessCategoryScroller />
+              <ServiceCategoryScroller />
+              <MarketplaceCategoryScroller />
               <FlashDeals />
             </div>
 
-            {/* Selection Bar and Content */}
-            <div className="mt-8 md:mt-12 space-y-6">
+            <div className="mt-4 md:mt-6 space-y-4">
               <Tabs value={activeTab} onValueChange={(value) => {
                 setActiveTab(value);
-                setSelectedCategory("All"); // Reset category when changing tabs
+                setSelectedCategory("All");
               }} className="w-full">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
                   <TabsList className="h-10">
@@ -113,7 +92,6 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Category Navigation for each tab content */}
                 <div className="mb-6">
                   <CategoryNavigationBar 
                     categories={getActiveCategories()}
@@ -122,7 +100,6 @@ export default function Home() {
                   />
                 </div>
 
-                {/* Tab Content */}
                 <TabsContent value="business" className="mt-2">
                   <BusinessesTabContent category={selectedCategory !== "All" ? selectedCategory : undefined} />
                 </TabsContent>
@@ -140,14 +117,12 @@ export default function Home() {
               </Tabs>
             </div>
             
-            {/* Location Section */}
             <LocationHeader />
             
             {currentLocation !== "All India" && (
-              <LocationAvailabilityStatus className="mb-6" />
+              <LocationAvailabilityStatus className="mb-4" />
             )}
             
-            {/* Location Picker Call to Action */}
             {currentLocation === "All India" && (
               <div className="flex-1 flex flex-col items-center justify-center py-8 sm:py-16 text-center">
                 <div className="bg-primary/10 dark:bg-primary/20 rounded-full p-5 mb-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
