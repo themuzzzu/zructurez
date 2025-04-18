@@ -12,6 +12,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { FilterPanel } from "@/components/shopping/FilterPanel";
 import { GridLayoutSelector } from "@/components/marketplace/GridLayoutSelector";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 type SearchCategory = "all" | "users" | "products" | "posts" | "businesses" | "services";
 
@@ -157,7 +158,10 @@ export default function UnifiedSearchPage() {
                     <h2 className="font-semibold mb-4">USERS</h2>
                     <div className="space-y-4">
                       <div className="flex items-center gap-4 p-4 hover:bg-muted/50 rounded-lg cursor-pointer">
-                        <Avatar className="h-12 w-12" />
+                        <Avatar className="h-12 w-12">
+                          <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="User Avatar" />
+                          <AvatarFallback>SM</AvatarFallback>
+                        </Avatar>
                         <div>
                           <h3 className="font-medium">Simon Matthews</h3>
                           <p className="text-sm text-muted-foreground">Plumber</p>
@@ -183,7 +187,10 @@ export default function UnifiedSearchPage() {
                     <h2 className="font-semibold mb-4">POSTS</h2>
                     <div className="space-y-4">
                       <div className="flex gap-4 p-4 hover:bg-muted/50 rounded-lg cursor-pointer">
-                        <Avatar className="h-12 w-12" />
+                        <Avatar className="h-12 w-12">
+                          <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=Neil" alt="User Avatar" />
+                          <AvatarFallback>NH</AvatarFallback>
+                        </Avatar>
                         <div>
                           <h3 className="font-medium">Neil Henderson</h3>
                           <p className="text-sm">Looking for recommendations for a reliable plumbing service in the area.</p>
