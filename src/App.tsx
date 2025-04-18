@@ -1,9 +1,10 @@
+
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { LocationProvider } from "@/providers/LocationProvider";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/react-query";
-import { Routes } from "./routes";
+import { Routes as AppRoutes } from "./routes";
 import { useEffect, useState, lazy, Suspense } from "react";
 import { PageLoader } from "@/components/loaders/PageLoader";
 import { NetworkMonitor } from "@/providers/NetworkMonitor";
@@ -11,7 +12,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import "./App.css";
 import "./styles/global.css";
 import "./styles/theme-manager.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter } from "react-router-dom";
 import UnifiedSearchPage from "@/pages/search/UnifiedSearchPage";
 
 // Lazy load components that aren't needed right away
@@ -146,9 +147,7 @@ function App() {
     
     return (
       <>
-        <Routes>
-          <Route path="/search" element={<UnifiedSearchPage />} />
-        </Routes>
+        <AppRoutes />
         <Suspense fallback={null}>
           {resourcesLoaded && <LazyLocationModalHandler />}
         </Suspense>
@@ -166,7 +165,9 @@ function App() {
           <QueryClientProvider client={queryClient}>
             <NetworkMonitor>
               <LocationProvider>
-                {renderContent()}
+                <BrowserRouter>
+                  {renderContent()}
+                </BrowserRouter>
               </LocationProvider>
             </NetworkMonitor>
           </QueryClientProvider>
