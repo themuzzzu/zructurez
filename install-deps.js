@@ -9,35 +9,13 @@ console.log('Installing missing dependencies...');
 try {
   // Check if package.json exists
   if (fs.existsSync(path.join(__dirname, 'package.json'))) {
-    // Install Vite
-    try {
-      require.resolve('vite');
-      console.log('Vite is already installed.');
-    } catch (e) {
-      console.log('Installing Vite...');
-      execSync('npm install vite@latest --save-dev', { stdio: 'inherit' });
-      console.log('Vite installed successfully.');
-    }
-
-    // Make sure we have the necessary Vite plugins for React
-    try {
-      require.resolve('@vitejs/plugin-react-swc');
-      console.log('@vitejs/plugin-react-swc is already installed.');
-    } catch (e) {
-      console.log('Installing @vitejs/plugin-react-swc...');
-      execSync('npm install @vitejs/plugin-react-swc --save-dev', { stdio: 'inherit' });
-      console.log('@vitejs/plugin-react-swc installed successfully.');
-    }
-
-    // Ensure we have React and React DOM
-    try {
-      require.resolve('react');
-      console.log('React is already installed.');
-    } catch (e) {
-      console.log('Installing React...');
-      execSync('npm install react react-dom --save', { stdio: 'inherit' });
-      console.log('React installed successfully.');
-    }
+    // Install Vite and its React plugin
+    console.log('Installing Vite and React plugin...');
+    execSync('npm install vite@latest @vitejs/plugin-react-swc@latest --save-dev', { stdio: 'inherit' });
+    
+    // Make sure we have React and React DOM
+    console.log('Installing React dependencies...');
+    execSync('npm install react@latest react-dom@latest --save', { stdio: 'inherit' });
 
     // Run npm install to ensure all dependencies are properly installed
     console.log('Running npm install to ensure all dependencies are up to date...');
