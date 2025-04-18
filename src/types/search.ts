@@ -1,4 +1,3 @@
-
 export interface SearchFilters {
   query?: string;
   sortBy?: "relevance" | "price-asc" | "price-desc" | "newest" | "popularity";
@@ -7,6 +6,7 @@ export interface SearchFilters {
   priceMax?: number;
   includeSponsored?: boolean;
   location?: string;
+  locationRadius?: number; // Added this property for radius-based location filtering
 }
 
 export interface SearchResult {

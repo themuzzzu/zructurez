@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
@@ -5,10 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Filter, Grid2X2, Grid, ListFilter, ArrowLeft, Search as SearchIcon } from "lucide-react";
+import { Filter, ArrowLeft, Search as SearchIcon } from "lucide-react";
 import { useSearch } from "@/hooks/useSearch";
 import { SearchFilters } from "@/types/search";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNetworkStatus } from "@/providers/NetworkMonitor";
 import { ServiceSearchFilters } from "@/components/search/ServiceSearchFilters";
 import { ServiceSearchResults } from "@/components/search/ServiceSearchResults";
@@ -26,13 +26,15 @@ export default function ServicesSearch() {
   // State for search and filtering
   const [searchQuery, setSearchQuery] = useState(queryParam);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("services");
   
   // Filter states
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
     categoryParam ? [categoryParam] : []
   );
   const [appliedFilters, setAppliedFilters] = useState<string[]>([]);
+  const [currentFilters, setCurrentFilters] = useState<Partial<SearchFilters>>({
+    categories: categoryParam ? [categoryParam] : []
+  });
 
   // Set up search from the hook
   const { 
@@ -72,6 +74,7 @@ export default function ServicesSearch() {
   // Handle filter application
   const applyFilters = (newFilters: Partial<SearchFilters>) => {
     // Apply filters to search
+    setCurrentFilters(newFilters);
     updateFilters(newFilters);
     search(queryParam, newFilters);
     
@@ -82,8 +85,8 @@ export default function ServicesSearch() {
       filtersArray.push(`Categories: ${newFilters.categories.length}`);
     }
     
-    if (newFilters.priceMin !== undefined && newFilters.priceMax !== undefined) {
-      filtersArray.push(`Price: ₹${newFilters.priceMin} - ₹${newFilters.priceMax}`);
+    if (newFilters.priceMin !== undefined || newFilters.priceMax !== undefined) {
+      filtersArray.push(`Price: ₹${newFilters.priceMin || 0} - ₹${newFilters.priceMax || '5000+'}`);
     }
     
     if (newFilters.sortBy && newFilters.sortBy !== "relevance") {
@@ -91,7 +94,7 @@ export default function ServicesSearch() {
         "price-asc": "Price: Low to High",
         "price-desc": "Price: High to Low",
         "newest": "Newest First",
-        "popularity": "Popularity"
+        "popularity": "Most Popular"
       };
       filtersArray.push(`Sort: ${sortLabels[newFilters.sortBy] || newFilters.sortBy}`);
     }
@@ -106,6 +109,7 @@ export default function ServicesSearch() {
   const resetFilters = () => {
     setSelectedCategories([]);
     setAppliedFilters([]);
+    setCurrentFilters({});
     
     search(queryParam);
     setIsFilterOpen(false);
@@ -114,7 +118,7 @@ export default function ServicesSearch() {
   return (
     <Layout>
       <div className="container max-w-7xl mx-auto px-2 md:px-4 py-4">
-        {/* Header with back button, search bar and layout toggles */}
+        {/* Header with back button and search bar */}
         <div className="space-y-4 mb-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
@@ -127,43 +131,42 @@ export default function ServicesSearch() {
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <h1 className="text-xl font-bold">
-                {queryParam ? `Service Search: "${queryParam}"` : "Search Services"}
+                {queryParam ? `Service Search: "${queryParam}"` : "Service Search"}
               </h1>
             </div>
             
-            <div className="flex items-center space-x-2">
-              <div className="flex md:hidden">
-                <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
-                  <SheetTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="flex items-center gap-1.5"
-                    >
-                      <Filter className="h-4 w-4" />
-                      <span>Filters</span>
-                      {appliedFilters.length > 0 && (
-                        <Badge variant="secondary" className="ml-1">
-                          {appliedFilters.length}
-                        </Badge>
-                      )}
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent side="left" className="w-[85%] sm:w-[350px] p-0">
-                    <div className="flex flex-col h-full">
-                      <div className="p-4 border-b">
-                        <h3 className="text-lg font-semibold">Filters</h3>
-                      </div>
-                      <div className="flex-grow overflow-y-auto px-4 py-2">
-                        <ServiceSearchFilters
-                          onChange={applyFilters}
-                          onReset={resetFilters}
-                        />
-                      </div>
+            <div className="flex md:hidden">
+              <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+                <SheetTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex items-center gap-1.5"
+                  >
+                    <Filter className="h-4 w-4" />
+                    <span>Filters</span>
+                    {appliedFilters.length > 0 && (
+                      <Badge variant="secondary" className="ml-1">
+                        {appliedFilters.length}
+                      </Badge>
+                    )}
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-[85%] sm:w-[350px] p-0">
+                  <div className="flex flex-col h-full">
+                    <div className="p-4 border-b">
+                      <h3 className="text-lg font-semibold">Filters</h3>
                     </div>
-                  </SheetContent>
-                </Sheet>
-              </div>
+                    <div className="flex-grow overflow-y-auto px-4 py-2">
+                      <ServiceSearchFilters
+                        filters={currentFilters}
+                        onChange={applyFilters}
+                        onReset={resetFilters}
+                      />
+                    </div>
+                  </div>
+                </SheetContent>
+              </Sheet>
             </div>
           </div>
           
@@ -204,32 +207,23 @@ export default function ServicesSearch() {
           )}
         </div>
 
-        {/* Tab navigation */}
-        <Tabs defaultValue="services" value={activeTab} onValueChange={setActiveTab} className="mb-6">
-          <TabsList className="w-full md:w-auto">
-            <TabsTrigger value="services" className="flex-1 md:flex-none">Services</TabsTrigger>
-            <TabsTrigger value="providers" className="flex-1 md:flex-none">Providers</TabsTrigger>
-            <TabsTrigger value="locations" className="flex-1 md:flex-none">Locations</TabsTrigger>
-          </TabsList>
-          
-          {/* Show corrected query suggestion if any */}
-          {correctedQuery && correctedQuery !== queryParam && (
-            <div className="mt-3 text-sm">
-              Did you mean: <Button 
-                variant="link" 
-                className="p-0 h-auto font-medium"
-                onClick={() => {
-                  setSearchQuery(correctedQuery);
-                  const params = new URLSearchParams(searchParams);
-                  params.set("q", correctedQuery);
-                  setSearchParams(params);
-                }}
-              >
-                {correctedQuery}
-              </Button>?
-            </div>
-          )}
-        </Tabs>
+        {/* Show corrected query suggestion if any */}
+        {correctedQuery && correctedQuery !== queryParam && (
+          <div className="mb-4 text-sm">
+            Did you mean: <Button 
+              variant="link" 
+              className="p-0 h-auto font-medium"
+              onClick={() => {
+                setSearchQuery(correctedQuery);
+                const params = new URLSearchParams(searchParams);
+                params.set("q", correctedQuery);
+                setSearchParams(params);
+              }}
+            >
+              {correctedQuery}
+            </Button>?
+          </div>
+        )}
         
         {/* Main content area with filters sidebar and results */}
         <div className="flex flex-col md:flex-row gap-5">
@@ -237,6 +231,7 @@ export default function ServicesSearch() {
           <div className="hidden md:block w-[240px] flex-shrink-0">
             <div className="sticky top-4 overflow-y-auto max-h-[calc(100vh-6rem)]">
               <ServiceSearchFilters
+                filters={currentFilters}
                 onChange={applyFilters}
                 onReset={resetFilters}
               />
@@ -255,30 +250,12 @@ export default function ServicesSearch() {
               </p>
             </div>
             
-            {/* Tab content */}
-            <TabsContent value="services" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
-              <ServiceSearchResults
-                results={results}
-                isLoading={isLoading}
-                query={queryParam}
-              />
-            </TabsContent>
-            
-            <TabsContent value="providers" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">
-                  Service provider search coming soon
-                </p>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="locations" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">
-                  Location-based service search coming soon
-                </p>
-              </div>
-            </TabsContent>
+            {/* Service search results */}
+            <ServiceSearchResults
+              results={results}
+              isLoading={isLoading}
+              query={queryParam}
+            />
             
             {/* Network offline message */}
             {!isOnline && !isLoading && (

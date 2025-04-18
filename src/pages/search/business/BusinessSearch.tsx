@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
@@ -33,6 +34,9 @@ export default function BusinessSearch() {
     categoryParam ? [categoryParam] : []
   );
   const [appliedFilters, setAppliedFilters] = useState<string[]>([]);
+  const [currentFilters, setCurrentFilters] = useState<Partial<SearchFilters>>({
+    categories: categoryParam ? [categoryParam] : []
+  });
 
   // Set up search from the hook
   const { 
@@ -72,6 +76,7 @@ export default function BusinessSearch() {
   // Handle filter application
   const applyFilters = (newFilters: Partial<SearchFilters>) => {
     // Apply filters to search
+    setCurrentFilters(newFilters);
     updateFilters(newFilters);
     search(queryParam, newFilters);
     
@@ -105,6 +110,7 @@ export default function BusinessSearch() {
   const resetFilters = () => {
     setSelectedCategories([]);
     setAppliedFilters([]);
+    setCurrentFilters({});
     
     search(queryParam);
     setIsFilterOpen(false);
@@ -154,6 +160,7 @@ export default function BusinessSearch() {
                     </div>
                     <div className="flex-grow overflow-y-auto px-4 py-2">
                       <BusinessSearchFilters
+                        filters={currentFilters}
                         onChange={applyFilters}
                         onReset={resetFilters}
                       />
@@ -225,6 +232,7 @@ export default function BusinessSearch() {
           <div className="hidden md:block w-[240px] flex-shrink-0">
             <div className="sticky top-4 overflow-y-auto max-h-[calc(100vh-6rem)]">
               <BusinessSearchFilters
+                filters={currentFilters}
                 onChange={applyFilters}
                 onReset={resetFilters}
               />
