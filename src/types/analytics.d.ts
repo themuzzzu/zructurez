@@ -23,4 +23,9 @@ export interface UserSubscription {
   analyticsLevel: string;
   nextPaymentDate: string;
   billingInterval: string;
+  plan?: {
+    name: string;
+    price: number;
+    features: string[];
+  };
 }

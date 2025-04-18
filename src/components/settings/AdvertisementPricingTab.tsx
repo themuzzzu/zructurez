@@ -1,7 +1,9 @@
+
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, XCircle, ShieldCheck, ShieldAlert, Bolt, PiggyBank, TrendingUp, Users, LayoutDashboard, FileText, BarChart3, Settings } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export const AdvertisementPricingTab = () => {
   return (
@@ -35,7 +37,7 @@ export const AdvertisementPricingTab = () => {
               <XCircle className="mr-2 h-5 w-5 text-red-500" />
               <span>No Dedicated Support</span>
             </div>
-            <Button variant="primary" className="w-full">Choose Basic</Button>
+            <Button variant="default" className="w-full">Choose Basic</Button>
           </CardContent>
         </Card>
 
@@ -60,7 +62,7 @@ export const AdvertisementPricingTab = () => {
               <CheckCircle className="mr-2 h-5 w-5 text-green-500" />
               <span>Priority Support</span>
             </div>
-            <Button variant="primary" className="w-full">Choose Pro</Button>
+            <Button variant="default" className="w-full">Choose Pro</Button>
           </CardContent>
         </Card>
 
@@ -85,11 +87,10 @@ export const AdvertisementPricingTab = () => {
               <CheckCircle className="mr-2 h-5 w-5 text-green-500" />
               <span>Dedicated Account Manager</span>
             </div>
-            <Button variant="primary" className="w-full">Contact Us</Button>
+            <Button variant="default" className="w-full">Contact Us</Button>
           </CardContent>
         </Card>
       </div>
     </div>
   );
 };
-import { Button } from "@/components/ui/button";
