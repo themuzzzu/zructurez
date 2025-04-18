@@ -1,4 +1,3 @@
-
 import { useEffect, useState, createContext, useContext, ReactNode } from "react";
 import { toast } from "sonner";
 
@@ -8,15 +7,17 @@ interface NetworkContextType {
   status: NetworkStatus;
   lastOnline: Date | null;
   isOnline: boolean;
+  connectionQuality: number;
 }
 
 const NetworkContext = createContext<NetworkContextType>({
   status: "online",
   lastOnline: null,
-  isOnline: true
+  isOnline: true,
+  connectionQuality: 100
 });
 
-export const useNetwork = () => useContext(NetworkContext);
+export const useNetworkStatus = () => useContext(NetworkContext);
 
 interface NetworkMonitorProps {
   children: ReactNode;
@@ -116,9 +117,12 @@ export const NetworkMonitor = ({ children }: NetworkMonitorProps) => {
     <NetworkContext.Provider value={{ 
       status, 
       lastOnline,
-      isOnline: status !== "offline" 
+      isOnline: status !== "offline",
+      connectionQuality
     }}>
       {children}
     </NetworkContext.Provider>
   );
 };
+
+export const useNetwork = useNetworkStatus;

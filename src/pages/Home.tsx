@@ -20,7 +20,7 @@ import { BusinessesTabContent } from "@/components/home/BusinessesTabContent";
 import { ProductsTabContent } from "@/components/home/ProductsTabContent";
 import { ServicesTabContent } from "@/components/home/ServicesTabContent";
 import type { GridLayoutType } from "@/components/products/types/ProductTypes";
-import { ErrorBoundary } from "react-error-boundary";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ErrorView } from "@/components/ErrorView";
 
 export default function Home() {

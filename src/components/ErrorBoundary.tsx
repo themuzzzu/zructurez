@@ -2,6 +2,21 @@
 import React, { Component, ErrorInfo, ReactNode } from "react";
 import { ErrorView } from "./ErrorView";
 
+// Add proper type declaration for window.gtag
+declare global {
+  interface Window {
+    gtag?: (
+      command: string,
+      action: string,
+      params: {
+        description: string;
+        fatal: boolean;
+        [key: string]: any;
+      }
+    ) => void;
+  }
+}
+
 interface Props {
   children: ReactNode;
   FallbackComponent?: React.ComponentType<{ error: Error; resetErrorBoundary: () => void }>;
