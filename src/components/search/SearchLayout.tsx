@@ -10,11 +10,14 @@ interface SearchLayoutProps {
 
 export function SearchLayout({ filters, content, className }: SearchLayoutProps) {
   return (
-    <div className={cn("grid grid-cols-1 md:grid-cols-[280px_1fr] gap-4 p-4", className)}>
-      <aside className="hidden md:block">
+    <div className={cn("flex flex-col md:flex-row gap-4", className)}>
+      {/* Filters sidebar - fixed width on desktop */}
+      <aside className="hidden md:block w-[240px] flex-shrink-0 border-r pr-4">
         {filters}
       </aside>
-      <main>
+      
+      {/* Main content area - flexible width */}
+      <main className="flex-1 min-w-0">
         {content}
       </main>
     </div>

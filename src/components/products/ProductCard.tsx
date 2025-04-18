@@ -1,14 +1,12 @@
 
 import { useState } from "react";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
-import { formatPrice } from "@/utils/productUtils";
-import { ProductLikeButton } from "./ProductLikeButton";
-import { Skeleton } from "@/components/ui/skeleton";
-import { GridLayoutType } from "./types/ProductTypes";
-import { LikeProvider } from "./LikeContext";
+import { Star, Heart } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { GridLayoutType } from "./types/ProductTypes";
 
 interface ProductCardProps {
   product: any;
@@ -19,277 +17,144 @@ interface ProductCardProps {
 export const ProductCard = ({ product, layout = "grid4x4", sponsored = false }: ProductCardProps) => {
   const navigate = useNavigate();
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
   
   const handleCardClick = () => {
     navigate(`/products/${product.id}`);
   };
-  
-  const price = formatPrice(product.price);
-  
-  const originalPrice = product.is_discounted && product.discount_percentage 
-    ? formatPrice(product.price / (1 - product.discount_percentage / 100))
-    : null;
-  
-  // Helper function to determine highlight tag badge color
-  const getTagColor = (tag: string) => {
-    switch(tag.toLowerCase()) {
-      case 'bestseller':
-        return 'bg-amber-500 text-white border-amber-600';
-      case 'new':
-        return 'bg-blue-500 text-white border-blue-600';
-      case 'hot deal':
-        return 'bg-red-500 text-white border-red-600';
-      case 'trending':
-        return 'bg-purple-500 text-white border-purple-600';
-      case 'limited':
-        return 'bg-orange-500 text-white border-orange-600';
-      default:
-        return 'bg-gray-500 text-white border-gray-600';
-    }
+
+  // Format the price with Indian currency format
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0,
+    }).format(price);
   };
 
-  // Helper function to determine discount badge color based on percentage
-  const getDiscountBadgeColor = (percentage?: number) => {
-    if (!percentage) return 'bg-red-500';
-    if (percentage >= 50) return 'bg-green-500 text-white';
-    if (percentage >= 30) return 'bg-amber-500 text-white';
-    return 'bg-red-500 text-white';
-  };
-  
-  // Render different layouts based on the grid type
-  if (layout === "grid1x1") {
-    return (
-      <motion.div 
-        whileHover={{ y: -5, transition: { duration: 0.2 } }}
-        className="h-full"
-      >
-        <Card 
-          className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer border-border flex flex-col md:flex-row h-full"
-          onClick={handleCardClick}
-        >
-          <div className="w-full md:w-1/3 aspect-square md:h-auto relative">
-            {!imageLoaded && (
-              <div className="w-full h-full bg-gray-200 dark:bg-gray-800 animate-pulse"></div>
-            )}
-            <img 
-              src={product.imageUrl || product.image_url || "https://via.placeholder.com/300x300"} 
-              alt={product.title || product.name} 
-              className={`w-full h-full object-cover transition-all duration-300 ${imageLoaded ? 'img-loaded' : 'img-loading'}`}
-              onLoad={() => setImageLoaded(true)}
-              loading="lazy"
-            />
-            
-            {/* Highlight tags */}
-            {product.highlight_tags && product.highlight_tags.length > 0 && (
-              <div className="absolute bottom-2 left-2 flex flex-wrap gap-1">
-                {product.highlight_tags.map((tag: string, index: number) => (
-                  <Badge 
-                    key={index}
-                    className={`${getTagColor(tag)} text-xs font-semibold shadow-sm`}
-                  >
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            )}
-          </div>
-          
-          <div className="flex flex-col flex-1 p-4">
-            <div className="flex justify-between items-start">
-              <div>
-                <h2 className="text-xl font-semibold">{product.title || product.name}</h2>
-                {product.category && (
-                  <Badge variant="outline" className="mt-1">
-                    {product.category}
-                  </Badge>
-                )}
-              </div>
-              
-              <div className="flex items-center">
-                <LikeProvider>
-                  <ProductLikeButton productId={product.id} />
-                </LikeProvider>
-                
-                {sponsored && (
-                  <Badge variant="outline" className="ml-2 bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
-                    Sponsored
-                  </Badge>
-                )}
-              </div>
-            </div>
-            
-            <p className="text-sm text-muted-foreground my-4 line-clamp-3">
-              {product.description}
-            </p>
-            
-            <div className="mt-auto flex justify-between items-center">
-              <div>
-                <span className="text-2xl font-bold">{price}</span>
-                {originalPrice && (
-                  <span className="text-sm text-muted-foreground line-through ml-2">
-                    {originalPrice}
-                  </span>
-                )}
-              </div>
-              
-              {product.is_discounted && product.discount_percentage && (
-                <Badge className={`${getDiscountBadgeColor(product.discount_percentage)} text-white`}>
-                  {Math.round(product.discount_percentage)}% OFF
-                </Badge>
-              )}
-            </div>
-          </div>
-        </Card>
-      </motion.div>
-    );
-  }
-  
-  if (layout === "grid2x2") {
-    return (
-      <motion.div 
-        whileHover={{ y: -5, transition: { duration: 0.2 } }}
-        className="h-full"
-      >
-        <Card 
-          className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer border-border h-full flex flex-col"
-          onClick={handleCardClick}
-        >
-          <div className="relative w-full aspect-video">
-            {!imageLoaded && (
-              <div className="w-full h-full bg-gray-200 dark:bg-gray-800 animate-pulse"></div>
-            )}
-            <img 
-              src={product.imageUrl || product.image_url || "https://via.placeholder.com/300x300"} 
-              alt={product.title || product.name} 
-              className={`w-full h-full object-cover transition-all duration-300 ${imageLoaded ? 'img-loaded hover:scale-105' : 'img-loading'}`}
-              onLoad={() => setImageLoaded(true)}
-              loading="lazy"
-            />
-            
-            {product.is_discounted && product.discount_percentage && (
-              <Badge className={`absolute top-2 left-2 ${getDiscountBadgeColor(product.discount_percentage)}`}>
-                {Math.round(product.discount_percentage)}% OFF
-              </Badge>
-            )}
-            
-            {sponsored && (
-              <Badge variant="outline" className="absolute top-2 right-2 bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
-                Sponsored
-              </Badge>
-            )}
-            
-            {/* Highlight tags */}
-            {product.highlight_tags && product.highlight_tags.length > 0 && (
-              <div className="absolute bottom-2 left-2 flex flex-wrap gap-1">
-                {product.highlight_tags.map((tag: string, index: number) => (
-                  <Badge 
-                    key={index}
-                    className={`${getTagColor(tag)} text-xs font-semibold shadow-sm`}
-                  >
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            )}
-          </div>
-          
-          <CardContent className="flex-1 p-4 pt-3">
-            <div className="flex justify-between">
-              <h3 className="font-medium line-clamp-1">{product.title || product.name}</h3>
-              <LikeProvider>
-                <ProductLikeButton productId={product.id} size="sm" />
-              </LikeProvider>
-            </div>
-            
-            <p className="text-sm text-muted-foreground mt-1 mb-2 line-clamp-2">
-              {product.description}
-            </p>
-            
-            {product.category && (
-              <Badge variant="outline" className="text-xs mt-1">
-                {product.category}
-              </Badge>
-            )}
-            
-            <div className="mt-2 pt-2 border-t flex justify-between items-center">
-              <span className="font-bold">{price}</span>
-              {originalPrice && (
-                <span className="text-sm text-muted-foreground line-through">
-                  {originalPrice}
-                </span>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
-    );
-  }
-  
-  // Default grid4x4 (compact) view
+  // Calculate the discount percentage
+  const discountPercentage = product.original_price 
+    ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
+    : 0;
+
+  // Determine if it's a list view
+  const isList = layout === "grid1x1";
+
   return (
-    <motion.div 
-      whileHover={{ y: -5, transition: { duration: 0.2 } }}
-      className="h-full"
+    <motion.div
+      whileHover={{ y: -4 }}
+      className={cn(
+        "group relative",
+        isList ? "w-full" : "w-full"
+      )}
     >
       <Card 
-        className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer border-border h-full flex flex-col"
+        className={cn(
+          "overflow-hidden border-0 rounded-none hover:shadow-lg transition-shadow duration-300",
+          isList ? "flex" : "flex flex-col"
+        )}
         onClick={handleCardClick}
       >
-        <div className="relative w-full aspect-square">
-          {!imageLoaded && (
-            <div className="w-full h-full bg-gray-200 dark:bg-gray-800 animate-pulse"></div>
-          )}
-          <img 
-            src={product.imageUrl || product.image_url || "https://via.placeholder.com/300x300"} 
-            alt={product.title || product.name} 
-            className={`w-full h-full object-cover transition-all duration-300 ${imageLoaded ? 'img-loaded hover:scale-105' : 'img-loading'}`}
+        {/* Image container */}
+        <div className={cn(
+          "relative overflow-hidden bg-gray-100",
+          isList ? "w-[200px] h-[250px]" : "aspect-[3/4] w-full"
+        )}>
+          <img
+            src={product.imageUrl || product.image_url}
+            alt={product.title}
+            className={cn(
+              "w-full h-full object-cover transition-transform duration-300 group-hover:scale-105",
+              !imageLoaded && "blur-sm"
+            )}
             onLoad={() => setImageLoaded(true)}
-            loading="lazy"
           />
           
-          {product.is_discounted && product.discount_percentage && (
-            <Badge className={`absolute top-2 left-2 ${getDiscountBadgeColor(product.discount_percentage)} text-xs shadow-sm`}>
-              {Math.round(product.discount_percentage)}% OFF
+          {/* Wishlist button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsLiked(!isLiked);
+            }}
+            className="absolute top-2 right-2 p-1.5 rounded-full bg-white/80 hover:bg-white"
+          >
+            <Heart className={cn(
+              "w-5 h-5 transition-colors",
+              isLiked ? "fill-red-500 stroke-red-500" : "stroke-gray-600"
+            )} />
+          </button>
+
+          {/* Discount tag */}
+          {discountPercentage > 0 && (
+            <Badge className="absolute bottom-2 left-2 bg-pink-500">
+              {discountPercentage}% OFF
             </Badge>
           )}
+        </div>
+
+        {/* Content */}
+        <div className={cn(
+          "flex flex-col",
+          isList ? "flex-1 p-4" : "p-3"
+        )}>
+          {/* Brand name */}
+          <h3 className="font-medium text-base text-gray-900 mb-1">
+            {product.brand_name || product.brand || "Brand"}
+          </h3>
           
-          <div className="absolute top-2 right-2">
-            <LikeProvider>
-              <ProductLikeButton productId={product.id} size="sm" />
-            </LikeProvider>
+          {/* Product title */}
+          <p className={cn(
+            "text-gray-600 text-sm mb-2",
+            isList ? "line-clamp-2" : "line-clamp-1"
+          )}>
+            {product.title}
+          </p>
+
+          {/* Price and rating */}
+          <div className="flex items-center justify-between mt-auto">
+            <div className="flex items-baseline gap-2">
+              <span className="font-semibold">
+                {formatPrice(product.price)}
+              </span>
+              {product.original_price && (
+                <>
+                  <span className="text-sm text-gray-500 line-through">
+                    {formatPrice(product.original_price)}
+                  </span>
+                  <span className="text-sm text-pink-500">
+                    ({discountPercentage}% OFF)
+                  </span>
+                </>
+              )}
+            </div>
+            
+            {/* Rating */}
+            {product.rating && (
+              <div className="flex items-center gap-1 bg-green-500 text-white px-2 py-0.5 rounded text-sm">
+                <span>{product.rating}</span>
+                <Star className="w-3 h-3 fill-current" />
+              </div>
+            )}
           </div>
-          
-          {sponsored && (
-            <Badge variant="outline" className="absolute bottom-2 right-2 text-xs bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
-              Sponsored
-            </Badge>
-          )}
-          
-          {/* Highlight tags */}
-          {product.highlight_tags && product.highlight_tags.length > 0 && (
-            <div className="absolute bottom-2 left-2 flex flex-wrap gap-1">
-              {product.highlight_tags.map((tag: string, index: number) => (
-                <Badge 
-                  key={index}
-                  className={`${getTagColor(tag)} text-xs font-semibold shadow-sm`}
-                >
-                  {tag}
-                </Badge>
-              ))}
+
+          {/* Additional details for list view */}
+          {isList && (
+            <div className="mt-4 space-y-2">
+              {product.description && (
+                <p className="text-sm text-gray-600 line-clamp-2">
+                  {product.description}
+                </p>
+              )}
+              {product.highlights && (
+                <ul className="text-sm text-gray-600 list-disc list-inside">
+                  {product.highlights.slice(0, 3).map((highlight: string, index: number) => (
+                    <li key={index}>{highlight}</li>
+                  ))}
+                </ul>
+              )}
             </div>
           )}
         </div>
-        
-        <CardContent className="flex-1 p-3 pt-2">
-          <h3 className="font-medium text-sm line-clamp-1 mb-1">{product.title || product.name}</h3>
-          
-          <div className="flex items-baseline justify-between">
-            <p className="font-bold text-sm">{price}</p>
-            {originalPrice && (
-              <p className="text-xs text-muted-foreground line-through">{originalPrice}</p>
-            )}
-          </div>
-        </CardContent>
       </Card>
     </motion.div>
   );
