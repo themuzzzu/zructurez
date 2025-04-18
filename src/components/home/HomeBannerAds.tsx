@@ -17,20 +17,23 @@ export function HomeBannerAds() {
     queryFn: () => fetchActiveAds("home", "banner", 3),
   });
 
-  if (isLoading) {
+  // If no ads are available or still loading, use the BannerCarousel component
+  // which has sample ads for demo purposes
+  if (isLoading || !ads.length) {
+    // Import and use BannerCarousel dynamically 
+    const BannerCarousel = React.lazy(() => import('@/components/marketplace/BannerCarousel').then(mod => ({ default: mod.BannerCarousel })));
+    
     return (
-      <div className="w-full px-0 sm:px-2">
-        <Skeleton className="w-full h-[200px] sm:h-[300px] rounded-lg" />
+      <div className="w-full px-0 sm:px-2 mt-2 mb-6">
+        <React.Suspense fallback={<Skeleton className="w-full h-[200px] sm:h-[300px] rounded-lg" />}>
+          <BannerCarousel />
+        </React.Suspense>
       </div>
     );
   }
 
-  if (!ads.length) {
-    return null;
-  }
-
   return (
-    <div className="w-full px-0 sm:px-2">
+    <div className="w-full px-0 sm:px-2 mt-2 mb-6">
       <Carousel className="w-full">
         <CarouselContent>
           {ads.map((ad) => (

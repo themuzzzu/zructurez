@@ -33,19 +33,19 @@ export const BusinessCategoryScroller = () => {
 
   return (
     <div className="bg-black dark:bg-zinc-950 rounded-lg p-3 mb-5">
-      <h3 className="text-lg font-semibold mb-2 text-white">Explore Businesses</h3>
+      <h3 className="text-lg font-semibold mb-3 text-white">Explore Businesses</h3>
       <ScrollArea className="w-full overflow-hidden">
-        <div className="flex gap-2 pb-2">
+        <div className="flex gap-3 pb-3">
           {categories.map((category) => (
             <motion.div
               key={category.id}
               onClick={() => handleCategoryClick(category.id)}
-              className="flex flex-col items-center cursor-pointer group min-w-[65px] bg-[#1b2430] rounded-lg p-2"
+              className="flex flex-col items-center cursor-pointer group min-w-[70px] bg-[#1b2430] rounded-lg p-3"
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               transition={{ duration: 0.15 }}
             >
-              <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mb-1">
+              <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mb-2">
                 {category.icon}
               </div>
               <span className="text-xs text-center text-white line-clamp-1">{category.name}</span>
@@ -56,4 +56,4 @@ export const BusinessCategoryScroller = () => {
       </ScrollArea>
     </div>
   );
-};
+}

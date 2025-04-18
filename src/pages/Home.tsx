@@ -12,6 +12,7 @@ import { MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sidebar } from "@/components/Sidebar";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import React from "react";
 
 export default function Home() {
   const { currentLocation, isLocationAvailable, setShowLocationPicker } = useLocation();
@@ -26,15 +27,25 @@ export default function Home() {
           <div className="min-h-[calc(100vh-4rem)] flex flex-col">
             <SearchHero />
             
-            <div className="-mt-4">
-              <HomeBannerAds />
-            </div>
+            {/* Banner Ads Section */}
+            <HomeBannerAds />
             
-            {/* Category Scrollers */}
-            <div className="space-y-4">
-              <BusinessCategoryScroller />
-              <ServiceCategoryScroller />
-              <MarketplaceCategoryScroller />
+            {/* Category Scrollers with improved spacing */}
+            <div className="space-y-8 mt-4">
+              {/* Business Categories */}
+              <div className="mb-6">
+                <BusinessCategoryScroller />
+              </div>
+              
+              {/* Service Categories */}
+              <div className="mb-6">
+                <ServiceCategoryScroller />
+              </div>
+              
+              {/* Marketplace Categories */}
+              <div className="mb-6">
+                <MarketplaceCategoryScroller />
+              </div>
             </div>
             
             {/* Location Section */}
