@@ -34,15 +34,18 @@ export function BusinessSearchResults({ results, isLoading, query }: BusinessSea
       {results.map((result) => (
         <BusinessCard
           key={result.id}
-          business={{
-            id: result.id,
-            name: result.title,
-            description: result.description,
-            category: result.category || '',
-            image_url: result.imageUrl,
-            user_id: '',
-            created_at: new Date().toISOString()
-          }}
+          id={result.id}
+          name={result.title}
+          description={result.description}
+          category={result.category || ''}
+          image_url={result.imageUrl}
+          rating={4.5} // Default rating
+          reviews={10} // Default reviews count
+          location="Local Area" // Default location
+          contact="" // Default contact
+          hours="" // Default hours
+          user_id=""
+          created_at={new Date().toISOString()}
         />
       ))}
     </div>

@@ -34,14 +34,14 @@ export function ServiceSearchResults({ results, isLoading, query }: ServiceSearc
       {results.map((result) => (
         <ServiceCard
           key={result.id}
-          service={{
-            id: result.id,
-            title: result.title,
-            description: result.description,
-            price: result.price || 0,
-            imageUrl: result.imageUrl,
-            category: result.category
-          }}
+          id={result.id}
+          name={result.title}
+          description={result.description}
+          price={`$${result.price?.toFixed(2) || '0.00'}`}
+          image={result.imageUrl || ''}
+          providerName="Service Provider" // Default provider name
+          providerId="provider-id" // Default provider ID
+          contact_info="" // Default contact info
         />
       ))}
     </div>
