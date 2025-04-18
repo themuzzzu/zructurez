@@ -6,17 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Filter, Grid2X2, LayoutGrid, Grip, ArrowLeft } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Slider } from "@/components/ui/slider";
+import { Badge } from "@/components/ui/badge";
 import { ProductCard } from "@/components/products/ProductCard";
 import { useSearch } from "@/hooks/useSearch";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { LikeProvider } from "@/components/products/LikeContext";
 import { motion } from "framer-motion";
-import { Badge } from "@/components/ui/badge";
 
 export default function MarketplaceSearch() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -31,15 +26,13 @@ export default function MarketplaceSearch() {
   );
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
   const [sortBy, setSortBy] = useState<"relevance" | "price-asc" | "price-desc" | "newest" | "popularity">("relevance");
-  const [showDiscounted, setShowDiscounted] = useState(false);
-  const [showBranded, setShowBranded] = useState(false);
   const [gridLayout, setGridLayout] = useState<"grid1x1" | "grid2x2" | "grid4x4">(() => {
     return (localStorage.getItem("searchGridLayout") as any) || "grid4x4";
   });
 
-  const { results, isLoading, search } = useSearch({
+  const { results, isLoading, search, relatedResults } = useSearch({
     initialQuery: query,
-    suggestionsEnabled: false
+    suggestionsEnabled: true
   });
 
   useEffect(() => {
@@ -59,9 +52,7 @@ export default function MarketplaceSearch() {
     }
   };
 
-  // Fix the type issue by creating a properly typed handler function
   const handlePriceRangeChange = (value: number[]) => {
-    // Ensure we handle the value as a tuple of two numbers
     if (value.length === 2) {
       setPriceRange([value[0], value[1]]);
     }
@@ -75,23 +66,6 @@ export default function MarketplaceSearch() {
       sortBy
     });
     setIsFilterOpen(false);
-  };
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.05 }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.3 }
-    }
   };
 
   return (
@@ -109,8 +83,8 @@ export default function MarketplaceSearch() {
               >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
-              <h1 className="text-xl font-bold">
-                {searchQuery ? `Results for "${searchQuery}"` : "Search Products"}
+              <h1 className="text-2xl font-bold tracking-tight">
+                {searchQuery ? `"${searchQuery}"` : "Search Products"}
               </h1>
             </div>
 
@@ -263,6 +237,38 @@ export default function MarketplaceSearch() {
         {/* Results */}
         <LikeProvider>
           <div>
+            {/* Related Products Section */}
+            {relatedResults && relatedResults.length > 0 && (
+              <div className="mb-8">
+                <h2 className="text-lg font-semibold mb-4">Related Products</h2>
+                <motion.div
+                  className={`grid ${
+                    gridLayout === "grid1x1" ? "grid-cols-1" :
+                    gridLayout === "grid2x2" ? "grid-cols-1 sm:grid-cols-2" :
+                    "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+                  } gap-4`}
+                >
+                  {relatedResults.slice(0, 4).map((product) => (
+                    <motion.div 
+                      key={product.id}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                    >
+                      <ProductCard
+                        product={{
+                          ...product,
+                          imageUrl: product.imageUrl || '',
+                          price: product.price || 0,
+                        }}
+                        layout={gridLayout}
+                      />
+                    </motion.div>
+                  ))}
+                </motion.div>
+              </div>
+            )}
+
+            {/* Main Results */}
             {isLoading ? (
               <motion.div
                 className={`grid ${
@@ -280,29 +286,36 @@ export default function MarketplaceSearch() {
                 ))}
               </motion.div>
             ) : results && results.length > 0 ? (
-              <motion.div
-                className={`grid ${
-                  gridLayout === "grid1x1" ? "grid-cols-1" :
-                  gridLayout === "grid2x2" ? "grid-cols-1 sm:grid-cols-2" :
-                  "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
-                } gap-4`}
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-              >
-                {results.map((product) => (
-                  <motion.div key={product.id} variants={itemVariants}>
-                    <ProductCard
-                      product={{
-                        ...product,
-                        imageUrl: product.imageUrl || '',
-                        price: product.price || 0,
-                      }}
-                      layout={gridLayout}
-                    />
-                  </motion.div>
-                ))}
-              </motion.div>
+              <>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {results.length} products found
+                </p>
+                <motion.div
+                  className={`grid ${
+                    gridLayout === "grid1x1" ? "grid-cols-1" :
+                    gridLayout === "grid2x2" ? "grid-cols-1 sm:grid-cols-2" :
+                    "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+                  } gap-4`}
+                >
+                  {results.map((product) => (
+                    <motion.div 
+                      key={product.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <ProductCard
+                        product={{
+                          ...product,
+                          imageUrl: product.imageUrl || '',
+                          price: product.price || 0,
+                        }}
+                        layout={gridLayout}
+                      />
+                    </motion.div>
+                  ))}
+                </motion.div>
+              </>
             ) : (
               <div className="text-center py-12">
                 <p className="text-muted-foreground">
