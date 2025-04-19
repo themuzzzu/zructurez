@@ -10,7 +10,7 @@ try {
   // Install critical dependencies if Vite is missing
   if (!fs.existsSync(path.join(__dirname, 'node_modules', '.bin', 'vite'))) {
     console.log('Vite not found, installing missing dependencies...');
-    execSync('node install-deps.js', { stdio: 'inherit' });
+    execSync('npm install --save-dev vite@latest @vitejs/plugin-react-swc@latest', { stdio: 'inherit' });
   }
 
   // Fix permissions on script files
@@ -27,7 +27,7 @@ try {
   }
   
   console.log('Project issues fixed!');
-  console.log('You can now run: npm run dev');
+  console.log('You can now run: npx vite dev');
 } catch (error) {
   console.error('Error fixing project:', error);
   process.exit(1);
