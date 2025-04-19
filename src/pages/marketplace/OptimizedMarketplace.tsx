@@ -1,4 +1,3 @@
-
 import { useState, useEffect, Suspense, lazy } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
@@ -12,26 +11,17 @@ import { useLoading } from "@/providers/LoadingProvider";
 const BannerCarousel = lazy(() => 
   import("@/components/marketplace/BannerCarousel").then(module => ({ default: module.BannerCarousel }))
 );
-const CrazyDeals = lazy(() => 
-  import("@/components/marketplace/CrazyDeals").then(module => ({ default: module.CrazyDeals }))
-);
 const SponsoredProducts = lazy(() => 
   import("@/components/marketplace/SponsoredProducts").then(module => ({ default: module.default }))
+);
+const SuggestedProducts = lazy(() => 
+  import("@/components/products/SuggestedProducts").then(module => ({ default: module.default }))
 );
 const TrendingProducts = lazy(() => 
   import("@/components/marketplace/TrendingProducts").then(module => ({ default: module.TrendingProducts }))
 );
-const PersonalizedRecommendations = lazy(() => 
-  import("@/components/marketplace/PersonalizedRecommendations").then(module => ({ default: module.PersonalizedRecommendations }))
-);
 const BrowseTabContent = lazy(() => 
   import("./BrowseTabContent").then(module => ({ default: module.BrowseTabContent }))
-);
-const FlashSale = lazy(() => 
-  import("@/components/marketplace/FlashSale").then(module => ({ default: module.FlashSale }))
-);
-const SuggestedProducts = lazy(() => 
-  import("@/components/products/SuggestedProducts").then(module => ({ default: module.default }))
 );
 
 // Optimized section loader
@@ -172,13 +162,13 @@ export const OptimizedMarketplace = () => {
         />
       </div>
       
-      {/* Main content sections */}
+      {/* Main content sections in new order */}
       <div className="space-y-4 sm:space-y-6 md:space-y-8">
-        {/* Banner */}
+        {/* Banner Carousel */}
         <LazySection fallbackCount={1}>
           <BannerCarousel />
         </LazySection>
-        
+
         {/* Categories */}
         <div className="mb-4 sm:mb-6">
           <ShopByCategory onCategorySelect={handleCategoryChange} />
@@ -193,16 +183,13 @@ export const OptimizedMarketplace = () => {
         <LazySection>
           <SuggestedProducts />
         </LazySection>
-        
+
+        {/* Trending Products */}
         <LazySection>
-          <FlashSale />
+          <TrendingProducts />
         </LazySection>
-        
-        <LazySection>
-          <CrazyDeals />
-        </LazySection>
-        
-        {/* Main browse content */}
+
+        {/* Browse by Category */}
         <LazySection>
           <BrowseTabContent 
             searchTerm={searchQuery}
