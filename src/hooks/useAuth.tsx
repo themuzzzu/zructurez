@@ -1,85 +1,117 @@
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import type { User, Session } from '@supabase/supabase-js';
-import { toast } from "sonner";
+import { Profile } from '@/types/profile';
+import { toast } from 'sonner';
 
 export const useAuth = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [refreshError, setRefreshError] = useState<Error | null>(null);
-
-  // Function to refresh session
-  const refreshSession = async () => {
-    try {
-      const { data, error } = await supabase.auth.refreshSession();
-      if (error) {
-        console.error('Session refresh error:', error);
-        setRefreshError(error);
-        return false;
-      }
-      
-      setSession(data.session);
-      setUser(data.session?.user ?? null);
-      return true;
-    } catch (error) {
-      console.error('Unexpected error during session refresh:', error);
-      setRefreshError(error as Error);
-      return false;
-    }
-  };
 
   useEffect(() => {
-    // Get initial session
-    const getInitialSession = async () => {
-      try {
-        setLoading(true);
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
+    const fetchUserProfile = async () => {
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      
+      if (authUser) {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', authUser.id)
+          .single();
+
         if (error) {
-          console.error('Error getting initial session:', error);
-          setRefreshError(error);
+          console.error('Error fetching profile:', error);
+        } else {
+          setProfile(data);
         }
-        
-        setSession(session);
-        setUser(session?.user ?? null);
-      } catch (error) {
-        console.error('Unexpected error getting session:', error);
-      } finally {
-        setLoading(false);
       }
+      
+      setUser(authUser);
+      setLoading(false);
     };
 
-    getInitialSession();
+    fetchUserProfile();
 
-    // Set up auto refresh timer
-    const refreshTimer = setInterval(() => {
-      if (session) {
-        refreshSession();
-      }
-    }, 55 * 60 * 1000); // Refresh 5 minutes before the default 1-hour expiry
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
-      setLoading(false);
+      if (session?.user) {
+        fetchUserProfile();
+      }
     });
 
     return () => {
-      clearInterval(refreshTimer);
-      subscription.unsubscribe();
+      authListener.subscription.unsubscribe();
     };
-  }, [session]);
+  }, []);
 
-  return { 
-    user, 
-    session,
-    loading, 
-    refreshError,
-    refreshSession 
+  const signUp = async (email: string, password: string) => {
+    setLoading(true);
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+
+    if (error) {
+      toast.error(error.message);
+      setLoading(false);
+      return false;
+    }
+
+    toast.success('Registration successful! Please check your email.');
+    setLoading(false);
+    return true;
+  };
+
+  const signIn = async (email: string, password: string) => {
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      toast.error(error.message);
+      setLoading(false);
+      return false;
+    }
+
+    toast.success('Logged in successfully!');
+    setLoading(false);
+    return true;
+  };
+
+  const signOut = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setProfile(null);
+    toast.info('Logged out successfully');
+  };
+
+  const updateProfile = async (updates: Partial<Profile>) => {
+    if (!user) return false;
+
+    const { error } = await supabase
+      .from('profiles')
+      .update(updates)
+      .eq('id', user.id);
+
+    if (error) {
+      toast.error(error.message);
+      return false;
+    }
+
+    toast.success('Profile updated successfully');
+    return true;
+  };
+
+  return {
+    user,
+    profile,
+    loading,
+    signUp,
+    signIn,
+    signOut,
+    updateProfile,
   };
 };
