@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import * as ToastPrimitives from "@radix-ui/react-toast"
 import { cva, type VariantProps } from "class-variance-authority"
@@ -116,14 +115,12 @@ type ToastProps = React.ComponentPropsWithoutRef<typeof Toast>
 
 type ToastActionElement = React.ReactElement<typeof ToastAction>
 
-// Updated Toaster component with toast type icons
 export function Toaster() {
   const { toasts } = useToast();
 
   return (
     <ToastProvider>
       {toasts.map(function ({ id, title, description, action, category, variant, ...props }) {
-        // Choose icon based on toast type
         let Icon = Info;
         if (title === "Success") Icon = CheckCircle;
         else if (title === "Error") Icon = AlertCircle;
