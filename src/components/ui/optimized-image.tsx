@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 interface OptimizedImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   fallback?: string;
+  priority?: boolean;
 }
 
 export function OptimizedImage({ 
@@ -12,6 +13,7 @@ export function OptimizedImage({
   alt, 
   className, 
   fallback = "/placeholder.png",
+  priority = false,
   ...props 
 }: OptimizedImageProps) {
   const [isLoading, setIsLoading] = useState(true);
@@ -31,6 +33,7 @@ export function OptimizedImage({
           "w-full h-full object-cover transition-opacity duration-300",
           isLoading ? "opacity-0" : "opacity-100"
         )}
+        loading={priority ? "eager" : "lazy"}
         onLoad={() => setIsLoading(false)}
         onError={() => {
           setError(true);
