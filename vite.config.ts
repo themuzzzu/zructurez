@@ -4,6 +4,7 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 import autoprefixer from "autoprefixer";
+import tailwindcss from "tailwindcss";
 
 export default defineConfig(({ mode }) => ({
   plugins: [
@@ -26,8 +27,8 @@ export default defineConfig(({ mode }) => ({
   css: {
     postcss: {
       plugins: [
-        require("tailwindcss"),
-        autoprefixer
+        tailwindcss(),
+        autoprefixer(),
       ],
     },
   },
