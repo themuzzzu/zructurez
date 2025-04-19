@@ -32,7 +32,7 @@ const Marketplace = () => {
   return (
     <Layout>
       <MarketplaceProvider>
-        {/* 1. Search Bar (Sticky) */}
+        {/* Search Bar */}
         <div className="sticky top-0 z-30 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
           <div className="container max-w-7xl mx-auto px-4 py-3">
             <MarketplaceSearch 
@@ -45,12 +45,12 @@ const Marketplace = () => {
         
         <div className="container max-w-7xl mx-auto pb-16">
           <div className="space-y-6 px-4 pt-4">
-            {/* 2. Banner Carousel */}
+            {/* Banner Carousel */}
             <div className="overflow-hidden rounded-2xl">
               <BannerCarousel />
             </div>
             
-            {/* 3. Shop by Category */}
+            {/* Shop by Category */}
             <div className="mt-8">
               <div className="flex items-center justify-between mb-2">
                 <h2 className="text-xl font-semibold">Shop by Category</h2>
@@ -59,7 +59,7 @@ const Marketplace = () => {
               <ShopByCategory onCategorySelect={handleCategorySelect} />
             </div>
             
-            {/* 4. Sponsored Products */}
+            {/* Sponsored Products */}
             <div className="mt-8">
               <div className="flex items-center justify-between mb-2">
                 <h2 className="text-xl font-semibold">Sponsored</h2>
@@ -68,7 +68,7 @@ const Marketplace = () => {
               <SponsoredProducts />
             </div>
             
-            {/* 5. Suggested Products */}
+            {/* Suggested Products */}
             <div className="mt-8">
               <div className="flex items-center justify-between mb-2">
                 <h2 className="text-xl font-semibold">Suggested for You</h2>
@@ -77,7 +77,7 @@ const Marketplace = () => {
               <SuggestedProducts />
             </div>
             
-            {/* 6. Trending Products */}
+            {/* Trending Products */}
             <div className="mt-8">
               <div className="flex items-center justify-between mb-2">
                 <h2 className="text-xl font-semibold">Trending Now in Your Area</h2>
@@ -86,7 +86,7 @@ const Marketplace = () => {
               <TrendingProducts />
             </div>
             
-            {/* 7. Browse by Category */}
+            {/* Browse by Category */}
             <div className="mt-10 mb-8">
               <h2 className="text-xl font-semibold mb-4">Browse by Category</h2>
               <BrowseTabContent 
