@@ -23,3 +23,10 @@ declare module 'dompurify' {
   const DOMPurify: DOMPurifyI;
   export default DOMPurify;
 }
+
+// Add window interface extension for browser environments
+declare global {
+  interface Window {
+    DOMPurify: import('dompurify').DOMPurifyI;
+  }
+}
