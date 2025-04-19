@@ -11,7 +11,6 @@ import { TrendingProducts } from "@/components/marketplace/TrendingProducts";
 import { TrendingSection } from "@/components/marketplace/TrendingSection";
 import { TrendingSearches } from "@/components/marketplace/TrendingSearches";
 import { BrowseCategoriesFooter } from "@/components/marketplace/BrowseCategoriesFooter";
-import { ProductRankings } from "@/components/marketplace/ProductRankings";
 import { useNavigate } from "react-router-dom";
 
 // Lazy-loaded components for better performance
@@ -40,8 +39,6 @@ export default function MarketplacePage() {
           if (entry.isIntersecting) {
             const sectionName = entry.target.getAttribute('data-section');
             console.log(`Section viewed: ${sectionName}`);
-            // Here you would typically track this event with your analytics provider
-            // Example: analytics.track('section_viewed', { section: sectionName });
           }
         });
       },
@@ -116,11 +113,6 @@ export default function MarketplacePage() {
         {/* Trending by category section */}
         <div data-section="trending-section">
           <TrendingSection />
-        </div>
-        
-        {/* Product rankings */}
-        <div data-section="product-rankings" className="bg-[#0f172a] text-white rounded-xl p-6">
-          <ProductRankings />
         </div>
         
         {/* Featured category - lazy loaded */}
