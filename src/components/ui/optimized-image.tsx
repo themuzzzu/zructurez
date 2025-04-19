@@ -1,11 +1,10 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { LoadingSpinner } from "./loading-spinner";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface OptimizedImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   fallback?: string;
-  priority?: boolean; // Added this property to fix the TypeScript error
 }
 
 export function OptimizedImage({ 
@@ -13,7 +12,6 @@ export function OptimizedImage({
   alt, 
   className, 
   fallback = "/placeholder.png",
-  priority = false, // Added default value
   ...props 
 }: OptimizedImageProps) {
   const [isLoading, setIsLoading] = useState(true);
@@ -22,8 +20,8 @@ export function OptimizedImage({
   return (
     <div className={cn("relative", className)}>
       {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-muted">
-          <LoadingSpinner size="sm" />
+        <div className="absolute inset-0 overflow-hidden">
+          <Skeleton className="w-full h-full" />
         </div>
       )}
       <img

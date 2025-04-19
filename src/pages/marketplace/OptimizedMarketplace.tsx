@@ -1,4 +1,3 @@
-
 import { useState, useEffect, Suspense, lazy } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
@@ -8,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { SkeletonCard } from "@/components/loaders";
 import { useLoading } from "@/providers/LoadingProvider";
 
-// Lazy load non-critical components - Fixed imports to handle named exports
+// Lazy load components
 const BannerCarousel = lazy(() => 
   import("@/components/marketplace/BannerCarousel").then(module => ({ default: module.BannerCarousel }))
 );
@@ -24,20 +23,17 @@ const TrendingProducts = lazy(() =>
 const PersonalizedRecommendations = lazy(() => 
   import("@/components/marketplace/PersonalizedRecommendations").then(module => ({ default: module.PersonalizedRecommendations }))
 );
-const ProductRankings = lazy(() => 
-  import("@/components/rankings/ProductRankings").then(module => ({ default: module.ProductRankings }))
-);
 const BrowseTabContent = lazy(() => 
   import("./BrowseTabContent").then(module => ({ default: module.BrowseTabContent }))
 );
 const FlashSale = lazy(() => 
   import("@/components/marketplace/FlashSale").then(module => ({ default: module.FlashSale }))
 );
-const SponsoredRecommendations = lazy(() => 
-  import("@/components/recommendations/SponsoredRecommendations").then(module => ({ default: module.SponsoredRecommendations }))
+const SuggestedProducts = lazy(() => 
+  import("@/components/products/SuggestedProducts").then(module => ({ default: module.default }))
 );
 
-// Optimized section loader with reduced skeleton count
+// Optimized section loader
 const LazySection = ({ children, fallbackCount = 2 }) => (
   <Suspense fallback={
     <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 animate-fade-in">
@@ -77,7 +73,7 @@ export const OptimizedMarketplace = () => {
   
   const { setLoading } = useLoading();
   
-  // Show loading indicator when page loads - significantly reduced loading time to 100ms
+  // Show loading indicator when page loads
   useEffect(() => {
     setLoading(true);
     const timeout = setTimeout(() => {
@@ -89,7 +85,6 @@ export const OptimizedMarketplace = () => {
   
   // Preload critical images and resources for faster loading
   useEffect(() => {
-    // Create link preload tags for critical resources
     const preloadImages = [
       '/lovable-uploads/a727b8a0-84a4-45b2-88da-392010b1b66c.png',
       '/lovable-uploads/c395d99e-dcf4-4659-9c50-fc50708c858d.png'
@@ -103,10 +98,8 @@ export const OptimizedMarketplace = () => {
       return link;
     });
     
-    // Add preload links to document head
     preloadLinks.forEach(link => document.head.appendChild(link));
     
-    // Cleanup function to remove preload links
     return () => {
       preloadLinks.forEach(link => {
         if (document.head.contains(link)) {
@@ -167,7 +160,7 @@ export const OptimizedMarketplace = () => {
   
   return (
     <div className="pt-2 sm:pt-4 px-2 sm:px-4 md:px-6 transition-opacity duration-200">
-      {/* Search Bar - Full width on mobile, max-width on desktop */}
+      {/* Search Bar */}
       <div className="mb-4 sm:mb-6 max-w-3xl mx-auto w-full">
         <AutocompleteSearch 
           value={searchQuery}
@@ -178,28 +171,26 @@ export const OptimizedMarketplace = () => {
         />
       </div>
       
-      {/* Main content sections with improved responsive spacing */}
+      {/* Main content sections */}
       <div className="space-y-4 sm:space-y-6 md:space-y-8">
-        {/* Banner - Lazy loaded with priority */}
+        {/* Banner */}
         <LazySection fallbackCount={1}>
           <BannerCarousel />
         </LazySection>
         
-        {/* Categories - Load immediately as it's critical */}
+        {/* Categories */}
         <div className="mb-4 sm:mb-6">
           <ShopByCategory onCategorySelect={handleCategoryChange} />
         </div>
         
-        {/* Lazy loaded sections with progressive enhancement */}
+        {/* Sponsored Products */}
         <LazySection>
-          <ProductRankings />
+          <SponsoredProducts />
         </LazySection>
-        
+
+        {/* Suggested Products */}
         <LazySection>
-          <SponsoredRecommendations 
-            title="Sponsored Products" 
-            limit={4} 
-          />
+          <SuggestedProducts />
         </LazySection>
         
         <LazySection>
