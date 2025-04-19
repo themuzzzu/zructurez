@@ -1,94 +1,33 @@
 
-import React, { useState } from "react";
-import { Card } from "@/components/ui/card";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Star } from "lucide-react";
-
-const categories = ["Electronics", "Home", "Clothing", "Toys"];
+import React from "react";
 
 export const TrendingSection = () => {
-  const navigate = useNavigate();
-  const [activeCategory, setActiveCategory] = useState("Electronics");
-
+  // Sample trending products data
   const products = [
-    {
-      id: "9",
-      name: "Wireless Earbuds",
-      price: 99.99,
-      rating: 4,
-      category: "Electronics",
-      image: "/lovable-uploads/070ce457-b6df-45a3-9490-d74e701eca37.png",
-    },
-    {
-      id: "10",
-      name: "Smartwatch",
-      price: 199.95,
-      rating: 4,
-      category: "Electronics",
-      image: "/lovable-uploads/070ce457-b6df-45a3-9490-d74e701eca37.png",
-    },
-    {
-      id: "11",
-      name: "Gaming Controller",
-      price: 39.99,
-      rating: 4,
-      category: "Electronics",
-      image: "/lovable-uploads/070ce457-b6df-45a3-9490-d74e701eca37.png",
-    },
-    {
-      id: "12",
-      name: "Stand Mixer",
-      price: 349.99,
-      rating: 4,
-      category: "Electronics",
-      image: "/lovable-uploads/070ce457-b6df-45a3-9490-d74e701eca37.png",
-    },
+    { id: 1, name: "Smart Home Hub", price: 129.99, image: "/lovable-uploads/c395d99e-dcf4-4659-9c50-fc50708c858d.png", soldCount: 234 },
+    { id: 2, name: "Fitness Tracker", price: 79.99, image: "/lovable-uploads/a727b8a0-84a4-45b2-88da-392010b1b66c.png", soldCount: 195 },
+    { id: 3, name: "Portable Power Bank", price: 49.99, image: "/lovable-uploads/c395d99e-dcf4-4659-9c50-fc50708c858d.png", soldCount: 178 },
+    { id: 4, name: "Wireless Mouse", price: 34.99, image: "/lovable-uploads/a727b8a0-84a4-45b2-88da-392010b1b66c.png", soldCount: 156 },
   ];
 
   return (
-    <section>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold">Trending Now in Your Area</h2>
-        <Button variant="link" onClick={() => navigate("/trending")} className="text-blue-600">
-          See All
-        </Button>
+    <div className="bg-white rounded-lg p-6 shadow-sm">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold">Trending Now</h2>
+        <a href="#" className="text-blue-600 text-sm">View all</a>
       </div>
-      
-      <div className="flex gap-4 mb-6 overflow-x-auto pb-2">
-        {categories.map((category) => (
-          <Button
-            key={category}
-            variant={activeCategory === category ? "default" : "outline"}
-            onClick={() => setActiveCategory(category)}
-            className="min-w-max"
-          >
-            {category}
-          </Button>
-        ))}
-      </div>
-      
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
         {products.map((product) => (
-          <Card key={product.id} className="overflow-hidden">
-            <div className="p-4 bg-gray-50 aspect-square flex items-center justify-center">
-              <img src={product.image} alt={product.name} className="max-h-full object-contain" />
-            </div>
+          <div key={product.id} className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+            <img src={product.image} alt={product.name} className="w-full h-40 object-cover" />
             <div className="p-4">
-              <h3 className="font-medium">{product.name}</h3>
-              <p className="text-lg font-bold mt-1">${product.price}</p>
-              <div className="flex mt-1">
-                {Array(5).fill(0).map((_, i) => (
-                  <Star
-                    key={i}
-                    className={`w-4 h-4 ${i < product.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
-                  />
-                ))}
-              </div>
+              <h3 className="font-medium mb-1 truncate">{product.name}</h3>
+              <p className="text-gray-900 font-bold mb-1">${product.price}</p>
+              <p className="text-sm text-gray-500">{product.soldCount} sold this week</p>
             </div>
-          </Card>
+          </div>
         ))}
       </div>
-    </section>
+    </div>
   );
 };

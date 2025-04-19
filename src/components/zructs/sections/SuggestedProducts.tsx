@@ -1,74 +1,42 @@
 
 import React from "react";
-import { Card } from "@/components/ui/card";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Star } from "lucide-react";
 
 export const SuggestedProducts = () => {
-  const navigate = useNavigate();
-
+  // Sample suggested products data
   const products = [
-    {
-      id: "5",
-      name: "Laptop",
-      price: 699.99,
-      rating: 4,
-      image: "/lovable-uploads/070ce457-b6df-45a3-9490-d74e701eca37.png",
-    },
-    {
-      id: "6",
-      name: "Dress",
-      price: 39.99,
-      rating: 4,
-      image: "/lovable-uploads/070ce457-b6df-45a3-9490-d74e701eca37.png",
-    },
-    {
-      id: "7",
-      name: "Camera",
-      price: 429.99,
-      rating: 4,
-      image: "/lovable-uploads/070ce457-b6df-45a3-9490-d74e701eca37.png",
-    },
-    {
-      id: "8",
-      name: "Cooking Pot",
-      price: 79.99,
-      rating: 4,
-      image: "/lovable-uploads/070ce457-b6df-45a3-9490-d74e701eca37.png",
-    },
+    { id: 1, name: "Wireless Charger", price: 29.99, image: "/lovable-uploads/c395d99e-dcf4-4659-9c50-fc50708c858d.png", rating: 4.5 },
+    { id: 2, name: "Bluetooth Speaker", price: 59.99, image: "/lovable-uploads/a727b8a0-84a4-45b2-88da-392010b1b66c.png", rating: 4.2 },
+    { id: 3, name: "Phone Case", price: 19.99, image: "/lovable-uploads/c395d99e-dcf4-4659-9c50-fc50708c858d.png", rating: 4.8 },
+    { id: 4, name: "USB-C Cable Pack", price: 12.99, image: "/lovable-uploads/a727b8a0-84a4-45b2-88da-392010b1b66c.png", rating: 4.6 },
   ];
 
   return (
-    <section>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold">Suggested for You</h2>
-        <Button variant="link" onClick={() => navigate("/suggested")} className="text-blue-600">
-          See All
-        </Button>
+    <div className="bg-white rounded-lg p-6 shadow-sm">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold">Suggested For You</h2>
+        <a href="#" className="text-blue-600 text-sm">View all</a>
       </div>
-      
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
         {products.map((product) => (
-          <Card key={product.id} className="overflow-hidden">
-            <div className="p-4 bg-gray-50 aspect-square flex items-center justify-center">
-              <img src={product.image} alt={product.name} className="max-h-full object-contain" />
-            </div>
+          <div key={product.id} className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+            <img src={product.image} alt={product.name} className="w-full h-40 object-cover" />
             <div className="p-4">
-              <h3 className="font-medium">{product.name}</h3>
-              <p className="text-lg font-bold mt-1">${product.price}</p>
-              <div className="flex mt-1">
-                {Array(5).fill(0).map((_, i) => (
-                  <Star
-                    key={i}
-                    className={`w-4 h-4 ${i < product.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
-                  />
-                ))}
+              <h3 className="font-medium mb-1 truncate">{product.name}</h3>
+              <div className="flex items-center text-sm mb-1">
+                <div className="flex text-yellow-400">
+                  {[...Array(5)].map((_, i) => (
+                    <svg key={i} className={`w-4 h-4 ${i < Math.floor(product.rating) ? "fill-current" : "stroke-current text-gray-300"}`} viewBox="0 0 24 24">
+                      <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+                    </svg>
+                  ))}
+                </div>
+                <span className="ml-1 text-gray-500">{product.rating}</span>
               </div>
+              <p className="text-gray-900 font-bold">${product.price}</p>
             </div>
-          </Card>
+          </div>
         ))}
       </div>
-    </section>
+    </div>
   );
 };

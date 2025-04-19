@@ -1,42 +1,30 @@
 
 import React from "react";
-import { useNavigate } from "react-router-dom";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 
 export const ShopByCategory = () => {
-  const navigate = useNavigate();
-  
+  // Sample categories data
   const categories = [
-    { id: "electronics", name: "Electronics", icon: "💻" },
-    { id: "fashion", name: "Fashion", icon: "👕" },
-    { id: "grocery", name: "Grocery", icon: "🛒" },
-    { id: "home", name: "Home", icon: "🏠" },
-    { id: "beauty", name: "Beauty", icon: "💄" },
-    { id: "sports", name: "Sports", icon: "⚽" },
+    { id: 1, name: "Electronics", image: "/lovable-uploads/c395d99e-dcf4-4659-9c50-fc50708c858d.png" },
+    { id: 2, name: "Fashion", image: "/lovable-uploads/a727b8a0-84a4-45b2-88da-392010b1b66c.png" },
+    { id: 3, name: "Home & Kitchen", image: "/lovable-uploads/c395d99e-dcf4-4659-9c50-fc50708c858d.png" },
+    { id: 4, name: "Beauty", image: "/lovable-uploads/a727b8a0-84a4-45b2-88da-392010b1b66c.png" },
+    { id: 5, name: "Sports", image: "/lovable-uploads/c395d99e-dcf4-4659-9c50-fc50708c858d.png" },
+    { id: 6, name: "Books", image: "/lovable-uploads/a727b8a0-84a4-45b2-88da-392010b1b66c.png" },
   ];
 
   return (
-    <section>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold">Shop by Category</h2>
-        <Button variant="link" onClick={() => navigate("/categories")} className="text-blue-600">
-          See All
-        </Button>
-      </div>
-      
-      <div className="grid grid-cols-3 sm:grid-cols-6 gap-4">
+    <div className="bg-white rounded-lg p-6 shadow-sm">
+      <h2 className="text-xl font-bold mb-4">Shop By Category</h2>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {categories.map((category) => (
-          <Card 
-            key={category.id}
-            className="p-4 flex flex-col items-center justify-center cursor-pointer hover:shadow-lg transition-shadow"
-            onClick={() => navigate(`/category/${category.id}`)}
-          >
-            <span className="text-3xl mb-2">{category.icon}</span>
-            <span className="text-sm font-medium">{category.name}</span>
-          </Card>
+          <div key={category.id} className="flex flex-col items-center cursor-pointer hover:opacity-80 transition-opacity">
+            <div className="w-16 h-16 rounded-full bg-gray-100 overflow-hidden mb-2">
+              <img src={category.image} alt={category.name} className="w-full h-full object-cover" />
+            </div>
+            <span className="text-sm text-center">{category.name}</span>
+          </div>
         ))}
       </div>
-    </section>
+    </div>
   );
 };

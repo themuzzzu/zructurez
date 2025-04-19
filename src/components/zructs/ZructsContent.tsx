@@ -7,7 +7,7 @@ import { TrendingSection } from "./sections/TrendingSection";
 
 export const ZructsContent = () => {
   return (
-    <div className="space-y-12">
+    <div className="space-y-6">
       <ShopByCategory />
       <SponsoredProducts />
       <SuggestedProducts />
