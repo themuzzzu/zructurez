@@ -1,34 +1,25 @@
 
-const VALID_WIDTHS = [200, 400, 600, 800, 1200, 1600, 2000];
-
 export const getOptimalImageWidth = (containerWidth: number): number => {
-  const dpr = window.devicePixelRatio || 1;
-  const idealWidth = containerWidth * dpr;
+  const devicePixelRatio = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
+  const width = Math.round(containerWidth * devicePixelRatio);
   
-  return VALID_WIDTHS.find(w => w >= idealWidth) || VALID_WIDTHS[VALID_WIDTHS.length - 1];
+  if (width <= 640) return 640;
+  if (width <= 768) return 768;
+  if (width <= 1024) return 1024;
+  if (width <= 1280) return 1280;
+  return 1536;
 };
 
 export const optimizeImageUrl = (url: string, width: number): string => {
-  if (!url || !url.startsWith('http')) return url;
+  if (!url) return '';
+  if (url.includes('data:image')) return url;
+  if (url.startsWith('blob:')) return url;
   
-  // Only optimize URLs from our domain
-  if (!url.includes('lovable-uploads')) return url;
+  // For Unsplash images
+  if (url.includes('unsplash.com')) {
+    return `${url}${url.includes('?') ? '&' : '?'}w=${width}&q=75&auto=format`;
+  }
   
-  const optimizedUrl = new URL(url);
-  optimizedUrl.searchParams.set('w', width.toString());
-  optimizedUrl.searchParams.set('q', '80'); // Decent quality
-  optimizedUrl.searchParams.set('auto', 'format'); // Auto format detection
-  
-  return optimizedUrl.toString();
-};
-
-export const preloadCriticalImages = (urls: string[]) => {
-  urls.forEach(url => {
-    const link = document.createElement('link');
-    link.rel = 'preload';
-    link.as = 'image';
-    link.href = url;
-    link.fetchPriority = 'high';
-    document.head.appendChild(link);
-  });
+  // For local/uploaded images, add width parameter
+  return `${url}${url.includes('?') ? '&' : '?'}w=${width}`;
 };

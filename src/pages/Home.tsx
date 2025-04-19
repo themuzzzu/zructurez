@@ -1,4 +1,3 @@
-
 import { Layout } from "@/components/layout/Layout";
 import { SearchHero } from "@/components/home/SearchHero";
 import { LocationAvailabilityStatus } from "@/components/location/LocationAvailabilityStatus";

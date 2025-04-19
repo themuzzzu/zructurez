@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { Shimmer } from "./shimmer";
+import { getOptimalImageWidth, optimizeImageUrl } from "@/utils/imageLoader";
 
 interface BlurImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   src: string;
@@ -28,63 +29,47 @@ export function BlurImage({
   const [isLoading, setIsLoading] = useState(!priority);
   const [currentSrc, setCurrentSrc] = useState(priority ? src : (blurDataUrl || ""));
   const imgRef = useRef<HTMLImageElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   
   // Create small base64 placeholder if not provided
   const placeholder = blurDataUrl || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+P+/HgAFdwI2QOYvBQAAAABJRU5ErkJggg==';
   
-  // Immediately set up image preloading for priority images
   useEffect(() => {
-    // For priority images, preload immediately
+    if (!containerRef.current) return;
+    
+    const width = getOptimalImageWidth(containerRef.current.offsetWidth);
+    const optimizedSrc = optimizeImageUrl(src, width);
+    
     if (priority) {
+      setCurrentSrc(optimizedSrc);
       setIsLoading(false);
-      setCurrentSrc(src);
-      
-      // Add preload link for priority images
-      const link = document.createElement('link');
-      link.rel = 'preload';
-      link.as = 'image';
-      link.href = src;
-      document.head.appendChild(link);
-      
-      return () => {
-        if (document.head.contains(link)) {
-          document.head.removeChild(link);
-        }
-      };
+      return;
     }
     
-    // For non-priority images, use Intersection Observer
-    setCurrentSrc(placeholder);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const img = new Image();
+            img.src = optimizedSrc;
+            img.onload = () => {
+              setCurrentSrc(optimizedSrc);
+              setIsLoading(false);
+              observer.disconnect();
+            };
+          }
+        });
+      },
+      { rootMargin: '300px', threshold: 0.01 }
+    );
     
-    const imgObserver = new IntersectionObserver((entries, observer) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          // Preload the actual image
-          const img = new Image();
-          img.src = src;
-          img.onload = () => {
-            setCurrentSrc(src);
-            setIsLoading(false);
-            observer.disconnect();
-          };
-        }
-      });
-    }, {
-      rootMargin: "300px", // Increased from 200px - load images further before they enter viewport
-      threshold: 0.01
-    });
-    
-    // Observe the actual image element
     if (imgRef.current) {
-      imgObserver.observe(imgRef.current);
+      observer.observe(imgRef.current);
     }
     
-    return () => {
-      imgObserver.disconnect();
-    };
-  }, [src, placeholder, priority]);
+    return () => observer.disconnect();
+  }, [src, priority, blurDataUrl]);
   
-  // Calculate aspect ratio classes
   const aspectRatioClass = {
     square: "aspect-square",
     video: "aspect-video",
@@ -93,20 +78,21 @@ export function BlurImage({
   };
   
   return (
-    <div className={cn(
-      "overflow-hidden relative bg-muted/20",
-      !fill && aspectRatioClass[aspectRatio],
-      containerClassName
-    )}>
+    <div 
+      ref={containerRef}
+      className={cn(
+        "overflow-hidden relative bg-muted/20",
+        !fill && aspectRatioClass[aspectRatio],
+        containerClassName
+      )}
+    >
       {isLoading && (
-        <Shimmer 
-          className={cn("absolute inset-0 z-10")} 
-        />
+        <Shimmer className="absolute inset-0 z-10" />
       )}
       
       <img
         ref={imgRef}
-        src={currentSrc || placeholder}
+        src={currentSrc}
         alt={alt}
         className={cn(
           "w-full h-full object-cover transition-all duration-300",
