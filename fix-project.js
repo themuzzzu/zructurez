@@ -28,6 +28,20 @@ try {
     console.log('BusinessCard.tsx not found, skipping fix');
   }
 
+  // Fix for DOMPurify types
+  console.log('Checking if DOMPurify types are installed...');
+  try {
+    const typesExist = fs.existsSync(path.join(__dirname, 'node_modules/@types/dompurify'));
+    if (!typesExist) {
+      console.log('Installing DOMPurify types...');
+      execSync('npm install --save-dev @types/dompurify@latest', { stdio: 'inherit' });
+    } else {
+      console.log('DOMPurify types already installed');
+    }
+  } catch (error) {
+    console.error('Error checking DOMPurify types:', error);
+  }
+  
   // Fix permissions on scripts
   if (process.platform !== 'win32') {
     try {
