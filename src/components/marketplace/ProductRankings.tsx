@@ -1,7 +1,5 @@
-
 import React from "react";
 import { Heart, Eye, ShoppingBag } from "lucide-react";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { ImageFallback } from "@/components/ui/image-fallback";
 
@@ -16,36 +14,46 @@ interface Product {
   brand: string;
   image: string;
   views?: number;
+  wishlistCount?: number;
+  sales?: number;
   price: number;
 }
 
 const sampleProducts: Product[] = [
   {
     id: 1,
-    brand: "Brand",
+    brand: "Nike",
     image: "/placeholders/image-placeholder.jpg",
     views: 22,
+    wishlistCount: 10,
+    sales: 150,
     price: 7250
   },
   {
     id: 2,
-    brand: "Brand",
+    brand: "Adidas",
     image: "/placeholders/image-placeholder.jpg",
     views: 10,
+    wishlistCount: 30,
+    sales: 240,
     price: 799
   },
   {
     id: 3,
-    brand: "Brand",
+    brand: "Puma",
     image: "/placeholders/image-placeholder.jpg",
     views: 2,
+    wishlistCount: 5,
+    sales: 90,
     price: 14299
   },
   {
     id: 4,
-    brand: "Brand",
+    brand: "Reebok",
     image: "/placeholders/image-placeholder.jpg",
     views: 1,
+    wishlistCount: 2,
+    sales: 15,
     price: 7499
   }
 ];
@@ -53,10 +61,27 @@ const sampleProducts: Product[] = [
 export const ProductRankings = () => {
   const [activeTab, setActiveTab] = React.useState("most-viewed");
 
+  const getSortedProducts = (): Product[] => {
+    const products = [...sampleProducts];
+
+    switch (activeTab) {
+      case "most-viewed":
+        return products.sort((a, b) => (b.views || 0) - (a.views || 0));
+      case "most-wishlisted":
+        return products.sort((a, b) => (b.wishlistCount || 0) - (a.wishlistCount || 0));
+      case "top-selling":
+        return products.sort((a, b) => (b.sales || 0) - (a.sales || 0));
+      default:
+        return products;
+    }
+  };
+
+  const sortedProducts = getSortedProducts();
+
   return (
     <div className="space-y-4">
       <h2 className="text-2xl font-bold text-white">Product Rankings</h2>
-      
+
       {/* Ranking Tabs */}
       <div className="space-y-2">
         {tabs.map((tab) => (
@@ -77,11 +102,11 @@ export const ProductRankings = () => {
       </div>
 
       {/* Product Grid */}
-      <div className="grid grid-cols-4 gap-4">
-        {sampleProducts.map((product) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {sortedProducts.map((product, index) => (
           <div key={product.id} className="relative group">
-            <div className="absolute top-2 left-2 bg-black/80 text-white px-2 py-0.5 rounded text-sm">
-              {product.id}
+            <div className="absolute top-2 left-2 bg-black/80 text-white px-2 py-0.5 rounded text-sm z-10">
+              #{index + 1}
             </div>
             <div className="relative aspect-square overflow-hidden rounded-lg bg-[#1b2430]">
               <ImageFallback
@@ -97,8 +122,9 @@ export const ProductRankings = () => {
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">{product.brand}</span>
                 <div className="flex items-center gap-1 text-xs text-gray-400">
-                  <Eye className="w-3 h-3" />
-                  <span>{product.views} views</span>
+                  {activeTab === "most-viewed" && <><Eye className="w-3 h-3" /><span>{product.views} views</span></>}
+                  {activeTab === "most-wishlisted" && <><Heart className="w-3 h-3" /><span>{product.wishlistCount} wishes</span></>}
+                  {activeTab === "top-selling" && <><ShoppingBag className="w-3 h-3" /><span>{product.sales} sold</span></>}
                 </div>
               </div>
               <div className="text-sm font-semibold">₹{product.price.toLocaleString()}</div>
