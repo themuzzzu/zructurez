@@ -8,34 +8,32 @@ console.log('Installing missing dependencies...');
 
 try {
   if (fs.existsSync(path.join(__dirname, 'package.json'))) {
-    // First install critical dependencies including Vite
+    // Install Vite and critical development dependencies
     console.log('Installing Vite and critical development dependencies...');
     execSync('npm install --save-dev vite@latest @vitejs/plugin-react-swc@latest typescript@latest @types/node@latest @types/dompurify@latest', { stdio: 'inherit' });
     
-    // Install PostCSS-related dependencies
-    console.log('Installing PostCSS and related dependencies...');
-    execSync('npm install --save-dev postcss@latest autoprefixer@latest tailwindcss@latest tailwindcss-animate@latest', { stdio: 'inherit' });
-    
-    // Then React dependencies
-    console.log('Installing React dependencies...');
-    execSync('npm install react@latest react-dom@latest @types/react@latest @types/react-dom@latest dompurify@latest --save', { stdio: 'inherit' });
+    // Install DOMPurify
+    console.log('Installing DOMPurify...');
+    execSync('npm install dompurify@latest @types/dompurify@latest', { stdio: 'inherit' });
 
-    // Install UI dependencies
-    console.log('Installing UI dependencies...');
-    execSync('npm install @radix-ui/react-dialog@latest @radix-ui/react-select@latest @radix-ui/react-scroll-area@latest @radix-ui/react-label@latest @radix-ui/react-slot@latest lucide-react@latest sonner@latest --save', { stdio: 'inherit' });
+    // Additional dependencies for project
+    console.log('Installing React and related dependencies...');
+    execSync('npm install react@latest react-dom@latest @types/react@latest @types/react-dom@latest', { stdio: 'inherit' });
 
-    // Create npm scripts
+    // Ensure npm scripts are set up
     console.log('Creating npm scripts...');
-    const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf-8'));
-    packageJson.scripts = {
-      ...packageJson.scripts,
-      dev: 'vite',
-      build: 'vite build',
-      preview: 'vite preview'
-    };
-    
-    fs.writeFileSync(path.join(__dirname, 'package.json'), JSON.stringify(packageJson, null, 2));
-    
+    const packageJsonPath = path.join(__dirname, 'package.json');
+    if (fs.existsSync(packageJsonPath)) {
+      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+      packageJson.scripts = {
+        ...packageJson.scripts,
+        dev: 'vite',
+        build: 'vite build',
+        preview: 'vite preview'
+      };
+      fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
+    }
+
     // Final npm install to ensure everything is in place
     console.log('Running final npm install...');
     execSync('npm install', { stdio: 'inherit' });
