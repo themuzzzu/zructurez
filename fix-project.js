@@ -17,7 +17,7 @@ try {
     // Replace variant="success" with className="bg-green-500 text-white"
     content = content.replace(/variant="success"/g, 'className="bg-green-500 text-white"');
     
-    // Replace variant="destructive" with className="bg-red-500 text-white"
+    // Replace variant="destructive" with className="bg-destructive text-destructive-foreground"
     content = content.replace(/variant="destructive"/g, 'className="bg-destructive text-destructive-foreground"');
     
     // Replace variant="outline" with className="bg-background border-border"
