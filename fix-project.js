@@ -12,6 +12,14 @@ try {
     console.log('Vite not found, installing missing dependencies...');
     execSync('npm install --save-dev vite@latest @vitejs/plugin-react-swc@latest', { stdio: 'inherit' });
   }
+  
+  // Install PostCSS and related dependencies
+  if (!fs.existsSync(path.join(__dirname, 'node_modules', 'postcss')) || 
+      !fs.existsSync(path.join(__dirname, 'node_modules', 'autoprefixer')) ||
+      !fs.existsSync(path.join(__dirname, 'node_modules', 'tailwindcss'))) {
+    console.log('Installing PostCSS and related dependencies...');
+    execSync('npm install --save-dev postcss@latest autoprefixer@latest tailwindcss@latest tailwindcss-animate@latest', { stdio: 'inherit' });
+  }
 
   // Fix permissions on script files
   console.log('Setting correct permissions for script files...');

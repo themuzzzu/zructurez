@@ -22,4 +22,13 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
     host: true,
   },
+  css: {
+    // Add PostCSS configuration directly here
+    postcss: {
+      plugins: [
+        require('tailwindcss'),
+        require('autoprefixer'),
+      ],
+    },
+  },
 }));

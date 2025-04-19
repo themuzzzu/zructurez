@@ -12,6 +12,10 @@ try {
     console.log('Installing Vite and critical development dependencies...');
     execSync('npm install --save-dev vite@latest @vitejs/plugin-react-swc@latest typescript@latest @types/node@latest @types/dompurify@latest', { stdio: 'inherit' });
     
+    // Install PostCSS-related dependencies
+    console.log('Installing PostCSS and related dependencies...');
+    execSync('npm install --save-dev postcss@latest autoprefixer@latest tailwindcss@latest tailwindcss-animate@latest', { stdio: 'inherit' });
+    
     // Then React dependencies
     console.log('Installing React dependencies...');
     execSync('npm install react@latest react-dom@latest @types/react@latest @types/react-dom@latest dompurify@latest --save', { stdio: 'inherit' });
