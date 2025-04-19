@@ -1,41 +1,41 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Search, RefreshCcw } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Search } from "lucide-react";
 
 interface EmptySearchResultsProps {
-  searchTerm: string;
-  onReset?: () => void; // Making this optional
+  searchTerm?: string;
 }
 
-export const EmptySearchResults = ({ searchTerm, onReset }: EmptySearchResultsProps) => {
+export const EmptySearchResults: React.FC<EmptySearchResultsProps> = ({ searchTerm = "" }) => {
+  const navigate = useNavigate();
+
   return (
-    <div className="text-center p-8 bg-muted/30 rounded-lg flex flex-col items-center gap-4">
-      <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center">
-        <Search className="h-8 w-8 text-muted-foreground" />
+    <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+      <div className="bg-muted/30 p-4 rounded-full mb-4">
+        <Search className="h-10 w-10 text-muted-foreground" />
       </div>
       
-      <h3 className="text-xl font-semibold mt-2">No results found</h3>
+      <h2 className="text-xl font-bold mb-2">
+        {searchTerm
+          ? `No results found for "${searchTerm}"`
+          : "No products available yet"}
+      </h2>
       
-      <p className="text-muted-foreground max-w-md mx-auto">
-        We couldn't find any products matching "{searchTerm}".
-        Try using different keywords or browsing our categories.
+      <p className="text-muted-foreground mb-6 max-w-md">
+        {searchTerm
+          ? "Try adjusting your search or filter to find what you're looking for."
+          : "Products will appear here once they're added to the marketplace."}
       </p>
       
-      <div className="flex flex-wrap gap-3 justify-center mt-4">
-        {onReset && (
-          <Button 
-            variant="outline" 
-            className="gap-2"
-            onClick={onReset}
-          >
-            <RefreshCcw className="h-4 w-4" />
-            Reset Filters
-          </Button>
-        )}
+      <div className="flex gap-4">
+        <Button variant="outline" onClick={() => navigate("/marketplace")}>
+          Back to Marketplace
+        </Button>
         
-        <Button onClick={() => window.location.href = '/marketplace'}>
-          Browse All Products
+        <Button onClick={() => navigate("/")}>
+          Browse Home
         </Button>
       </div>
     </div>

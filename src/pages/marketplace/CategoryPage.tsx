@@ -1,87 +1,18 @@
-import { useState, useEffect } from "react";
+
+import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { ProductCard } from "@/components/products/ProductCard";
 import { ProductsGrid } from "@/components/products/ProductsGrid";
 import { Layout } from "@/components/layout/Layout";
 import { CategoryHeader } from "@/components/marketplace/CategoryHeader";
-import { CategorySidebar } from "@/components/marketplace/CategorySidebar";
 import { EmptySearchResults } from "@/components/marketplace/EmptySearchResults";
 
 const CategoryPage = () => {
   const { categorySlug } = useParams();
   const [products, setProducts] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [categoryName, setCategoryName] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [categoryName, setCategoryName] = useState<string>(categorySlug || "Category");
   const [layout, setLayout] = useState<"grid4x4" | "grid3x3" | "grid2x2" | "list">("grid3x3");
   const [searchQuery, setSearchQuery] = useState("");
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      setIsLoading(true);
-      try {
-        // Replace this query with one that works with existing tables
-        const { data, error } = await supabase
-          .from('ad_categories')  // Use an existing table or handle the error gracefully
-          .select('*')
-          .eq('name', categorySlug);
-
-        if (error) {
-          console.error("Error fetching categories:", error);
-          setIsLoading(false);
-          return;
-        }
-
-        if (data && data.length > 0) {
-          setCategoryName(data[0].name);
-        } else {
-          setCategoryName(categorySlug || "Category");
-        }
-      } catch (error) {
-        console.error("Unexpected error:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (categorySlug) {
-      fetchCategories();
-    }
-  }, [categorySlug]);
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      setIsLoading(true);
-      try {
-        let query = supabase
-          .from('products')
-          .select('*')
-          .eq('category', categorySlug);
-
-        if (searchQuery) {
-          query = query.ilike('title', `%${searchQuery}%`);
-        }
-
-        const { data, error } = await query;
-
-        if (error) {
-          console.error("Error fetching products:", error);
-          setIsLoading(false);
-          return;
-        }
-
-        setProducts(data || []);
-      } catch (error) {
-        console.error("Unexpected error:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (categorySlug) {
-      fetchProducts();
-    }
-  }, [categorySlug, searchQuery]);
 
   const handleLayoutChange = (newLayout: "grid4x4" | "grid3x3" | "grid2x2" | "list") => {
     setLayout(newLayout);
@@ -103,12 +34,17 @@ const CategoryPage = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <div className="md:col-span-1">
-            <CategorySidebar />
+            <div className="bg-muted/30 p-4 rounded-lg">
+              <h2 className="text-lg font-semibold mb-2">Filter Options</h2>
+              <p className="text-muted-foreground text-sm">
+                Filter options will be added here
+              </p>
+            </div>
           </div>
 
           <div className="md:col-span-3">
             {isLoading ? (
-              <div>Loading products...</div>
+              <div className="flex justify-center items-center h-40">Loading products...</div>
             ) : products.length > 0 ? (
               <ProductsGrid
                 products={products}
