@@ -52,26 +52,43 @@ const Marketplace = () => {
             
             {/* 3. Shop by Category */}
             <div className="mt-8">
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="text-xl font-semibold">Shop by Category</h2>
+                <a href="/categories" className="text-sm text-primary">See All</a>
+              </div>
               <ShopByCategory onCategorySelect={handleCategorySelect} />
             </div>
             
             {/* 4. Sponsored Products */}
             <div className="mt-8">
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="text-xl font-semibold">Sponsored</h2>
+                <a href="/products/sponsored" className="text-sm text-primary">See All</a>
+              </div>
               <SponsoredProducts />
             </div>
             
             {/* 5. Suggested Products */}
             <div className="mt-8">
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="text-xl font-semibold">Suggested for You</h2>
+                <a href="/products/suggested" className="text-sm text-primary">See All</a>
+              </div>
               <SuggestedProducts />
             </div>
             
             {/* 6. Trending Products */}
             <div className="mt-8">
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="text-xl font-semibold">Trending Now in Your Area</h2>
+                <a href="/products/trending" className="text-sm text-primary">See All</a>
+              </div>
               <TrendingProducts />
             </div>
             
             {/* 7. Browse by Category */}
             <div className="mt-10 mb-8">
+              <h2 className="text-xl font-semibold mb-4">Browse by Category</h2>
               <BrowseTabContent 
                 searchTerm={searchTerm}
                 onCategorySelect={handleCategorySelect} 

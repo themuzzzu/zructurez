@@ -9,7 +9,6 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
-import { useDebounce } from '@/hooks/useDebounce';
 
 interface MarketplaceSearchProps {
   onSearch: (searchTerm: string) => void;
@@ -52,7 +51,7 @@ export const MarketplaceSearch = ({
         <Input
           type="text"
           placeholder="Search for products, brands and categories..."
-          className="w-full pl-10 pr-10 h-11 rounded-xl border-gray-200"
+          className="w-full pl-10 pr-10 h-11 rounded-xl border-gray-200 bg-white dark:bg-gray-800"
           value={localSearchTerm}
           onChange={(e) => setLocalSearchTerm(e.target.value)}
         />
@@ -73,7 +72,7 @@ export const MarketplaceSearch = ({
         type="button"
         size="icon"
         variant="ghost"
-        className="rounded-full h-11 w-11"
+        className="rounded-full h-11 w-11 bg-gray-100 dark:bg-gray-700"
         onClick={handleVoiceSearch}
       >
         <Mic className={`h-5 w-5 ${showVoiceSearch ? 'text-primary animate-pulse' : ''}`} />
@@ -83,7 +82,7 @@ export const MarketplaceSearch = ({
         type="button"
         size="icon"
         variant="ghost"
-        className="rounded-full h-11 w-11"
+        className="rounded-full h-11 w-11 bg-gray-100 dark:bg-gray-700"
       >
         <Camera className="h-5 w-5" />
       </Button>
@@ -94,7 +93,7 @@ export const MarketplaceSearch = ({
             type="button"
             size="icon"
             variant="ghost"
-            className="rounded-full h-11 w-11"
+            className="rounded-full h-11 w-11 bg-gray-100 dark:bg-gray-700"
           >
             <Filter className="h-5 w-5" />
           </Button>
@@ -110,6 +109,14 @@ export const MarketplaceSearch = ({
               <div className="flex items-center">
                 <input type="checkbox" id="freeShipping" className="mr-2" />
                 <label htmlFor="freeShipping">Free Shipping</label>
+              </div>
+              <div className="flex items-center">
+                <input type="checkbox" id="inStock" className="mr-2" />
+                <label htmlFor="inStock">In Stock</label>
+              </div>
+              <div className="flex items-center">
+                <input type="checkbox" id="highRated" className="mr-2" />
+                <label htmlFor="highRated">4★ & above</label>
               </div>
             </div>
             <Button className="w-full">Apply Filters</Button>
