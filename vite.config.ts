@@ -25,5 +25,8 @@ export default defineConfig(({ mode }) => ({
   server: {
     port: 8080,
     host: true,
+    hmr: {
+      overlay: false, // Disable the error overlay
+    },
   },
 }));
