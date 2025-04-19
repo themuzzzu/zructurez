@@ -33,6 +33,12 @@ export function MobileNav() {
       active: location.pathname.startsWith("/marketplace"),
     },
     {
+      icon: ShoppingBag,
+      label: t("zructs"),
+      href: "/zructs",
+      active: location.pathname.startsWith("/zructs"),
+    },
+    {
       icon: Wrench,
       label: t("services"),
       href: "/services",
