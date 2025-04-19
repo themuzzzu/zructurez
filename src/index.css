@@ -113,7 +113,7 @@ body {
 
 /* Marketplace specific styles */
 .marketplace-item-hover {
-  @apply transition-all duration-200 hover:shadow-lg;
+  @apply transition-all duration-200 hover:shadow-lg rounded-2xl;
 }
 
 .category-card {
@@ -125,10 +125,11 @@ body {
 }
 
 .section-title {
-  @apply text-xl md:text-2xl font-bold flex items-center gap-2;
+  @apply text-xl md:text-2xl font-bold flex items-center gap-2 mb-4;
 }
 
 /* Enhanced rounded corners */
 .rounded-2xl {
   border-radius: 1rem;
 }
+
