@@ -1,18 +1,12 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { Layout } from "@/components/layout/Layout";
 import { CategorySection } from "@/components/marketplace/CategorySection";
-import { AutocompleteSearch } from "@/components/marketplace/AutocompleteSearch";
 import { ShopByCategory } from "@/components/marketplace/ShopByCategory";
 import { useNavigate } from "react-router-dom";
 
 const Marketplace = () => {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState("");
-  
-  const handleSearch = (term: string) => {
-    navigate(`/search/marketplace?q=${encodeURIComponent(term)}`);
-  };
 
   return (
     <Layout>
