@@ -1,16 +1,7 @@
 
 import React from "react";
-import { useNavigate } from "react-router-dom";
-import { ShopByCategory } from "./ShopByCategory";
-import { CategorySection } from "./CategorySection";
+import MarketplacePage from "@/pages/marketplace/MarketplacePage";
 
 export const MarketplaceContent = () => {
-  const navigate = useNavigate();
-
-  return (
-    <>
-      <ShopByCategory />
-      <CategorySection onCategorySelect={(category) => navigate(`/marketplace/category/${category}`)} />
-    </>
-  );
+  return <MarketplacePage />;
 };
