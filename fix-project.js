@@ -4,44 +4,42 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-console.log('Fixing common project issues...');
+console.log('Fixing project issues...');
 
 try {
-  // Install critical dependencies if Vite is missing
-  if (!fs.existsSync(path.join(__dirname, 'node_modules', '.bin', 'vite'))) {
-    console.log('Vite not found, installing missing dependencies...');
-    execSync('npm install --save-dev vite@latest @vitejs/plugin-react-swc@latest', { stdio: 'inherit' });
-  }
+  // Fix BusinessCard.tsx Badge variant issue
+  console.log('Fixing Badge variant issue in BusinessCard.tsx...');
+  const businessCardPath = path.join(__dirname, 'src/components/BusinessCard.tsx');
   
-  // Install DOMPurify types if missing
-  if (!fs.existsSync(path.join(__dirname, 'node_modules', '@types', 'dompurify'))) {
-    console.log('Installing DOMPurify types...');
-    execSync('npm install --save-dev @types/dompurify@latest', { stdio: 'inherit' });
-  }
-  
-  // Install PostCSS and related dependencies
-  if (!fs.existsSync(path.join(__dirname, 'node_modules', 'postcss')) || 
-      !fs.existsSync(path.join(__dirname, 'node_modules', 'autoprefixer')) ||
-      !fs.existsSync(path.join(__dirname, 'node_modules', 'tailwindcss'))) {
-    console.log('Installing PostCSS and related dependencies...');
-    execSync('npm install --save-dev postcss@latest autoprefixer@latest tailwindcss@latest tailwindcss-animate@latest', { stdio: 'inherit' });
+  if (fs.existsSync(businessCardPath)) {
+    let content = fs.readFileSync(businessCardPath, 'utf-8');
+    
+    // Replace variant="success" with className="bg-green-500 text-white"
+    content = content.replace(/variant="success"/g, 'className="bg-green-500 text-white"');
+    
+    // Replace variant="destructive" with className="bg-red-500 text-white"
+    content = content.replace(/variant="destructive"/g, 'className="bg-destructive text-destructive-foreground"');
+    
+    // Replace variant="outline" with className="bg-background border-border"
+    content = content.replace(/variant="outline"/g, 'className="bg-background border-border"');
+    
+    fs.writeFileSync(businessCardPath, content);
+  } else {
+    console.log('BusinessCard.tsx not found, skipping fix');
   }
 
-  // Fix permissions on script files
-  console.log('Setting correct permissions for script files...');
+  // Fix permissions on scripts
   if (process.platform !== 'win32') {
-    execSync('chmod +x install-deps.js', { stdio: 'inherit' });
-    execSync('chmod +x fix-project.js', { stdio: 'inherit' });
+    try {
+      execSync('chmod +x fix-project.js', { stdio: 'inherit' });
+      console.log('Fixed script permissions');
+    } catch (error) {
+      console.log('Failed to set permissions, but continuing...');
+    }
   }
   
-  // Verify Vite installation one more time
-  if (!fs.existsSync(path.join(__dirname, 'node_modules', '.bin', 'vite'))) {
-    console.log('Vite still not found. Installing it directly...');
-    execSync('npm install --save-dev vite@latest', { stdio: 'inherit' });
-  }
-  
-  console.log('Project issues fixed!');
-  console.log('You can now run: npx vite dev');
+  console.log('Project fixes completed!');
+  console.log('You should now be able to run: npm run dev');
 } catch (error) {
   console.error('Error fixing project:', error);
   process.exit(1);
