@@ -1,10 +1,9 @@
-
 import { type Config } from "tailwindcss";
 import tailwindcssAnimate from "tailwindcss-animate";
-import { fontFamily } from "tailwindcss/defaultTheme";
+import defaultTheme from "tailwindcss/defaultTheme";
 
 export default {
-  darkMode: "class",  // Changed from ["class"] to "class"
+  darkMode: "class",
   content: [
     './pages/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',
@@ -62,7 +61,7 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ["var(--font-sans)", ...fontFamily.sans],
+        sans: ["var(--font-sans)", ...defaultTheme.fontFamily.sans],
       },
       keyframes: {
         "accordion-down": {
@@ -82,4 +81,3 @@ export default {
   },
   plugins: [tailwindcssAnimate],
 } satisfies Config;
-
