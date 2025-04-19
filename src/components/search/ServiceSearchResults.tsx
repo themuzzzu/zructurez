@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { SearchResult } from "@/types/search";
+import { ServiceSearchResult } from "@/types/serviceTypes";
 import { EmptySearchResults } from "@/components/marketplace/EmptySearchResults";
 import { ServicesGrid } from "@/components/service-marketplace/ServicesGrid";
 
@@ -11,6 +12,11 @@ interface ServiceSearchResultsProps {
 }
 
 export function ServiceSearchResults({ results, isLoading, query }: ServiceSearchResultsProps) {
+  // Filter only service type results
+  const serviceResults = results.filter((result): result is ServiceSearchResult => 
+    result.type === 'service'
+  );
+
   if (isLoading) {
     return (
       <div className="container mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -25,12 +31,11 @@ export function ServiceSearchResults({ results, isLoading, query }: ServiceSearc
     );
   }
 
-  if (!results.length) {
-    return <EmptySearchResults searchTerm={query} />;
+  if (!serviceResults.length) {
+    return <EmptySearchResults searchTerm={query} type="service" />;
   }
 
-  // Convert search results to service format
-  const services = results.map(result => ({
+  const services = serviceResults.map(result => ({
     id: result.id,
     title: result.title,
     description: result.description,
@@ -48,3 +53,4 @@ export function ServiceSearchResults({ results, isLoading, query }: ServiceSearc
     <ServicesGrid services={services} layout="grid3x3" />
   );
 }
+
