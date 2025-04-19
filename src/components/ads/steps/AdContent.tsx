@@ -1,8 +1,9 @@
 
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import {
+import { Textarea } from "@/components/ui/textarea";
+import { 
   Select,
   SelectContent,
   SelectItem,
@@ -17,81 +18,86 @@ interface AdContentProps {
 }
 
 export const AdContent = ({ data, onChange }: AdContentProps) => {
+  const [targetType, setTargetType] = useState<TargetType>(data.targetType);
+
+  const handleTargetTypeChange = (type: TargetType) => {
+    setTargetType(type);
+    onChange({ targetType: type });
+  };
+
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <h3 className="text-lg font-medium">Ad Content</h3>
+        <h3 className="text-lg font-medium">Advertisement Content</h3>
         <p className="text-sm text-muted-foreground">
           Enter the details for your advertisement
         </p>
       </div>
 
       <div className="space-y-4">
-        <div className="space-y-2">
+        <div className="grid gap-2">
           <Label htmlFor="title">Title</Label>
           <Input
             id="title"
             value={data.title}
             onChange={(e) => onChange({ title: e.target.value })}
-            placeholder="Enter a compelling title"
+            placeholder="Enter a compelling title for your advertisement"
           />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="description">Description (Optional)</Label>
+        <div className="grid gap-2">
+          <Label htmlFor="description">Description</Label>
           <Textarea
             id="description"
             value={data.description}
             onChange={(e) => onChange({ description: e.target.value })}
-            placeholder="Add more details about your ad"
-            rows={3}
+            placeholder="Describe your offering in detail"
+            rows={4}
           />
         </div>
 
-        <div className="space-y-2">
+        <div className="grid gap-2">
           <Label htmlFor="cta">Call to Action Text</Label>
           <Input
             id="cta"
             value={data.ctaText}
             onChange={(e) => onChange({ ctaText: e.target.value })}
-            placeholder="e.g., 'Shop Now', 'Learn More'"
+            placeholder="e.g., Shop Now, Learn More, Sign Up"
           />
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label>Target Type</Label>
-            <Select 
-              value={data.targetType} 
-              onValueChange={(value: TargetType) => onChange({ targetType: value })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select target type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="product">Product</SelectItem>
-                <SelectItem value="business">Business</SelectItem>
-                <SelectItem value="service">Service</SelectItem>
-                <SelectItem value="url">External URL</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+        <div className="grid gap-2">
+          <Label htmlFor="target-type">Target Type</Label>
+          <Select 
+            value={targetType} 
+            onValueChange={(value: TargetType) => handleTargetTypeChange(value)}
+          >
+            <SelectTrigger id="target-type">
+              <SelectValue placeholder="Select what your ad links to" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="product">Product</SelectItem>
+              <SelectItem value="business">Business</SelectItem>
+              <SelectItem value="service">Service</SelectItem>
+              <SelectItem value="url">External URL</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="targetId">
-              {data.targetType === "url" ? "URL" : "ID"}
-            </Label>
-            <Input
-              id="targetId"
-              value={data.targetId}
-              onChange={(e) => onChange({ targetId: e.target.value })}
-              placeholder={data.targetType === "url" 
-                ? "https://..." 
-                : `Enter ${data.targetType} ID`
-              }
-              type={data.targetType === "url" ? "url" : "text"}
-            />
-          </div>
+        <div className="grid gap-2">
+          <Label htmlFor="target-id">
+            {targetType === "url" ? "URL" : `${targetType.charAt(0).toUpperCase() + targetType.slice(1)} ID`}
+          </Label>
+          <Input
+            id="target-id"
+            value={data.targetId}
+            onChange={(e) => onChange({ targetId: e.target.value })}
+            placeholder={
+              targetType === "url" 
+                ? "https://example.com/page" 
+                : `Enter the ${targetType} ID`
+            }
+          />
         </div>
       </div>
     </div>

@@ -1,5 +1,5 @@
 
-import {
+import { 
   Select,
   SelectContent,
   SelectItem,
@@ -14,56 +14,60 @@ interface SelectTypeProps {
   onChange: (value: AdType) => void;
 }
 
-const adTypesBySection: Record<AdSectionType, { value: AdType; label: string }[]> = {
-  home: [
-    { value: "banner", label: "Banner Ad" },
-    { value: "flash_deal", label: "Flash Deal" }
-  ],
-  marketplace: [
-    { value: "banner", label: "Banner" },
-    { value: "sponsored_product", label: "Sponsored Product" },
-    { value: "suggested_product", label: "Suggested Product" }
-  ],
-  business: [
-    { value: "banner", label: "Banner" },
-    { value: "sponsored_business", label: "Sponsored Business" },
-    { value: "suggested_business", label: "Suggested for You" }
-  ],
-  services: [
-    { value: "banner", label: "Banner" },
-    { value: "recommended_service", label: "Recommended Service" },
-    { value: "sponsored_service", label: "Sponsored Service" }
-  ]
-};
-
 export const SelectType = ({ section, value, onChange }: SelectTypeProps) => {
+  // Define the ad types available for each section
+  const adTypesBySection: Record<AdSectionType, { value: AdType; label: string }[]> = {
+    home: [
+      { value: "banner", label: "Banner Ad" },
+      { value: "flash_deal", label: "Flash Deal" },
+    ],
+    marketplace: [
+      { value: "banner", label: "Banner Ad" },
+      { value: "sponsored_product", label: "Sponsored Product" },
+      { value: "suggested_product", label: "Suggested Product" },
+    ],
+    business: [
+      { value: "banner", label: "Banner Ad" },
+      { value: "sponsored_business", label: "Sponsored Business" },
+      { value: "suggested_business", label: "Suggested Business" },
+    ],
+    services: [
+      { value: "banner", label: "Banner Ad" },
+      { value: "recommended_service", label: "Recommended Service" },
+      { value: "sponsored_service", label: "Sponsored Service" },
+    ],
+  };
+
+  // Get the available ad types based on the selected section
   const availableTypes = section ? adTypesBySection[section] : [];
 
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <h3 className="text-lg font-medium">What type of ad would you like to create?</h3>
+        <h3 className="text-lg font-medium">Select Advertisement Type</h3>
         <p className="text-sm text-muted-foreground">
-          Select the type of advertisement that best suits your needs
+          Choose the type of advertisement you want to create
         </p>
       </div>
 
-      <Select 
-        value={value} 
-        onValueChange={onChange}
-        disabled={!section}
-      >
-        <SelectTrigger className="w-full max-w-xs">
-          <SelectValue placeholder={section ? "Select ad type" : "First select a section"} />
-        </SelectTrigger>
-        <SelectContent>
-          {availableTypes.map(type => (
-            <SelectItem key={type.value} value={type.value}>
-              {type.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      {!section ? (
+        <div className="text-amber-500 text-sm p-3 bg-amber-50 rounded-md border border-amber-200">
+          Please select a section first to see available ad types
+        </div>
+      ) : (
+        <Select value={value} onValueChange={onChange}>
+          <SelectTrigger className="w-full max-w-xs">
+            <SelectValue placeholder="Select an ad type" />
+          </SelectTrigger>
+          <SelectContent>
+            {availableTypes.map((type) => (
+              <SelectItem key={type.value} value={type.value}>
+                {type.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
     </div>
   );
 };

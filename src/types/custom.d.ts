@@ -1,9 +1,6 @@
 
 /// <reference types="dompurify" />
 
-// This file adds custom type declarations for the project
-// and ensures TypeScript can find the DOMPurify types
-
 declare module 'dompurify' {
   export interface DOMPurifyI {
     sanitize(
@@ -24,7 +21,6 @@ declare module 'dompurify' {
   export default DOMPurify;
 }
 
-// Add window interface extension for browser environments
 declare global {
   interface Window {
     DOMPurify: import('dompurify').DOMPurifyI;

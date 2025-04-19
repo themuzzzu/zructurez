@@ -1,7 +1,12 @@
 
+import { format } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { CalendarIcon } from "lucide-react";
 import { AdFormData } from "../types";
 
 interface ScheduleProps {
@@ -13,42 +18,78 @@ export const Schedule = ({ data, onChange }: ScheduleProps) => {
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <h3 className="text-lg font-medium">Schedule</h3>
+        <h3 className="text-lg font-medium">Schedule Your Advertisement</h3>
         <p className="text-sm text-muted-foreground">
-          Set when your advertisement will run
+          Choose when your advertisement should start and end
         </p>
       </div>
 
-      <div className="grid gap-6 sm:grid-cols-2">
-        <div className="space-y-2">
+      <div className="space-y-4">
+        <div className="grid gap-2">
           <Label>Start Date</Label>
-          <Calendar
-            mode="single"
-            selected={data.startDate}
-            onSelect={(date) => date && onChange({ startDate: date })}
-            disabled={(date) => date < new Date()}
-            className="rounded-md border"
-          />
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "w-full justify-start text-left font-normal",
+                  !data.startDate && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {data.startDate ? format(data.startDate, "PPP") : "Select date"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={data.startDate}
+                onSelect={(date) => onChange({ startDate: date || new Date() })}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
         </div>
 
-        <div className="space-y-2">
-          <Label>End Date</Label>
-          <Calendar
-            mode="single"
-            selected={data.endDate}
-            onSelect={(date) => onChange({ endDate: date })}
-            disabled={(date) => date < data.startDate}
-            className="rounded-md border"
-          />
+        <div className="grid gap-2">
+          <Label>End Date (Optional)</Label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "w-full justify-start text-left font-normal",
+                  !data.endDate && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {data.endDate ? format(data.endDate, "PPP") : "No end date"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={data.endDate}
+                onSelect={(date) => onChange({ endDate: date })}
+                initialFocus
+                disabled={(date) => 
+                  data.startDate ? date < data.startDate : false
+                }
+              />
+            </PopoverContent>
+          </Popover>
         </div>
-      </div>
 
-      <div className="flex items-center space-x-2">
-        <Switch
-          checked={data.isActive}
-          onCheckedChange={(checked) => onChange({ isActive: checked })}
-        />
-        <Label>Activate immediately after creation</Label>
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="active-status"
+            checked={data.isActive}
+            onCheckedChange={(checked) => onChange({ isActive: checked })}
+          />
+          <Label htmlFor="active-status">
+            Set advertisement as active
+          </Label>
+        </div>
       </div>
     </div>
   );
