@@ -7,27 +7,6 @@ const path = require('path');
 console.log('Fixing project issues...');
 
 try {
-  // Fix BusinessCard.tsx Badge variant issue
-  console.log('Fixing Badge variant issue in BusinessCard.tsx...');
-  const businessCardPath = path.join(__dirname, 'src/components/BusinessCard.tsx');
-  
-  if (fs.existsSync(businessCardPath)) {
-    let content = fs.readFileSync(businessCardPath, 'utf-8');
-    
-    // Replace variant="success" with className="bg-green-500 text-white"
-    content = content.replace(/variant="success"/g, 'className="bg-green-500 text-white"');
-    
-    // Replace variant="destructive" with className="bg-destructive text-destructive-foreground"
-    content = content.replace(/variant="destructive"/g, 'className="bg-destructive text-destructive-foreground"');
-    
-    // Replace variant="outline" with className="bg-background border-border"
-    content = content.replace(/variant="outline"/g, 'className="bg-background border-border"');
-    
-    fs.writeFileSync(businessCardPath, content);
-  } else {
-    console.log('BusinessCard.tsx not found, skipping fix');
-  }
-
   // Fix for DOMPurify types
   console.log('Checking if DOMPurify types are installed...');
   try {
@@ -82,6 +61,59 @@ declare global {
 export {};
 `;
   fs.writeFileSync(customDtsPath, customDtsContent.trim());
+  
+  // Create or update vite.config.js if it doesn't exist
+  const viteConfigPath = path.join(__dirname, 'vite.config.js');
+  if (!fs.existsSync(viteConfigPath)) {
+    console.log('Creating vite.config.js...');
+    const viteConfig = `
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react-swc';
+import path from 'path';
+
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+  server: {
+    port: 8080,
+    host: true,
+  },
+});
+`;
+    fs.writeFileSync(viteConfigPath, viteConfig.trim());
+  }
+  
+  // Create a utility to verify Vite is working properly
+  const verifyVitePath = path.join(__dirname, 'src/utils/verifyVite.ts');
+  const verifyViteContent = `
+export const verifyVite = () => {
+  console.log('Verifying Vite installation...');
+  try {
+    // Check if we're running in a Vite environment
+    const isViteEnv = import.meta.env !== undefined;
+    
+    if (isViteEnv) {
+      console.log('Vite environment check successful');
+      return true;
+    } else {
+      console.warn('Vite environment variables not detected - may be running in production build');
+      return false;
+    }
+  } catch (error) {
+    console.error('Error verifying Vite:', error);
+    return false;
+  }
+};
+`;
+  
+  if (!fs.existsSync(path.dirname(verifyVitePath))) {
+    fs.mkdirSync(path.dirname(verifyVitePath), { recursive: true });
+  }
+  fs.writeFileSync(verifyVitePath, verifyViteContent.trim());
   
   // Fix permissions on scripts
   if (process.platform !== 'win32') {

@@ -21,10 +21,6 @@ try {
     console.log('Installing additional dependencies...');
     execSync('npm install @tanstack/react-query@latest react-router-dom@latest sonner@latest lucide-react@latest framer-motion@latest', { stdio: 'inherit' });
     
-    // Install shadcn-ui dependencies
-    console.log('Installing shadcn-ui dependencies...');
-    execSync('npm install @radix-ui/react-dialog@latest @radix-ui/react-select@latest @radix-ui/react-scroll-area@latest @radix-ui/react-label@latest @radix-ui/react-alert-dialog@latest', { stdio: 'inherit' });
-    
     // Install DOMPurify with its types
     console.log('Installing DOMPurify...');
     execSync('npm install dompurify@latest', { stdio: 'inherit' });
