@@ -1,16 +1,13 @@
-
 import { type Config } from "tailwindcss";
-import { fontFamily } from "tailwindcss/defaultTheme";
 
 export default {
-  darkMode: ["class"],
   content: [
     './pages/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',
     './app/**/*.{ts,tsx}',
     './src/**/*.{ts,tsx}',
   ],
-  prefix: "",
+  darkMode: ["class"],
   theme: {
     container: {
       center: true,
@@ -27,11 +24,11 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#3B82F6", // Changed from red to blue
+          DEFAULT: "#3B82F6",
           foreground: "#ffffff",
         },
         secondary: {
-          DEFAULT: "#2563EB", // Changed from red to darker blue
+          DEFAULT: "#2563EB",
           foreground: "#ffffff",
         },
         destructive: {
@@ -108,5 +105,5 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: ["tailwindcss-animate"],
 } satisfies Config;

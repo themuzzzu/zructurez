@@ -3,13 +3,11 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
-import tailwindcss from "tailwindcss";
-import autoprefixer from "autoprefixer";
+import postcss from '@tailwindcss/postcss';
 
 export default defineConfig(({ mode }) => ({
   plugins: [
     react({
-      // Enable TypeScript support
       tsDecorators: true,
     }),
     mode === 'development' && componentTagger(),
@@ -19,16 +17,13 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  css: {
+    postcss: {
+      plugins: [postcss],
+    },
+  },
   server: {
     port: 8080,
     host: true,
-  },
-  css: {
-    postcss: {
-      plugins: [
-        tailwindcss,
-        autoprefixer,
-      ],
-    },
   },
 }));

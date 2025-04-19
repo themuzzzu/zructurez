@@ -1,111 +1,30 @@
 
-import React, { Suspense, lazy, useEffect, useState } from "react";
+import React, { Suspense, lazy } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { NotFound } from "@/components/NotFound";
 import { useParams } from "react-router-dom";
-import { Skeleton } from "@/components/ui/skeleton";
-import { trackPageLoad } from "@/utils/performanceUtils";
-import { ErrorView } from "@/components/ErrorView";
+import { MarketplaceProvider } from "@/providers/MarketplaceProvider";
+import { MarketplaceSkeleton } from "@/components/marketplace/MarketplaceSkeleton";
 
-// Load optimized marketplace with proper error handling
 const OptimizedMarketplace = lazy(() => 
   import("./marketplace/OptimizedMarketplace")
 );
 
-// Better loading placeholder with reduced padding on mobile
-const MarketplaceSkeleton = () => (
-  <div className="space-y-2 w-full px-1 animate-fade-in">
-    <Skeleton className="h-10 w-full max-w-3xl mx-auto rounded-lg" />
-    <Skeleton className="h-48 w-full rounded-lg" />
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-      {[...Array(8)].map((_, i) => (
-        <div key={i} className="space-y-1">
-          <Skeleton className="h-32 rounded-md w-full" />
-          <Skeleton className="h-4 w-2/3" />
-          <Skeleton className="h-4 w-1/2" />
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
-// Simple error boundary component
-class ErrorBoundary extends React.Component<{
-  children: React.ReactNode;
-  fallback: React.ReactNode;
-}> {
-  state = { hasError: false };
-
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-
-  componentDidCatch(error: any, info: any) {
-    console.error("Error in marketplace component:", error, info);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return this.props.fallback;
-    }
-    return this.props.children;
-  }
-}
-
 const Marketplace = () => {
   const params = useParams();
-  const [isReady, setIsReady] = useState(false);
   
-  // Track page load performance and preload resources
-  useEffect(() => {
-    trackPageLoad('/marketplace');
-    
-    // Preload critical resources and images for faster loading
-    const resources = [
-      '/lovable-uploads/a727b8a0-84a4-45b2-88da-392010b1b66c.png',
-      '/lovable-uploads/c395d99e-dcf4-4659-9c50-fc50708c858d.png'
-    ];
-    
-    // Create and add preload links for critical resources
-    const links = resources.map(resource => {
-      const link = document.createElement('link');
-      link.rel = 'preload';
-      link.as = 'image';
-      link.href = resource;
-      link.fetchPriority = 'high';
-      return link;
-    });
-    
-    // Add links to document head
-    links.forEach(link => document.head.appendChild(link));
-    
-    // Set ready state after a short delay to prevent animation issues
-    const timer = setTimeout(() => setIsReady(true), 50);
-    
-    return () => {
-      // Remove links on component unmount
-      links.forEach(link => {
-        if (document.head.contains(link)) {
-          document.head.removeChild(link);
-        }
-      });
-      clearTimeout(timer);
-    };
-  }, []);
-  
-  // If we have a productId parameter, show a 404 since the route should be /product/:productId
   if (params.productId) {
     return <NotFound />;
   }
   
   return (
     <Layout>
-      <div className={`container max-w-7xl mx-auto px-1 pt-2 sm:pt-6 pb-16 overflow-hidden transition-opacity duration-300 ${isReady ? 'opacity-100' : 'opacity-0'}`}>
-        <Suspense fallback={<MarketplaceSkeleton />}>
-          <ErrorBoundary fallback={<ErrorView message="There was a problem loading the marketplace. Please try again later." />}>
+      <div className="container max-w-7xl mx-auto px-4 pt-2 sm:pt-6 pb-16">
+        <MarketplaceProvider>
+          <Suspense fallback={<MarketplaceSkeleton />}>
             <OptimizedMarketplace />
-          </ErrorBoundary>
-        </Suspense>
+          </Suspense>
+        </MarketplaceProvider>
       </div>
     </Layout>
   );
