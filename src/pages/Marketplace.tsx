@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { MarketplaceHero } from "@/components/marketplace/MarketplaceHero";
 import { CategorySection } from "@/components/marketplace/CategorySection";
@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 
 const Marketplace = () => {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = React.useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   
   const handleSearch = (term: string) => {
     navigate(`/search/marketplace?q=${encodeURIComponent(term)}`);

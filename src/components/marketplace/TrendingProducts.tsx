@@ -1,164 +1,96 @@
 
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
-import { Card } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { ProductCard } from "@/components/products/ProductCard";
-import { GridLayoutType } from "@/components/products/types/ProductTypes";
-import { TrendingUp, ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useRef, useState, useEffect } from "react";
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { TrendingUp, Star } from 'lucide-react';
 
-interface TrendingProductsProps {
-  gridLayout?: GridLayoutType;
-}
-
-export const TrendingProducts = ({ gridLayout = "grid4x4" }: TrendingProductsProps) => {
+export const TrendingProducts = () => {
   const navigate = useNavigate();
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [showLeftScroll, setShowLeftScroll] = useState(false);
-  const [showRightScroll, setShowRightScroll] = useState(true);
   
-  const { data: products, isLoading } = useQuery({
-    queryKey: ['trending-products'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .order('views', { ascending: false })
-        .limit(8);
-      
-      if (error) throw error;
-      return data;
+  const trendingProducts = [
+    {
+      id: "5",
+      title: "Wireless Earbuds",
+      price: "$89.99",
+      image: "/lovable-uploads/070ce457-b6df-45a3-9490-d74e701eca37.png",
+      rating: 5
     },
-    staleTime: 60 * 1000, // 1 minute cache
-  });
-  
-  // Check scroll position on mount and scroll
-  useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-    
-    const checkScroll = () => {
-      setShowLeftScroll(container.scrollLeft > 10);
-      setShowRightScroll(container.scrollLeft < (container.scrollWidth - container.clientWidth - 10));
-    };
-    
-    // Initial check
-    checkScroll();
-    
-    // Add scroll listener
-    container.addEventListener('scroll', checkScroll);
-    
-    // Clean up
-    return () => container.removeEventListener('scroll', checkScroll);
-  }, [products]);
-  
-  // Handle horizontal scroll with buttons
-  const scroll = (direction: 'left' | 'right') => {
-    if (scrollContainerRef.current) {
-      const scrollAmount = 300;
-      const currentScroll = scrollContainerRef.current.scrollLeft;
-      
-      scrollContainerRef.current.scrollTo({
-        left: direction === 'left' ? currentScroll - scrollAmount : currentScroll + scrollAmount,
-        behavior: 'smooth'
-      });
+    {
+      id: "6",
+      title: "Smart Watch",
+      price: "$159.99",
+      image: "/lovable-uploads/070ce457-b6df-45a3-9490-d74e701eca37.png",
+      rating: 4
+    },
+    {
+      id: "7",
+      title: "Fitness Tracker",
+      price: "$79.99",
+      image: "/lovable-uploads/070ce457-b6df-45a3-9490-d74e701eca37.png",
+      rating: 4
+    },
+    {
+      id: "8",
+      title: "Bluetooth Speaker",
+      price: "$129.99",
+      image: "/lovable-uploads/070ce457-b6df-45a3-9490-d74e701eca37.png",
+      rating: 5
     }
+  ];
+
+  const handleSeeAll = () => {
+    navigate("/marketplace/trending");
   };
-  
-  if (isLoading) {
-    return (
-      <div className="space-y-4 mb-8">
-        <h3 className="text-xl md:text-2xl font-bold flex items-center gap-2 px-1">
-          <TrendingUp className="h-5 w-5 text-red-500" />
-          Trending Products
-        </h3>
-        <div className="flex overflow-x-auto gap-3 pb-2 pt-1 px-1 scrollbar-hide">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="min-w-[160px] sm:min-w-[220px] flex-shrink-0">
-              <Card className="overflow-hidden h-full">
-                <Skeleton className="h-48 w-full" />
-                <div className="p-3">
-                  <Skeleton className="h-4 w-3/4 mb-2" />
-                  <Skeleton className="h-4 w-1/2" />
-                </div>
-              </Card>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-  
-  if (!products || products.length === 0) {
-    return null;
-  }
-  
+
+  const handleProductClick = (productId: string) => {
+    navigate(`/product/${productId}`);
+  };
+
   return (
-    <div className="space-y-4 mb-8 relative">
-      <div className="flex justify-between items-center px-1">
-        <h3 className="text-xl md:text-2xl font-bold flex items-center gap-2">
-          <TrendingUp className="h-5 w-5 text-red-500" />
-          Trending Products
-        </h3>
-        <Button 
-          variant="ghost" 
-          size="sm"
-          onClick={() => navigate('/marketplace')}
-          className="gap-1"
-        >
-          View All
+    <div className="mb-10">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold flex items-center">
+          <TrendingUp className="mr-2 h-5 w-5 text-red-500" />
+          Trending Now
+        </h2>
+        <Button variant="link" className="text-blue-500" onClick={handleSeeAll}>
+          See All
         </Button>
       </div>
       
-      <div className="relative group">
-        {showLeftScroll && (
-          <Button 
-            onClick={() => scroll('left')}
-            size="icon"
-            variant="ghost" 
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 dark:bg-black/50 rounded-full opacity-70 hover:opacity-100 shadow-md hidden sm:flex"
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+        {trendingProducts.map((product) => (
+          <Card 
+            key={product.id}
+            className="overflow-hidden cursor-pointer hover:shadow-md transition-all"
+            onClick={() => handleProductClick(product.id)}
           >
-            <ChevronLeft />
-          </Button>
-        )}
-        
-        <div 
-          ref={scrollContainerRef}
-          className="flex overflow-x-auto gap-3 pb-2 pt-1 px-1 no-scrollbar snap-x snap-mandatory scroll-smooth"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-          onScroll={() => {
-            if (scrollContainerRef.current) {
-              const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
-              setShowLeftScroll(scrollLeft > 10);
-              setShowRightScroll(scrollLeft < scrollWidth - clientWidth - 10);
-            }
-          }}
-        >
-          {products.map((product) => (
-            <div key={product.id} className="min-w-[160px] sm:min-w-[220px] md:min-w-[250px] w-[40vw] sm:w-[35vw] md:w-[30vw] lg:w-[25vw] max-w-[320px] flex-shrink-0 snap-start">
-              <div className="relative h-full">
-                <ProductCard 
-                  product={product}
-                  layout={gridLayout}
-                />
+            <div className="aspect-square p-4 flex items-center justify-center bg-zinc-50 dark:bg-zinc-900">
+              <img
+                src={product.image}
+                alt={product.title}
+                className="max-h-full object-contain"
+              />
+            </div>
+            <div className="p-3">
+              <h3 className="font-medium text-sm line-clamp-1">{product.title}</h3>
+              <div className="mt-1 font-bold text-base">{product.price}</div>
+              <div className="mt-1 flex items-center">
+                {Array(5).fill(0).map((_, i) => (
+                  <Star
+                    key={i}
+                    className={`h-3 w-3 ${i < product.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
+                  />
+                ))}
+                <Badge className="ml-2 text-xs bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
+                  Trending
+                </Badge>
               </div>
             </div>
-          ))}
-        </div>
-        
-        {showRightScroll && (
-          <Button 
-            onClick={() => scroll('right')}
-            size="icon"
-            variant="ghost" 
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 dark:bg-black/50 rounded-full opacity-70 hover:opacity-100 shadow-md hidden sm:flex"
-          >
-            <ChevronRight />
-          </Button>
-        )}
+          </Card>
+        ))}
       </div>
     </div>
   );

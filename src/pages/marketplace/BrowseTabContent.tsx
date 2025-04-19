@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { ShoppingSection } from "@/components/ShoppingSection";
 import { Categories } from "@/components/marketplace/Categories";
 import { useNavigate, useLocation } from "react-router-dom";
-import SponsoredProducts from "@/components/marketplace/SponsoredProducts";
+import { SponsoredProducts } from "@/components/marketplace/SponsoredProducts";
 import { TrendingProducts } from "@/components/marketplace/TrendingProducts";
 import { CategoryIconGrid } from "@/components/marketplace/CategoryIconGrid";
 import { CategorySubcategoryGrid } from "@/components/marketplace/CategorySubcategoryGrid";
