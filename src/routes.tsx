@@ -1,10 +1,8 @@
 
 import { createBrowserRouter, RouteObject } from "react-router-dom";
-import { dashboardRoutes } from "@/routes/dashboardRoutes";
-import { marketplaceRoutes } from "@/routes/marketplaceRoutes";
 import { shopRoutes } from "@/routes/shopRoutes";
-import { landingRoutes } from "@/routes/landingRoutes";
-import ErrorPage from "@/pages/Error";
+import { marketplaceRoutes } from "@/routes/marketplaceRoutes";
+import ErrorPage from "@/pages/NotFound"; // Use NotFound as fallback
 import Index from "@/pages/Index";
 
 export const routes: RouteObject[] = [
@@ -13,10 +11,8 @@ export const routes: RouteObject[] = [
     element: <Index />,
     errorElement: <ErrorPage />,
   },
-  ...dashboardRoutes,
   ...marketplaceRoutes,
   ...shopRoutes,
-  ...landingRoutes,
   {
     path: "*",
     element: <ErrorPage />

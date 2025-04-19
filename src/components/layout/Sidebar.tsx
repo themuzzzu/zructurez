@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -51,8 +52,6 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
     return location.pathname === href || location.pathname.startsWith(`${href}/`);
   };
 
-  const linkClasses = "flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100";
-
   return (
     <div
       className={cn(
@@ -94,7 +93,7 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
             <SidebarLink
               key={index}
               href={link.href}
-              icon={link.icon}
+              icon={link.icon as any}
               isActive={isCurrentPath(link.href)}
               onClick={onClose}
             >

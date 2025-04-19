@@ -4,7 +4,8 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { LocationProvider } from "@/providers/LocationProvider";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/react-query";
-import { Routes as AppRoutes } from "./routes";
+import { router } from "./routes"; // Changed from 'Routes' to 'router'
+import { RouterProvider } from "react-router-dom"; // Added explicit import
 import { useEffect, useState } from "react";
 import { PageLoader } from "@/components/loaders/PageLoader";
 import { NetworkMonitor } from "@/providers/NetworkMonitor";
@@ -143,7 +144,7 @@ function App() {
     
     return (
       <>
-        <AppRoutes />
+        <RouterProvider router={router} /> {/* Changed from <AppRoutes /> to <RouterProvider router={router} /> */}
         <LocationModalHandler />
         <Toaster position="top-center" richColors closeButton />
       </>
