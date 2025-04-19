@@ -3,7 +3,7 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { Home, ShoppingBag, Wrench, Briefcase, MoreVertical } from "lucide-react";
+import { Home, ShoppingBag, Wrench, Briefcase, MoreVertical, Store } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { IconComponent } from "@/types/component";
 
@@ -33,10 +33,10 @@ export function MobileNav() {
       active: location.pathname.startsWith("/marketplace"),
     },
     {
-      icon: ShoppingBag,
-      label: t("zructs"),
-      href: "/zructs",
-      active: location.pathname.startsWith("/zructs"),
+      icon: Store,
+      label: t("shop"),
+      href: "/shop",
+      active: location.pathname.startsWith("/shop"),
     },
     {
       icon: Wrench,

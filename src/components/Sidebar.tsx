@@ -6,6 +6,7 @@ import {
   ShoppingBag,
   Users,
   Search,
+  Store,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { usePathname } from "@/hooks/usePathname";
@@ -41,9 +42,9 @@ export function Sidebar({ className }: { className?: string }) {
       icon: <ShoppingBag className="w-5 h-5" />,
     },
     {
-      title: "Zructs",
-      href: "/zructs",
-      icon: <ShoppingBag className="w-5 h-5" />,
+      title: "Shop",
+      href: "/shop",
+      icon: <Store className="w-5 h-5" />,
     },
     {
       title: "Search",
