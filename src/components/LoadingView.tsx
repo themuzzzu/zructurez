@@ -1,73 +1,38 @@
 
-import { PageLoader } from "./loaders/PageLoader";
-import { Card } from "./ui/card";
-import { Skeleton } from "./ui/skeleton";
+import { Spinner } from '@/components/common/Spinner';
+import { Progress } from '@/components/ui/progress';
+import { useEffect, useState } from 'react';
 
 interface LoadingViewProps {
-  type?: 'default' | 'business' | 'service' | 'product';
-  fullScreen?: boolean;
-  className?: string;
+  message?: string;
+  showProgress?: boolean;
 }
 
-export const LoadingView = ({ 
-  type = 'default', 
-  fullScreen = false,
-  className = ''
-}: LoadingViewProps) => {
-  if (type === 'business') {
-    return (
-      <div className={`container max-w-[1400px] mx-auto px-4 py-8 ${className}`}>
-        <Skeleton className="h-10 w-1/3 mb-6" /> {/* Heading */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <Card key={i} className="overflow-hidden">
-              <Skeleton className="h-48 w-full" />
-              <div className="p-4">
-                <Skeleton className="h-6 w-3/4 mb-3" />
-                <Skeleton className="h-4 w-1/2 mb-2" />
-                <Skeleton className="h-4 w-2/3 mb-4" />
-                <div className="flex gap-2">
-                  <Skeleton className="h-10 w-24" />
-                  <Skeleton className="h-10 w-24" />
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-      </div>
-    );
-  }
+export function LoadingView({ message = "Loading...", showProgress = true }: LoadingViewProps) {
+  const [progress, setProgress] = useState(0);
   
-  if (type === 'service') {
-    return (
-      <div className={`container max-w-[1400px] mx-auto px-4 py-8 ${className}`}>
-        <Skeleton className="h-10 w-1/3 mb-6" /> {/* Heading */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Card key={i} className="overflow-hidden">
-              <Skeleton className="h-48 w-full" />
-              <div className="p-4">
-                <Skeleton className="h-6 w-3/4 mb-3" />
-                <Skeleton className="h-4 w-1/2 mb-2" />
-                <Skeleton className="h-4 w-2/3 mb-4" />
-                <Skeleton className="h-10 w-full" />
-              </div>
-            </Card>
-          ))}
-        </div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (showProgress) {
+      const interval = setInterval(() => {
+        setProgress(prev => {
+          const newProgress = prev + Math.random() * 10;
+          return newProgress >= 90 ? 90 : newProgress;
+        });
+      }, 500);
+      
+      return () => clearInterval(interval);
+    }
+  }, [showProgress]);
 
   return (
-    <div className={`${fullScreen ? 'min-h-screen' : ''} bg-background ${className}`}>
-      <div className="container max-w-[1400px]">
-        <PageLoader 
-          type="shimmer" 
-          fullScreen={fullScreen} 
-          className={fullScreen ? "h-[80vh]" : ""}
-        />
-      </div>
+    <div className="flex flex-col items-center justify-center min-h-[200px] p-6">
+      <Spinner size="lg" className="mb-4" />
+      <p className="text-center text-muted-foreground mb-2">{message}</p>
+      {showProgress && (
+        <div className="w-full max-w-xs">
+          <Progress value={progress} className="h-1" />
+        </div>
+      )}
     </div>
   );
-};
+}
