@@ -30,3 +30,5 @@ declare global {
     DOMPurify: import('dompurify').DOMPurifyI;
   }
 }
+
+export {};

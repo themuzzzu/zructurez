@@ -13,6 +13,12 @@ try {
     execSync('npm install --save-dev vite@latest @vitejs/plugin-react-swc@latest', { stdio: 'inherit' });
   }
   
+  // Install DOMPurify types if missing
+  if (!fs.existsSync(path.join(__dirname, 'node_modules', '@types', 'dompurify'))) {
+    console.log('Installing DOMPurify types...');
+    execSync('npm install --save-dev @types/dompurify@latest', { stdio: 'inherit' });
+  }
+  
   // Install PostCSS and related dependencies
   if (!fs.existsSync(path.join(__dirname, 'node_modules', 'postcss')) || 
       !fs.existsSync(path.join(__dirname, 'node_modules', 'autoprefixer')) ||
