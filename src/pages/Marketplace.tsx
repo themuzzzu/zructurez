@@ -1,100 +1,15 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { Layout } from "@/components/layout/Layout";
-import { NotFound } from "@/components/NotFound";
-import { useParams } from "react-router-dom";
 import { MarketplaceProvider } from "@/providers/MarketplaceProvider";
-import { MarketplaceSearch } from "@/components/marketplace/MarketplaceSearch";
-import { BannerCarousel } from "@/components/marketplace/BannerCarousel";
-import { ShopByCategory } from "@/components/marketplace/ShopByCategory";
-import SponsoredProducts from "@/components/marketplace/SponsoredProducts";
-import { TrendingProducts } from "@/components/marketplace/TrendingProducts";
-import { BrowseTabContent } from "@/components/marketplace/BrowseTabContent";
-import { SuggestedProducts } from "@/components/marketplace/SuggestedProducts";
 
 const Marketplace = () => {
-  const params = useParams();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
-  
-  if (params.productId) {
-    return <NotFound />;
-  }
-  
-  const handleSearch = (term: string) => {
-    setSearchTerm(term);
-  };
-  
-  const handleCategorySelect = (category: string) => {
-    setSelectedCategory(category);
-  };
-  
   return (
     <Layout>
       <MarketplaceProvider>
-        {/* Search Bar */}
-        <div className="sticky top-0 z-30 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-          <div className="container max-w-7xl mx-auto px-4 py-3">
-            <MarketplaceSearch 
-              onSearch={handleSearch}
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-            />
-          </div>
-        </div>
-        
-        <div className="container max-w-7xl mx-auto pb-16">
-          <div className="space-y-6 px-4 pt-4">
-            {/* Banner Carousel */}
-            <div className="overflow-hidden rounded-2xl">
-              <BannerCarousel />
-            </div>
-            
-            {/* Shop by Category */}
-            <div className="mt-8">
-              <div className="flex items-center justify-between mb-2">
-                <h2 className="text-xl font-semibold">Shop by Category</h2>
-                <a href="/categories" className="text-sm text-primary">See All</a>
-              </div>
-              <ShopByCategory onCategorySelect={handleCategorySelect} />
-            </div>
-            
-            {/* Sponsored Products */}
-            <div className="mt-8">
-              <div className="flex items-center justify-between mb-2">
-                <h2 className="text-xl font-semibold">Sponsored</h2>
-                <a href="/products/sponsored" className="text-sm text-primary">See All</a>
-              </div>
-              <SponsoredProducts />
-            </div>
-            
-            {/* Suggested Products */}
-            <div className="mt-8">
-              <div className="flex items-center justify-between mb-2">
-                <h2 className="text-xl font-semibold">Suggested for You</h2>
-                <a href="/products/suggested" className="text-sm text-primary">See All</a>
-              </div>
-              <SuggestedProducts />
-            </div>
-            
-            {/* Trending Products */}
-            <div className="mt-8">
-              <div className="flex items-center justify-between mb-2">
-                <h2 className="text-xl font-semibold">Trending Now in Your Area</h2>
-                <a href="/products/trending" className="text-sm text-primary">See All</a>
-              </div>
-              <TrendingProducts />
-            </div>
-            
-            {/* Browse by Category */}
-            <div className="mt-10 mb-8">
-              <h2 className="text-xl font-semibold mb-4">Browse by Category</h2>
-              <BrowseTabContent 
-                searchTerm={searchTerm}
-                onCategorySelect={handleCategorySelect} 
-              />
-            </div>
-          </div>
+        {/* Marketplace content will be redesigned */}
+        <div className="container max-w-7xl mx-auto">
+          <h1 className="text-2xl font-bold">Marketplace (Under Redesign)</h1>
         </div>
       </MarketplaceProvider>
     </Layout>
