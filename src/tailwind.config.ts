@@ -1,3 +1,4 @@
+
 import { type Config } from "tailwindcss";
 import tailwindcssAnimate from "tailwindcss-animate";
 import defaultTheme from "tailwindcss/defaultTheme";
@@ -54,6 +55,8 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Extend with the default gray colors from Tailwind
+        ...defaultTheme.colors,
       },
       borderRadius: {
         lg: "var(--radius)",
