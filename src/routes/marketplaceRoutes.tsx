@@ -8,5 +8,6 @@ export const marketplaceRoutes: RouteObject[] = [
     path: "/marketplace",
     element: <Marketplace />,
     errorElement: <ErrorView />,
-  }
+  },
+  // Any additional marketplace routes can be added here
 ];

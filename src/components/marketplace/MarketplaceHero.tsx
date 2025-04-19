@@ -1,35 +1,60 @@
 
-import { AdvancedSearch } from "@/components/marketplace/AdvancedSearch";
+import React, { useState } from "react";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { Search, ArrowRight } from "lucide-react";
 
 interface MarketplaceHeroProps {
   onCategorySelect: (category: string) => void;
   onSearch: (term: string) => void;
 }
 
-export const MarketplaceHero = ({ onCategorySelect, onSearch }: MarketplaceHeroProps) => {
+export const MarketplaceHero: React.FC<MarketplaceHeroProps> = ({ onCategorySelect, onSearch }) => {
+  const [searchTerm, setSearchTerm] = useState("");
+  
   const popularCategories = [
     "Electronics",
     "Fashion",
-    "Home Appliances",
+    "Home",
     "Beauty",
-    "Furniture"
+    "Sports"
   ];
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchTerm.trim()) {
+      onSearch(searchTerm);
+    }
+  };
 
   return (
     <div className="rounded-xl overflow-hidden mb-8">
-      {/* Search section first */}
-      <div className="relative rounded-xl overflow-hidden bg-zinc-100 dark:bg-zinc-900 p-6 md:p-8 mb-4">
-        <div className="max-w-xl relative z-10">
-          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-zinc-900 dark:text-white mb-4">
-            Discover, Shop & Connect
+      {/* Blue wave pattern banner */}
+      <div className="relative bg-blue-500 text-white p-6 md:p-8 rounded-xl overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-full opacity-30">
+          <svg width="100%" height="100%" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+            <path fill="#ffffff" d="M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,266.7C672,267,768,245,864,224C960,203,1056,181,1152,186.7C1248,192,1344,224,1392,240L1440,256L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+          </svg>
+        </div>
+        
+        <div className="relative z-10 max-w-xl">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4">
+            Search for products, brands and categories...
           </h1>
-          <p className="text-zinc-600 dark:text-zinc-300 mb-6 md:text-lg">
-            Explore thousands of products from local businesses and trusted sellers
-          </p>
           
-          <AdvancedSearch onSearch={onSearch} />
+          <form onSubmit={handleSearch} className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Input
+              type="search"
+              placeholder="Search for products, brands and categories..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 h-12 bg-white text-zinc-900 rounded-lg border-0 focus-visible:ring-2 focus-visible:ring-blue-600"
+            />
+            <Button type="submit" className="absolute right-1.5 top-1/2 transform -translate-y-1/2 h-9">
+              Search
+            </Button>
+          </form>
           
           <div className="flex flex-wrap gap-2 mt-4">
             {popularCategories.map((category) => (
@@ -37,7 +62,7 @@ export const MarketplaceHero = ({ onCategorySelect, onSearch }: MarketplaceHeroP
                 key={category}
                 variant="outline" 
                 size="sm"
-                className="bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-700"
+                className="bg-white/10 text-white border-white/20 hover:bg-white/20"
                 onClick={() => onCategorySelect(category.toLowerCase())}
               >
                 {category}
@@ -45,20 +70,6 @@ export const MarketplaceHero = ({ onCategorySelect, onSearch }: MarketplaceHeroP
               </Button>
             ))}
           </div>
-        </div>
-        
-        {/* Abstract pattern for the background */}
-        <div className="absolute top-0 right-0 opacity-10 w-full h-full">
-          <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-            <defs>
-              <pattern id="hatch" width="10" height="10" patternTransform="rotate(45 0 0)" patternUnits="userSpaceOnUse">
-                <line x1="0" y1="0" x2="0" y2="10" stroke="black" strokeWidth="2" />
-              </pattern>
-            </defs>
-            <rect x="0" y="0" width="100%" height="100%" fill="url(#hatch)" />
-            <circle cx="300" cy="100" r="50" fill="black" fillOpacity="0.1" />
-            <circle cx="80" cy="300" r="80" fill="black" fillOpacity="0.1" />
-          </svg>
         </div>
       </div>
     </div>
