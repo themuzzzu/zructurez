@@ -1,5 +1,6 @@
 
 import React from "react";
+import { cn } from "@/lib/utils";
 import { Shimmer } from "@/components/ui/shimmer";
 import { Card } from "@/components/ui/card";
 

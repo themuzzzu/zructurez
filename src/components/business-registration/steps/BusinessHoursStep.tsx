@@ -1,429 +1,475 @@
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useFormContext } from "react-hook-form";
-import { 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormControl, 
-  FormDescription, 
-  FormMessage 
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
-import { 
-  Clock, 
-  CalendarDays,
-  IndianRupee,
-  Copy
-} from "lucide-react";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
-import type { BusinessFormValues } from "../BusinessRegistrationForm";
-import { formatCurrency } from "../utils";
-import { toast } from "@/components/ui/use-toast";
+import { Button } from "@/components/ui/button";
+import { Clock, Plus, Trash } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner"; // Changed to use sonner directly
 
-// Days of the week for business hours
+type DayHoursEntry = {
+  day: string;
+  open: string;
+  close: string;
+  closed: boolean;
+};
+
+type DayHours = {
+  [key: string]: {
+    open: string;
+    close: string;
+    closed: boolean;
+  };
+};
+
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
-// Time options for the select dropdown
-const TIME_OPTIONS = [
-  "Closed",
-  "Open 24 Hours",
-  "12:00 AM", "12:30 AM", "1:00 AM", "1:30 AM", "2:00 AM", "2:30 AM",
-  "3:00 AM", "3:30 AM", "4:00 AM", "4:30 AM", "5:00 AM", "5:30 AM",
-  "6:00 AM", "6:30 AM", "7:00 AM", "7:30 AM", "8:00 AM", "8:30 AM",
-  "9:00 AM", "9:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM",
-  "12:00 PM", "12:30 PM", "1:00 PM", "1:30 PM", "2:00 PM", "2:30 PM",
-  "3:00 PM", "3:30 PM", "4:00 PM", "4:30 PM", "5:00 PM", "5:30 PM",
-  "6:00 PM", "6:30 PM", "7:00 PM", "7:30 PM", "8:00 PM", "8:30 PM",
-  "9:00 PM", "9:30 PM", "10:00 PM", "10:30 PM", "11:00 PM", "11:30 PM",
-];
-
-// Standard hours templates
-const HOURS_TEMPLATES = [
-  {
-    name: "Regular Business (9-5)",
-    hours: {
-      Monday: { open: "9:00 AM", close: "5:00 PM" },
-      Tuesday: { open: "9:00 AM", close: "5:00 PM" },
-      Wednesday: { open: "9:00 AM", close: "5:00 PM" },
-      Thursday: { open: "9:00 AM", close: "5:00 PM" },
-      Friday: { open: "9:00 AM", close: "5:00 PM" },
-      Saturday: { open: "Closed", close: "Closed" },
-      Sunday: { open: "Closed", close: "Closed" },
-    }
-  },
-  {
-    name: "Extended Hours (8-8)",
-    hours: {
-      Monday: { open: "8:00 AM", close: "8:00 PM" },
-      Tuesday: { open: "8:00 AM", close: "8:00 PM" },
-      Wednesday: { open: "8:00 AM", close: "8:00 PM" },
-      Thursday: { open: "8:00 AM", close: "8:00 PM" },
-      Friday: { open: "8:00 AM", close: "8:00 PM" },
-      Saturday: { open: "10:00 AM", close: "6:00 PM" },
-      Sunday: { open: "Closed", close: "Closed" },
-    }
-  },
-  {
-    name: "Retail Hours (10-7)",
-    hours: {
-      Monday: { open: "10:00 AM", close: "7:00 PM" },
-      Tuesday: { open: "10:00 AM", close: "7:00 PM" },
-      Wednesday: { open: "10:00 AM", close: "7:00 PM" },
-      Thursday: { open: "10:00 AM", close: "7:00 PM" },
-      Friday: { open: "10:00 AM", close: "7:00 PM" },
-      Saturday: { open: "10:00 AM", close: "7:00 PM" },
-      Sunday: { open: "11:00 AM", close: "5:00 PM" },
-    }
-  },
-  {
-    name: "Restaurant Hours (11-10)",
-    hours: {
-      Monday: { open: "11:00 AM", close: "10:00 PM" },
-      Tuesday: { open: "11:00 AM", close: "10:00 PM" },
-      Wednesday: { open: "11:00 AM", close: "10:00 PM" },
-      Thursday: { open: "11:00 AM", close: "10:00 PM" },
-      Friday: { open: "11:00 AM", close: "11:00 PM" },
-      Saturday: { open: "11:00 AM", close: "11:00 PM" },
-      Sunday: { open: "12:00 PM", close: "9:00 PM" },
-    }
-  },
-  {
-    name: "Weekend Only",
-    hours: {
-      Monday: { open: "Closed", close: "Closed" },
-      Tuesday: { open: "Closed", close: "Closed" },
-      Wednesday: { open: "Closed", close: "Closed" },
-      Thursday: { open: "Closed", close: "Closed" },
-      Friday: { open: "Closed", close: "Closed" },
-      Saturday: { open: "9:00 AM", close: "6:00 PM" },
-      Sunday: { open: "9:00 AM", close: "6:00 PM" },
-    }
-  }
-];
-
 export const BusinessHoursStep = () => {
-  const { control, setValue, watch, formState: { errors } } = useFormContext<BusinessFormValues>();
-  const [customHours, setCustomHours] = useState(false);
-  const [dayHours, setDayHours] = useState<Record<string, { open: string; close: string }>>({
-    Monday: { open: "9:00 AM", close: "6:00 PM" },
-    Tuesday: { open: "9:00 AM", close: "6:00 PM" },
-    Wednesday: { open: "9:00 AM", close: "6:00 PM" },
-    Thursday: { open: "9:00 AM", close: "6:00 PM" },
-    Friday: { open: "9:00 AM", close: "6:00 PM" },
-    Saturday: { open: "10:00 AM", close: "4:00 PM" },
-    Sunday: { open: "Closed", close: "Closed" },
+  const { register, watch, setValue } = useFormContext();
+  const is24_7 = watch("is_24_7");
+  const [dayHours, setDayHours] = useState<DayHours>(() => {
+    const hoursText = watch("hours") || "";
+    const initialHours: DayHours = {};
+    
+    DAYS.forEach(day => {
+      initialHours[day] = {
+        open: "09:00",
+        close: "17:00",
+        closed: day === "Sunday"
+      };
+    });
+    
+    // Try to parse existing hours if available
+    if (hoursText && typeof hoursText === "string") {
+      try {
+        const entries = hoursText.split(",").map(entry => entry.trim());
+        
+        entries.forEach(entry => {
+          const dayMatch = entry.match(/^(.*?):/);
+          if (!dayMatch) return;
+          
+          const day = dayMatch[1].trim();
+          
+          if (day === "Mon-Fri") {
+            ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"].forEach(weekday => {
+              const timeMatch = entry.match(/:\s*(.*?)\s*-\s*(.*?)\s*$/);
+              if (timeMatch) {
+                initialHours[weekday] = {
+                  open: convertTo24HourFormat(timeMatch[1]),
+                  close: convertTo24HourFormat(timeMatch[2]),
+                  closed: entry.toLowerCase().includes("closed")
+                };
+              }
+            });
+          } else if (day === "Sat") {
+            const timeMatch = entry.match(/:\s*(.*?)\s*-\s*(.*?)\s*$/);
+            if (timeMatch) {
+              initialHours["Saturday"] = {
+                open: convertTo24HourFormat(timeMatch[1]),
+                close: convertTo24HourFormat(timeMatch[2]),
+                closed: entry.toLowerCase().includes("closed")
+              };
+            }
+          } else if (day === "Sun") {
+            initialHours["Sunday"] = {
+              open: "09:00",
+              close: "17:00",
+              closed: entry.toLowerCase().includes("closed")
+            };
+          } else {
+            // Individual day format
+            const mappedDay = mapShortDayToFull(day);
+            if (mappedDay && initialHours[mappedDay]) {
+              const timeMatch = entry.match(/:\s*(.*?)\s*-\s*(.*?)\s*$/);
+              if (timeMatch) {
+                initialHours[mappedDay] = {
+                  open: convertTo24HourFormat(timeMatch[1]),
+                  close: convertTo24HourFormat(timeMatch[2]),
+                  closed: entry.toLowerCase().includes("closed")
+                };
+              }
+            }
+          }
+        });
+      } catch (error) {
+        console.error("Error parsing hours:", error);
+      }
+    }
+    
+    return initialHours;
   });
   
-  const is24_7 = watch("is_24_7");
-  const appointmentPrice = watch("appointment_price");
-  const consultationPrice = watch("consultation_price");
+  const [specialHours, setSpecialHours] = useState<DayHoursEntry[]>([]);
   
-  const updateHoursText = () => {
+  const formattedHours = useMemo(() => {
     if (is24_7) {
-      setValue("hours", "Open 24/7");
-      return;
+      return "24/7";
     }
     
-    if (!customHours) {
-      setValue("hours", "Mon-Fri: 9:00 AM - 6:00 PM, Sat: 10:00 AM - 4:00 PM, Sun: Closed");
-      return;
-    }
+    const segments: string[] = [];
+    let currentGroup: string[] = [];
+    let prevHours = '';
     
-    // Format the custom hours into a string
-    const formattedHours = DAYS.map(day => {
-      const dayData = dayHours[day];
-      if (!dayData || dayData.open === "Closed") {
-        return `${day.slice(0, 3)}: Closed`;
-      }
-      if (dayData.open === "Open 24 Hours") {
-        return `${day.slice(0, 3)}: Open 24 Hours`;
-      }
-      return `${day.slice(0, 3)}: ${dayData.open} - ${dayData.close}`;
-    }).join(", ");
-    
-    setValue("hours", formattedHours);
-  };
-  
-  // Watch for changes in 24/7 toggle
-  const handle24_7Change = (checked: boolean) => {
-    setValue("is_24_7", checked);
-    updateHoursText();
-  };
-  
-  // Watch for changes in custom hours toggle
-  const handleCustomHoursChange = (checked: boolean) => {
-    setCustomHours(checked);
-    updateHoursText();
-  };
-  
-  // Update day hours
-  const updateDayHours = (day: string, type: 'open' | 'close', value: string) => {
-    setDayHours(prev => {
-      const newHours = {
-        ...prev,
-        [day]: {
-          ...prev[day],
-          [type]: value
+    // Group consecutive days with the same hours
+    DAYS.forEach((day, index) => {
+      const { open, close, closed } = dayHours[day] || { open: '', close: '', closed: true };
+      const hoursString = closed ? "Closed" : `${formatTime(open)} - ${formatTime(close)}`;
+      
+      if (index === 0 || hoursString !== prevHours) {
+        // Start a new group
+        if (currentGroup.length > 0) {
+          // Add the previous group to segments
+          segments.push(formatDayGroup(currentGroup, prevHours));
+          currentGroup = [];
         }
-      };
-      
-      // Special handling for "Closed" and "Open 24 Hours"
-      if (type === 'open' && (value === 'Closed' || value === 'Open 24 Hours')) {
-        newHours[day].close = value;
+        currentGroup.push(day);
+      } else {
+        // Continue the current group
+        currentGroup.push(day);
       }
       
-      setTimeout(() => {
-        updateHoursText();
-      }, 0);
+      prevHours = hoursString;
       
-      return newHours;
+      // Handle the last group
+      if (index === DAYS.length - 1 && currentGroup.length > 0) {
+        segments.push(formatDayGroup(currentGroup, hoursString));
+      }
     });
+    
+    // Add special hours
+    specialHours.forEach(special => {
+      if (!special.day || (!special.open || !special.close) && !special.closed) return;
+      
+      const hoursString = special.closed ? "Closed" : `${formatTime(special.open)} - ${formatTime(special.close)}`;
+      segments.push(`${special.day}: ${hoursString}`);
+    });
+    
+    return segments.join(", ");
+  }, [dayHours, is24_7, specialHours]);
+  
+  // Update the form value whenever formatted hours change
+  useMemo(() => {
+    setValue("hours", formattedHours);
+  }, [formattedHours, setValue]);
+  
+  const handleHoursChange = (day: string, field: 'open' | 'close' | 'closed', value: string | boolean) => {
+    setDayHours(prev => ({
+      ...prev,
+      [day]: {
+        ...prev[day],
+        [field]: value
+      }
+    }));
   };
   
-  // Apply a template of standard hours
-  const applyHoursTemplate = (templateIndex: number) => {
-    if (templateIndex >= 0 && templateIndex < HOURS_TEMPLATES.length) {
-      setDayHours(HOURS_TEMPLATES[templateIndex].hours);
-      setCustomHours(true);
-      
-      setTimeout(() => {
-        updateHoursText();
-        toast({
-          title: "Hours template applied",
-          description: `Applied the "${HOURS_TEMPLATES[templateIndex].name}" template`,
-        });
-      }, 0);
-    }
+  const addSpecialHours = () => {
+    setSpecialHours(prev => [
+      ...prev,
+      { day: "Holiday", open: "09:00", close: "17:00", closed: false }
+    ]);
+  };
+  
+  const removeSpecialHours = (index: number) => {
+    setSpecialHours(prev => prev.filter((_, i) => i !== index));
+  };
+  
+  const copyFromPreviousDay = (dayIndex: number) => {
+    if (dayIndex === 0) return;
+    
+    const prevDay = DAYS[dayIndex - 1];
+    const currentDay = DAYS[dayIndex];
+    
+    setDayHours(prev => ({
+      ...prev,
+      [currentDay]: { ...prev[prevDay] }
+    }));
+    
+    toast.success("Hours copied from previous day");
   };
   
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold flex items-center">
-        <Clock className="mr-2 h-5 w-5 text-primary" />
-        Business Hours & Pricing
-      </h2>
-      <p className="text-muted-foreground mb-6">
-        Set your business operating hours and confirm pricing.
-      </p>
+      <div>
+        <h3 className="text-lg font-medium">Business Hours</h3>
+        <p className="text-sm text-muted-foreground">
+          Set your regular operating hours. This helps customers know when they can visit or contact your business.
+        </p>
+      </div>
       
-      {/* Business Hours Section */}
-      <Card>
-        <CardContent className="pt-6">
-          <h3 className="text-lg font-medium mb-4">Business Hours</h3>
-          
-          <div className="space-y-6">
-            <FormField
-              control={control}
-              name="is_24_7"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-base">Open 24/7</FormLabel>
-                    <FormDescription>
-                      Toggle on if your business is open 24 hours a day, 7 days a week
-                    </FormDescription>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={(checked) => {
-                        field.onChange(checked);
-                        handle24_7Change(checked);
-                      }}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            
-            {!is24_7 && (
+      <div className="flex items-center space-x-2">
+        <Switch
+          id="is_24_7"
+          checked={is24_7}
+          onCheckedChange={value => setValue("is_24_7", value)}
+        />
+        <Label htmlFor="is_24_7" className="font-medium">This business is open 24/7</Label>
+      </div>
+      
+      {!is24_7 && (
+        <>
+          <Card>
+            <CardContent className="pt-6">
               <div className="space-y-4">
-                <div className="flex flex-row items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-base">Custom Hours</FormLabel>
-                    <FormDescription>
-                      Set different hours for each day of the week
-                    </FormDescription>
-                  </div>
-                  <Switch
-                    checked={customHours}
-                    onCheckedChange={handleCustomHoursChange}
-                  />
-                </div>
-                
-                {customHours ? (
-                  <div className="space-y-4 mt-6">
-                    <div className="flex flex-col md:flex-row items-start md:items-center gap-2 mb-4">
-                      <h4 className="text-sm font-medium flex items-center">
-                        <CalendarDays className="mr-2 h-4 w-4" /> Standard Hours Templates
-                      </h4>
-                      <div className="flex flex-wrap gap-2">
-                        {HOURS_TEMPLATES.map((template, index) => (
-                          <Button 
-                            key={index} 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => applyHoursTemplate(index)}
-                            className="text-xs"
-                          >
-                            <Copy className="h-3 w-3 mr-1" />
-                            {template.name}
-                          </Button>
-                        ))}
-                      </div>
+                {DAYS.map((day, index) => (
+                  <div key={day} className="grid grid-cols-12 gap-4 items-center">
+                    <div className="col-span-3 sm:col-span-2">
+                      <Label>{day}</Label>
                     </div>
                     
-                    <h4 className="text-sm font-medium flex items-center">
-                      <CalendarDays className="mr-2 h-4 w-4" /> Set Hours Per Day
-                    </h4>
-                    
-                    <div className="space-y-2">
-                      {DAYS.map((day) => (
-                        <div key={day} className="grid grid-cols-3 gap-2 items-center">
-                          <div className="text-sm font-medium">{day}</div>
-                          <Select
-                            value={dayHours[day]?.open || "9:00 AM"}
-                            onValueChange={(value) => updateDayHours(day, 'open', value)}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Opening time" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {TIME_OPTIONS.map((time) => (
-                                <SelectItem key={`${day}-open-${time}`} value={time}>
-                                  {time}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                    <div className="col-span-9 sm:col-span-10 flex flex-wrap items-center gap-2">
+                      <div className="flex items-center space-x-2 mr-4">
+                        <Switch
+                          id={`${day.toLowerCase()}-closed`}
+                          checked={dayHours[day]?.closed}
+                          onCheckedChange={value => handleHoursChange(day, 'closed', value)}
+                        />
+                        <Label htmlFor={`${day.toLowerCase()}-closed`}>Closed</Label>
+                      </div>
+                      
+                      {!dayHours[day]?.closed && (
+                        <>
+                          <div className="flex items-center space-x-2">
+                            <Label htmlFor={`${day.toLowerCase()}-open`} className="w-12">Open:</Label>
+                            <Input
+                              id={`${day.toLowerCase()}-open`}
+                              type="time"
+                              value={dayHours[day]?.open || "09:00"}
+                              onChange={e => handleHoursChange(day, 'open', e.target.value)}
+                              className="w-32"
+                            />
+                          </div>
                           
-                          {dayHours[day]?.open !== "Closed" && dayHours[day]?.open !== "Open 24 Hours" && (
-                            <Select
-                              value={dayHours[day]?.close || "6:00 PM"}
-                              onValueChange={(value) => updateDayHours(day, 'close', value)}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Closing time" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {TIME_OPTIONS.filter(time => 
-                                  time !== "Closed" && time !== "Open 24 Hours"
-                                ).map((time) => (
-                                  <SelectItem key={`${day}-close-${time}`} value={time}>
-                                    {time}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          )}
+                          <div className="flex items-center space-x-2">
+                            <Label htmlFor={`${day.toLowerCase()}-close`} className="w-12">Close:</Label>
+                            <Input
+                              id={`${day.toLowerCase()}-close`}
+                              type="time"
+                              value={dayHours[day]?.close || "17:00"}
+                              onChange={e => handleHoursChange(day, 'close', e.target.value)}
+                              className="w-32"
+                            />
+                          </div>
+                        </>
+                      )}
+                      
+                      {index > 0 && (
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => copyFromPreviousDay(index)}
+                          className="ml-auto"
+                        >
+                          Copy from {DAYS[index - 1]}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+          
+          <div>
+            <div className="flex justify-between items-center mb-2">
+              <h4 className="font-medium">Special Hours</h4>
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm"
+                onClick={addSpecialHours}
+              >
+                <Plus className="h-4 w-4 mr-1" /> Add Special Hours
+              </Button>
+            </div>
+            
+            {specialHours.length > 0 && (
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="space-y-4">
+                    {specialHours.map((special, index) => (
+                      <div key={index} className="grid grid-cols-12 gap-4 items-center">
+                        <div className="col-span-3 sm:col-span-2">
+                          <Input
+                            value={special.day}
+                            onChange={(e) => {
+                              const updated = [...specialHours];
+                              updated[index].day = e.target.value;
+                              setSpecialHours(updated);
+                            }}
+                            placeholder="Day/Date"
+                          />
+                        </div>
+                        
+                        <div className="col-span-8 sm:col-span-9 flex flex-wrap items-center gap-2">
+                          <div className="flex items-center space-x-2 mr-4">
+                            <Switch
+                              id={`special-${index}-closed`}
+                              checked={special.closed}
+                              onCheckedChange={(value) => {
+                                const updated = [...specialHours];
+                                updated[index].closed = value;
+                                setSpecialHours(updated);
+                              }}
+                            />
+                            <Label htmlFor={`special-${index}-closed`}>Closed</Label>
+                          </div>
                           
-                          {(dayHours[day]?.open === "Closed" || dayHours[day]?.open === "Open 24 Hours") && (
-                            <div className="text-sm text-muted-foreground">
-                              {dayHours[day]?.open === "Closed" ? "Closed All Day" : "Open All Day"}
-                            </div>
+                          {!special.closed && (
+                            <>
+                              <div className="flex items-center space-x-2">
+                                <Label htmlFor={`special-${index}-open`} className="w-12">Open:</Label>
+                                <Input
+                                  id={`special-${index}-open`}
+                                  type="time"
+                                  value={special.open}
+                                  onChange={(e) => {
+                                    const updated = [...specialHours];
+                                    updated[index].open = e.target.value;
+                                    setSpecialHours(updated);
+                                  }}
+                                  className="w-32"
+                                />
+                              </div>
+                              
+                              <div className="flex items-center space-x-2">
+                                <Label htmlFor={`special-${index}-close`} className="w-12">Close:</Label>
+                                <Input
+                                  id={`special-${index}-close`}
+                                  type="time"
+                                  value={special.close}
+                                  onChange={(e) => {
+                                    const updated = [...specialHours];
+                                    updated[index].close = e.target.value;
+                                    setSpecialHours(updated);
+                                  }}
+                                  className="w-32"
+                                />
+                              </div>
+                            </>
                           )}
                         </div>
-                      ))}
-                    </div>
+                        
+                        <div className="col-span-1">
+                          <Button 
+                            type="button" 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => removeSpecialHours(index)}
+                          >
+                            <Trash className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ) : (
-                  <div className="space-y-4">
-                    <FormField
-                      control={control}
-                      name="hours"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Standard Business Hours <span className="text-red-500">*</span></FormLabel>
-                          <FormControl>
-                            <Textarea
-                              placeholder="e.g., Mon-Fri: 9:00 AM - 6:00 PM, Sat: 10:00 AM - 4:00 PM, Sun: Closed"
-                              {...field}
-                              disabled={is24_7}
-                              value={is24_7 ? "Open 24/7" : field.value}
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            Specify your general business hours
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                )}
-              </div>
+                </CardContent>
+              </Card>
             )}
           </div>
-        </CardContent>
-      </Card>
+        </>
+      )}
       
-      {/* Pricing Confirmation Section - Now editable */}
-      <Card>
-        <CardContent className="pt-6">
-          <h3 className="text-lg font-medium mb-4">Pricing Information</h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <FormField
-              control={control}
-              name="appointment_price"
-              render={({ field }) => (
-                <FormItem className="rounded-lg border p-4">
-                  <div className="flex items-center mb-2">
-                    <IndianRupee className="h-4 w-4 mr-2 text-primary" />
-                    <FormLabel className="text-base font-medium">Appointment Price</FormLabel>
-                  </div>
-                  <FormControl>
-                    <Input 
-                      type="number" 
-                      placeholder="Leave empty if not applicable"
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormDescription className="text-xs mt-2">
-                    Standard appointment pricing (optional)
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={control}
-              name="consultation_price"
-              render={({ field }) => (
-                <FormItem className="rounded-lg border p-4">
-                  <div className="flex items-center mb-2">
-                    <IndianRupee className="h-4 w-4 mr-2 text-primary" />
-                    <FormLabel className="text-base font-medium">Consultation Price</FormLabel>
-                  </div>
-                  <FormControl>
-                    <Input 
-                      type="number" 
-                      placeholder="Leave empty if not applicable"
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormDescription className="text-xs mt-2">
-                    Standard consultation pricing (optional)
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        </CardContent>
-      </Card>
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <Clock className="h-4 w-4 text-muted-foreground" />
+          <Label htmlFor="hours">Hours Display Format</Label>
+        </div>
+        
+        <Textarea
+          id="hours"
+          placeholder="Business hours"
+          {...register("hours")}
+          value={formattedHours}
+          readOnly
+          className="h-20 font-mono text-sm"
+        />
+        
+        <p className="text-xs text-muted-foreground">
+          This is how your business hours will display to customers. You can edit the hours above.
+        </p>
+      </div>
     </div>
   );
 };
+
+// Helper functions
+function mapShortDayToFull(shortDay: string): string | null {
+  const map: Record<string, string> = {
+    "Mon": "Monday",
+    "Tue": "Tuesday",
+    "Wed": "Wednesday",
+    "Thu": "Thursday",
+    "Fri": "Friday",
+    "Sat": "Saturday",
+    "Sun": "Sunday"
+  };
+  
+  return map[shortDay] || null;
+}
+
+function convertTo24HourFormat(timeStr: string): string {
+  try {
+    // Already in 24-hour format (e.g., "14:00")
+    if (timeStr.match(/^\d{1,2}:\d{2}$/)) {
+      return timeStr;
+    }
+    
+    // AM/PM format
+    const match = timeStr.match(/^(\d{1,2}):?(\d{2})?\s*(AM|PM)$/i);
+    if (!match) return "00:00";
+    
+    let hours = parseInt(match[1], 10);
+    const minutes = match[2] ? parseInt(match[2], 10) : 0;
+    const period = match[3].toUpperCase();
+    
+    if (period === "PM" && hours < 12) {
+      hours += 12;
+    } else if (period === "AM" && hours === 12) {
+      hours = 0;
+    }
+    
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+  } catch (error) {
+    console.error("Error converting time:", error);
+    return "00:00";
+  }
+}
+
+function formatTime(time: string): string {
+  try {
+    if (!time) return "";
+    
+    const [hours, minutes] = time.split(':').map(Number);
+    let period = "AM";
+    
+    let displayHours = hours;
+    if (hours > 12) {
+      displayHours = hours - 12;
+      period = "PM";
+    } else if (hours === 12) {
+      period = "PM";
+    } else if (hours === 0) {
+      displayHours = 12;
+    }
+    
+    return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`;
+  } catch (error) {
+    console.error("Error formatting time:", error);
+    return time;
+  }
+}
+
+function formatDayGroup(days: string[], hoursString: string): string {
+  if (days.length === 1) {
+    return `${days[0].substring(0, 3)}: ${hoursString}`;
+  }
+  
+  const firstDay = days[0].substring(0, 3);
+  const lastDay = days[days.length - 1].substring(0, 3);
+  
+  return `${firstDay}-${lastDay}: ${hoursString}`;
+}

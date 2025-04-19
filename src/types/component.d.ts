@@ -1,6 +1,12 @@
 
 import { ComponentType, ForwardRefExoticComponent, RefAttributes } from 'react';
 
+// Define IconComponent type
+export type IconComponent = React.ComponentType<{ 
+  className?: string; 
+  size?: number | string;
+}>;
+
 // This file extends React's typings to properly support the children prop
 declare module 'react' {
   // Ensure that React's ElementType can handle components with children props

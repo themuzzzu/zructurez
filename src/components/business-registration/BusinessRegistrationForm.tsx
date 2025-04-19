@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,7 +13,7 @@ import { LocationContactStep } from "./steps/LocationContactStep";
 import { BusinessHoursStep } from "./steps/BusinessHoursStep";
 import { FinalSubmitStep } from "./steps/FinalSubmitStep";
 import { FormSidebar } from "./FormSidebar";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner"; // Using Sonner directly
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { businessFormSchema } from "./schema";
@@ -26,7 +27,6 @@ export const BusinessRegistrationForm = () => {
   const [loading, setLoading] = useState(false);
   const [userHasBusiness, setUserHasBusiness] = useState(false);
   const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(null);
-  const { toast } = useToast();
   const navigate = useNavigate();
   
   const methods = useForm<BusinessFormValues>({
@@ -99,10 +99,8 @@ export const BusinessRegistrationForm = () => {
           
           if (businesses && businesses.length > 0) {
             setUserHasBusiness(true);
-            toast({
-              title: "You already have a business",
-              description: "Only one business is allowed per user. Please manage your existing business.",
-              variant: "destructive",
+            toast.error("You already have a business", {
+              description: "Only one business is allowed per user. Please manage your existing business."
             });
             
             setTimeout(() => {
@@ -118,7 +116,7 @@ export const BusinessRegistrationForm = () => {
     };
     
     checkUserBusiness();
-  }, [navigate, toast]);
+  }, [navigate]);
   
   useEffect(() => {
     if (isDirty) {
@@ -127,10 +125,8 @@ export const BusinessRegistrationForm = () => {
       const timer = setTimeout(() => {
         saveFormDataToLocalStorage(formValues);
         localStorage.setItem("business-registration-step", currentStep.toString());
-        toast({
-          title: "Progress auto-saved",
-          description: "Your form data has been automatically saved",
-          duration: 2000,
+        toast.success("Progress auto-saved", {
+          description: "Your form data has been automatically saved"
         });
       }, 30000);
       
@@ -151,10 +147,8 @@ export const BusinessRegistrationForm = () => {
     saveFormDataToLocalStorage(formValues);
     localStorage.setItem("business-registration-step", currentStep.toString());
     
-    toast({
-      title: "Progress saved",
-      description: "You can continue registration later",
-      duration: 3000,
+    toast.success("Progress saved", {
+      description: "You can continue registration later"
     });
     
     setTimeout(() => {
@@ -191,10 +185,8 @@ export const BusinessRegistrationForm = () => {
         window.scrollTo(0, 0);
       }
     } else {
-      toast({
-        title: "Please fill all required fields",
-        description: "You need to complete all required fields before proceeding",
-        variant: "destructive",
+      toast.error("Please fill all required fields", {
+        description: "You need to complete all required fields before proceeding"
       });
     }
   };
@@ -211,10 +203,8 @@ export const BusinessRegistrationForm = () => {
       if (isDirty) {
         saveFormDataToLocalStorage(formValues);
         localStorage.setItem("business-registration-step", currentStep.toString());
-        toast({
-          title: "Progress saved",
-          description: "You can continue registration later",
-          duration: 3000,
+        toast.success("Progress saved", {
+          description: "You can continue registration later"
         });
       }
       navigate("/businesses");
@@ -226,10 +216,8 @@ export const BusinessRegistrationForm = () => {
       if (window.confirm("Going back will save your current progress. Continue?")) {
         saveFormDataToLocalStorage(formValues);
         localStorage.setItem("business-registration-step", currentStep.toString());
-        toast({
-          title: "Progress saved",
-          description: "You can continue registration later",
-          duration: 3000,
+        toast.success("Progress saved", {
+          description: "You can continue registration later"
         });
       } else {
         return;
@@ -240,10 +228,8 @@ export const BusinessRegistrationForm = () => {
   
   const onSubmit = async (data: BusinessFormValues) => {
     if (userHasBusiness) {
-      toast({
-        title: "Registration not allowed",
-        description: "You already have a registered business. Only one business is allowed per user.",
-        variant: "destructive",
+      toast.error("Registration not allowed", {
+        description: "You already have a registered business. Only one business is allowed per user."
       });
       return;
     }
@@ -273,10 +259,8 @@ export const BusinessRegistrationForm = () => {
       
       const { data: userData } = await supabase.auth.getUser();
       if (!userData?.user) {
-        toast({
-          title: "Error",
-          description: "You must be logged in to register a business",
-          variant: "destructive",
+        toast.error("Error", {
+          description: "You must be logged in to register a business"
         });
         return;
       }
@@ -292,10 +276,8 @@ export const BusinessRegistrationForm = () => {
       }
       
       if (existingBusinesses && existingBusinesses.length > 0) {
-        toast({
-          title: "Registration failed",
-          description: "You already have a registered business. Only one business is allowed per user.",
-          variant: "destructive",
+        toast.error("Registration failed", {
+          description: "You already have a registered business. Only one business is allowed per user."
         });
         setUserHasBusiness(true);
         return;
@@ -330,17 +312,14 @@ export const BusinessRegistrationForm = () => {
       
       if (error) {
         console.error("Error submitting form:", error);
-        toast({
-          title: "Registration failed",
-          description: error.message,
-          variant: "destructive",
+        toast.error("Registration failed", {
+          description: error.message
         });
         return;
       }
       
-      toast({
-        title: "Business registered successfully!",
-        description: "Your business has been registered and is now live.",
+      toast.success("Business registered successfully!", {
+        description: "Your business has been registered and is now live."
       });
       
       localStorage.removeItem("business-registration-form");
@@ -356,10 +335,8 @@ export const BusinessRegistrationForm = () => {
       
     } catch (error) {
       console.error("Error in form submission:", error);
-      toast({
-        title: "Registration failed",
-        description: "An unexpected error occurred. Please try again.",
-        variant: "destructive",
+      toast.error("Registration failed", {
+        description: "An unexpected error occurred. Please try again."
       });
     } finally {
       setLoading(false);

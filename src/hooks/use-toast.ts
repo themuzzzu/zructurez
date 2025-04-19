@@ -1,6 +1,5 @@
 
-// This file is needed because in src/components/ui/use-toast.ts it's imported from this path
-import { toast } from 'sonner';
+import { toast as sonnerToast } from 'sonner';
 
 // Define the shape of our toast hook
 type ToastProps = {
@@ -8,29 +7,27 @@ type ToastProps = {
   description?: React.ReactNode;
   action?: React.ReactNode;
   variant?: 'default' | 'destructive' | 'success';
+  duration?: number; // Added duration property
 };
 
 export const useToast = () => {
-  const showToast = ({ title, description, action, variant = 'default' }: ToastProps) => {
+  const showToast = ({ title, description, action, variant = 'default', duration }: ToastProps) => {
+    const options: any = {
+      description,
+      action,
+      duration,
+    };
+
     if (variant === 'destructive') {
-      toast.error(title, {
-        description,
-        action,
-      });
+      sonnerToast.error(title, options);
     } else if (variant === 'success') {
-      toast.success(title, {
-        description,
-        action,
-      });
+      sonnerToast.success(title, options);
     } else {
-      toast(title, {
-        description,
-        action,
-      });
+      sonnerToast(title, options);
     }
   };
 
-  return { toast: showToast };
+  return { toast: showToast, toasts: [] }; // Added empty toasts array for compatibility
 };
 
-export { toast };
+export { sonnerToast as toast };
