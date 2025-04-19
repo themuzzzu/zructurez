@@ -11,6 +11,7 @@ import { ShopByCategory } from "@/components/marketplace/ShopByCategory";
 import SponsoredProducts from "@/components/marketplace/SponsoredProducts";
 import { TrendingProducts } from "@/components/marketplace/TrendingProducts";
 import { BrowseTabContent } from "@/components/marketplace/BrowseTabContent";
+import { ProductRankings } from "@/components/marketplace/ProductRankings";
 
 const Marketplace = () => {
   const params = useParams();
@@ -37,12 +38,17 @@ const Marketplace = () => {
             {/* Shop by Category */}
             <ShopByCategory />
             
+            {/* Product Rankings */}
+            <div className="mt-8">
+              <ProductRankings />
+            </div>
+            
             {/* Sponsored Products */}
             <div className="mt-8">
               <SponsoredProducts />
             </div>
             
-            {/* Suggested Products */}
+            {/* Trending Products */}
             <div className="mt-8">
               <TrendingProducts />
             </div>
