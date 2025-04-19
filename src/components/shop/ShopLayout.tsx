@@ -11,6 +11,7 @@ export const ShopLayout = ({ children }: ShopLayoutProps) => {
     <Layout>
       <div className="container max-w-7xl mx-auto px-4 py-6 space-y-8">
         <div className="mb-6">
+          <h1 className="text-2xl font-bold mb-4">Shop</h1>
           <div className="relative">
             <input
               type="search"

@@ -10,6 +10,7 @@ import { servicesRoutes } from "./servicesRoutes";
 import { userRoutes } from "./userRoutes";
 import { miscRoutes } from "./miscRoutes";
 import Shop from "@/pages/Shop";
+import { NotFound } from "@/components/NotFound";
 
 // Export the routes configuration without creating a router instance
 export const routes: RouteObject[] = [
@@ -28,6 +29,10 @@ export const routes: RouteObject[] = [
         path: "/shop",
         element: <Shop />,
       },
+      {
+        path: "*",
+        element: <NotFound />,
+      }
     ]
   }
 ];
