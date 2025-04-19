@@ -8,7 +8,7 @@ import { MarketplaceSkeleton } from "@/components/marketplace/MarketplaceSkeleto
 import { MarketplaceHeader } from "./marketplace/MarketplaceHeader";
 import { BannerCarousel } from "@/components/marketplace/BannerCarousel";
 import { ShopByCategory } from "@/components/marketplace/ShopByCategory";
-import { SponsoredProducts } from "@/components/marketplace/SponsoredProducts";
+import SponsoredProducts from "@/components/marketplace/SponsoredProducts";
 import { TrendingProducts } from "@/components/marketplace/TrendingProducts";
 import { BrowseTabContent } from "@/components/marketplace/BrowseTabContent";
 
