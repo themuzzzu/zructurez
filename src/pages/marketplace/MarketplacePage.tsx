@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { MarketplaceLayout } from "@/components/marketplace/MarketplaceLayout";
 import { AutocompleteSearch } from "@/components/marketplace/AutocompleteSearch";
@@ -64,18 +65,6 @@ export default function MarketplacePage() {
         <div data-section="categories">
           <ShopByCategory />
         </div>
-        
-        {/* Removed sections:
-          - MarketplaceHeader
-          - SponsoredProducts
-          - FlashSale
-          - SuggestedProducts
-          - TrendingProducts
-          - TrendingSection
-          - CategoryFeatured
-          - TrendingSearches
-          - BrowseCategoriesFooter
-        */}
       </div>
     </MarketplaceLayout>
   );
