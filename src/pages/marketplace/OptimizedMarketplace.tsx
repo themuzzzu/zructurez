@@ -1,41 +1,10 @@
-import { useState, useEffect, Suspense, lazy } from "react";
+
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { GridLayoutType } from "@/components/products/types/ProductTypes";
 import { AutocompleteSearch } from "@/components/marketplace/AutocompleteSearch";
-import { ShopByCategory } from "@/components/marketplace/ShopByCategory";
-import { Button } from "@/components/ui/button";
-import { SkeletonCard } from "@/components/loaders";
 import { useLoading } from "@/providers/LoadingProvider";
-
-// Lazy load components
-const BannerCarousel = lazy(() => 
-  import("@/components/marketplace/BannerCarousel").then(module => ({ default: module.BannerCarousel }))
-);
-const SponsoredProducts = lazy(() => 
-  import("@/components/marketplace/SponsoredProducts").then(module => ({ default: module.default }))
-);
-const SuggestedProducts = lazy(() => 
-  import("@/components/products/SuggestedProducts").then(module => ({ default: module.default }))
-);
-const TrendingProducts = lazy(() => 
-  import("@/components/marketplace/TrendingProducts").then(module => ({ default: module.TrendingProducts }))
-);
-const BrowseTabContent = lazy(() => 
-  import("./BrowseTabContent").then(module => ({ default: module.BrowseTabContent }))
-);
-
-// Optimized section loader
-const LazySection = ({ children, fallbackCount = 2 }) => (
-  <Suspense fallback={
-    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 animate-fade-in">
-      {Array.from({ length: fallbackCount }).map((_, i) => (
-        <SkeletonCard key={i} />
-      ))}
-    </div>
-  }>
-    {children}
-  </Suspense>
-);
+import { MarketplaceSections } from "@/components/marketplace/MarketplaceSections";
 
 export const OptimizedMarketplace = () => {
   const navigate = useNavigate();
@@ -45,22 +14,12 @@ export const OptimizedMarketplace = () => {
   const categoryParam = searchParams.get("category") || "all";
   const subcategoryParam = searchParams.get("subcategory") || "";
   
-  // State for search and cart
+  // State for search and filters
   const [searchQuery, setSearchQuery] = useState(queryParam);
-  const [isCartOpen, setIsCartOpen] = useState(false);
-  const [cartItemCount, setCartItemCount] = useState(0);
-  
-  // State for filters and layout
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(categoryParam);
   const [selectedSubcategory, setSelectedSubcategory] = useState(subcategoryParam);
-  const [showDiscounted, setShowDiscounted] = useState(false);
-  const [showUsed, setShowUsed] = useState(false);
-  const [showBranded, setShowBranded] = useState(false);
-  const [sortOption, setSortOption] = useState("newest");
-  const [priceRange, setPriceRange] = useState("all");
-  const [gridLayout, setGridLayout] = useState<GridLayoutType>("grid4x4");
   const [isPageReady, setIsPageReady] = useState(false);
+  const [gridLayout] = useState<GridLayoutType>("grid4x4");
   
   const { setLoading } = useLoading();
   
@@ -151,7 +110,7 @@ export const OptimizedMarketplace = () => {
   
   return (
     <div className="pt-2 sm:pt-4 px-2 sm:px-4 md:px-6 transition-opacity duration-200">
-      {/* Search Bar */}
+      {/* Search Bar - Always at the top */}
       <div className="mb-4 sm:mb-6 max-w-3xl mx-auto w-full">
         <AutocompleteSearch 
           value={searchQuery}
@@ -162,41 +121,14 @@ export const OptimizedMarketplace = () => {
         />
       </div>
       
-      {/* Main content sections in new order */}
-      <div className="space-y-4 sm:space-y-6 md:space-y-8">
-        {/* Banner Carousel */}
-        <LazySection fallbackCount={1}>
-          <BannerCarousel />
-        </LazySection>
-
-        {/* Categories */}
-        <div className="mb-4 sm:mb-6">
-          <ShopByCategory onCategorySelect={handleCategoryChange} />
-        </div>
-        
-        {/* Sponsored Products */}
-        <LazySection>
-          <SponsoredProducts />
-        </LazySection>
-
-        {/* Suggested Products */}
-        <LazySection>
-          <SuggestedProducts />
-        </LazySection>
-
-        {/* Trending Products */}
-        <LazySection>
-          <TrendingProducts />
-        </LazySection>
-
-        {/* Browse by Category */}
-        <LazySection>
-          <BrowseTabContent 
-            searchTerm={searchQuery}
-            onCategorySelect={handleCategoryChange}
-          />
-        </LazySection>
-      </div>
+      {/* Main content with organized sections */}
+      <MarketplaceSections 
+        searchQuery={searchQuery}
+        selectedCategory={selectedCategory}
+        selectedSubcategory={selectedSubcategory}
+        onCategoryChange={handleCategoryChange}
+        gridLayout={gridLayout}
+      />
     </div>
   );
 };

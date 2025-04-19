@@ -5,7 +5,7 @@ import { ChevronRight, ChevronLeft } from "lucide-react";
 import { useRef, useEffect, useState } from "react";
 
 interface CategoryProps {
-  onCategorySelect?: (category: string) => void;
+  onCategorySelect?: (category: string, subcategory?: string) => void;
 }
 
 export const ShopByCategory = ({ onCategorySelect }: CategoryProps) => {

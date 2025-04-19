@@ -9,24 +9,7 @@ import { ErrorView } from "@/components/ErrorView";
 
 // Load optimized marketplace with proper error handling
 const OptimizedMarketplace = lazy(() => 
-  import("./marketplace/OptimizedMarketplace").then(module => {
-    console.log("OptimizedMarketplace component loaded successfully");
-    return module;
-  }).catch(error => {
-    console.error("Failed to load OptimizedMarketplace:", error);
-    return { default: () => <ErrorView message="Failed to load marketplace content. Please try again." /> };
-  })
-);
-
-// Load sponsored products with proper error handling
-const SponsoredProducts = lazy(() => 
-  import("@/components/marketplace/SponsoredProducts").then(module => {
-    console.log("SponsoredProducts component loaded successfully");
-    return module;
-  }).catch(error => {
-    console.error("Failed to load SponsoredProducts:", error);
-    return { default: () => <div className="py-4 text-center text-muted-foreground">Sponsored content unavailable</div> };
-  })
+  import("./marketplace/OptimizedMarketplace")
 );
 
 // Better loading placeholder with reduced padding on mobile
@@ -123,18 +106,6 @@ const Marketplace = () => {
             <OptimizedMarketplace />
           </ErrorBoundary>
         </Suspense>
-        
-        {/* Add sponsored products section */}
-        <div className="mt-6 overflow-hidden">
-          <h2 className="text-xl font-bold mb-4">Sponsored Products</h2>
-          <Suspense fallback={<MarketplaceSkeleton />}>
-            <ErrorBoundary fallback={<div className="py-4 text-center text-muted-foreground">
-              Sponsored products unavailable at the moment
-            </div>}>
-              <SponsoredProducts />
-            </ErrorBoundary>
-          </Suspense>
-        </div>
       </div>
     </Layout>
   );
