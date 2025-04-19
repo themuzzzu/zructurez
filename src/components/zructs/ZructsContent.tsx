@@ -1,0 +1,17 @@
+
+import React from "react";
+import { ShopByCategory } from "./sections/ShopByCategory";
+import { SponsoredProducts } from "./sections/SponsoredProducts";
+import { SuggestedProducts } from "./sections/SuggestedProducts";
+import { TrendingSection } from "./sections/TrendingSection";
+
+export const ZructsContent = () => {
+  return (
+    <div className="space-y-12">
+      <ShopByCategory />
+      <SponsoredProducts />
+      <SuggestedProducts />
+      <TrendingSection />
+    </div>
+  );
+};

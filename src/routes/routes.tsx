@@ -1,4 +1,3 @@
-
 import { RouteObject } from "react-router-dom";
 import { Layout } from "./Layout";
 import { ErrorView } from "@/components/ErrorView";
@@ -9,6 +8,7 @@ import { businessRoutes } from "./businessRoutes";
 import { servicesRoutes } from "./servicesRoutes";
 import { userRoutes } from "./userRoutes";
 import { miscRoutes } from "./miscRoutes";
+import Zructs from "@/pages/Zructs";
 
 // Export the routes configuration without creating a router instance
 export const routes: RouteObject[] = [
@@ -23,6 +23,10 @@ export const routes: RouteObject[] = [
       ...servicesRoutes,
       ...userRoutes,
       ...miscRoutes,
+      {
+        path: "/zructs",
+        element: <Zructs />,
+      },
     ]
   }
 ];
