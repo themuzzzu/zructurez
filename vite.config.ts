@@ -4,14 +4,6 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
-// Import postcss config values directly
-const postcssConfig = {
-  plugins: {
-    tailwindcss: {},
-    autoprefixer: {},
-  },
-};
-
 export default defineConfig(({ mode }) => ({
   plugins: [
     react({
@@ -31,6 +23,11 @@ export default defineConfig(({ mode }) => ({
     host: true,
   },
   css: {
-    postcss: postcssConfig,
+    postcss: {
+      plugins: [
+        require('tailwindcss'),
+        require('autoprefixer')
+      ],
+    },
   },
 }));
