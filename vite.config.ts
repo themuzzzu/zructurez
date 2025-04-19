@@ -11,7 +11,6 @@ export default defineConfig(({ mode }) => ({
     react({
       // Enable TypeScript support
       tsDecorators: true,
-      // Remove tsconfig property as it doesn't exist in Options type
     }),
     mode === 'development' && componentTagger(),
   ].filter(Boolean),
