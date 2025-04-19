@@ -1,8 +1,13 @@
 
 import { MarketplaceLayout } from '@/components/marketplace/MarketplaceLayout';
+import { MarketplaceProvider } from '@/providers/MarketplaceProvider';
 
 const OptimizedMarketplace = () => {
-  return <MarketplaceLayout />;
+  return (
+    <MarketplaceProvider>
+      <MarketplaceLayout />
+    </MarketplaceProvider>
+  );
 };
 
 export default OptimizedMarketplace;
