@@ -1,6 +1,6 @@
 
-import { CreateAdvertisement as AdvertisementForm } from "@/components/advertisements/CreateAdvertisement";
+import { AdCreationStepper } from "@/components/ads/AdCreationStepper";
 
 export const CreateAdvertisement = ({ onClose }: { onClose: () => void }) => {
-  return <AdvertisementForm onClose={onClose} />;
+  return <AdCreationStepper onClose={onClose} />;
 };
