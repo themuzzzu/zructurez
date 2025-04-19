@@ -20,6 +20,12 @@ try {
     execSync('chmod +x fix-project.js', { stdio: 'inherit' });
   }
   
+  // Verify Vite installation one more time
+  if (!fs.existsSync(path.join(__dirname, 'node_modules', '.bin', 'vite'))) {
+    console.log('Vite still not found. Installing it directly...');
+    execSync('npm install --save-dev vite@latest', { stdio: 'inherit' });
+  }
+  
   console.log('Project issues fixed!');
   console.log('You can now run: npm run dev');
 } catch (error) {

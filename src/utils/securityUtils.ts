@@ -6,6 +6,11 @@ import { z } from 'zod';
  * Sanitizes HTML to prevent XSS attacks
  */
 export const sanitizeHtml = (html: string): string => {
+  if (typeof DOMPurify === 'undefined') {
+    console.warn('DOMPurify not available, returning text without sanitization');
+    return html;
+  }
+  
   return DOMPurify.sanitize(html, {
     ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br'],
     ALLOWED_ATTR: ['href', 'target', 'rel']
