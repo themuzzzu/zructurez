@@ -18,8 +18,9 @@ export function Layout({ children, hideNav = false, hideSidebar = false }: Layou
     <div className="min-h-screen bg-background flex flex-col relative">
       {!hideNav && <Navbar />}
       <div className="flex flex-1 pt-16">
+        {/* Only show sidebar if not mobile and not explicitly hidden */}
         {!hideSidebar && !isMobile && (
-          <Sidebar className="h-[calc(100vh-4rem)] fixed left-0 top-16" />
+          <Sidebar className="hidden md:block h-[calc(100vh-4rem)] fixed left-0 top-16" />
         )}
         <main className={`flex-1 relative ${!hideSidebar && !isMobile ? 'ml-[72px]' : ''}`}>
           <SuspenseBoundary>
