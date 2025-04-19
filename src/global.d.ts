@@ -12,12 +12,21 @@ declare module 'react' {
   }
 }
 
-// Explicitly declare children prop support for shadcn components
+// Explicitly declare children prop support for all shadcn components
 declare module '@/components/ui/*' {
   interface BaseComponentProps {
     children?: React.ReactNode;
     className?: string;
     asChild?: boolean;
+  }
+}
+
+// Fix issue with global JSX children support
+declare global {
+  namespace JSX {
+    interface IntrinsicAttributes {
+      children?: React.ReactNode;
+    }
   }
 }
 

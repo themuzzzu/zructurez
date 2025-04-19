@@ -8,8 +8,8 @@ console.log('Installing missing dependencies...');
 
 try {
   if (fs.existsSync(path.join(__dirname, 'package.json'))) {
-    // First install critical dependencies
-    console.log('Installing critical development dependencies...');
+    // First install critical dependencies including Vite
+    console.log('Installing Vite and critical development dependencies...');
     execSync('npm install --save-dev vite@latest @vitejs/plugin-react-swc@latest typescript@latest @types/node@latest lovable-tagger@latest class-variance-authority@latest tailwind-merge@latest clsx@latest tailwindcss-animate@latest', { stdio: 'inherit' });
     
     // Then React dependencies

@@ -13,6 +13,19 @@ declare module 'react' {
     T extends ForwardRefExoticComponent<infer P>
       ? P
       : ComponentPropsWithoutRef<T>;
+
+  // Important: explicitly add children to JSX.IntrinsicAttributes
+  interface FunctionComponent<P = {}> {
+    (props: P & { children?: React.ReactNode }, context?: any): React.ReactElement<any, any> | null;
+  }
+
+  // Add children to ForwardRefExoticComponent
+  interface ForwardRefExoticComponent<P = {}> {
+    defaultProps?: Partial<P>;
+    propTypes?: React.WeakValidationMap<P>;
+    displayName?: string;
+    (props: P & { children?: React.ReactNode }, ref?: React.Ref<any>): React.ReactElement | null;
+  }
 }
 
 // Ensure that JSX inherently supports children props
@@ -21,21 +34,5 @@ declare namespace JSX {
     children?: React.ReactNode;
     key?: any;
     ref?: any;
-  }
-}
-
-// Make sure React knows elements can have children
-declare module 'react' {
-  interface FunctionComponent<P = {}> {
-    (props: P & { children?: React.ReactNode }, context?: any): React.ReactElement<any, any> | null;
-  }
-}
-
-// Augment ForwardRefExoticComponent to ensure children are allowed
-declare module 'react' {
-  interface ForwardRefExoticComponent<P> {
-    defaultProps?: Partial<P>;
-    propTypes?: React.WeakValidationMap<P>;
-    displayName?: string;
   }
 }
