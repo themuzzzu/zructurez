@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { ProductsGrid } from "@/components/products/ProductsGrid";
 import { Heading } from "@/components/ui/heading";
 import { ShoppingCardSkeleton } from "@/components/ShoppingCardSkeleton";
@@ -15,54 +15,31 @@ export function MarketplaceContent() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const { isOnline } = useNetworkStatus();
 
-  // Fix: Explicitly define the return type to prevent excessive type instantiation
   const { data: featuredProducts, isLoading: loadingFeatured, error: featuredError } = useQuery({
     queryKey: ["featuredProducts"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .eq("is_featured", true)
-        .limit(8);
+      try {
+        const { data, error } = await supabase
+          .from("products")
+          .select("*")
+          .eq("is_featured", true)
+          .limit(8);
+          
+        if (error) {
+          console.error("Error fetching featured products:", error);
+          throw new Error("Failed to fetch featured products");
+        }
         
-      if (error) {
-        console.error("Error fetching featured products:", error);
-        throw new Error("Failed to fetch featured products");
+        return data || [];
+      } catch (error) {
+        console.error("Error in featured products query:", error);
+        toast.error("Failed to load featured products");
+        return [];
       }
-      
-      return data || [];
     },
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 60000, // 1 minute
     enabled: isOnline, // Only run when online
   });
-  
-  // Fix: Explicitly define the return type to prevent excessive type instantiation
-  const { data: trendingProducts, isLoading: loadingTrending, error: trendingError } = useQuery({
-    queryKey: ["trendingProducts"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .order("views", { ascending: false })
-        .limit(8);
-        
-      if (error) {
-        console.error("Error fetching trending products:", error);
-        throw new Error("Failed to fetch trending products");
-      }
-      
-      return data || [];
-    },
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    enabled: isOnline, // Only run when online
-  });
-
-  // Handle network status change
-  useEffect(() => {
-    if (!isOnline) {
-      toast.warning("You're offline. Some content may not be available.");
-    }
-  }, [isOnline]);
 
   // Animation variants for sections
   const containerVariants = {
@@ -111,37 +88,6 @@ export function MarketplaceContent() {
         ) : (
           <ProductsGrid 
             products={featuredProducts || []} 
-            layout="grid3x3" 
-          />
-        )}
-      </motion.section>
-
-      {/* Trending Products Section */}
-      <motion.section 
-        initial="hidden"
-        animate="visible"
-        variants={containerVariants}
-        className="space-y-4"
-      >
-        <Heading as="h2" className="text-2xl font-bold">
-          Trending Products
-        </Heading>
-        
-        {loadingTrending ? (
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <ShoppingCardSkeleton key={i} />
-            ))}
-          </div>
-        ) : trendingError ? (
-          <ErrorView 
-            title="Couldn't load trending products"
-            message="There was an error loading trending products."
-            onRetry={() => {}} // Add retry logic if needed
-          />
-        ) : (
-          <ProductsGrid 
-            products={trendingProducts || []} 
             layout="grid3x3" 
           />
         )}
