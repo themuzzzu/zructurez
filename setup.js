@@ -11,17 +11,19 @@ try {
   console.log('\n=== INSTALLING BASE DEPENDENCIES ===');
   execSync('npm install', { stdio: 'inherit' });
   
-  // Run install-deps.js to install critical dependencies
+  // Install critical dependencies
   console.log('\n=== INSTALLING CRITICAL DEPENDENCIES ===');
-  execSync('node install-deps.js', { stdio: 'inherit' });
+  execSync('npm install react react-dom @tanstack/react-query react-router-dom sonner lucide-react framer-motion', { stdio: 'inherit' });
+  execSync('npm install --save-dev @types/react @types/react-dom typescript @types/node', { stdio: 'inherit' });
   
   // Install DOMPurify types explicitly
   console.log('\n=== INSTALLING DOMPURIFY TYPES ===');
-  execSync('npm install --save-dev @types/dompurify@latest', { stdio: 'inherit' });
+  execSync('npm install dompurify', { stdio: 'inherit' });
+  execSync('npm install --save-dev @types/dompurify', { stdio: 'inherit' });
   
   // Install Vite and React plugin explicitly
   console.log('\n=== INSTALLING VITE AND PLUGINS ===');
-  execSync('npm install --save-dev vite@latest @vitejs/plugin-react-swc@latest', { stdio: 'inherit' });
+  execSync('npm install --save-dev vite @vitejs/plugin-react-swc', { stdio: 'inherit' });
   
   // Verify Vite installation
   console.log('\n=== VERIFYING VITE INSTALLATION ===');
@@ -33,13 +35,6 @@ try {
     console.log('Issue with Vite installation, reinstalling...');
     execSync('npm install --save-dev vite@latest @vitejs/plugin-react-swc@latest', { stdio: 'inherit' });
     execSync('npm install', { stdio: 'inherit' }); // Run npm install again to fix dependencies
-  }
-  
-  // Create or update the Vite environment type declaration file
-  const viteEnvPath = path.join(__dirname, 'src/vite-env.d.ts');
-  if (!fs.existsSync(viteEnvPath)) {
-    console.log('Creating vite-env.d.ts...');
-    fs.writeFileSync(viteEnvPath, '/// <reference types="vite/client" />\n');
   }
   
   // Make sure npm scripts are set up correctly
@@ -63,6 +58,7 @@ try {
   if (process.platform !== 'win32') {
     try {
       execSync('chmod +x setup.js', { stdio: 'inherit' });
+      execSync('chmod +x start-dev.sh', { stdio: 'inherit' });
     } catch (error) {
       console.log('Failed to set permissions, but continuing...');
     }

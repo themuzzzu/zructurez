@@ -76,14 +76,12 @@ export const BusinessCard = ({
           <p className="text-sm text-gray-200 mb-1">{category}</p>
         </div>
         <Badge 
-          variant={is_open ? "success" : "destructive"}
-          className="absolute top-3 right-3"
+          className={`absolute top-3 right-3 ${is_open ? "bg-green-500 text-white" : "bg-destructive text-destructive-foreground"}`}
         >
           {is_open ? "Open" : "Closed"}
         </Badge>
         {verified && (
           <Badge 
-            variant="outline"
             className="absolute top-3 left-3 bg-white/80 text-gray-800"
           >
             Verified

@@ -145,8 +145,9 @@ export default defineConfig({
     try {
       console.log('\n🔑 Setting executable permissions...');
       execSync('chmod +x install.js', { stdio: 'inherit' });
-      execSync('chmod +x setup-project.js', { stdio: 'inherit' });
+      execSync('chmod +x setup.js', { stdio: 'inherit' });
       execSync('chmod +x start-dev.js', { stdio: 'inherit' });
+      execSync('chmod +x start-dev.sh', { stdio: 'inherit' });
     } catch (error) {
       console.log('⚠️ Failed to set permissions, but continuing...');
     }
