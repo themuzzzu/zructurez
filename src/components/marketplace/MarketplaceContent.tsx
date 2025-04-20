@@ -15,7 +15,7 @@ export function MarketplaceContent() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const { isOnline } = useNetworkStatus();
 
-  // Fetch featured products
+  // Fix: Explicitly define the return type to prevent excessive type instantiation
   const { data: featuredProducts, isLoading: loadingFeatured, error: featuredError } = useQuery({
     queryKey: ["featuredProducts"],
     queryFn: async () => {
@@ -36,7 +36,7 @@ export function MarketplaceContent() {
     enabled: isOnline, // Only run when online
   });
   
-  // Fetch trending products
+  // Fix: Explicitly define the return type to prevent excessive type instantiation
   const { data: trendingProducts, isLoading: loadingTrending, error: trendingError } = useQuery({
     queryKey: ["trendingProducts"],
     queryFn: async () => {

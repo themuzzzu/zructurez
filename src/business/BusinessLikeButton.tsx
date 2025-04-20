@@ -5,7 +5,7 @@ import { Heart } from "lucide-react";
 
 interface BusinessLikeButtonProps {
   businessId: string;
-  size?: "sm" | "md" | "lg" | "default";
+  size?: "sm" | "default" | "lg";
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
 }
 
