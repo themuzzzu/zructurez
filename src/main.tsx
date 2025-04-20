@@ -1,31 +1,24 @@
 
-import React from "react";
-import ReactDOM from "react-dom/client";
-import App from "./App.tsx";
-import "./index.css";
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import './index.css';
 import { verifyVite } from "./utils/verifyVite";
 
 // Verify Vite is working
 verifyVite();
 
-// Check if DOM is ready
-const rootElement = document.getElementById("root");
+// Get root element
+const rootElement = document.getElementById('root');
 
 if (!rootElement) {
-  console.error("Root element not found. Creating one...");
-  const newRoot = document.createElement("div");
-  newRoot.id = "root";
-  document.body.appendChild(newRoot);
-  
-  ReactDOM.createRoot(newRoot).render(
-    <React.StrictMode>
-      <App />
-    </React.StrictMode>
-  );
+  console.error('Root element not found in the DOM.');
 } else {
   ReactDOM.createRoot(rootElement).render(
     <React.StrictMode>
-      <App />
+      <div className="p-8">
+        <h1 className="text-2xl font-bold mb-4">Business Directory</h1>
+        <p>App is loading...</p>
+      </div>
     </React.StrictMode>
   );
 }
