@@ -17,7 +17,7 @@ if (!rootElement) {
     <React.StrictMode>
       <div className="p-8">
         <h1 className="text-2xl font-bold mb-4">Business Directory</h1>
-        <p>App is loading...</p>
+        <p>Setup successful! Your application is now configured correctly.</p>
       </div>
     </React.StrictMode>
   );
