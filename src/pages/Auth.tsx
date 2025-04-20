@@ -1,171 +1,133 @@
 
-import { Auth as SupabaseAuth } from "@supabase/auth-ui-react";
-import { ThemeSupa } from "@supabase/auth-ui-shared";
-import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { AuthChangeEvent, Session } from "@supabase/supabase-js";
-import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import React from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useState } from 'react';
+import { Navigate, useNavigate } from 'react-router-dom';
 
-const Auth = () => {
+interface AuthProps {
+  isSignup?: boolean;
+}
+
+const Auth: React.FC<AuthProps> = ({ isSignup = false }) => {
+  const { user, loading, signIn, signUp } = useAuth();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [authLoading, setAuthLoading] = useState(false);
 
-  useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        
-        if (sessionError) {
-          console.error('Session check error:', sessionError);
-          handleAuthError(sessionError);
-        } else if (session) {
-          navigate('/');
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (user) {
+    return <Navigate to="/profile" />;
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setIsSubmitting(true);
+
+    try {
+      if (isSignup) {
+        if (password !== confirmPassword) {
+          setError('Passwords do not match');
+          setIsSubmitting(false);
+          return;
         }
-      } catch (error) {
-        console.error('Error:', error);
-        toast.error('An unexpected error occurred');
-      } finally {
-        setLoading(false);
+        
+        const success = await signUp(email, password);
+        if (success) {
+          navigate('/profile');
+        }
+      } else {
+        const success = await signIn(email, password);
+        if (success) {
+          navigate('/profile');
+        }
       }
-    };
-
-    const handleAuthEvent = (event: AuthChangeEvent, session: Session | null) => {
-      setAuthLoading(false);
-      
-      if (event === 'SIGNED_IN' && session) {
-        toast.success('Successfully signed in!');
-        navigate('/');
-      } else if (event === 'SIGNED_OUT') {
-        toast.info('You have been signed out');
-      } else if (event === 'USER_UPDATED') {
-        toast.success('Your profile has been updated');
-      } else if (event === 'PASSWORD_RECOVERY') {
-        toast.info('Please check your email for password reset instructions');
-      }
-    };
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(handleAuthEvent);
-
-    checkSession();
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [navigate]);
-
-  const handleAuthError = (error: any) => {
-    if (!error || !error.message) {
-      toast.error('An unknown error occurred');
-      return;
-    }
-
-    const message = error.message.toLowerCase();
-    
-    if (message.includes('invalid_credentials') || message.includes('invalid login credentials')) {
-      toast.error('Incorrect email or password');
-    } else if (message.includes('email_not_confirmed')) {
-      toast.error('Please verify your email before signing in');
-    } else if (message.includes('rate_limited')) {
-      toast.error('Too many attempts. Please try again later');
-    } else if (message.includes('user_banned') || message.includes('banned')) {
-      toast.error('This account has been suspended. Please contact support');
-    } else if (message.includes('token_expired') || message.includes('jwt expired')) {
-      toast.error('Your session has expired. Please sign in again');
-    } else if (message.includes('user_not_found')) {
-      toast.error('No account found with this email');
-    } else if (message.includes('already_registered')) {
-      toast.error('An account with this email already exists');
-    } else if (message.includes('weak_password')) {
-      toast.error('Please use a stronger password');
-    } else {
-      toast.error(`Authentication error: ${error.message}`);
+    } catch (err) {
+      setError('Authentication failed');
+      console.error(err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="w-full max-w-md space-y-4">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold">Welcome to Zructures</h1>
-          <p className="text-muted-foreground">Sign in to continue</p>
-        </div>
-        <div className="bg-card p-6 rounded-lg shadow-lg">
-          <SupabaseAuth 
-            supabaseClient={supabase}
-            appearance={{
-              theme: ThemeSupa,
-              variables: {
-                default: {
-                  colors: {
-                    brand: '#e31837',
-                    brandAccent: '#b31528',
-                    inputText: 'white',
-                    inputPlaceholder: 'rgba(255, 255, 255, 0.6)',
-                    inputBackground: 'rgb(23, 23, 23)',
-                    inputBorder: 'rgb(55, 55, 55)',
-                  }
-                }
-              },
-              style: {
-                button: {
-                  borderRadius: '6px',
-                  transition: 'all 0.2s ease',
-                  opacity: '1',
-                },
-                container: {
-                  borderRadius: '8px',
-                },
-                input: {
-                  borderRadius: '6px',
-                  color: 'white',
-                },
-                anchor: {
-                  color: '#e31837',
-                },
-                label: {
-                  color: 'white',
-                }
-              },
-              className: {
-                button: authLoading ? 'opacity-50' : ''
-              }
-            }}
-            localization={{
-              variables: {
-                sign_in: {
-                  email_input_placeholder: 'Your email address',
-                  password_input_placeholder: 'Your password',
-                  email_label: 'Email',
-                  password_label: 'Password',
-                  button_label: 'Sign in',
-                  loading_button_label: 'Signing in...',
-                },
-                sign_up: {
-                  email_input_placeholder: 'Your email address',
-                  password_input_placeholder: 'Create a password',
-                  email_label: 'Email',
-                  password_label: 'Password',
-                  button_label: 'Sign up',
-                  loading_button_label: 'Signing up...',
-                }
-              }
-            }}
-            providers={[]}
-            redirectTo={`${window.location.origin}/auth/callback`}
-            onlyThirdPartyProviders={false}
-          />
-        </div>
+    <div className="container mx-auto p-6 flex justify-center">
+      <div className="w-full max-w-md">
+        <h1 className="text-2xl font-bold mb-6">{isSignup ? 'Sign Up' : 'Sign In'}</h1>
+        
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {error}
+          </div>
+        )}
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          
+          {isSignup && (
+            <div>
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+            </div>
+          )}
+          
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? 'Processing...' : isSignup ? 'Sign Up' : 'Sign In'}
+          </Button>
+          
+          <div className="text-center text-sm">
+            {isSignup ? (
+              <p>
+                Already have an account?{' '}
+                <a href="/login" className="text-blue-600 hover:underline">
+                  Sign in
+                </a>
+              </p>
+            ) : (
+              <p>
+                Don't have an account?{' '}
+                <a href="/signup" className="text-blue-600 hover:underline">
+                  Sign up
+                </a>
+              </p>
+            )}
+          </div>
+        </form>
       </div>
     </div>
   );

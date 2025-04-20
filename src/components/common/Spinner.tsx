@@ -3,9 +3,10 @@ import React from 'react';
 
 interface SpinnerProps {
   size?: 'sm' | 'md' | 'lg';
+  className?: string;
 }
 
-export const Spinner: React.FC<SpinnerProps> = ({ size = 'md' }) => {
+export const Spinner: React.FC<SpinnerProps> = ({ size = 'md', className = '' }) => {
   const sizeClasses = {
     sm: 'h-4 w-4',
     md: 'h-8 w-8',
@@ -13,7 +14,7 @@ export const Spinner: React.FC<SpinnerProps> = ({ size = 'md' }) => {
   };
 
   return (
-    <div className="animate-spin text-primary" aria-label="Loading">
+    <div className={`animate-spin text-primary ${className}`} aria-label="Loading">
       <svg
         className={sizeClasses[size]}
         xmlns="http://www.w3.org/2000/svg"
