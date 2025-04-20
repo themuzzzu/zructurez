@@ -1,5 +1,5 @@
 
-import { BusinessCardRating } from "./business/BusinessCardRating";
+import { BusinessCardRating } from "../business/BusinessCardRating";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge"; 
