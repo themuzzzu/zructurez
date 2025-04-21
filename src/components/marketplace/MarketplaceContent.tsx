@@ -15,6 +15,7 @@ export function MarketplaceContent() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const { isOnline } = useNetworkStatus();
 
+  // Fixed by explicitly providing a proper return type for the query function
   const { data: featuredProducts, isLoading: loadingFeatured, error: featuredError } = useQuery({
     queryKey: ["featuredProducts"],
     queryFn: async () => {
