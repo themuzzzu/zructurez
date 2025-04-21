@@ -22,10 +22,13 @@ try {
     fs.mkdirSync(typesDir, { recursive: true });
   }
 
-  // Create a DOMPurify declaration file
-  const dompurifyDTSPath = path.join(typesDir, 'dompurify.d.ts');
+  // Create a custom DOMPurify declaration file
+  const dompurifyDTSPath = path.join(typesDir, 'dompurify-custom.d.ts');
   const dompurifyContent = `
 /// <reference types="@types/dompurify" />
+
+// This file is needed to ensure TypeScript can find the DOMPurify types
+// without modifying the read-only tsconfig.json file
 
 declare module 'dompurify' {
   export interface DOMPurifyI {
@@ -58,7 +61,7 @@ declare global {
   console.log('Created DOMPurify type definition file');
 
   // Create a Vite config file if it doesn't exist
-  const viteConfigPath = path.join(__dirname, 'vite.config.ts');
+  const viteConfigPath = path.join(__dirname, 'vite.config.js');
   if (!fs.existsSync(viteConfigPath)) {
     const viteConfigContent = `
 import { defineConfig } from 'vite';
@@ -73,69 +76,15 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  server: {
+    port: 8080,
+    host: true,
+  }
 });
 `;
     fs.writeFileSync(viteConfigPath, viteConfigContent);
     console.log('Created Vite configuration file');
   }
-
-  // Create tsconfig.json if it doesn't exist
-  const tsconfigPath = path.join(__dirname, 'tsconfig.json');
-  if (!fs.existsSync(tsconfigPath)) {
-    const tsconfigContent = `{
-  "compilerOptions": {
-    "target": "ES2020",
-    "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
-    "jsx": "react-jsx",
-    "strict": true,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "noFallthroughCasesInSwitch": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"]
-    }
-  },
-  "include": ["src"],
-  "references": [{ "path": "./tsconfig.node.json" }]
-}`;
-    fs.writeFileSync(tsconfigPath, tsconfigContent);
-    console.log('Created TypeScript configuration file');
-  }
-
-  // Create tsconfig.node.json if it doesn't exist
-  const tsconfigNodePath = path.join(__dirname, 'tsconfig.node.json');
-  if (!fs.existsSync(tsconfigNodePath)) {
-    const tsconfigNodeContent = `{
-  "compilerOptions": {
-    "composite": true,
-    "skipLibCheck": true,
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "allowSyntheticDefaultImports": true
-  },
-  "include": ["vite.config.ts"]
-}`;
-    fs.writeFileSync(tsconfigNodePath, tsconfigNodeContent);
-    console.log('Created Node TypeScript configuration file');
-  }
-
-  // Create environment.d.ts for type definitions
-  const envDtsPath = path.join(__dirname, 'src/vite-env.d.ts');
-  if (!fs.existsSync(path.dirname(envDtsPath))) {
-    fs.mkdirSync(path.dirname(envDtsPath), { recursive: true });
-  }
-  fs.writeFileSync(envDtsPath, '/// <reference types="vite/client" />');
-  console.log('Created Vite environment declaration file');
 
   // Create a start script that launches Vite directly
   const startScriptPath = path.join(__dirname, 'start-dev.js');
@@ -180,7 +129,6 @@ vite.on('close', (code) => {
     try {
       execSync('chmod +x setup-project.js', { stdio: 'inherit' });
       execSync('chmod +x start-dev.js', { stdio: 'inherit' });
-      execSync('chmod +x install.js', { stdio: 'inherit' });
       console.log('Made scripts executable');
     } catch (error) {
       console.log('Failed to set permissions, but continuing...');
