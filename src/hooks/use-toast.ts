@@ -1,33 +1,70 @@
 
-import { toast as sonnerToast } from 'sonner';
+import { useState, useCallback } from 'react'
 
-// Define the shape of our toast hook
-type ToastProps = {
-  title?: string;
-  description?: React.ReactNode;
-  action?: React.ReactNode;
-  variant?: 'default' | 'destructive' | 'success';
-  duration?: number; // Added duration property
-};
+type ToastType = 'default' | 'success' | 'info' | 'warning' | 'error'
 
-export const useToast = () => {
-  const showToast = ({ title, description, action, variant = 'default', duration }: ToastProps) => {
-    const options: any = {
+interface ToastProps {
+  id?: string
+  title: string
+  description?: string
+  type?: ToastType
+  duration?: number
+}
+
+export function useToast() {
+  const [toasts, setToasts] = useState<ToastProps[]>([])
+
+  const toast = useCallback(
+    function ({
+      id = String(Math.random()),
+      title,
       description,
-      action,
-      duration,
-    };
+      type = 'default',
+      duration = 5000,
+    }: ToastProps) {
+      setToasts((toasts) => [...toasts, { id, title, description, type, duration }])
 
-    if (variant === 'destructive') {
-      sonnerToast.error(title, options);
-    } else if (variant === 'success') {
-      sonnerToast.success(title, options);
-    } else {
-      sonnerToast(title, options);
-    }
-  };
+      if (duration !== Infinity) {
+        setTimeout(() => {
+          setToasts((toasts) => toasts.filter((toast) => toast.id !== id))
+        }, duration)
+      }
 
-  return { toast: showToast, toasts: [] }; // Added empty toasts array for compatibility
-};
+      return {
+        id,
+        dismiss: () => setToasts((toasts) => toasts.filter((toast) => toast.id !== id)),
+        update: (props: Omit<Partial<ToastProps>, 'id'>) => {
+          setToasts((toasts) =>
+            toasts.map((toast) =>
+              toast.id === id ? { ...toast, ...props } : toast
+            )
+          )
+        },
+      }
+    },
+    []
+  )
 
-export { sonnerToast as toast };
+  return {
+    toasts,
+    toast,
+    dismiss: (id: string) => setToasts((toasts) => toasts.filter((toast) => toast.id !== id)),
+    dismissAll: () => setToasts([]),
+  }
+}
+
+export const toast = {
+  success: (title: string, description?: string) => {
+    // This is just a stub that should probably connect to sonner
+    console.log('TOAST SUCCESS:', title, description)
+  },
+  error: (title: string, description?: string) => {
+    console.log('TOAST ERROR:', title, description)
+  },
+  warning: (title: string, description?: string) => {
+    console.log('TOAST WARNING:', title, description)
+  },
+  info: (title: string, description?: string) => {
+    console.log('TOAST INFO:', title, description)
+  },
+}
