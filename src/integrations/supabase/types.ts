@@ -157,6 +157,27 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_users: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          last_sign_in_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id: string
+          last_sign_in_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          last_sign_in_at?: string | null
+        }
+        Relationships: []
+      }
       advertisements: {
         Row: {
           budget: number
@@ -319,6 +340,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      batch_analytics_events: {
+        Row: {
+          created_at: string | null
+          events: Json
+          id: string
+          processed: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          events: Json
+          id?: string
+          processed?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          events?: Json
+          id?: string
+          processed?: boolean | null
+        }
+        Relationships: []
       }
       bookmarks: {
         Row: {
@@ -637,6 +679,38 @@ export type Database = {
           },
         ]
       }
+      business_photos: {
+        Row: {
+          business_id: string
+          created_at: string
+          id: string
+          image_url: string
+          title: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          id?: string
+          image_url: string
+          title: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          id?: string
+          image_url?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_photos_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_portfolio: {
         Row: {
           business_id: string
@@ -885,6 +959,66 @@ export type Database = {
         }
         Relationships: []
       }
+      cart_events: {
+        Row: {
+          age: number | null
+          created_at: string | null
+          event_type: string
+          gender: string | null
+          id: string
+          location: string | null
+          product_id: string | null
+          quantity: number
+          service_id: string | null
+          session_id: string
+          timestamp: string
+          user_id: string
+        }
+        Insert: {
+          age?: number | null
+          created_at?: string | null
+          event_type: string
+          gender?: string | null
+          id?: string
+          location?: string | null
+          product_id?: string | null
+          quantity: number
+          service_id?: string | null
+          session_id: string
+          timestamp?: string
+          user_id: string
+        }
+        Update: {
+          age?: number | null
+          created_at?: string | null
+          event_type?: string
+          gender?: string | null
+          id?: string
+          location?: string | null
+          product_id?: string | null
+          quantity?: number
+          service_id?: string | null
+          session_id?: string
+          timestamp?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cart_events_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cart_events_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cart_items: {
         Row: {
           created_at: string
@@ -947,6 +1081,48 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           region?: string | null
+        }
+        Relationships: []
+      }
+      click_events: {
+        Row: {
+          age: number | null
+          created_at: string | null
+          event_type: string
+          gender: string | null
+          id: string
+          location: string | null
+          session_id: string
+          target_id: string
+          target_type: string
+          timestamp: string
+          user_id: string
+        }
+        Insert: {
+          age?: number | null
+          created_at?: string | null
+          event_type: string
+          gender?: string | null
+          id?: string
+          location?: string | null
+          session_id: string
+          target_id: string
+          target_type: string
+          timestamp?: string
+          user_id: string
+        }
+        Update: {
+          age?: number | null
+          created_at?: string | null
+          event_type?: string
+          gender?: string | null
+          id?: string
+          location?: string | null
+          session_id?: string
+          target_id?: string
+          target_type?: string
+          timestamp?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -1529,6 +1705,59 @@ export type Database = {
         }
         Relationships: []
       }
+      order_events: {
+        Row: {
+          age: number | null
+          business_id: string | null
+          created_at: string | null
+          event_type: string
+          gender: string | null
+          id: string
+          location: string | null
+          order_id: string
+          session_id: string
+          timestamp: string
+          total_amount: number
+          user_id: string
+        }
+        Insert: {
+          age?: number | null
+          business_id?: string | null
+          created_at?: string | null
+          event_type: string
+          gender?: string | null
+          id?: string
+          location?: string | null
+          order_id: string
+          session_id: string
+          timestamp?: string
+          total_amount: number
+          user_id: string
+        }
+        Update: {
+          age?: number | null
+          business_id?: string | null
+          created_at?: string | null
+          event_type?: string
+          gender?: string | null
+          id?: string
+          location?: string | null
+          order_id?: string
+          session_id?: string
+          timestamp?: string
+          total_amount?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_events_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           business_id: string | null
@@ -1573,6 +1802,73 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      page_views: {
+        Row: {
+          age: number | null
+          business_id: string | null
+          created_at: string | null
+          gender: string | null
+          id: string
+          location: string | null
+          page_type: string
+          product_id: string | null
+          service_id: string | null
+          session_id: string
+          timestamp: string
+          user_id: string
+        }
+        Insert: {
+          age?: number | null
+          business_id?: string | null
+          created_at?: string | null
+          gender?: string | null
+          id?: string
+          location?: string | null
+          page_type: string
+          product_id?: string | null
+          service_id?: string | null
+          session_id: string
+          timestamp?: string
+          user_id: string
+        }
+        Update: {
+          age?: number | null
+          business_id?: string | null
+          created_at?: string | null
+          gender?: string | null
+          id?: string
+          location?: string | null
+          page_type?: string
+          product_id?: string | null
+          service_id?: string | null
+          session_id?: string
+          timestamp?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_views_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "page_views_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "page_views_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
             referencedColumns: ["id"]
           },
         ]
@@ -1874,6 +2170,35 @@ export type Database = {
           },
         ]
       }
+      product_likes: {
+        Row: {
+          created_at: string
+          id: string
+          product_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_likes_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_purchases: {
         Row: {
           id: string
@@ -2069,6 +2394,103 @@ export type Database = {
           },
         ]
       }
+      retention_tracking: {
+        Row: {
+          age: number | null
+          created_at: string | null
+          first_visit_date: string
+          gender: string | null
+          id: string
+          last_visit_date: string
+          location: string | null
+          retention_days: number | null
+          user_id: string
+          visit_count: number
+        }
+        Insert: {
+          age?: number | null
+          created_at?: string | null
+          first_visit_date: string
+          gender?: string | null
+          id?: string
+          last_visit_date: string
+          location?: string | null
+          retention_days?: number | null
+          user_id: string
+          visit_count?: number
+        }
+        Update: {
+          age?: number | null
+          created_at?: string | null
+          first_visit_date?: string
+          gender?: string | null
+          id?: string
+          last_visit_date?: string
+          location?: string | null
+          retention_days?: number | null
+          user_id?: string
+          visit_count?: number
+        }
+        Relationships: []
+      }
+      revenue_analytics: {
+        Row: {
+          amount: number
+          business_id: string
+          created_at: string | null
+          event_type: string
+          id: string
+          location: string | null
+          product_id: string | null
+          service_id: string | null
+          timestamp: string
+        }
+        Insert: {
+          amount: number
+          business_id: string
+          created_at?: string | null
+          event_type: string
+          id?: string
+          location?: string | null
+          product_id?: string | null
+          service_id?: string | null
+          timestamp?: string
+        }
+        Update: {
+          amount?: number
+          business_id?: string
+          created_at?: string | null
+          event_type?: string
+          id?: string
+          location?: string | null
+          product_id?: string | null
+          service_id?: string | null
+          timestamp?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "revenue_analytics_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "revenue_analytics_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "revenue_analytics_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       saved_product_labels: {
         Row: {
           attributes: Json
@@ -2098,12 +2520,10 @@ export type Database = {
           category: string | null
           content: string
           created_at: string
-          gif_url: string | null
           group_id: string | null
           id: string
           image_url: string | null
           location: string | null
-          poll_id: string | null
           profile_id: string
           scheduled_for: string
           status: string
@@ -2113,27 +2533,23 @@ export type Database = {
           category?: string | null
           content: string
           created_at?: string
-          gif_url?: string | null
           group_id?: string | null
           id?: string
           image_url?: string | null
           location?: string | null
-          poll_id?: string | null
           profile_id: string
           scheduled_for: string
-          status?: string
+          status: string
           user_id: string
         }
         Update: {
           category?: string | null
           content?: string
           created_at?: string
-          gif_url?: string | null
           group_id?: string | null
           id?: string
           image_url?: string | null
           location?: string | null
-          poll_id?: string | null
           profile_id?: string
           scheduled_for?: string
           status?: string
@@ -2148,10 +2564,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "scheduled_posts_poll_id_fkey"
-            columns: ["poll_id"]
+            foreignKeyName: "scheduled_posts_profile_id_fkey"
+            columns: ["profile_id"]
             isOneToOne: false
-            referencedRelation: "polls"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -2453,6 +2869,76 @@ export type Database = {
         }
         Relationships: []
       }
+      time_spent: {
+        Row: {
+          age: number | null
+          business_id: string | null
+          created_at: string | null
+          duration_seconds: number
+          gender: string | null
+          id: string
+          location: string | null
+          page_type: string
+          product_id: string | null
+          service_id: string | null
+          session_id: string
+          timestamp: string
+          user_id: string
+        }
+        Insert: {
+          age?: number | null
+          business_id?: string | null
+          created_at?: string | null
+          duration_seconds: number
+          gender?: string | null
+          id?: string
+          location?: string | null
+          page_type: string
+          product_id?: string | null
+          service_id?: string | null
+          session_id: string
+          timestamp?: string
+          user_id: string
+        }
+        Update: {
+          age?: number | null
+          business_id?: string | null
+          created_at?: string | null
+          duration_seconds?: number
+          gender?: string | null
+          id?: string
+          location?: string | null
+          page_type?: string
+          product_id?: string | null
+          service_id?: string | null
+          session_id?: string
+          timestamp?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "time_spent_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_spent_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_spent_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_addresses: {
         Row: {
           address_line1: string
@@ -2543,6 +3029,51 @@ export type Database = {
         }
         Relationships: []
       }
+      user_sessions: {
+        Row: {
+          age: number | null
+          browser: string | null
+          created_at: string | null
+          device_type: string | null
+          end_time: string | null
+          gender: string | null
+          id: string
+          location: string | null
+          os: string | null
+          session_id: string
+          start_time: string
+          user_id: string
+        }
+        Insert: {
+          age?: number | null
+          browser?: string | null
+          created_at?: string | null
+          device_type?: string | null
+          end_time?: string | null
+          gender?: string | null
+          id?: string
+          location?: string | null
+          os?: string | null
+          session_id: string
+          start_time?: string
+          user_id: string
+        }
+        Update: {
+          age?: number | null
+          browser?: string | null
+          created_at?: string | null
+          device_type?: string | null
+          end_time?: string | null
+          gender?: string | null
+          id?: string
+          location?: string | null
+          os?: string | null
+          session_id?: string
+          start_time?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       voice_recordings: {
         Row: {
           audio_url: string
@@ -2564,6 +3095,48 @@ export type Database = {
           id?: string
           transcription?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      wishlist_events: {
+        Row: {
+          age: number | null
+          created_at: string | null
+          event_type: string
+          gender: string | null
+          id: string
+          location: string | null
+          session_id: string
+          target_id: string
+          target_type: string
+          timestamp: string
+          user_id: string
+        }
+        Insert: {
+          age?: number | null
+          created_at?: string | null
+          event_type: string
+          gender?: string | null
+          id?: string
+          location?: string | null
+          session_id: string
+          target_id: string
+          target_type: string
+          timestamp?: string
+          user_id: string
+        }
+        Update: {
+          age?: number | null
+          created_at?: string | null
+          event_type?: string
+          gender?: string | null
+          id?: string
+          location?: string | null
+          session_id?: string
+          target_id?: string
+          target_type?: string
+          timestamp?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -2601,6 +3174,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      bootstrap_first_admin: {
+        Args: { admin_email: string }
+        Returns: undefined
+      }
       check_search_suggestion_exists: {
         Args: { term_param: string }
         Returns: boolean
@@ -2650,9 +3227,80 @@ export type Database = {
         Args: { image_id_param: string }
         Returns: Json
       }
+      get_product_likes_count: {
+        Args: { product_id: string }
+        Returns: number
+      }
       get_sample_user_id: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_user_liked_businesses: {
+        Args: { user_id?: string }
+        Returns: {
+          aadhar_number: string | null
+          appointment_price: number | null
+          bio: string | null
+          category: string
+          closure_reason: string | null
+          consultation_price: number | null
+          contact: string | null
+          created_at: string
+          description: string
+          gst_number: string | null
+          hours: string | null
+          id: string
+          image_position: Json | null
+          image_scale: number | null
+          image_url: string | null
+          is_open: boolean | null
+          latitude: number | null
+          location: string | null
+          longitude: number | null
+          membership_plans: Json | null
+          name: string
+          owners: Json | null
+          pan_number: string | null
+          show_in_services: boolean | null
+          staff_details: Json | null
+          user_id: string
+          verification_documents: Json | null
+          verification_status: string | null
+          verification_submitted_at: string | null
+          verified: boolean | null
+          video_url: string | null
+          wait_time: string | null
+          website: string | null
+        }[]
+      }
+      get_user_liked_products: {
+        Args: { user_id?: string }
+        Returns: {
+          brand_name: string | null
+          category: string
+          condition: string | null
+          created_at: string
+          description: string
+          discount_percentage: number | null
+          id: string
+          image_url: string | null
+          is_branded: boolean | null
+          is_discounted: boolean | null
+          is_used: boolean | null
+          latitude: number | null
+          longitude: number | null
+          model: string | null
+          original_price: number | null
+          price: number
+          reach: number | null
+          service_product_id: string | null
+          size: string | null
+          stock: number
+          subcategory: string | null
+          title: string
+          user_id: string | null
+          views: number | null
+        }[]
       }
       get_user_presence: {
         Args: { user_id: string }
@@ -2727,6 +3375,14 @@ export type Database = {
           transcription_param: string
         }
         Returns: string
+      }
+      is_business_liked: {
+        Args: { business_id: string; user_id?: string }
+        Returns: boolean
+      }
+      is_product_liked: {
+        Args: { product_id: string; user_id?: string }
+        Returns: boolean
       }
       publish_scheduled_posts: {
         Args: Record<PropertyKey, never>

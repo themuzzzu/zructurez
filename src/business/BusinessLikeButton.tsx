@@ -18,7 +18,6 @@ export const BusinessLikeButton = ({
 
   const toggleLike = () => {
     setIsLiked(!isLiked);
-    // Here you would typically call an API to update like status
   };
 
   return (

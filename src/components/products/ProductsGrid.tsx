@@ -1,190 +1,74 @@
 
-import { useState, useEffect } from "react";
-import { ProductCard } from "./ProductCard";
-import { GridLayoutType } from "./types/ProductTypes";
-import { Product } from "@/types/product";
-import { Button } from "@/components/ui/button";
-import { Grid3X3, Grid2X2, LayoutList } from "lucide-react";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingCardSkeleton } from "@/components/ShoppingCardSkeleton";
-import { Progress } from "@/components/ui/progress";
+import { useState } from "react";
 
-export interface ProductsGridProps {
-  products: Product[] | any[];
-  layout?: GridLayoutType;
-  isLoading?: boolean;
-  onOpenAddProductDialog?: () => void;
-  searchQuery?: string;
-  onLayoutChange?: (layout: GridLayoutType) => void;
-  hasMore?: boolean;
-  onLoadMore?: () => void;
-  loadMoreRef?: React.RefObject<HTMLDivElement>;
+interface Product {
+  id: string;
+  name?: string;
+  title?: string;
+  price?: number;
+  image?: string;
+  image_url?: string;
+  description?: string;
+  category?: string;
+  is_featured?: boolean;
+}
+
+interface ProductsGridProps {
+  products: Product[];
+  layout?: "grid1x1" | "grid2x2" | "grid3x3" | "grid4x4";
 }
 
 export const ProductsGrid = ({ 
-  products, 
-  layout = "grid3x3",
-  isLoading = false,
-  onOpenAddProductDialog,
-  searchQuery,
-  onLayoutChange,
-  hasMore,
-  onLoadMore,
-  loadMoreRef
+  products = [], 
+  layout = "grid3x3" 
 }: ProductsGridProps) => {
-  const [visibleProducts, setVisibleProducts] = useState<any[]>([]);
-  const [currentLayout, setCurrentLayout] = useState<GridLayoutType>(layout);
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [hoveredProduct, setHoveredProduct] = useState<string | null>(null);
   
-  useEffect(() => {
-    if (products && products.length > 0) {
-      setVisibleProducts(products);
-      
-      const timer = setTimeout(() => {
-        setIsInitialLoad(false);
-      }, 150);
-      
-      return () => clearTimeout(timer);
-    } else {
-      setIsInitialLoad(false);
-    }
-  }, [products]);
-  
-  useEffect(() => {
-    setCurrentLayout(layout);
-  }, [layout]);
-  
-  useEffect(() => {
-    if (isLoading) {
-      setLoadingProgress(0);
-      const interval = setInterval(() => {
-        setLoadingProgress(prev => {
-          const newProgress = Math.min(prev + 5, 95);
-          return newProgress;
-        });
-      }, 100);
-      
-      return () => clearInterval(interval);
-    } else {
-      setLoadingProgress(100);
-      const timer = setTimeout(() => setLoadingProgress(0), 500);
-      return () => clearTimeout(timer);
-    }
-  }, [isLoading]);
-  
-  const handleLayoutChange = (value: string) => {
-    if (value === "grid2x2" || value === "grid3x3" || value === "grid4x4" || value === "list" || value === "single") {
-      setCurrentLayout(value as GridLayoutType);
-      if (onLayoutChange) {
-        onLayoutChange(value as GridLayoutType);
-      }
-    }
-  };
-  
-  // Helper function for empty state
-  const renderEmptyState = () => {
-    if (searchQuery) {
-      return (
-        <div className="text-center p-8 border border-dashed rounded-lg">
-          <div className="mx-auto w-16 h-16 mb-4 flex items-center justify-center rounded-full bg-muted">
-            <Grid3X3 className="h-8 w-8 text-muted-foreground opacity-40" />
-          </div>
-          <h3 className="text-lg font-medium mb-2">No results found</h3>
-          <p className="text-muted-foreground mb-4">
-            We couldn't find any products matching "{searchQuery}"
-          </p>
-          <Button onClick={() => window.history.back()}>Go Back</Button>
-        </div>
-      );
-    }
-    
-    return (
-      <div className="text-center py-8">
-        <p className="text-muted-foreground mb-4">No products found</p>
-        {onOpenAddProductDialog && (
-          <Button onClick={onOpenAddProductDialog}>Add Your Product</Button>
-        )}
-      </div>
-    );
-  };
-
-  // Calculate grid layout classes based on current layout
-  const gridLayoutClass = {
+  const layoutClasses = {
+    grid1x1: "grid-cols-1 gap-4",
     grid2x2: "grid-cols-1 sm:grid-cols-2 gap-4",
-    grid3x3: "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4",
-    grid4x4: "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4",
-    list: "flex flex-col gap-3",
-    single: "grid-cols-1 gap-4 max-w-3xl mx-auto"
+    grid3x3: "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4",
+    grid4x4: "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
   };
-
-  if (!products || products.length === 0) {
-    return renderEmptyState();
-  }
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-3 mr-1">
-        <div className={`w-40 transition-opacity ${loadingProgress > 0 ? 'opacity-100' : 'opacity-0'}`}>
-          <Progress value={loadingProgress} className="h-1" />
+    <div className={`grid ${layoutClasses[layout]}`}>
+      {products.map((product) => (
+        <div
+          key={product.id}
+          className="border rounded-lg overflow-hidden transition-shadow hover:shadow-md"
+          onMouseEnter={() => setHoveredProduct(product.id)}
+          onMouseLeave={() => setHoveredProduct(null)}
+        >
+          <div className="relative h-40 overflow-hidden">
+            <img
+              src={product.image_url || product.image || "/placeholder-product.jpg"}
+              alt={product.name || product.title || "Product"}
+              className="w-full h-full object-cover transition-transform duration-300"
+              style={{
+                transform: hoveredProduct === product.id ? "scale(1.05)" : "scale(1)"
+              }}
+              loading="lazy"
+            />
+            {product.is_featured && (
+              <div className="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded">
+                Featured
+              </div>
+            )}
+          </div>
+          <div className="p-3">
+            <h3 className="font-medium text-sm line-clamp-1">
+              {product.name || product.title}
+            </h3>
+            {product.price !== undefined && (
+              <p className="text-sm font-bold mt-1">₹{product.price.toLocaleString()}</p>
+            )}
+            {product.category && (
+              <p className="text-xs text-gray-500 mt-1">{product.category}</p>
+            )}
+          </div>
         </div>
-        
-        <ToggleGroup type="single" value={currentLayout} onValueChange={handleLayoutChange}>
-          <ToggleGroupItem value="grid4x4">
-            <Grid3X3 className="h-4 w-4" />
-          </ToggleGroupItem>
-          <ToggleGroupItem value="grid2x2">
-            <Grid2X2 className="h-4 w-4" />
-          </ToggleGroupItem>
-          <ToggleGroupItem value="list">
-            <LayoutList className="h-4 w-4" />
-          </ToggleGroupItem>
-        </ToggleGroup>
-      </div>
-      
-      {isLoading ? (
-        <div className={`grid ${gridLayoutClass[currentLayout]}`}>
-          {Array.from({ length: currentLayout === "single" ? 1 : currentLayout === "list" ? 4 : 8 }).map((_, i) => (
-            <ShoppingCardSkeleton key={i} />
-          ))}
-        </div>
-      ) : visibleProducts.length === 0 ? (
-        renderEmptyState()
-      ) : (
-        <div className={`grid ${gridLayoutClass[currentLayout]}`}>
-          <AnimatePresence mode="wait">
-            {visibleProducts.map((product) => (
-              <motion.div
-                key={product.id}
-                layout
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.2 }}
-              >
-                <ProductCard 
-                  product={product} 
-                  layout={currentLayout}
-                />
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </div>
-      )}
-      
-      {/* Load more button/indicator if needed */}
-      {hasMore && !isLoading && (
-        <div className="flex justify-center mt-8" ref={loadMoreRef}>
-          <Button 
-            variant="outline" 
-            onClick={onLoadMore}
-            className="min-w-[200px]"
-          >
-            Load More
-          </Button>
-        </div>
-      )}
+      ))}
     </div>
   );
-}
+};

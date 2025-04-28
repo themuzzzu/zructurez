@@ -2,7 +2,7 @@
 import { BusinessCardRating } from "../business/BusinessCardRating";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Badge } from "@/components/ui/badge"; 
+import { Badge } from "@/components/ui/badge";
 import { Clock } from "lucide-react";
 
 export interface BusinessCardProps {
@@ -11,7 +11,7 @@ export interface BusinessCardProps {
   category: string;
   description: string;
   image?: string;
-  image_url?: string; // Added this to support both image and image_url
+  image_url?: string;
   rating: number;
   reviews: number;
   location: string;

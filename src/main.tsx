@@ -2,6 +2,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
+import App from './App';
 import { verifyVite } from "./utils/verifyVite";
 
 // Verify Vite is working
@@ -15,10 +16,7 @@ if (!rootElement) {
 } else {
   ReactDOM.createRoot(rootElement).render(
     <React.StrictMode>
-      <div className="p-8">
-        <h1 className="text-2xl font-bold mb-4">Business Directory</h1>
-        <p>Setup successful! Your application is now configured correctly.</p>
-      </div>
+      <App />
     </React.StrictMode>
   );
 }
