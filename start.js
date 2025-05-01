@@ -10,14 +10,14 @@ try {
   // Check if node_modules exists, if not run setup
   if (!fs.existsSync(path.join(__dirname, 'node_modules'))) {
     console.log('Missing dependencies. Running setup first...');
-    require('./setup-project');
+    require('./fix-dependencies.js');
   }
   
   console.log('Starting development server...');
   execSync('npm run dev', { stdio: 'inherit' });
 } catch (error) {
   console.error('Error starting application:', error.message);
-  console.log('Try running setup-project.js first:');
-  console.log('  node setup-project.js');
+  console.log('Try running fix-dependencies.js first:');
+  console.log('  node fix-dependencies.js');
   process.exit(1);
 }
