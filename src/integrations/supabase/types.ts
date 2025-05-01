@@ -3174,6 +3174,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      bootstrap_admin_safe: {
+        Args: { admin_email: string }
+        Returns: undefined
+      }
       bootstrap_first_admin: {
         Args: { admin_email: string }
         Returns: undefined
@@ -3396,6 +3400,10 @@ export type Database = {
           is_sponsored_param: boolean
         }
         Returns: string
+      }
+      set_user_admin_metadata: {
+        Args: { user_id: string }
+        Returns: undefined
       }
       update_image_search_description: {
         Args: { image_id_param: string; description_param: string }
