@@ -1,30 +1,27 @@
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
-interface NetworkContextType {
+interface NetworkMonitorContextValue {
   isOnline: boolean;
 }
 
-const NetworkContext = createContext<NetworkContextType>({ isOnline: true });
+const NetworkMonitorContext = createContext<NetworkMonitorContextValue>({ isOnline: true });
 
-export function NetworkMonitorProvider({ children }: { children: React.ReactNode }) {
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
+export const useNetworkMonitor = () => useContext(NetworkMonitorContext);
+
+export const NetworkMonitorProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
 
   useEffect(() => {
     const handleOnline = () => {
       setIsOnline(true);
-      toast.success('You are back online!', {
-        id: 'network-status',
-      });
+      toast.success('Back online');
     };
 
     const handleOffline = () => {
       setIsOnline(false);
-      toast.error('You are offline. Some features may be limited.', {
-        id: 'network-status',
-        duration: Infinity,
-      });
+      toast.error('You are offline. Some features may be limited.');
     };
 
     window.addEventListener('online', handleOnline);
@@ -37,10 +34,8 @@ export function NetworkMonitorProvider({ children }: { children: React.ReactNode
   }, []);
 
   return (
-    <NetworkContext.Provider value={{ isOnline }}>
+    <NetworkMonitorContext.Provider value={{ isOnline }}>
       {children}
-    </NetworkContext.Provider>
+    </NetworkMonitorContext.Provider>
   );
-}
-
-export const useNetworkStatus = () => useContext(NetworkContext);
+};

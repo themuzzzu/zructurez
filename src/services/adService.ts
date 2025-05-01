@@ -1,340 +1,77 @@
-import { supabase } from "@/integrations/supabase/client";
-import { v4 as uuidv4 } from "uuid";
 
-// Define the types that were missing or causing errors
-export type AdType = "banner" | "square" | "leaderboard" | "carousel" | "sidebar" | "popup" | "business" | "service" | "product" | "sponsored";
-export type AdFormat = "standard" | "banner" | "carousel" | "video" | "boosted_post";
-export type AdLocation = "home" | "marketplace" | "businesses" | "services" | "events" | "profile";
+import { supabase } from '@/integrations/supabase/client';
 
-export interface Advertisement {
-  id: string;
-  title: string;
-  description: string;
-  image_url?: string;
-  status: string;
-  type: string;
-  location: string;
-  reference_id: string;
-  carousel_images?: string[];
-  business_id?: string;
-  start_date: string;
-  end_date: string;
-  budget: number;
-  clicks: number;
-  impressions: number; // Explicitly define impressions property
-  format: string;
-  video_url?: string;
-  user_id: string;
-  created_at: string;
-  targeting_locations?: string[];
-  targeting_interests?: string[];
-  targeting_age_min?: number;
-  targeting_age_max?: number;
-  targeting_gender?: string;
-  reach?: number;
-}
-
-// Updated AdPlacement interface with all required properties
-export interface AdPlacement {
-  id: string;
-  name: string;
-  description: string;
-  location: string;
-  type: string;
-  size: string;
-  active: boolean;
-  cpc_rate: number;
-  cpm_rate: number;
-  priority: number;
-  max_size_kb: number;
-  created_at?: string;
-  impressions: number; // Explicitly define impressions property
-  clicks: number;      // Explicitly define clicks property
-  revenue: number;     // Explicitly define revenue property
-}
-
-export const getAdPlacements = async (): Promise<AdPlacement[]> => {
-  try {
-    const { data, error } = await supabase
-      .from("ad_placements")
-      .select("*")
-      .eq("active", true);
-
-    if (error) {
-      console.error("Error fetching ad placements:", error);
-      return [];
-    }
-
-    // Transform the raw Supabase data to ensure it has all required properties
-    return (data || []).map(item => ({
-      id: item.id,
-      name: item.name,
-      description: item.description || "",
-      location: item.location,
-      type: item.type,
-      size: item.size || "",
-      active: item.active,
-      cpc_rate: item.cpc_rate,
-      cpm_rate: item.cpm_rate,
-      priority: item.priority || 1,
-      max_size_kb: item.max_size_kb || 1024,
-      created_at: item.created_at,
-      // Add missing properties with default values
-      impressions: 0,
-      clicks: 0,
-      revenue: 0
-    }));
-  } catch (error) {
-    console.error("Error in getAdPlacements:", error);
-    return [];
-  }
-};
-
-// Fetch active ads function
-export const fetchActiveAds = async (
-  type?: string,
-  format?: string,
-  limit?: number
-): Promise<Advertisement[]> => {
+/**
+ * Fetch active advertisements with optional filters
+ * @param type Optional type filter
+ * @param businessId Optional business ID filter
+ * @param limit Optional limit on number of records to fetch
+ * @returns Array of active advertisements
+ */
+export async function fetchActiveAds(type?: string, businessId?: string, limit?: number) {
   try {
     let query = supabase
-      .from("advertisements")
-      .select("*")
-      .eq("status", "active")
-      .lte("start_date", new Date().toISOString())
-      .gte("end_date", new Date().toISOString());
+      .from('advertisements')
+      .select('*')
+      .eq('status', 'active')
+      .gte('end_date', new Date().toISOString());
 
     if (type) {
-      query = query.eq("type", type);
+      query = query.eq('type', type);
     }
-    
-    if (format) {
-      query = query.eq("format", format);
+
+    if (businessId) {
+      query = query.eq('business_id', businessId);
     }
-    
+
     if (limit) {
       query = query.limit(limit);
     }
 
-    const { data, error } = await query;
+    const { data, error } = await query.order('created_at', { ascending: false });
 
     if (error) {
-      console.error("Error fetching active ads:", error);
-      return getFallbackAds("home", "banner");
-    }
-
-    // Properly transform the data to match the Advertisement interface
-    return (data || []).map(ad => ({
-      ...ad,
-      carousel_images: Array.isArray(ad.carousel_images) ? ad.carousel_images.map(String) : [],
-      clicks: ad.clicks || 0,
-      impressions: 0,
-      reach: ad.reach || 0,
-      targeting_locations: Array.isArray(ad.targeting_locations) ? ad.targeting_locations.map(String) : [],
-      targeting_interests: Array.isArray(ad.targeting_interests) ? ad.targeting_interests.map(String) : []
-    }));
-  } catch (error) {
-    console.error("Error in fetchActiveAds:", error);
-    return getFallbackAds("home", "banner");
-  }
-};
-
-// Add fetchUserAds function
-export const fetchUserAds = async (): Promise<Advertisement[]> => {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return [];
-
-    const { data, error } = await supabase
-      .from("advertisements")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.error("Error fetching user ads:", error);
+      console.error('Error fetching ads:', error);
       return [];
     }
 
-    // Transform data to match Advertisement interface
-    return (data || []).map(ad => ({
-      ...ad,
-      carousel_images: Array.isArray(ad.carousel_images) ? ad.carousel_images.map(String) : [],
-      clicks: ad.clicks || 0,
-      impressions: 0, // Handle missing impressions field
-      reach: ad.reach || 0,
-      targeting_locations: Array.isArray(ad.targeting_locations) ? ad.targeting_locations.map(String) : [],
-      targeting_interests: Array.isArray(ad.targeting_interests) ? ad.targeting_interests.map(String) : []
-    }));
+    return data || [];
   } catch (error) {
-    console.error("Error in fetchUserAds:", error);
+    console.error('Error in fetchActiveAds:', error);
     return [];
   }
-};
+}
 
-export const getAdvertisementsByLocation = async (
-  location: AdLocation,
-  type?: string
-): Promise<Advertisement[]> => {
+/**
+ * Increment the view count for an advertisement
+ * @param adId Advertisement ID
+ */
+export async function incrementAdView(adId: string) {
   try {
-    let query = supabase
-      .from("advertisements")
-      .select("*")
-      .eq("location", location)
-      .eq("status", "active")
-      .lte("start_date", new Date().toISOString())
-      .gte("end_date", new Date().toISOString());
-
-    if (type) {
-      query = query.eq("type", type);
-    }
-
-    const { data, error } = await query;
-
+    // Using the RPC function to increment ad views
+    const { error } = await supabase.rpc('increment_ad_views', { ad_id: adId });
+    
     if (error) {
-      console.error(`Error fetching ads for ${location}:`, error);
-      return getFallbackAds(location, "banner");
+      console.error('Error incrementing ad view:', error);
     }
-
-    // Transform data to match Advertisement interface
-    return (data || []).map(ad => ({
-      ...ad,
-      carousel_images: Array.isArray(ad.carousel_images) ? ad.carousel_images.map(String) : [],
-      clicks: ad.clicks || 0,
-      impressions: 0, // Handle missing impressions field
-      reach: ad.reach || 0,
-      targeting_locations: Array.isArray(ad.targeting_locations) ? ad.targeting_locations.map(String) : [],
-      targeting_interests: Array.isArray(ad.targeting_interests) ? ad.targeting_interests.map(String) : []
-    })).sort((a, b) => b.budget - a.budget);
   } catch (error) {
-    console.error(`Error in getAdvertisementsByLocation for ${location}:`, error);
-    return getFallbackAds(location, "banner");
+    console.error('Error in incrementAdView:', error);
   }
-};
+}
 
-export const createAdvertisement = async (
-  adData: Omit<Advertisement, "id" | "created_at" | "clicks" | "impressions" | "status" | "reach">
-): Promise<{ success: boolean; id?: string; error?: string }> => {
+/**
+ * Increment the click count for an advertisement
+ * @param adId Advertisement ID
+ */
+export async function incrementAdClick(adId: string) {
   try {
-    const newAd = {
-      ...adData,
-      id: uuidv4(),
-      clicks: 0,
-      status: "pending",
-      reach: 0,
-      // Make sure reference_id is provided (required in DB)
-      reference_id: adData.reference_id || adData.business_id || uuidv4()
-    };
+    // Using the RPC function to increment ad clicks
+    const { error } = await supabase.rpc('increment_ad_clicks', { ad_id: adId });
     
-    const { data, error } = await supabase.from("advertisements").insert(newAd).select();
-
     if (error) {
-      return { success: false, error: error.message };
+      console.error('Error incrementing ad click:', error);
     }
-
-    return { success: true, id: data?.[0]?.id };
-  } catch (error: any) {
-    return { success: false, error: error.message };
-  }
-};
-
-// Implement incrementAdView function directly without using RPC
-export const incrementAdView = async (adId: string): Promise<boolean> => {
-  try {
-    // Get current data first since we can't use RPC
-    const { data: adData, error: fetchError } = await supabase
-      .from("advertisements")
-      .select("reach")
-      .eq("id", adId)
-      .single();
-      
-    if (fetchError) {
-      console.error("Error fetching ad for view increment:", fetchError);
-      return false;
-    }
-    
-    // Update with incremented values - only use reach since impressions doesn't exist
-    const currentReach = adData?.reach !== undefined ? adData.reach : 0;
-    
-    const { error: updateError } = await supabase
-      .from("advertisements")
-      .update({ 
-        reach: currentReach + 1 
-      })
-      .eq("id", adId);
-
-    if (updateError) {
-      console.error("Error updating ad view:", updateError);
-      return false;
-    }
-
-    return true;
   } catch (error) {
-    console.error("Error in incrementAdView:", error);
-    return false;
+    console.error('Error in incrementAdClick:', error);
   }
-};
-
-// Implement incrementAdClick function directly without using RPC
-export const incrementAdClick = async (adId: string): Promise<boolean> => {
-  try {
-    // Get current data first since we can't use RPC
-    const { data: adData, error: fetchError } = await supabase
-      .from("advertisements")
-      .select("clicks")
-      .eq("id", adId)
-      .single();
-    
-    if (fetchError) {
-      console.error("Error fetching ad for click increment:", fetchError);
-      return false;
-    }
-    
-    // Check if clicks field exists and has a value
-    const currentClicks = adData?.clicks !== undefined ? adData.clicks : 0;
-    
-    // Update with incremented value
-    const { error: updateError } = await supabase
-      .from("advertisements")
-      .update({ clicks: currentClicks + 1 })
-      .eq("id", adId);
-
-    if (updateError) {
-      console.error("Error updating ad click:", updateError);
-      return false;
-    }
-
-    return true;
-  } catch (error) {
-    console.error("Error in incrementAdClick:", error);
-    return false;
-  }
-};
-
-// Get mock/fallback ads when real ads aren't available
-export const getFallbackAds = (location: AdLocation, type: string): Advertisement[] => {
-  const now = new Date();
-  const future = new Date();
-  future.setDate(future.getDate() + 30);
-  
-  return [
-    {
-      id: `fallback-${location}-1`,
-      title: `${location.charAt(0).toUpperCase() + location.slice(1)} Advertisement`,
-      description: "This is a fallback advertisement",
-      image_url: `https://picsum.photos/seed/${location}/600/300`,
-      status: "approved",
-      type: type,
-      location: location,
-      start_date: now.toISOString(),
-      end_date: future.toISOString(),
-      budget: 100,
-      clicks: 0,
-      impressions: 0,
-      format: "standard",
-      user_id: "system",
-      created_at: now.toISOString(),
-      reference_id: "fallback-reference"
-    }
-  ];
-};
+}

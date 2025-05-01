@@ -2,20 +2,14 @@
 export interface Service {
   id: string;
   title: string;
-  description?: string;
+  description: string;
+  image_url?: string;
+  imageUrl?: string; // alternative property name sometimes used
   price: number;
-  imageUrl?: string;
-  image_url?: string; // Adding alternative property name
+  user_id: string;
   category?: string;
   location?: string;
   contact_info?: string;
   is_sponsored?: boolean;
-  rating?: number;
-  created_at?: string;
-  updated_at?: string;
-  user_id?: string;
-  availability?: string[] | string; // Updated to accept both string and string array
-  business_id?: string;
-  views?: number;
-  is_open?: boolean;
+  availability?: string[] | string;
 }

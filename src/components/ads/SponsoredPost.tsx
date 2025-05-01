@@ -1,79 +1,82 @@
 
-import { useState, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import React from 'react';
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Advertisement, incrementAdClick, incrementAdView } from "@/services/adService";
+import { Sparkles, ExternalLink } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Sparkles } from "lucide-react";
+import { incrementAdClick } from "@/services/adService";
+
+interface Ad {
+  id: string;
+  title: string;
+  description: string;
+  image_url?: string;
+  reference_id?: string;
+  type?: string;
+}
 
 interface SponsoredPostProps {
-  ad: Advertisement;
-  className?: string;
+  ad: Ad;
 }
 
-export function SponsoredPost({ ad, className }: SponsoredPostProps) {
+export const SponsoredPost: React.FC<SponsoredPostProps> = ({ ad }) => {
   const navigate = useNavigate();
-  const [hasTrackedView, setHasTrackedView] = useState(false);
-  
-  useEffect(() => {
-    const trackImpression = async () => {
-      if (!hasTrackedView) {
-        await incrementAdView(ad.id);
-        setHasTrackedView(true);
+
+  const handleClick = () => {
+    incrementAdClick(ad.id);
+    
+    if (ad.reference_id && ad.type) {
+      switch (ad.type) {
+        case 'business':
+          navigate(`/business/${ad.reference_id}`);
+          break;
+        case 'product':
+          navigate(`/product/${ad.reference_id}`);
+          break;
+        case 'service':
+          navigate(`/service/${ad.reference_id}`);
+          break;
+        default:
+          // Just open the ad URL if available
+          if (ad.image_url && ad.image_url.startsWith('http')) {
+            window.open(ad.image_url, '_blank');
+          }
       }
-    };
-    
-    trackImpression();
-  }, [ad.id, hasTrackedView]);
-  
-  const handleClick = async () => {
-    await incrementAdClick(ad.id);
-    
-    // Direct the user to the appropriate page based on ad type
-    if (ad.type === "product") {
-      navigate(`/products/${ad.reference_id}`);
-    } else if (ad.type === "business") {
-      navigate(`/businesses/${ad.reference_id}`);
-    } else if (ad.type === "service") {
-      navigate(`/services/${ad.reference_id}`);
-    } else {
-      window.open(ad.image_url || '', '_blank');
     }
   };
-  
+
   return (
-    <Card 
-      className={`overflow-hidden cursor-pointer hover:shadow-md transition-shadow ${className}`}
-      onClick={handleClick}
-    >
-      <CardContent className="p-4 relative">
-        <Badge 
-          variant="outline" 
-          className="absolute top-2 right-2 bg-yellow-500/80 text-white text-xs"
-        >
-          <Sparkles className="h-3 w-3 mr-1" />
-          Sponsored
-        </Badge>
-        
-        <div className="flex gap-3">
-          {ad.image_url && (
-            <div className="w-16 h-16 rounded-md overflow-hidden flex-shrink-0">
-              <img 
-                src={ad.image_url} 
-                alt={ad.title}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          )}
-          
-          <div>
-            <h3 className="font-medium text-base line-clamp-1">{ad.title}</h3>
-            <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-              {ad.description}
-            </p>
+    <Card className="overflow-hidden">
+      <div className="flex flex-col sm:flex-row">
+        {ad.image_url && (
+          <div className="sm:w-1/3 h-48 sm:h-auto">
+            <img
+              src={ad.image_url}
+              alt={ad.title}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.currentTarget.src = "/placeholder.png";
+              }}
+            />
           </div>
+        )}
+        <div className="p-4 flex flex-col flex-grow">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="font-semibold text-lg">{ad.title}</h3>
+            <Badge variant="secondary" className="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-500">
+              <Sparkles className="h-3 w-3 mr-1" />
+              Sponsored
+            </Badge>
+          </div>
+          <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 flex-grow">
+            {ad.description}
+          </p>
+          <Button onClick={handleClick} className="self-start">
+            Learn More <ExternalLink className="ml-2 h-4 w-4" />
+          </Button>
         </div>
-      </CardContent>
+      </div>
     </Card>
   );
-}
+};
