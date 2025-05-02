@@ -1,59 +1,23 @@
 
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { AlertTriangle, ArrowLeft, RefreshCw } from "lucide-react";
+import React from 'react';
+import { useRouteError } from 'react-router-dom';
 
-interface ErrorViewProps {
-  title?: string;
-  message?: string;
-  onRetry?: () => void;
-}
-
-export const ErrorView = ({ 
-  title = "Something went wrong",
-  message = "We encountered an error while processing your request.",
-  onRetry
-}: ErrorViewProps) => {
-  const navigate = useNavigate();
-
-  // Handle retry action
-  const handleRetry = () => {
-    if (onRetry) {
-      onRetry();
-    } else {
-      window.location.reload();
-    }
-  };
+export const ErrorView: React.FC = () => {
+  const error = useRouteError() as any;
+  console.error(error);
 
   return (
-    <div className="flex flex-col items-center justify-center p-6 min-h-[200px]">
-      <div className="bg-red-50 w-full max-w-lg rounded-lg p-6 text-center border border-red-100">
-        <div className="flex justify-center mb-4">
-          <AlertTriangle className="h-12 w-12 text-red-500" />
-        </div>
-        
-        <h2 className="text-xl font-bold mb-2 text-red-700">{title}</h2>
-        <p className="text-gray-600 mb-6">{message}</p>
-        
-        <div className="flex flex-col sm:flex-row justify-center gap-3">
-          <Button 
-            variant="outline"
-            onClick={() => navigate(-1)}
-            className="flex items-center"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Go Back
-          </Button>
-          
-          <Button 
-            onClick={handleRetry}
-            className="flex items-center"
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Retry
-          </Button>
-        </div>
-      </div>
+    <div className="flex min-h-[400px] flex-col items-center justify-center">
+      <h1 className="text-2xl font-bold text-destructive">Oops! Something went wrong</h1>
+      <p className="mt-2 text-center text-gray-600">
+        {error?.statusText || error?.message || 'Sorry, an unexpected error has occurred.'}
+      </p>
+      <button 
+        onClick={() => window.location.href = '/'}
+        className="mt-4 rounded-md bg-primary px-4 py-2 text-white hover:bg-primary/90"
+      >
+        Go Home
+      </button>
     </div>
   );
 };

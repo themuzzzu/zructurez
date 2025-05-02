@@ -1,19 +1,16 @@
 
 import React from 'react';
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Sparkles, ExternalLink } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
-import { incrementAdClick } from "@/services/adService";
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { ExternalLink } from 'lucide-react';
 
 interface Ad {
   id: string;
   title: string;
   description: string;
   image_url?: string;
-  reference_id?: string;
-  type?: string;
+  url?: string;
+  company?: string;
 }
 
 interface SponsoredPostProps {
@@ -21,62 +18,41 @@ interface SponsoredPostProps {
 }
 
 export const SponsoredPost: React.FC<SponsoredPostProps> = ({ ad }) => {
-  const navigate = useNavigate();
-
-  const handleClick = () => {
-    incrementAdClick(ad.id);
-    
-    if (ad.reference_id && ad.type) {
-      switch (ad.type) {
-        case 'business':
-          navigate(`/business/${ad.reference_id}`);
-          break;
-        case 'product':
-          navigate(`/product/${ad.reference_id}`);
-          break;
-        case 'service':
-          navigate(`/service/${ad.reference_id}`);
-          break;
-        default:
-          // Just open the ad URL if available
-          if (ad.image_url && ad.image_url.startsWith('http')) {
-            window.open(ad.image_url, '_blank');
-          }
-      }
-    }
-  };
-
+  const { title, description, image_url, url, company } = ad;
+  
   return (
-    <Card className="overflow-hidden">
-      <div className="flex flex-col sm:flex-row">
-        {ad.image_url && (
-          <div className="sm:w-1/3 h-48 sm:h-auto">
-            <img
-              src={ad.image_url}
-              alt={ad.title}
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                e.currentTarget.src = "/placeholder.png";
-              }}
-            />
-          </div>
+    <Card className="overflow-hidden border-2 border-primary/20 transition-all hover:shadow-md">
+      <div className="relative">
+        {image_url && (
+          <img
+            src={image_url}
+            alt={title}
+            className="h-40 w-full object-cover"
+          />
         )}
-        <div className="p-4 flex flex-col flex-grow">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="font-semibold text-lg">{ad.title}</h3>
-            <Badge variant="secondary" className="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-500">
-              <Sparkles className="h-3 w-3 mr-1" />
-              Sponsored
-            </Badge>
-          </div>
-          <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 flex-grow">
-            {ad.description}
-          </p>
-          <Button onClick={handleClick} className="self-start">
-            Learn More <ExternalLink className="ml-2 h-4 w-4" />
-          </Button>
+        <div className="absolute right-2 top-2">
+          <Badge variant="success" className="px-2 py-0.5 text-xs">
+            Sponsored
+          </Badge>
         </div>
       </div>
+      <CardContent className="p-4">
+        <h3 className="mb-1 text-lg font-medium">{title}</h3>
+        {company && <p className="mb-2 text-sm text-muted-foreground">{company}</p>}
+        <p className="text-sm text-gray-600">{description}</p>
+      </CardContent>
+      <CardFooter className="flex justify-end bg-gray-50 p-2">
+        {url && (
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-sm text-blue-600 hover:underline"
+          >
+            Learn more <ExternalLink size={14} />
+          </a>
+        )}
+      </CardFooter>
     </Card>
   );
 };

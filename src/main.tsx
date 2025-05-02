@@ -1,12 +1,8 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
 import App from './App';
-import { verifyVite } from "./utils/verifyVite";
-
-// Verify Vite is working
-verifyVite();
+import './index.css';
 
 // Get root element
 const rootElement = document.getElementById('root');

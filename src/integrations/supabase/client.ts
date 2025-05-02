@@ -1,8 +1,47 @@
 
-import { createClient } from '@supabase/supabase-js';
+// This is a stub for the Supabase client
+// Replace with actual implementation when connecting to Supabase
 
-// Supabase client configuration
-const supabaseUrl = 'https://kjmlxafygdzkrlopyyvk.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqbWx4YWZ5Z2R6a3Jsb3B5eXZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM0OTM1OTcsImV4cCI6MjA0OTA2OTU5N30.YSE8moLsMnhZIMnCdVfL7b2Xj2SDF9pHkLTKVTPLUkM';
-
-export const supabase = createClient(supabaseUrl, supabaseKey);
+export const supabase = {
+  auth: {
+    getUser: async () => ({ data: { user: null }, error: null }),
+    signIn: async () => ({ data: null, error: null }),
+    signOut: async () => ({ error: null }),
+  },
+  from: (table: string) => ({
+    select: (columns: string = '*') => ({
+      eq: (column: string, value: any) => ({
+        single: async () => ({ data: null, error: null }),
+        maybeSingle: async () => ({ data: null, error: null }),
+      }),
+      limit: (count: number) => ({
+        eq: (column: string, value: any) => ({
+          data: [],
+          error: null,
+        }),
+        lte: (column: string, value: any) => ({
+          gte: (column: string, value: any) => ({
+            limit: (count: number) => ({ data: [], error: null }),
+          }),
+        }),
+      }),
+      filter: (column: string, operator: string, value: any) => ({
+        data: [], 
+        error: null,
+      }),
+    }),
+    insert: (data: any) => ({ error: null }),
+    update: (data: any) => ({
+      eq: (column: string, value: any) => ({ error: null }),
+    }),
+    delete: () => ({ 
+      eq: (column: string, value: any) => ({ error: null }),
+    }),
+  }),
+  storage: {
+    from: (bucket: string) => ({
+      upload: async (path: string, file: File) => ({ data: { path }, error: null }),
+      getPublicUrl: (path: string) => ({ data: { publicUrl: `https://example.com/${path}` } }),
+    }),
+  },
+};
