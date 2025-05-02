@@ -1,124 +1,71 @@
 
-import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import React from "react";
+import { ProductCard } from "@/components/ProductCard";
 import { supabase } from "@/integrations/supabase/client";
-import { SponsoredProducts } from "./SponsoredProducts";
-import { ProductCard } from "../ProductCard";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { SearchIcon, FilterIcon } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { useEffect, useState } from "react";
+import { Service } from "@/types/service";
 
 export const MarketplaceContent = () => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [category, setCategory] = useState<string | null>(null);
-  
-  // Fetch all products
-  const { data: products = [], isLoading } = useQuery({
-    queryKey: ['products', category],
-    queryFn: async () => {
-      let query = supabase
-        .from('products')
-        .select('*')
-        .eq('stock', 0, { negate: true });
-      
-      if (category) {
-        query = query.eq('category', category);
+  const [products, setProducts] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const { data, error } = await supabase
+          .from("services")
+          .select("*")
+          .limit(10);
+
+        if (error) {
+          console.error("Error fetching products:", error);
+          return;
+        }
+
+        setProducts(data || []);
+      } catch (error) {
+        console.error("Unexpected error:", error);
+      } finally {
+        setLoading(false);
       }
-      
-      const { data, error } = await query.order('created_at', { ascending: false });
-      
-      if (error) {
-        console.error('Error fetching products:', error);
-        return [];
-      }
-      
-      return data;
+    };
+
+    fetchProducts();
+  }, []);
+
+  const mockProducts = [
+    {
+      id: "1",
+      title: "Handmade Wall Art",
+      description: "Beautiful handcrafted wall art for your home",
+      price: 79.99,
+      image_url: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      category: "Home Decor",
+      user_id: "user1",
+    },
+    {
+      id: "2",
+      title: "Organic Skin Care Set",
+      description: "100% natural ingredients for healthy skin",
+      price: 49.99,
+      image_url: "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      category: "Beauty",
+      user_id: "user2",
     }
-  });
-  
-  // Filter products based on search query
-  const filteredProducts = products.filter(product => 
-    searchQuery === "" || 
-    product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.description.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-  
-  const categories = [
-    "All", "Electronics", "Clothing", "Home", "Beauty", "Sports", "Books"
   ];
-  
-  const handleCategoryChange = (selectedCategory: string) => {
-    setCategory(selectedCategory === "All" ? null : selectedCategory);
-  };
-  
-  // Increment product view when clicked
-  const handleProductClick = async (productId: string) => {
-    try {
-      await supabase.rpc('increment_product_views', { product_id_param: productId });
-    } catch (error) {
-      console.error('Error incrementing product view:', error);
-    }
-  };
+
+  const displayProducts = products.length > 0 ? products : mockProducts;
 
   return (
-    <div className="space-y-8">
-      {/* Search bar */}
-      <div className="relative">
-        <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
-        <Input
-          className="pl-10 bg-white dark:bg-gray-800"
-          placeholder="Search products..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-      </div>
-      
-      {/* Categories */}
-      <div className="flex gap-2 overflow-x-auto pb-2">
-        {categories.map((cat) => (
-          <Button
-            key={cat}
-            variant={cat === (category || "All") ? "default" : "outline"}
-            size="sm"
-            onClick={() => handleCategoryChange(cat)}
-          >
-            {cat}
-          </Button>
-        ))}
-      </div>
-      
-      {/* Sponsored Products */}
-      <SponsoredProducts />
-      
-      {/* Regular Products */}
-      <div>
-        <h2 className="text-xl font-bold mb-4">Products</h2>
-        
-        {isLoading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {[...Array(8)].map((_, i) => (
-              <div key={i} className="rounded-lg overflow-hidden border">
-                <Skeleton className="h-40 w-full" />
-                <div className="p-3 space-y-2">
-                  <Skeleton className="h-4 w-4/5" />
-                  <Skeleton className="h-4 w-2/5" />
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {filteredProducts.map((product) => (
-              <div key={product.id} onClick={() => handleProductClick(product.id)}>
-                <ProductCard product={product} />
-              </div>
-            ))}
-          </div>
+    <div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {loading ? (
+          <p>Loading products...</p>
         ) : (
-          <div className="text-center py-12 text-gray-500">
-            <p>No products found matching your criteria</p>
-          </div>
+          displayProducts.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))
         )}
       </div>
     </div>

@@ -884,6 +884,7 @@ export type Database = {
           verification_submitted_at: string | null
           verified: boolean | null
           video_url: string | null
+          views: number
           wait_time: string | null
           website: string | null
         }
@@ -919,6 +920,7 @@ export type Database = {
           verification_submitted_at?: string | null
           verified?: boolean | null
           video_url?: string | null
+          views?: number
           wait_time?: string | null
           website?: string | null
         }
@@ -954,6 +956,7 @@ export type Database = {
           verification_submitted_at?: string | null
           verified?: boolean | null
           video_url?: string | null
+          views?: number
           wait_time?: string | null
           website?: string | null
         }
@@ -2234,6 +2237,7 @@ export type Database = {
       products: {
         Row: {
           brand_name: string | null
+          business_id: string | null
           category: string
           condition: string | null
           created_at: string
@@ -2260,6 +2264,7 @@ export type Database = {
         }
         Insert: {
           brand_name?: string | null
+          business_id?: string | null
           category: string
           condition?: string | null
           created_at?: string
@@ -2286,6 +2291,7 @@ export type Database = {
         }
         Update: {
           brand_name?: string | null
+          business_id?: string | null
           category?: string
           condition?: string | null
           created_at?: string
@@ -2311,6 +2317,13 @@ export type Database = {
           views?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "products_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "products_service_product_id_fkey"
             columns: ["service_product_id"]
@@ -3171,7 +3184,15 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      top_viewed_entities: {
+        Row: {
+          entity_type: string | null
+          id: string | null
+          name: string | null
+          views: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       bootstrap_admin_safe: {
@@ -3219,6 +3240,10 @@ export type Database = {
       delete_service_safely: {
         Args: { service_id_param: string }
         Returns: boolean
+      }
+      get_entity_views: {
+        Args: { table_name: string; record_id: string }
+        Returns: number
       }
       get_group_members: {
         Args: { group_id: string }
@@ -3273,6 +3298,7 @@ export type Database = {
           verification_submitted_at: string | null
           verified: boolean | null
           video_url: string | null
+          views: number
           wait_time: string | null
           website: string | null
         }[]
@@ -3281,6 +3307,7 @@ export type Database = {
         Args: { user_id?: string }
         Returns: {
           brand_name: string | null
+          business_id: string | null
           category: string
           condition: string | null
           created_at: string

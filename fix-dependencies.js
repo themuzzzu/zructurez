@@ -24,18 +24,18 @@ try {
   // Fix Tailwind CSS issue
   console.log('\n📦 Installing Tailwind CSS with proper configuration...');
   execSync('npm install --save-dev tailwindcss postcss autoprefixer', { stdio: 'inherit' });
+  execSync('npm install --save-dev @tailwindcss/postcss', { stdio: 'inherit' });
   
   // Install Vite
   console.log('\n📦 Installing Vite and plugins...');
-  execSync('npm install --save-dev vite @vitejs/plugin-react', { stdio: 'inherit' });
+  execSync('npm install --save-dev vite @vitejs/plugin-react-swc', { stdio: 'inherit' });
 
   // Create postcss.config.js
   console.log('\n📝 Creating PostCSS configuration...');
   const postcssConfig = `
 module.exports = {
   plugins: {
-    tailwindcss: {},
-    autoprefixer: {},
+    '@tailwindcss/postcss': {},
   },
 };
 `;
@@ -45,7 +45,7 @@ module.exports = {
   console.log('\n📝 Updating Vite configuration...');
   const viteConfig = `
 import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import react from '@vitejs/plugin-react-swc';
 import path from 'path';
 
 export default defineConfig({
@@ -178,7 +178,7 @@ module.exports = {
   --popover: 0 0% 100%;
   --popover-foreground: 222.2 84% 4.9%;
 
-  --primary: 222.2 47.4% 11.2%;
+  --primary: 221.2 83.2% 53.3%;
   --primary-foreground: 210 40% 98%;
 
   --secondary: 210 40% 96.1%;
