@@ -1,57 +1,46 @@
 
-import { useState } from "react";
+import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { getInitials, getAvatarColorClass } from "@/utils/avatarUtils";
 
 interface AvatarWithFallbackProps {
   src?: string | null;
-  name?: string | null;
-  userId?: string | null;
-  className?: string;
-  fallback?: string;
+  name?: string;
   size?: "sm" | "md" | "lg" | "xl";
+  className?: string;
 }
 
-export function AvatarWithFallback({
+export const AvatarWithFallback = ({
   src,
-  name,
-  userId,
+  name = "User",
+  size = "md",
   className = "",
-  fallback,
-  size = "md"
-}: AvatarWithFallbackProps) {
-  const [error, setError] = useState(false);
-  
+}: AvatarWithFallbackProps) => {
+  // Get initials from name
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((part) => part[0])
+      .join("")
+      .toUpperCase()
+      .substring(0, 2);
+  };
+
   // Determine size class
-  const sizeClass = {
+  const sizeClasses = {
     sm: "h-8 w-8",
     md: "h-10 w-10",
-    lg: "h-16 w-16",
-    xl: "h-24 w-24"
-  }[size];
-  
-  // Get initials from name
-  const userInitials = getInitials(name, fallback);
-  
-  // Get unique avatar background color
-  const colorClass = getAvatarColorClass(userId || name);
-  
-  // Generate dicebear URL if no src provided or error loading
-  const defaultAvatarUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name || userId || "User")}&backgroundColor=transparent&chars=1`;
-  
-  // If src provided but had an error, set dicebear
-  const imageSrc = (error || !src) ? defaultAvatarUrl : src;
+    lg: "h-12 w-12",
+    xl: "h-16 w-16",
+  };
+
+  const sizeClass = sizeClasses[size] || sizeClasses.md;
 
   return (
     <Avatar className={`${sizeClass} ${className}`}>
-      <AvatarImage 
-        src={imageSrc} 
-        alt={name || "User"} 
-        onError={() => setError(true)}
-      />
-      <AvatarFallback className={colorClass}>
-        {userInitials}
+      <AvatarImage src={src || undefined} alt={name} />
+      <AvatarFallback className="bg-primary text-primary-foreground">
+        {getInitials(name)}
       </AvatarFallback>
     </Avatar>
   );
-}
+};
