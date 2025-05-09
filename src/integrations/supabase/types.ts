@@ -39,7 +39,7 @@ export type Database = {
             foreignKeyName: "ad_analytics_ad_id_fkey"
             columns: ["ad_id"]
             isOneToOne: false
-            referencedRelation: "advertisements"
+            referencedRelation: "ads"
             referencedColumns: ["id"]
           },
         ]
@@ -83,7 +83,7 @@ export type Database = {
             foreignKeyName: "ad_auctions_winning_ad_id_fkey"
             columns: ["winning_ad_id"]
             isOneToOne: false
-            referencedRelation: "advertisements"
+            referencedRelation: "ads"
             referencedColumns: ["id"]
           },
         ]
@@ -178,7 +178,7 @@ export type Database = {
         }
         Relationships: []
       }
-      advertisements: {
+      ads: {
         Row: {
           budget: number
           business_id: string | null
@@ -751,7 +751,9 @@ export type Database = {
       }
       business_products: {
         Row: {
+          brand: string | null
           business_id: string
+          category: string | null
           created_at: string
           description: string
           id: string
@@ -759,9 +761,12 @@ export type Database = {
           name: string
           price: number
           stock: number | null
+          user_id: string | null
         }
         Insert: {
+          brand?: string | null
           business_id: string
+          category?: string | null
           created_at?: string
           description: string
           id?: string
@@ -769,9 +774,12 @@ export type Database = {
           name: string
           price: number
           stock?: number | null
+          user_id?: string | null
         }
         Update: {
+          brand?: string | null
           business_id?: string
+          category?: string | null
           created_at?: string
           description?: string
           id?: string
@@ -779,6 +787,7 @@ export type Database = {
           name?: string
           price?: number
           stock?: number | null
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -786,6 +795,13 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_products_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "business_products"
             referencedColumns: ["id"]
           },
         ]
@@ -870,7 +886,9 @@ export type Database = {
           image_url: string | null
           is_open: boolean | null
           latitude: number | null
+          like_count: number | null
           location: string | null
+          logo_url: string | null
           longitude: number | null
           membership_plans: Json | null
           name: string
@@ -906,7 +924,9 @@ export type Database = {
           image_url?: string | null
           is_open?: boolean | null
           latitude?: number | null
+          like_count?: number | null
           location?: string | null
+          logo_url?: string | null
           longitude?: number | null
           membership_plans?: Json | null
           name: string
@@ -942,7 +962,9 @@ export type Database = {
           image_url?: string | null
           is_open?: boolean | null
           latitude?: number | null
+          like_count?: number | null
           location?: string | null
+          logo_url?: string | null
           longitude?: number | null
           membership_plans?: Json | null
           name?: string
@@ -1327,6 +1349,35 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      favorites: {
+        Row: {
+          business_id: string
+          created_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorites_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       followers: {
         Row: {
@@ -2236,7 +2287,7 @@ export type Database = {
       }
       products: {
         Row: {
-          brand_name: string | null
+          brand: string | null
           business_id: string | null
           category: string
           condition: string | null
@@ -2251,19 +2302,20 @@ export type Database = {
           latitude: number | null
           longitude: number | null
           model: string | null
+          name: string
           original_price: number | null
           price: number
+          product_id: string | null
           reach: number | null
           service_product_id: string | null
           size: string | null
           stock: number
           subcategory: string | null
-          title: string
           user_id: string | null
           views: number | null
         }
         Insert: {
-          brand_name?: string | null
+          brand?: string | null
           business_id?: string | null
           category: string
           condition?: string | null
@@ -2278,19 +2330,20 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           model?: string | null
+          name: string
           original_price?: number | null
           price: number
+          product_id?: string | null
           reach?: number | null
           service_product_id?: string | null
           size?: string | null
           stock?: number
           subcategory?: string | null
-          title: string
           user_id?: string | null
           views?: number | null
         }
         Update: {
-          brand_name?: string | null
+          brand?: string | null
           business_id?: string | null
           category?: string
           condition?: string | null
@@ -2305,14 +2358,15 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           model?: string | null
+          name?: string
           original_price?: number | null
           price?: number
+          product_id?: string | null
           reach?: number | null
           service_product_id?: string | null
           size?: string | null
           stock?: number
           subcategory?: string | null
-          title?: string
           user_id?: string | null
           views?: number | null
         }
@@ -2322,6 +2376,13 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: true
+            referencedRelation: "products"
             referencedColumns: ["id"]
           },
           {
@@ -2882,6 +2943,39 @@ export type Database = {
         }
         Relationships: []
       }
+      subscriptions: {
+        Row: {
+          created_at: string | null
+          end_date: string | null
+          id: string
+          plan_type: string
+          start_date: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          plan_type: string
+          start_date?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          plan_type?: string
+          start_date?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       time_spent: {
         Row: {
           age: number | null
@@ -3229,6 +3323,10 @@ export type Database = {
         }
         Returns: string
       }
+      decrement_business_likes: {
+        Args: { business_id: string }
+        Returns: undefined
+      }
       delete_business_cascade: {
         Args: { business_id_param: string }
         Returns: boolean
@@ -3284,7 +3382,9 @@ export type Database = {
           image_url: string | null
           is_open: boolean | null
           latitude: number | null
+          like_count: number | null
           location: string | null
+          logo_url: string | null
           longitude: number | null
           membership_plans: Json | null
           name: string
@@ -3306,7 +3406,7 @@ export type Database = {
       get_user_liked_products: {
         Args: { user_id?: string }
         Returns: {
-          brand_name: string | null
+          brand: string | null
           business_id: string | null
           category: string
           condition: string | null
@@ -3321,14 +3421,15 @@ export type Database = {
           latitude: number | null
           longitude: number | null
           model: string | null
+          name: string
           original_price: number | null
           price: number
+          product_id: string | null
           reach: number | null
           service_product_id: string | null
           size: string | null
           stock: number
           subcategory: string | null
-          title: string
           user_id: string | null
           views: number | null
         }[]
@@ -3347,6 +3448,10 @@ export type Database = {
       }
       increment_ad_views: {
         Args: { ad_id: string }
+        Returns: undefined
+      }
+      increment_business_likes: {
+        Args: { business_id: string }
         Returns: undefined
       }
       increment_business_views: {

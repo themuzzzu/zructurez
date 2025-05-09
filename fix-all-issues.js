@@ -21,73 +21,42 @@ try {
   
   // Step 4: Install Vite and required plugins
   console.log('\n📦 Installing Vite and plugins...');
-  execSync('npm install --save-dev vite @vitejs/plugin-react-swc @tailwindcss/postcss', { stdio: 'inherit' });
+  execSync('npm install --save-dev vite @vitejs/plugin-react-swc autoprefixer tailwindcss postcss', { stdio: 'inherit' });
   
-  // Step 5: Create necessary configuration files
+  // Step 5: Install Supabase SDK and auth helpers
+  console.log('\n📦 Installing Supabase SDK...');
+  execSync('npm install @supabase/supabase-js', { stdio: 'inherit' });
+  
+  // Step 6: Create or update necessary configuration files
   console.log('\n📝 Creating necessary configuration files...');
   
-  // Create postcss.config.js
+  // Update postcss.config.js
   fs.writeFileSync('postcss.config.js', `
 module.exports = {
   plugins: {
-    '@tailwindcss/postcss': {},
+    tailwindcss: {},
+    autoprefixer: {},
   },
 };
 `);
   
-  // Create lib/utils.ts if it doesn't exist
-  const libDir = path.join(__dirname, 'src/lib');
-  if (!fs.existsSync(libDir)) {
-    fs.mkdirSync(libDir, { recursive: true });
+  // Update src/components/ui/badge.tsx to include success variant
+  const badgeFilePath = path.join(__dirname, 'src/components/ui/badge.tsx');
+  if (fs.existsSync(badgeFilePath)) {
+    let badgeContent = fs.readFileSync(badgeFilePath, 'utf-8');
+    
+    if (!badgeContent.includes('success:')) {
+      badgeContent = badgeContent.replace(
+        'variants: {\n      variant: {',
+        'variants: {\n      variant: {\n        success:\n          "border-transparent bg-green-500 text-white hover:bg-green-600",'
+      );
+      
+      fs.writeFileSync(badgeFilePath, badgeContent, 'utf-8');
+      console.log('✅ Added success variant to Badge component');
+    }
   }
 
-  const utilsPath = path.join(libDir, 'utils.ts');
-  if (!fs.existsSync(utilsPath)) {
-    fs.writeFileSync(utilsPath, `
-import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
-`);
-  }
-  
-  // Update package.json scripts
-  const packageJsonPath = path.join(__dirname, 'package.json');
-  if (fs.existsSync(packageJsonPath)) {
-    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
-    packageJson.scripts = {
-      ...packageJson.scripts,
-      "dev": "vite",
-      "build": "tsc && vite build",
-      "preview": "vite preview"
-    };
-    fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
-  }
-
-  // Create types directory for any missing type declarations
-  const typesDir = path.join(__dirname, 'src/types');
-  if (!fs.existsSync(typesDir)) {
-    fs.mkdirSync(typesDir, { recursive: true });
-  }
-
-  // Create service.d.ts for service type definitions
-  fs.writeFileSync(path.join(typesDir, 'service.d.ts'), `
-export interface Service {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  image_url?: string;
-  imageUrl?: string;
-  category?: string;
-  provider?: string;
-  rating?: number;
-}
-`);
-
-  // Make script executable
+  // Make this script executable
   if (process.platform !== 'win32') {
     try {
       execSync('chmod +x fix-all-issues.js', { stdio: 'inherit' });
@@ -96,15 +65,9 @@ export interface Service {
     }
   }
 
-  // Fix the Badge component to support the 'success' variant
-  const componentUIDir = path.join(__dirname, 'src/components/ui');
-  if (!fs.existsSync(componentUIDir)) {
-    fs.mkdirSync(componentUIDir, { recursive: true });
-  }
-
   console.log('\n✅ All issues fixed successfully!');
   console.log('\n🚀 Start your application by running:');
-  console.log('node start.js');
+  console.log('npm run dev');
 } catch (error) {
   console.error('\n❌ Error fixing issues:', error);
   process.exit(1);

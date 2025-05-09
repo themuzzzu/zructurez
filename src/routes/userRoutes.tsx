@@ -9,6 +9,10 @@ export const userRoutes: RouteObject[] = [
     element: <Profile />,
   },
   {
+    path: "/profile/:id",
+    element: <Profile />,
+  },
+  {
     path: "/login", 
     element: <Auth />,
   },
