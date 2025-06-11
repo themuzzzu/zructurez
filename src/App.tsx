@@ -23,29 +23,29 @@ function App() {
     const initializeMobile = async () => {
       if (isNativePlatform()) {
         try {
-          // Dynamically import Capacitor plugins only when needed
+          // Dynamically import Capacitor plugins only when needed and available
           const capacitorModules = await Promise.allSettled([
-            import('@capacitor/splash-screen'),
-            import('@capacitor/status-bar'),
-            import('@capacitor/app')
+            import('@capacitor/splash-screen').catch(() => null),
+            import('@capacitor/status-bar').catch(() => null),
+            import('@capacitor/app').catch(() => null)
           ]);
           
           // Hide splash screen
           const splashScreenModule = capacitorModules[0];
-          if (splashScreenModule.status === 'fulfilled') {
+          if (splashScreenModule.status === 'fulfilled' && splashScreenModule.value) {
             await splashScreenModule.value.SplashScreen.hide();
           }
           
           // Set status bar style
           const statusBarModule = capacitorModules[1];
-          if (statusBarModule.status === 'fulfilled') {
+          if (statusBarModule.status === 'fulfilled' && statusBarModule.value) {
             const { StatusBar, Style } = statusBarModule.value;
             await StatusBar.setStyle({ style: Style.Default });
           }
           
           // Handle back button on Android
           const appModule = capacitorModules[2];
-          if (appModule.status === 'fulfilled') {
+          if (appModule.status === 'fulfilled' && appModule.value) {
             const { App: CapApp } = appModule.value;
             CapApp.addListener('backButton', ({ canGoBack }) => {
               if (!canGoBack) {
