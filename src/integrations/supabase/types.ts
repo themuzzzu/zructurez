@@ -405,26 +405,38 @@ export type Database = {
       }
       advertisements: {
         Row: {
+          advertiser_id: string | null
           budget: number
+          budget_daily: number | null
+          budget_total: number | null
           business_id: string | null
           carousel_images: Json | null
+          city: string | null
           clicks: number | null
+          clicks_count: number | null
           created_at: string
           cta_text: string | null
           description: string
+          district: string | null
           end_date: string
           format: string | null
           id: string
           image_url: string | null
           impressions: number
+          impressions_count: number | null
+          is_active: boolean | null
           location: string
           media_url: string | null
           position: string | null
           reach: number | null
           reference_id: string
           section: string
+          spent_amount: number | null
           start_date: string
+          state: string | null
           status: string
+          target_cities: string[] | null
+          target_districts: string[] | null
           target_id: string | null
           target_type: string | null
           targeting_age_max: number | null
@@ -438,26 +450,38 @@ export type Database = {
           video_url: string | null
         }
         Insert: {
+          advertiser_id?: string | null
           budget: number
+          budget_daily?: number | null
+          budget_total?: number | null
           business_id?: string | null
           carousel_images?: Json | null
+          city?: string | null
           clicks?: number | null
+          clicks_count?: number | null
           created_at?: string
           cta_text?: string | null
           description: string
+          district?: string | null
           end_date: string
           format?: string | null
           id?: string
           image_url?: string | null
           impressions?: number
+          impressions_count?: number | null
+          is_active?: boolean | null
           location: string
           media_url?: string | null
           position?: string | null
           reach?: number | null
           reference_id: string
           section?: string
+          spent_amount?: number | null
           start_date: string
+          state?: string | null
           status?: string
+          target_cities?: string[] | null
+          target_districts?: string[] | null
           target_id?: string | null
           target_type?: string | null
           targeting_age_max?: number | null
@@ -471,26 +495,38 @@ export type Database = {
           video_url?: string | null
         }
         Update: {
+          advertiser_id?: string | null
           budget?: number
+          budget_daily?: number | null
+          budget_total?: number | null
           business_id?: string | null
           carousel_images?: Json | null
+          city?: string | null
           clicks?: number | null
+          clicks_count?: number | null
           created_at?: string
           cta_text?: string | null
           description?: string
+          district?: string | null
           end_date?: string
           format?: string | null
           id?: string
           image_url?: string | null
           impressions?: number
+          impressions_count?: number | null
+          is_active?: boolean | null
           location?: string
           media_url?: string | null
           position?: string | null
           reach?: number | null
           reference_id?: string
           section?: string
+          spent_amount?: number | null
           start_date?: string
+          state?: string | null
           status?: string
+          target_cities?: string[] | null
+          target_districts?: string[] | null
           target_id?: string | null
           target_type?: string | null
           targeting_age_max?: number | null
@@ -1567,56 +1603,6 @@ export type Database = {
         }
         Relationships: []
       }
-      business_products: {
-        Row: {
-          brand: string | null
-          business_id: string
-          category: string | null
-          created_at: string
-          description: string
-          id: string
-          image_url: string | null
-          name: string
-          price: number
-          stock: number | null
-          user_id: string | null
-        }
-        Insert: {
-          brand?: string | null
-          business_id: string
-          category?: string | null
-          created_at?: string
-          description: string
-          id?: string
-          image_url?: string | null
-          name: string
-          price: number
-          stock?: number | null
-          user_id?: string | null
-        }
-        Update: {
-          brand?: string | null
-          business_id?: string
-          category?: string | null
-          created_at?: string
-          description?: string
-          id?: string
-          image_url?: string | null
-          name?: string
-          price?: number
-          stock?: number | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "business_products_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "business_products"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       business_ratings: {
         Row: {
           business_id: string
@@ -2064,139 +2050,94 @@ export type Database = {
         Row: {
           address_line1: string | null
           address_line2: string | null
-          annual_revenue_range: string | null
           average_rating: number | null
-          banner_url: string | null
           business_hours: Json | null
           business_name: string
           business_type: string | null
           category: string | null
           city: string
-          contact_email: string | null
           contact_phone: string | null
           created_at: string | null
           description: string | null
-          district: string
-          employee_count_range: string | null
-          gallery_urls: string[] | null
-          gstin: string | null
-          id: number
+          district: string | null
+          email: string | null
+          id: string
           is_active: boolean | null
           is_verified: boolean | null
-          landmark: string | null
           latitude: number | null
-          location_service_id: number | null
-          logo_url: string | null
           longitude: number | null
-          postal_code: string | null
-          registration_number: string | null
-          service_radius_km: number | null
+          metadata: Json | null
+          pincode: string | null
           state: string | null
           subcategory: string | null
-          tags: string[] | null
           total_reviews: number | null
+          total_views: number | null
           updated_at: string | null
-          user_id: number
+          user_id: string
           verification_date: string | null
-          verification_documents: string[] | null
           website: string | null
         }
         Insert: {
           address_line1?: string | null
           address_line2?: string | null
-          annual_revenue_range?: string | null
           average_rating?: number | null
-          banner_url?: string | null
           business_hours?: Json | null
           business_name: string
           business_type?: string | null
           category?: string | null
           city: string
-          contact_email?: string | null
           contact_phone?: string | null
           created_at?: string | null
           description?: string | null
-          district: string
-          employee_count_range?: string | null
-          gallery_urls?: string[] | null
-          gstin?: string | null
-          id?: number
+          district?: string | null
+          email?: string | null
+          id?: string
           is_active?: boolean | null
           is_verified?: boolean | null
-          landmark?: string | null
           latitude?: number | null
-          location_service_id?: number | null
-          logo_url?: string | null
           longitude?: number | null
-          postal_code?: string | null
-          registration_number?: string | null
-          service_radius_km?: number | null
+          metadata?: Json | null
+          pincode?: string | null
           state?: string | null
           subcategory?: string | null
-          tags?: string[] | null
           total_reviews?: number | null
+          total_views?: number | null
           updated_at?: string | null
-          user_id: number
+          user_id: string
           verification_date?: string | null
-          verification_documents?: string[] | null
           website?: string | null
         }
         Update: {
           address_line1?: string | null
           address_line2?: string | null
-          annual_revenue_range?: string | null
           average_rating?: number | null
-          banner_url?: string | null
           business_hours?: Json | null
           business_name?: string
           business_type?: string | null
           category?: string | null
           city?: string
-          contact_email?: string | null
           contact_phone?: string | null
           created_at?: string | null
           description?: string | null
-          district?: string
-          employee_count_range?: string | null
-          gallery_urls?: string[] | null
-          gstin?: string | null
-          id?: number
+          district?: string | null
+          email?: string | null
+          id?: string
           is_active?: boolean | null
           is_verified?: boolean | null
-          landmark?: string | null
           latitude?: number | null
-          location_service_id?: number | null
-          logo_url?: string | null
           longitude?: number | null
-          postal_code?: string | null
-          registration_number?: string | null
-          service_radius_km?: number | null
+          metadata?: Json | null
+          pincode?: string | null
           state?: string | null
           subcategory?: string | null
-          tags?: string[] | null
           total_reviews?: number | null
+          total_views?: number | null
           updated_at?: string | null
-          user_id?: number
+          user_id?: string
           verification_date?: string | null
-          verification_documents?: string[] | null
           website?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "businesses_location_service_id_fkey"
-            columns: ["location_service_id"]
-            isOneToOne: false
-            referencedRelation: "location_service_config"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "businesses_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       cart_events: {
         Row: {
@@ -2243,13 +2184,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "cart_events_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "cart_events_service_id_fkey"
             columns: ["service_id"]
             isOneToOne: false
@@ -2280,15 +2214,55 @@ export type Database = {
           quantity?: number
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "cart_items_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
+      }
+      cities: {
+        Row: {
+          created_at: string
+          delivery_available: boolean
+          district: string
+          id: string
+          is_serviceable: boolean
+          latitude: number | null
+          longitude: number | null
+          mandal: string | null
+          name: string
+          pincode: string | null
+          population: number | null
+          priority_order: number | null
+          state: string
+        }
+        Insert: {
+          created_at?: string
+          delivery_available?: boolean
+          district: string
+          id?: string
+          is_serviceable?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          mandal?: string | null
+          name: string
+          pincode?: string | null
+          population?: number | null
+          priority_order?: number | null
+          state?: string
+        }
+        Update: {
+          created_at?: string
+          delivery_available?: boolean
+          district?: string
+          id?: string
+          is_serviceable?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          mandal?: string | null
+          name?: string
+          pincode?: string | null
+          population?: number | null
+          priority_order?: number | null
+          state?: string
+        }
+        Relationships: []
       }
       city_availability: {
         Row: {
@@ -4698,15 +4672,7 @@ export type Database = {
           total_price?: number
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "orders_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       page_views: {
         Row: {
@@ -4752,13 +4718,6 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "page_views_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "page_views_service_id_fkey"
             columns: ["service_id"]
@@ -4997,15 +4956,11 @@ export type Database = {
           cart_removals: number | null
           checkout_completions: number | null
           checkout_starts: number | null
-          city_wise_orders: Json | null
-          competitor_price_comparison: Json | null
           conversion_rate: number | null
           created_at: string | null
-          current_price: number | null
           date_tracked: string
           description_reads: number | null
           detail_page_views: number | null
-          discount_percentage: number | null
           five_star_count: number | null
           four_star_count: number | null
           id: string
@@ -5014,20 +4969,12 @@ export type Database = {
           orders_cancelled: number | null
           orders_completed: number | null
           orders_placed: number | null
-          original_price: number | null
-          out_of_stock_duration: number | null
-          price_changes_count: number | null
           product_id: string
           profit_margin: number | null
           ratings_count: number | null
-          region_popularity: Json | null
-          restock_events: number | null
           return_rate: number | null
           revenue_generated: number | null
-          stock_alerts: number | null
-          stock_count: number | null
           three_star_count: number | null
-          top_performing_cities: Json | null
           two_star_count: number | null
           unique_viewers: number | null
           updated_at: string | null
@@ -5045,15 +4992,11 @@ export type Database = {
           cart_removals?: number | null
           checkout_completions?: number | null
           checkout_starts?: number | null
-          city_wise_orders?: Json | null
-          competitor_price_comparison?: Json | null
           conversion_rate?: number | null
           created_at?: string | null
-          current_price?: number | null
           date_tracked?: string
           description_reads?: number | null
           detail_page_views?: number | null
-          discount_percentage?: number | null
           five_star_count?: number | null
           four_star_count?: number | null
           id?: string
@@ -5062,20 +5005,12 @@ export type Database = {
           orders_cancelled?: number | null
           orders_completed?: number | null
           orders_placed?: number | null
-          original_price?: number | null
-          out_of_stock_duration?: number | null
-          price_changes_count?: number | null
           product_id: string
           profit_margin?: number | null
           ratings_count?: number | null
-          region_popularity?: Json | null
-          restock_events?: number | null
           return_rate?: number | null
           revenue_generated?: number | null
-          stock_alerts?: number | null
-          stock_count?: number | null
           three_star_count?: number | null
-          top_performing_cities?: Json | null
           two_star_count?: number | null
           unique_viewers?: number | null
           updated_at?: string | null
@@ -5093,15 +5028,11 @@ export type Database = {
           cart_removals?: number | null
           checkout_completions?: number | null
           checkout_starts?: number | null
-          city_wise_orders?: Json | null
-          competitor_price_comparison?: Json | null
           conversion_rate?: number | null
           created_at?: string | null
-          current_price?: number | null
           date_tracked?: string
           description_reads?: number | null
           detail_page_views?: number | null
-          discount_percentage?: number | null
           five_star_count?: number | null
           four_star_count?: number | null
           id?: string
@@ -5110,20 +5041,12 @@ export type Database = {
           orders_cancelled?: number | null
           orders_completed?: number | null
           orders_placed?: number | null
-          original_price?: number | null
-          out_of_stock_duration?: number | null
-          price_changes_count?: number | null
           product_id?: string
           profit_margin?: number | null
           ratings_count?: number | null
-          region_popularity?: Json | null
-          restock_events?: number | null
           return_rate?: number | null
           revenue_generated?: number | null
-          stock_alerts?: number | null
-          stock_count?: number | null
           three_star_count?: number | null
-          top_performing_cities?: Json | null
           two_star_count?: number | null
           unique_viewers?: number | null
           updated_at?: string | null
@@ -5134,7 +5057,43 @@ export type Database = {
           wishlist_shares?: number | null
           wishlist_to_cart?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "product_analytics_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "business_overview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_analytics_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_analytics_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_analytics_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "product_details"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_analytics_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       product_images: {
         Row: {
@@ -5155,15 +5114,7 @@ export type Database = {
           image_url?: string
           product_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "product_images_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       product_labels: {
         Row: {
@@ -5187,36 +5138,42 @@ export type Database = {
           name?: string
           product_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "product_labels_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       product_likes: {
         Row: {
-          created_at: string
           id: string
+          liked_at: string | null
           product_id: string
           user_id: string
         }
         Insert: {
-          created_at?: string
           id?: string
+          liked_at?: string | null
           product_id: string
           user_id: string
         }
         Update: {
-          created_at?: string
           id?: string
+          liked_at?: string | null
           product_id?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "product_likes_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_likes_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "product_details"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "product_likes_product_id_fkey"
             columns: ["product_id"]
@@ -5228,31 +5185,86 @@ export type Database = {
       }
       product_purchases: {
         Row: {
+          business_id: string
+          delivery_address: Json | null
+          delivery_date: string | null
           id: string
-          product_id: string | null
+          notes: string | null
+          order_status: string | null
+          payment_method: string | null
+          product_id: string
           purchase_date: string | null
           quantity: number
-          user_id: string | null
+          total_price: number
+          transaction_id: string | null
+          unit_price: number
+          user_id: string
         }
         Insert: {
+          business_id: string
+          delivery_address?: Json | null
+          delivery_date?: string | null
           id?: string
-          product_id?: string | null
+          notes?: string | null
+          order_status?: string | null
+          payment_method?: string | null
+          product_id: string
           purchase_date?: string | null
           quantity?: number
-          user_id?: string | null
+          total_price: number
+          transaction_id?: string | null
+          unit_price: number
+          user_id: string
         }
         Update: {
+          business_id?: string
+          delivery_address?: Json | null
+          delivery_date?: string | null
           id?: string
-          product_id?: string | null
+          notes?: string | null
+          order_status?: string | null
+          payment_method?: string | null
+          product_id?: string
           purchase_date?: string | null
           quantity?: number
-          user_id?: string | null
+          total_price?: number
+          transaction_id?: string | null
+          unit_price?: number
+          user_id?: string
         }
         Relationships: [
           {
+            foreignKeyName: "product_purchases_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "business_overview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_purchases_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "product_purchases_product_id_fkey"
             columns: ["product_id"]
-            isOneToOne: true
+            isOneToOne: false
+            referencedRelation: "marketplace_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_purchases_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "product_details"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_purchases_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
             referencedRelation: "products"
             referencedColumns: ["id"]
           },
@@ -5260,105 +5272,372 @@ export type Database = {
       }
       products: {
         Row: {
+          admin_approved_at: string | null
+          admin_rejected_at: string | null
+          admin_status: string | null
           brand: string | null
-          business_id: string | null
-          category: string
+          business_id: string
+          category: string | null
+          city: string | null
+          color: string | null
           condition: string | null
-          created_at: string
-          description: string
+          created_at: string | null
+          delivery_available: boolean | null
+          delivery_charge: number | null
+          description: string | null
+          dimensions: Json | null
           discount_percentage: number | null
+          district: string | null
           id: string
-          image_url: string | null
+          image_urls: string[] | null
+          is_active: boolean | null
           is_branded: boolean | null
+          is_digital: boolean | null
           is_discounted: boolean | null
+          is_featured: boolean | null
           is_used: boolean | null
+          labels: string[] | null
           latitude: number | null
+          likes_count: number | null
           longitude: number | null
+          main_image_url: string | null
+          marketplace_approved: boolean | null
+          metadata: Json | null
+          min_order_quantity: number | null
           model: string | null
-          name: string
           original_price: number | null
           price: number
-          product_id: string | null
+          product_name: string
+          purchases_count: number | null
+          rating: number | null
           reach: number | null
-          service_product_id: string | null
+          rejection_reason: string | null
+          review_count: number | null
+          seo_description: string | null
+          seo_title: string | null
+          show_in_marketplace: boolean | null
           size: string | null
-          stock: number
+          sku: string | null
+          specifications: Json | null
+          state: string | null
+          stock_quantity: number | null
           subcategory: string | null
+          tags: string[] | null
+          total_reviews: number | null
+          updated_at: string | null
           user_id: string | null
-          views: number | null
+          video_urls: string[] | null
+          views_count: number | null
+          weight: number | null
         }
         Insert: {
+          admin_approved_at?: string | null
+          admin_rejected_at?: string | null
+          admin_status?: string | null
           brand?: string | null
-          business_id?: string | null
-          category: string
+          business_id: string
+          category?: string | null
+          city?: string | null
+          color?: string | null
           condition?: string | null
-          created_at?: string
-          description: string
+          created_at?: string | null
+          delivery_available?: boolean | null
+          delivery_charge?: number | null
+          description?: string | null
+          dimensions?: Json | null
           discount_percentage?: number | null
+          district?: string | null
           id?: string
-          image_url?: string | null
+          image_urls?: string[] | null
+          is_active?: boolean | null
           is_branded?: boolean | null
+          is_digital?: boolean | null
           is_discounted?: boolean | null
+          is_featured?: boolean | null
           is_used?: boolean | null
+          labels?: string[] | null
           latitude?: number | null
+          likes_count?: number | null
           longitude?: number | null
+          main_image_url?: string | null
+          marketplace_approved?: boolean | null
+          metadata?: Json | null
+          min_order_quantity?: number | null
           model?: string | null
-          name: string
           original_price?: number | null
           price: number
-          product_id?: string | null
+          product_name: string
+          purchases_count?: number | null
+          rating?: number | null
           reach?: number | null
-          service_product_id?: string | null
+          rejection_reason?: string | null
+          review_count?: number | null
+          seo_description?: string | null
+          seo_title?: string | null
+          show_in_marketplace?: boolean | null
           size?: string | null
-          stock?: number
+          sku?: string | null
+          specifications?: Json | null
+          state?: string | null
+          stock_quantity?: number | null
           subcategory?: string | null
+          tags?: string[] | null
+          total_reviews?: number | null
+          updated_at?: string | null
           user_id?: string | null
-          views?: number | null
+          video_urls?: string[] | null
+          views_count?: number | null
+          weight?: number | null
         }
         Update: {
+          admin_approved_at?: string | null
+          admin_rejected_at?: string | null
+          admin_status?: string | null
           brand?: string | null
-          business_id?: string | null
-          category?: string
+          business_id?: string
+          category?: string | null
+          city?: string | null
+          color?: string | null
           condition?: string | null
-          created_at?: string
-          description?: string
+          created_at?: string | null
+          delivery_available?: boolean | null
+          delivery_charge?: number | null
+          description?: string | null
+          dimensions?: Json | null
           discount_percentage?: number | null
+          district?: string | null
           id?: string
-          image_url?: string | null
+          image_urls?: string[] | null
+          is_active?: boolean | null
           is_branded?: boolean | null
+          is_digital?: boolean | null
           is_discounted?: boolean | null
+          is_featured?: boolean | null
           is_used?: boolean | null
+          labels?: string[] | null
           latitude?: number | null
+          likes_count?: number | null
           longitude?: number | null
+          main_image_url?: string | null
+          marketplace_approved?: boolean | null
+          metadata?: Json | null
+          min_order_quantity?: number | null
           model?: string | null
-          name?: string
           original_price?: number | null
           price?: number
-          product_id?: string | null
+          product_name?: string
+          purchases_count?: number | null
+          rating?: number | null
           reach?: number | null
-          service_product_id?: string | null
+          rejection_reason?: string | null
+          review_count?: number | null
+          seo_description?: string | null
+          seo_title?: string | null
+          show_in_marketplace?: boolean | null
           size?: string | null
-          stock?: number
+          sku?: string | null
+          specifications?: Json | null
+          state?: string | null
+          stock_quantity?: number | null
           subcategory?: string | null
+          tags?: string[] | null
+          total_reviews?: number | null
+          updated_at?: string | null
           user_id?: string | null
-          views?: number | null
+          video_urls?: string[] | null
+          views_count?: number | null
+          weight?: number | null
         }
         Relationships: [
           {
-            foreignKeyName: "products_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: true
-            referencedRelation: "products"
+            foreignKeyName: "products_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "business_overview"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "products_service_product_id_fkey"
-            columns: ["service_product_id"]
+            foreignKeyName: "products_business_id_fkey"
+            columns: ["business_id"]
             isOneToOne: false
-            referencedRelation: "service_products"
+            referencedRelation: "businesses"
             referencedColumns: ["id"]
           },
         ]
+      }
+      "products_backup_2025-06-06_172252_975853+00": {
+        Row: {
+          admin_approved_at: string | null
+          admin_rejected_at: string | null
+          admin_status: string | null
+          brand: string | null
+          business_id: string | null
+          category: string | null
+          city: string | null
+          color: string | null
+          condition: string | null
+          created_at: string | null
+          delivery_available: boolean | null
+          delivery_charge: number | null
+          description: string | null
+          dimensions: Json | null
+          discount_percentage: number | null
+          district: string | null
+          id: string | null
+          image_urls: string[] | null
+          is_active: boolean | null
+          is_branded: boolean | null
+          is_digital: boolean | null
+          is_discounted: boolean | null
+          is_featured: boolean | null
+          is_used: boolean | null
+          labels: string[] | null
+          latitude: number | null
+          likes_count: number | null
+          longitude: number | null
+          main_image_url: string | null
+          marketplace_approved: boolean | null
+          metadata: Json | null
+          min_order_quantity: number | null
+          model: string | null
+          original_price: number | null
+          price: number | null
+          product_name: string | null
+          purchases_count: number | null
+          rating: number | null
+          reach: number | null
+          rejection_reason: string | null
+          seo_description: string | null
+          seo_title: string | null
+          show_in_marketplace: boolean | null
+          size: string | null
+          sku: string | null
+          state: string | null
+          stock_quantity: number | null
+          subcategory: string | null
+          tags: string[] | null
+          total_reviews: number | null
+          updated_at: string | null
+          user_id: string | null
+          video_urls: string[] | null
+          views_count: number | null
+          weight: number | null
+        }
+        Insert: {
+          admin_approved_at?: string | null
+          admin_rejected_at?: string | null
+          admin_status?: string | null
+          brand?: string | null
+          business_id?: string | null
+          category?: string | null
+          city?: string | null
+          color?: string | null
+          condition?: string | null
+          created_at?: string | null
+          delivery_available?: boolean | null
+          delivery_charge?: number | null
+          description?: string | null
+          dimensions?: Json | null
+          discount_percentage?: number | null
+          district?: string | null
+          id?: string | null
+          image_urls?: string[] | null
+          is_active?: boolean | null
+          is_branded?: boolean | null
+          is_digital?: boolean | null
+          is_discounted?: boolean | null
+          is_featured?: boolean | null
+          is_used?: boolean | null
+          labels?: string[] | null
+          latitude?: number | null
+          likes_count?: number | null
+          longitude?: number | null
+          main_image_url?: string | null
+          marketplace_approved?: boolean | null
+          metadata?: Json | null
+          min_order_quantity?: number | null
+          model?: string | null
+          original_price?: number | null
+          price?: number | null
+          product_name?: string | null
+          purchases_count?: number | null
+          rating?: number | null
+          reach?: number | null
+          rejection_reason?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
+          show_in_marketplace?: boolean | null
+          size?: string | null
+          sku?: string | null
+          state?: string | null
+          stock_quantity?: number | null
+          subcategory?: string | null
+          tags?: string[] | null
+          total_reviews?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+          video_urls?: string[] | null
+          views_count?: number | null
+          weight?: number | null
+        }
+        Update: {
+          admin_approved_at?: string | null
+          admin_rejected_at?: string | null
+          admin_status?: string | null
+          brand?: string | null
+          business_id?: string | null
+          category?: string | null
+          city?: string | null
+          color?: string | null
+          condition?: string | null
+          created_at?: string | null
+          delivery_available?: boolean | null
+          delivery_charge?: number | null
+          description?: string | null
+          dimensions?: Json | null
+          discount_percentage?: number | null
+          district?: string | null
+          id?: string | null
+          image_urls?: string[] | null
+          is_active?: boolean | null
+          is_branded?: boolean | null
+          is_digital?: boolean | null
+          is_discounted?: boolean | null
+          is_featured?: boolean | null
+          is_used?: boolean | null
+          labels?: string[] | null
+          latitude?: number | null
+          likes_count?: number | null
+          longitude?: number | null
+          main_image_url?: string | null
+          marketplace_approved?: boolean | null
+          metadata?: Json | null
+          min_order_quantity?: number | null
+          model?: string | null
+          original_price?: number | null
+          price?: number | null
+          product_name?: string | null
+          purchases_count?: number | null
+          rating?: number | null
+          reach?: number | null
+          rejection_reason?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
+          show_in_marketplace?: boolean | null
+          size?: string | null
+          sku?: string | null
+          state?: string | null
+          stock_quantity?: number | null
+          subcategory?: string | null
+          tags?: string[] | null
+          total_reviews?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+          video_urls?: string[] | null
+          views_count?: number | null
+          weight?: number | null
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -6343,55 +6622,94 @@ export type Database = {
       }
       services: {
         Row: {
+          advance_booking_required: boolean | null
           availability: string | null
+          business_id: number | null
           category: string
+          city: string | null
           contact_info: string | null
           created_at: string
           description: string
+          district: string | null
+          home_service: boolean | null
           id: string
           image_url: string | null
+          is_active: boolean | null
+          is_featured: boolean | null
           is_open: boolean | null
           latitude: number | null
           location: string | null
           longitude: number | null
           price: number
+          provider_id: string | null
+          rating: number | null
+          service_duration: string | null
+          state: string | null
           title: string
+          total_reviews: number | null
           user_id: string
           views: number | null
+          views_count: number | null
         }
         Insert: {
+          advance_booking_required?: boolean | null
           availability?: string | null
+          business_id?: number | null
           category: string
+          city?: string | null
           contact_info?: string | null
           created_at?: string
           description: string
+          district?: string | null
+          home_service?: boolean | null
           id?: string
           image_url?: string | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
           is_open?: boolean | null
           latitude?: number | null
           location?: string | null
           longitude?: number | null
           price: number
+          provider_id?: string | null
+          rating?: number | null
+          service_duration?: string | null
+          state?: string | null
           title: string
+          total_reviews?: number | null
           user_id: string
           views?: number | null
+          views_count?: number | null
         }
         Update: {
+          advance_booking_required?: boolean | null
           availability?: string | null
+          business_id?: number | null
           category?: string
+          city?: string | null
           contact_info?: string | null
           created_at?: string
           description?: string
+          district?: string | null
+          home_service?: boolean | null
           id?: string
           image_url?: string | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
           is_open?: boolean | null
           latitude?: number | null
           location?: string | null
           longitude?: number | null
           price?: number
+          provider_id?: string | null
+          rating?: number | null
+          service_duration?: string | null
+          state?: string | null
           title?: string
+          total_reviews?: number | null
           user_id?: string
           views?: number | null
+          views_count?: number | null
         }
         Relationships: []
       }
@@ -6482,6 +6800,30 @@ export type Database = {
           skill_prerequisites?: Json | null
           top_locations?: Json | null
           total_mentions?: number | null
+        }
+        Relationships: []
+      }
+      spatial_ref_sys: {
+        Row: {
+          auth_name: string | null
+          auth_srid: number | null
+          proj4text: string | null
+          srid: number
+          srtext: string | null
+        }
+        Insert: {
+          auth_name?: string | null
+          auth_srid?: number | null
+          proj4text?: string | null
+          srid: number
+          srtext?: string | null
+        }
+        Update: {
+          auth_name?: string | null
+          auth_srid?: number | null
+          proj4text?: string | null
+          srid?: number
+          srtext?: string | null
         }
         Relationships: []
       }
@@ -6703,13 +7045,6 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "time_spent_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "time_spent_service_id_fkey"
             columns: ["service_id"]
@@ -7019,6 +7354,54 @@ export type Database = {
           },
         ]
       }
+      user_locations: {
+        Row: {
+          city: string
+          created_at: string
+          district: string
+          id: string
+          is_current_location: boolean
+          is_serviceable: boolean
+          latitude: number | null
+          longitude: number | null
+          mandal: string | null
+          pincode: string | null
+          state: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          city: string
+          created_at?: string
+          district: string
+          id?: string
+          is_current_location?: boolean
+          is_serviceable?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          mandal?: string | null
+          pincode?: string | null
+          state?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          city?: string
+          created_at?: string
+          district?: string
+          id?: string
+          is_current_location?: boolean
+          is_serviceable?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          mandal?: string | null
+          pincode?: string | null
+          state?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_presence: {
         Row: {
           is_online: boolean | null
@@ -7225,22 +7608,30 @@ export type Database = {
       users: {
         Row: {
           apple_id: string | null
+          avatar_url: string | null
           ban_reason: string | null
+          bio: string | null
           created_at: string | null
           currency_preference: string | null
           current_city: string | null
           current_district: string | null
           current_location_service_id: number | null
+          display_preferences: Json | null
           email: string
           email_verified: boolean | null
           facebook_id: string | null
           failed_login_attempts: number | null
+          full_name: string | null
           google_id: string | null
           id: number
           is_active: boolean | null
+          is_admin: boolean | null
           is_banned: boolean | null
+          is_verified: boolean | null
           last_login: string | null
+          last_login_at: string | null
           last_seen: string | null
+          location: string | null
           locked_until: string | null
           password_hash: string | null
           password_reset_expires: string | null
@@ -7249,26 +7640,37 @@ export type Database = {
           phone_verified: boolean | null
           preferred_language: string | null
           role: string | null
+          status: string | null
           updated_at: string | null
+          username: string | null
+          website: string | null
         }
         Insert: {
           apple_id?: string | null
+          avatar_url?: string | null
           ban_reason?: string | null
+          bio?: string | null
           created_at?: string | null
           currency_preference?: string | null
           current_city?: string | null
           current_district?: string | null
           current_location_service_id?: number | null
+          display_preferences?: Json | null
           email: string
           email_verified?: boolean | null
           facebook_id?: string | null
           failed_login_attempts?: number | null
+          full_name?: string | null
           google_id?: string | null
           id?: number
           is_active?: boolean | null
+          is_admin?: boolean | null
           is_banned?: boolean | null
+          is_verified?: boolean | null
           last_login?: string | null
+          last_login_at?: string | null
           last_seen?: string | null
+          location?: string | null
           locked_until?: string | null
           password_hash?: string | null
           password_reset_expires?: string | null
@@ -7277,26 +7679,37 @@ export type Database = {
           phone_verified?: boolean | null
           preferred_language?: string | null
           role?: string | null
+          status?: string | null
           updated_at?: string | null
+          username?: string | null
+          website?: string | null
         }
         Update: {
           apple_id?: string | null
+          avatar_url?: string | null
           ban_reason?: string | null
+          bio?: string | null
           created_at?: string | null
           currency_preference?: string | null
           current_city?: string | null
           current_district?: string | null
           current_location_service_id?: number | null
+          display_preferences?: Json | null
           email?: string
           email_verified?: boolean | null
           facebook_id?: string | null
           failed_login_attempts?: number | null
+          full_name?: string | null
           google_id?: string | null
           id?: number
           is_active?: boolean | null
+          is_admin?: boolean | null
           is_banned?: boolean | null
+          is_verified?: boolean | null
           last_login?: string | null
+          last_login_at?: string | null
           last_seen?: string | null
+          location?: string | null
           locked_until?: string | null
           password_hash?: string | null
           password_reset_expires?: string | null
@@ -7305,7 +7718,10 @@ export type Database = {
           phone_verified?: boolean | null
           preferred_language?: string | null
           role?: string | null
+          status?: string | null
           updated_at?: string | null
+          username?: string | null
+          website?: string | null
         }
         Relationships: [
           {
@@ -7473,39 +7889,309 @@ export type Database = {
           product_id?: string
           user_id?: string
         }
+        Relationships: []
+      }
+    }
+    Views: {
+      business_overview: {
+        Row: {
+          active_products: number | null
+          address_line1: string | null
+          address_line2: string | null
+          average_rating: number | null
+          business_hours: Json | null
+          business_name: string | null
+          business_type: string | null
+          category: string | null
+          city: string | null
+          contact_phone: string | null
+          created_at: string | null
+          description: string | null
+          district: string | null
+          email: string | null
+          id: string | null
+          is_active: boolean | null
+          is_verified: boolean | null
+          latitude: number | null
+          longitude: number | null
+          metadata: Json | null
+          pincode: string | null
+          state: string | null
+          subcategory: string | null
+          total_product_likes: number | null
+          total_product_purchases: number | null
+          total_product_views: number | null
+          total_products: number | null
+          total_reviews: number | null
+          total_views: number | null
+          updated_at: string | null
+          user_id: string | null
+          verification_date: string | null
+          website: string | null
+        }
+        Relationships: []
+      }
+      category_stats: {
+        Row: {
+          avg_price: number | null
+          avg_rating: number | null
+          category: string | null
+          featured_count: number | null
+          max_price: number | null
+          min_price: number | null
+          product_count: number | null
+          total_stock: number | null
+        }
+        Relationships: []
+      }
+      city_business_analytics: {
+        Row: {
+          active_businesses: number | null
+          avg_city_rating: number | null
+          city: string | null
+          state: string | null
+          total_businesses: number | null
+          total_city_reviews: number | null
+          unique_categories: number | null
+          verified_businesses: number | null
+        }
+        Relationships: []
+      }
+      geography_columns: {
+        Row: {
+          coord_dimension: number | null
+          f_geography_column: unknown | null
+          f_table_catalog: unknown | null
+          f_table_name: unknown | null
+          f_table_schema: unknown | null
+          srid: number | null
+          type: string | null
+        }
+        Relationships: []
+      }
+      geometry_columns: {
+        Row: {
+          coord_dimension: number | null
+          f_geometry_column: unknown | null
+          f_table_catalog: string | null
+          f_table_name: unknown | null
+          f_table_schema: unknown | null
+          srid: number | null
+          type: string | null
+        }
+        Insert: {
+          coord_dimension?: number | null
+          f_geometry_column?: unknown | null
+          f_table_catalog?: string | null
+          f_table_name?: unknown | null
+          f_table_schema?: unknown | null
+          srid?: number | null
+          type?: string | null
+        }
+        Update: {
+          coord_dimension?: number | null
+          f_geometry_column?: unknown | null
+          f_table_catalog?: string | null
+          f_table_name?: unknown | null
+          f_table_schema?: unknown | null
+          srid?: number | null
+          type?: string | null
+        }
+        Relationships: []
+      }
+      marketplace_products: {
+        Row: {
+          brand: string | null
+          business_id: string | null
+          category: string | null
+          color: string | null
+          condition: string | null
+          created_at: string | null
+          delivery_available: boolean | null
+          delivery_charge: number | null
+          description: string | null
+          dimensions: Json | null
+          id: string | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          likes_count: number | null
+          main_image_url: string | null
+          model: string | null
+          original_price: number | null
+          price: number | null
+          product_name: string | null
+          rating: number | null
+          review_count: number | null
+          seo_title: string | null
+          size: string | null
+          specifications: Json | null
+          stock_quantity: number | null
+          subcategory: string | null
+          tags: string[] | null
+          views_count: number | null
+          weight: number | null
+        }
+        Insert: {
+          brand?: string | null
+          business_id?: string | null
+          category?: string | null
+          color?: string | null
+          condition?: string | null
+          created_at?: string | null
+          delivery_available?: boolean | null
+          delivery_charge?: number | null
+          description?: string | null
+          dimensions?: Json | null
+          id?: string | null
+          is_active?: never
+          is_featured?: never
+          likes_count?: never
+          main_image_url?: string | null
+          model?: string | null
+          original_price?: number | null
+          price?: number | null
+          product_name?: string | null
+          rating?: never
+          review_count?: never
+          seo_title?: string | null
+          size?: string | null
+          specifications?: never
+          stock_quantity?: never
+          subcategory?: string | null
+          tags?: string[] | null
+          views_count?: never
+          weight?: number | null
+        }
+        Update: {
+          brand?: string | null
+          business_id?: string | null
+          category?: string | null
+          color?: string | null
+          condition?: string | null
+          created_at?: string | null
+          delivery_available?: boolean | null
+          delivery_charge?: number | null
+          description?: string | null
+          dimensions?: Json | null
+          id?: string | null
+          is_active?: never
+          is_featured?: never
+          likes_count?: never
+          main_image_url?: string | null
+          model?: string | null
+          original_price?: number | null
+          price?: number | null
+          product_name?: string | null
+          rating?: never
+          review_count?: never
+          seo_title?: string | null
+          size?: string | null
+          specifications?: never
+          stock_quantity?: never
+          subcategory?: string | null
+          tags?: string[] | null
+          views_count?: never
+          weight?: number | null
+        }
         Relationships: [
           {
-            foreignKeyName: "wishlists_product_id_fkey"
-            columns: ["product_id"]
+            foreignKeyName: "products_business_id_fkey"
+            columns: ["business_id"]
             isOneToOne: false
-            referencedRelation: "products"
+            referencedRelation: "business_overview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
             referencedColumns: ["id"]
           },
         ]
       }
-    }
-    Views: {
-      location_analytics: {
+      product_details: {
         Row: {
-          active_users_30d: number | null
-          active_users_7d: number | null
-          avg_profile_completion: number | null
-          city_name: string | null
-          district_name: string | null
-          estimated_businesses: number | null
-          estimated_daily_orders: number | null
+          admin_approved_at: string | null
+          admin_rejected_at: string | null
+          admin_status: string | null
+          brand: string | null
+          business_category: string | null
+          business_city: string | null
+          business_email: string | null
+          business_id: string | null
+          business_name: string | null
+          business_phone: string | null
+          business_rating: number | null
+          category: string | null
+          city: string | null
+          color: string | null
+          condition: string | null
+          created_at: string | null
+          delivery_available: boolean | null
+          delivery_charge: number | null
+          description: string | null
+          dimensions: Json | null
+          discount_percentage: number | null
+          district: string | null
+          id: string | null
+          image_urls: string[] | null
           is_active: boolean | null
-          population_estimate: number | null
-          priority_level: number | null
-          region_name: string | null
-          service_type: string | null
-          total_businesses: number | null
-          total_jobs: number | null
-          total_users: number | null
-          verified_businesses: number | null
-          verified_users: number | null
+          is_branded: boolean | null
+          is_digital: boolean | null
+          is_discounted: boolean | null
+          is_featured: boolean | null
+          is_used: boolean | null
+          labels: string[] | null
+          latitude: number | null
+          likes_count: number | null
+          longitude: number | null
+          main_image_url: string | null
+          marketplace_approved: boolean | null
+          metadata: Json | null
+          min_order_quantity: number | null
+          model: string | null
+          original_price: number | null
+          price: number | null
+          product_name: string | null
+          purchases_count: number | null
+          rating: number | null
+          reach: number | null
+          rejection_reason: string | null
+          review_count: number | null
+          seo_description: string | null
+          seo_title: string | null
+          show_in_marketplace: boolean | null
+          size: string | null
+          sku: string | null
+          specifications: Json | null
+          state: string | null
+          stock_quantity: number | null
+          subcategory: string | null
+          tags: string[] | null
+          total_reviews: number | null
+          updated_at: string | null
+          user_id: string | null
+          video_urls: string[] | null
+          views_count: number | null
+          weight: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "products_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "business_overview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       v_regional_business_heatmap: {
         Row: {
@@ -7546,6 +8232,120 @@ export type Database = {
       }
     }
     Functions: {
+      _postgis_deprecate: {
+        Args: { oldname: string; newname: string; version: string }
+        Returns: undefined
+      }
+      _postgis_index_extent: {
+        Args: { tbl: unknown; col: string }
+        Returns: unknown
+      }
+      _postgis_pgsql_version: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      _postgis_scripts_pgsql_version: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      _postgis_selectivity: {
+        Args: { tbl: unknown; att_name: string; geom: unknown; mode?: string }
+        Returns: number
+      }
+      _st_3dintersects: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      _st_bestsrid: {
+        Args: { "": unknown }
+        Returns: number
+      }
+      _st_contains: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      _st_containsproperly: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      _st_coveredby: {
+        Args:
+          | { geog1: unknown; geog2: unknown }
+          | { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      _st_covers: {
+        Args:
+          | { geog1: unknown; geog2: unknown }
+          | { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      _st_crosses: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      _st_dwithin: {
+        Args: {
+          geog1: unknown
+          geog2: unknown
+          tolerance: number
+          use_spheroid?: boolean
+        }
+        Returns: boolean
+      }
+      _st_equals: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      _st_intersects: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      _st_linecrossingdirection: {
+        Args: { line1: unknown; line2: unknown }
+        Returns: number
+      }
+      _st_longestline: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: unknown
+      }
+      _st_maxdistance: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: number
+      }
+      _st_orderingequals: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      _st_overlaps: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      _st_pointoutside: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      _st_sortablehash: {
+        Args: { geom: unknown }
+        Returns: number
+      }
+      _st_touches: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      _st_voronoi: {
+        Args: {
+          g1: unknown
+          clip?: unknown
+          tolerance?: number
+          return_polygons?: boolean
+        }
+        Returns: unknown
+      }
+      _st_within: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
       add_business_to_list: {
         Args: {
           user_uuid: string
@@ -7554,6 +8354,49 @@ export type Database = {
           user_notes?: string
         }
         Returns: Json
+      }
+      add_product_like: {
+        Args: { product_id: string }
+        Returns: undefined
+      }
+      add_to_cart: {
+        Args: { product_id: string; quantity?: number }
+        Returns: undefined
+      }
+      addauth: {
+        Args: { "": string }
+        Returns: boolean
+      }
+      addgeometrycolumn: {
+        Args:
+          | {
+              catalog_name: string
+              schema_name: string
+              table_name: string
+              column_name: string
+              new_srid_in: number
+              new_type: string
+              new_dim: number
+              use_typmod?: boolean
+            }
+          | {
+              schema_name: string
+              table_name: string
+              column_name: string
+              new_srid: number
+              new_type: string
+              new_dim: number
+              use_typmod?: boolean
+            }
+          | {
+              table_name: string
+              column_name: string
+              new_srid: number
+              new_type: string
+              new_dim: number
+              use_typmod?: boolean
+            }
+        Returns: string
       }
       admin_has_permission: {
         Args: { admin_id: string; required_permission: string }
@@ -7579,6 +8422,50 @@ export type Database = {
       bootstrap_first_admin: {
         Args: { admin_email: string }
         Returns: undefined
+      }
+      box: {
+        Args: { "": unknown } | { "": unknown }
+        Returns: unknown
+      }
+      box2d: {
+        Args: { "": unknown } | { "": unknown }
+        Returns: unknown
+      }
+      box2d_in: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      box2d_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      box2df_in: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      box2df_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      box3d: {
+        Args: { "": unknown } | { "": unknown }
+        Returns: unknown
+      }
+      box3d_in: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      box3d_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      box3dtobox: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      bytea: {
+        Args: { "": unknown } | { "": unknown }
+        Returns: string
       }
       calculate_ai_match_score: {
         Args: {
@@ -7688,6 +8575,37 @@ export type Database = {
         Args: { user_uuid: string; list_uuid: string }
         Returns: Json
       }
+      disablelongtransactions: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      dropgeometrycolumn: {
+        Args:
+          | {
+              catalog_name: string
+              schema_name: string
+              table_name: string
+              column_name: string
+            }
+          | { schema_name: string; table_name: string; column_name: string }
+          | { table_name: string; column_name: string }
+        Returns: string
+      }
+      dropgeometrytable: {
+        Args:
+          | { catalog_name: string; schema_name: string; table_name: string }
+          | { schema_name: string; table_name: string }
+          | { table_name: string }
+        Returns: string
+      }
+      enablelongtransactions: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      equals: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
       extract_job_keywords: {
         Args: {
           job_description: string
@@ -7715,6 +8633,230 @@ export type Database = {
       generate_slug: {
         Args: { input_text: string }
         Returns: string
+      }
+      geography: {
+        Args: { "": string } | { "": unknown }
+        Returns: unknown
+      }
+      geography_analyze: {
+        Args: { "": unknown }
+        Returns: boolean
+      }
+      geography_gist_compress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      geography_gist_decompress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      geography_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      geography_send: {
+        Args: { "": unknown }
+        Returns: string
+      }
+      geography_spgist_compress_nd: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      geography_typmod_in: {
+        Args: { "": unknown[] }
+        Returns: number
+      }
+      geography_typmod_out: {
+        Args: { "": number }
+        Returns: unknown
+      }
+      geometry: {
+        Args:
+          | { "": string }
+          | { "": string }
+          | { "": unknown }
+          | { "": unknown }
+          | { "": unknown }
+          | { "": unknown }
+          | { "": unknown }
+          | { "": unknown }
+        Returns: unknown
+      }
+      geometry_above: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      geometry_analyze: {
+        Args: { "": unknown }
+        Returns: boolean
+      }
+      geometry_below: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      geometry_cmp: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: number
+      }
+      geometry_contained_3d: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      geometry_contains: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      geometry_contains_3d: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      geometry_distance_box: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: number
+      }
+      geometry_distance_centroid: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: number
+      }
+      geometry_eq: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      geometry_ge: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      geometry_gist_compress_2d: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      geometry_gist_compress_nd: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      geometry_gist_decompress_2d: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      geometry_gist_decompress_nd: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      geometry_gist_sortsupport_2d: {
+        Args: { "": unknown }
+        Returns: undefined
+      }
+      geometry_gt: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      geometry_hash: {
+        Args: { "": unknown }
+        Returns: number
+      }
+      geometry_in: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      geometry_le: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      geometry_left: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      geometry_lt: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      geometry_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      geometry_overabove: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      geometry_overbelow: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      geometry_overlaps: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      geometry_overlaps_3d: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      geometry_overleft: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      geometry_overright: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      geometry_recv: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      geometry_right: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      geometry_same: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      geometry_same_3d: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      geometry_send: {
+        Args: { "": unknown }
+        Returns: string
+      }
+      geometry_sortsupport: {
+        Args: { "": unknown }
+        Returns: undefined
+      }
+      geometry_spgist_compress_2d: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      geometry_spgist_compress_3d: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      geometry_spgist_compress_nd: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      geometry_typmod_in: {
+        Args: { "": unknown[] }
+        Returns: number
+      }
+      geometry_typmod_out: {
+        Args: { "": number }
+        Returns: unknown
+      }
+      geometry_within: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      geometrytype: {
+        Args: { "": unknown } | { "": unknown }
+        Returns: string
+      }
+      geomfromewkb: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      geomfromewkt: {
+        Args: { "": string }
+        Returns: unknown
       }
       get_business_analytics_by_custom_id: {
         Args: { p_custom_id: string }
@@ -7958,13 +9100,56 @@ export type Database = {
           min_order_amount: number
         }[]
       }
+      get_product_analytics: {
+        Args: { product_id: string }
+        Returns: {
+          views_count: number
+          likes_count: number
+          cart_adds_count: number
+          conversion_rate: number
+        }[]
+      }
       get_product_likes_count: {
         Args: { product_id: string }
         Returns: number
       }
+      get_products_by_location: {
+        Args: { user_city?: string }
+        Returns: {
+          id: string
+          name: string
+          description: string
+          price: number
+          image_url: string
+          category: string
+          business_id: string
+          business_name: string
+          business_city: string
+          admin_status: string
+          show_in_marketplace: boolean
+        }[]
+      }
+      get_proj4_from_srid: {
+        Args: { "": number }
+        Returns: string
+      }
       get_sample_user_id: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_services_by_location: {
+        Args: { user_city?: string }
+        Returns: {
+          id: string
+          name: string
+          description: string
+          price: number
+          category: string
+          business_id: string
+          business_name: string
+          business_city: string
+          home_service: boolean
+        }[]
       }
       get_top_entities_by_ranking: {
         Args: {
@@ -8073,37 +9258,6 @@ export type Database = {
           drop_off_rate: number
         }[]
       }
-      get_user_liked_products: {
-        Args: { user_id?: string }
-        Returns: {
-          brand: string | null
-          business_id: string | null
-          category: string
-          condition: string | null
-          created_at: string
-          description: string
-          discount_percentage: number | null
-          id: string
-          image_url: string | null
-          is_branded: boolean | null
-          is_discounted: boolean | null
-          is_used: boolean | null
-          latitude: number | null
-          longitude: number | null
-          model: string | null
-          name: string
-          original_price: number | null
-          price: number
-          product_id: string | null
-          reach: number | null
-          service_product_id: string | null
-          size: string | null
-          stock: number
-          subcategory: string | null
-          user_id: string | null
-          views: number | null
-        }[]
-      }
       get_user_lists_with_counts: {
         Args: { user_uuid: string }
         Returns: {
@@ -8154,6 +9308,18 @@ export type Database = {
         Args: { recording_id_param: string }
         Returns: Json
       }
+      gettransactionid: {
+        Args: Record<PropertyKey, never>
+        Returns: unknown
+      }
+      gidx_in: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gidx_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
       gtrgm_compress: {
         Args: { "": unknown }
         Returns: unknown
@@ -8203,7 +9369,7 @@ export type Database = {
         Returns: undefined
       }
       increment_product_views: {
-        Args: { product_id_param: string } | { product_id_param: string }
+        Args: { product_id: string } | { product_id_param: string }
         Returns: undefined
       }
       increment_search_suggestion: {
@@ -8264,6 +9430,14 @@ export type Database = {
         Args: { product_id: string; user_id?: string }
         Returns: boolean
       }
+      json: {
+        Args: { "": unknown }
+        Returns: Json
+      }
+      jsonb: {
+        Args: { "": unknown }
+        Returns: Json
+      }
       log_business_interaction: {
         Args: {
           p_business_id: string
@@ -8287,9 +9461,203 @@ export type Database = {
         }
         Returns: boolean
       }
+      longtransactionsenabled: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      path: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      pgis_asflatgeobuf_finalfn: {
+        Args: { "": unknown }
+        Returns: string
+      }
+      pgis_asgeobuf_finalfn: {
+        Args: { "": unknown }
+        Returns: string
+      }
+      pgis_asmvt_finalfn: {
+        Args: { "": unknown }
+        Returns: string
+      }
+      pgis_asmvt_serialfn: {
+        Args: { "": unknown }
+        Returns: string
+      }
+      pgis_geometry_clusterintersecting_finalfn: {
+        Args: { "": unknown }
+        Returns: unknown[]
+      }
+      pgis_geometry_clusterwithin_finalfn: {
+        Args: { "": unknown }
+        Returns: unknown[]
+      }
+      pgis_geometry_collect_finalfn: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      pgis_geometry_makeline_finalfn: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      pgis_geometry_polygonize_finalfn: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      pgis_geometry_union_parallel_finalfn: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      pgis_geometry_union_parallel_serialfn: {
+        Args: { "": unknown }
+        Returns: string
+      }
+      point: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      polygon: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      populate_geometry_columns: {
+        Args:
+          | { tbl_oid: unknown; use_typmod?: boolean }
+          | { use_typmod?: boolean }
+        Returns: string
+      }
       populate_sample_analytics_data: {
         Args: { p_business_id: string }
         Returns: boolean
+      }
+      postgis_addbbox: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      postgis_constraint_dims: {
+        Args: { geomschema: string; geomtable: string; geomcolumn: string }
+        Returns: number
+      }
+      postgis_constraint_srid: {
+        Args: { geomschema: string; geomtable: string; geomcolumn: string }
+        Returns: number
+      }
+      postgis_constraint_type: {
+        Args: { geomschema: string; geomtable: string; geomcolumn: string }
+        Returns: string
+      }
+      postgis_dropbbox: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      postgis_extensions_upgrade: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      postgis_full_version: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      postgis_geos_noop: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      postgis_geos_version: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      postgis_getbbox: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      postgis_hasbbox: {
+        Args: { "": unknown }
+        Returns: boolean
+      }
+      postgis_index_supportfn: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      postgis_lib_build_date: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      postgis_lib_revision: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      postgis_lib_version: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      postgis_libjson_version: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      postgis_liblwgeom_version: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      postgis_libprotobuf_version: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      postgis_libxml_version: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      postgis_noop: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      postgis_proj_version: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      postgis_scripts_build_date: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      postgis_scripts_installed: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      postgis_scripts_released: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      postgis_svn_version: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      postgis_type_name: {
+        Args: {
+          geomname: string
+          coord_dimension: number
+          use_new_name?: boolean
+        }
+        Returns: string
+      }
+      postgis_typmod_dims: {
+        Args: { "": number }
+        Returns: number
+      }
+      postgis_typmod_srid: {
+        Args: { "": number }
+        Returns: number
+      }
+      postgis_typmod_type: {
+        Args: { "": number }
+        Returns: string
+      }
+      postgis_version: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      postgis_wagyu_version: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       publish_scheduled_posts: {
         Args: Record<PropertyKey, never>
@@ -8307,6 +9675,10 @@ export type Database = {
       remove_business_from_list: {
         Args: { user_uuid: string; list_uuid: string; business_uuid: string }
         Returns: Json
+      }
+      remove_product_like: {
+        Args: { product_id: string }
+        Returns: undefined
       }
       reset_analytics_data: {
         Args: { p_business_id: string }
@@ -8340,6 +9712,20 @@ export type Database = {
           application_count: number
         }[]
       }
+      search_products: {
+        Args: { search_term: string }
+        Returns: {
+          id: string
+          product_name: string
+          business_name: string
+          description: string
+          price: number
+          rating: number
+          main_image_url: string
+          category: string
+          match_rank: number
+        }[]
+      }
       set_limit: {
         Args: { "": number }
         Returns: number
@@ -8362,6 +9748,1079 @@ export type Database = {
       show_trgm: {
         Args: { "": string }
         Returns: string[]
+      }
+      spheroid_in: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      spheroid_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      st_3dclosestpoint: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: unknown
+      }
+      st_3ddistance: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: number
+      }
+      st_3dintersects: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      st_3dlength: {
+        Args: { "": unknown }
+        Returns: number
+      }
+      st_3dlongestline: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: unknown
+      }
+      st_3dmakebox: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: unknown
+      }
+      st_3dmaxdistance: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: number
+      }
+      st_3dperimeter: {
+        Args: { "": unknown }
+        Returns: number
+      }
+      st_3dshortestline: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: unknown
+      }
+      st_addpoint: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: unknown
+      }
+      st_angle: {
+        Args:
+          | { line1: unknown; line2: unknown }
+          | { pt1: unknown; pt2: unknown; pt3: unknown; pt4?: unknown }
+        Returns: number
+      }
+      st_area: {
+        Args:
+          | { "": string }
+          | { "": unknown }
+          | { geog: unknown; use_spheroid?: boolean }
+        Returns: number
+      }
+      st_area2d: {
+        Args: { "": unknown }
+        Returns: number
+      }
+      st_asbinary: {
+        Args: { "": unknown } | { "": unknown }
+        Returns: string
+      }
+      st_asencodedpolyline: {
+        Args: { geom: unknown; nprecision?: number }
+        Returns: string
+      }
+      st_asewkb: {
+        Args: { "": unknown }
+        Returns: string
+      }
+      st_asewkt: {
+        Args: { "": string } | { "": unknown } | { "": unknown }
+        Returns: string
+      }
+      st_asgeojson: {
+        Args:
+          | { "": string }
+          | { geog: unknown; maxdecimaldigits?: number; options?: number }
+          | { geom: unknown; maxdecimaldigits?: number; options?: number }
+          | {
+              r: Record<string, unknown>
+              geom_column?: string
+              maxdecimaldigits?: number
+              pretty_bool?: boolean
+            }
+        Returns: string
+      }
+      st_asgml: {
+        Args:
+          | { "": string }
+          | {
+              geog: unknown
+              maxdecimaldigits?: number
+              options?: number
+              nprefix?: string
+              id?: string
+            }
+          | { geom: unknown; maxdecimaldigits?: number; options?: number }
+          | {
+              version: number
+              geog: unknown
+              maxdecimaldigits?: number
+              options?: number
+              nprefix?: string
+              id?: string
+            }
+          | {
+              version: number
+              geom: unknown
+              maxdecimaldigits?: number
+              options?: number
+              nprefix?: string
+              id?: string
+            }
+        Returns: string
+      }
+      st_ashexewkb: {
+        Args: { "": unknown }
+        Returns: string
+      }
+      st_askml: {
+        Args:
+          | { "": string }
+          | { geog: unknown; maxdecimaldigits?: number; nprefix?: string }
+          | { geom: unknown; maxdecimaldigits?: number; nprefix?: string }
+        Returns: string
+      }
+      st_aslatlontext: {
+        Args: { geom: unknown; tmpl?: string }
+        Returns: string
+      }
+      st_asmarc21: {
+        Args: { geom: unknown; format?: string }
+        Returns: string
+      }
+      st_asmvtgeom: {
+        Args: {
+          geom: unknown
+          bounds: unknown
+          extent?: number
+          buffer?: number
+          clip_geom?: boolean
+        }
+        Returns: unknown
+      }
+      st_assvg: {
+        Args:
+          | { "": string }
+          | { geog: unknown; rel?: number; maxdecimaldigits?: number }
+          | { geom: unknown; rel?: number; maxdecimaldigits?: number }
+        Returns: string
+      }
+      st_astext: {
+        Args: { "": string } | { "": unknown } | { "": unknown }
+        Returns: string
+      }
+      st_astwkb: {
+        Args:
+          | {
+              geom: unknown[]
+              ids: number[]
+              prec?: number
+              prec_z?: number
+              prec_m?: number
+              with_sizes?: boolean
+              with_boxes?: boolean
+            }
+          | {
+              geom: unknown
+              prec?: number
+              prec_z?: number
+              prec_m?: number
+              with_sizes?: boolean
+              with_boxes?: boolean
+            }
+        Returns: string
+      }
+      st_asx3d: {
+        Args: { geom: unknown; maxdecimaldigits?: number; options?: number }
+        Returns: string
+      }
+      st_azimuth: {
+        Args:
+          | { geog1: unknown; geog2: unknown }
+          | { geom1: unknown; geom2: unknown }
+        Returns: number
+      }
+      st_boundary: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      st_boundingdiagonal: {
+        Args: { geom: unknown; fits?: boolean }
+        Returns: unknown
+      }
+      st_buffer: {
+        Args:
+          | { geom: unknown; radius: number; options?: string }
+          | { geom: unknown; radius: number; quadsegs: number }
+        Returns: unknown
+      }
+      st_buildarea: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      st_centroid: {
+        Args: { "": string } | { "": unknown }
+        Returns: unknown
+      }
+      st_cleangeometry: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      st_clipbybox2d: {
+        Args: { geom: unknown; box: unknown }
+        Returns: unknown
+      }
+      st_closestpoint: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: unknown
+      }
+      st_clusterintersecting: {
+        Args: { "": unknown[] }
+        Returns: unknown[]
+      }
+      st_collect: {
+        Args: { "": unknown[] } | { geom1: unknown; geom2: unknown }
+        Returns: unknown
+      }
+      st_collectionextract: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      st_collectionhomogenize: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      st_concavehull: {
+        Args: {
+          param_geom: unknown
+          param_pctconvex: number
+          param_allow_holes?: boolean
+        }
+        Returns: unknown
+      }
+      st_contains: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      st_containsproperly: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      st_convexhull: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      st_coorddim: {
+        Args: { geometry: unknown }
+        Returns: number
+      }
+      st_coveredby: {
+        Args:
+          | { geog1: unknown; geog2: unknown }
+          | { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      st_covers: {
+        Args:
+          | { geog1: unknown; geog2: unknown }
+          | { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      st_crosses: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      st_curvetoline: {
+        Args: { geom: unknown; tol?: number; toltype?: number; flags?: number }
+        Returns: unknown
+      }
+      st_delaunaytriangles: {
+        Args: { g1: unknown; tolerance?: number; flags?: number }
+        Returns: unknown
+      }
+      st_difference: {
+        Args: { geom1: unknown; geom2: unknown; gridsize?: number }
+        Returns: unknown
+      }
+      st_dimension: {
+        Args: { "": unknown }
+        Returns: number
+      }
+      st_disjoint: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      st_distance: {
+        Args:
+          | { geog1: unknown; geog2: unknown; use_spheroid?: boolean }
+          | { geom1: unknown; geom2: unknown }
+        Returns: number
+      }
+      st_distancesphere: {
+        Args:
+          | { geom1: unknown; geom2: unknown }
+          | { geom1: unknown; geom2: unknown; radius: number }
+        Returns: number
+      }
+      st_distancespheroid: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: number
+      }
+      st_dump: {
+        Args: { "": unknown }
+        Returns: Database["public"]["CompositeTypes"]["geometry_dump"][]
+      }
+      st_dumppoints: {
+        Args: { "": unknown }
+        Returns: Database["public"]["CompositeTypes"]["geometry_dump"][]
+      }
+      st_dumprings: {
+        Args: { "": unknown }
+        Returns: Database["public"]["CompositeTypes"]["geometry_dump"][]
+      }
+      st_dumpsegments: {
+        Args: { "": unknown }
+        Returns: Database["public"]["CompositeTypes"]["geometry_dump"][]
+      }
+      st_dwithin: {
+        Args: {
+          geog1: unknown
+          geog2: unknown
+          tolerance: number
+          use_spheroid?: boolean
+        }
+        Returns: boolean
+      }
+      st_endpoint: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      st_envelope: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      st_equals: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      st_expand: {
+        Args:
+          | { box: unknown; dx: number; dy: number }
+          | { box: unknown; dx: number; dy: number; dz?: number }
+          | { geom: unknown; dx: number; dy: number; dz?: number; dm?: number }
+        Returns: unknown
+      }
+      st_exteriorring: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      st_flipcoordinates: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      st_force2d: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      st_force3d: {
+        Args: { geom: unknown; zvalue?: number }
+        Returns: unknown
+      }
+      st_force3dm: {
+        Args: { geom: unknown; mvalue?: number }
+        Returns: unknown
+      }
+      st_force3dz: {
+        Args: { geom: unknown; zvalue?: number }
+        Returns: unknown
+      }
+      st_force4d: {
+        Args: { geom: unknown; zvalue?: number; mvalue?: number }
+        Returns: unknown
+      }
+      st_forcecollection: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      st_forcecurve: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      st_forcepolygonccw: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      st_forcepolygoncw: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      st_forcerhr: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      st_forcesfs: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      st_generatepoints: {
+        Args:
+          | { area: unknown; npoints: number }
+          | { area: unknown; npoints: number; seed: number }
+        Returns: unknown
+      }
+      st_geogfromtext: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      st_geogfromwkb: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      st_geographyfromtext: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      st_geohash: {
+        Args:
+          | { geog: unknown; maxchars?: number }
+          | { geom: unknown; maxchars?: number }
+        Returns: string
+      }
+      st_geomcollfromtext: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      st_geomcollfromwkb: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      st_geometricmedian: {
+        Args: {
+          g: unknown
+          tolerance?: number
+          max_iter?: number
+          fail_if_not_converged?: boolean
+        }
+        Returns: unknown
+      }
+      st_geometryfromtext: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      st_geometrytype: {
+        Args: { "": unknown }
+        Returns: string
+      }
+      st_geomfromewkb: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      st_geomfromewkt: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      st_geomfromgeojson: {
+        Args: { "": Json } | { "": Json } | { "": string }
+        Returns: unknown
+      }
+      st_geomfromgml: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      st_geomfromkml: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      st_geomfrommarc21: {
+        Args: { marc21xml: string }
+        Returns: unknown
+      }
+      st_geomfromtext: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      st_geomfromtwkb: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      st_geomfromwkb: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      st_gmltosql: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      st_hasarc: {
+        Args: { geometry: unknown }
+        Returns: boolean
+      }
+      st_hausdorffdistance: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: number
+      }
+      st_hexagon: {
+        Args: { size: number; cell_i: number; cell_j: number; origin?: unknown }
+        Returns: unknown
+      }
+      st_hexagongrid: {
+        Args: { size: number; bounds: unknown }
+        Returns: Record<string, unknown>[]
+      }
+      st_interpolatepoint: {
+        Args: { line: unknown; point: unknown }
+        Returns: number
+      }
+      st_intersection: {
+        Args: { geom1: unknown; geom2: unknown; gridsize?: number }
+        Returns: unknown
+      }
+      st_intersects: {
+        Args:
+          | { geog1: unknown; geog2: unknown }
+          | { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      st_isclosed: {
+        Args: { "": unknown }
+        Returns: boolean
+      }
+      st_iscollection: {
+        Args: { "": unknown }
+        Returns: boolean
+      }
+      st_isempty: {
+        Args: { "": unknown }
+        Returns: boolean
+      }
+      st_ispolygonccw: {
+        Args: { "": unknown }
+        Returns: boolean
+      }
+      st_ispolygoncw: {
+        Args: { "": unknown }
+        Returns: boolean
+      }
+      st_isring: {
+        Args: { "": unknown }
+        Returns: boolean
+      }
+      st_issimple: {
+        Args: { "": unknown }
+        Returns: boolean
+      }
+      st_isvalid: {
+        Args: { "": unknown }
+        Returns: boolean
+      }
+      st_isvaliddetail: {
+        Args: { geom: unknown; flags?: number }
+        Returns: Database["public"]["CompositeTypes"]["valid_detail"]
+      }
+      st_isvalidreason: {
+        Args: { "": unknown }
+        Returns: string
+      }
+      st_isvalidtrajectory: {
+        Args: { "": unknown }
+        Returns: boolean
+      }
+      st_length: {
+        Args:
+          | { "": string }
+          | { "": unknown }
+          | { geog: unknown; use_spheroid?: boolean }
+        Returns: number
+      }
+      st_length2d: {
+        Args: { "": unknown }
+        Returns: number
+      }
+      st_letters: {
+        Args: { letters: string; font?: Json }
+        Returns: unknown
+      }
+      st_linecrossingdirection: {
+        Args: { line1: unknown; line2: unknown }
+        Returns: number
+      }
+      st_linefromencodedpolyline: {
+        Args: { txtin: string; nprecision?: number }
+        Returns: unknown
+      }
+      st_linefrommultipoint: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      st_linefromtext: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      st_linefromwkb: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      st_linelocatepoint: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: number
+      }
+      st_linemerge: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      st_linestringfromwkb: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      st_linetocurve: {
+        Args: { geometry: unknown }
+        Returns: unknown
+      }
+      st_locatealong: {
+        Args: { geometry: unknown; measure: number; leftrightoffset?: number }
+        Returns: unknown
+      }
+      st_locatebetween: {
+        Args: {
+          geometry: unknown
+          frommeasure: number
+          tomeasure: number
+          leftrightoffset?: number
+        }
+        Returns: unknown
+      }
+      st_locatebetweenelevations: {
+        Args: { geometry: unknown; fromelevation: number; toelevation: number }
+        Returns: unknown
+      }
+      st_longestline: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: unknown
+      }
+      st_m: {
+        Args: { "": unknown }
+        Returns: number
+      }
+      st_makebox2d: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: unknown
+      }
+      st_makeline: {
+        Args: { "": unknown[] } | { geom1: unknown; geom2: unknown }
+        Returns: unknown
+      }
+      st_makepolygon: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      st_makevalid: {
+        Args: { "": unknown } | { geom: unknown; params: string }
+        Returns: unknown
+      }
+      st_maxdistance: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: number
+      }
+      st_maximuminscribedcircle: {
+        Args: { "": unknown }
+        Returns: Record<string, unknown>
+      }
+      st_memsize: {
+        Args: { "": unknown }
+        Returns: number
+      }
+      st_minimumboundingcircle: {
+        Args: { inputgeom: unknown; segs_per_quarter?: number }
+        Returns: unknown
+      }
+      st_minimumboundingradius: {
+        Args: { "": unknown }
+        Returns: Record<string, unknown>
+      }
+      st_minimumclearance: {
+        Args: { "": unknown }
+        Returns: number
+      }
+      st_minimumclearanceline: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      st_mlinefromtext: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      st_mlinefromwkb: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      st_mpointfromtext: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      st_mpointfromwkb: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      st_mpolyfromtext: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      st_mpolyfromwkb: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      st_multi: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      st_multilinefromwkb: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      st_multilinestringfromtext: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      st_multipointfromtext: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      st_multipointfromwkb: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      st_multipolyfromwkb: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      st_multipolygonfromtext: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      st_ndims: {
+        Args: { "": unknown }
+        Returns: number
+      }
+      st_node: {
+        Args: { g: unknown }
+        Returns: unknown
+      }
+      st_normalize: {
+        Args: { geom: unknown }
+        Returns: unknown
+      }
+      st_npoints: {
+        Args: { "": unknown }
+        Returns: number
+      }
+      st_nrings: {
+        Args: { "": unknown }
+        Returns: number
+      }
+      st_numgeometries: {
+        Args: { "": unknown }
+        Returns: number
+      }
+      st_numinteriorring: {
+        Args: { "": unknown }
+        Returns: number
+      }
+      st_numinteriorrings: {
+        Args: { "": unknown }
+        Returns: number
+      }
+      st_numpatches: {
+        Args: { "": unknown }
+        Returns: number
+      }
+      st_numpoints: {
+        Args: { "": unknown }
+        Returns: number
+      }
+      st_offsetcurve: {
+        Args: { line: unknown; distance: number; params?: string }
+        Returns: unknown
+      }
+      st_orderingequals: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      st_orientedenvelope: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      st_overlaps: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      st_perimeter: {
+        Args: { "": unknown } | { geog: unknown; use_spheroid?: boolean }
+        Returns: number
+      }
+      st_perimeter2d: {
+        Args: { "": unknown }
+        Returns: number
+      }
+      st_pointfromtext: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      st_pointfromwkb: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      st_pointm: {
+        Args: {
+          xcoordinate: number
+          ycoordinate: number
+          mcoordinate: number
+          srid?: number
+        }
+        Returns: unknown
+      }
+      st_pointonsurface: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      st_points: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      st_pointz: {
+        Args: {
+          xcoordinate: number
+          ycoordinate: number
+          zcoordinate: number
+          srid?: number
+        }
+        Returns: unknown
+      }
+      st_pointzm: {
+        Args: {
+          xcoordinate: number
+          ycoordinate: number
+          zcoordinate: number
+          mcoordinate: number
+          srid?: number
+        }
+        Returns: unknown
+      }
+      st_polyfromtext: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      st_polyfromwkb: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      st_polygonfromtext: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      st_polygonfromwkb: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      st_polygonize: {
+        Args: { "": unknown[] }
+        Returns: unknown
+      }
+      st_project: {
+        Args: { geog: unknown; distance: number; azimuth: number }
+        Returns: unknown
+      }
+      st_quantizecoordinates: {
+        Args: {
+          g: unknown
+          prec_x: number
+          prec_y?: number
+          prec_z?: number
+          prec_m?: number
+        }
+        Returns: unknown
+      }
+      st_reduceprecision: {
+        Args: { geom: unknown; gridsize: number }
+        Returns: unknown
+      }
+      st_relate: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: string
+      }
+      st_removerepeatedpoints: {
+        Args: { geom: unknown; tolerance?: number }
+        Returns: unknown
+      }
+      st_reverse: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      st_segmentize: {
+        Args: { geog: unknown; max_segment_length: number }
+        Returns: unknown
+      }
+      st_setsrid: {
+        Args: { geog: unknown; srid: number } | { geom: unknown; srid: number }
+        Returns: unknown
+      }
+      st_sharedpaths: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: unknown
+      }
+      st_shiftlongitude: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      st_shortestline: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: unknown
+      }
+      st_simplifypolygonhull: {
+        Args: { geom: unknown; vertex_fraction: number; is_outer?: boolean }
+        Returns: unknown
+      }
+      st_split: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: unknown
+      }
+      st_square: {
+        Args: { size: number; cell_i: number; cell_j: number; origin?: unknown }
+        Returns: unknown
+      }
+      st_squaregrid: {
+        Args: { size: number; bounds: unknown }
+        Returns: Record<string, unknown>[]
+      }
+      st_srid: {
+        Args: { geog: unknown } | { geom: unknown }
+        Returns: number
+      }
+      st_startpoint: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      st_subdivide: {
+        Args: { geom: unknown; maxvertices?: number; gridsize?: number }
+        Returns: unknown[]
+      }
+      st_summary: {
+        Args: { "": unknown } | { "": unknown }
+        Returns: string
+      }
+      st_swapordinates: {
+        Args: { geom: unknown; ords: unknown }
+        Returns: unknown
+      }
+      st_symdifference: {
+        Args: { geom1: unknown; geom2: unknown; gridsize?: number }
+        Returns: unknown
+      }
+      st_symmetricdifference: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: unknown
+      }
+      st_tileenvelope: {
+        Args: {
+          zoom: number
+          x: number
+          y: number
+          bounds?: unknown
+          margin?: number
+        }
+        Returns: unknown
+      }
+      st_touches: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      st_transform: {
+        Args:
+          | { geom: unknown; from_proj: string; to_proj: string }
+          | { geom: unknown; from_proj: string; to_srid: number }
+          | { geom: unknown; to_proj: string }
+        Returns: unknown
+      }
+      st_triangulatepolygon: {
+        Args: { g1: unknown }
+        Returns: unknown
+      }
+      st_union: {
+        Args:
+          | { "": unknown[] }
+          | { geom1: unknown; geom2: unknown }
+          | { geom1: unknown; geom2: unknown; gridsize: number }
+        Returns: unknown
+      }
+      st_voronoilines: {
+        Args: { g1: unknown; tolerance?: number; extend_to?: unknown }
+        Returns: unknown
+      }
+      st_voronoipolygons: {
+        Args: { g1: unknown; tolerance?: number; extend_to?: unknown }
+        Returns: unknown
+      }
+      st_within: {
+        Args: { geom1: unknown; geom2: unknown }
+        Returns: boolean
+      }
+      st_wkbtosql: {
+        Args: { wkb: string }
+        Returns: unknown
+      }
+      st_wkttosql: {
+        Args: { "": string }
+        Returns: unknown
+      }
+      st_wrapx: {
+        Args: { geom: unknown; wrap: number; move: number }
+        Returns: unknown
+      }
+      st_x: {
+        Args: { "": unknown }
+        Returns: number
+      }
+      st_xmax: {
+        Args: { "": unknown }
+        Returns: number
+      }
+      st_xmin: {
+        Args: { "": unknown }
+        Returns: number
+      }
+      st_y: {
+        Args: { "": unknown }
+        Returns: number
+      }
+      st_ymax: {
+        Args: { "": unknown }
+        Returns: number
+      }
+      st_ymin: {
+        Args: { "": unknown }
+        Returns: number
+      }
+      st_z: {
+        Args: { "": unknown }
+        Returns: number
+      }
+      st_zmax: {
+        Args: { "": unknown }
+        Returns: number
+      }
+      st_zmflag: {
+        Args: { "": unknown }
+        Returns: number
+      }
+      st_zmin: {
+        Args: { "": unknown }
+        Returns: number
+      }
+      text: {
+        Args: { "": unknown }
+        Returns: string
       }
       toggle_business_favorite: {
         Args: { user_uuid: string; business_uuid: string }
@@ -8477,6 +10936,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      unlockrows: {
+        Args: { "": string }
+        Returns: number
+      }
       update_business_real_time_stats: {
         Args: {
           p_business_id: string
@@ -8536,12 +10999,34 @@ export type Database = {
         Args: { recording_id_param: string; transcription_param: string }
         Returns: undefined
       }
+      updategeometrysrid: {
+        Args: {
+          catalogn_name: string
+          schema_name: string
+          table_name: string
+          column_name: string
+          new_srid_in: number
+        }
+        Returns: string
+      }
+      user_liked_product: {
+        Args: { product_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
     }
     CompositeTypes: {
-      [_ in never]: never
+      geometry_dump: {
+        path: number[] | null
+        geom: unknown | null
+      }
+      valid_detail: {
+        valid: boolean | null
+        reason: string | null
+        location: unknown | null
+      }
     }
   }
 }

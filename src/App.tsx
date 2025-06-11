@@ -23,23 +23,38 @@ function App() {
     const initializeMobile = async () => {
       if (isNativePlatform()) {
         try {
-          // Hide splash screen after app loads
-          const { SplashScreen } = await import('@capacitor/splash-screen');
-          await SplashScreen.hide();
+          // Dynamically import Capacitor plugins only when needed
+          const capacitorModules = await Promise.allSettled([
+            import('@capacitor/splash-screen'),
+            import('@capacitor/status-bar'),
+            import('@capacitor/app')
+          ]);
+          
+          // Hide splash screen
+          const splashScreenModule = capacitorModules[0];
+          if (splashScreenModule.status === 'fulfilled') {
+            await splashScreenModule.value.SplashScreen.hide();
+          }
           
           // Set status bar style
-          const { StatusBar, Style } = await import('@capacitor/status-bar');
-          await StatusBar.setStyle({ style: Style.Default });
+          const statusBarModule = capacitorModules[1];
+          if (statusBarModule.status === 'fulfilled') {
+            const { StatusBar, Style } = statusBarModule.value;
+            await StatusBar.setStyle({ style: Style.Default });
+          }
           
           // Handle back button on Android
-          const { App: CapApp } = await import('@capacitor/app');
-          CapApp.addListener('backButton', ({ canGoBack }) => {
-            if (!canGoBack) {
-              CapApp.exitApp();
-            } else {
-              window.history.back();
-            }
-          });
+          const appModule = capacitorModules[2];
+          if (appModule.status === 'fulfilled') {
+            const { App: CapApp } = appModule.value;
+            CapApp.addListener('backButton', ({ canGoBack }) => {
+              if (!canGoBack) {
+                CapApp.exitApp();
+              } else {
+                window.history.back();
+              }
+            });
+          }
           
           console.log('Mobile features initialized');
         } catch (error) {
