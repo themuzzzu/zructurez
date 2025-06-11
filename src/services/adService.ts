@@ -17,6 +17,7 @@ export interface Advertisement {
   end_date: string;
   clicks: number;
   impressions: number;
+  reach?: number; // Add reach property
   format?: string;
   user_id: string;
   created_at: string;
@@ -54,6 +55,7 @@ export const fetchActiveAds = async (
       end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
       clicks: 0,
       impressions: 0,
+      reach: 1000,
       format: format || 'banner',
       user_id: 'demo-user',
       created_at: new Date().toISOString()

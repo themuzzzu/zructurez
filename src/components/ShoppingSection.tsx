@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { ProductsGrid } from './products/ProductsGrid';
 import { useQuery } from '@tanstack/react-query';
@@ -71,7 +72,7 @@ export const ShoppingSection = ({
       let query = supabase.from('products').select('*');
       
       if (searchQuery) {
-        query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,category.ilike.%${searchQuery}%`);
+        query = query.or(`name.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,category.ilike.%${searchQuery}%`);
       }
       
       if (localCategory && localCategory !== 'all') {
@@ -196,7 +197,7 @@ export const ShoppingSection = ({
     
     return Array(12).fill(0).map((_, index) => ({
       id: `mock-${index}`,
-      title: `${selectedCat} Product ${index + 1}`,
+      name: `${selectedCat} Product ${index + 1}`,
       description: `This is a mock product in the ${selectedCat} category.`,
       price: Math.floor(Math.random() * 100) + 10,
       image_url: `https://picsum.photos/seed/${selectedCat}${index}/300/300`,
