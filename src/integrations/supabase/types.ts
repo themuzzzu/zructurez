@@ -786,7 +786,28 @@ export type Database = {
             foreignKeyName: "bookmarks_service_id_fkey"
             columns: ["service_id"]
             isOneToOne: false
+            referencedRelation: "service_details_complete"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookmarks_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
             referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookmarks_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services_complete"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookmarks_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "trending_services"
             referencedColumns: ["id"]
           },
         ]
@@ -2067,7 +2088,10 @@ export type Database = {
           latitude: number | null
           longitude: number | null
           metadata: Json | null
+          name: string | null
+          phone: string | null
           pincode: string | null
+          rating: number | null
           state: string | null
           subcategory: string | null
           total_reviews: number | null
@@ -2075,6 +2099,7 @@ export type Database = {
           updated_at: string | null
           user_id: string
           verification_date: string | null
+          verified: boolean | null
           website: string | null
         }
         Insert: {
@@ -2097,7 +2122,10 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           metadata?: Json | null
+          name?: string | null
+          phone?: string | null
           pincode?: string | null
+          rating?: number | null
           state?: string | null
           subcategory?: string | null
           total_reviews?: number | null
@@ -2105,6 +2133,7 @@ export type Database = {
           updated_at?: string | null
           user_id: string
           verification_date?: string | null
+          verified?: boolean | null
           website?: string | null
         }
         Update: {
@@ -2127,7 +2156,10 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           metadata?: Json | null
+          name?: string | null
+          phone?: string | null
           pincode?: string | null
+          rating?: number | null
           state?: string | null
           subcategory?: string | null
           total_reviews?: number | null
@@ -2135,6 +2167,7 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
           verification_date?: string | null
+          verified?: boolean | null
           website?: string | null
         }
         Relationships: []
@@ -2187,7 +2220,28 @@ export type Database = {
             foreignKeyName: "cart_events_service_id_fkey"
             columns: ["service_id"]
             isOneToOne: false
+            referencedRelation: "service_details_complete"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cart_events_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
             referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cart_events_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services_complete"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cart_events_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "trending_services"
             referencedColumns: ["id"]
           },
         ]
@@ -2671,6 +2725,42 @@ export type Database = {
         }
         Relationships: []
       }
+      deleted_businesses: {
+        Row: {
+          backup_data: Json | null
+          business_name: string | null
+          city: string | null
+          deleted_at: string | null
+          id: string
+          original_business_id: string
+          permanent_delete_at: string | null
+          state: string | null
+          user_id: string | null
+        }
+        Insert: {
+          backup_data?: Json | null
+          business_name?: string | null
+          city?: string | null
+          deleted_at?: string | null
+          id?: string
+          original_business_id: string
+          permanent_delete_at?: string | null
+          state?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          backup_data?: Json | null
+          business_name?: string | null
+          city?: string | null
+          deleted_at?: string | null
+          id?: string
+          original_business_id?: string
+          permanent_delete_at?: string | null
+          state?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       delivery_analytics: {
         Row: {
           actual_delivery_time_mins: number | null
@@ -2808,6 +2898,67 @@ export type Database = {
           weather_impact?: string | null
         }
         Relationships: []
+      }
+      delivery_zones: {
+        Row: {
+          business_id: string | null
+          created_at: string | null
+          delivery_fee: number | null
+          id: string
+          is_active: boolean | null
+          location_id: string | null
+          max_delivery_time: number | null
+          min_order_amount: number | null
+          polygon: unknown | null
+          zone_name: string | null
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string | null
+          delivery_fee?: number | null
+          id?: string
+          is_active?: boolean | null
+          location_id?: string | null
+          max_delivery_time?: number | null
+          min_order_amount?: number | null
+          polygon?: unknown | null
+          zone_name?: string | null
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string | null
+          delivery_fee?: number | null
+          id?: string
+          is_active?: boolean | null
+          location_id?: string | null
+          max_delivery_time?: number | null
+          min_order_amount?: number | null
+          polygon?: unknown | null
+          zone_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_zones_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "business_overview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "delivery_zones_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "delivery_zones_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       detailed_location_analytics: {
         Row: {
@@ -4382,6 +4533,54 @@ export type Database = {
         }
         Relationships: []
       }
+      locations: {
+        Row: {
+          address: string | null
+          city: string | null
+          created_at: string | null
+          district: string | null
+          geo: unknown | null
+          id: string
+          lat: number | null
+          lng: number | null
+          mandal: string | null
+          name: string | null
+          pincode: string | null
+          type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          created_at?: string | null
+          district?: string | null
+          geo?: unknown | null
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          mandal?: string | null
+          name?: string | null
+          pincode?: string | null
+          type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          created_at?: string | null
+          district?: string | null
+          geo?: unknown | null
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          mandal?: string | null
+          name?: string | null
+          pincode?: string | null
+          type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       marketing_analytics: {
         Row: {
           business_id: string
@@ -4722,7 +4921,28 @@ export type Database = {
             foreignKeyName: "page_views_service_id_fkey"
             columns: ["service_id"]
             isOneToOne: false
+            referencedRelation: "service_details_complete"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "page_views_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
             referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "page_views_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services_complete"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "page_views_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "trending_services"
             referencedColumns: ["id"]
           },
         ]
@@ -5100,18 +5320,21 @@ export type Database = {
           created_at: string
           id: string
           image_url: string
+          is_primary: boolean | null
           product_id: string
         }
         Insert: {
           created_at?: string
           id?: string
           image_url: string
+          is_primary?: boolean | null
           product_id: string
         }
         Update: {
           created_at?: string
           id?: string
           image_url?: string
+          is_primary?: boolean | null
           product_id?: string
         }
         Relationships: []
@@ -5642,6 +5865,9 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          bio: string | null
+          city: string | null
+          country: string | null
           created_at: string | null
           display_preferences: Json | null
           email: string | null
@@ -5652,6 +5878,7 @@ export type Database = {
           last_login_at: string | null
           name: string | null
           phone: string | null
+          state: string | null
           status: string | null
           updated_at: string | null
           username: string | null
@@ -5659,6 +5886,9 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          bio?: string | null
+          city?: string | null
+          country?: string | null
           created_at?: string | null
           display_preferences?: Json | null
           email?: string | null
@@ -5669,6 +5899,7 @@ export type Database = {
           last_login_at?: string | null
           name?: string | null
           phone?: string | null
+          state?: string | null
           status?: string | null
           updated_at?: string | null
           username?: string | null
@@ -5676,6 +5907,9 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          bio?: string | null
+          city?: string | null
+          country?: string | null
           created_at?: string | null
           display_preferences?: Json | null
           email?: string | null
@@ -5686,6 +5920,7 @@ export type Database = {
           last_login_at?: string | null
           name?: string | null
           phone?: string | null
+          state?: string | null
           status?: string | null
           updated_at?: string | null
           username?: string | null
@@ -6370,144 +6605,332 @@ export type Database = {
       }
       service_analytics: {
         Row: {
-          availability_percentage: number | null
-          average_rating: number | null
-          average_service_value: number | null
-          booked_slots: number | null
-          booking_inquiries: number | null
-          booking_requests: number | null
-          bookings_cancelled_by_customer: number | null
-          bookings_cancelled_by_provider: number | null
-          bookings_completed: number | null
-          bookings_confirmed: number | null
-          bookings_rescheduled: number | null
-          business_id: string
-          cancellation_rate: number | null
-          cancellation_reasons: Json | null
-          completion_time_minutes: number | null
-          created_at: string | null
-          customer_satisfaction_score: number | null
-          date_tracked: string
-          detail_views: number | null
-          five_star_count: number | null
-          four_star_count: number | null
-          id: string
-          no_shows: number | null
-          off_peak_hours: Json | null
-          one_star_count: number | null
-          peak_hours: Json | null
-          portfolio_views: number | null
-          pricing_views: number | null
-          ratings_count: number | null
-          refund_requests: number | null
-          refunds_processed: number | null
-          repeat_booking_rate: number | null
-          response_time_minutes: number | null
-          revenue_generated: number | null
-          review_sentiment_score: number | null
-          service_id: string
-          testimonial_views: number | null
-          three_star_count: number | null
-          total_available_slots: number | null
-          two_star_count: number | null
-          unavailable_periods: number | null
-          unique_viewers: number | null
-          updated_at: string | null
-          views_count: number | null
+          analytics_date: string
+          bookings_count: number
+          clicks_count: number
+          created_at: string
+          id: number
+          revenue_amount: number
+          service_id: string | null
+          updated_at: string
+          views_count: number
         }
         Insert: {
-          availability_percentage?: number | null
-          average_rating?: number | null
-          average_service_value?: number | null
-          booked_slots?: number | null
-          booking_inquiries?: number | null
-          booking_requests?: number | null
-          bookings_cancelled_by_customer?: number | null
-          bookings_cancelled_by_provider?: number | null
-          bookings_completed?: number | null
-          bookings_confirmed?: number | null
-          bookings_rescheduled?: number | null
-          business_id: string
-          cancellation_rate?: number | null
-          cancellation_reasons?: Json | null
-          completion_time_minutes?: number | null
-          created_at?: string | null
-          customer_satisfaction_score?: number | null
-          date_tracked?: string
-          detail_views?: number | null
-          five_star_count?: number | null
-          four_star_count?: number | null
-          id?: string
-          no_shows?: number | null
-          off_peak_hours?: Json | null
-          one_star_count?: number | null
-          peak_hours?: Json | null
-          portfolio_views?: number | null
-          pricing_views?: number | null
-          ratings_count?: number | null
-          refund_requests?: number | null
-          refunds_processed?: number | null
-          repeat_booking_rate?: number | null
-          response_time_minutes?: number | null
-          revenue_generated?: number | null
-          review_sentiment_score?: number | null
-          service_id: string
-          testimonial_views?: number | null
-          three_star_count?: number | null
-          total_available_slots?: number | null
-          two_star_count?: number | null
-          unavailable_periods?: number | null
-          unique_viewers?: number | null
-          updated_at?: string | null
-          views_count?: number | null
+          analytics_date?: string
+          bookings_count?: number
+          clicks_count?: number
+          created_at?: string
+          id?: number
+          revenue_amount?: number
+          service_id?: string | null
+          updated_at?: string
+          views_count?: number
         }
         Update: {
-          availability_percentage?: number | null
-          average_rating?: number | null
-          average_service_value?: number | null
-          booked_slots?: number | null
-          booking_inquiries?: number | null
-          booking_requests?: number | null
-          bookings_cancelled_by_customer?: number | null
-          bookings_cancelled_by_provider?: number | null
-          bookings_completed?: number | null
-          bookings_confirmed?: number | null
-          bookings_rescheduled?: number | null
-          business_id?: string
-          cancellation_rate?: number | null
-          cancellation_reasons?: Json | null
-          completion_time_minutes?: number | null
+          analytics_date?: string
+          bookings_count?: number
+          clicks_count?: number
+          created_at?: string
+          id?: number
+          revenue_amount?: number
+          service_id?: string | null
+          updated_at?: string
+          views_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_analytics_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "service_details_complete"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_analytics_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_analytics_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services_complete"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_analytics_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "trending_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_bookings: {
+        Row: {
+          booking_date: string
+          booking_status: string | null
+          booking_time: string | null
+          created_at: string | null
+          customer_email: string | null
+          customer_id: string
+          customer_name: string
+          customer_phone: string
+          id: string
+          service_id: string
+          special_requirements: string | null
+          total_amount: number
+          updated_at: string | null
+        }
+        Insert: {
+          booking_date: string
+          booking_status?: string | null
+          booking_time?: string | null
           created_at?: string | null
-          customer_satisfaction_score?: number | null
-          date_tracked?: string
-          detail_views?: number | null
-          five_star_count?: number | null
-          four_star_count?: number | null
+          customer_email?: string | null
+          customer_id: string
+          customer_name: string
+          customer_phone: string
           id?: string
-          no_shows?: number | null
-          off_peak_hours?: Json | null
-          one_star_count?: number | null
-          peak_hours?: Json | null
-          portfolio_views?: number | null
-          pricing_views?: number | null
-          ratings_count?: number | null
-          refund_requests?: number | null
-          refunds_processed?: number | null
-          repeat_booking_rate?: number | null
-          response_time_minutes?: number | null
-          revenue_generated?: number | null
-          review_sentiment_score?: number | null
-          service_id?: string
-          testimonial_views?: number | null
-          three_star_count?: number | null
-          total_available_slots?: number | null
-          two_star_count?: number | null
-          unavailable_periods?: number | null
-          unique_viewers?: number | null
+          service_id: string
+          special_requirements?: string | null
+          total_amount: number
           updated_at?: string | null
-          views_count?: number | null
+        }
+        Update: {
+          booking_date?: string
+          booking_status?: string | null
+          booking_time?: string | null
+          created_at?: string | null
+          customer_email?: string | null
+          customer_id?: string
+          customer_name?: string
+          customer_phone?: string
+          id?: string
+          service_id?: string
+          special_requirements?: string | null
+          total_amount?: number
+          updated_at?: string | null
         }
         Relationships: []
+      }
+      service_bookings_enhanced: {
+        Row: {
+          booking_date: string
+          created_at: string | null
+          customer_email: string | null
+          customer_id: string
+          customer_name: string | null
+          customer_notes: string | null
+          customer_phone: string | null
+          duration: string | null
+          id: string
+          location_address: string | null
+          num_rooms: number | null
+          payment_status: string | null
+          provider_id: string
+          provider_notes: string | null
+          selected_time: string | null
+          service_date: string | null
+          service_id: string
+          special_requirements: string | null
+          status: string | null
+          total_amount: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          booking_date: string
+          created_at?: string | null
+          customer_email?: string | null
+          customer_id: string
+          customer_name?: string | null
+          customer_notes?: string | null
+          customer_phone?: string | null
+          duration?: string | null
+          id?: string
+          location_address?: string | null
+          num_rooms?: number | null
+          payment_status?: string | null
+          provider_id: string
+          provider_notes?: string | null
+          selected_time?: string | null
+          service_date?: string | null
+          service_id: string
+          special_requirements?: string | null
+          status?: string | null
+          total_amount?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          booking_date?: string
+          created_at?: string | null
+          customer_email?: string | null
+          customer_id?: string
+          customer_name?: string | null
+          customer_notes?: string | null
+          customer_phone?: string | null
+          duration?: string | null
+          id?: string
+          location_address?: string | null
+          num_rooms?: number | null
+          payment_status?: string | null
+          provider_id?: string
+          provider_notes?: string | null
+          selected_time?: string | null
+          service_date?: string | null
+          service_id?: string
+          special_requirements?: string | null
+          status?: string | null
+          total_amount?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_bookings_enhanced_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "service_details_complete"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_bookings_enhanced_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_bookings_enhanced_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services_complete"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_bookings_enhanced_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "trending_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_categories_enhanced: {
+        Row: {
+          color_class: string | null
+          created_at: string | null
+          description: string | null
+          icon_name: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          parent_category_id: string | null
+          slug: string
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          color_class?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          parent_category_id?: string | null
+          slug: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          color_class?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          parent_category_id?: string | null
+          slug?: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_categories_enhanced_parent_category_id_fkey"
+            columns: ["parent_category_id"]
+            isOneToOne: false
+            referencedRelation: "service_categories_enhanced"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_images: {
+        Row: {
+          caption: string | null
+          created_at: string | null
+          id: string
+          image_order: number | null
+          image_type: string | null
+          image_url: string
+          is_primary: boolean | null
+          service_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string | null
+          id?: string
+          image_order?: number | null
+          image_type?: string | null
+          image_url: string
+          is_primary?: boolean | null
+          service_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string | null
+          id?: string
+          image_order?: number | null
+          image_type?: string | null
+          image_url?: string
+          is_primary?: boolean | null
+          service_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_images_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "service_details_complete"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_images_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_images_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services_complete"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_images_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "trending_services"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       service_portfolio: {
         Row: {
@@ -6545,7 +6968,99 @@ export type Database = {
             foreignKeyName: "service_portfolio_service_id_fkey"
             columns: ["service_id"]
             isOneToOne: false
+            referencedRelation: "service_details_complete"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_portfolio_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
             referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_portfolio_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services_complete"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_portfolio_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "trending_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_pricing_tiers: {
+        Row: {
+          created_at: string | null
+          delivery_days: number | null
+          description: string | null
+          features: Json | null
+          id: string
+          is_active: boolean | null
+          max_revisions: number | null
+          price: number
+          service_id: string
+          tier_name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          delivery_days?: number | null
+          description?: string | null
+          features?: Json | null
+          id?: string
+          is_active?: boolean | null
+          max_revisions?: number | null
+          price: number
+          service_id: string
+          tier_name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          delivery_days?: number | null
+          description?: string | null
+          features?: Json | null
+          id?: string
+          is_active?: boolean | null
+          max_revisions?: number | null
+          price?: number
+          service_id?: string
+          tier_name?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_pricing_tiers_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "service_details_complete"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_pricing_tiers_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_pricing_tiers_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services_complete"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_pricing_tiers_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "trending_services"
             referencedColumns: ["id"]
           },
         ]
@@ -6615,101 +7130,224 @@ export type Database = {
             foreignKeyName: "service_products_service_id_fkey"
             columns: ["service_id"]
             isOneToOne: false
+            referencedRelation: "service_details_complete"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_products_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
             referencedRelation: "services"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "service_products_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services_complete"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_products_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "trending_services"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      service_reviews: {
+        Row: {
+          created_at: string | null
+          customer_id: string
+          customer_name: string | null
+          helpful_votes: number | null
+          id: string
+          is_helpful_count: number | null
+          rating: number
+          review_text: string | null
+          service_id: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          customer_id: string
+          customer_name?: string | null
+          helpful_votes?: number | null
+          id?: string
+          is_helpful_count?: number | null
+          rating: number
+          review_text?: string | null
+          service_id: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          customer_id?: string
+          customer_name?: string | null
+          helpful_votes?: number | null
+          id?: string
+          is_helpful_count?: number | null
+          rating?: number
+          review_text?: string | null
+          service_id?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       services: {
         Row: {
           advance_booking_required: boolean | null
           availability: string | null
+          bookings_count: number | null
           business_id: number | null
+          cancellation_policy: string | null
           category: string
           city: string | null
+          contact_email: string | null
           contact_info: string | null
+          contact_phone: string | null
+          contact_whatsapp: string | null
           created_at: string
+          currency: string | null
+          daily_views: number | null
           description: string
           district: string | null
+          duration: string | null
+          features: string[] | null
           home_service: boolean | null
           id: string
           image_url: string | null
           is_active: boolean | null
+          is_available: boolean | null
           is_featured: boolean | null
           is_open: boolean | null
           latitude: number | null
           location: string | null
           longitude: number | null
+          monthly_views: number | null
+          portfolio_images: string[] | null
           price: number
+          pricing_type: string | null
           provider_id: string | null
           rating: number | null
+          requirements: string | null
+          reviews_count: number | null
+          service_area: string | null
           service_duration: string | null
           state: string | null
+          subcategory: string | null
           title: string
           total_reviews: number | null
+          trending_score: number | null
+          updated_at: string | null
           user_id: string
           views: number | null
           views_count: number | null
+          weekly_views: number | null
         }
         Insert: {
           advance_booking_required?: boolean | null
           availability?: string | null
+          bookings_count?: number | null
           business_id?: number | null
+          cancellation_policy?: string | null
           category: string
           city?: string | null
+          contact_email?: string | null
           contact_info?: string | null
+          contact_phone?: string | null
+          contact_whatsapp?: string | null
           created_at?: string
+          currency?: string | null
+          daily_views?: number | null
           description: string
           district?: string | null
+          duration?: string | null
+          features?: string[] | null
           home_service?: boolean | null
           id?: string
           image_url?: string | null
           is_active?: boolean | null
+          is_available?: boolean | null
           is_featured?: boolean | null
           is_open?: boolean | null
           latitude?: number | null
           location?: string | null
           longitude?: number | null
+          monthly_views?: number | null
+          portfolio_images?: string[] | null
           price: number
+          pricing_type?: string | null
           provider_id?: string | null
           rating?: number | null
+          requirements?: string | null
+          reviews_count?: number | null
+          service_area?: string | null
           service_duration?: string | null
           state?: string | null
+          subcategory?: string | null
           title: string
           total_reviews?: number | null
+          trending_score?: number | null
+          updated_at?: string | null
           user_id: string
           views?: number | null
           views_count?: number | null
+          weekly_views?: number | null
         }
         Update: {
           advance_booking_required?: boolean | null
           availability?: string | null
+          bookings_count?: number | null
           business_id?: number | null
+          cancellation_policy?: string | null
           category?: string
           city?: string | null
+          contact_email?: string | null
           contact_info?: string | null
+          contact_phone?: string | null
+          contact_whatsapp?: string | null
           created_at?: string
+          currency?: string | null
+          daily_views?: number | null
           description?: string
           district?: string | null
+          duration?: string | null
+          features?: string[] | null
           home_service?: boolean | null
           id?: string
           image_url?: string | null
           is_active?: boolean | null
+          is_available?: boolean | null
           is_featured?: boolean | null
           is_open?: boolean | null
           latitude?: number | null
           location?: string | null
           longitude?: number | null
+          monthly_views?: number | null
+          portfolio_images?: string[] | null
           price?: number
+          pricing_type?: string | null
           provider_id?: string | null
           rating?: number | null
+          requirements?: string | null
+          reviews_count?: number | null
+          service_area?: string | null
           service_duration?: string | null
           state?: string | null
+          subcategory?: string | null
           title?: string
           total_reviews?: number | null
+          trending_score?: number | null
+          updated_at?: string | null
           user_id?: string
           views?: number | null
           views_count?: number | null
+          weekly_views?: number | null
         }
         Relationships: []
       }
@@ -7049,7 +7687,28 @@ export type Database = {
             foreignKeyName: "time_spent_service_id_fkey"
             columns: ["service_id"]
             isOneToOne: false
+            referencedRelation: "service_details_complete"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_spent_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
             referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_spent_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services_complete"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_spent_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "trending_services"
             referencedColumns: ["id"]
           },
         ]
@@ -7230,6 +7889,62 @@ export type Database = {
           user_type?: string | null
         }
         Relationships: []
+      }
+      user_bookmarks: {
+        Row: {
+          bookmark_type: string | null
+          business_id: string | null
+          created_at: string | null
+          id: string
+          service_id: string | null
+          user_id: string
+        }
+        Insert: {
+          bookmark_type?: string | null
+          business_id?: string | null
+          created_at?: string | null
+          id?: string
+          service_id?: string | null
+          user_id: string
+        }
+        Update: {
+          bookmark_type?: string | null
+          business_id?: string | null
+          created_at?: string | null
+          id?: string
+          service_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_bookmarks_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "service_details_complete"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_bookmarks_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_bookmarks_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services_complete"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_bookmarks_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "trending_services"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_device_tokens: {
         Row: {
@@ -8193,6 +8908,456 @@ export type Database = {
           },
         ]
       }
+      reviews_with_votes: {
+        Row: {
+          created_at: string | null
+          customer_id: string | null
+          customer_name: string | null
+          helpful_votes: number | null
+          helpful_votes_total: number | null
+          id: string | null
+          is_helpful_count: number | null
+          rating: number | null
+          review_text: string | null
+          service_id: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          customer_id?: string | null
+          customer_name?: string | null
+          helpful_votes?: number | null
+          helpful_votes_total?: never
+          id?: string | null
+          is_helpful_count?: number | null
+          rating?: number | null
+          review_text?: string | null
+          service_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          customer_id?: string | null
+          customer_name?: string | null
+          helpful_votes?: number | null
+          helpful_votes_total?: never
+          id?: string | null
+          is_helpful_count?: number | null
+          rating?: number | null
+          review_text?: string | null
+          service_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      service_details_complete: {
+        Row: {
+          additional_room_price: number | null
+          advance_booking_required: boolean | null
+          areas_covered: string | null
+          availability: string | null
+          availability_info: string | null
+          base_price: number | null
+          bookings_count: number | null
+          bookmark_count: number | null
+          business_rating: number | null
+          business_verified: boolean | null
+          cancellation_policy: string | null
+          category: string | null
+          city: string | null
+          computed_rating: number | null
+          computed_reviews_count: number | null
+          contact_email: string | null
+          contact_phone: string | null
+          contact_whatsapp: string | null
+          cover_images: string[] | null
+          created_at: string | null
+          currency: string | null
+          description: string | null
+          duration: string | null
+          enhanced_description: string | null
+          features: string[] | null
+          home_service: boolean | null
+          id: string | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          latest_review: string | null
+          latitude: number | null
+          location: string | null
+          longitude: number | null
+          portfolio_images: string[] | null
+          price: number | null
+          pricing_type: string | null
+          primary_image_url: string | null
+          provider_avatar: string | null
+          provider_city: string | null
+          provider_name: string | null
+          provider_phone: string | null
+          rating: number | null
+          requirements: string | null
+          reviews_count: number | null
+          service_area: string | null
+          service_badge: string | null
+          service_duration: string | null
+          service_frequency: string | null
+          state: string | null
+          subcategory: string | null
+          title: string | null
+          total_reviews_count: number | null
+          user_id: string | null
+          views: number | null
+        }
+        Insert: {
+          additional_room_price?: never
+          advance_booking_required?: boolean | null
+          areas_covered?: string | null
+          availability?: never
+          availability_info?: never
+          base_price?: number | null
+          bookings_count?: never
+          bookmark_count?: never
+          business_rating?: never
+          business_verified?: never
+          cancellation_policy?: never
+          category?: string | null
+          city?: never
+          computed_rating?: never
+          computed_reviews_count?: never
+          contact_email?: never
+          contact_phone?: string | null
+          contact_whatsapp?: string | null
+          cover_images?: never
+          created_at?: string | null
+          currency?: never
+          description?: string | null
+          duration?: never
+          enhanced_description?: string | null
+          features?: never
+          home_service?: boolean | null
+          id?: string | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          latest_review?: never
+          latitude?: number | null
+          location?: string | null
+          longitude?: number | null
+          portfolio_images?: never
+          price?: number | null
+          pricing_type?: never
+          primary_image_url?: string | null
+          provider_avatar?: never
+          provider_city?: never
+          provider_name?: never
+          provider_phone?: string | null
+          rating?: never
+          requirements?: never
+          reviews_count?: never
+          service_area?: string | null
+          service_badge?: never
+          service_duration?: never
+          service_frequency?: never
+          state?: string | null
+          subcategory?: string | null
+          title?: string | null
+          total_reviews_count?: never
+          user_id?: string | null
+          views?: never
+        }
+        Update: {
+          additional_room_price?: never
+          advance_booking_required?: boolean | null
+          areas_covered?: string | null
+          availability?: never
+          availability_info?: never
+          base_price?: number | null
+          bookings_count?: never
+          bookmark_count?: never
+          business_rating?: never
+          business_verified?: never
+          cancellation_policy?: never
+          category?: string | null
+          city?: never
+          computed_rating?: never
+          computed_reviews_count?: never
+          contact_email?: never
+          contact_phone?: string | null
+          contact_whatsapp?: string | null
+          cover_images?: never
+          created_at?: string | null
+          currency?: never
+          description?: string | null
+          duration?: never
+          enhanced_description?: string | null
+          features?: never
+          home_service?: boolean | null
+          id?: string | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          latest_review?: never
+          latitude?: number | null
+          location?: string | null
+          longitude?: number | null
+          portfolio_images?: never
+          price?: number | null
+          pricing_type?: never
+          primary_image_url?: string | null
+          provider_avatar?: never
+          provider_city?: never
+          provider_name?: never
+          provider_phone?: string | null
+          rating?: never
+          requirements?: never
+          reviews_count?: never
+          service_area?: string | null
+          service_badge?: never
+          service_duration?: never
+          service_frequency?: never
+          state?: string | null
+          subcategory?: string | null
+          title?: string | null
+          total_reviews_count?: never
+          user_id?: string | null
+          views?: never
+        }
+        Relationships: []
+      }
+      services_complete: {
+        Row: {
+          additional_room_price: number | null
+          advance_booking_required: boolean | null
+          areas_covered: string | null
+          availability: string | null
+          availability_info: string | null
+          base_price: number | null
+          bookings_count: number | null
+          business_rating: number | null
+          business_verified: boolean | null
+          cancellation_policy: string | null
+          category: string | null
+          city: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          contact_whatsapp: string | null
+          cover_images: string[] | null
+          created_at: string | null
+          currency: string | null
+          description: string | null
+          duration: string | null
+          enhanced_description: string | null
+          features: string[] | null
+          home_service: boolean | null
+          id: string | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          latest_review: string | null
+          latitude: number | null
+          location: string | null
+          longitude: number | null
+          portfolio_images: string[] | null
+          price: number | null
+          pricing_type: string | null
+          primary_image_url: string | null
+          provider_avatar: string | null
+          provider_city: string | null
+          provider_name: string | null
+          provider_phone: string | null
+          rating: number | null
+          requirements: string | null
+          reviews_count: number | null
+          service_area: string | null
+          service_badge: string | null
+          service_duration: string | null
+          service_frequency: string | null
+          state: string | null
+          subcategory: string | null
+          title: string | null
+          total_reviews_count: number | null
+          user_id: string | null
+          views: number | null
+        }
+        Insert: {
+          additional_room_price?: never
+          advance_booking_required?: boolean | null
+          areas_covered?: string | null
+          availability?: never
+          availability_info?: never
+          base_price?: number | null
+          bookings_count?: never
+          business_rating?: never
+          business_verified?: never
+          cancellation_policy?: never
+          category?: string | null
+          city?: never
+          contact_email?: never
+          contact_phone?: string | null
+          contact_whatsapp?: string | null
+          cover_images?: never
+          created_at?: string | null
+          currency?: never
+          description?: string | null
+          duration?: never
+          enhanced_description?: string | null
+          features?: never
+          home_service?: boolean | null
+          id?: string | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          latest_review?: never
+          latitude?: number | null
+          location?: string | null
+          longitude?: number | null
+          portfolio_images?: never
+          price?: number | null
+          pricing_type?: never
+          primary_image_url?: string | null
+          provider_avatar?: never
+          provider_city?: never
+          provider_name?: never
+          provider_phone?: string | null
+          rating?: never
+          requirements?: never
+          reviews_count?: never
+          service_area?: string | null
+          service_badge?: never
+          service_duration?: never
+          service_frequency?: never
+          state?: string | null
+          subcategory?: string | null
+          title?: string | null
+          total_reviews_count?: never
+          user_id?: string | null
+          views?: never
+        }
+        Update: {
+          additional_room_price?: never
+          advance_booking_required?: boolean | null
+          areas_covered?: string | null
+          availability?: never
+          availability_info?: never
+          base_price?: number | null
+          bookings_count?: never
+          business_rating?: never
+          business_verified?: never
+          cancellation_policy?: never
+          category?: string | null
+          city?: never
+          contact_email?: never
+          contact_phone?: string | null
+          contact_whatsapp?: string | null
+          cover_images?: never
+          created_at?: string | null
+          currency?: never
+          description?: string | null
+          duration?: never
+          enhanced_description?: string | null
+          features?: never
+          home_service?: boolean | null
+          id?: string | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          latest_review?: never
+          latitude?: number | null
+          location?: string | null
+          longitude?: number | null
+          portfolio_images?: never
+          price?: number | null
+          pricing_type?: never
+          primary_image_url?: string | null
+          provider_avatar?: never
+          provider_city?: never
+          provider_name?: never
+          provider_phone?: string | null
+          rating?: never
+          requirements?: never
+          reviews_count?: never
+          service_area?: string | null
+          service_badge?: never
+          service_duration?: never
+          service_frequency?: never
+          state?: string | null
+          subcategory?: string | null
+          title?: string | null
+          total_reviews_count?: never
+          user_id?: string | null
+          views?: never
+        }
+        Relationships: []
+      }
+      trending_services: {
+        Row: {
+          bookings_count: number | null
+          business_verified: boolean | null
+          category: string | null
+          contact_info: string | null
+          created_at: string | null
+          description: string | null
+          id: string | null
+          image_url: string | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          location: string | null
+          price: number | null
+          provider_avatar: string | null
+          provider_city: string | null
+          provider_name: string | null
+          reviews_count: number | null
+          service_badge: string | null
+          title: string | null
+          trending_score: number | null
+          user_id: string | null
+          views: number | null
+        }
+        Insert: {
+          bookings_count?: never
+          business_verified?: never
+          category?: string | null
+          contact_info?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          image_url?: string | null
+          is_active?: never
+          is_featured?: never
+          location?: string | null
+          price?: number | null
+          provider_avatar?: never
+          provider_city?: string | null
+          provider_name?: never
+          reviews_count?: never
+          service_badge?: never
+          title?: string | null
+          trending_score?: number | null
+          user_id?: string | null
+          views?: never
+        }
+        Update: {
+          bookings_count?: never
+          business_verified?: never
+          category?: string | null
+          contact_info?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          image_url?: string | null
+          is_active?: never
+          is_featured?: never
+          location?: string | null
+          price?: number | null
+          provider_avatar?: never
+          provider_city?: string | null
+          provider_name?: never
+          reviews_count?: never
+          service_badge?: never
+          title?: string | null
+          trending_score?: number | null
+          user_id?: string | null
+          views?: never
+        }
+        Relationships: []
+      }
       v_regional_business_heatmap: {
         Row: {
           active_businesses: number | null
@@ -9000,6 +10165,15 @@ export type Database = {
           performance_rank: number
         }[]
       }
+      get_delivery_info: {
+        Args: { user_lat: number; user_lng: number; business_id_param: string }
+        Returns: {
+          can_deliver: boolean
+          delivery_fee: number
+          estimated_time: number
+          min_order_amount: number
+        }[]
+      }
       get_enabled_buckets: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -9100,6 +10274,17 @@ export type Database = {
           min_order_amount: number
         }[]
       }
+      get_nearby_businesses: {
+        Args: { user_lat: number; user_lng: number; radius_km?: number }
+        Returns: {
+          id: string
+          name: string
+          type: string
+          address: string
+          city: string
+          distance_km: number
+        }[]
+      }
       get_product_analytics: {
         Args: { product_id: string }
         Returns: {
@@ -9129,6 +10314,18 @@ export type Database = {
           show_in_marketplace: boolean
         }[]
       }
+      get_products_by_location_fixed: {
+        Args: { user_city: string; include_business_location?: boolean }
+        Returns: {
+          id: string
+          name: string
+          price: number
+          city: string
+          business_name: string
+          business_city: string
+          location_type: string
+        }[]
+      }
       get_proj4_from_srid: {
         Args: { "": number }
         Returns: string
@@ -9149,6 +10346,18 @@ export type Database = {
           business_name: string
           business_city: string
           home_service: boolean
+        }[]
+      }
+      get_services_by_location_fixed: {
+        Args: { user_city: string; include_business_location?: boolean }
+        Returns: {
+          id: string
+          title: string
+          price: number
+          city: string
+          business_name: string
+          business_city: string
+          location_type: string
         }[]
       }
       get_top_entities_by_ranking: {
@@ -9377,7 +10586,11 @@ export type Database = {
         Returns: undefined
       }
       increment_service_views: {
-        Args: { service_id_param: string } | { service_id_param: string }
+        Args: { service_id: string } | { service_id_param: string }
+        Returns: undefined
+      }
+      increment_service_views_safe: {
+        Args: { service_uuid: string }
         Returns: undefined
       }
       increment_views: {
@@ -9428,6 +10641,10 @@ export type Database = {
       }
       is_product_liked: {
         Args: { product_id: string; user_id?: string }
+        Returns: boolean
+      }
+      is_user_in_delivery_zone: {
+        Args: { user_lat: number; user_lng: number; business_id_param: string }
         Returns: boolean
       }
       json: {
@@ -10972,6 +12189,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      update_service_rating: {
+        Args: { service_uuid: string }
+        Returns: undefined
+      }
       update_system_metrics: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -11012,6 +12233,15 @@ export type Database = {
       user_liked_product: {
         Args: { product_id: string }
         Returns: boolean
+      }
+      verify_schema_fix: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          tbl_name: string
+          has_required_columns: boolean
+          has_proper_indexes: boolean
+          rls_enabled: boolean
+        }[]
       }
     }
     Enums: {
