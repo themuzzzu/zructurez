@@ -167,6 +167,45 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_logs: {
+        Row: {
+          action: string
+          admin_id: string | null
+          id: string
+          ip_address: unknown | null
+          new_values: Json | null
+          old_values: Json | null
+          resource_id: string | null
+          resource_type: string
+          timestamp: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          admin_id?: string | null
+          id?: string
+          ip_address?: unknown | null
+          new_values?: Json | null
+          old_values?: Json | null
+          resource_id?: string | null
+          resource_type: string
+          timestamp?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          admin_id?: string | null
+          id?: string
+          ip_address?: unknown | null
+          new_values?: Json | null
+          old_values?: Json | null
+          resource_id?: string | null
+          resource_type?: string
+          timestamp?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       admin_roles: {
         Row: {
           created_at: string | null
@@ -2725,6 +2764,54 @@ export type Database = {
         }
         Relationships: []
       }
+      content_moderation: {
+        Row: {
+          auto_flagged: boolean | null
+          content_id: string
+          content_type: string
+          created_at: string | null
+          id: string
+          moderator_id: string | null
+          moderator_notes: string | null
+          reason: string | null
+          reported_by: string | null
+          resolved_at: string | null
+          reviewed_at: string | null
+          severity_level: number | null
+          status: string | null
+        }
+        Insert: {
+          auto_flagged?: boolean | null
+          content_id: string
+          content_type: string
+          created_at?: string | null
+          id?: string
+          moderator_id?: string | null
+          moderator_notes?: string | null
+          reason?: string | null
+          reported_by?: string | null
+          resolved_at?: string | null
+          reviewed_at?: string | null
+          severity_level?: number | null
+          status?: string | null
+        }
+        Update: {
+          auto_flagged?: boolean | null
+          content_id?: string
+          content_type?: string
+          created_at?: string | null
+          id?: string
+          moderator_id?: string | null
+          moderator_notes?: string | null
+          reason?: string | null
+          reported_by?: string | null
+          resolved_at?: string | null
+          reviewed_at?: string | null
+          severity_level?: number | null
+          status?: string | null
+        }
+        Relationships: []
+      }
       deleted_businesses: {
         Row: {
           backup_data: Json | null
@@ -3127,6 +3214,51 @@ export type Database = {
           created_at?: string | null
           id?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      financial_transactions: {
+        Row: {
+          amount: number
+          created_at: string | null
+          currency: string | null
+          id: string
+          notes: string | null
+          payment_method: string | null
+          processed_at: string | null
+          reference_id: string | null
+          status: string | null
+          stripe_payment_intent_id: string | null
+          transaction_type: string
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          currency?: string | null
+          id?: string
+          notes?: string | null
+          payment_method?: string | null
+          processed_at?: string | null
+          reference_id?: string | null
+          status?: string | null
+          stripe_payment_intent_id?: string | null
+          transaction_type: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          currency?: string | null
+          id?: string
+          notes?: string | null
+          payment_method?: string | null
+          processed_at?: string | null
+          reference_id?: string | null
+          status?: string | null
+          stripe_payment_intent_id?: string | null
+          transaction_type?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -4992,6 +5124,33 @@ export type Database = {
         }
         Relationships: []
       }
+      permissions: {
+        Row: {
+          action: string
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          resource: string
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          resource: string
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          resource?: string
+        }
+        Relationships: []
+      }
       poll_votes: {
         Row: {
           created_at: string
@@ -6400,6 +6559,35 @@ export type Database = {
           },
         ]
       }
+      role_permissions: {
+        Row: {
+          created_at: string | null
+          id: string
+          permission_id: string | null
+          role_name: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          permission_id?: string | null
+          role_name: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          permission_id?: string | null
+          role_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_permissions_permission_id_fkey"
+            columns: ["permission_id"]
+            isOneToOne: false
+            referencedRelation: "permissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       roles: {
         Row: {
           created_at: string | null
@@ -7527,79 +7715,28 @@ export type Database = {
       }
       system_metrics: {
         Row: {
-          active_businesses: number | null
-          active_users: number | null
-          api_response_time_ms: number | null
-          avg_session_duration: number | null
-          bounce_rate: number | null
-          conversion_rate: number | null
-          created_at: string | null
-          daily_revenue: number | null
-          database_size_mb: number | null
-          date_tracked: string
-          error_rate_percent: number | null
           id: string
-          new_businesses_today: number | null
-          new_users_today: number | null
-          pending_verifications: number | null
-          server_uptime_percent: number | null
-          total_businesses: number | null
-          total_page_views: number | null
-          total_revenue: number | null
-          total_sessions: number | null
-          total_users: number | null
-          user_retention_rate: number | null
-          verified_businesses: number | null
+          metric_name: string
+          metric_type: string
+          metric_value: number
+          tags: Json | null
+          timestamp: string | null
         }
         Insert: {
-          active_businesses?: number | null
-          active_users?: number | null
-          api_response_time_ms?: number | null
-          avg_session_duration?: number | null
-          bounce_rate?: number | null
-          conversion_rate?: number | null
-          created_at?: string | null
-          daily_revenue?: number | null
-          database_size_mb?: number | null
-          date_tracked?: string
-          error_rate_percent?: number | null
           id?: string
-          new_businesses_today?: number | null
-          new_users_today?: number | null
-          pending_verifications?: number | null
-          server_uptime_percent?: number | null
-          total_businesses?: number | null
-          total_page_views?: number | null
-          total_revenue?: number | null
-          total_sessions?: number | null
-          total_users?: number | null
-          user_retention_rate?: number | null
-          verified_businesses?: number | null
+          metric_name: string
+          metric_type: string
+          metric_value: number
+          tags?: Json | null
+          timestamp?: string | null
         }
         Update: {
-          active_businesses?: number | null
-          active_users?: number | null
-          api_response_time_ms?: number | null
-          avg_session_duration?: number | null
-          bounce_rate?: number | null
-          conversion_rate?: number | null
-          created_at?: string | null
-          daily_revenue?: number | null
-          database_size_mb?: number | null
-          date_tracked?: string
-          error_rate_percent?: number | null
           id?: string
-          new_businesses_today?: number | null
-          new_users_today?: number | null
-          pending_verifications?: number | null
-          server_uptime_percent?: number | null
-          total_businesses?: number | null
-          total_page_views?: number | null
-          total_revenue?: number | null
-          total_sessions?: number | null
-          total_users?: number | null
-          user_retention_rate?: number | null
-          verified_businesses?: number | null
+          metric_name?: string
+          metric_type?: string
+          metric_value?: number
+          tags?: Json | null
+          timestamp?: string | null
         }
         Relationships: []
       }
@@ -8252,28 +8389,38 @@ export type Database = {
       user_roles: {
         Row: {
           created_at: string | null
-          role_id: number
-          user_id: string
+          expires_at: string | null
+          granted_at: string | null
+          granted_by: string | null
+          id: string
+          is_active: boolean | null
+          role_name: string
+          updated_at: string | null
+          user_id: string | null
         }
         Insert: {
           created_at?: string | null
-          role_id: number
-          user_id: string
+          expires_at?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          role_name: string
+          updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
           created_at?: string | null
-          role_id?: number
-          user_id?: string
+          expires_at?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          role_name?: string
+          updated_at?: string | null
+          user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "user_roles_role_id_fkey"
-            columns: ["role_id"]
-            isOneToOne: false
-            referencedRelation: "roles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       user_sessions: {
         Row: {

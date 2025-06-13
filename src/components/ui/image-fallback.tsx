@@ -1,37 +1,35 @@
 
 import React, { useState } from 'react';
 
-interface ImageFallbackProps extends React.ImgHTMLAttributes<HTMLImageElement> {
-  fallbackSrc: string;
-  lazyLoad?: boolean;
+interface ImageFallbackProps {
+  src: string;
+  alt: string;
+  fallbackSrc?: string;
+  className?: string;
 }
 
-export const ImageFallback = ({
+export const ImageFallback: React.FC<ImageFallbackProps> = ({
   src,
   alt,
-  fallbackSrc,
-  className,
-  lazyLoad = true,
-  ...props
-}: ImageFallbackProps) => {
-  const [imgSrc, setImgSrc] = useState<string | undefined>(src);
+  fallbackSrc = '/placeholder-image.png',
+  className = ''
+}) => {
+  const [imageSrc, setImageSrc] = useState(src);
   const [hasError, setHasError] = useState(false);
 
   const handleError = () => {
     if (!hasError) {
-      setImgSrc(fallbackSrc);
       setHasError(true);
+      setImageSrc(fallbackSrc);
     }
   };
 
   return (
     <img
-      src={imgSrc}
-      alt={alt || "Image"}
-      onError={handleError}
+      src={imageSrc}
+      alt={alt}
       className={className}
-      loading={lazyLoad ? "lazy" : "eager"}
-      {...props}
+      onError={handleError}
     />
   );
 };
