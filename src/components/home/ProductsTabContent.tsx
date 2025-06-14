@@ -43,7 +43,8 @@ export const ProductsTabContent = ({ category = 'all', layout = "grid4x4" }: Pro
   return (
     <ProductsGrid 
       products={products || []} 
-      layout={layout} 
+      layout={layout}
+      isLoading={isLoading}
     />
   );
 };

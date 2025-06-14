@@ -1,4 +1,3 @@
-
 import { useCallback } from "react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { useState, useEffect, useRef } from "react";
@@ -80,7 +79,6 @@ export const ProductCardImage = ({
             alt={title}
             className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110"
             fallbackSrc={defaultFallbackSrc}
-            lazyLoad={false} // We're already handling visibility detection above
           />
         )}
       </AspectRatio>

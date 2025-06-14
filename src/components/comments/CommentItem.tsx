@@ -19,8 +19,7 @@ export const CommentItem = ({ comment }: CommentItemProps) => {
     <div className="flex gap-4 animate-fade-up">
       <AvatarWithFallback
         src={comment.profile?.avatar_url}
-        name={comment.profile?.username}
-        userId={comment.user_id}
+        name={comment.profile?.username || 'Anonymous'}
         size="sm"
       />
       <div className="flex-1">

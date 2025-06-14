@@ -14,6 +14,11 @@ interface ShoppingSectionProps {
   sortOption?: string;
   priceRange?: string;
   gridLayout?: GridLayoutType;
+  title?: string;
+  isLoading?: boolean;
+  results?: any[];
+  hasError?: boolean;
+  onRetry?: () => void;
 }
 
 export const ShoppingSection: React.FC<ShoppingSectionProps> = ({
@@ -24,9 +29,14 @@ export const ShoppingSection: React.FC<ShoppingSectionProps> = ({
   showBranded = false,
   sortOption = "newest",
   priceRange = "all",
-  gridLayout = "grid4x4"
+  gridLayout = "grid4x4",
+  title,
+  isLoading: externalIsLoading = false,
+  results = [],
+  hasError = false,
+  onRetry
 }) => {
-  const { data: products = [], isLoading } = useQuery({
+  const { data: products = [], isLoading: queryIsLoading } = useQuery({
     queryKey: ['products', searchQuery, selectedCategory, showDiscounted, showUsed, showBranded, sortOption, priceRange],
     queryFn: async () => {
       let query = supabase.from("products").select("*");
@@ -74,22 +84,25 @@ export const ShoppingSection: React.FC<ShoppingSectionProps> = ({
     }
   });
 
+  const isLoading = externalIsLoading || queryIsLoading;
+  const displayProducts = results.length > 0 ? results : products;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold">
-          {searchQuery ? `Search Results for "${searchQuery}"` : 
+          {title || (searchQuery ? `Search Results for "${searchQuery}"` : 
            selectedCategory && selectedCategory !== "all" ? 
            `${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} Products` : 
-           "All Products"}
+           "All Products")}
         </h2>
         <span className="text-sm text-muted-foreground">
-          {products.length} products found
+          {displayProducts.length} products found
         </span>
       </div>
       
       <ProductsGrid
-        products={products}
+        products={displayProducts}
         layout={gridLayout}
         isLoading={isLoading}
         searchQuery={searchQuery}
