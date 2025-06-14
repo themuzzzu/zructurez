@@ -1,32 +1,41 @@
 
-import { AlertCircle } from "lucide-react";
+import React from "react";
+import { Search, Package } from "lucide-react";
 
 interface EmptySearchResultsProps {
-  searchTerm: string;
-  type?: 'product' | 'service' | 'business';
+  searchTerm?: string;
 }
 
-export function EmptySearchResults({ searchTerm, type = 'product' }: EmptySearchResultsProps) {
-  const getMessage = () => {
-    switch (type) {
-      case 'business':
-        return `No businesses found matching "${searchTerm}"`;
-      case 'service':
-        return `No services found matching "${searchTerm}"`;
-      default:
-        return `No products found matching "${searchTerm}"`;
-    }
-  };
-
+export const EmptySearchResults: React.FC<EmptySearchResultsProps> = ({ searchTerm }) => {
   return (
-    <div className="flex flex-col items-center justify-center p-8 text-center">
-      <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
-      <h3 className="text-lg font-semibold mb-2">No Results Found</h3>
-      <p className="text-muted-foreground">{getMessage()}</p>
-      <p className="text-sm text-muted-foreground mt-2">
-        Try adjusting your search or filters to find what you're looking for.
+    <div className="flex flex-col items-center justify-center py-16 text-center">
+      <div className="mb-4">
+        {searchTerm ? (
+          <Search className="h-16 w-16 text-muted-foreground" />
+        ) : (
+          <Package className="h-16 w-16 text-muted-foreground" />
+        )}
+      </div>
+      
+      <h3 className="text-lg font-semibold mb-2">
+        {searchTerm ? `No results found for "${searchTerm}"` : "No products available"}
+      </h3>
+      
+      <p className="text-muted-foreground mb-6 max-w-md">
+        {searchTerm 
+          ? "Try adjusting your search terms or browse our categories to find what you're looking for."
+          : "Check back later for new products or try browsing our other categories."
+        }
       </p>
+      
+      <div className="space-y-2 text-sm text-muted-foreground">
+        <p>Suggestions:</p>
+        <ul className="list-disc list-inside space-y-1">
+          <li>Check your spelling</li>
+          <li>Try more general keywords</li>
+          <li>Browse categories instead</li>
+        </ul>
+      </div>
     </div>
   );
-}
-
+};

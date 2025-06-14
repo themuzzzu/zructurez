@@ -1,73 +1,108 @@
 
-import { useState } from "react";
-
-interface Product {
-  id: string;
-  name?: string;
-  title?: string;
-  price?: number;
-  image?: string;
-  image_url?: string;
-  description?: string;
-  category?: string;
-  is_featured?: boolean;
-}
+import React from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Star, Eye } from "lucide-react";
+import { GridLayoutType, Product } from "./types/ProductTypes";
+import { cn } from "@/lib/utils";
 
 interface ProductsGridProps {
   products: Product[];
-  layout?: "grid1x1" | "grid2x2" | "grid3x3" | "grid4x4";
+  layout: GridLayoutType;
+  isLoading: boolean;
+  searchQuery?: string;
+  onOpenAddProductDialog?: () => void;
 }
 
-export const ProductsGrid = ({ 
-  products = [], 
-  layout = "grid3x3" 
-}: ProductsGridProps) => {
-  const [hoveredProduct, setHoveredProduct] = useState<string | null>(null);
-  
-  const layoutClasses = {
-    grid1x1: "grid-cols-1 gap-4",
-    grid2x2: "grid-cols-1 sm:grid-cols-2 gap-4",
-    grid3x3: "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4",
-    grid4x4: "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+export const ProductsGrid: React.FC<ProductsGridProps> = ({
+  products,
+  layout,
+  isLoading,
+  searchQuery = ""
+}) => {
+  const getGridClasses = (layout: GridLayoutType) => {
+    switch (layout) {
+      case "grid1x1":
+        return "grid-cols-1";
+      case "grid2x2":
+        return "grid-cols-1 sm:grid-cols-2";
+      case "grid3x3":
+        return "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3";
+      case "grid4x4":
+        return "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
+      default:
+        return "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
+    }
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center py-12">
+        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
+
+  if (products.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-muted-foreground">
+          {searchQuery ? `No products found for "${searchQuery}"` : "No products available"}
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <div className={`grid ${layoutClasses[layout]}`}>
+    <div className={cn("grid gap-4", getGridClasses(layout))}>
       {products.map((product) => (
-        <div
-          key={product.id}
-          className="border rounded-lg overflow-hidden transition-shadow hover:shadow-md"
-          onMouseEnter={() => setHoveredProduct(product.id)}
-          onMouseLeave={() => setHoveredProduct(null)}
-        >
-          <div className="relative h-40 overflow-hidden">
-            <img
-              src={product.image_url || product.image || "/placeholder-product.jpg"}
-              alt={product.name || product.title || "Product"}
-              className="w-full h-full object-cover transition-transform duration-300"
-              style={{
-                transform: hoveredProduct === product.id ? "scale(1.05)" : "scale(1)"
-              }}
-              loading="lazy"
-            />
-            {product.is_featured && (
-              <div className="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded">
-                Featured
+        <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow group cursor-pointer">
+          <div className="relative aspect-square">
+            {product.image_url ? (
+              <img
+                src={product.image_url}
+                alt={product.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+            ) : (
+              <div className="w-full h-full bg-muted flex items-center justify-center">
+                <span className="text-muted-foreground">No Image</span>
+              </div>
+            )}
+            
+            {product.is_discounted && (
+              <Badge className="absolute top-2 left-2 bg-red-500">
+                Sale
+              </Badge>
+            )}
+            
+            {product.views && (
+              <div className="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
+                <Eye className="h-3 w-3" />
+                {product.views}
               </div>
             )}
           </div>
-          <div className="p-3">
-            <h3 className="font-medium text-sm line-clamp-1">
-              {product.name || product.title}
-            </h3>
-            {product.price !== undefined && (
-              <p className="text-sm font-bold mt-1">₹{product.price.toLocaleString()}</p>
-            )}
+          
+          <CardContent className="p-3">
+            <h3 className="font-medium line-clamp-2 text-sm mb-1">{product.title}</h3>
+            
+            <div className="flex items-center justify-between">
+              <span className="text-lg font-bold">₹{product.price?.toLocaleString()}</span>
+              
+              <div className="flex items-center gap-1">
+                <Star className="h-3 w-3 fill-current text-yellow-500" />
+                <span className="text-xs text-muted-foreground">4.5</span>
+              </div>
+            </div>
+            
             {product.category && (
-              <p className="text-xs text-gray-500 mt-1">{product.category}</p>
+              <Badge variant="outline" className="mt-2 text-xs">
+                {product.category}
+              </Badge>
             )}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       ))}
     </div>
   );

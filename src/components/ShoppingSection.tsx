@@ -1,287 +1,99 @@
 
-import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { ProductsGrid } from './products/ProductsGrid';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { GridLayoutType } from './products/types/ProductTypes';
-import { ProductFilters } from './marketplace/ProductFilters';
-import { Skeleton } from './ui/skeleton';
-import { ShoppingCardSkeleton } from './ShoppingCardSkeleton';
-import { LoadingView } from './LoadingView';
-import { Progress } from './ui/progress';
-import { SearchResult } from '@/types/search';
-import { Alert, AlertTitle, AlertDescription } from './ui/alert';
-import { Button } from './ui/button';
-import { Wifi, WifiOff } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { ProductsGrid } from "@/components/products/ProductsGrid";
+import { GridLayoutType } from "@/components/products/types/ProductTypes";
 
 interface ShoppingSectionProps {
-  searchQuery: string;
+  searchQuery?: string;
   selectedCategory?: string;
   showDiscounted?: boolean;
   showUsed?: boolean;
   showBranded?: boolean;
   sortOption?: string;
   priceRange?: string;
-  gridLayout?: GridLayoutType;
-  title?: string;
-  isLoading?: boolean;
-  results?: SearchResult[];
-  hasError?: boolean;
-  onRetry?: () => void;
 }
 
-export const ShoppingSection = ({
-  searchQuery,
-  selectedCategory = '',
+export const ShoppingSection: React.FC<ShoppingSectionProps> = ({
+  searchQuery = "",
+  selectedCategory = "",
   showDiscounted = false,
   showUsed = false,
   showBranded = false,
-  sortOption = 'newest',
-  priceRange = 'all',
-  gridLayout = 'grid4x4',
-  title = 'Products',
-  isLoading: externalLoading,
-  results: externalResults,
-  hasError = false,
-  onRetry
-}: ShoppingSectionProps) => {
-  // Local state for filters
-  const [localCategory, setLocalCategory] = useState(selectedCategory);
-  const [localShowDiscounted, setLocalShowDiscounted] = useState(showDiscounted);
-  const [localShowUsed, setLocalShowUsed] = useState(showUsed);
-  const [localShowBranded, setLocalShowBranded] = useState(showBranded);
-  const [localSortOption, setLocalSortOption] = useState(sortOption);
-  const [localPriceRange, setLocalPriceRange] = useState(priceRange);
-  const [localGridLayout, setLocalGridLayout] = useState<GridLayoutType>(gridLayout);
-  const [showMobileFilters, setShowMobileFilters] = useState(false);
-  const [loadingProgress, setLoadingProgress] = useState(0);
-  
-  // Progress reference for loading animation
-  const loadingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  sortOption = "newest",
+  priceRange = "all"
+}) => {
+  const [layout] = useState<GridLayoutType>("grid4x4");
 
-  // If external results and loading state are provided, use them instead of fetching
-  const shouldFetch = !externalResults || externalResults.length === 0;
-  
-  // Fetch products based on filters
-  const { data: products, isLoading: queryLoading, error } = useQuery({
-    queryKey: ['products', searchQuery, localCategory, localShowDiscounted, localShowUsed, localShowBranded, localSortOption, localPriceRange],
+  const { data: products = [], isLoading } = useQuery({
+    queryKey: ['products', searchQuery, selectedCategory, showDiscounted, showUsed, showBranded, sortOption, priceRange],
     queryFn: async () => {
-      // Start loading progress animation
-      startLoadingProgress();
-      
-      let query = supabase.from('products').select('*');
-      
+      let query = supabase.from("products").select("*");
+
+      // Apply filters
       if (searchQuery) {
-        query = query.or(`name.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,category.ilike.%${searchQuery}%`);
+        query = query.ilike("title", `%${searchQuery}%`);
       }
+
+      if (selectedCategory && selectedCategory !== "all") {
+        query = query.eq("category", selectedCategory);
+      }
+
+      if (showDiscounted) {
+        query = query.eq("is_discounted", true);
+      }
+
+      if (showUsed) {
+        query = query.eq("is_used", true);
+      }
+
+      if (showBranded) {
+        query = query.eq("is_branded", true);
+      }
+
+      // Apply sorting
+      switch (sortOption) {
+        case "priceAsc":
+          query = query.order("price", { ascending: true });
+          break;
+        case "priceDesc":
+          query = query.order("price", { ascending: false });
+          break;
+        case "newest":
+          query = query.order("created_at", { ascending: false });
+          break;
+        default:
+          query = query.order("created_at", { ascending: false });
+      }
+
+      const { data, error } = await query.limit(20);
       
-      if (localCategory && localCategory !== 'all') {
-        query = query.eq('category', localCategory);
-      }
-      
-      if (localShowDiscounted) {
-        query = query.eq('is_discounted', true);
-      }
-      
-      if (localShowUsed) {
-        query = query.eq('is_used', true);
-      }
-      
-      if (localShowBranded) {
-        query = query.eq('is_branded', true);
-      }
-      
-      if (localSortOption === 'price-low') {
-        query = query.order('price', { ascending: true });
-      } else if (localSortOption === 'price-high') {
-        query = query.order('price', { ascending: false });
-      } else if (localSortOption === 'most-viewed') {
-        query = query.order('views', { ascending: false });
-      } else {
-        query = query.order('created_at', { ascending: false });
-      }
-      
-      if (localPriceRange !== 'all') {
-        const [minPrice, maxPrice] = localPriceRange.split('-').map(val => val === 'up' ? '10000000' : val);
-        query = query.gte('price', minPrice).lte('price', maxPrice);
-      }
-      
-      try {
-        const { data, error } = await query;
-        
-        if (error) {
-          console.error('Error fetching products:', error);
-          // If the table doesn't exist or there's an error, return mock data
-          return getMockProducts(localCategory);
-        }
-        
-        if (!data || data.length === 0) {
-          // If no data, return mock products
-          return getMockProducts(localCategory);
-        }
-        
-        return data;
-      } catch (err) {
-        console.error('Error in products fetch:', err);
-        // Return mock data on error
-        return getMockProducts(localCategory);
-      } finally {
-        // Complete the loading animation
-        completeLoadingProgress();
-      }
-    },
-    staleTime: 60000, // 1 minute
-    enabled: shouldFetch, // Only run the query if we don't have external results
+      if (error) throw error;
+      return data || [];
+    }
   });
 
-  // Determine if we're loading
-  const isLoading = externalLoading !== undefined ? externalLoading : queryLoading;
-  
-  // Determine which results to use
-  const displayProducts = externalResults || products || [];
-  
-  // Start loading animation
-  const startLoadingProgress = () => {
-    setLoadingProgress(0);
-    if (loadingIntervalRef.current) {
-      clearInterval(loadingIntervalRef.current);
-    }
-    
-    loadingIntervalRef.current = setInterval(() => {
-      setLoadingProgress(prev => {
-        // Slow down as it approaches 100%
-        const increment = prev < 60 ? 10 : prev < 80 ? 5 : 1;
-        const newProgress = Math.min(prev + increment, 95);
-        return newProgress;
-      });
-    }, 100);
-  };
-  
-  // Complete loading animation
-  const completeLoadingProgress = () => {
-    if (loadingIntervalRef.current) {
-      clearInterval(loadingIntervalRef.current);
-      loadingIntervalRef.current = null;
-    }
-    setLoadingProgress(100);
-  };
-  
-  // Reset to first page when filters change
-  useEffect(() => {
-    setLocalCategory(selectedCategory);
-  }, [selectedCategory]);
-  
-  // Clean up interval on unmount
-  useEffect(() => {
-    return () => {
-      if (loadingIntervalRef.current) {
-        clearInterval(loadingIntervalRef.current);
-      }
-    };
-  }, []);
-  
-  // Reset filters function
-  const resetFilters = useCallback(() => {
-    setLocalCategory('');
-    setLocalShowDiscounted(false);
-    setLocalShowUsed(false);
-    setLocalShowBranded(false);
-    setLocalSortOption('newest');
-    setLocalPriceRange('all');
-  }, []);
-  
-  // Generate mock products for when database doesn't have data
-  const getMockProducts = (category: string = '') => {
-    const categoryNames = ['Electronics', 'Fashion', 'Home', 'Sports', 'Books', 'Toys'];
-    const selectedCat = category || categoryNames[Math.floor(Math.random() * categoryNames.length)];
-    
-    return Array(12).fill(0).map((_, index) => ({
-      id: `mock-${index}`,
-      name: `${selectedCat} Product ${index + 1}`,
-      description: `This is a mock product in the ${selectedCat} category.`,
-      price: Math.floor(Math.random() * 100) + 10,
-      image_url: `https://picsum.photos/seed/${selectedCat}${index}/300/300`,
-      category: selectedCat.toLowerCase(),
-      is_discounted: Math.random() > 0.7,
-      discount_percentage: Math.floor(Math.random() * 30) + 10,
-      rating: (Math.random() * 3) + 2,
-      rating_count: Math.floor(Math.random() * 100) + 5,
-      created_at: new Date().toISOString(),
-    }));
-  };
-  
   return (
-    <div>
-      {title && <h2 className="text-xl font-bold mb-4">{title}</h2>}
-      
-      {isLoading && (
-        <div className="w-full h-1 mb-4">
-          <Progress value={loadingProgress} className="h-1" />
-        </div>
-      )}
-
-      {hasError && (
-        <Alert variant="warning" className="mb-4">
-          <WifiOff className="h-4 w-4" />
-          <AlertTitle>Network connectivity issue</AlertTitle>
-          <AlertDescription>
-            We couldn't connect to our search service. Showing you locally cached results instead.
-            {onRetry && (
-              <Button variant="outline" size="sm" onClick={onRetry} className="ml-2">
-                Retry
-              </Button>
-            )}
-          </AlertDescription>
-        </Alert>
-      )}
-      
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {/* Filters - Desktop */}
-        <div className="hidden md:block">
-          <ProductFilters 
-            selectedCategory={localCategory}
-            onCategorySelect={setLocalCategory}
-            showDiscounted={localShowDiscounted}
-            onDiscountedChange={setLocalShowDiscounted}
-            showUsed={localShowUsed}
-            onUsedChange={setLocalShowUsed}
-            showBranded={localShowBranded}
-            onBrandedChange={setLocalShowBranded}
-            sortOption={localSortOption}
-            onSortChange={setLocalSortOption}
-            priceRange={localPriceRange}
-            onPriceRangeChange={setLocalPriceRange}
-            onResetFilters={resetFilters}
-          />
-        </div>
-        
-        {/* Products Grid */}
-        <div className="md:col-span-3">
-          {isLoading ? (
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {[...Array(8)].map((_, i) => (
-                  <ShoppingCardSkeleton key={i} />
-                ))}
-              </div>
-            </div>
-          ) : error ? (
-            <div className="text-center p-4 text-red-500">
-              An error occurred while loading products. Please try again.
-            </div>
-          ) : (
-            <ProductsGrid 
-              products={displayProducts} 
-              isLoading={isLoading} 
-              layout={localGridLayout}
-              onLayoutChange={setLocalGridLayout}
-              searchQuery={searchQuery}
-            />
-          )}
-        </div>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-bold">
+          {searchQuery ? `Search Results for "${searchQuery}"` : 
+           selectedCategory && selectedCategory !== "all" ? 
+           `${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} Products` : 
+           "All Products"}
+        </h2>
+        <span className="text-sm text-muted-foreground">
+          {products.length} products found
+        </span>
       </div>
+      
+      <ProductsGrid
+        products={products}
+        layout={layout}
+        isLoading={isLoading}
+        searchQuery={searchQuery}
+      />
     </div>
   );
 };
-
-export default ShoppingSection;

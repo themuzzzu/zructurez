@@ -1,33 +1,18 @@
 
-import { ReactNode } from "react";
-import { Navbar } from "@/components/Navbar";
-import { SuspenseBoundary } from "./SuspenseBoundary";
-import { Sidebar } from "@/components/Sidebar";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
+import React from "react";
+import { OfflineIndicator } from "@/components/layout/OfflineIndicator";
 
 interface LayoutProps {
-  children: ReactNode;
-  hideNav?: boolean;
-  hideSidebar?: boolean;
+  children: React.ReactNode;
 }
 
-export function Layout({ children, hideNav = false, hideSidebar = false }: LayoutProps) {
-  const isMobile = useMediaQuery("(max-width: 768px)");
-
+export const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
-    <div className="min-h-screen bg-background flex flex-col relative">
-      {!hideNav && <Navbar />}
-      <div className="flex flex-1 pt-16">
-        {/* Only show sidebar if not mobile and not explicitly hidden */}
-        {!hideSidebar && !isMobile && (
-          <Sidebar className="hidden md:block h-[calc(100vh-4rem)] fixed left-0 top-16" />
-        )}
-        <main className={`flex-1 relative ${!hideSidebar && !isMobile ? 'ml-[72px]' : ''}`}>
-          <SuspenseBoundary>
-            {children}
-          </SuspenseBoundary>
-        </main>
-      </div>
+    <div className="min-h-screen bg-background">
+      <OfflineIndicator />
+      <main className="pt-0">
+        {children}
+      </main>
     </div>
   );
-}
+};
