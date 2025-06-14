@@ -7,7 +7,10 @@ interface SpinnerProps {
   className?: string;
 }
 
-export const Spinner: React.FC<SpinnerProps> = ({ size = "md", className }) => {
+export const Spinner: React.FC<SpinnerProps> = ({ 
+  size = "md", 
+  className 
+}) => {
   const sizeClasses = {
     sm: "h-4 w-4",
     md: "h-6 w-6", 

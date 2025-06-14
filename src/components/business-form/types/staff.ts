@@ -1,10 +1,13 @@
 
 export interface StaffMember {
+  id?: string;
   name: string;
+  role?: string;
   position: string;
   experience: string;
   bio?: string;
   image_url?: string | null;
+  specialties?: string[];
 }
 
 export interface StaffMembersProps {

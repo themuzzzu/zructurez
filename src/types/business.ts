@@ -10,6 +10,7 @@ export interface Business {
   city?: string;
   contact?: string;
   hours?: string;
+  business_hours?: BusinessHours | string;
   verified?: boolean;
   is_active?: boolean;
   appointment_price?: number;
@@ -22,6 +23,12 @@ export interface Business {
   user_id?: string;
   created_at?: string;
   updated_at?: string;
+  bio?: string;
+  website?: string;
+  owners?: BusinessOwner[];
+  staff_details?: StaffMember[];
+  business_portfolio?: PortfolioItem[];
+  business_products?: BusinessProduct[];
 }
 
 export interface BusinessHours {
@@ -35,29 +42,40 @@ export interface BusinessHours {
 }
 
 export interface BusinessOwner {
-  id: string;
+  id?: string;
   name: string;
-  email: string;
+  email?: string;
   phone?: string;
   avatar_url?: string;
+  image_url?: string;
+  role?: string;
+  position?: string;
+  experience?: string;
+  qualifications?: string;
+  bio?: string;
 }
 
 export interface StaffMember {
-  id: string;
+  id?: string;
   name: string;
-  role: string;
+  role?: string;
+  position?: string;
   phone?: string;
   avatar_url?: string;
+  image_url?: string;
   specialties?: string[];
+  experience?: string;
+  bio?: string;
 }
 
 export interface PortfolioItem {
-  id: string;
+  id?: string;
   title: string;
   description?: string;
   image_url: string;
   category?: string;
-  created_at: string;
+  created_at?: string;
+  views?: number;
 }
 
 export interface UserPost {
@@ -81,4 +99,5 @@ export interface BusinessProduct {
   business_id: string;
   is_available: boolean;
   created_at: string;
+  stock?: number;
 }

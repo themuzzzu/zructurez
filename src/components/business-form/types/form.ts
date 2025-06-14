@@ -2,7 +2,7 @@
 import type { MembershipPlan } from "@/types/membership";
 import type { Owner } from "./owner";
 import type { StaffMember } from "./staff";
-import type { BusinessProduct } from "@/types/business"; // Import from central type definition
+import type { BusinessProduct } from "@/types/business";
 
 export interface BusinessFormData {
   name: string;

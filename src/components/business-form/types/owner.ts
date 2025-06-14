@@ -1,6 +1,8 @@
 
 export interface Owner {
+  id?: string;
   name: string;
+  email?: string;
   role: string;
   position: string;
   experience: string;

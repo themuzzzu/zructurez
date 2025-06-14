@@ -3,7 +3,7 @@ import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface AvatarWithFallbackProps {
-  src?: string;
+  src?: string | null;
   name: string;
   size?: 'sm' | 'md' | 'lg';
   className?: string;
@@ -31,7 +31,7 @@ export const AvatarWithFallback: React.FC<AvatarWithFallbackProps> = ({
 
   return (
     <Avatar className={`${sizeClasses[size]} ${className}`}>
-      <AvatarImage src={src} alt={name} />
+      <AvatarImage src={src || undefined} alt={name} />
       <AvatarFallback>
         {getInitials(name)}
       </AvatarFallback>

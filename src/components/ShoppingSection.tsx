@@ -13,6 +13,7 @@ interface ShoppingSectionProps {
   showBranded?: boolean;
   sortOption?: string;
   priceRange?: string;
+  gridLayout?: GridLayoutType;
 }
 
 export const ShoppingSection: React.FC<ShoppingSectionProps> = ({
@@ -22,10 +23,9 @@ export const ShoppingSection: React.FC<ShoppingSectionProps> = ({
   showUsed = false,
   showBranded = false,
   sortOption = "newest",
-  priceRange = "all"
+  priceRange = "all",
+  gridLayout = "grid4x4"
 }) => {
-  const [layout] = useState<GridLayoutType>("grid4x4");
-
   const { data: products = [], isLoading } = useQuery({
     queryKey: ['products', searchQuery, selectedCategory, showDiscounted, showUsed, showBranded, sortOption, priceRange],
     queryFn: async () => {
@@ -90,7 +90,7 @@ export const ShoppingSection: React.FC<ShoppingSectionProps> = ({
       
       <ProductsGrid
         products={products}
-        layout={layout}
+        layout={gridLayout}
         isLoading={isLoading}
         searchQuery={searchQuery}
       />
