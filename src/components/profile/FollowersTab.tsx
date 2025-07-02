@@ -1,183 +1,82 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar } from "@/components/ui/avatar";
-import { supabase } from "@/integrations/supabase/client";
-import { useProfile } from "@/hooks/useProfile";
-import { toast } from "sonner";
 
-interface FollowData {
+import React, { useState } from "react";
+import { Button } from "../ui/button";
+import { AvatarWithFallback } from "../common/AvatarWithFallback";
+
+interface User {
   id: string;
-  name: string | null;
-  username: string | null;
-  avatar_url: string | null;
-  is_business: boolean;
+  name: string;
+  username: string;
+  avatar_url: string;
 }
 
 export const FollowersTab = () => {
-  const { profile } = useProfile();
-  const [followers, setFollowers] = useState<FollowData[]>([]);
-  const [following, setFollowing] = useState<FollowData[]>([]);
-  const [activeTab, setActiveTab] = useState("followers");
-
-  useEffect(() => {
-    if (profile.id) {
-      fetchFollowers();
-      fetchFollowing();
-      subscribeToFollowers();
+  const [activeTab, setActiveTab] = useState<'followers' | 'following'>('followers');
+  
+  // Mock data
+  const followers: User[] = [
+    {
+      id: "1",
+      name: "John Doe",
+      username: "@johndoe",
+      avatar_url: "/placeholder-avatar.jpg"
     }
-  }, [profile.id]);
+  ];
 
-  const fetchFollowers = async () => {
-    const { data, error } = await supabase
-      .from('followers')
-      .select(`
-        is_business,
-        follower:profiles!followers_follower_id_fkey (
-          id,
-          name,
-          username,
-          avatar_url
-        )
-      `)
-      .eq('following_id', profile.id);
-
-    if (!error && data) {
-      const formattedData = data.map(item => ({
-        id: item.follower.id,
-        name: item.follower.name,
-        username: item.follower.username,
-        avatar_url: item.follower.avatar_url,
-        is_business: item.is_business || false
-      }));
-      setFollowers(formattedData);
+  const following: User[] = [
+    {
+      id: "2", 
+      name: "Jane Smith",
+      username: "@janesmith",
+      avatar_url: "/placeholder-avatar.jpg"
     }
-  };
+  ];
 
-  const fetchFollowing = async () => {
-    const { data, error } = await supabase
-      .from('followers')
-      .select(`
-        is_business,
-        following:profiles!followers_following_id_fkey (
-          id,
-          name,
-          username,
-          avatar_url
-        )
-      `)
-      .eq('follower_id', profile.id);
-
-    if (!error && data) {
-      const formattedData = data.map(item => ({
-        id: item.following.id,
-        name: item.following.name,
-        username: item.following.username,
-        avatar_url: item.following.avatar_url,
-        is_business: item.is_business || false
-      }));
-      setFollowing(formattedData);
-    }
-  };
-
-  const subscribeToFollowers = () => {
-    const channel = supabase
-      .channel('followers-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'followers',
-          filter: `following_id=eq.${profile.id}`
-        },
-        () => {
-          fetchFollowers();
-          toast.success("Followers list updated");
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  };
-
-  const renderFollowList = (data: FollowData[], type: "followers" | "following") => {
-    const people = data.filter(item => !item.is_business);
-    const businesses = data.filter(item => item.is_business);
-
-    return (
-      <div className="space-y-6">
-        <div>
-          <h3 className="text-lg font-semibold mb-4">People</h3>
-          <div className="space-y-4">
-            {people.map(item => (
-              <div key={item.id} className="flex items-center gap-4">
-                <Avatar className="h-10 w-10">
-                  <img
-                    src={item.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"}
-                    alt={item.name || "Profile"}
-                  />
-                </Avatar>
-                <div>
-                  <p className="font-medium">{item.name || "Anonymous"}</p>
-                  <p className="text-sm text-muted-foreground">@{item.username || "username"}</p>
-                </div>
-              </div>
-            ))}
-            {people.length === 0 && (
-              <p className="text-muted-foreground">No people {type} yet</p>
-            )}
-          </div>
-        </div>
-
-        <div>
-          <h3 className="text-lg font-semibold mb-4">Businesses</h3>
-          <div className="space-y-4">
-            {businesses.map(item => (
-              <div key={item.id} className="flex items-center gap-4">
-                <Avatar className="h-10 w-10">
-                  <img
-                    src={item.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"}
-                    alt={item.name || "Business"}
-                  />
-                </Avatar>
-                <div>
-                  <p className="font-medium">{item.name || "Business"}</p>
-                  <p className="text-sm text-muted-foreground">@{item.username || "business"}</p>
-                </div>
-              </div>
-            ))}
-            {businesses.length === 0 && (
-              <p className="text-muted-foreground">No businesses {type} yet</p>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  };
+  const currentData = activeTab === 'followers' ? followers : following;
 
   return (
-    <Card>
-      <CardContent className="p-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="followers">
-              Followers ({followers.length})
-            </TabsTrigger>
-            <TabsTrigger value="following">
-              Following ({following.length})
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="followers" className="mt-6">
-            {renderFollowList(followers, "followers")}
-          </TabsContent>
-          <TabsContent value="following" className="mt-6">
-            {renderFollowList(following, "following")}
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-    </Card>
+    <div className="space-y-4">
+      <div className="flex space-x-4 border-b">
+        <button
+          className={`pb-2 px-1 ${activeTab === 'followers' ? 'border-b-2 border-blue-500 font-semibold' : 'text-gray-600'}`}
+          onClick={() => setActiveTab('followers')}
+        >
+          Followers ({followers.length})
+        </button>
+        <button
+          className={`pb-2 px-1 ${activeTab === 'following' ? 'border-b-2 border-blue-500 font-semibold' : 'text-gray-600'}`}
+          onClick={() => setActiveTab('following')}
+        >
+          Following ({following.length})
+        </button>
+      </div>
+
+      <div className="space-y-3">
+        {currentData.map((user) => (
+          <div key={user.id} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg">
+            <div className="flex items-center space-x-3">
+              <AvatarWithFallback
+                src={user.avatar_url}
+                name={user.name}
+                size="md"
+              />
+              <div>
+                <p className="font-medium">{user.name}</p>
+                <p className="text-sm text-gray-600">{user.username}</p>
+              </div>
+            </div>
+            <Button variant="outline" size="sm">
+              {activeTab === 'followers' ? 'Follow Back' : 'Unfollow'}
+            </Button>
+          </div>
+        ))}
+      </div>
+
+      {currentData.length === 0 && (
+        <div className="text-center py-8 text-gray-500">
+          No {activeTab} yet
+        </div>
+      )}
+    </div>
   );
 };

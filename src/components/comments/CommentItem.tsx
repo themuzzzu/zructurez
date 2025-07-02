@@ -1,5 +1,5 @@
 
-import { AvatarWithFallback } from "../ui/avatar-with-fallback";
+import { AvatarWithFallback } from "../common/AvatarWithFallback";
 
 interface CommentItemProps {
   comment: {

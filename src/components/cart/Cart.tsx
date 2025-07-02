@@ -1,131 +1,135 @@
-
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { CartItem } from "./CartItem";
+import React, { useState, useEffect } from "react";
 import { Button } from "../ui/button";
-import { ShoppingBag, ArrowRight } from "lucide-react";
+import { Trash2, Plus, Minus } from "lucide-react";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
-import { measureApiCall } from "@/utils/performanceTracking";
 
-export const Cart = () => {
-  const queryClient = useQueryClient();
-  const navigate = useNavigate();
-  
-  const { data: cartItems, isLoading } = useQuery({
-    queryKey: ['cart'],
-    queryFn: async () => {
-      const { data: session } = await supabase.auth.getSession();
-      if (!session?.session?.user) {
-        throw new Error('User must be logged in to view cart');
-      }
+interface CartItem {
+  id: string;
+  title: string;
+  price: number;
+  image_url: string;
+  quantity: number;
+}
 
-      return await measureApiCall('fetch-cart-items', async () => {
-        const { data, error } = await supabase
-          .from('cart_items')
-          .select(`
-            quantity,
-            products (
-              id,
-              title,
-              price,
-              image_url
-            )
-          `)
-          .order('created_at', { ascending: false });
+interface CartProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
 
-        if (error) throw error;
-        return data;
-      });
-    },
-  });
+export const Cart = ({ isOpen, onClose }: CartProps) => {
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
-  const clearCartMutation = useMutation({
-    mutationFn: async () => {
-      const { data: session } = await supabase.auth.getSession();
-      if (!session?.session?.user) {
-        throw new Error('User must be logged in to clear cart');
-      }
+  useEffect(() => {
+    // Mock cart items (replace with actual data fetching)
+    const mockCartItems: CartItem[] = [
+      {
+        id: "1",
+        title: "Sample Product 1",
+        price: 50,
+        image_url: "/placeholder.png",
+        quantity: 1,
+      },
+      {
+        id: "2",
+        title: "Sample Product 2",
+        price: 75,
+        image_url: "/placeholder.png",
+        quantity: 2,
+      },
+    ];
+    setCartItems(mockCartItems);
+  }, []);
 
-      const { error } = await supabase
-        .from('cart_items')
-        .delete()
-        .eq('user_id', session.session.user.id);
-      
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['cart'] });
-      queryClient.invalidateQueries({ queryKey: ['cartCount'] });
-      toast.success("Cart cleared successfully!");
-    },
-    onError: () => {
-      toast.error("Failed to clear cart");
-    },
-  });
+  const totalAmount = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
-  const handleCheckout = () => {
-    if (!cartItems?.length) {
-      toast.error("Your cart is empty");
+  const updateQuantity = (id: string, newQuantity: number) => {
+    if (newQuantity <= 0) {
+      removeFromCart(id);
       return;
     }
     
-    navigate('/checkout');
+    setCartItems(prev => 
+      prev.map(item => 
+        item.id === id ? { ...item, quantity: newQuantity } : item
+      )
+    );
   };
 
-  const total = cartItems?.reduce((sum, item) => {
-    return sum + (item.products?.price || 0) * item.quantity;
-  }, 0) || 0;
-
-  // Format price in Indian Rupees
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0,
-    }).format(price);
+  const removeFromCart = (id: string) => {
+    setCartItems(prev => prev.filter(item => item.id !== id));
+    toast.success("Item removed from cart");
   };
 
-  if (isLoading) {
-    return <div className="p-4">Loading cart...</div>;
-  }
+  if (!isOpen) return null;
 
   return (
-    <div className="p-4 bg-card rounded-lg border">
-      <h2 className="text-xl font-semibold mb-4">Shopping Cart</h2>
-      {cartItems && cartItems.length > 0 ? (
-        <>
-          <div className="space-y-2">
-            {cartItems.map((item) => (
-              <CartItem
-                key={item.products?.id}
-                id={item.products?.id}
-                title={item.products?.title}
-                price={item.products?.price}
-                quantity={item.quantity}
-                image_url={item.products?.image_url}
-              />
-            ))}
-          </div>
-          <div className="mt-4 pt-4 border-t">
-            <div className="flex justify-between items-center mb-4">
-              <span className="font-semibold">Total:</span>
-              <span className="font-semibold">{formatPrice(total)}</span>
-            </div>
-            <Button 
-              className="w-full" 
-              onClick={handleCheckout}
-            >
-              Proceed to Checkout
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </div>
-        </>
-      ) : (
-        <div className="text-center py-8 text-muted-foreground">
-          Your cart is empty
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-end">
+      <div className="bg-white w-96 h-full overflow-y-auto">
+        <div className="p-6 border-b">
+          <h3 className="text-lg font-semibold">Shopping Cart</h3>
+          <Button variant="ghost" size="sm" className="absolute top-2 right-2" onClick={onClose}>
+            Close
+          </Button>
         </div>
-      )}
+        
+        <div className="flex-1 p-4">
+          {cartItems.length === 0 ? (
+            <p className="text-center text-gray-500 mt-8">Your cart is empty</p>
+          ) : (
+            <div className="space-y-4">
+              {cartItems.map((item) => (
+                <div key={item.id} className="flex items-center gap-4 p-4 border rounded-lg">
+                  <img 
+                    src={item.image_url || '/placeholder.png'} 
+                    alt={item.title}
+                    className="w-16 h-16 object-cover rounded"
+                  />
+                  <div className="flex-1">
+                    <h4 className="font-medium">{item.title}</h4>
+                    <p className="text-gray-600">₹{item.price}</p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                      >
+                        <Minus className="h-4 w-4" />
+                      </Button>
+                      <span className="px-3 py-1 bg-gray-100 rounded">
+                        {item.quantity}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeFromCart(item.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="p-6 border-t">
+          <div className="flex justify-between items-center mb-4">
+            <span className="font-medium">Total:</span>
+            <span className="text-lg font-semibold">₹{totalAmount}</span>
+          </div>
+          <Button className="w-full">
+            Checkout
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };

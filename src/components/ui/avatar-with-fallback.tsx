@@ -1,44 +1,42 @@
 
 import React from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
+import { cn } from "@/lib/utils";
 
-interface AvatarWithFallbackProps {
-  src?: string | null;
+export interface AvatarWithFallbackProps {
+  src?: string;
   name?: string;
   size?: "sm" | "md" | "lg" | "xl";
   className?: string;
 }
 
-export const AvatarWithFallback = ({
-  src,
-  name = "User",
-  size = "md",
-  className = "",
-}: AvatarWithFallbackProps) => {
-  // Get initials from name
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((part) => part[0])
-      .join("")
-      .toUpperCase()
-      .substring(0, 2);
-  };
-
-  // Determine size class
+export const AvatarWithFallback: React.FC<AvatarWithFallbackProps> = ({ 
+  src, 
+  name = "User", 
+  size = "md", 
+  className = ""
+}) => {
   const sizeClasses = {
     sm: "h-8 w-8",
-    md: "h-10 w-10",
+    md: "h-10 w-10", 
     lg: "h-12 w-12",
-    xl: "h-16 w-16",
+    xl: "h-16 w-16"
   };
 
-  const sizeClass = sizeClasses[size] || sizeClasses.md;
+  const getInitials = (displayName: string) => {
+    if (!displayName) return "U";
+    return displayName
+      .split(" ")
+      .map(part => part.charAt(0))
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
 
   return (
-    <Avatar className={`${sizeClass} ${className}`}>
-      <AvatarImage src={src || undefined} alt={name} />
-      <AvatarFallback className="bg-primary text-primary-foreground">
+    <Avatar className={cn(sizeClasses[size], className)}>
+      {src && <AvatarImage src={src} alt={name} />}
+      <AvatarFallback className="bg-primary/10 text-primary">
         {getInitials(name)}
       </AvatarFallback>
     </Avatar>
