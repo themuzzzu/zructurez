@@ -1,23 +1,26 @@
 
-import React from 'react';
-import { useRouteError } from 'react-router-dom';
+import React from "react";
+import { AlertCircle, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-export const ErrorView: React.FC = () => {
-  const error = useRouteError() as any;
-  console.error(error);
+interface ErrorViewProps {
+  onRetry: () => void;
+}
 
+export const ErrorView = ({ onRetry }: ErrorViewProps) => {
   return (
-    <div className="flex min-h-[400px] flex-col items-center justify-center">
-      <h1 className="text-2xl font-bold text-destructive">Oops! Something went wrong</h1>
-      <p className="mt-2 text-center text-gray-600">
-        {error?.statusText || error?.message || 'Sorry, an unexpected error has occurred.'}
+    <div className="flex flex-col items-center justify-center py-12 text-center">
+      <AlertCircle className="h-16 w-16 text-red-500 mb-4" />
+      <h3 className="text-xl font-semibold text-gray-900 mb-2">
+        Something went wrong
+      </h3>
+      <p className="text-gray-600 mb-6">
+        We encountered an error while loading the data. Please try again.
       </p>
-      <button 
-        onClick={() => window.location.href = '/'}
-        className="mt-4 rounded-md bg-primary px-4 py-2 text-white hover:bg-primary/90"
-      >
-        Go Home
-      </button>
+      <Button onClick={onRetry} className="gap-2">
+        <RefreshCw className="h-4 w-4" />
+        Try Again
+      </Button>
     </div>
   );
 };

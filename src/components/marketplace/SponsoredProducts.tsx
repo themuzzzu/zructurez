@@ -43,7 +43,7 @@ export const SponsoredProducts = () => {
             <ProductCard 
               product={{
                 ...product,
-                name: product.title,
+                title: product.title,
                 city: "Sponsored"
               }}
             />

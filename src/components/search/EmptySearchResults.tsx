@@ -4,9 +4,10 @@ import { Search } from "lucide-react";
 
 interface EmptySearchResultsProps {
   searchTerm: string;
+  type?: string;
 }
 
-export const EmptySearchResults = ({ searchTerm }: EmptySearchResultsProps) => {
+export const EmptySearchResults = ({ searchTerm, type }: EmptySearchResultsProps) => {
   return (
     <div className="text-center py-12">
       <div className="flex flex-col items-center gap-4">
@@ -16,7 +17,7 @@ export const EmptySearchResults = ({ searchTerm }: EmptySearchResultsProps) => {
             No results found
           </h3>
           <p className="text-gray-600">
-            We couldn't find any results for "{searchTerm}". Try adjusting your search terms.
+            We couldn't find any {type ? type : "results"} for "{searchTerm}". Try adjusting your search terms.
           </p>
         </div>
       </div>

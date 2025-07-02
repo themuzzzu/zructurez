@@ -1,56 +1,27 @@
 
+import React, { useState } from "react";
 import { ShoppingCart } from "lucide-react";
-import { Button } from "../ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { Cart } from "../cart/Cart";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Cart } from "@/components/cart/Cart";
 
 export const CartButton = () => {
-  const { data: cartItemCount = 0 } = useQuery({
-    queryKey: ['cartCount'],
-    queryFn: async () => {
-      const { data: session } = await supabase.auth.getSession();
-      if (!session?.session?.user) return 0;
-
-      const { count, error } = await supabase
-        .from('cart_items')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', session.session.user.id);
-
-      if (error) throw error;
-      return count || 0;
-    },
-  });
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   return (
-    <Sheet>
-      <SheetTrigger asChild>
-        <div className="relative">
-          <Button variant="ghost" size="icon" className="h-9 w-9 transition-transform duration-300 hover:scale-110">
-            <ShoppingCart className="h-4 w-4" />
-          </Button>
-          {cartItemCount > 0 && (
-            <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-[10px] rounded-full flex items-center justify-center shadow-sm font-bold">
-              {cartItemCount}
-            </span>
-          )}
-        </div>
-      </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-md">
-        <SheetHeader>
-          <SheetTitle>Shopping Cart</SheetTitle>
-        </SheetHeader>
-        <div className="mt-4 overflow-y-auto overflow-x-hidden h-[calc(100vh-8rem)]">
-          <Cart />
-        </div>
-      </SheetContent>
-    </Sheet>
+    <>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => setIsCartOpen(true)}
+        className="relative"
+      >
+        <ShoppingCart className="h-5 w-5" />
+        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+          2
+        </span>
+      </Button>
+      
+      <Cart isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+    </>
   );
 };
