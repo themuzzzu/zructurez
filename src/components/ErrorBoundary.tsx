@@ -61,7 +61,8 @@ export class ErrorBoundary extends Component<Props, State> {
       return (
         <FallbackComponent 
           error={this.state.error as Error} 
-          resetErrorBoundary={this.resetErrorBoundary} 
+          resetErrorBoundary={this.resetErrorBoundary}
+          onRetry={this.resetErrorBoundary}
         />
       );
     }

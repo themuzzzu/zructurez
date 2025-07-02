@@ -8,13 +8,15 @@ export interface AvatarWithFallbackProps {
   name?: string;
   size?: "sm" | "md" | "lg" | "xl";
   className?: string;
+  userId?: string;
 }
 
 export const AvatarWithFallback: React.FC<AvatarWithFallbackProps> = ({ 
   src, 
   name = "User", 
   size = "md", 
-  className = ""
+  className = "",
+  userId
 }) => {
   const sizeClasses = {
     sm: "h-8 w-8",

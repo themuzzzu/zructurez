@@ -55,8 +55,6 @@ export const ProductsGrid = ({
         return "flex flex-col gap-2 sm:gap-3";
       case "grid3x3":
         return "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3";
-      case "single":
-        return "grid grid-cols-1 gap-3 max-w-2xl mx-auto";
       case "grid1x1":
         return "grid grid-cols-1 gap-3";
       default:
@@ -67,7 +65,7 @@ export const ProductsGrid = ({
   if (isLoading) {
     return (
       <div className={getGridClasses()}>
-        {[...Array(currentLayout === "list" || currentLayout === "single" ? 3 : 6)].map((_, i) => (
+        {[...Array(currentLayout === "list" || currentLayout === "grid1x1" ? 3 : 6)].map((_, i) => (
           <Card key={i} className="overflow-hidden animate-pulse">
             <div className="w-full aspect-square bg-gray-200 dark:bg-gray-700"></div>
             <div className="p-2 space-y-1.5">
