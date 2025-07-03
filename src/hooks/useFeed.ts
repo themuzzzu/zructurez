@@ -1,75 +1,42 @@
 
-import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { UserPost } from "@/types/business";
+import { UserPost } from "@/types/post";
 
 export const useFeed = () => {
-  const [posts, setPosts] = useState<UserPost[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  const fetchFeed = async () => {
-    setLoading(true);
-    try {
-      // Fetch posts
-      const { data, error } = await supabase
-        .from("posts")
+  return useQuery({
+    queryKey: ['feed'],
+    queryFn: async (): Promise<UserPost[]> => {
+      const { data: posts, error } = await supabase
+        .from('posts')
         .select(`
-          id,
-          user_id,
-          content,
-          image_url,
-          created_at,
-          category,
-          profiles:profile_id (id, username, avatar_url, name)
+          *,
+          profiles!inner(id, username, avatar_url, full_name)
         `)
-        .order("created_at", { ascending: false })
+        .order('created_at', { ascending: false })
         .limit(20);
 
       if (error) throw error;
 
-      if (!data || data.length === 0) {
-        setPosts([]);
-        return;
-      }
-
-      // Transform data into UserPost format
-      const transformedPosts: UserPost[] = data.map(post => ({
+      return posts?.map(post => ({
         id: post.id,
         user_id: post.user_id,
-        profile_id: post.profiles?.id || '',
+        profile_id: post.profile_id,
+        business_id: post.business_id || undefined,
         content: post.content,
         image_url: post.image_url,
         created_at: post.created_at,
         category: post.category,
-        likes_count: Math.floor(Math.random() * 50), // Mock data for demonstration
-        comments_count: Math.floor(Math.random() * 20), // Mock data for demonstration
-        reposts_count: Math.floor(Math.random() * 10), // Mock data for demonstration
+        likes_count: 0,
+        comments_count: 0,
+        reposts_count: 0,
         profile: {
-          id: post.profiles?.id || '',
-          username: post.profiles?.username || 'user',
-          avatar_url: post.profiles?.avatar_url,
-          full_name: post.profiles?.name || 'Anonymous User'
+          id: post.profiles.id,
+          username: post.profiles.username,
+          avatar_url: post.profiles.avatar_url,
+          full_name: post.profiles.full_name,
         }
-      }));
-
-      setPosts(transformedPosts);
-    } catch (err) {
-      console.error("Error fetching feed:", err);
-      setError(err instanceof Error ? err.message : "Failed to load feed");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Function to refresh the feed
-  const refreshFeed = () => {
-    fetchFeed();
-  };
-
-  useEffect(() => {
-    fetchFeed();
-  }, []);
-
-  return { posts, loading, error, refreshFeed };
+      })) || [];
+    },
+  });
 };

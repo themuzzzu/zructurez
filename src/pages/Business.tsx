@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -281,7 +280,7 @@ const Business = () => {
                       onCheckedChange={(checked) =>
                         handleFilterChange({
                           ...selectedFilters,
-                          verified: checked || false,
+                          verified: Boolean(checked),
                         })
                       }
                     />
@@ -294,7 +293,7 @@ const Business = () => {
                       onCheckedChange={(checked) =>
                         handleFilterChange({
                           ...selectedFilters,
-                          openNow: checked || false,
+                          openNow: Boolean(checked),
                         })
                       }
                     />

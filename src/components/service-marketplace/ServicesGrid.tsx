@@ -21,9 +21,10 @@ interface Service {
 interface ServicesGridProps {
   services: Service[];
   gridLayout: GridLayoutType;
+  isLoading?: boolean;
 }
 
-export const ServicesGrid = ({ services, gridLayout }: ServicesGridProps) => {
+export const ServicesGrid = ({ services, gridLayout, isLoading = false }: ServicesGridProps) => {
   const getGridClasses = () => {
     switch (gridLayout) {
       case "grid1x1":
@@ -43,12 +44,23 @@ export const ServicesGrid = ({ services, gridLayout }: ServicesGridProps) => {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center py-12">
+        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
+
   return (
     <div className={`grid gap-6 ${getGridClasses()}`}>
       {services.map((service) => (
         <ServiceCard
           key={service.id}
-          service={service}
+          service={{
+            ...service,
+            description: service.description || ""
+          }}
           layout={gridLayout}
         />
       ))}

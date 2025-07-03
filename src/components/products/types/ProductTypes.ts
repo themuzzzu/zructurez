@@ -9,6 +9,7 @@ export interface Product {
   description?: string;
   category?: string;
   image_url?: string;
+  imageUrl?: string;
   price?: number;
   rating?: number;
   views?: number;
@@ -20,6 +21,10 @@ export interface Product {
   updated_at: string;
   city?: string;
   business_id?: string;
+  brand?: string;
+  brand_name?: string;
+  rating_count?: number;
+  highlight_tags?: string[];
 }
 
 export interface ProductType {
@@ -30,6 +35,7 @@ export interface ProductType {
   description?: string;
   category?: string;
   image_url?: string;
+  imageUrl?: string;
   price?: number;
   rating?: number;
   views?: number;
@@ -41,4 +47,8 @@ export interface ProductType {
   updated_at: string;
   city?: string;
   business_id?: string;
+  brand?: string;
+  brand_name?: string;
+  rating_count?: number;
+  highlight_tags?: string[];
 }

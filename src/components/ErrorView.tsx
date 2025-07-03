@@ -9,7 +9,14 @@ interface ErrorViewProps {
   onRetry: () => void;
 }
 
-export const ErrorView = ({ onRetry }: ErrorViewProps) => {
+export const ErrorView = ({ error, resetErrorBoundary, onRetry }: ErrorViewProps) => {
+  const handleRetry = () => {
+    if (resetErrorBoundary) {
+      resetErrorBoundary();
+    }
+    onRetry();
+  };
+
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center">
       <AlertCircle className="h-16 w-16 text-red-500 mb-4" />
@@ -19,7 +26,7 @@ export const ErrorView = ({ onRetry }: ErrorViewProps) => {
       <p className="text-gray-600 mb-6">
         We encountered an error while loading the data. Please try again.
       </p>
-      <Button onClick={onRetry} className="gap-2">
+      <Button onClick={handleRetry} className="gap-2">
         <RefreshCw className="h-4 w-4" />
         Try Again
       </Button>

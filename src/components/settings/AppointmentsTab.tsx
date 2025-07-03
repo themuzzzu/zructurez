@@ -1,102 +1,106 @@
+
+import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { format } from "date-fns";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Database } from "@/integrations/supabase/types";
 
-type AppointmentRow = Database['public']['Tables']['appointments']['Row'];
-type BusinessRow = Database['public']['Tables']['businesses']['Row'];
-
-type Appointment = AppointmentRow & {
-  businesses: Pick<BusinessRow, 'name' | 'image_url'> | null;
-};
+interface Business {
+  id: string;
+  name: string;
+  image_url?: string;
+}
 
 export const AppointmentsTab = () => {
-  const { data: appointments, isLoading } = useQuery({
-    queryKey: ['user-appointments'],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return [];
-
+  const { data: businesses } = useQuery({
+    queryKey: ["businesses"],
+    queryFn: async (): Promise<Business[]> => {
       const { data, error } = await supabase
-        .from('appointments')
-        .select(`
-          *,
-          businesses (
-            name,
-            image_url
-          )
-        `)
-        .eq('user_id', user.id)
-        .order('appointment_date', { ascending: false });
+        .from("businesses")
+        .select("id, name, image_url")
+        .limit(10);
 
-      if (error) {
-        console.error('Error fetching appointments:', error);
-        return [];
-      }
-
-      return data as Appointment[];
+      if (error) throw error;
+      return data || [];
     },
   });
 
-  if (isLoading) {
-    return <div>Loading appointments...</div>;
-  }
+  const { data: appointments } = useQuery({
+    queryKey: ["appointments"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("appointments")
+        .select(`
+          *,
+          businesses!inner(name, image_url)
+        `)
+        .order("created_at", { ascending: false });
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'confirmed':
-        return 'bg-green-500';
-      case 'cancelled':
-        return 'bg-red-500';
-      case 'completed':
-        return 'bg-blue-500';
-      default:
-        return 'bg-yellow-500';
-    }
-  };
+      if (error) throw error;
+      return data;
+    },
+  });
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>My Appointments</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {appointments?.length === 0 ? (
-          <p className="text-muted-foreground">No appointments found.</p>
-        ) : (
-          appointments?.map((appointment) => (
-            <div
-              key={appointment.id}
-              className="flex items-center justify-between p-4 border rounded-lg"
-            >
-              <div className="flex items-center gap-4">
-                {appointment.businesses?.image_url && (
-                  <img
-                    src={appointment.businesses.image_url}
-                    alt={appointment.businesses?.name}
-                    className="w-12 h-12 rounded-full object-cover"
-                  />
-                )}
-                <div>
-                  <h3 className="font-semibold">{appointment.businesses?.name}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {format(new Date(appointment.appointment_date), 'PPp')}
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-lg font-medium">Your Appointments</h3>
+        <p className="text-sm text-muted-foreground">
+          View and manage your appointments
+        </p>
+      </div>
+
+      {appointments && appointments.length > 0 ? (
+        <div className="grid gap-4">
+          {appointments.map((appointment) => (
+            <Card key={appointment.id}>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span>{appointment.service_name}</span>
+                  <Badge
+                    variant={
+                      appointment.status === "confirmed"
+                        ? "default"
+                        : appointment.status === "pending"
+                        ? "secondary"
+                        : "destructive"
+                    }
+                  >
+                    {appointment.status}
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <p className="text-sm">
+                    <strong>Business:</strong> {String(appointment.businesses?.name || 'Unknown')}
                   </p>
-                  <p className="text-sm">{appointment.service_name}</p>
+                  <p className="text-sm">
+                    <strong>Date:</strong>{" "}
+                    {new Date(appointment.appointment_date).toLocaleDateString()}
+                  </p>
+                  <p className="text-sm">
+                    <strong>Cost:</strong> ₹{appointment.cost}
+                  </p>
+                  {appointment.notes && (
+                    <p className="text-sm">
+                      <strong>Notes:</strong> {appointment.notes}
+                    </p>
+                  )}
                 </div>
-              </div>
-              <div className="flex flex-col items-end gap-2">
-                <Badge className={getStatusColor(appointment.status)}>
-                  {appointment.status}
-                </Badge>
-                <p className="text-sm font-semibold">₹{appointment.cost}</p>
-              </div>
-            </div>
-          ))
-        )}
-      </CardContent>
-    </Card>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-center text-muted-foreground">
+              No appointments found
+            </p>
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 };
