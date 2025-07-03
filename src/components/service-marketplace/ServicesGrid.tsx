@@ -1,38 +1,56 @@
 
+import React from "react";
 import { ServiceCard } from "./ServiceCard";
-import type { Service } from "@/types/service";
-import { cn } from "@/lib/utils";
+import { GridLayoutType } from "@/components/products/types/ProductTypes";
 
-type GridLayout = "grid2x2" | "grid3x3" | "grid4x4" | "list";
+interface Service {
+  id: string;
+  user_id: string;
+  title: string;
+  description?: string;
+  category?: string;
+  image_url?: string;
+  price?: number;
+  rating?: number;
+  location?: string;
+  is_available?: boolean;
+  created_at: string;
+  updated_at: string;
+}
 
 interface ServicesGridProps {
   services: Service[];
-  layout?: GridLayout;
+  gridLayout: GridLayoutType;
 }
 
-export const ServicesGrid: React.FC<ServicesGridProps> = ({ 
-  services, 
-  layout = "grid3x3" 
-}) => {
-  const getLayoutClasses = () => {
-    switch (layout) {
+export const ServicesGrid = ({ services, gridLayout }: ServicesGridProps) => {
+  const getGridClasses = () => {
+    switch (gridLayout) {
+      case "grid1x1":
+        return "grid-cols-1";
       case "grid2x2":
-        return "grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 w-full";
+        return "grid-cols-1 md:grid-cols-2";
       case "grid3x3":
-        return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 w-full";
+        return "grid-cols-1 md:grid-cols-2 lg:grid-cols-3";
       case "grid4x4":
-        return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 w-full";
+        return "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
       case "list":
-        return "flex flex-col gap-3 sm:gap-4 w-full";
+        return "grid-cols-1 gap-2";
+      case "single":
+        return "grid-cols-1";
       default:
-        return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 w-full";
+        return "grid-cols-1 md:grid-cols-2 lg:grid-cols-3";
     }
   };
 
   return (
-    <div className={cn(getLayoutClasses(), "overflow-hidden")}>
+    <div className={`grid gap-6 ${getGridClasses()}`}>
       {services.map((service) => (
-        <ServiceCard key={service.id} service={service} />
+        <ServiceCard
+          key={service.id}
+          service={service}
+          layout={gridLayout}
+        />
       ))}
     </div>
   );

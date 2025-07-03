@@ -1,7 +1,7 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 interface AuthContextType {
@@ -88,16 +88,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  // Sign up a new user
+  // Sign up a new user with email confirmation
   const signUp = async (email: string, password: string) => {
     try {
-      const { data, error } = await supabase.auth.signUp({ email, password });
+      const redirectUrl = `${window.location.origin}/`;
+      
+      const { data, error } = await supabase.auth.signUp({ 
+        email, 
+        password,
+        options: {
+          emailRedirectTo: redirectUrl
+        }
+      });
       
       if (error) {
         return { success: false, error: error.message };
       }
       
-      toast.success('Sign up successful! Please check your email for confirmation.');
+      // Check if user needs to confirm email
+      if (data.user && !data.session) {
+        toast.success('Please check your email for a confirmation link to complete your registration.');
+      } else {
+        toast.success('Account created successfully!');
+      }
+      
       return { success: true };
     } catch (error: any) {
       return { success: false, error: error.message || 'An error occurred during sign up' };

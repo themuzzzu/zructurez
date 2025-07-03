@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -11,6 +12,7 @@ import { Slider } from "@/components/ui/slider";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
 import {
   Accordion,
   AccordionContent,
@@ -307,7 +309,7 @@ const Business = () => {
 
       {isLoading ? (
         <p>Loading businesses...</p>
-      ) : businesses && businesses.length > 0 ? (
+      ) : businesses && Array.isArray(businesses) && businesses.length > 0 ? (
         <ProductGrid gridLayout={gridLayout}>
           {businesses.map((business) => (
             <Card key={business.id} className="shadow-md">
@@ -319,7 +321,7 @@ const Business = () => {
                     className="w-full h-40 object-cover rounded-md mb-3"
                   />
                   <div className="absolute top-2 left-2">
-                    <Badge>{business.category}</Badge>
+                    <Badge variant="secondary">{business.category}</Badge>
                   </div>
                 </div>
                 <h3 className="text-lg font-semibold mb-2">{business.name}</h3>
@@ -358,10 +360,10 @@ const Business = () => {
         <Button
           onClick={() =>
             setCurrentPage((prev) =>
-              businesses && businesses.length === 12 ? prev + 1 : prev
+              businesses && Array.isArray(businesses) && businesses.length === 12 ? prev + 1 : prev
             )
           }
-          disabled={!businesses || businesses.length < 12}
+          disabled={!businesses || !Array.isArray(businesses) || businesses.length < 12}
         >
           Next Page
         </Button>
@@ -401,6 +403,5 @@ function useBusinesses({
 
       return data;
     },
-    keepPreviousData: true,
   });
 }
