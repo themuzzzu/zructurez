@@ -1,89 +1,78 @@
 
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import React from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Phone, MessageSquare, Calendar } from "lucide-react";
-import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
-import type { Service } from "@/types/service";
+import { Star, MapPin } from "lucide-react";
+
+interface Service {
+  id: string;
+  user_id: string;
+  title: string;
+  description?: string;
+  category?: string;
+  image_url?: string;
+  price?: number;
+  rating?: number;
+  location?: string;
+  is_available?: boolean;
+  created_at: string;
+  updated_at: string;
+}
 
 interface ServiceCardProps {
   service: Service;
+  layout?: string;
 }
 
-export const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
-  const navigate = useNavigate();
-  
+export const ServiceCard = ({ service, layout = "grid3x3" }: ServiceCardProps) => {
+  const isListLayout = layout === "list";
+
   return (
-    <Card className="overflow-hidden h-full flex flex-col">
-      <div className="h-32 overflow-hidden">
+    <Card className={`shadow-md hover:shadow-lg transition-shadow ${isListLayout ? 'flex' : ''}`}>
+      <div className={`${isListLayout ? 'w-1/3' : 'w-full'}`}>
         <img
-          src={service.imageUrl || service.image_url || "/placeholder.svg"}
+          src={service.image_url || "/placeholder.svg"}
           alt={service.title}
-          className="object-cover w-full h-full"
-          onError={(e) => {
-            e.currentTarget.src = "/placeholder.svg";
-          }}
+          className={`object-cover rounded-t-md ${isListLayout ? 'h-full rounded-l-md rounded-t-none' : 'w-full h-40'}`}
         />
       </div>
-      <div className="p-3 space-y-1.5 flex-1">
-        <div className="flex justify-between items-start">
-          <h3 className="font-medium text-sm line-clamp-1">{service.title}</h3>
+      <CardContent className={`p-4 ${isListLayout ? 'flex-1' : ''}`}>
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-lg font-semibold">{service.title}</h3>
           {service.category && (
-            <Badge variant="outline" className="text-[9px] h-4 px-1">
-              {service.category}
-            </Badge>
+            <Badge variant="secondary">{service.category}</Badge>
           )}
         </div>
-        <p className="text-[11px] text-muted-foreground line-clamp-2">
-          {service.description}
-        </p>
-        <div className="font-medium text-xs">₹{service.price.toLocaleString('en-IN')}</div>
-      </div>
-      <div className="p-3 pt-0 mt-auto">
-        <div className="grid grid-cols-3 gap-1.5">
-          <Button 
-            className="w-full text-[10px] h-7" 
-            size="sm"
-            onClick={() => navigate(`/services/${service.id}/book`)}
-          >
-            <Calendar className="h-3 w-3 mr-0.5" />
-            Book
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full text-[10px] h-7"
-            onClick={() => {
-              if (service.contact_info) {
-                window.location.href = `tel:${service.contact_info}`;
-              } else {
-                toast.error("Contact information not available");
-                navigate(`/services/${service.id}`);
-              }
-            }}
-          >
-            <Phone className="h-3 w-3 mr-0.5" />
-            Call
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full text-[10px] h-7"
-            onClick={() => {
-              if (service.contact_info) {
-                window.open(`https://wa.me/${service.contact_info.replace(/\D/g, '')}?text=Hi, I'm interested in your service: ${service.title}`, '_blank');
-              } else {
-                toast.error("Contact information not available");
-                navigate(`/services/${service.id}`);
-              }
-            }}
-          >
-            <MessageSquare className="h-3 w-3 mr-0.5" />
-            Chat
-          </Button>
+        
+        {service.description && (
+          <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+            {service.description}
+          </p>
+        )}
+        
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {service.location && (
+              <div className="flex items-center">
+                <MapPin className="w-4 h-4 mr-1 text-gray-400" />
+                <span className="text-sm text-gray-500">{service.location}</span>
+              </div>
+            )}
+          </div>
+          
+          <div className="flex items-center gap-2">
+            {service.rating && (
+              <div className="flex items-center">
+                <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                <span className="text-sm text-gray-600 ml-1">{service.rating}</span>
+              </div>
+            )}
+            {service.price && (
+              <span className="text-lg font-bold text-primary">₹{service.price}</span>
+            )}
+          </div>
         </div>
-      </div>
+      </CardContent>
     </Card>
   );
 };

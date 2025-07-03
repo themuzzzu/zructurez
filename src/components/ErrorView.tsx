@@ -6,15 +6,18 @@ import { Button } from "@/components/ui/button";
 interface ErrorViewProps {
   error?: Error;
   resetErrorBoundary?: () => void;
-  onRetry: () => void;
+  onRetry?: () => void;
+  message?: string;
 }
 
-export const ErrorView = ({ error, resetErrorBoundary, onRetry }: ErrorViewProps) => {
+export const ErrorView = ({ error, resetErrorBoundary, onRetry, message }: ErrorViewProps) => {
   const handleRetry = () => {
     if (resetErrorBoundary) {
       resetErrorBoundary();
     }
-    onRetry();
+    if (onRetry) {
+      onRetry();
+    }
   };
 
   return (
@@ -24,7 +27,7 @@ export const ErrorView = ({ error, resetErrorBoundary, onRetry }: ErrorViewProps
         Something went wrong
       </h3>
       <p className="text-gray-600 mb-6">
-        We encountered an error while loading the data. Please try again.
+        {message || "We encountered an error while loading the data. Please try again."}
       </p>
       <Button onClick={handleRetry} className="gap-2">
         <RefreshCw className="h-4 w-4" />

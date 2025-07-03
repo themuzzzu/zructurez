@@ -1,18 +1,22 @@
 
 import React from "react";
-import { OfflineIndicator } from "@/components/layout/OfflineIndicator";
+import { Navbar } from "@/components/Navbar";
+import { Sidebar } from "@/components/layout/Sidebar";
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
-export const Layout: React.FC<LayoutProps> = ({ children }) => {
+export const Layout = ({ children }: LayoutProps) => {
   return (
-    <div className="min-h-screen bg-background">
-      <OfflineIndicator />
-      <main className="pt-0">
-        {children}
-      </main>
+    <div className="min-h-screen bg-gray-50">
+      <Navbar />
+      <div className="flex">
+        <Sidebar />
+        <main className="flex-1 p-6">
+          {children}
+        </main>
+      </div>
     </div>
   );
 };
