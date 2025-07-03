@@ -1215,13 +1215,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "business_comments_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "business_comments_reply_to_fkey"
             columns: ["reply_to"]
             isOneToOne: false
@@ -1774,7 +1767,22 @@ export type Database = {
           rating?: number
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "business_ratings_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "business_overview"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_ratings_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       business_real_time_stats: {
         Row: {
@@ -6524,31 +6532,25 @@ export type Database = {
           avatar_url: string | null
           created_at: string | null
           display_preferences: Json | null
-          full_name: string | null
           id: string
           name: string | null
           updated_at: string | null
-          username: string | null
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string | null
           display_preferences?: Json | null
-          full_name?: string | null
           id: string
           name?: string | null
           updated_at?: string | null
-          username?: string | null
         }
         Update: {
           avatar_url?: string | null
           created_at?: string | null
           display_preferences?: Json | null
-          full_name?: string | null
           id?: string
           name?: string | null
           updated_at?: string | null
-          username?: string | null
         }
         Relationships: []
       }
@@ -9104,7 +9106,7 @@ export type Database = {
           date_of_birth: string | null
           display_name: string | null
           display_preferences: Json | null
-          email: string
+          email: string | null
           email_verified: boolean | null
           facebook_id: string | null
           failed_login_attempts: number | null
@@ -9159,7 +9161,7 @@ export type Database = {
           date_of_birth?: string | null
           display_name?: string | null
           display_preferences?: Json | null
-          email: string
+          email?: string | null
           email_verified?: boolean | null
           facebook_id?: string | null
           failed_login_attempts?: number | null
@@ -9214,7 +9216,7 @@ export type Database = {
           date_of_birth?: string | null
           display_name?: string | null
           display_preferences?: Json | null
-          email?: string
+          email?: string | null
           email_verified?: boolean | null
           facebook_id?: string | null
           failed_login_attempts?: number | null
@@ -10586,6 +10588,10 @@ export type Database = {
       equals: {
         Args: { geom1: unknown; geom2: unknown }
         Returns: boolean
+      }
+      exec_sql: {
+        Args: { sql: string }
+        Returns: undefined
       }
       extract_job_keywords: {
         Args: {

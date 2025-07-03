@@ -1,56 +1,70 @@
 
-import React from 'react';
-import { SearchResult } from "@/types/search";
-import { ServiceSearchResult } from "@/types/serviceTypes";
-import { EmptySearchResults } from "@/components/marketplace/EmptySearchResults";
-import { ServicesGrid } from "@/components/service-marketplace/ServicesGrid";
+import React from "react";
+import { EmptySearchResults } from "./EmptySearchResults";
+import { ServicesGrid } from "../service-marketplace/ServicesGrid";
 
 interface ServiceSearchResultsProps {
-  results: SearchResult[];
+  searchTerm: string;
   isLoading: boolean;
-  query: string;
+  results: any[];
 }
 
-export function ServiceSearchResults({ results, isLoading, query }: ServiceSearchResultsProps) {
-  // Filter only service type results
-  const serviceResults = results.filter((result): result is ServiceSearchResult => 
-    result.type === 'service'
-  );
-
+export const ServiceSearchResults = ({ searchTerm, isLoading, results }: ServiceSearchResultsProps) => {
   if (isLoading) {
     return (
-      <div className="container mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="animate-pulse">
-            <div className="bg-gray-200 dark:bg-gray-700 h-48 rounded-lg mb-2"></div>
-            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
-            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
-          </div>
-        ))}
+      <div className="space-y-4">
+        <div className="text-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-2 text-sm text-muted-foreground">Searching services...</p>
+        </div>
       </div>
     );
   }
 
-  if (!serviceResults.length) {
-    return <EmptySearchResults searchTerm={query} type="service" />;
+  if (results.length === 0) {
+    return (
+      <div className="w-full max-w-4xl mx-auto px-4">
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold mb-2">Service Results</h2>
+          <p className="text-muted-foreground">
+            {searchTerm ? `Search results for "${searchTerm}"` : "Browse all services"}
+          </p>
+        </div>
+        <EmptySearchResults searchTerm={searchTerm} type="services" />
+      </div>
+    );
   }
 
-  const services = serviceResults.map(result => ({
+  // Transform results to match Service interface
+  const transformedResults = results.map(result => ({
     id: result.id,
+    user_id: result.user_id || "unknown",
     title: result.title,
     description: result.description,
-    category: result.category || 'General',
-    image_url: result.imageUrl,
-    price: result.price || 0,
-    rating: result.rating || 0,
-    provider: result.provider || 'Service Provider',
-    location: result.location || 'Local Area',
-    availabilityStatus: 'Available',
-    tags: result.tags || []
+    category: result.category,
+    image_url: result.image_url,
+    price: result.price,
+    rating: result.rating,
+    location: result.location,
+    is_available: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
   }));
 
   return (
-    <ServicesGrid services={services} layout="grid3x3" />
+    <div className="w-full max-w-4xl mx-auto px-4">
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold mb-2">Service Results</h2>
+        <p className="text-muted-foreground">
+          {searchTerm ? `${results.length} results for "${searchTerm}"` : `${results.length} services found`}
+        </p>
+      </div>
+      
+      <ServicesGrid 
+        services={transformedResults}
+        isLoading={false}
+        gridLayout="grid3x3"
+      />
+    </div>
   );
-}
-
+};

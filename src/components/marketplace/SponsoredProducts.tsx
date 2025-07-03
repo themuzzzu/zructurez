@@ -1,12 +1,14 @@
 
 import React from "react";
-import { ProductCard } from "../ProductCard";
+import { ProductCard } from "../products/ProductCard";
 
 interface Product {
   id: string;
   title: string;
   price: number;
   image_url: string;
+  category?: string;
+  city?: string;
 }
 
 export const SponsoredProducts = () => {
@@ -16,13 +18,17 @@ export const SponsoredProducts = () => {
       id: "1",
       title: "Premium Laptop",
       price: 75000,
-      image_url: "/lovable-uploads/laptop-sponsored.jpg"
+      image_url: "/lovable-uploads/laptop-sponsored.jpg",
+      category: "Electronics",
+      city: "Sponsored"
     },
     {
       id: "2", 
       title: "Wireless Headphones",
       price: 12000,
-      image_url: "/lovable-uploads/headphones-sponsored.jpg"
+      image_url: "/lovable-uploads/headphones-sponsored.jpg",
+      category: "Electronics",
+      city: "Sponsored"
     }
   ];
 
@@ -43,9 +49,13 @@ export const SponsoredProducts = () => {
             <ProductCard 
               product={{
                 ...product,
-                title: product.title,
-                city: "Sponsored"
+                user_id: "sponsored",
+                description: `Sponsored ${product.title}`,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+                is_available: true
               }}
+              layout="grid2x2"
             />
             <div className="absolute top-2 right-2 bg-yellow-400 text-xs px-2 py-1 rounded font-medium">
               Sponsored

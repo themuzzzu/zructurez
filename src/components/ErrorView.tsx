@@ -4,6 +4,8 @@ import { AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface ErrorViewProps {
+  error?: Error;
+  resetErrorBoundary?: () => void;
   onRetry: () => void;
 }
 

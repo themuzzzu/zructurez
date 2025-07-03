@@ -1,367 +1,406 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, Plus } from "lucide-react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { LoadingView } from "@/components/LoadingView";
+import { ProductCard } from "@/components/products/ProductCard";
+import { ProductGrid } from "@/components/products/ProductGrid";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
+import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Filter,
+  List,
+  Grip,
+  GripHorizontal,
+  Plus,
+  MapPin,
+  Check,
+} from "lucide-react";
 import { ErrorView } from "@/components/ErrorView";
-import { SearchInput } from "@/components/SearchInput";
-import { Layout } from "@/components/layout/Layout";
-import { toast } from "sonner";
-import { motion } from "framer-motion";
-import type { Business } from "@/types/business";
-import { BusinessCategoryScroller } from "@/components/business/BusinessCategoryScroller";
-import { BusinessCardHeader } from "@/components/business/BusinessCardHeader";
-import { BusinessCardDescription } from "@/components/business/BusinessCardDescription";
-import { BusinessCardInfo } from "@/components/business/BusinessCardInfo";
-import { BusinessCardRating } from "@/components/business/BusinessCardRating";
-import { BusinessCardActions } from "@/components/business/BusinessCardActions";
-import { Card } from "@/components/ui/card";
-import { CategoryIconGrid } from "@/components/marketplace/CategoryIconGrid";
-import { BusinessBannerCarousel } from "@/components/business/BusinessBannerCarousel";
-import { SponsoredBusinesses } from "@/components/business/SponsoredBusinesses";
-import { SuggestedBusinesses } from "@/components/business/SuggestedBusinesses";
-import { BusinessCategoryFilter } from "@/components/BusinessCategoryFilter";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AvatarWithFallback } from "@/components/common/AvatarWithFallback";
+import { cn } from "@/lib/utils";
+import { ProductsGrid } from "@/components/ProductsGrid";
+import { GridLayoutType } from "@/components/products/types/ProductTypes";
 
-interface BusinessWithRating {
+interface Business {
   id: string;
+  user_id: string;
   name: string;
   description: string;
   category: string;
-  location?: string;
-  contact?: string;
-  hours?: string;
-  verified?: boolean;
-  image_url?: string;
-  is_open?: boolean;
-  wait_time?: string;
-  closure_reason?: string;
-  created_at?: string;
-  appointment_price?: number;
-  consultation_price?: number;
-  average_rating: number;
-  reviews_count: number;
-  business_ratings: Array<{ rating: number }>;
+  image_url: string;
+  rating: number;
+  location: string;
+  is_available: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
-const BusinessPage = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
+interface FilterState {
+  category: string;
+  priceRange: [number, number];
+  rating: number;
+  location: string;
+  verified: boolean;
+  openNow: boolean;
+  sortBy: string;
+}
+
+interface UseBusinessesProps {
+  searchQuery: string;
+  category: string;
+  sortBy: string;
+  page: number;
+  limit: number;
+}
+
+const Business = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [sortBy, setSortBy] = useState("newest");
-  
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const categoryParam = params.get('category');
-    const subcategoryParam = params.get('subcategory');
-    
-    if (categoryParam) {
-      setSelectedCategory(subcategoryParam ? `${categoryParam}-${subcategoryParam}` : categoryParam);
-    }
-  }, [location.search]);
-  
-  const fetchBusinesses = async (): Promise<BusinessWithRating[]> => {
-    let query = supabase
-      .from('businesses')
-      .select(`
-        *,
-        business_ratings (*)
-      `);
-    
-    if (selectedCategory !== "all") {
-      if (selectedCategory.includes('-')) {
-        const [category] = selectedCategory.split('-');
-        query = query.eq('category', category);
-      } else {
-        query = query.eq('category', selectedCategory);
-      }
-    }
-
-    const { data, error } = await query;
-    
-    if (error) throw error;
-    
-    return (data || []).map((business): BusinessWithRating => {
-      const ratings = business.business_ratings || [];
-      const totalRating = ratings.reduce((sum: number, rating: any) => sum + (rating.rating || 0), 0);
-      const averageRating = ratings.length > 0 ? totalRating / ratings.length : 0;
-      
-      return {
-        id: business.id,
-        name: business.name,
-        description: business.description,
-        category: business.category,
-        location: business.location,
-        contact: business.contact,
-        hours: business.hours,
-        verified: business.verified,
-        image_url: business.image_url,
-        is_open: business.is_open,
-        wait_time: business.wait_time,
-        closure_reason: business.closure_reason,
-        created_at: business.created_at,
-        appointment_price: business.appointment_price,
-        consultation_price: business.consultation_price,
-        average_rating: averageRating,
-        reviews_count: ratings.length,
-        business_ratings: ratings
-      };
-    });
-  };
-  
-  const { data: businesses, isLoading, error, refetch } = useQuery({
-    queryKey: ['businesses', selectedCategory],
-    queryFn: fetchBusinesses
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [sortBy, setSortBy] = useState<string>("rating");
+  const [gridLayout, setGridLayout] = useState<GridLayoutType>("grid3x3");
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [selectedFilters, setSelectedFilters] = useState<FilterState>({
+    category: "",
+    priceRange: [0, 10000],
+    rating: 0,
+    location: "",
+    verified: false,
+    openNow: false,
+    sortBy: "rating"
   });
 
-  if (isLoading) return <LoadingView />;
-  if (error) return <ErrorView />;
-
-  const filteredBusinesses = (businesses || []).filter(business => 
-    business.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    business.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    business.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (business.location && business.location.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
-
-  const sortedBusinesses = [...filteredBusinesses].sort((a, b) => {
-    switch (sortBy) {
-      case "newest":
-        return new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime();
-      case "oldest":
-        return new Date(a.created_at || '').getTime() - new Date(b.created_at || '').getTime();
-      case "rating":
-        return (b.average_rating || 0) - (a.average_rating || 0);
-      case "name_asc":
-        return (a.name || '').localeCompare(b.name || '');
-      case "name_desc":
-        return (b.name || '').localeCompare(a.name || '');
-      default:
-        return 0;
-    }
+  const { data: businesses, isLoading, error, refetch } = useBusinesses({
+    searchQuery,
+    category: selectedCategory,
+    sortBy,
+    page: currentPage,
+    limit: 12
   });
 
-  const handleCategoryChange = (category: string) => {
-    setSelectedCategory(category);
-    
-    if (category === "all") {
-      navigate("/businesses");
-    } else {
-      navigate(`/businesses?category=${category}`);
-    }
+  const handleFilterChange = (newFilters: FilterState) => {
+    setSelectedFilters(newFilters);
+    setSelectedCategory(newFilters.category);
+    setSortBy(newFilters.sortBy);
+    setCurrentPage(1);
   };
 
-  const formatHours = (hours: string | undefined): string => {
-    if (!hours) return '';
-    return hours;
+  const handleRetry = () => {
+    refetch();
   };
 
-  const handleCategorySelect = (category: string) => {
-    setSelectedCategory(category);
-    navigate(`/businesses?category=${category}`);
-  };
-  
-  const handleSubcategorySelect = (category: string | { id: string; name: string; icon: string }) => {
-    const categoryId = typeof category === 'string' ? category : category.id;
-    setSelectedCategory(categoryId);
-    navigate(`/businesses?category=${categoryId}`);
-  };
-
-  const handleBusinessAction = (action: 'book' | 'whatsapp' | 'share' | 'call', businessId: string) => {
-    switch (action) {
-      case 'book':
-        navigate(`/businesses/${businessId}/book`);
-        break;
-      case 'whatsapp':
-        window.open(`https://wa.me/?text=Check out this business: ${window.location.origin}/businesses/${businessId}`, '_blank');
-        break;
-      case 'share':
-        if (navigator.share) {
-          navigator.share({
-            title: 'Business Details',
-            url: `${window.location.origin}/businesses/${businessId}`,
-          }).catch(err => {
-            toast.error('Error sharing');
-          });
-        } else {
-          navigator.clipboard.writeText(`${window.location.origin}/businesses/${businessId}`)
-            .then(() => toast.success('Link copied to clipboard'))
-            .catch(() => toast.error('Failed to copy link'));
-        }
-        break;
-      case 'call':
-        const business = businesses?.find(b => b.id === businessId);
-        if (business?.contact) {
-          window.location.href = `tel:${business.contact}`;
-        } else {
-          toast.error('No contact information available');
-        }
-        break;
-      default:
-        break;
-    }
-  };
+  if (error) {
+    return <ErrorView onRetry={handleRetry} />;
+  }
 
   return (
-    <Layout>
-      <div className="container max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <div className="flex items-center gap-2">
-            <Link to="/">
-              <Button variant="ghost" size="icon" className="hidden sm:flex">
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-            </Link>
-            <h1 className="text-2xl sm:text-3xl font-bold animate-fade-up">Local Businesses</h1>
-          </div>
-          <Link to="/register-business">
-            <Button className="w-full sm:w-auto gap-2">
-              <Plus className="h-4 w-4" />
-              Register Business
-            </Button>
-          </Link>
-        </div>
-
-        <div className="mb-6">
-          <SearchInput 
-            placeholder="Search for businesses..." 
-            value={searchQuery} 
-            onChange={setSearchQuery} 
-            className="w-full max-w-3xl mx-auto"
+    <div className="container py-10">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Businesses</h1>
+        <div className="flex items-center space-x-4">
+          <Input
+            type="text"
+            placeholder="Search businesses..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
-        </div>
-        
-        <BusinessBannerCarousel />
-        
-        <div className="mb-6">
-          <h2 className="text-xl font-bold mb-4">Browse by Category</h2>
-          <CategoryIconGrid onCategorySelect={handleSubcategorySelect} />
-        </div>
-        
-        <SponsoredBusinesses />
-        
-        <SuggestedBusinesses />
-        
-        <BusinessCategoryScroller />
-        
-        <div className="mt-8">
-          <h2 className="text-2xl font-bold mb-4">All Businesses</h2>
-          
-          <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between mb-6">
-            <BusinessCategoryFilter onCategoryChange={handleCategoryChange} />
-            <div className="w-full md:w-64">
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="newest">Newest First</SelectItem>
-                  <SelectItem value="oldest">Oldest First</SelectItem>
-                  <SelectItem value="rating">Highest Rated</SelectItem>
-                  <SelectItem value="name_asc">Name (A-Z)</SelectItem>
-                  <SelectItem value="name_desc">Name (Z-A)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {businesses && businesses.length > 0 ? (
-            <motion.div 
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ staggerChildren: 0.1 }}
-            >
-              {sortedBusinesses.map((business) => (
-                <motion.div 
-                  key={business.id} 
-                  className="relative h-full"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                  whileHover={{ y: -5, transition: { duration: 0.2 } }}
-                >
-                  <Link to={`/businesses/${business.id}`}>
-                    <Card className="overflow-hidden h-full bg-black text-white flex flex-col">
-                      <div className="relative">
-                        {business.image_url ? (
-                          <div className="h-40 w-full overflow-hidden">
-                            <img 
-                              src={business.image_url} 
-                              alt={business.name} 
-                              className="w-full h-full object-cover"
-                              loading="lazy"
-                              onError={(e) => {
-                                // Fallback if image fails to load
-                                (e.target as HTMLImageElement).src = '/placeholder.svg';
-                              }}
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-80" />
-                          </div>
-                        ) : (
-                          <div className="h-40 w-full bg-zinc-900">
-                            <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-80" />
-                          </div>
-                        )}
-                        
-                        <div className="absolute bottom-0 left-0 right-0 p-4">
-                          <BusinessCardHeader 
-                            name={business.name}
-                            category={business.category}
-                            is_open={business.is_open}
-                            verified={business.verified || false}
-                            wait_time={business.wait_time}
-                            closure_reason={business.closure_reason}
-                          />
-                        </div>
-                      </div>
-                      
-                      <div className="p-4 flex-grow flex flex-col justify-between">
-                        <div className="space-y-4">
-                          <BusinessCardDescription description={business.description} />
-                          
-                          <BusinessCardInfo 
-                            location={business.location || ''}
-                            hours={formatHours(business.hours)}
-                            appointment_price={business.appointment_price}
-                            consultation_price={business.consultation_price}
-                          />
-                          
-                          <BusinessCardRating 
-                            rating={business.average_rating || 0}
-                            reviews={business.reviews_count || 0}
-                            businessId={business.id}
-                          />
-                        </div>
-                      </div>
-                      
-                      <BusinessCardActions
-                        appointment_price={business.appointment_price}
-                        onBookClick={() => handleBusinessAction('book', business.id)}
-                        onWhatsAppClick={() => handleBusinessAction('whatsapp', business.id)}
-                        onShareClick={() => handleBusinessAction('share', business.id)}
-                        onCallClick={() => handleBusinessAction('call', business.id)}
-                        is_open={business.is_open}
-                      />
-                    </Card>
-                  </Link>
-                </motion.div>
-              ))}
-            </motion.div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">No businesses found. Be the first to register your business!</p>
-            </div>
-          )}
+          <Button onClick={() => setIsFilterOpen(true)}>
+            <Filter className="w-4 h-4 mr-2" /> Filters
+          </Button>
         </div>
       </div>
-    </Layout>
+
+      <Dialog open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Filter Businesses</DialogTitle>
+            <DialogDescription>
+              Apply filters to refine the list of businesses.
+            </DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="h-[400px] pr-4">
+            <Accordion type="single" collapsible>
+              <AccordionItem value="category">
+                <AccordionTrigger>Category</AccordionTrigger>
+                <AccordionContent>
+                  <Select
+                    onValueChange={(value) =>
+                      handleFilterChange({
+                        ...selectedFilters,
+                        category: value,
+                      })
+                    }
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">All Categories</SelectItem>
+                      <SelectItem value="Restaurant">Restaurant</SelectItem>
+                      <SelectItem value="Retail">Retail</SelectItem>
+                      <SelectItem value="Service">Service</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="price">
+                <AccordionTrigger>Price Range</AccordionTrigger>
+                <AccordionContent>
+                  <div className="space-y-2">
+                    <Label>Price Range (₹)</Label>
+                    <div className="flex items-center space-x-2">
+                      <Input
+                        type="number"
+                        value={selectedFilters.priceRange[0].toString()}
+                        onChange={(e) =>
+                          handleFilterChange({
+                            ...selectedFilters,
+                            priceRange: [
+                              parseInt(e.target.value),
+                              selectedFilters.priceRange[1],
+                            ],
+                          })
+                        }
+                        className="w-24"
+                      />
+                      <span>-</span>
+                      <Input
+                        type="number"
+                        value={selectedFilters.priceRange[1].toString()}
+                        onChange={(e) =>
+                          handleFilterChange({
+                            ...selectedFilters,
+                            priceRange: [
+                              selectedFilters.priceRange[0],
+                              parseInt(e.target.value),
+                            ],
+                          })
+                        }
+                        className="w-24"
+                      />
+                    </div>
+                    <Slider
+                      defaultValue={selectedFilters.priceRange}
+                      max={10000}
+                      step={100}
+                      onValueChange={(value) =>
+                        handleFilterChange({
+                          ...selectedFilters,
+                          priceRange: [value[0], value[1]],
+                        })
+                      }
+                    />
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="rating">
+                <AccordionTrigger>Rating</AccordionTrigger>
+                <AccordionContent>
+                  <div className="space-y-2">
+                    <Label>Minimum Rating</Label>
+                    <Slider
+                      defaultValue={[selectedFilters.rating]}
+                      max={5}
+                      step={0.5}
+                      onValueChange={(value) =>
+                        handleFilterChange({
+                          ...selectedFilters,
+                          rating: value[0],
+                        })
+                      }
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      Selected Rating: {selectedFilters.rating} stars
+                    </p>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="location">
+                <AccordionTrigger>Location</AccordionTrigger>
+                <AccordionContent>
+                  <Input
+                    type="text"
+                    placeholder="Enter location"
+                    value={selectedFilters.location}
+                    onChange={(e) =>
+                      handleFilterChange({
+                        ...selectedFilters,
+                        location: e.target.value,
+                      })
+                    }
+                  />
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="other">
+                <AccordionTrigger>Other Filters</AccordionTrigger>
+                <AccordionContent className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="verified"
+                      checked={selectedFilters.verified}
+                      onCheckedChange={(checked) =>
+                        handleFilterChange({
+                          ...selectedFilters,
+                          verified: checked || false,
+                        })
+                      }
+                    />
+                    <Label htmlFor="verified">Verified</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="openNow"
+                      checked={selectedFilters.openNow}
+                      onCheckedChange={(checked) =>
+                        handleFilterChange({
+                          ...selectedFilters,
+                          openNow: checked || false,
+                        })
+                      }
+                    />
+                    <Label htmlFor="openNow">Open Now</Label>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
+      {isLoading ? (
+        <p>Loading businesses...</p>
+      ) : businesses && businesses.length > 0 ? (
+        <ProductGrid gridLayout={gridLayout}>
+          {businesses.map((business) => (
+            <Card key={business.id} className="shadow-md">
+              <CardContent className="p-4">
+                <div className="relative">
+                  <img
+                    src={business.image_url}
+                    alt={business.name}
+                    className="w-full h-40 object-cover rounded-md mb-3"
+                  />
+                  <div className="absolute top-2 left-2">
+                    <Badge>{business.category}</Badge>
+                  </div>
+                </div>
+                <h3 className="text-lg font-semibold mb-2">{business.name}</h3>
+                <p className="text-sm text-gray-500 mb-3 line-clamp-2">
+                  {business.description}
+                </p>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <MapPin className="w-4 h-4 mr-1 text-gray-400" />
+                    <span className="text-sm text-gray-500">
+                      {business.location}
+                    </span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-sm text-gray-500 mr-1">
+                      Rating: {business.rating}
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </ProductGrid>
+      ) : (
+        <p>No businesses found.</p>
+      )}
+
+      <div className="flex justify-between items-center mt-6">
+        <Button
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+        >
+          Previous Page
+        </Button>
+        <span>Page {currentPage}</span>
+        <Button
+          onClick={() =>
+            setCurrentPage((prev) =>
+              businesses && businesses.length === 12 ? prev + 1 : prev
+            )
+          }
+          disabled={!businesses || businesses.length < 12}
+        >
+          Next Page
+        </Button>
+      </div>
+    </div>
   );
 };
 
-export default BusinessPage;
+export default Business;
+
+function useBusinesses({
+  searchQuery,
+  category,
+  sortBy,
+  page,
+  limit,
+}: UseBusinessesProps) {
+  return useQuery({
+    queryKey: ["businesses", searchQuery, category, sortBy, page, limit],
+    queryFn: async () => {
+      let query = supabase
+        .from("businesses")
+        .select("*")
+        .ilike("name", `%${searchQuery}%`)
+        .order(sortBy, { ascending: false })
+        .range((page - 1) * limit, page * limit - 1);
+
+      if (category) {
+        query = query.eq("category", category);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        throw error;
+      }
+
+      return data;
+    },
+    keepPreviousData: true,
+  });
+}

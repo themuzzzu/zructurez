@@ -3,25 +3,21 @@ export type GridLayoutType = "grid1x1" | "grid2x2" | "grid3x3" | "grid4x4" | "li
 
 export interface Product {
   id: string;
+  user_id: string;
   title: string;
-  price: number;
-  image_url?: string;
-  imageUrl?: string;
-  category?: string;
+  name?: string;
   description?: string;
-  views?: number;
-  is_discounted?: boolean;
-  is_used?: boolean;
-  is_branded?: boolean;
-  created_at?: string;
-  original_price?: number;
-  discount_percentage?: number;
-  brand?: string;
-  brand_name?: string;
+  category?: string;
+  image_url?: string;
+  price?: number;
   rating?: number;
-  rating_count?: number;
-  highlight_tags?: string[];
+  views?: number;
+  is_available?: boolean;
+  is_discounted?: boolean;
+  discount_percentage?: number;
+  original_price?: number;
+  created_at: string;
+  updated_at: string;
+  city?: string;
+  business_id?: string;
 }
-
-// ProductType alias for backwards compatibility
-export type ProductType = Product;

@@ -6,16 +6,14 @@ import { Profile } from "@/types/profile";
 import { useAuth } from "./useAuth";
 
 export const useCurrentUser = () => {
-  const { user, loading: authLoading, refreshSession } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   
   return useQuery({
     queryKey: ['currentUser'],
     queryFn: async () => {
       try {
         if (!user) {
-          // Try to refresh the session if user is null
-          const refreshed = await refreshSession();
-          if (!refreshed) return null;
+          return null;
         }
         
         const { data: profile, error: profileError } = await supabase
